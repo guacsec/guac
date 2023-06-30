@@ -64,6 +64,13 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultVersion holds the default value on creation for the "version" field.
+	DefaultVersion string
+	// DefaultSubpath holds the default value on creation for the "subpath" field.
+	DefaultSubpath string
+)
+
 // OrderOption defines the ordering options for the PackageVersion queries.
 type OrderOption func(*sql.Selector)
 

@@ -19,8 +19,8 @@ type PackageVersion struct {
 func (PackageVersion) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("name_id"),
-		field.String("version"),
-		field.String("subpath"),
+		field.String("version").Default(""),
+		field.String("subpath").Default(""),
 		field.JSON("qualifiers", []model.PackageQualifier{}).Optional(),
 		field.String("hash").Comment("A SHA1 of the qualifiers, subpath, version fields after sorting keys, used to ensure uniqueness of version records."),
 	}

@@ -206,8 +206,8 @@ var (
 	// PackageVersionsColumns holds the columns for the "package_versions" table.
 	PackageVersionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "version", Type: field.TypeString},
-		{Name: "subpath", Type: field.TypeString},
+		{Name: "version", Type: field.TypeString, Default: ""},
+		{Name: "subpath", Type: field.TypeString, Default: ""},
 		{Name: "qualifiers", Type: field.TypeJSON, Nullable: true},
 		{Name: "hash", Type: field.TypeString},
 		{Name: "name_id", Type: field.TypeInt},

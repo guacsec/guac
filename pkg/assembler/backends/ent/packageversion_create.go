@@ -36,9 +36,25 @@ func (pvc *PackageVersionCreate) SetVersion(s string) *PackageVersionCreate {
 	return pvc
 }
 
+// SetNillableVersion sets the "version" field if the given value is not nil.
+func (pvc *PackageVersionCreate) SetNillableVersion(s *string) *PackageVersionCreate {
+	if s != nil {
+		pvc.SetVersion(*s)
+	}
+	return pvc
+}
+
 // SetSubpath sets the "subpath" field.
 func (pvc *PackageVersionCreate) SetSubpath(s string) *PackageVersionCreate {
 	pvc.mutation.SetSubpath(s)
+	return pvc
+}
+
+// SetNillableSubpath sets the "subpath" field if the given value is not nil.
+func (pvc *PackageVersionCreate) SetNillableSubpath(s *string) *PackageVersionCreate {
+	if s != nil {
+		pvc.SetSubpath(*s)
+	}
 	return pvc
 }
 
@@ -81,6 +97,7 @@ func (pvc *PackageVersionCreate) Mutation() *PackageVersionMutation {
 
 // Save creates the PackageVersion in the database.
 func (pvc *PackageVersionCreate) Save(ctx context.Context) (*PackageVersion, error) {
+	pvc.defaults()
 	return withHooks(ctx, pvc.sqlSave, pvc.mutation, pvc.hooks)
 }
 
@@ -103,6 +120,18 @@ func (pvc *PackageVersionCreate) Exec(ctx context.Context) error {
 func (pvc *PackageVersionCreate) ExecX(ctx context.Context) {
 	if err := pvc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pvc *PackageVersionCreate) defaults() {
+	if _, ok := pvc.mutation.Version(); !ok {
+		v := packageversion.DefaultVersion
+		pvc.mutation.SetVersion(v)
+	}
+	if _, ok := pvc.mutation.Subpath(); !ok {
+		v := packageversion.DefaultSubpath
+		pvc.mutation.SetSubpath(v)
 	}
 }
 
@@ -482,6 +511,7 @@ func (pvcb *PackageVersionCreateBulk) Save(ctx context.Context) ([]*PackageVersi
 	for i := range pvcb.builders {
 		func(i int, root context.Context) {
 			builder := pvcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PackageVersionMutation)
 				if !ok {

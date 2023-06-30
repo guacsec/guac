@@ -5,6 +5,7 @@ package ent
 import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/schema"
 )
 
@@ -24,4 +25,14 @@ func init() {
 	packagetypeDescType := packagetypeFields[0].Descriptor()
 	// packagetype.TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	packagetype.TypeValidator = packagetypeDescType.Validators[0].(func(string) error)
+	packageversionFields := schema.PackageVersion{}.Fields()
+	_ = packageversionFields
+	// packageversionDescVersion is the schema descriptor for version field.
+	packageversionDescVersion := packageversionFields[1].Descriptor()
+	// packageversion.DefaultVersion holds the default value on creation for the version field.
+	packageversion.DefaultVersion = packageversionDescVersion.Default.(string)
+	// packageversionDescSubpath is the schema descriptor for subpath field.
+	packageversionDescSubpath := packageversionFields[2].Descriptor()
+	// packageversion.DefaultSubpath holds the default value on creation for the subpath field.
+	packageversion.DefaultSubpath = packageversionDescSubpath.Default.(string)
 }

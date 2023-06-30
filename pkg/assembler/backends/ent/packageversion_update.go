@@ -43,9 +43,25 @@ func (pvu *PackageVersionUpdate) SetVersion(s string) *PackageVersionUpdate {
 	return pvu
 }
 
+// SetNillableVersion sets the "version" field if the given value is not nil.
+func (pvu *PackageVersionUpdate) SetNillableVersion(s *string) *PackageVersionUpdate {
+	if s != nil {
+		pvu.SetVersion(*s)
+	}
+	return pvu
+}
+
 // SetSubpath sets the "subpath" field.
 func (pvu *PackageVersionUpdate) SetSubpath(s string) *PackageVersionUpdate {
 	pvu.mutation.SetSubpath(s)
+	return pvu
+}
+
+// SetNillableSubpath sets the "subpath" field if the given value is not nil.
+func (pvu *PackageVersionUpdate) SetNillableSubpath(s *string) *PackageVersionUpdate {
+	if s != nil {
+		pvu.SetSubpath(*s)
+	}
 	return pvu
 }
 
@@ -298,9 +314,25 @@ func (pvuo *PackageVersionUpdateOne) SetVersion(s string) *PackageVersionUpdateO
 	return pvuo
 }
 
+// SetNillableVersion sets the "version" field if the given value is not nil.
+func (pvuo *PackageVersionUpdateOne) SetNillableVersion(s *string) *PackageVersionUpdateOne {
+	if s != nil {
+		pvuo.SetVersion(*s)
+	}
+	return pvuo
+}
+
 // SetSubpath sets the "subpath" field.
 func (pvuo *PackageVersionUpdateOne) SetSubpath(s string) *PackageVersionUpdateOne {
 	pvuo.mutation.SetSubpath(s)
+	return pvuo
+}
+
+// SetNillableSubpath sets the "subpath" field if the given value is not nil.
+func (pvuo *PackageVersionUpdateOne) SetNillableSubpath(s *string) *PackageVersionUpdateOne {
+	if s != nil {
+		pvuo.SetSubpath(*s)
+	}
 	return pvuo
 }
 
