@@ -14,6 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 )
 
 // ArtifactQuery is the builder for querying Artifact entities.
@@ -24,6 +25,7 @@ type ArtifactQuery struct {
 	inters          []Interceptor
 	predicates      []predicate.Artifact
 	withOccurrences *OccurrenceQuery
+	withSbom        *SBOMQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +77,28 @@ func (aq *ArtifactQuery) QueryOccurrences() *OccurrenceQuery {
 			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.OccurrencesTable, artifact.OccurrencesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySbom chains the current query on the "sbom" edge.
+func (aq *ArtifactQuery) QuerySbom() *SBOMQuery {
+	query := (&SBOMClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(sbom.Table, sbom.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.SbomTable, artifact.SbomColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -275,6 +299,7 @@ func (aq *ArtifactQuery) Clone() *ArtifactQuery {
 		inters:          append([]Interceptor{}, aq.inters...),
 		predicates:      append([]predicate.Artifact{}, aq.predicates...),
 		withOccurrences: aq.withOccurrences.Clone(),
+		withSbom:        aq.withSbom.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -289,6 +314,17 @@ func (aq *ArtifactQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *Artifa
 		opt(query)
 	}
 	aq.withOccurrences = query
+	return aq
+}
+
+// WithSbom tells the query-builder to eager-load the nodes that are connected to
+// the "sbom" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithSbom(opts ...func(*SBOMQuery)) *ArtifactQuery {
+	query := (&SBOMClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withSbom = query
 	return aq
 }
 
@@ -370,8 +406,9 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	var (
 		nodes       = []*Artifact{}
 		_spec       = aq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			aq.withOccurrences != nil,
+			aq.withSbom != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -396,6 +433,13 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 		if err := aq.loadOccurrences(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Occurrences = []*Occurrence{} },
 			func(n *Artifact, e *Occurrence) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withSbom; query != nil {
+		if err := aq.loadSbom(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.Sbom = []*SBOM{} },
+			func(n *Artifact, e *SBOM) { n.Edges.Sbom = append(n.Edges.Sbom, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -427,6 +471,39 @@ func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQ
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "artifact_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *SBOMQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SBOM)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Artifact)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(sbom.FieldArtifactID)
+	}
+	query.Where(predicate.SBOM(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(artifact.SbomColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ArtifactID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "artifact_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "artifact_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

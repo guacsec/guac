@@ -243,6 +243,56 @@ var (
 			},
 		},
 	}
+	// SboMsColumns holds the columns for the "sbo_ms" table.
+	SboMsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "uri", Type: field.TypeString},
+		{Name: "algorithm", Type: field.TypeString},
+		{Name: "digest", Type: field.TypeString},
+		{Name: "download_location", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "package_id", Type: field.TypeInt, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
+	}
+	// SboMsTable holds the schema information for the "sbo_ms" table.
+	SboMsTable = &schema.Table{
+		Name:       "sbo_ms",
+		Columns:    SboMsColumns,
+		PrimaryKey: []*schema.Column{SboMsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "sbo_ms_package_versions_package",
+				Columns:    []*schema.Column{SboMsColumns[7]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "sbo_ms_artifacts_artifact",
+				Columns:    []*schema.Column{SboMsColumns[8]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "sbom_unique_package",
+				Unique:  true,
+				Columns: []*schema.Column{SboMsColumns[2], SboMsColumns[3], SboMsColumns[1], SboMsColumns[7]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NOT NULL AND artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "sbom_unique_artifact",
+				Unique:  true,
+				Columns: []*schema.Column{SboMsColumns[2], SboMsColumns[3], SboMsColumns[1], SboMsColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NULL AND artifact_id IS NOT NULL",
+				},
+			},
+		},
+	}
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -323,6 +373,7 @@ var (
 		PackageNamespacesTable,
 		PackageTypesTable,
 		PackageVersionsTable,
+		SboMsTable,
 		SourceNamesTable,
 		SourceNamespacesTable,
 		SourceTypesTable,
@@ -338,6 +389,8 @@ func init() {
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageTypesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
+	SboMsTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	SboMsTable.ForeignKeys[1].RefTable = ArtifactsTable
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
 }

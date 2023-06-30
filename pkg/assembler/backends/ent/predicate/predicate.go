@@ -30,6 +30,9 @@ type PackageType func(*sql.Selector)
 // PackageVersion is the predicate function for packageversion builders.
 type PackageVersion func(*sql.Selector)
 
+// SBOM is the predicate function for sbom builders.
+type SBOM func(*sql.Selector)
+
 // SourceName is the predicate function for sourcename builders.
 type SourceName func(*sql.Selector)
 

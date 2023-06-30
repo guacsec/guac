@@ -30,9 +30,11 @@ type Artifact struct {
 type ArtifactEdges struct {
 	// Occurrences holds the value of the occurrences edge.
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
+	// Sbom holds the value of the sbom edge.
+	Sbom []*SBOM `json:"sbom,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
@@ -42,6 +44,15 @@ func (e ArtifactEdges) OccurrencesOrErr() ([]*Occurrence, error) {
 		return e.Occurrences, nil
 	}
 	return nil, &NotLoadedError{edge: "occurrences"}
+}
+
+// SbomOrErr returns the Sbom value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) SbomOrErr() ([]*SBOM, error) {
+	if e.loadedTypes[1] {
+		return e.Sbom, nil
+	}
+	return nil, &NotLoadedError{edge: "sbom"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -102,6 +113,11 @@ func (a *Artifact) Value(name string) (ent.Value, error) {
 // QueryOccurrences queries the "occurrences" edge of the Artifact entity.
 func (a *Artifact) QueryOccurrences() *OccurrenceQuery {
 	return NewArtifactClient(a.config).QueryOccurrences(a)
+}
+
+// QuerySbom queries the "sbom" edge of the Artifact entity.
+func (a *Artifact) QuerySbom() *SBOMQuery {
+	return NewArtifactClient(a.config).QuerySbom(a)
 }
 
 // Update returns a builder for updating this Artifact.

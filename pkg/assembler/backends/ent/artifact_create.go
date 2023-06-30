@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 )
 
 // ArtifactCreate is the builder for creating a Artifact entity.
@@ -47,6 +48,21 @@ func (ac *ArtifactCreate) AddOccurrences(o ...*Occurrence) *ArtifactCreate {
 		ids[i] = o[i].ID
 	}
 	return ac.AddOccurrenceIDs(ids...)
+}
+
+// AddSbomIDs adds the "sbom" edge to the SBOM entity by IDs.
+func (ac *ArtifactCreate) AddSbomIDs(ids ...int) *ArtifactCreate {
+	ac.mutation.AddSbomIDs(ids...)
+	return ac
+}
+
+// AddSbom adds the "sbom" edges to the SBOM entity.
+func (ac *ArtifactCreate) AddSbom(s ...*SBOM) *ArtifactCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return ac.AddSbomIDs(ids...)
 }
 
 // Mutation returns the ArtifactMutation object of the builder.
@@ -133,6 +149,22 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.SbomIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.SbomTable,
+			Columns: []string{artifact.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

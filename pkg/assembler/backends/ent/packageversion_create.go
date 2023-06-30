@@ -13,6 +13,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -88,6 +89,21 @@ func (pvc *PackageVersionCreate) AddOccurrences(o ...*Occurrence) *PackageVersio
 		ids[i] = o[i].ID
 	}
 	return pvc.AddOccurrenceIDs(ids...)
+}
+
+// AddSbomIDs adds the "sbom" edge to the SBOM entity by IDs.
+func (pvc *PackageVersionCreate) AddSbomIDs(ids ...int) *PackageVersionCreate {
+	pvc.mutation.AddSbomIDs(ids...)
+	return pvc
+}
+
+// AddSbom adds the "sbom" edges to the SBOM entity.
+func (pvc *PackageVersionCreate) AddSbom(s ...*SBOM) *PackageVersionCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pvc.AddSbomIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -221,6 +237,22 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.SbomIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.SbomTable,
+			Columns: []string{packageversion.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

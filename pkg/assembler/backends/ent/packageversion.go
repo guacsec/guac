@@ -41,9 +41,11 @@ type PackageVersionEdges struct {
 	Name *PackageName `json:"name,omitempty"`
 	// Occurrences holds the value of the occurrences edge.
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
+	// Sbom holds the value of the sbom edge.
+	Sbom []*SBOM `json:"sbom,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // NameOrErr returns the Name value or an error if the edge
@@ -66,6 +68,15 @@ func (e PackageVersionEdges) OccurrencesOrErr() ([]*Occurrence, error) {
 		return e.Occurrences, nil
 	}
 	return nil, &NotLoadedError{edge: "occurrences"}
+}
+
+// SbomOrErr returns the Sbom value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) SbomOrErr() ([]*SBOM, error) {
+	if e.loadedTypes[2] {
+		return e.Sbom, nil
+	}
+	return nil, &NotLoadedError{edge: "sbom"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -153,6 +164,11 @@ func (pv *PackageVersion) QueryName() *PackageNameQuery {
 // QueryOccurrences queries the "occurrences" edge of the PackageVersion entity.
 func (pv *PackageVersion) QueryOccurrences() *OccurrenceQuery {
 	return NewPackageVersionClient(pv.config).QueryOccurrences(pv)
+}
+
+// QuerySbom queries the "sbom" edge of the PackageVersion entity.
+func (pv *PackageVersion) QuerySbom() *SBOMQuery {
+	return NewPackageVersionClient(pv.config).QuerySbom(pv)
 }
 
 // Update returns a builder for updating this PackageVersion.

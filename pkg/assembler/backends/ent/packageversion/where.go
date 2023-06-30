@@ -344,6 +344,29 @@ func HasOccurrencesWith(preds ...predicate.Occurrence) predicate.PackageVersion 
 	})
 }
 
+// HasSbom applies the HasEdge predicate on the "sbom" edge.
+func HasSbom() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, SbomTable, SbomColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSbomWith applies the HasEdge predicate on the "sbom" edge with a given conditions (other predicates).
+func HasSbomWith(preds ...predicate.SBOM) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newSbomStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.PackageVersion) predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {

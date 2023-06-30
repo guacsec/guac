@@ -81,9 +81,6 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 	return nil, nil
 }
 
-func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
-	return nil, nil
-}
 func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	return nil, nil
 }

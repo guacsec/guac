@@ -105,6 +105,18 @@ func (f PackageVersionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageVersionMutation", m)
 }
 
+// The SBOMFunc type is an adapter to allow the use of ordinary
+// function as SBOM mutator.
+type SBOMFunc func(context.Context, *ent.SBOMMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SBOMFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SBOMMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SBOMMutation", m)
+}
+
 // The SourceNameFunc type is an adapter to allow the use of ordinary
 // function as SourceName mutator.
 type SourceNameFunc func(context.Context, *ent.SourceNameMutation) (ent.Value, error)
