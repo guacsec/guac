@@ -38,7 +38,7 @@ var nowNode DfsNode
 var queue []string
 
 // TODO: make more robust usuing predicates
-func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, startType string, maxDepth int) (map[string]DfsNode, error) {
+func SearchConnectionsFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, startType string, maxDepth int) (map[string]DfsNode, error) {
 	startNode, err := model.Node(ctx, gqlclient, startID)
 
 	if err != nil {

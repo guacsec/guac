@@ -187,7 +187,7 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 	}
 }
 
-func Test_SearchSubgraphFromVuln(t *testing.T) {
+func Test_SearchConnectionsFromStartNode(t *testing.T) {
 	server, logger := startTestServer()
 	ctx := logging.WithLogger(context.Background())
 
@@ -285,7 +285,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				stopID = ""
 			}
 
-			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, startID, stopID, "packageVersion", tt.maxDepth)
+			gotMap, err := SearchConnectionsFromStartNode(ctx, gqlclient, startID, stopID, "packageVersion", tt.maxDepth)
 
 			if err != nil {
 				t.Errorf("got err from SearchDependenciesFromStartNode: %v", err)
