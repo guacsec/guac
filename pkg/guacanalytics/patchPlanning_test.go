@@ -172,17 +172,11 @@ var (
 )
 
 func ingestTestData(graphInput string, ctx context.Context, client graphql.Client) {
-	logger := logging.FromContext(ctx)
 	switch graphInput {
 	case "isDependency":
 		for _, ingest := range isDepTestData.IsDependency {
 
-			_, err := model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
-
-			if err != nil {
-
-				logger.Errorf("Error in ingesting: %v\n", err)
-			}
+			model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
 		}
 	}
 }
