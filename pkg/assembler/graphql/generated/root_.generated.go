@@ -176,10 +176,12 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CertifyScorecard      func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
 		IngestArtifact        func(childComplexity int, artifact *model.ArtifactInputSpec) int
+		IngestArtifacts       func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
+		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
@@ -188,8 +190,10 @@ type ComplexityRoot struct {
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
 		IngestMaterials       func(childComplexity int, materials []*model.ArtifactInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
+		IngestOccurrences     func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
+		IngestPackages        func(childComplexity int, pkgs []*model.PkgInputSpec) int
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
@@ -954,6 +958,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestArtifact(childComplexity, args["artifact"].(*model.ArtifactInputSpec)), true
 
+	case "Mutation.ingestArtifacts":
+		if e.complexity.Mutation.IngestArtifacts == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestArtifacts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestArtifacts(childComplexity, args["artifacts"].([]*model.ArtifactInputSpec)), true
+
 	case "Mutation.ingestBuilder":
 		if e.complexity.Mutation.IngestBuilder == nil {
 			break
@@ -1001,6 +1017,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestCve(childComplexity, args["cve"].(*model.CVEInputSpec)), true
+
+	case "Mutation.ingestDependencies":
+		if e.complexity.Mutation.IngestDependencies == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestDependencies_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestDependencies(childComplexity, args["pkgs"].([]*model.PkgInputSpec), args["depPkgs"].([]*model.PkgInputSpec), args["dependencies"].([]*model.IsDependencyInputSpec)), true
 
 	case "Mutation.ingestDependency":
 		if e.complexity.Mutation.IngestDependency == nil {
@@ -1098,6 +1126,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["subject"].(model.PackageOrSourceInput), args["artifact"].(model.ArtifactInputSpec), args["occurrence"].(model.IsOccurrenceInputSpec)), true
 
+	case "Mutation.ingestOccurrences":
+		if e.complexity.Mutation.IngestOccurrences == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestOccurrences_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestOccurrences(childComplexity, args["subjects"].(model.PackageOrSourceInputs), args["artifacts"].([]*model.ArtifactInputSpec), args["occurrences"].([]*model.IsOccurrenceInputSpec)), true
+
 	case "Mutation.ingestOSV":
 		if e.complexity.Mutation.IngestOsv == nil {
 			break
@@ -1121,6 +1161,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(model.PkgInputSpec)), true
+
+	case "Mutation.ingestPackages":
+		if e.complexity.Mutation.IngestPackages == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestPackages_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestPackages(childComplexity, args["pkgs"].([]*model.PkgInputSpec)), true
 
 	case "Mutation.ingestPkgEqual":
 		if e.complexity.Mutation.IngestPkgEqual == nil {
@@ -1948,6 +2000,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageOrArtifactInput,
 		ec.unmarshalInputPackageOrArtifactSpec,
 		ec.unmarshalInputPackageOrSourceInput,
+		ec.unmarshalInputPackageOrSourceInputs,
 		ec.unmarshalInputPackageOrSourceSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
@@ -2130,6 +2183,8 @@ extend type Query {
 extend type Mutation {
   "Ingests a new artifact and returns it."
   ingestArtifact(artifact: ArtifactInputSpec): Artifact!
+  "Bulk ingests new artifacts and returns a list of them."
+  ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [Artifact!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/builder.graphql", Input: `#
@@ -3372,6 +3427,8 @@ extend type Query {
 extend type Mutation {
   "Adds a dependency between two packages"
   ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
+  "Bulk adds a dependency between two packages"
+  ingestDependencies(pkgs: [PkgInputSpec!]!, depPkgs: [PkgInputSpec!]!, dependencies: [IsDependencyInputSpec!]!): [IsDependency!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isOccurrence.graphql", Input: `#
@@ -3415,6 +3472,16 @@ input PackageOrSourceInput {
   package: PkgInputSpec
   source: SourceInputSpec
 }
+
+"""
+PackageOrSourceInputs allows using packages and sources as input for batch mutations.
+Exactly one list must be specified.
+"""
+input PackageOrSourceInputs {
+  packages: [PkgInputSpec!]
+  sources: [SourceInputSpec!]
+}
+
 
 """
 IsOccurrence is an attestation to link an artifact to a package or source.
@@ -3463,6 +3530,8 @@ extend type Query {
 extend type Mutation {
   "Ingest that an artifact is produced from a package or source."
   ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
+  "Bulk ingest that an artifact is produced from a package or source."
+  ingestOccurrences(subjects: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [IsOccurrence!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isVulnerability.graphql", Input: `#
@@ -3792,6 +3861,8 @@ extend type Query {
 extend type Mutation {
   "Ingests a new package and returns the corresponding package trie path."
   ingestPackage(pkg: PkgInputSpec!): Package!
+  "Bulk ingests packages and returns the list of corresponding package trie path."
+  ingestPackages(pkgs: [PkgInputSpec!]!): [Package!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/path.graphql", Input: `#

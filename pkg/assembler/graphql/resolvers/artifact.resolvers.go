@@ -16,6 +16,11 @@ func (r *mutationResolver) IngestArtifact(ctx context.Context, artifact *model.A
 	return r.Backend.IngestArtifact(ctx, artifact)
 }
 
+// IngestArtifacts is the resolver for the ingestArtifacts field.
+func (r *mutationResolver) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+	return r.Backend.IngestArtifacts(ctx, artifacts)
+}
+
 // Artifacts is the resolver for the artifacts field.
 func (r *queryResolver) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	return r.Backend.Artifacts(ctx, artifactSpec)

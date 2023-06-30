@@ -15,6 +15,11 @@ func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.PkgIn
 	return r.Backend.IngestDependency(ctx, pkg, depPkg, dependency)
 }
 
+// IngestDependencies is the resolver for the ingestDependencies field.
+func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+	return r.Backend.IngestDependencies(ctx, pkgs, depPkgs, dependencies)
+}
+
 // IsDependency is the resolver for the IsDependency field.
 func (r *queryResolver) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	return r.Backend.IsDependency(ctx, isDependencySpec)

@@ -4818,6 +4818,92 @@ func (v *IngestArtifactResponse) GetIngestArtifact() IngestArtifactIngestArtifac
 	return v.IngestArtifact
 }
 
+// IngestArtifactsIngestArtifactsArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type IngestArtifactsIngestArtifactsArtifact struct {
+	AllArtifactTree `json:"-"`
+}
+
+// GetId returns IngestArtifactsIngestArtifactsArtifact.Id, and is useful for accessing the field via an interface.
+func (v *IngestArtifactsIngestArtifactsArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns IngestArtifactsIngestArtifactsArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *IngestArtifactsIngestArtifactsArtifact) GetAlgorithm() string {
+	return v.AllArtifactTree.Algorithm
+}
+
+// GetDigest returns IngestArtifactsIngestArtifactsArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *IngestArtifactsIngestArtifactsArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *IngestArtifactsIngestArtifactsArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestArtifactsIngestArtifactsArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestArtifactsIngestArtifactsArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestArtifactsIngestArtifactsArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *IngestArtifactsIngestArtifactsArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestArtifactsIngestArtifactsArtifact) __premarshalJSON() (*__premarshalIngestArtifactsIngestArtifactsArtifact, error) {
+	var retval __premarshalIngestArtifactsIngestArtifactsArtifact
+
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// IngestArtifactsResponse is returned by IngestArtifacts on success.
+type IngestArtifactsResponse struct {
+	// Bulk ingests new artifacts and returns a list of them.
+	IngestArtifacts []IngestArtifactsIngestArtifactsArtifact `json:"ingestArtifacts"`
+}
+
+// GetIngestArtifacts returns IngestArtifactsResponse.IngestArtifacts, and is useful for accessing the field via an interface.
+func (v *IngestArtifactsResponse) GetIngestArtifacts() []IngestArtifactsIngestArtifactsArtifact {
+	return v.IngestArtifacts
+}
+
 // IngestBuilderIngestBuilder includes the requested fields of the GraphQL type Builder.
 // The GraphQL type's documentation follows.
 //
@@ -5253,6 +5339,99 @@ type IngestPackageResponse struct {
 // GetIngestPackage returns IngestPackageResponse.IngestPackage, and is useful for accessing the field via an interface.
 func (v *IngestPackageResponse) GetIngestPackage() IngestPackageIngestPackage { return v.IngestPackage }
 
+// IngestPackagesIngestPackagesPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type IngestPackagesIngestPackagesPackage struct {
+	AllPkgTree `json:"-"`
+}
+
+// GetId returns IngestPackagesIngestPackagesPackage.Id, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns IngestPackagesIngestPackagesPackage.Type, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns IngestPackagesIngestPackagesPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *IngestPackagesIngestPackagesPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestPackagesIngestPackagesPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestPackagesIngestPackagesPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestPackagesIngestPackagesPackage struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *IngestPackagesIngestPackagesPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestPackagesIngestPackagesPackage) __premarshalJSON() (*__premarshalIngestPackagesIngestPackagesPackage, error) {
+	var retval __premarshalIngestPackagesIngestPackagesPackage
+
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// IngestPackagesResponse is returned by IngestPackages on success.
+type IngestPackagesResponse struct {
+	// Bulk ingests packages and returns the list of corresponding package trie path.
+	IngestPackages []IngestPackagesIngestPackagesPackage `json:"ingestPackages"`
+}
+
+// GetIngestPackages returns IngestPackagesResponse.IngestPackages, and is useful for accessing the field via an interface.
+func (v *IngestPackagesResponse) GetIngestPackages() []IngestPackagesIngestPackagesPackage {
+	return v.IngestPackages
+}
+
 // IngestSourceIngestSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
 //
@@ -5340,6 +5519,130 @@ type IngestSourceResponse struct {
 
 // GetIngestSource returns IngestSourceResponse.IngestSource, and is useful for accessing the field via an interface.
 func (v *IngestSourceResponse) GetIngestSource() IngestSourceIngestSource { return v.IngestSource }
+
+// IsDependenciesIngestDependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
+// The GraphQL type's documentation follows.
+//
+// IsDependency is an attestation to record that a package depends on another.
+type IsDependenciesIngestDependenciesIsDependency struct {
+	allIsDependencyTree `json:"-"`
+}
+
+// GetId returns IsDependenciesIngestDependenciesIsDependency.Id, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetId() string {
+	return v.allIsDependencyTree.Id
+}
+
+// GetJustification returns IsDependenciesIngestDependenciesIsDependency.Justification, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetJustification() string {
+	return v.allIsDependencyTree.Justification
+}
+
+// GetPackage returns IsDependenciesIngestDependenciesIsDependency.Package, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetPackage() allIsDependencyTreePackage {
+	return v.allIsDependencyTree.Package
+}
+
+// GetDependentPackage returns IsDependenciesIngestDependenciesIsDependency.DependentPackage, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetDependentPackage() allIsDependencyTreeDependentPackage {
+	return v.allIsDependencyTree.DependentPackage
+}
+
+// GetDependencyType returns IsDependenciesIngestDependenciesIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetDependencyType() DependencyType {
+	return v.allIsDependencyTree.DependencyType
+}
+
+// GetVersionRange returns IsDependenciesIngestDependenciesIsDependency.VersionRange, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetVersionRange() string {
+	return v.allIsDependencyTree.VersionRange
+}
+
+// GetOrigin returns IsDependenciesIngestDependenciesIsDependency.Origin, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetOrigin() string {
+	return v.allIsDependencyTree.Origin
+}
+
+// GetCollector returns IsDependenciesIngestDependenciesIsDependency.Collector, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetCollector() string {
+	return v.allIsDependencyTree.Collector
+}
+
+func (v *IsDependenciesIngestDependenciesIsDependency) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsDependenciesIngestDependenciesIsDependency
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsDependenciesIngestDependenciesIsDependency = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allIsDependencyTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsDependenciesIngestDependenciesIsDependency struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Package allIsDependencyTreePackage `json:"package"`
+
+	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
+
+	DependencyType DependencyType `json:"dependencyType"`
+
+	VersionRange string `json:"versionRange"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *IsDependenciesIngestDependenciesIsDependency) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsDependenciesIngestDependenciesIsDependency) __premarshalJSON() (*__premarshalIsDependenciesIngestDependenciesIsDependency, error) {
+	var retval __premarshalIsDependenciesIngestDependenciesIsDependency
+
+	retval.Id = v.allIsDependencyTree.Id
+	retval.Justification = v.allIsDependencyTree.Justification
+	retval.Package = v.allIsDependencyTree.Package
+	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
+	retval.DependencyType = v.allIsDependencyTree.DependencyType
+	retval.VersionRange = v.allIsDependencyTree.VersionRange
+	retval.Origin = v.allIsDependencyTree.Origin
+	retval.Collector = v.allIsDependencyTree.Collector
+	return &retval, nil
+}
+
+// IsDependenciesResponse is returned by IsDependencies on success.
+type IsDependenciesResponse struct {
+	// Bulk adds a dependency between two packages
+	IngestDependencies []IsDependenciesIngestDependenciesIsDependency `json:"ingestDependencies"`
+}
+
+// GetIngestDependencies returns IsDependenciesResponse.IngestDependencies, and is useful for accessing the field via an interface.
+func (v *IsDependenciesResponse) GetIngestDependencies() []IsDependenciesIngestDependenciesIsDependency {
+	return v.IngestDependencies
+}
 
 // IsDependencyIngestDependencyIsDependency includes the requested fields of the GraphQL type IsDependency.
 // The GraphQL type's documentation follows.
@@ -5743,6 +6046,248 @@ type IsOccurrenceSrcResponse struct {
 // GetIngestOccurrence returns IsOccurrenceSrcResponse.IngestOccurrence, and is useful for accessing the field via an interface.
 func (v *IsOccurrenceSrcResponse) GetIngestOccurrence() IsOccurrenceSrcIngestOccurrenceIsOccurrence {
 	return v.IngestOccurrence
+}
+
+// IsOccurrencesPkgIngestOccurrencesIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrence is an attestation to link an artifact to a package or source.
+//
+// Attestation must occur at the PackageVersion or at the SourceName.
+type IsOccurrencesPkgIngestOccurrencesIsOccurrence struct {
+	AllIsOccurrencesTree `json:"-"`
+}
+
+// GetId returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetId() string {
+	return v.AllIsOccurrencesTree.Id
+}
+
+// GetSubject returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
+	return v.AllIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
+	return v.AllIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetJustification() string {
+	return v.AllIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetOrigin() string {
+	return v.AllIsOccurrencesTree.Origin
+}
+
+// GetCollector returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetCollector() string {
+	return v.AllIsOccurrencesTree.Collector
+}
+
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsOccurrencesPkgIngestOccurrencesIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsOccurrencesPkgIngestOccurrencesIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsOccurrencesPkgIngestOccurrencesIsOccurrence struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) __premarshalJSON() (*__premarshalIsOccurrencesPkgIngestOccurrencesIsOccurrence, error) {
+	var retval __premarshalIsOccurrencesPkgIngestOccurrencesIsOccurrence
+
+	retval.Id = v.AllIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal IsOccurrencesPkgIngestOccurrencesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.AllIsOccurrencesTree.Artifact
+	retval.Justification = v.AllIsOccurrencesTree.Justification
+	retval.Origin = v.AllIsOccurrencesTree.Origin
+	retval.Collector = v.AllIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// IsOccurrencesPkgResponse is returned by IsOccurrencesPkg on success.
+type IsOccurrencesPkgResponse struct {
+	// Bulk ingest that an artifact is produced from a package or source.
+	IngestOccurrences []IsOccurrencesPkgIngestOccurrencesIsOccurrence `json:"ingestOccurrences"`
+}
+
+// GetIngestOccurrences returns IsOccurrencesPkgResponse.IngestOccurrences, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgResponse) GetIngestOccurrences() []IsOccurrencesPkgIngestOccurrencesIsOccurrence {
+	return v.IngestOccurrences
+}
+
+// IsOccurrencesSrcIngestOccurrencesIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrence is an attestation to link an artifact to a package or source.
+//
+// Attestation must occur at the PackageVersion or at the SourceName.
+type IsOccurrencesSrcIngestOccurrencesIsOccurrence struct {
+	AllIsOccurrencesTree `json:"-"`
+}
+
+// GetId returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetId() string {
+	return v.AllIsOccurrencesTree.Id
+}
+
+// GetSubject returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
+	return v.AllIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
+	return v.AllIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetJustification() string {
+	return v.AllIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetOrigin() string {
+	return v.AllIsOccurrencesTree.Origin
+}
+
+// GetCollector returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetCollector() string {
+	return v.AllIsOccurrencesTree.Collector
+}
+
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsOccurrencesSrcIngestOccurrencesIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsOccurrencesSrcIngestOccurrencesIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsOccurrencesSrcIngestOccurrencesIsOccurrence struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) __premarshalJSON() (*__premarshalIsOccurrencesSrcIngestOccurrencesIsOccurrence, error) {
+	var retval __premarshalIsOccurrencesSrcIngestOccurrencesIsOccurrence
+
+	retval.Id = v.AllIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal IsOccurrencesSrcIngestOccurrencesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.AllIsOccurrencesTree.Artifact
+	retval.Justification = v.AllIsOccurrencesTree.Justification
+	retval.Origin = v.AllIsOccurrencesTree.Origin
+	retval.Collector = v.AllIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// IsOccurrencesSrcResponse is returned by IsOccurrencesSrc on success.
+type IsOccurrencesSrcResponse struct {
+	// Bulk ingest that an artifact is produced from a package or source.
+	IngestOccurrences []IsOccurrencesSrcIngestOccurrencesIsOccurrence `json:"ingestOccurrences"`
+}
+
+// GetIngestOccurrences returns IsOccurrencesSrcResponse.IngestOccurrences, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcResponse) GetIngestOccurrences() []IsOccurrencesSrcIngestOccurrencesIsOccurrence {
+	return v.IngestOccurrences
 }
 
 // IsVulnerabilityCVEIngestIsVulnerability includes the requested fields of the GraphQL type IsVulnerability.
@@ -17990,6 +18535,14 @@ type __IngestArtifactInput struct {
 // GetArtifact returns __IngestArtifactInput.Artifact, and is useful for accessing the field via an interface.
 func (v *__IngestArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
 
+// __IngestArtifactsInput is used internally by genqlient
+type __IngestArtifactsInput struct {
+	Artifacts []ArtifactInputSpec `json:"artifacts"`
+}
+
+// GetArtifacts returns __IngestArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__IngestArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
 // __IngestBuilderInput is used internally by genqlient
 type __IngestBuilderInput struct {
 	Builder BuilderInputSpec `json:"builder"`
@@ -18038,6 +18591,14 @@ type __IngestPackageInput struct {
 // GetPkg returns __IngestPackageInput.Pkg, and is useful for accessing the field via an interface.
 func (v *__IngestPackageInput) GetPkg() PkgInputSpec { return v.Pkg }
 
+// __IngestPackagesInput is used internally by genqlient
+type __IngestPackagesInput struct {
+	Pkgs []PkgInputSpec `json:"pkgs"`
+}
+
+// GetPkgs returns __IngestPackagesInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__IngestPackagesInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
 // __IngestSourceInput is used internally by genqlient
 type __IngestSourceInput struct {
 	Source SourceInputSpec `json:"source"`
@@ -18045,6 +18606,22 @@ type __IngestSourceInput struct {
 
 // GetSource returns __IngestSourceInput.Source, and is useful for accessing the field via an interface.
 func (v *__IngestSourceInput) GetSource() SourceInputSpec { return v.Source }
+
+// __IsDependenciesInput is used internally by genqlient
+type __IsDependenciesInput struct {
+	Pkgs         []PkgInputSpec          `json:"pkgs"`
+	DepPkgs      []PkgInputSpec          `json:"depPkgs"`
+	Dependencies []IsDependencyInputSpec `json:"dependencies"`
+}
+
+// GetPkgs returns __IsDependenciesInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__IsDependenciesInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetDepPkgs returns __IsDependenciesInput.DepPkgs, and is useful for accessing the field via an interface.
+func (v *__IsDependenciesInput) GetDepPkgs() []PkgInputSpec { return v.DepPkgs }
+
+// GetDependencies returns __IsDependenciesInput.Dependencies, and is useful for accessing the field via an interface.
+func (v *__IsDependenciesInput) GetDependencies() []IsDependencyInputSpec { return v.Dependencies }
 
 // __IsDependencyInput is used internally by genqlient
 type __IsDependencyInput struct {
@@ -18093,6 +18670,38 @@ func (v *__IsOccurrenceSrcInput) GetArtifact() ArtifactInputSpec { return v.Arti
 
 // GetOccurrence returns __IsOccurrenceSrcInput.Occurrence, and is useful for accessing the field via an interface.
 func (v *__IsOccurrenceSrcInput) GetOccurrence() IsOccurrenceInputSpec { return v.Occurrence }
+
+// __IsOccurrencesPkgInput is used internally by genqlient
+type __IsOccurrencesPkgInput struct {
+	Pkgs        []PkgInputSpec          `json:"pkgs"`
+	Artifacts   []ArtifactInputSpec     `json:"artifacts"`
+	Occurrences []IsOccurrenceInputSpec `json:"occurrences"`
+}
+
+// GetPkgs returns __IsOccurrencesPkgInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesPkgInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetArtifacts returns __IsOccurrencesPkgInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesPkgInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetOccurrences returns __IsOccurrencesPkgInput.Occurrences, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesPkgInput) GetOccurrences() []IsOccurrenceInputSpec { return v.Occurrences }
+
+// __IsOccurrencesSrcInput is used internally by genqlient
+type __IsOccurrencesSrcInput struct {
+	Sources     []SourceInputSpec       `json:"sources"`
+	Artifacts   []ArtifactInputSpec     `json:"artifacts"`
+	Occurrences []IsOccurrenceInputSpec `json:"occurrences"`
+}
+
+// GetSources returns __IsOccurrencesSrcInput.Sources, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesSrcInput) GetSources() []SourceInputSpec { return v.Sources }
+
+// GetArtifacts returns __IsOccurrencesSrcInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesSrcInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetOccurrences returns __IsOccurrencesSrcInput.Occurrences, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesSrcInput) GetOccurrences() []IsOccurrenceInputSpec { return v.Occurrences }
 
 // __IsVulnerabilityCVEInput is used internally by genqlient
 type __IsVulnerabilityCVEInput struct {
@@ -23001,6 +23610,46 @@ func IngestArtifact(
 	return &data, err
 }
 
+// The query or mutation executed by IngestArtifacts.
+const IngestArtifacts_Operation = `
+mutation IngestArtifacts ($artifacts: [ArtifactInputSpec!]!) {
+	ingestArtifacts(artifacts: $artifacts) {
+		... AllArtifactTree
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IngestArtifacts(
+	ctx context.Context,
+	client graphql.Client,
+	artifacts []ArtifactInputSpec,
+) (*IngestArtifactsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestArtifacts",
+		Query:  IngestArtifacts_Operation,
+		Variables: &__IngestArtifactsInput{
+			Artifacts: artifacts,
+		},
+	}
+	var err error
+
+	var data IngestArtifactsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by IngestBuilder.
 const IngestBuilder_Operation = `
 mutation IngestBuilder ($builder: BuilderInputSpec!) {
@@ -23250,6 +23899,62 @@ func IngestPackage(
 	return &data, err
 }
 
+// The query or mutation executed by IngestPackages.
+const IngestPackages_Operation = `
+mutation IngestPackages ($pkgs: [PkgInputSpec!]!) {
+	ingestPackages(pkgs: $pkgs) {
+		... AllPkgTree
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func IngestPackages(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+) (*IngestPackagesResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestPackages",
+		Query:  IngestPackages_Operation,
+		Variables: &__IngestPackagesInput{
+			Pkgs: pkgs,
+		},
+	}
+	var err error
+
+	var data IngestPackagesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by IngestSource.
 const IngestSource_Operation = `
 mutation IngestSource ($source: SourceInputSpec!) {
@@ -23288,6 +23993,80 @@ func IngestSource(
 	var err error
 
 	var data IngestSourceResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IsDependencies.
+const IsDependencies_Operation = `
+mutation IsDependencies ($pkgs: [PkgInputSpec!]!, $depPkgs: [PkgInputSpec!]!, $dependencies: [IsDependencyInputSpec!]!) {
+	ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, dependencies: $dependencies) {
+		... allIsDependencyTree
+	}
+}
+fragment allIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... AllPkgTree
+	}
+	dependentPackage {
+		... AllPkgTree
+	}
+	dependencyType
+	versionRange
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func IsDependencies(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	depPkgs []PkgInputSpec,
+	dependencies []IsDependencyInputSpec,
+) (*IsDependenciesResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsDependencies",
+		Query:  IsDependencies_Operation,
+		Variables: &__IsDependenciesInput{
+			Pkgs:         pkgs,
+			DepPkgs:      depPkgs,
+			Dependencies: dependencies,
+		},
+	}
+	var err error
+
+	var data IsDependenciesResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -23556,6 +24335,200 @@ func IsOccurrenceSrc(
 	var err error
 
 	var data IsOccurrenceSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IsOccurrencesPkg.
+const IsOccurrencesPkg_Operation = `
+mutation IsOccurrencesPkg ($pkgs: [PkgInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
+	ingestOccurrences(subjects: {packages:$pkgs}, artifacts: $artifacts, occurrences: $occurrences) {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IsOccurrencesPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	artifacts []ArtifactInputSpec,
+	occurrences []IsOccurrenceInputSpec,
+) (*IsOccurrencesPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsOccurrencesPkg",
+		Query:  IsOccurrencesPkg_Operation,
+		Variables: &__IsOccurrencesPkgInput{
+			Pkgs:        pkgs,
+			Artifacts:   artifacts,
+			Occurrences: occurrences,
+		},
+	}
+	var err error
+
+	var data IsOccurrencesPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IsOccurrencesSrc.
+const IsOccurrencesSrc_Operation = `
+mutation IsOccurrencesSrc ($sources: [SourceInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
+	ingestOccurrences(subjects: {sources:$sources}, artifacts: $artifacts, occurrences: $occurrences) {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IsOccurrencesSrc(
+	ctx context.Context,
+	client graphql.Client,
+	sources []SourceInputSpec,
+	artifacts []ArtifactInputSpec,
+	occurrences []IsOccurrenceInputSpec,
+) (*IsOccurrencesSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsOccurrencesSrc",
+		Query:  IsOccurrencesSrc_Operation,
+		Variables: &__IsOccurrencesSrcInput{
+			Sources:     sources,
+			Artifacts:   artifacts,
+			Occurrences: occurrences,
+		},
+	}
+	var err error
+
+	var data IsOccurrencesSrcResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

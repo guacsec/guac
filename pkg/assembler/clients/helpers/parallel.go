@@ -143,7 +143,7 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 				verbs.Go(func() error { return ingestIsDependency(errGroupVerbCtx, gqlclient, v) })
 			}
 
-			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurrence))
+			logger.Infof("assembling IsOccurrence: %v", len(p.IsOccurrence))
 			for _, v := range p.IsOccurrence {
 				if errGroupVerbCtx.Err() != nil {
 					break
