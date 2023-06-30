@@ -106,7 +106,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
-			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurrence))
+			logger.Infof("assembling IsOccurrence: %v", len(p.IsOccurrence))
 			for _, v := range p.IsOccurrence {
 				if err := ingestIsOccurrence(ctx, gqlclient, v); err != nil {
 					return err

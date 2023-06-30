@@ -190,7 +190,7 @@ type ComplexityRoot struct {
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
 		IngestMaterials       func(childComplexity int, materials []*model.ArtifactInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
-		IngestOccurrences     func(childComplexity int, subject model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
+		IngestOccurrences     func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestPackages        func(childComplexity int, pkgs []*model.PkgInputSpec) int
@@ -1135,7 +1135,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestOccurrences(childComplexity, args["subject"].(model.PackageOrSourceInputs), args["artifacts"].([]*model.ArtifactInputSpec), args["occurrences"].([]*model.IsOccurrenceInputSpec)), true
+		return e.complexity.Mutation.IngestOccurrences(childComplexity, args["subjects"].(model.PackageOrSourceInputs), args["artifacts"].([]*model.ArtifactInputSpec), args["occurrences"].([]*model.IsOccurrenceInputSpec)), true
 
 	case "Mutation.ingestOSV":
 		if e.complexity.Mutation.IngestOsv == nil {
@@ -2172,7 +2172,6 @@ extend type Mutation {
   ingestArtifact(artifact: ArtifactInputSpec): Artifact!
   "Bulk ingests new artifacts and returns a list of them."
   ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [Artifact!]!
-
 }
 `, BuiltIn: false},
 	{Name: "../schema/builder.graphql", Input: `#
@@ -3519,7 +3518,7 @@ extend type Mutation {
   "Ingest that an artifact is produced from a package or source."
   ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
   "Bulk ingest that an artifact is produced from a package or source."
-  ingestOccurrences(subject: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [IsOccurrence!]!
+  ingestOccurrences(subjects: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [IsOccurrence!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isVulnerability.graphql", Input: `#
@@ -3851,7 +3850,6 @@ extend type Mutation {
   ingestPackage(pkg: PkgInputSpec!): Package!
   "Bulk ingests packages and returns the list of corresponding package trie path."
   ingestPackages(pkgs: [PkgInputSpec!]!): [Package!]!
-
 }
 `, BuiltIn: false},
 	{Name: "../schema/path.graphql", Input: `#

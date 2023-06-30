@@ -96,7 +96,55 @@ func (n *isOccurrenceStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // 	}
 // }
 
-// Ingest IsOccurrence
+// Ingest IngestOccurrences
+
+func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
+	valuesDefined := 0
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(artifacts) {
+			return nil, gqlerror.Errorf("uneven packages and artifacts for ingestion")
+		}
+		if len(subjects.Packages) != len(occurrences) {
+			return nil, gqlerror.Errorf("uneven packages and occurrence for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Sources) > 0 {
+		if len(subjects.Sources) != len(artifacts) {
+			return nil, gqlerror.Errorf("uneven Sources and artifacts for ingestion")
+		}
+		if len(subjects.Sources) != len(occurrences) {
+			return nil, gqlerror.Errorf("uneven Sources and occurrence for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return nil, gqlerror.Errorf("must specify at most packages or sources for %v", "IngestOccurrences")
+	}
+
+	var modelIsOccurrences []*model.IsOccurrence
+
+	for i := range occurrences {
+		var isOccurrence *model.IsOccurrence
+		var err error
+		if len(subjects.Packages) > 0 {
+			subject := model.PackageOrSourceInput{Package: subjects.Packages[i]}
+			isOccurrence, err = c.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("ingestOccurrence failed with err: %v", err)
+			}
+		} else {
+			subject := model.PackageOrSourceInput{Source: subjects.Sources[i]}
+			isOccurrence, err = c.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("ingestOccurrence failed with err: %v", err)
+			}
+		}
+		modelIsOccurrences = append(modelIsOccurrences, isOccurrence)
+	}
+	return modelIsOccurrences, nil
+}
+
 func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 	return c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
 }

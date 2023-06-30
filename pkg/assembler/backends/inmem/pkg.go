@@ -274,6 +274,19 @@ func (p *pkgVersionNode) getCertifyGoodLinks() []uint32   { return p.goodLinks }
 func (p *pkgVersionNode) setPkgEquals(id uint32) { p.pkgEquals = append(p.pkgEquals, id) }
 
 // Ingest Package
+
+func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
+	var modelPkgs []*model.Package
+	for _, pkg := range pkgs {
+		modelPkg, err := c.IngestPackage(ctx, *pkg)
+		if err != nil {
+			return nil, gqlerror.Errorf("ingestPackage failed with err: %v", err)
+		}
+		modelPkgs = append(modelPkgs, modelPkg)
+	}
+	return modelPkgs, nil
+}
+
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
 	c.m.RLock()
 	namespacesStruct, hasNamespace := c.packages[input.Type]

@@ -63,5 +63,4 @@ extend type Mutation {
   ingestArtifact(artifact: ArtifactInputSpec): Artifact!
   "Bulk ingests new artifacts and returns a list of them."
   ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [Artifact!]!
-
 }

@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -18,7 +17,7 @@ func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.PkgIn
 
 // IngestDependencies is the resolver for the ingestDependencies field.
 func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
-	panic(fmt.Errorf("not implemented: IngestDependencies - ingestDependencies"))
+	return r.Backend.IngestDependencies(ctx, pkgs, depPkgs, dependencies)
 }
 
 // IsDependency is the resolver for the IsDependency field.

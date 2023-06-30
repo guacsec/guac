@@ -32,13 +32,13 @@ mutation IsOccurrenceSrc($source: SourceInputSpec!, $artifact: ArtifactInputSpec
 # Defines the GraphQL operations to bulk ingest occurrences information into GUAC
 
 mutation IsOccurrencesPkg($pkgs: [PkgInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
-  ingestOccurrences(subject: {packages: $pkgs}, artifacts: $artifacts, occurrences: $occurrences) {
+  ingestOccurrences(subjects: {packages: $pkgs}, artifacts: $artifacts, occurrences: $occurrences) {
     ...AllIsOccurrencesTree
   }
 }
 
 mutation IsOccurrencesSrc($sources: [SourceInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
-  ingestOccurrences(subject: {sources: $sources}, artifacts: $artifacts, occurrences: $occurrences) {
+  ingestOccurrences(subjects: {sources: $sources}, artifacts: $artifacts, occurrences: $occurrences) {
     ...AllIsOccurrencesTree
   }
 }

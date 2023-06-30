@@ -37,7 +37,7 @@ type MutationResolver interface {
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
 	IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error)
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
-	IngestOccurrences(ctx context.Context, subject model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error)
+	IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error)
 	IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
@@ -506,14 +506,14 @@ func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Co
 	var err error
 	args := map[string]interface{}{}
 	var arg0 model.PackageOrSourceInputs
-	if tmp, ok := rawArgs["subject"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+	if tmp, ok := rawArgs["subjects"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
 		arg0, err = ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["subject"] = arg0
+	args["subjects"] = arg0
 	var arg1 []*model.ArtifactInputSpec
 	if tmp, ok := rawArgs["artifacts"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
@@ -2490,7 +2490,7 @@ func (ec *executionContext) _Mutation_ingestOccurrences(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestOccurrences(rctx, fc.Args["subject"].(model.PackageOrSourceInputs), fc.Args["artifacts"].([]*model.ArtifactInputSpec), fc.Args["occurrences"].([]*model.IsOccurrenceInputSpec))
+		return ec.resolvers.Mutation().IngestOccurrences(rctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["artifacts"].([]*model.ArtifactInputSpec), fc.Args["occurrences"].([]*model.IsOccurrenceInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

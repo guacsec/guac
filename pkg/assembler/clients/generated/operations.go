@@ -23798,7 +23798,7 @@ func IsOccurrenceSrc(
 // The query or mutation executed by IsOccurrencesPkg.
 const IsOccurrencesPkg_Operation = `
 mutation IsOccurrencesPkg ($pkgs: [PkgInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
-	ingestOccurrences(subject: {packages:$pkgs}, artifacts: $artifacts, occurrences: $occurrences) {
+	ingestOccurrences(subjects: {packages:$pkgs}, artifacts: $artifacts, occurrences: $occurrences) {
 		... AllIsOccurrencesTree
 	}
 }
@@ -23895,7 +23895,7 @@ func IsOccurrencesPkg(
 // The query or mutation executed by IsOccurrencesSrc.
 const IsOccurrencesSrc_Operation = `
 mutation IsOccurrencesSrc ($sources: [SourceInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
-	ingestOccurrences(subject: {sources:$sources}, artifacts: $artifacts, occurrences: $occurrences) {
+	ingestOccurrences(subjects: {sources:$sources}, artifacts: $artifacts, occurrences: $occurrences) {
 		... AllIsOccurrencesTree
 	}
 }

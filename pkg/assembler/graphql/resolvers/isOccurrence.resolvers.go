@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -17,8 +16,8 @@ func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.P
 }
 
 // IngestOccurrences is the resolver for the ingestOccurrences field.
-func (r *mutationResolver) IngestOccurrences(ctx context.Context, subject model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	panic(fmt.Errorf("not implemented: IngestOccurrences - ingestOccurrences"))
+func (r *mutationResolver) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
+	return r.Backend.IngestOccurrences(ctx, subjects, artifacts, occurrences)
 }
 
 // IsOccurrence is the resolver for the IsOccurrence field.
