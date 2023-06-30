@@ -145,6 +145,8 @@ func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.Packa
 	return modelIsOccurrences, nil
 }
 
+// Ingest IsOccurrence
+
 func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 	return c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
 }
