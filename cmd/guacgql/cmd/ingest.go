@@ -40,6 +40,8 @@ func ingestData(port int) {
 	gqlclient := graphql.NewClient(url, &httpClient)
 
 	start := time.Now()
+
+	// TODO: these ingestion tests need to be updated to ingest the nouns first before the verbs
 	logger.Infof("Ingesting test data into backend server")
 	ingestScorecards(ctx, gqlclient)
 	ingestSLSA(ctx, gqlclient)
