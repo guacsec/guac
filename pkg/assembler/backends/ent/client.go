@@ -22,6 +22,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
@@ -48,6 +49,8 @@ type Client struct {
 	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
+	// SBOM is the client for interacting with the SBOM builders.
+	SBOM *SBOMClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// SourceNamespace is the client for interacting with the SourceNamespace builders.
@@ -75,6 +78,7 @@ func (c *Client) init() {
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
 	c.PackageType = NewPackageTypeClient(c.config)
 	c.PackageVersion = NewPackageVersionClient(c.config)
+	c.SBOM = NewSBOMClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
 	c.SourceNamespace = NewSourceNamespaceClient(c.config)
 	c.SourceType = NewSourceTypeClient(c.config)
@@ -168,6 +172,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
+		SBOM:             NewSBOMClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
 		SourceType:       NewSourceTypeClient(cfg),
@@ -198,6 +203,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
+		SBOM:             NewSBOMClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
 		SourceType:       NewSourceTypeClient(cfg),
@@ -231,7 +237,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SourceName,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SBOM, c.SourceName,
 		c.SourceNamespace, c.SourceType,
 	} {
 		n.Use(hooks...)
@@ -243,7 +249,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SourceName,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SBOM, c.SourceName,
 		c.SourceNamespace, c.SourceType,
 	} {
 		n.Intercept(interceptors...)
@@ -269,6 +275,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PackageType.mutate(ctx, m)
 	case *PackageVersionMutation:
 		return c.PackageVersion.mutate(ctx, m)
+	case *SBOMMutation:
+		return c.SBOM.mutate(ctx, m)
 	case *SourceNameMutation:
 		return c.SourceName.mutate(ctx, m)
 	case *SourceNamespaceMutation:
@@ -382,6 +390,22 @@ func (c *ArtifactClient) QueryOccurrences(a *Artifact) *OccurrenceQuery {
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.OccurrencesTable, artifact.OccurrencesColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySbom queries the sbom edge of a Artifact.
+func (c *ArtifactClient) QuerySbom(a *Artifact) *SBOMQuery {
+	query := (&SBOMClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, id),
+			sqlgraph.To(sbom.Table, sbom.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.SbomTable, artifact.SbomColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -1407,6 +1431,22 @@ func (c *PackageVersionClient) QueryOccurrences(pv *PackageVersion) *OccurrenceQ
 	return query
 }
 
+// QuerySbom queries the sbom edge of a PackageVersion.
+func (c *PackageVersionClient) QuerySbom(pv *PackageVersion) *SBOMQuery {
+	query := (&SBOMClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(sbom.Table, sbom.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.SbomTable, packageversion.SbomColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PackageVersionClient) Hooks() []Hook {
 	return c.hooks.PackageVersion
@@ -1429,6 +1469,156 @@ func (c *PackageVersionClient) mutate(ctx context.Context, m *PackageVersionMuta
 		return (&PackageVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown PackageVersion mutation op: %q", m.Op())
+	}
+}
+
+// SBOMClient is a client for the SBOM schema.
+type SBOMClient struct {
+	config
+}
+
+// NewSBOMClient returns a client for the SBOM from the given config.
+func NewSBOMClient(c config) *SBOMClient {
+	return &SBOMClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sbom.Hooks(f(g(h())))`.
+func (c *SBOMClient) Use(hooks ...Hook) {
+	c.hooks.SBOM = append(c.hooks.SBOM, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sbom.Intercept(f(g(h())))`.
+func (c *SBOMClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SBOM = append(c.inters.SBOM, interceptors...)
+}
+
+// Create returns a builder for creating a SBOM entity.
+func (c *SBOMClient) Create() *SBOMCreate {
+	mutation := newSBOMMutation(c.config, OpCreate)
+	return &SBOMCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SBOM entities.
+func (c *SBOMClient) CreateBulk(builders ...*SBOMCreate) *SBOMCreateBulk {
+	return &SBOMCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SBOM.
+func (c *SBOMClient) Update() *SBOMUpdate {
+	mutation := newSBOMMutation(c.config, OpUpdate)
+	return &SBOMUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SBOMClient) UpdateOne(s *SBOM) *SBOMUpdateOne {
+	mutation := newSBOMMutation(c.config, OpUpdateOne, withSBOM(s))
+	return &SBOMUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SBOMClient) UpdateOneID(id int) *SBOMUpdateOne {
+	mutation := newSBOMMutation(c.config, OpUpdateOne, withSBOMID(id))
+	return &SBOMUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SBOM.
+func (c *SBOMClient) Delete() *SBOMDelete {
+	mutation := newSBOMMutation(c.config, OpDelete)
+	return &SBOMDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SBOMClient) DeleteOne(s *SBOM) *SBOMDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SBOMClient) DeleteOneID(id int) *SBOMDeleteOne {
+	builder := c.Delete().Where(sbom.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SBOMDeleteOne{builder}
+}
+
+// Query returns a query builder for SBOM.
+func (c *SBOMClient) Query() *SBOMQuery {
+	return &SBOMQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSBOM},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SBOM entity by its id.
+func (c *SBOMClient) Get(ctx context.Context, id int) (*SBOM, error) {
+	return c.Query().Where(sbom.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SBOMClient) GetX(ctx context.Context, id int) *SBOM {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPackage queries the package edge of a SBOM.
+func (c *SBOMClient) QueryPackage(s *SBOM) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sbom.Table, sbom.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, sbom.PackageTable, sbom.PackageColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryArtifact queries the artifact edge of a SBOM.
+func (c *SBOMClient) QueryArtifact(s *SBOM) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sbom.Table, sbom.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, sbom.ArtifactTable, sbom.ArtifactColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SBOMClient) Hooks() []Hook {
+	return c.hooks.SBOM
+}
+
+// Interceptors returns the client interceptors.
+func (c *SBOMClient) Interceptors() []Interceptor {
+	return c.inters.SBOM
+}
+
+func (c *SBOMClient) mutate(ctx context.Context, m *SBOMMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SBOMCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SBOMUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SBOMUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SBOMDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SBOM mutation op: %q", m.Op())
 	}
 }
 
@@ -1870,11 +2060,12 @@ func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (V
 type (
 	hooks struct {
 		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, SourceName, SourceNamespace, SourceType []ent.Hook
+		PackageType, PackageVersion, SBOM, SourceName, SourceNamespace,
+		SourceType []ent.Hook
 	}
 	inters struct {
 		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, SourceName, SourceNamespace,
+		PackageType, PackageVersion, SBOM, SourceName, SourceNamespace,
 		SourceType []ent.Interceptor
 	}
 )

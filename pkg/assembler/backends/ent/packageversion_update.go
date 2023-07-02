@@ -15,6 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -109,6 +110,21 @@ func (pvu *PackageVersionUpdate) AddOccurrences(o ...*Occurrence) *PackageVersio
 	return pvu.AddOccurrenceIDs(ids...)
 }
 
+// AddSbomIDs adds the "sbom" edge to the SBOM entity by IDs.
+func (pvu *PackageVersionUpdate) AddSbomIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.AddSbomIDs(ids...)
+	return pvu
+}
+
+// AddSbom adds the "sbom" edges to the SBOM entity.
+func (pvu *PackageVersionUpdate) AddSbom(s ...*SBOM) *PackageVersionUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pvu.AddSbomIDs(ids...)
+}
+
 // Mutation returns the PackageVersionMutation object of the builder.
 func (pvu *PackageVersionUpdate) Mutation() *PackageVersionMutation {
 	return pvu.mutation
@@ -139,6 +155,27 @@ func (pvu *PackageVersionUpdate) RemoveOccurrences(o ...*Occurrence) *PackageVer
 		ids[i] = o[i].ID
 	}
 	return pvu.RemoveOccurrenceIDs(ids...)
+}
+
+// ClearSbom clears all "sbom" edges to the SBOM entity.
+func (pvu *PackageVersionUpdate) ClearSbom() *PackageVersionUpdate {
+	pvu.mutation.ClearSbom()
+	return pvu
+}
+
+// RemoveSbomIDs removes the "sbom" edge to SBOM entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveSbomIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.RemoveSbomIDs(ids...)
+	return pvu
+}
+
+// RemoveSbom removes "sbom" edges to SBOM entities.
+func (pvu *PackageVersionUpdate) RemoveSbom(s ...*SBOM) *PackageVersionUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pvu.RemoveSbomIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -282,6 +319,51 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pvu.mutation.SbomCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.SbomTable,
+			Columns: []string{packageversion.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedSbomIDs(); len(nodes) > 0 && !pvu.mutation.SbomCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.SbomTable,
+			Columns: []string{packageversion.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.SbomIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.SbomTable,
+			Columns: []string{packageversion.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pvu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{packageversion.Label}
@@ -380,6 +462,21 @@ func (pvuo *PackageVersionUpdateOne) AddOccurrences(o ...*Occurrence) *PackageVe
 	return pvuo.AddOccurrenceIDs(ids...)
 }
 
+// AddSbomIDs adds the "sbom" edge to the SBOM entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddSbomIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.AddSbomIDs(ids...)
+	return pvuo
+}
+
+// AddSbom adds the "sbom" edges to the SBOM entity.
+func (pvuo *PackageVersionUpdateOne) AddSbom(s ...*SBOM) *PackageVersionUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pvuo.AddSbomIDs(ids...)
+}
+
 // Mutation returns the PackageVersionMutation object of the builder.
 func (pvuo *PackageVersionUpdateOne) Mutation() *PackageVersionMutation {
 	return pvuo.mutation
@@ -410,6 +507,27 @@ func (pvuo *PackageVersionUpdateOne) RemoveOccurrences(o ...*Occurrence) *Packag
 		ids[i] = o[i].ID
 	}
 	return pvuo.RemoveOccurrenceIDs(ids...)
+}
+
+// ClearSbom clears all "sbom" edges to the SBOM entity.
+func (pvuo *PackageVersionUpdateOne) ClearSbom() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearSbom()
+	return pvuo
+}
+
+// RemoveSbomIDs removes the "sbom" edge to SBOM entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveSbomIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveSbomIDs(ids...)
+	return pvuo
+}
+
+// RemoveSbom removes "sbom" edges to SBOM entities.
+func (pvuo *PackageVersionUpdateOne) RemoveSbom(s ...*SBOM) *PackageVersionUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pvuo.RemoveSbomIDs(ids...)
 }
 
 // Where appends a list predicates to the PackageVersionUpdate builder.
@@ -576,6 +694,51 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.SbomCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.SbomTable,
+			Columns: []string{packageversion.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedSbomIDs(); len(nodes) > 0 && !pvuo.mutation.SbomCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.SbomTable,
+			Columns: []string{packageversion.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.SbomIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.SbomTable,
+			Columns: []string{packageversion.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

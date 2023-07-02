@@ -18,6 +18,8 @@ const (
 	FieldDigest = "digest"
 	// EdgeOccurrences holds the string denoting the occurrences edge name in mutations.
 	EdgeOccurrences = "occurrences"
+	// EdgeSbom holds the string denoting the sbom edge name in mutations.
+	EdgeSbom = "sbom"
 	// Table holds the table name of the artifact in the database.
 	Table = "artifacts"
 	// OccurrencesTable is the table that holds the occurrences relation/edge.
@@ -27,6 +29,13 @@ const (
 	OccurrencesInverseTable = "occurrences"
 	// OccurrencesColumn is the table column denoting the occurrences relation/edge.
 	OccurrencesColumn = "artifact_id"
+	// SbomTable is the table that holds the sbom relation/edge.
+	SbomTable = "sbo_ms"
+	// SbomInverseTable is the table name for the SBOM entity.
+	// It exists in this package in order to avoid circular dependency with the "sbom" package.
+	SbomInverseTable = "sbo_ms"
+	// SbomColumn is the table column denoting the sbom relation/edge.
+	SbomColumn = "artifact_id"
 )
 
 // Columns holds all SQL columns for artifact fields.
@@ -77,10 +86,31 @@ func ByOccurrences(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newOccurrencesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySbomCount orders the results by sbom count.
+func BySbomCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSbomStep(), opts...)
+	}
+}
+
+// BySbom orders the results by sbom terms.
+func BySbom(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSbomStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newOccurrencesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(OccurrencesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, OccurrencesTable, OccurrencesColumn),
+	)
+}
+func newSbomStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SbomInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, SbomTable, SbomColumn),
 	)
 }

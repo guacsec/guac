@@ -13,6 +13,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 )
 
 // ArtifactUpdate is the builder for updating Artifact entities.
@@ -55,6 +56,21 @@ func (au *ArtifactUpdate) AddOccurrences(o ...*Occurrence) *ArtifactUpdate {
 	return au.AddOccurrenceIDs(ids...)
 }
 
+// AddSbomIDs adds the "sbom" edge to the SBOM entity by IDs.
+func (au *ArtifactUpdate) AddSbomIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.AddSbomIDs(ids...)
+	return au
+}
+
+// AddSbom adds the "sbom" edges to the SBOM entity.
+func (au *ArtifactUpdate) AddSbom(s ...*SBOM) *ArtifactUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return au.AddSbomIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (au *ArtifactUpdate) Mutation() *ArtifactMutation {
 	return au.mutation
@@ -79,6 +95,27 @@ func (au *ArtifactUpdate) RemoveOccurrences(o ...*Occurrence) *ArtifactUpdate {
 		ids[i] = o[i].ID
 	}
 	return au.RemoveOccurrenceIDs(ids...)
+}
+
+// ClearSbom clears all "sbom" edges to the SBOM entity.
+func (au *ArtifactUpdate) ClearSbom() *ArtifactUpdate {
+	au.mutation.ClearSbom()
+	return au
+}
+
+// RemoveSbomIDs removes the "sbom" edge to SBOM entities by IDs.
+func (au *ArtifactUpdate) RemoveSbomIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.RemoveSbomIDs(ids...)
+	return au
+}
+
+// RemoveSbom removes "sbom" edges to SBOM entities.
+func (au *ArtifactUpdate) RemoveSbom(s ...*SBOM) *ArtifactUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return au.RemoveSbomIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -168,6 +205,51 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if au.mutation.SbomCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.SbomTable,
+			Columns: []string{artifact.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedSbomIDs(); len(nodes) > 0 && !au.mutation.SbomCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.SbomTable,
+			Columns: []string{artifact.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.SbomIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.SbomTable,
+			Columns: []string{artifact.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{artifact.Label}
@@ -215,6 +297,21 @@ func (auo *ArtifactUpdateOne) AddOccurrences(o ...*Occurrence) *ArtifactUpdateOn
 	return auo.AddOccurrenceIDs(ids...)
 }
 
+// AddSbomIDs adds the "sbom" edge to the SBOM entity by IDs.
+func (auo *ArtifactUpdateOne) AddSbomIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.AddSbomIDs(ids...)
+	return auo
+}
+
+// AddSbom adds the "sbom" edges to the SBOM entity.
+func (auo *ArtifactUpdateOne) AddSbom(s ...*SBOM) *ArtifactUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return auo.AddSbomIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (auo *ArtifactUpdateOne) Mutation() *ArtifactMutation {
 	return auo.mutation
@@ -239,6 +336,27 @@ func (auo *ArtifactUpdateOne) RemoveOccurrences(o ...*Occurrence) *ArtifactUpdat
 		ids[i] = o[i].ID
 	}
 	return auo.RemoveOccurrenceIDs(ids...)
+}
+
+// ClearSbom clears all "sbom" edges to the SBOM entity.
+func (auo *ArtifactUpdateOne) ClearSbom() *ArtifactUpdateOne {
+	auo.mutation.ClearSbom()
+	return auo
+}
+
+// RemoveSbomIDs removes the "sbom" edge to SBOM entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveSbomIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.RemoveSbomIDs(ids...)
+	return auo
+}
+
+// RemoveSbom removes "sbom" edges to SBOM entities.
+func (auo *ArtifactUpdateOne) RemoveSbom(s ...*SBOM) *ArtifactUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return auo.RemoveSbomIDs(ids...)
 }
 
 // Where appends a list predicates to the ArtifactUpdate builder.
@@ -351,6 +469,51 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.SbomCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.SbomTable,
+			Columns: []string{artifact.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedSbomIDs(); len(nodes) > 0 && !auo.mutation.SbomCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.SbomTable,
+			Columns: []string{artifact.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.SbomIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.SbomTable,
+			Columns: []string{artifact.SbomColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

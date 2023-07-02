@@ -15,6 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 )
 
 // PackageVersionQuery is the builder for querying PackageVersion entities.
@@ -26,6 +27,7 @@ type PackageVersionQuery struct {
 	predicates      []predicate.PackageVersion
 	withName        *PackageNameQuery
 	withOccurrences *OccurrenceQuery
+	withSbom        *SBOMQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -99,6 +101,28 @@ func (pvq *PackageVersionQuery) QueryOccurrences() *OccurrenceQuery {
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.OccurrencesTable, packageversion.OccurrencesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySbom chains the current query on the "sbom" edge.
+func (pvq *PackageVersionQuery) QuerySbom() *SBOMQuery {
+	query := (&SBOMClient{config: pvq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pvq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pvq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
+			sqlgraph.To(sbom.Table, sbom.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.SbomTable, packageversion.SbomColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
 		return fromU, nil
@@ -300,6 +324,7 @@ func (pvq *PackageVersionQuery) Clone() *PackageVersionQuery {
 		predicates:      append([]predicate.PackageVersion{}, pvq.predicates...),
 		withName:        pvq.withName.Clone(),
 		withOccurrences: pvq.withOccurrences.Clone(),
+		withSbom:        pvq.withSbom.Clone(),
 		// clone intermediate query.
 		sql:  pvq.sql.Clone(),
 		path: pvq.path,
@@ -325,6 +350,17 @@ func (pvq *PackageVersionQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) 
 		opt(query)
 	}
 	pvq.withOccurrences = query
+	return pvq
+}
+
+// WithSbom tells the query-builder to eager-load the nodes that are connected to
+// the "sbom" edge. The optional arguments are used to configure the query builder of the edge.
+func (pvq *PackageVersionQuery) WithSbom(opts ...func(*SBOMQuery)) *PackageVersionQuery {
+	query := (&SBOMClient{config: pvq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pvq.withSbom = query
 	return pvq
 }
 
@@ -406,9 +442,10 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	var (
 		nodes       = []*PackageVersion{}
 		_spec       = pvq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			pvq.withName != nil,
 			pvq.withOccurrences != nil,
+			pvq.withSbom != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -439,6 +476,13 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		if err := pvq.loadOccurrences(ctx, query, nodes,
 			func(n *PackageVersion) { n.Edges.Occurrences = []*Occurrence{} },
 			func(n *PackageVersion, e *Occurrence) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pvq.withSbom; query != nil {
+		if err := pvq.loadSbom(ctx, query, nodes,
+			func(n *PackageVersion) { n.Edges.Sbom = []*SBOM{} },
+			func(n *PackageVersion, e *SBOM) { n.Edges.Sbom = append(n.Edges.Sbom, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -489,6 +533,39 @@ func (pvq *PackageVersionQuery) loadOccurrences(ctx context.Context, query *Occu
 	}
 	query.Where(predicate.Occurrence(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(packageversion.OccurrencesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PackageID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "package_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "package_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *SBOMQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *SBOM)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*PackageVersion)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(sbom.FieldPackageID)
+	}
+	query.Where(predicate.SBOM(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packageversion.SbomColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

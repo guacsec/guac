@@ -28,6 +28,8 @@ type Tx struct {
 	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
+	// SBOM is the client for interacting with the SBOM builders.
+	SBOM *SBOMClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// SourceNamespace is the client for interacting with the SourceNamespace builders.
@@ -173,6 +175,7 @@ func (tx *Tx) init() {
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)
 	tx.PackageType = NewPackageTypeClient(tx.config)
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
+	tx.SBOM = NewSBOMClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)
 	tx.SourceType = NewSourceTypeClient(tx.config)

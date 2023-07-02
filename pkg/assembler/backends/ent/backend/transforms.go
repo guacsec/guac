@@ -210,3 +210,29 @@ func toModelIsDependency(id *ent.Dependency) *model.IsDependency {
 		Collector:        id.Collector,
 	}
 }
+
+func toModelHasSbom(sbom *ent.SBOM) *model.HasSbom {
+	return &model.HasSbom{
+		ID: nodeID(sbom.ID),
+		Subject: toSBOMSubject(sbom),
+		URI: sbom.URI,
+		Algorithm: sbom.Algorithm,
+		Digest: sbom.Digest,
+		DownloadLocation: sbom.DownloadLocation,
+		Origin: sbom.Origin,
+		Collector: sbom.Collector,
+	}
+}
+
+func toSBOMSubject(s *ent.SBOM) model.PackageOrArtifact {
+	if s.Edges.Package != nil {
+		if s.Edges.Package.Edges.Name != nil &&
+			s.Edges.Package.Edges.Name.Edges.Namespace != nil &&
+			s.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package != nil {
+			return toModelPackage(s.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
+		}
+	} else if s.Edges.Artifact != nil {
+		return toModelArtifact(s.Edges.Artifact)
+	}
+	return nil
+}

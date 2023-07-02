@@ -26,6 +26,8 @@ const (
 	EdgeName = "name"
 	// EdgeOccurrences holds the string denoting the occurrences edge name in mutations.
 	EdgeOccurrences = "occurrences"
+	// EdgeSbom holds the string denoting the sbom edge name in mutations.
+	EdgeSbom = "sbom"
 	// Table holds the table name of the packageversion in the database.
 	Table = "package_versions"
 	// NameTable is the table that holds the name relation/edge.
@@ -42,6 +44,13 @@ const (
 	OccurrencesInverseTable = "occurrences"
 	// OccurrencesColumn is the table column denoting the occurrences relation/edge.
 	OccurrencesColumn = "package_id"
+	// SbomTable is the table that holds the sbom relation/edge.
+	SbomTable = "sbo_ms"
+	// SbomInverseTable is the table name for the SBOM entity.
+	// It exists in this package in order to avoid circular dependency with the "sbom" package.
+	SbomInverseTable = "sbo_ms"
+	// SbomColumn is the table column denoting the sbom relation/edge.
+	SbomColumn = "package_id"
 )
 
 // Columns holds all SQL columns for packageversion fields.
@@ -119,6 +128,20 @@ func ByOccurrences(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newOccurrencesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySbomCount orders the results by sbom count.
+func BySbomCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSbomStep(), opts...)
+	}
+}
+
+// BySbom orders the results by sbom terms.
+func BySbom(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSbomStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newNameStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -131,5 +154,12 @@ func newOccurrencesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(OccurrencesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, OccurrencesTable, OccurrencesColumn),
+	)
+}
+func newSbomStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SbomInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, SbomTable, SbomColumn),
 	)
 }
