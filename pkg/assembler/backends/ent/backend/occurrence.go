@@ -91,6 +91,12 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 	return models, nil
 }
 
+func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
+	// funcName := "IngestOccurrences"
+
+	return nil, nil
+}
+
 func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	subject model.PackageOrSourceInput,
 	art model.ArtifactInputSpec,
