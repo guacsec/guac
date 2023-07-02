@@ -4,6 +4,7 @@ package builder
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
@@ -120,6 +121,29 @@ func URIEqualFold(v string) predicate.Builder {
 // URIContainsFold applies the ContainsFold predicate on the "uri" field.
 func URIContainsFold(v string) predicate.Builder {
 	return predicate.Builder(sql.FieldContainsFold(FieldURI, v))
+}
+
+// HasSlsaAttestation applies the HasEdge predicate on the "slsa_attestation" edge.
+func HasSlsaAttestation() predicate.Builder {
+	return predicate.Builder(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, SlsaAttestationTable, SlsaAttestationColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSlsaAttestationWith applies the HasEdge predicate on the "slsa_attestation" edge with a given conditions (other predicates).
+func HasSlsaAttestationWith(preds ...predicate.SLSAAttestation) predicate.Builder {
+	return predicate.Builder(func(s *sql.Selector) {
+		step := newSlsaAttestationStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

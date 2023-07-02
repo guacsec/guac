@@ -14,21 +14,12 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "algorithm", Type: field.TypeString},
 		{Name: "digest", Type: field.TypeString},
-		{Name: "slsa_attestation_built_from", Type: field.TypeInt, Nullable: true},
 	}
 	// ArtifactsTable holds the schema information for the "artifacts" table.
 	ArtifactsTable = &schema.Table{
 		Name:       "artifacts",
 		Columns:    ArtifactsColumns,
 		PrimaryKey: []*schema.Column{ArtifactsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "artifacts_slsa_attestations_built_from",
-				Columns:    []*schema.Column{ArtifactsColumns[3]},
-				RefColumns: []*schema.Column{SlsaAttestationsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "artifact_algorithm_digest",
@@ -91,7 +82,7 @@ var (
 	BuildersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "uri", Type: field.TypeString, Unique: true},
-		{Name: "slsa_attestation_built_by", Type: field.TypeInt, Nullable: true},
+		{Name: "slsa_attestation_built_by", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// BuildersTable holds the schema information for the "builders" table.
 	BuildersTable = &schema.Table{
@@ -398,6 +389,31 @@ var (
 		Columns:    SourceTypesColumns,
 		PrimaryKey: []*schema.Column{SourceTypesColumns[0]},
 	}
+	// SlsaAttestationBuiltFromColumns holds the columns for the "slsa_attestation_built_from" table.
+	SlsaAttestationBuiltFromColumns = []*schema.Column{
+		{Name: "slsa_attestation_id", Type: field.TypeInt},
+		{Name: "artifact_id", Type: field.TypeInt},
+	}
+	// SlsaAttestationBuiltFromTable holds the schema information for the "slsa_attestation_built_from" table.
+	SlsaAttestationBuiltFromTable = &schema.Table{
+		Name:       "slsa_attestation_built_from",
+		Columns:    SlsaAttestationBuiltFromColumns,
+		PrimaryKey: []*schema.Column{SlsaAttestationBuiltFromColumns[0], SlsaAttestationBuiltFromColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "slsa_attestation_built_from_slsa_attestation_id",
+				Columns:    []*schema.Column{SlsaAttestationBuiltFromColumns[0]},
+				RefColumns: []*schema.Column{SlsaAttestationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "slsa_attestation_built_from_artifact_id",
+				Columns:    []*schema.Column{SlsaAttestationBuiltFromColumns[1]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArtifactsTable,
@@ -413,11 +429,11 @@ var (
 		SourceNamesTable,
 		SourceNamespacesTable,
 		SourceTypesTable,
+		SlsaAttestationBuiltFromTable,
 	}
 )
 
 func init() {
-	ArtifactsTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	BillOfMaterialsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	BillOfMaterialsTable.ForeignKeys[1].RefTable = ArtifactsTable
 	BuildersTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
@@ -434,4 +450,6 @@ func init() {
 	}
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
+	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
+	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
 }

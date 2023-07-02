@@ -26,6 +26,7 @@ func (Artifact) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("occurrences", Occurrence.Type).Ref("artifact").Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From("sbom", BillOfMaterials.Type).Ref("artifact"),
+		edge.From("attestations", SLSAAttestation.Type).Ref("built_from"),
 		// edge.To("dependency", Artifact.Type).Annotations(entsql.OnDelete(entsql.Cascade)).From("dependents"),
 		// edge.From("source_occurrences", SourceOccurrence.Type).Ref("artifact"),
 		// edge.To("sources", Source.Type).Through("source_occurrences", SourceOccurrence.Type),

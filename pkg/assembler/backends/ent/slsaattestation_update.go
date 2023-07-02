@@ -129,19 +129,23 @@ func (sau *SLSAAttestationUpdate) AddBuiltFrom(a ...*Artifact) *SLSAAttestationU
 	return sau.AddBuiltFromIDs(ids...)
 }
 
-// AddBuiltByIDs adds the "built_by" edge to the Builder entity by IDs.
-func (sau *SLSAAttestationUpdate) AddBuiltByIDs(ids ...int) *SLSAAttestationUpdate {
-	sau.mutation.AddBuiltByIDs(ids...)
+// SetBuiltByID sets the "built_by" edge to the Builder entity by ID.
+func (sau *SLSAAttestationUpdate) SetBuiltByID(id int) *SLSAAttestationUpdate {
+	sau.mutation.SetBuiltByID(id)
 	return sau
 }
 
-// AddBuiltBy adds the "built_by" edges to the Builder entity.
-func (sau *SLSAAttestationUpdate) AddBuiltBy(b ...*Builder) *SLSAAttestationUpdate {
-	ids := make([]int, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+// SetNillableBuiltByID sets the "built_by" edge to the Builder entity by ID if the given value is not nil.
+func (sau *SLSAAttestationUpdate) SetNillableBuiltByID(id *int) *SLSAAttestationUpdate {
+	if id != nil {
+		sau = sau.SetBuiltByID(*id)
 	}
-	return sau.AddBuiltByIDs(ids...)
+	return sau
+}
+
+// SetBuiltBy sets the "built_by" edge to the Builder entity.
+func (sau *SLSAAttestationUpdate) SetBuiltBy(b *Builder) *SLSAAttestationUpdate {
+	return sau.SetBuiltByID(b.ID)
 }
 
 // Mutation returns the SLSAAttestationMutation object of the builder.
@@ -170,25 +174,10 @@ func (sau *SLSAAttestationUpdate) RemoveBuiltFrom(a ...*Artifact) *SLSAAttestati
 	return sau.RemoveBuiltFromIDs(ids...)
 }
 
-// ClearBuiltBy clears all "built_by" edges to the Builder entity.
+// ClearBuiltBy clears the "built_by" edge to the Builder entity.
 func (sau *SLSAAttestationUpdate) ClearBuiltBy() *SLSAAttestationUpdate {
 	sau.mutation.ClearBuiltBy()
 	return sau
-}
-
-// RemoveBuiltByIDs removes the "built_by" edge to Builder entities by IDs.
-func (sau *SLSAAttestationUpdate) RemoveBuiltByIDs(ids ...int) *SLSAAttestationUpdate {
-	sau.mutation.RemoveBuiltByIDs(ids...)
-	return sau
-}
-
-// RemoveBuiltBy removes "built_by" edges to Builder entities.
-func (sau *SLSAAttestationUpdate) RemoveBuiltBy(b ...*Builder) *SLSAAttestationUpdate {
-	ids := make([]int, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
-	}
-	return sau.RemoveBuiltByIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -264,10 +253,10 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 	}
 	if sau.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   slsaattestation.BuiltFromTable,
-			Columns: []string{slsaattestation.BuiltFromColumn},
+			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
@@ -277,10 +266,10 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 	}
 	if nodes := sau.mutation.RemovedBuiltFromIDs(); len(nodes) > 0 && !sau.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   slsaattestation.BuiltFromTable,
-			Columns: []string{slsaattestation.BuiltFromColumn},
+			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
@@ -293,10 +282,10 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 	}
 	if nodes := sau.mutation.BuiltFromIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   slsaattestation.BuiltFromTable,
-			Columns: []string{slsaattestation.BuiltFromColumn},
+			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
@@ -309,7 +298,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 	}
 	if sau.mutation.BuiltByCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   slsaattestation.BuiltByTable,
 			Columns: []string{slsaattestation.BuiltByColumn},
@@ -317,28 +306,12 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := sau.mutation.RemovedBuiltByIDs(); len(nodes) > 0 && !sau.mutation.BuiltByCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   slsaattestation.BuiltByTable,
-			Columns: []string{slsaattestation.BuiltByColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := sau.mutation.BuiltByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   slsaattestation.BuiltByTable,
 			Columns: []string{slsaattestation.BuiltByColumn},
@@ -469,19 +442,23 @@ func (sauo *SLSAAttestationUpdateOne) AddBuiltFrom(a ...*Artifact) *SLSAAttestat
 	return sauo.AddBuiltFromIDs(ids...)
 }
 
-// AddBuiltByIDs adds the "built_by" edge to the Builder entity by IDs.
-func (sauo *SLSAAttestationUpdateOne) AddBuiltByIDs(ids ...int) *SLSAAttestationUpdateOne {
-	sauo.mutation.AddBuiltByIDs(ids...)
+// SetBuiltByID sets the "built_by" edge to the Builder entity by ID.
+func (sauo *SLSAAttestationUpdateOne) SetBuiltByID(id int) *SLSAAttestationUpdateOne {
+	sauo.mutation.SetBuiltByID(id)
 	return sauo
 }
 
-// AddBuiltBy adds the "built_by" edges to the Builder entity.
-func (sauo *SLSAAttestationUpdateOne) AddBuiltBy(b ...*Builder) *SLSAAttestationUpdateOne {
-	ids := make([]int, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+// SetNillableBuiltByID sets the "built_by" edge to the Builder entity by ID if the given value is not nil.
+func (sauo *SLSAAttestationUpdateOne) SetNillableBuiltByID(id *int) *SLSAAttestationUpdateOne {
+	if id != nil {
+		sauo = sauo.SetBuiltByID(*id)
 	}
-	return sauo.AddBuiltByIDs(ids...)
+	return sauo
+}
+
+// SetBuiltBy sets the "built_by" edge to the Builder entity.
+func (sauo *SLSAAttestationUpdateOne) SetBuiltBy(b *Builder) *SLSAAttestationUpdateOne {
+	return sauo.SetBuiltByID(b.ID)
 }
 
 // Mutation returns the SLSAAttestationMutation object of the builder.
@@ -510,25 +487,10 @@ func (sauo *SLSAAttestationUpdateOne) RemoveBuiltFrom(a ...*Artifact) *SLSAAttes
 	return sauo.RemoveBuiltFromIDs(ids...)
 }
 
-// ClearBuiltBy clears all "built_by" edges to the Builder entity.
+// ClearBuiltBy clears the "built_by" edge to the Builder entity.
 func (sauo *SLSAAttestationUpdateOne) ClearBuiltBy() *SLSAAttestationUpdateOne {
 	sauo.mutation.ClearBuiltBy()
 	return sauo
-}
-
-// RemoveBuiltByIDs removes the "built_by" edge to Builder entities by IDs.
-func (sauo *SLSAAttestationUpdateOne) RemoveBuiltByIDs(ids ...int) *SLSAAttestationUpdateOne {
-	sauo.mutation.RemoveBuiltByIDs(ids...)
-	return sauo
-}
-
-// RemoveBuiltBy removes "built_by" edges to Builder entities.
-func (sauo *SLSAAttestationUpdateOne) RemoveBuiltBy(b ...*Builder) *SLSAAttestationUpdateOne {
-	ids := make([]int, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
-	}
-	return sauo.RemoveBuiltByIDs(ids...)
 }
 
 // Where appends a list predicates to the SLSAAttestationUpdate builder.
@@ -634,10 +596,10 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 	}
 	if sauo.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   slsaattestation.BuiltFromTable,
-			Columns: []string{slsaattestation.BuiltFromColumn},
+			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
@@ -647,10 +609,10 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 	}
 	if nodes := sauo.mutation.RemovedBuiltFromIDs(); len(nodes) > 0 && !sauo.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   slsaattestation.BuiltFromTable,
-			Columns: []string{slsaattestation.BuiltFromColumn},
+			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
@@ -663,10 +625,10 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 	}
 	if nodes := sauo.mutation.BuiltFromIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   slsaattestation.BuiltFromTable,
-			Columns: []string{slsaattestation.BuiltFromColumn},
+			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
@@ -679,7 +641,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 	}
 	if sauo.mutation.BuiltByCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   slsaattestation.BuiltByTable,
 			Columns: []string{slsaattestation.BuiltByColumn},
@@ -687,28 +649,12 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := sauo.mutation.RemovedBuiltByIDs(); len(nodes) > 0 && !sauo.mutation.BuiltByCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   slsaattestation.BuiltByTable,
-			Columns: []string{slsaattestation.BuiltByColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := sauo.mutation.BuiltByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   slsaattestation.BuiltByTable,
 			Columns: []string{slsaattestation.BuiltByColumn},

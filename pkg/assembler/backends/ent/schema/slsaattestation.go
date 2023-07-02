@@ -38,7 +38,7 @@ func (SLSAAttestation) Fields() []ent.Field {
 func (SLSAAttestation) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("built_from", Artifact.Type),
-		edge.To("built_by", Builder.Type),
+		edge.To("built_by", Builder.Type).Unique(),
 	}
 }
 

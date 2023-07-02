@@ -98,19 +98,23 @@ func (sac *SLSAAttestationCreate) AddBuiltFrom(a ...*Artifact) *SLSAAttestationC
 	return sac.AddBuiltFromIDs(ids...)
 }
 
-// AddBuiltByIDs adds the "built_by" edge to the Builder entity by IDs.
-func (sac *SLSAAttestationCreate) AddBuiltByIDs(ids ...int) *SLSAAttestationCreate {
-	sac.mutation.AddBuiltByIDs(ids...)
+// SetBuiltByID sets the "built_by" edge to the Builder entity by ID.
+func (sac *SLSAAttestationCreate) SetBuiltByID(id int) *SLSAAttestationCreate {
+	sac.mutation.SetBuiltByID(id)
 	return sac
 }
 
-// AddBuiltBy adds the "built_by" edges to the Builder entity.
-func (sac *SLSAAttestationCreate) AddBuiltBy(b ...*Builder) *SLSAAttestationCreate {
-	ids := make([]int, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+// SetNillableBuiltByID sets the "built_by" edge to the Builder entity by ID if the given value is not nil.
+func (sac *SLSAAttestationCreate) SetNillableBuiltByID(id *int) *SLSAAttestationCreate {
+	if id != nil {
+		sac = sac.SetBuiltByID(*id)
 	}
-	return sac.AddBuiltByIDs(ids...)
+	return sac
+}
+
+// SetBuiltBy sets the "built_by" edge to the Builder entity.
+func (sac *SLSAAttestationCreate) SetBuiltBy(b *Builder) *SLSAAttestationCreate {
+	return sac.SetBuiltByID(b.ID)
 }
 
 // Mutation returns the SLSAAttestationMutation object of the builder.
@@ -216,10 +220,10 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 	}
 	if nodes := sac.mutation.BuiltFromIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   slsaattestation.BuiltFromTable,
-			Columns: []string{slsaattestation.BuiltFromColumn},
+			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
@@ -232,7 +236,7 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 	}
 	if nodes := sac.mutation.BuiltByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   slsaattestation.BuiltByTable,
 			Columns: []string{slsaattestation.BuiltByColumn},

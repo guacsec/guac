@@ -55,21 +55,24 @@ const (
 // ArtifactMutation represents an operation that mutates the Artifact nodes in the graph.
 type ArtifactMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	algorithm          *string
-	digest             *string
-	clearedFields      map[string]struct{}
-	occurrences        map[int]struct{}
-	removedoccurrences map[int]struct{}
-	clearedoccurrences bool
-	sbom               map[int]struct{}
-	removedsbom        map[int]struct{}
-	clearedsbom        bool
-	done               bool
-	oldValue           func(context.Context) (*Artifact, error)
-	predicates         []predicate.Artifact
+	op                  Op
+	typ                 string
+	id                  *int
+	algorithm           *string
+	digest              *string
+	clearedFields       map[string]struct{}
+	occurrences         map[int]struct{}
+	removedoccurrences  map[int]struct{}
+	clearedoccurrences  bool
+	sbom                map[int]struct{}
+	removedsbom         map[int]struct{}
+	clearedsbom         bool
+	attestations        map[int]struct{}
+	removedattestations map[int]struct{}
+	clearedattestations bool
+	done                bool
+	oldValue            func(context.Context) (*Artifact, error)
+	predicates          []predicate.Artifact
 }
 
 var _ ent.Mutation = (*ArtifactMutation)(nil)
@@ -350,6 +353,60 @@ func (m *ArtifactMutation) ResetSbom() {
 	m.removedsbom = nil
 }
 
+// AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by ids.
+func (m *ArtifactMutation) AddAttestationIDs(ids ...int) {
+	if m.attestations == nil {
+		m.attestations = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.attestations[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAttestations clears the "attestations" edge to the SLSAAttestation entity.
+func (m *ArtifactMutation) ClearAttestations() {
+	m.clearedattestations = true
+}
+
+// AttestationsCleared reports if the "attestations" edge to the SLSAAttestation entity was cleared.
+func (m *ArtifactMutation) AttestationsCleared() bool {
+	return m.clearedattestations
+}
+
+// RemoveAttestationIDs removes the "attestations" edge to the SLSAAttestation entity by IDs.
+func (m *ArtifactMutation) RemoveAttestationIDs(ids ...int) {
+	if m.removedattestations == nil {
+		m.removedattestations = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.attestations, ids[i])
+		m.removedattestations[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAttestations returns the removed IDs of the "attestations" edge to the SLSAAttestation entity.
+func (m *ArtifactMutation) RemovedAttestationsIDs() (ids []int) {
+	for id := range m.removedattestations {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AttestationsIDs returns the "attestations" edge IDs in the mutation.
+func (m *ArtifactMutation) AttestationsIDs() (ids []int) {
+	for id := range m.attestations {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAttestations resets all changes to the "attestations" edge.
+func (m *ArtifactMutation) ResetAttestations() {
+	m.attestations = nil
+	m.clearedattestations = false
+	m.removedattestations = nil
+}
+
 // Where appends a list predicates to the ArtifactMutation builder.
 func (m *ArtifactMutation) Where(ps ...predicate.Artifact) {
 	m.predicates = append(m.predicates, ps...)
@@ -500,12 +557,15 @@ func (m *ArtifactMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ArtifactMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.occurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
 	if m.sbom != nil {
 		edges = append(edges, artifact.EdgeSbom)
+	}
+	if m.attestations != nil {
+		edges = append(edges, artifact.EdgeAttestations)
 	}
 	return edges
 }
@@ -526,18 +586,27 @@ func (m *ArtifactMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case artifact.EdgeAttestations:
+		ids := make([]ent.Value, 0, len(m.attestations))
+		for id := range m.attestations {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ArtifactMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedoccurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
 	if m.removedsbom != nil {
 		edges = append(edges, artifact.EdgeSbom)
+	}
+	if m.removedattestations != nil {
+		edges = append(edges, artifact.EdgeAttestations)
 	}
 	return edges
 }
@@ -558,18 +627,27 @@ func (m *ArtifactMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case artifact.EdgeAttestations:
+		ids := make([]ent.Value, 0, len(m.removedattestations))
+		for id := range m.removedattestations {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ArtifactMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedoccurrences {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
 	if m.clearedsbom {
 		edges = append(edges, artifact.EdgeSbom)
+	}
+	if m.clearedattestations {
+		edges = append(edges, artifact.EdgeAttestations)
 	}
 	return edges
 }
@@ -582,6 +660,8 @@ func (m *ArtifactMutation) EdgeCleared(name string) bool {
 		return m.clearedoccurrences
 	case artifact.EdgeSbom:
 		return m.clearedsbom
+	case artifact.EdgeAttestations:
+		return m.clearedattestations
 	}
 	return false
 }
@@ -603,6 +683,9 @@ func (m *ArtifactMutation) ResetEdge(name string) error {
 		return nil
 	case artifact.EdgeSbom:
 		m.ResetSbom()
+		return nil
+	case artifact.EdgeAttestations:
+		m.ResetAttestations()
 		return nil
 	}
 	return fmt.Errorf("unknown Artifact edge %s", name)
@@ -1457,14 +1540,16 @@ func (m *BillOfMaterialsMutation) ResetEdge(name string) error {
 // BuilderMutation represents an operation that mutates the Builder nodes in the graph.
 type BuilderMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	uri           *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Builder, error)
-	predicates    []predicate.Builder
+	op                      Op
+	typ                     string
+	id                      *int
+	uri                     *string
+	clearedFields           map[string]struct{}
+	slsa_attestation        *int
+	clearedslsa_attestation bool
+	done                    bool
+	oldValue                func(context.Context) (*Builder, error)
+	predicates              []predicate.Builder
 }
 
 var _ ent.Mutation = (*BuilderMutation)(nil)
@@ -1601,6 +1686,45 @@ func (m *BuilderMutation) ResetURI() {
 	m.uri = nil
 }
 
+// SetSlsaAttestationID sets the "slsa_attestation" edge to the SLSAAttestation entity by id.
+func (m *BuilderMutation) SetSlsaAttestationID(id int) {
+	m.slsa_attestation = &id
+}
+
+// ClearSlsaAttestation clears the "slsa_attestation" edge to the SLSAAttestation entity.
+func (m *BuilderMutation) ClearSlsaAttestation() {
+	m.clearedslsa_attestation = true
+}
+
+// SlsaAttestationCleared reports if the "slsa_attestation" edge to the SLSAAttestation entity was cleared.
+func (m *BuilderMutation) SlsaAttestationCleared() bool {
+	return m.clearedslsa_attestation
+}
+
+// SlsaAttestationID returns the "slsa_attestation" edge ID in the mutation.
+func (m *BuilderMutation) SlsaAttestationID() (id int, exists bool) {
+	if m.slsa_attestation != nil {
+		return *m.slsa_attestation, true
+	}
+	return
+}
+
+// SlsaAttestationIDs returns the "slsa_attestation" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SlsaAttestationID instead. It exists only for internal usage by the builders.
+func (m *BuilderMutation) SlsaAttestationIDs() (ids []int) {
+	if id := m.slsa_attestation; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSlsaAttestation resets all changes to the "slsa_attestation" edge.
+func (m *BuilderMutation) ResetSlsaAttestation() {
+	m.slsa_attestation = nil
+	m.clearedslsa_attestation = false
+}
+
 // Where appends a list predicates to the BuilderMutation builder.
 func (m *BuilderMutation) Where(ps ...predicate.Builder) {
 	m.predicates = append(m.predicates, ps...)
@@ -1734,19 +1858,28 @@ func (m *BuilderMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *BuilderMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.slsa_attestation != nil {
+		edges = append(edges, builder.EdgeSlsaAttestation)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *BuilderMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case builder.EdgeSlsaAttestation:
+		if id := m.slsa_attestation; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *BuilderMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -1758,25 +1891,42 @@ func (m *BuilderMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *BuilderMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedslsa_attestation {
+		edges = append(edges, builder.EdgeSlsaAttestation)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *BuilderMutation) EdgeCleared(name string) bool {
+	switch name {
+	case builder.EdgeSlsaAttestation:
+		return m.clearedslsa_attestation
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *BuilderMutation) ClearEdge(name string) error {
+	switch name {
+	case builder.EdgeSlsaAttestation:
+		m.ClearSlsaAttestation()
+		return nil
+	}
 	return fmt.Errorf("unknown Builder unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *BuilderMutation) ResetEdge(name string) error {
+	switch name {
+	case builder.EdgeSlsaAttestation:
+		m.ResetSlsaAttestation()
+		return nil
+	}
 	return fmt.Errorf("unknown Builder edge %s", name)
 }
 
@@ -5598,8 +5748,7 @@ type SLSAAttestationMutation struct {
 	built_from           map[int]struct{}
 	removedbuilt_from    map[int]struct{}
 	clearedbuilt_from    bool
-	built_by             map[int]struct{}
-	removedbuilt_by      map[int]struct{}
+	built_by             *int
 	clearedbuilt_by      bool
 	done                 bool
 	oldValue             func(context.Context) (*SLSAAttestation, error)
@@ -6065,14 +6214,9 @@ func (m *SLSAAttestationMutation) ResetBuiltFrom() {
 	m.removedbuilt_from = nil
 }
 
-// AddBuiltByIDs adds the "built_by" edge to the Builder entity by ids.
-func (m *SLSAAttestationMutation) AddBuiltByIDs(ids ...int) {
-	if m.built_by == nil {
-		m.built_by = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.built_by[ids[i]] = struct{}{}
-	}
+// SetBuiltByID sets the "built_by" edge to the Builder entity by id.
+func (m *SLSAAttestationMutation) SetBuiltByID(id int) {
+	m.built_by = &id
 }
 
 // ClearBuiltBy clears the "built_by" edge to the Builder entity.
@@ -6085,29 +6229,20 @@ func (m *SLSAAttestationMutation) BuiltByCleared() bool {
 	return m.clearedbuilt_by
 }
 
-// RemoveBuiltByIDs removes the "built_by" edge to the Builder entity by IDs.
-func (m *SLSAAttestationMutation) RemoveBuiltByIDs(ids ...int) {
-	if m.removedbuilt_by == nil {
-		m.removedbuilt_by = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.built_by, ids[i])
-		m.removedbuilt_by[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedBuiltBy returns the removed IDs of the "built_by" edge to the Builder entity.
-func (m *SLSAAttestationMutation) RemovedBuiltByIDs() (ids []int) {
-	for id := range m.removedbuilt_by {
-		ids = append(ids, id)
+// BuiltByID returns the "built_by" edge ID in the mutation.
+func (m *SLSAAttestationMutation) BuiltByID() (id int, exists bool) {
+	if m.built_by != nil {
+		return *m.built_by, true
 	}
 	return
 }
 
 // BuiltByIDs returns the "built_by" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// BuiltByID instead. It exists only for internal usage by the builders.
 func (m *SLSAAttestationMutation) BuiltByIDs() (ids []int) {
-	for id := range m.built_by {
-		ids = append(ids, id)
+	if id := m.built_by; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -6116,7 +6251,6 @@ func (m *SLSAAttestationMutation) BuiltByIDs() (ids []int) {
 func (m *SLSAAttestationMutation) ResetBuiltBy() {
 	m.built_by = nil
 	m.clearedbuilt_by = false
-	m.removedbuilt_by = nil
 }
 
 // Where appends a list predicates to the SLSAAttestationMutation builder.
@@ -6396,11 +6530,9 @@ func (m *SLSAAttestationMutation) AddedIDs(name string) []ent.Value {
 		}
 		return ids
 	case slsaattestation.EdgeBuiltBy:
-		ids := make([]ent.Value, 0, len(m.built_by))
-		for id := range m.built_by {
-			ids = append(ids, id)
+		if id := m.built_by; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -6410,9 +6542,6 @@ func (m *SLSAAttestationMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.removedbuilt_from != nil {
 		edges = append(edges, slsaattestation.EdgeBuiltFrom)
-	}
-	if m.removedbuilt_by != nil {
-		edges = append(edges, slsaattestation.EdgeBuiltBy)
 	}
 	return edges
 }
@@ -6424,12 +6553,6 @@ func (m *SLSAAttestationMutation) RemovedIDs(name string) []ent.Value {
 	case slsaattestation.EdgeBuiltFrom:
 		ids := make([]ent.Value, 0, len(m.removedbuilt_from))
 		for id := range m.removedbuilt_from {
-			ids = append(ids, id)
-		}
-		return ids
-	case slsaattestation.EdgeBuiltBy:
-		ids := make([]ent.Value, 0, len(m.removedbuilt_by))
-		for id := range m.removedbuilt_by {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6465,6 +6588,9 @@ func (m *SLSAAttestationMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *SLSAAttestationMutation) ClearEdge(name string) error {
 	switch name {
+	case slsaattestation.EdgeBuiltBy:
+		m.ClearBuiltBy()
+		return nil
 	}
 	return fmt.Errorf("unknown SLSAAttestation unique edge %s", name)
 }

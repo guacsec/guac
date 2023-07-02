@@ -239,6 +239,29 @@ func HasSbomWith(preds ...predicate.BillOfMaterials) predicate.Artifact {
 	})
 }
 
+// HasAttestations applies the HasEdge predicate on the "attestations" edge.
+func HasAttestations() predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, AttestationsTable, AttestationsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAttestationsWith applies the HasEdge predicate on the "attestations" edge with a given conditions (other predicates).
+func HasAttestationsWith(preds ...predicate.SLSAAttestation) predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := newAttestationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Artifact) predicate.Artifact {
 	return predicate.Artifact(sql.AndPredicates(predicates...))

@@ -76,7 +76,7 @@ func (saq *SLSAAttestationQuery) QueryBuiltFrom() *ArtifactQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, selector),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, slsaattestation.BuiltFromTable, slsaattestation.BuiltFromColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, slsaattestation.BuiltFromTable, slsaattestation.BuiltFromPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(saq.driver.Dialect(), step)
 		return fromU, nil
@@ -98,7 +98,7 @@ func (saq *SLSAAttestationQuery) QueryBuiltBy() *BuilderQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, selector),
 			sqlgraph.To(builder.Table, builder.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(saq.driver.Dialect(), step)
 		return fromU, nil
@@ -437,9 +437,8 @@ func (saq *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		}
 	}
 	if query := saq.withBuiltBy; query != nil {
-		if err := saq.loadBuiltBy(ctx, query, nodes,
-			func(n *SLSAAttestation) { n.Edges.BuiltBy = []*Builder{} },
-			func(n *SLSAAttestation, e *Builder) { n.Edges.BuiltBy = append(n.Edges.BuiltBy, e) }); err != nil {
+		if err := saq.loadBuiltBy(ctx, query, nodes, nil,
+			func(n *SLSAAttestation, e *Builder) { n.Edges.BuiltBy = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -447,33 +446,63 @@ func (saq *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 }
 
 func (saq *SLSAAttestationQuery) loadBuiltFrom(ctx context.Context, query *ArtifactQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Artifact)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*SLSAAttestation)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*SLSAAttestation)
+	nids := make(map[int]map[*SLSAAttestation]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
 		if init != nil {
-			init(nodes[i])
+			init(node)
 		}
 	}
-	query.withFKs = true
-	query.Where(predicate.Artifact(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(slsaattestation.BuiltFromColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(slsaattestation.BuiltFromTable)
+		s.Join(joinT).On(s.C(artifact.FieldID), joinT.C(slsaattestation.BuiltFromPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(slsaattestation.BuiltFromPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(slsaattestation.BuiltFromPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*SLSAAttestation]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Artifact](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.slsa_attestation_built_from
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "slsa_attestation_built_from" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "slsa_attestation_built_from" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected "built_from" node returned %v`, n.ID)
 		}
-		assign(node, n)
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }
@@ -483,9 +512,6 @@ func (saq *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *Builder
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Builder(func(s *sql.Selector) {

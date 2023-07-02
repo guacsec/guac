@@ -6,7 +6,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -23,7 +23,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		algorithm := strings.ToLower(hasSbom.Algorithm)
 		digest := strings.ToLower(hasSbom.Digest)
 
-		sbomCreate := client.SBOM.Create().
+		sbomCreate := client.BillOfMaterials.Create().
 			SetURI(hasSbom.URI).
 			SetAlgorithm(algorithm).
 			SetDigest(digest).
@@ -32,9 +32,9 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			SetCollector(hasSbom.Collector)
 
 		sbomConflictColumns := []string{
-			sbom.FieldURI,
-			sbom.FieldAlgorithm,
-			sbom.FieldDigest,
+			billofmaterials.FieldURI,
+			billofmaterials.FieldAlgorithm,
+			billofmaterials.FieldDigest,
 		}
 
 		var conflictWhere *sql.Predicate
@@ -50,10 +50,10 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 				return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 			}
 			sbomCreate.SetPackage(p)
-			sbomConflictColumns = append(sbomConflictColumns, sbom.FieldPackageID)
+			sbomConflictColumns = append(sbomConflictColumns, billofmaterials.FieldPackageID)
 			conflictWhere = sql.And(
-				sql.NotNull(sbom.FieldPackageID),
-				sql.IsNull(sbom.FieldArtifactID),
+				sql.NotNull(billofmaterials.FieldPackageID),
+				sql.IsNull(billofmaterials.FieldArtifactID),
 			)
 		} else if subject.Artifact != nil {
 			var err error
@@ -64,10 +64,10 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 				return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 			}
 			sbomCreate.SetArtifact(art)
-			sbomConflictColumns = append(sbomConflictColumns, sbom.FieldArtifactID)
+			sbomConflictColumns = append(sbomConflictColumns, billofmaterials.FieldArtifactID)
 			conflictWhere = sql.And(
-				sql.IsNull(sbom.FieldPackageID),
-				sql.NotNull(sbom.FieldArtifactID),
+				sql.IsNull(billofmaterials.FieldPackageID),
+				sql.NotNull(billofmaterials.FieldArtifactID),
 			)
 		} else {
 			return nil, gqlerror.Errorf("%v :: %s", funcName, "subject must be either a package or artifact")
@@ -89,8 +89,8 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	s, err := b.client.SBOM.Query().
-		Where(sbom.ID(*sbomId)).
+	s, err := b.client.BillOfMaterials.Query().
+		Where(billofmaterials.ID(*sbomId)).
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {
 				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {

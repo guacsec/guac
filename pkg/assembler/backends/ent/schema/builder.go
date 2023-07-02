@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -20,7 +21,9 @@ func (Builder) Fields() []ent.Field {
 
 // Edges of the Builder.
 func (Builder) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("slsa_attestation", SLSAAttestation.Type).Ref("built_by").Unique(),
+	}
 }
 
 // Indexes of the BuilderNode.

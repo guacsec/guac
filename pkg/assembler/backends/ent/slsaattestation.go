@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -44,7 +45,7 @@ type SLSAAttestationEdges struct {
 	// BuiltFrom holds the value of the built_from edge.
 	BuiltFrom []*Artifact `json:"built_from,omitempty"`
 	// BuiltBy holds the value of the built_by edge.
-	BuiltBy []*Builder `json:"built_by,omitempty"`
+	BuiltBy *Builder `json:"built_by,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -60,9 +61,13 @@ func (e SLSAAttestationEdges) BuiltFromOrErr() ([]*Artifact, error) {
 }
 
 // BuiltByOrErr returns the BuiltBy value or an error if the edge
-// was not loaded in eager-loading.
-func (e SLSAAttestationEdges) BuiltByOrErr() ([]*Builder, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e SLSAAttestationEdges) BuiltByOrErr() (*Builder, error) {
 	if e.loadedTypes[1] {
+		if e.BuiltBy == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: builder.Label}
+		}
 		return e.BuiltBy, nil
 	}
 	return nil, &NotLoadedError{edge: "built_by"}

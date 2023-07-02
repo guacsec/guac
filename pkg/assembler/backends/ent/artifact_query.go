@@ -15,18 +15,19 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
 
 // ArtifactQuery is the builder for querying Artifact entities.
 type ArtifactQuery struct {
 	config
-	ctx             *QueryContext
-	order           []artifact.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Artifact
-	withOccurrences *OccurrenceQuery
-	withSbom        *BillOfMaterialsQuery
-	withFKs         bool
+	ctx              *QueryContext
+	order            []artifact.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.Artifact
+	withOccurrences  *OccurrenceQuery
+	withSbom         *BillOfMaterialsQuery
+	withAttestations *SLSAAttestationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -100,6 +101,28 @@ func (aq *ArtifactQuery) QuerySbom() *BillOfMaterialsQuery {
 			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.SbomTable, artifact.SbomColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAttestations chains the current query on the "attestations" edge.
+func (aq *ArtifactQuery) QueryAttestations() *SLSAAttestationQuery {
+	query := (&SLSAAttestationClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, artifact.AttestationsTable, artifact.AttestationsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,13 +317,14 @@ func (aq *ArtifactQuery) Clone() *ArtifactQuery {
 		return nil
 	}
 	return &ArtifactQuery{
-		config:          aq.config,
-		ctx:             aq.ctx.Clone(),
-		order:           append([]artifact.OrderOption{}, aq.order...),
-		inters:          append([]Interceptor{}, aq.inters...),
-		predicates:      append([]predicate.Artifact{}, aq.predicates...),
-		withOccurrences: aq.withOccurrences.Clone(),
-		withSbom:        aq.withSbom.Clone(),
+		config:           aq.config,
+		ctx:              aq.ctx.Clone(),
+		order:            append([]artifact.OrderOption{}, aq.order...),
+		inters:           append([]Interceptor{}, aq.inters...),
+		predicates:       append([]predicate.Artifact{}, aq.predicates...),
+		withOccurrences:  aq.withOccurrences.Clone(),
+		withSbom:         aq.withSbom.Clone(),
+		withAttestations: aq.withAttestations.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -326,6 +350,17 @@ func (aq *ArtifactQuery) WithSbom(opts ...func(*BillOfMaterialsQuery)) *Artifact
 		opt(query)
 	}
 	aq.withSbom = query
+	return aq
+}
+
+// WithAttestations tells the query-builder to eager-load the nodes that are connected to
+// the "attestations" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithAttestations(opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
+	query := (&SLSAAttestationClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withAttestations = query
 	return aq
 }
 
@@ -406,16 +441,13 @@ func (aq *ArtifactQuery) prepareQuery(ctx context.Context) error {
 func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Artifact, error) {
 	var (
 		nodes       = []*Artifact{}
-		withFKs     = aq.withFKs
 		_spec       = aq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			aq.withOccurrences != nil,
 			aq.withSbom != nil,
+			aq.withAttestations != nil,
 		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, artifact.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Artifact).scanValues(nil, columns)
 	}
@@ -445,6 +477,13 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 		if err := aq.loadSbom(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Sbom = []*BillOfMaterials{} },
 			func(n *Artifact, e *BillOfMaterials) { n.Edges.Sbom = append(n.Edges.Sbom, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withAttestations; query != nil {
+		if err := aq.loadAttestations(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.Attestations = []*SLSAAttestation{} },
+			func(n *Artifact, e *SLSAAttestation) { n.Edges.Attestations = append(n.Edges.Attestations, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -511,6 +550,67 @@ func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQue
 			return fmt.Errorf(`unexpected referenced foreign-key "artifact_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttestationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SLSAAttestation)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Artifact)
+	nids := make(map[int]map[*Artifact]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(artifact.AttestationsTable)
+		s.Join(joinT).On(s.C(slsaattestation.FieldID), joinT.C(artifact.AttestationsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(artifact.AttestationsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(artifact.AttestationsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Artifact]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*SLSAAttestation](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "attestations" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

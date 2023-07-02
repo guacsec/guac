@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
 
 // BuilderCreate is the builder for creating a Builder entity.
@@ -25,6 +26,25 @@ type BuilderCreate struct {
 func (bc *BuilderCreate) SetURI(s string) *BuilderCreate {
 	bc.mutation.SetURI(s)
 	return bc
+}
+
+// SetSlsaAttestationID sets the "slsa_attestation" edge to the SLSAAttestation entity by ID.
+func (bc *BuilderCreate) SetSlsaAttestationID(id int) *BuilderCreate {
+	bc.mutation.SetSlsaAttestationID(id)
+	return bc
+}
+
+// SetNillableSlsaAttestationID sets the "slsa_attestation" edge to the SLSAAttestation entity by ID if the given value is not nil.
+func (bc *BuilderCreate) SetNillableSlsaAttestationID(id *int) *BuilderCreate {
+	if id != nil {
+		bc = bc.SetSlsaAttestationID(*id)
+	}
+	return bc
+}
+
+// SetSlsaAttestation sets the "slsa_attestation" edge to the SLSAAttestation entity.
+func (bc *BuilderCreate) SetSlsaAttestation(s *SLSAAttestation) *BuilderCreate {
+	return bc.SetSlsaAttestationID(s.ID)
 }
 
 // Mutation returns the BuilderMutation object of the builder.
@@ -94,6 +114,23 @@ func (bc *BuilderCreate) createSpec() (*Builder, *sqlgraph.CreateSpec) {
 	if value, ok := bc.mutation.URI(); ok {
 		_spec.SetField(builder.FieldURI, field.TypeString, value)
 		_node.URI = value
+	}
+	if nodes := bc.mutation.SlsaAttestationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   builder.SlsaAttestationTable,
+			Columns: []string{builder.SlsaAttestationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.slsa_attestation_built_by = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

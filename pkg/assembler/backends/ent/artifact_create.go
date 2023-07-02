@@ -13,6 +13,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
 
 // ArtifactCreate is the builder for creating a Artifact entity.
@@ -63,6 +64,21 @@ func (ac *ArtifactCreate) AddSbom(b ...*BillOfMaterials) *ArtifactCreate {
 		ids[i] = b[i].ID
 	}
 	return ac.AddSbomIDs(ids...)
+}
+
+// AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by IDs.
+func (ac *ArtifactCreate) AddAttestationIDs(ids ...int) *ArtifactCreate {
+	ac.mutation.AddAttestationIDs(ids...)
+	return ac
+}
+
+// AddAttestations adds the "attestations" edges to the SLSAAttestation entity.
+func (ac *ArtifactCreate) AddAttestations(s ...*SLSAAttestation) *ArtifactCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return ac.AddAttestationIDs(ids...)
 }
 
 // Mutation returns the ArtifactMutation object of the builder.
@@ -165,6 +181,22 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.AttestationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.AttestationsTable,
+			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

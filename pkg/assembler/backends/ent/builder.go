@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
 
 // Builder is the model entity for the Builder schema.
@@ -17,9 +18,34 @@ type Builder struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// The URI of the builder, used as a unique identifier in the graph query
-	URI                       string `json:"uri,omitempty"`
+	URI string `json:"uri,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the BuilderQuery when eager-loading is set.
+	Edges                     BuilderEdges `json:"edges"`
 	slsa_attestation_built_by *int
 	selectValues              sql.SelectValues
+}
+
+// BuilderEdges holds the relations/edges for other nodes in the graph.
+type BuilderEdges struct {
+	// SlsaAttestation holds the value of the slsa_attestation edge.
+	SlsaAttestation *SLSAAttestation `json:"slsa_attestation,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// SlsaAttestationOrErr returns the SlsaAttestation value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e BuilderEdges) SlsaAttestationOrErr() (*SLSAAttestation, error) {
+	if e.loadedTypes[0] {
+		if e.SlsaAttestation == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: slsaattestation.Label}
+		}
+		return e.SlsaAttestation, nil
+	}
+	return nil, &NotLoadedError{edge: "slsa_attestation"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -78,6 +104,11 @@ func (b *Builder) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (b *Builder) Value(name string) (ent.Value, error) {
 	return b.selectValues.Get(name)
+}
+
+// QuerySlsaAttestation queries the "slsa_attestation" edge of the Builder entity.
+func (b *Builder) QuerySlsaAttestation() *SLSAAttestationQuery {
+	return NewBuilderClient(b.config).QuerySlsaAttestation(b)
 }
 
 // Update returns a builder for updating this Builder.

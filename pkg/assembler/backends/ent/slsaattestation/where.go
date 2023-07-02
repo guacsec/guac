@@ -460,7 +460,7 @@ func HasBuiltFrom() predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, BuiltFromTable, BuiltFromColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, BuiltFromTable, BuiltFromPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -483,7 +483,7 @@ func HasBuiltBy() predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, BuiltByTable, BuiltByColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, BuiltByTable, BuiltByColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

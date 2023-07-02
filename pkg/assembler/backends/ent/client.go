@@ -421,6 +421,22 @@ func (c *ArtifactClient) QuerySbom(a *Artifact) *BillOfMaterialsQuery {
 	return query
 }
 
+// QueryAttestations queries the attestations edge of a Artifact.
+func (c *ArtifactClient) QueryAttestations(a *Artifact) *SLSAAttestationQuery {
+	query := (&SLSAAttestationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, id),
+			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, artifact.AttestationsTable, artifact.AttestationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ArtifactClient) Hooks() []Hook {
 	return c.hooks.Artifact
@@ -687,6 +703,22 @@ func (c *BuilderClient) GetX(ctx context.Context, id int) *Builder {
 		panic(err)
 	}
 	return obj
+}
+
+// QuerySlsaAttestation queries the slsa_attestation edge of a Builder.
+func (c *BuilderClient) QuerySlsaAttestation(b *Builder) *SLSAAttestationQuery {
+	query := (&SLSAAttestationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(builder.Table, builder.FieldID, id),
+			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, builder.SlsaAttestationTable, builder.SlsaAttestationColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -1731,7 +1763,7 @@ func (c *SLSAAttestationClient) QueryBuiltFrom(sa *SLSAAttestation) *ArtifactQue
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, slsaattestation.BuiltFromTable, slsaattestation.BuiltFromColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, slsaattestation.BuiltFromTable, slsaattestation.BuiltFromPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
 		return fromV, nil
@@ -1747,7 +1779,7 @@ func (c *SLSAAttestationClient) QueryBuiltBy(sa *SLSAAttestation) *BuilderQuery 
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
 			sqlgraph.To(builder.Table, builder.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
 		)
 		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
 		return fromV, nil

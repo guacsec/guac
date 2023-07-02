@@ -20,6 +20,8 @@ const (
 	EdgeOccurrences = "occurrences"
 	// EdgeSbom holds the string denoting the sbom edge name in mutations.
 	EdgeSbom = "sbom"
+	// EdgeAttestations holds the string denoting the attestations edge name in mutations.
+	EdgeAttestations = "attestations"
 	// Table holds the table name of the artifact in the database.
 	Table = "artifacts"
 	// OccurrencesTable is the table that holds the occurrences relation/edge.
@@ -36,6 +38,11 @@ const (
 	SbomInverseTable = "bill_of_materials"
 	// SbomColumn is the table column denoting the sbom relation/edge.
 	SbomColumn = "artifact_id"
+	// AttestationsTable is the table that holds the attestations relation/edge. The primary key declared below.
+	AttestationsTable = "slsa_attestation_built_from"
+	// AttestationsInverseTable is the table name for the SLSAAttestation entity.
+	// It exists in this package in order to avoid circular dependency with the "slsaattestation" package.
+	AttestationsInverseTable = "slsa_attestations"
 )
 
 // Columns holds all SQL columns for artifact fields.
@@ -45,21 +52,16 @@ var Columns = []string{
 	FieldDigest,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "artifacts"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"slsa_attestation_built_from",
-}
+var (
+	// AttestationsPrimaryKey and AttestationsColumn2 are the table columns denoting the
+	// primary key for the attestations relation (M2M).
+	AttestationsPrimaryKey = []string{"slsa_attestation_id", "artifact_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -111,6 +113,20 @@ func BySbom(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSbomStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByAttestationsCount orders the results by attestations count.
+func ByAttestationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAttestationsStep(), opts...)
+	}
+}
+
+// ByAttestations orders the results by attestations terms.
+func ByAttestations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAttestationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newOccurrencesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -123,5 +139,12 @@ func newSbomStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SbomInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, SbomTable, SbomColumn),
+	)
+}
+func newAttestationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AttestationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, AttestationsTable, AttestationsPrimaryKey...),
 	)
 }

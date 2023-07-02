@@ -15,7 +15,7 @@ func toModelArtifact(a *ent.Artifact) *model.Artifact {
 	}
 }
 
-func toModelBuilder(b *ent.BuilderNode) *model.Builder {
+func toModelBuilder(b *ent.Builder) *model.Builder {
 	return &model.Builder{
 		ID:  nodeID(b.ID),
 		URI: b.URI,
@@ -221,7 +221,7 @@ func toModelIsDependency(id *ent.Dependency) *model.IsDependency {
 	}
 }
 
-func toModelHasSbom(sbom *ent.SBOM) *model.HasSbom {
+func toModelHasSbom(sbom *ent.BillOfMaterials) *model.HasSbom {
 	return &model.HasSbom{
 		ID:               nodeID(sbom.ID),
 		Subject:          toSBOMSubject(sbom),
@@ -234,7 +234,7 @@ func toModelHasSbom(sbom *ent.SBOM) *model.HasSbom {
 	}
 }
 
-func toSBOMSubject(s *ent.SBOM) model.PackageOrArtifact {
+func toSBOMSubject(s *ent.BillOfMaterials) model.PackageOrArtifact {
 	if s.Edges.Package != nil {
 		if s.Edges.Package.Edges.Name != nil &&
 			s.Edges.Package.Edges.Name.Edges.Namespace != nil &&

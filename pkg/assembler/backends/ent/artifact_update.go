@@ -14,6 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
 
 // ArtifactUpdate is the builder for updating Artifact entities.
@@ -71,6 +72,21 @@ func (au *ArtifactUpdate) AddSbom(b ...*BillOfMaterials) *ArtifactUpdate {
 	return au.AddSbomIDs(ids...)
 }
 
+// AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by IDs.
+func (au *ArtifactUpdate) AddAttestationIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.AddAttestationIDs(ids...)
+	return au
+}
+
+// AddAttestations adds the "attestations" edges to the SLSAAttestation entity.
+func (au *ArtifactUpdate) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return au.AddAttestationIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (au *ArtifactUpdate) Mutation() *ArtifactMutation {
 	return au.mutation
@@ -116,6 +132,27 @@ func (au *ArtifactUpdate) RemoveSbom(b ...*BillOfMaterials) *ArtifactUpdate {
 		ids[i] = b[i].ID
 	}
 	return au.RemoveSbomIDs(ids...)
+}
+
+// ClearAttestations clears all "attestations" edges to the SLSAAttestation entity.
+func (au *ArtifactUpdate) ClearAttestations() *ArtifactUpdate {
+	au.mutation.ClearAttestations()
+	return au
+}
+
+// RemoveAttestationIDs removes the "attestations" edge to SLSAAttestation entities by IDs.
+func (au *ArtifactUpdate) RemoveAttestationIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.RemoveAttestationIDs(ids...)
+	return au
+}
+
+// RemoveAttestations removes "attestations" edges to SLSAAttestation entities.
+func (au *ArtifactUpdate) RemoveAttestations(s ...*SLSAAttestation) *ArtifactUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return au.RemoveAttestationIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -250,6 +287,51 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if au.mutation.AttestationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.AttestationsTable,
+			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedAttestationsIDs(); len(nodes) > 0 && !au.mutation.AttestationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.AttestationsTable,
+			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.AttestationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.AttestationsTable,
+			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{artifact.Label}
@@ -312,6 +394,21 @@ func (auo *ArtifactUpdateOne) AddSbom(b ...*BillOfMaterials) *ArtifactUpdateOne 
 	return auo.AddSbomIDs(ids...)
 }
 
+// AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by IDs.
+func (auo *ArtifactUpdateOne) AddAttestationIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.AddAttestationIDs(ids...)
+	return auo
+}
+
+// AddAttestations adds the "attestations" edges to the SLSAAttestation entity.
+func (auo *ArtifactUpdateOne) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return auo.AddAttestationIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (auo *ArtifactUpdateOne) Mutation() *ArtifactMutation {
 	return auo.mutation
@@ -357,6 +454,27 @@ func (auo *ArtifactUpdateOne) RemoveSbom(b ...*BillOfMaterials) *ArtifactUpdateO
 		ids[i] = b[i].ID
 	}
 	return auo.RemoveSbomIDs(ids...)
+}
+
+// ClearAttestations clears all "attestations" edges to the SLSAAttestation entity.
+func (auo *ArtifactUpdateOne) ClearAttestations() *ArtifactUpdateOne {
+	auo.mutation.ClearAttestations()
+	return auo
+}
+
+// RemoveAttestationIDs removes the "attestations" edge to SLSAAttestation entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveAttestationIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.RemoveAttestationIDs(ids...)
+	return auo
+}
+
+// RemoveAttestations removes "attestations" edges to SLSAAttestation entities.
+func (auo *ArtifactUpdateOne) RemoveAttestations(s ...*SLSAAttestation) *ArtifactUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return auo.RemoveAttestationIDs(ids...)
 }
 
 // Where appends a list predicates to the ArtifactUpdate builder.
@@ -514,6 +632,51 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.AttestationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.AttestationsTable,
+			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedAttestationsIDs(); len(nodes) > 0 && !auo.mutation.AttestationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.AttestationsTable,
+			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.AttestationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.AttestationsTable,
+			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

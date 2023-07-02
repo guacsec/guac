@@ -22,9 +22,8 @@ type Artifact struct {
 	Digest string `json:"digest,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ArtifactQuery when eager-loading is set.
-	Edges                       ArtifactEdges `json:"edges"`
-	slsa_attestation_built_from *int
-	selectValues                sql.SelectValues
+	Edges        ArtifactEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // ArtifactEdges holds the relations/edges for other nodes in the graph.
@@ -33,9 +32,11 @@ type ArtifactEdges struct {
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// Sbom holds the value of the sbom edge.
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
+	// Attestations holds the value of the attestations edge.
+	Attestations []*SLSAAttestation `json:"attestations,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
@@ -56,6 +57,15 @@ func (e ArtifactEdges) SbomOrErr() ([]*BillOfMaterials, error) {
 	return nil, &NotLoadedError{edge: "sbom"}
 }
 
+// AttestationsOrErr returns the Attestations value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) AttestationsOrErr() ([]*SLSAAttestation, error) {
+	if e.loadedTypes[2] {
+		return e.Attestations, nil
+	}
+	return nil, &NotLoadedError{edge: "attestations"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Artifact) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -65,8 +75,6 @@ func (*Artifact) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case artifact.FieldAlgorithm, artifact.FieldDigest:
 			values[i] = new(sql.NullString)
-		case artifact.ForeignKeys[0]: // slsa_attestation_built_from
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -100,13 +108,6 @@ func (a *Artifact) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				a.Digest = value.String
 			}
-		case artifact.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field slsa_attestation_built_from", value)
-			} else if value.Valid {
-				a.slsa_attestation_built_from = new(int)
-				*a.slsa_attestation_built_from = int(value.Int64)
-			}
 		default:
 			a.selectValues.Set(columns[i], values[i])
 		}
@@ -128,6 +129,11 @@ func (a *Artifact) QueryOccurrences() *OccurrenceQuery {
 // QuerySbom queries the "sbom" edge of the Artifact entity.
 func (a *Artifact) QuerySbom() *BillOfMaterialsQuery {
 	return NewArtifactClient(a.config).QuerySbom(a)
+}
+
+// QueryAttestations queries the "attestations" edge of the Artifact entity.
+func (a *Artifact) QueryAttestations() *SLSAAttestationQuery {
+	return NewArtifactClient(a.config).QueryAttestations(a)
 }
 
 // Update returns a builder for updating this Artifact.
