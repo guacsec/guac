@@ -111,6 +111,15 @@ func TestSPDXProcessor_ValidateSchema(t *testing.T) {
 			SourceInformation: processor.SourceInformation{},
 		},
 		expectErr: true,
+	}, {
+		name: "invalid SPDX DocumentIdentifier",
+		doc: processor.Document{
+			Blob:              testdata.SpdxInvalidSPDXIdentifierExample,
+			Format:            processor.FormatJSON,
+			Type:              processor.DocumentSPDX,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: true,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {

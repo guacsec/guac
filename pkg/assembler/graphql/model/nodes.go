@@ -789,6 +789,13 @@ type PackageOrSourceInput struct {
 	Source  *SourceInputSpec `json:"source,omitempty"`
 }
 
+// PackageOrSourceInputs allows using packages and sources as input for batch mutations.
+// Exactly one list must be specified.
+type PackageOrSourceInputs struct {
+	Packages []*PkgInputSpec    `json:"packages,omitempty"`
+	Sources  []*SourceInputSpec `json:"sources,omitempty"`
+}
+
 // PackageOrSourceSpec allows using PackageOrSource union as input for queries.
 //
 // Exactly one field must be specified.

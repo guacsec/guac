@@ -15,6 +15,22 @@
 
 # NOTE: This is experimental and might change in the future!
 
+# Ingest Package
+
+mutation IngestPackage($pkg: PkgInputSpec!) {
+  ingestPackage(pkg: $pkg) {
+    ...AllPkgTree
+  }
+}
+
+# Bulk Ingest Packages
+
+mutation IngestPackages($pkgs: [PkgInputSpec!]!) {
+  ingestPackages(pkgs: $pkgs) {
+    ...AllPkgTree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC packages
 
 query Packages($filter: PkgSpec) {

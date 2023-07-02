@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/url"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -39,6 +40,21 @@ func PurlToPkg(purlUri string) (*model.PkgInputSpec, error) {
 	}
 
 	return purlConvert(p)
+}
+
+func PkgInputSpecToPurl(currentPkg *model.PkgInputSpec) string {
+	qualifiersMap := map[string]string{}
+	keys := []string{}
+	for _, kv := range currentPkg.Qualifiers {
+		qualifiersMap[kv.Key] = kv.Value
+		keys = append(keys, kv.Key)
+	}
+	sort.Strings(keys)
+	qualifiers := []string{}
+	for _, k := range keys {
+		qualifiers = append(qualifiers, k, qualifiersMap[k])
+	}
+	return PkgToPurl(currentPkg.Type, *currentPkg.Namespace, currentPkg.Name, *currentPkg.Version, *currentPkg.Subpath, qualifiers)
 }
 
 func PkgToPurl(purlType, namespace, name, version, subpath string, qualifiersList []string) string {

@@ -50,6 +50,28 @@ func (n *isDependencyLink) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildIsDependency(n, nil, true)
 }
 
+// Ingest IngestDependencies
+
+func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+
+	if len(pkgs) != len(depPkgs) {
+		return nil, gqlerror.Errorf("uneven packages and dependent packages for ingestion")
+	}
+	if len(pkgs) != len(dependencies) {
+		return nil, gqlerror.Errorf("uneven packages and dependencies nodes for ingestion")
+	}
+
+	var modelIsDependencies []*model.IsDependency
+	for i := range dependencies {
+		isDependency, err := c.IngestDependency(ctx, *pkgs[i], *depPkgs[i], *dependencies[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestDependency failed with err: %v", err)
+		}
+		modelIsDependencies = append(modelIsDependencies, isDependency)
+	}
+	return modelIsDependencies, nil
+}
+
 // Ingest IsDependency
 func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
 	return c.ingestDependency(ctx, packageArg, dependentPackageArg, dependency, true)

@@ -30,6 +30,68 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
+			packages := p.GetPackages(ctx)
+			logger.Infof("assembling Package: %v", len(packages))
+			for _, v := range packages {
+				if err := ingestPackage(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			sources := p.GetSources(ctx)
+			logger.Infof("assembling Source: %v", len(sources))
+			for _, v := range sources {
+				if err := ingestSource(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			artifacts := p.GetArtifacts(ctx)
+			logger.Infof("assembling Artifact: %v", len(artifacts))
+			for _, v := range artifacts {
+				if err := ingestArtifact(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			builders := p.GetBuilders(ctx)
+			logger.Infof("assembling Builder: %v", len(builders))
+			for _, v := range builders {
+				if err := ingestBuilder(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			materials := p.GetMaterials(ctx)
+			logger.Infof("assembling Materials (Artifact): %v", len(materials))
+			if err := ingestMaterials(ctx, gqlclient, materials); err != nil {
+				return err
+			}
+
+			cves := p.GetCVEs(ctx)
+			logger.Infof("assembling CVE: %v", len(cves))
+			for _, v := range cves {
+				if err := ingestCVE(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			osvs := p.GetOSVs(ctx)
+			logger.Infof("assembling OSV: %v", len(osvs))
+			for _, v := range osvs {
+				if err := ingestOSV(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			ghsas := p.GetGHSAs(ctx)
+			logger.Infof("assembling GHSA: %v", len(ghsas))
+			for _, v := range ghsas {
+				if err := ingestGHSA(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			for _, v := range p.CertifyScorecard {
 				if err := ingestCertifyScorecards(ctx, gqlclient, v); err != nil {
@@ -44,7 +106,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
-			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurrence))
+			logger.Infof("assembling IsOccurrence: %v", len(p.IsOccurrence))
 			for _, v := range p.IsOccurrence {
 				if err := ingestIsOccurrence(ctx, gqlclient, v); err != nil {
 					return err
@@ -99,9 +161,70 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 					return err
 				}
 			}
+
+			logger.Infof("assembling VEX : %v", len(p.Vex))
+			for _, v := range p.Vex {
+				if err := ingestVex(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling HashEqual : %v", len(p.HashEqual))
+			for _, equal := range p.HashEqual {
+				if err := ingestHashEqual(ctx, gqlclient, equal); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling PkgEqual : %v", len(p.PkgEqual))
+			for _, equal := range p.PkgEqual {
+				if err := ingestPkgEqual(ctx, gqlclient, equal); err != nil {
+					return err
+				}
+			}
 		}
 		return nil
 	}
+}
+
+func ingestPackage(ctx context.Context, client graphql.Client, v *model.PkgInputSpec) error {
+	_, err := model.IngestPackage(ctx, client, *v)
+	return err
+}
+
+func ingestSource(ctx context.Context, client graphql.Client, v *model.SourceInputSpec) error {
+	_, err := model.IngestSource(ctx, client, *v)
+	return err
+}
+
+func ingestArtifact(ctx context.Context, client graphql.Client, v *model.ArtifactInputSpec) error {
+	_, err := model.IngestArtifact(ctx, client, *v)
+	return err
+}
+
+func ingestMaterials(ctx context.Context, client graphql.Client, v []model.ArtifactInputSpec) error {
+	_, err := model.IngestMaterials(ctx, client, v)
+	return err
+}
+
+func ingestBuilder(ctx context.Context, client graphql.Client, v *model.BuilderInputSpec) error {
+	_, err := model.IngestBuilder(ctx, client, *v)
+	return err
+}
+
+func ingestCVE(ctx context.Context, client graphql.Client, v *model.CVEInputSpec) error {
+	_, err := model.IngestCVE(ctx, client, *v)
+	return err
+}
+
+func ingestOSV(ctx context.Context, client graphql.Client, v *model.OSVInputSpec) error {
+	_, err := model.IngestOSV(ctx, client, *v)
+	return err
+}
+
+func ingestGHSA(ctx context.Context, client graphql.Client, v *model.GHSAInputSpec) error {
+	_, err := model.IngestGHSA(ctx, client, *v)
+	return err
 }
 
 func ingestCertifyScorecards(ctx context.Context, client graphql.Client, v assembler.CertifyScorecardIngest) error {
@@ -227,6 +350,91 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasS
 	return err
 }
 
+func ingestVex(ctx context.Context, client graphql.Client, vi assembler.VexIngest) error {
+	if err := ValidateVulnerabilityInput(vi.OSV, vi.CVE, vi.GHSA, "VexIngest"); err != nil {
+		return fmt.Errorf("input validation failed for VexIngest: %w", err)
+	}
+
+	if vi.Artifact != nil && vi.Pkg != nil {
+		return fmt.Errorf("unable to create VexIngest with both Pkg and Artifact specified")
+	}
+
+	if vi.Artifact == nil && vi.Pkg == nil {
+		return fmt.Errorf("unable to create VexIngest without either Pkg or Artifact specified")
+	}
+
+	if vi.CVE != nil {
+		if vi.Pkg != nil {
+			_, err := model.VexPackageAndCve(ctx, client, *vi.Pkg, *vi.CVE, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+
+		if vi.Artifact != nil {
+			_, err := model.VexArtifactAndCve(ctx, client, *vi.Artifact, *vi.CVE, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if vi.GHSA != nil {
+		if vi.Pkg != nil {
+			_, err := model.VEXPackageAndGhsa(ctx, client, *vi.Pkg, *vi.GHSA, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+
+		if vi.Artifact != nil {
+			_, err := model.VexArtifactAndGhsa(ctx, client, *vi.Artifact, *vi.GHSA, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if vi.OSV != nil {
+		if vi.Pkg != nil {
+			_, err := model.VexPackageAndOsv(ctx, client, *vi.Pkg, *vi.OSV, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+
+		if vi.Artifact != nil {
+			_, err := model.VexArtifactAndOsv(ctx, client, *vi.Artifact, *vi.OSV, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func ingestPkgEqual(ctx context.Context, client graphql.Client, v assembler.PkgEqualIngest) error {
+	if v.Pkg == nil {
+		return fmt.Errorf("unable to create pkgEqual without Pkg")
+	}
+	if v.EqualPkg == nil {
+		return fmt.Errorf("unable to create pkgEqual without EqualPkg")
+	}
+	_, err := model.PkgEqual(ctx, client, *v.Pkg, *v.EqualPkg, *v.PkgEqual)
+	return err
+}
+
+func ingestHashEqual(ctx context.Context, client graphql.Client, v assembler.HashEqualIngest) error {
+	if v.Artifact == nil {
+		return fmt.Errorf("unable to create HashEqual without artifact")
+	}
+	if v.EqualArtifact == nil {
+		return fmt.Errorf("unable to create HashEqual without equal artifact")
+	}
+	_, err := model.HashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
+	return err
+}
+
 func validatePackageSourceOrArtifactInput(pkg *model.PkgInputSpec, src *model.SourceInputSpec, artifact *model.ArtifactInputSpec, path string) error {
 	valuesDefined := 0
 	if pkg != nil {
@@ -239,7 +447,7 @@ func validatePackageSourceOrArtifactInput(pkg *model.PkgInputSpec, src *model.So
 		valuesDefined = valuesDefined + 1
 	}
 	if valuesDefined != 1 {
-		return fmt.Errorf("Must specify at most one package, source, or artifact for %v", path)
+		return fmt.Errorf("must specify at most one package, source, or artifact for %v", path)
 	}
 
 	return nil
@@ -257,7 +465,7 @@ func ValidateVulnerabilityInput(osv *model.OSVInputSpec, cve *model.CVEInputSpec
 		vulnDefined = vulnDefined + 1
 	}
 	if vulnDefined > 2 {
-		return fmt.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa) for %v", path)
+		return fmt.Errorf("must specify at most one vulnerability (cve, osv, or ghsa) for %v", path)
 	}
 	return nil
 }

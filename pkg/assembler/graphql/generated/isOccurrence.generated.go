@@ -464,6 +464,44 @@ func (ec *executionContext) unmarshalInputPackageOrSourceInput(ctx context.Conte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputPackageOrSourceInputs(ctx context.Context, obj interface{}) (model.PackageOrSourceInputs, error) {
+	var it model.PackageOrSourceInputs
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"packages", "sources"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "packages":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packages"))
+			data, err := ec.unmarshalOPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Packages = data
+		case "sources":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
+			data, err := ec.unmarshalOSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Sources = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputPackageOrSourceSpec(ctx context.Context, obj interface{}) (model.PackageOrSourceSpec, error) {
 	var it model.PackageOrSourceSpec
 	asMap := map[string]interface{}{}
@@ -664,6 +702,28 @@ func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacs
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.IsOccurrenceInputSpec, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.IsOccurrenceInputSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNIsOccurrenceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx context.Context, v interface{}) (*model.IsOccurrenceInputSpec, error) {
+	res, err := ec.unmarshalInputIsOccurrenceInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNPackageOrSource2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSource(ctx context.Context, sel ast.SelectionSet, v model.PackageOrSource) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -676,6 +736,11 @@ func (ec *executionContext) marshalNPackageOrSource2githubᚗcomᚋguacsecᚋgua
 
 func (ec *executionContext) unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx context.Context, v interface{}) (model.PackageOrSourceInput, error) {
 	res, err := ec.unmarshalInputPackageOrSourceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx context.Context, v interface{}) (model.PackageOrSourceInputs, error) {
+	res, err := ec.unmarshalInputPackageOrSourceInputs(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

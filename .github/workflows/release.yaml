@@ -49,9 +49,9 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
       - name: Install cosign
-        uses:  sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # main
+        uses:  sigstore/cosign-installer@d13028333d784fcc802b67ec924bcebe75aa0a5f # main
       - name: Install syft
-        uses: anchore/sbom-action/download-syft@4d571ad1038a9cc29d676154ef265ab8f9027042 # v0.14.2
+        uses: anchore/sbom-action/download-syft@78fc58e266e87a38d4194b2137a3d4e9bcaf7ca1 # v0.14.3
 
       - name: Run GoReleaser Snapshot
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -119,7 +119,7 @@ jobs:
           format: 'spdx-json'
           output: 'spdx.sbom.json'
       - name: Install cosign
-        uses: sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # main
+        uses: sigstore/cosign-installer@d13028333d784fcc802b67ec924bcebe75aa0a5f # main
       - name: Sign image and sbom
         run: |
           #!/usr/bin/env bash

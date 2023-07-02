@@ -15,6 +15,14 @@
 
 # NOTE: This is experimental and might change in the future!
 
+# Ingest CVE
+
+mutation IngestCVE($cve: CVEInputSpec!) {
+  ingestCVE(cve: $cve) {
+    ...AllCveTree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC CVEs
 
 query CVEs($filter: CVESpec) {

@@ -18,23 +18,23 @@ package gcs
 import (
 	"context"
 	"errors"
-	"os"
 	"reflect"
 	"testing"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/fsouza/fake-gcs-server/fakestorage"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 func TestGCS_RetrieveArtifacts(t *testing.T) {
-	os.Setenv("GCS_BUCKET_ADDRESS", "some-bucket")
+	const bucketName = "some-bucket"
 	ctx := context.Background()
 	server := fakestorage.NewServer([]fakestorage.Object{
 		{
 			ObjectAttrs: fakestorage.ObjectAttrs{
-				BucketName: "some-bucket",
+				BucketName: bucketName,
 				Name:       "some/object/file.txt",
 				Updated:    time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 			},
@@ -50,7 +50,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		Format: processor.FormatUnknown,
 		SourceInformation: processor.SourceInformation{
 			Collector: string(CollectorGCS),
-			Source:    getBucketPath() + "/some/object/file.txt",
+			Source:    bucketName + "/some/object/file.txt",
 		},
 	}
 
@@ -73,8 +73,8 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "get object",
 		fields: fields{
-			bucket: getBucketPath(),
-			reader: &reader{client: client, bucket: getBucketPath()},
+			bucket: bucketName,
+			reader: &reader{client: client, bucket: bucketName},
 		},
 		want:     []*processor.Document{doc},
 		wantErr:  false,
@@ -82,8 +82,8 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "last download time the same",
 		fields: fields{
-			bucket:       getBucketPath(),
-			reader:       &reader{client: client, bucket: getBucketPath()},
+			bucket:       bucketName,
+			reader:       &reader{client: client, bucket: bucketName},
 			lastDownload: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 		},
 		want:     nil,
@@ -92,14 +92,15 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "last download time set before",
 		fields: fields{
-			bucket:       getBucketPath(),
-			reader:       &reader{client: client, bucket: getBucketPath()},
+			bucket:       bucketName,
+			reader:       &reader{client: client, bucket: bucketName},
 			lastDownload: time.Date(2009, 10, 17, 20, 34, 58, 651387237, time.UTC),
 		},
 		want:     []*processor.Document{doc},
 		wantErr:  false,
 		wantDone: true,
 	}}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := &gcs{
@@ -134,6 +135,88 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			}
 			if g.Type() != CollectorGCS {
 				t.Errorf("g.Type() = %s, want %s", g.Type(), CollectorGCS)
+			}
+		})
+	}
+}
+
+func TestNewGCSCollector(t *testing.T) {
+	var client = &storage.Client{}
+
+	type args struct {
+		bucket       string
+		pollInterval time.Duration
+		client       *storage.Client
+	}
+
+	tests := []struct {
+		name    string
+		args    args
+		want    *gcs
+		wantErr bool
+	}{
+		{
+			name:    "no bucket",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name:    "no client",
+			args:    args{bucket: "some-bucket"},
+			wantErr: true,
+		},
+		{
+			name: "client and bucket",
+			args: args{
+				client: client,
+				bucket: "some-bucket",
+			},
+			want: &gcs{
+				bucket: "some-bucket",
+				client: client,
+				reader: &reader{bucket: "some-bucket", client: client},
+				poll:   false,
+			},
+			wantErr: false,
+		}, {
+			name: "bucket and poll",
+			args: args{
+				bucket:       "some-bucket",
+				client:       client,
+				pollInterval: 2 * time.Minute,
+			},
+			want: &gcs{
+				bucket:   "some-bucket",
+				client:   client,
+				reader:   &reader{bucket: "some-bucket", client: client},
+				poll:     true,
+				interval: 2 * time.Minute,
+			},
+			wantErr: false,
+		}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opts := []Opt{}
+
+			if tt.args.pollInterval.Nanoseconds() > 0 {
+				opts = append(opts, WithPolling(tt.args.pollInterval))
+			}
+
+			if tt.args.bucket != "" {
+				opts = append(opts, WithBucket(tt.args.bucket))
+			}
+
+			if tt.args.client != nil {
+				opts = append(opts, WithClient(tt.args.client))
+			}
+
+			g, err := NewGCSCollector(opts...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewGCSCollector() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(g, tt.want) {
+				t.Errorf("NewGCSCollector() = %v, want %v", g, tt.want)
 			}
 		})
 	}

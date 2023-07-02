@@ -2285,79 +2285,6 @@ type CVEsResponse struct {
 // GetCve returns CVEsResponse.Cve, and is useful for accessing the field via an interface.
 func (v *CVEsResponse) GetCve() []CVEsCveCVE { return v.Cve }
 
-// CertifyBadArtifactIngestArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type CertifyBadArtifactIngestArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns CertifyBadArtifactIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns CertifyBadArtifactIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns CertifyBadArtifactIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *CertifyBadArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyBadArtifactIngestArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyBadArtifactIngestArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyBadArtifactIngestArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *CertifyBadArtifactIngestArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyBadArtifactIngestArtifact) __premarshalJSON() (*__premarshalCertifyBadArtifactIngestArtifact, error) {
-	var retval __premarshalCertifyBadArtifactIngestArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
-
 // CertifyBadArtifactIngestCertifyBad includes the requested fields of the GraphQL type CertifyBad.
 // The GraphQL type's documentation follows.
 //
@@ -2464,15 +2391,8 @@ func (v *CertifyBadArtifactIngestCertifyBad) __premarshalJSON() (*__premarshalCe
 
 // CertifyBadArtifactResponse is returned by CertifyBadArtifact on success.
 type CertifyBadArtifactResponse struct {
-	// Ingests a new artifact and returns it.
-	IngestArtifact CertifyBadArtifactIngestArtifact `json:"ingestArtifact"`
 	// Adds a certification that a package, source or artifact is considered bad.
 	IngestCertifyBad CertifyBadArtifactIngestCertifyBad `json:"ingestCertifyBad"`
-}
-
-// GetIngestArtifact returns CertifyBadArtifactResponse.IngestArtifact, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactResponse) GetIngestArtifact() CertifyBadArtifactIngestArtifact {
-	return v.IngestArtifact
 }
 
 // GetIngestCertifyBad returns CertifyBadArtifactResponse.IngestCertifyBad, and is useful for accessing the field via an interface.
@@ -2601,98 +2521,11 @@ func (v *CertifyBadPkgIngestCertifyBad) __premarshalJSON() (*__premarshalCertify
 	return &retval, nil
 }
 
-// CertifyBadPkgIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type CertifyBadPkgIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns CertifyBadPkgIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *CertifyBadPkgIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns CertifyBadPkgIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *CertifyBadPkgIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns CertifyBadPkgIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyBadPkgIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *CertifyBadPkgIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyBadPkgIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyBadPkgIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyBadPkgIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *CertifyBadPkgIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyBadPkgIngestPackage) __premarshalJSON() (*__premarshalCertifyBadPkgIngestPackage, error) {
-	var retval __premarshalCertifyBadPkgIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
 // CertifyBadPkgResponse is returned by CertifyBadPkg on success.
 type CertifyBadPkgResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage CertifyBadPkgIngestPackage `json:"ingestPackage"`
 	// Adds a certification that a package, source or artifact is considered bad.
 	IngestCertifyBad CertifyBadPkgIngestCertifyBad `json:"ingestCertifyBad"`
 }
-
-// GetIngestPackage returns CertifyBadPkgResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *CertifyBadPkgResponse) GetIngestPackage() CertifyBadPkgIngestPackage { return v.IngestPackage }
 
 // GetIngestCertifyBad returns CertifyBadPkgResponse.IngestCertifyBad, and is useful for accessing the field via an interface.
 func (v *CertifyBadPkgResponse) GetIngestCertifyBad() CertifyBadPkgIngestCertifyBad {
@@ -2835,95 +2668,11 @@ func (v *CertifyBadSrcIngestCertifyBad) __premarshalJSON() (*__premarshalCertify
 	return &retval, nil
 }
 
-// CertifyBadSrcIngestSource includes the requested fields of the GraphQL type Source.
-// The GraphQL type's documentation follows.
-//
-// Source represents the root of the source trie/tree.
-//
-// We map source information to a trie, as a derivative of the pURL specification:
-// each path in the trie represents a type, namespace, name and an optional
-// qualifier that stands for tag/commit information.
-//
-// This node represents the type part of the trie path. It is used to represent
-// the version control system that is being used.
-//
-// Since this node is at the root of the source trie, it is named Source, not
-// SourceType.
-type CertifyBadSrcIngestSource struct {
-	AllSourceTree `json:"-"`
-}
-
-// GetId returns CertifyBadSrcIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestSource) GetId() string { return v.AllSourceTree.Id }
-
-// GetType returns CertifyBadSrcIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestSource) GetType() string { return v.AllSourceTree.Type }
-
-// GetNamespaces returns CertifyBadSrcIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
-	return v.AllSourceTree.Namespaces
-}
-
-func (v *CertifyBadSrcIngestSource) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyBadSrcIngestSource
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyBadSrcIngestSource = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllSourceTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyBadSrcIngestSource struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
-}
-
-func (v *CertifyBadSrcIngestSource) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyBadSrcIngestSource) __premarshalJSON() (*__premarshalCertifyBadSrcIngestSource, error) {
-	var retval __premarshalCertifyBadSrcIngestSource
-
-	retval.Id = v.AllSourceTree.Id
-	retval.Type = v.AllSourceTree.Type
-	retval.Namespaces = v.AllSourceTree.Namespaces
-	return &retval, nil
-}
-
 // CertifyBadSrcResponse is returned by CertifyBadSrc on success.
 type CertifyBadSrcResponse struct {
-	// Ingests a new source and returns the corresponding source trie path.
-	IngestSource CertifyBadSrcIngestSource `json:"ingestSource"`
 	// Adds a certification that a package, source or artifact is considered bad.
 	IngestCertifyBad CertifyBadSrcIngestCertifyBad `json:"ingestCertifyBad"`
 }
-
-// GetIngestSource returns CertifyBadSrcResponse.IngestSource, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcResponse) GetIngestSource() CertifyBadSrcIngestSource { return v.IngestSource }
 
 // GetIngestCertifyBad returns CertifyBadSrcResponse.IngestCertifyBad, and is useful for accessing the field via an interface.
 func (v *CertifyBadSrcResponse) GetIngestCertifyBad() CertifyBadSrcIngestCertifyBad {
@@ -3041,164 +2790,6 @@ type CertifyBadsResponse struct {
 // GetCertifyBad returns CertifyBadsResponse.CertifyBad, and is useful for accessing the field via an interface.
 func (v *CertifyBadsResponse) GetCertifyBad() []CertifyBadsCertifyBad { return v.CertifyBad }
 
-// CertifyCVEIngestCVE includes the requested fields of the GraphQL type CVE.
-// The GraphQL type's documentation follows.
-//
-// CVE represents a vulnerability in the Common Vulnerabilities and Exposures
-// schema.
-//
-// The vulnerability identifier contains a year field, so we are extracting that
-// to allow matching for vulnerabilities found in a given year.
-//
-// The vulnerability identifier field is mandatory and canonicalized to be
-// lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type CertifyCVEIngestCVE struct {
-	AllCveTree `json:"-"`
-}
-
-// GetId returns CertifyCVEIngestCVE.Id, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestCVE) GetId() string { return v.AllCveTree.Id }
-
-// GetYear returns CertifyCVEIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestCVE) GetYear() int { return v.AllCveTree.Year }
-
-// GetCveId returns CertifyCVEIngestCVE.CveId, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestCVE) GetCveId() string { return v.AllCveTree.CveId }
-
-func (v *CertifyCVEIngestCVE) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyCVEIngestCVE
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyCVEIngestCVE = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCveTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyCVEIngestCVE struct {
-	Id string `json:"id"`
-
-	Year int `json:"year"`
-
-	CveId string `json:"cveId"`
-}
-
-func (v *CertifyCVEIngestCVE) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyCVEIngestCVE) __premarshalJSON() (*__premarshalCertifyCVEIngestCVE, error) {
-	var retval __premarshalCertifyCVEIngestCVE
-
-	retval.Id = v.AllCveTree.Id
-	retval.Year = v.AllCveTree.Year
-	retval.CveId = v.AllCveTree.CveId
-	return &retval, nil
-}
-
-// CertifyCVEIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type CertifyCVEIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns CertifyCVEIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns CertifyCVEIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns CertifyCVEIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *CertifyCVEIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyCVEIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyCVEIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyCVEIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *CertifyCVEIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyCVEIngestPackage) __premarshalJSON() (*__premarshalCertifyCVEIngestPackage, error) {
-	var retval __premarshalCertifyCVEIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
 // CertifyCVEIngestVulnerabilityCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
 // The GraphQL type's documentation follows.
 //
@@ -3294,170 +2885,13 @@ func (v *CertifyCVEIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premar
 
 // CertifyCVEResponse is returned by CertifyCVE on success.
 type CertifyCVEResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage CertifyCVEIngestPackage `json:"ingestPackage"`
-	// Ingests new CVE and returns it.
-	IngestCVE CertifyCVEIngestCVE `json:"ingestCVE"`
 	// Adds a certification that a package has been scanned for vulnerabilities.
 	IngestVulnerability CertifyCVEIngestVulnerabilityCertifyVuln `json:"ingestVulnerability"`
 }
 
-// GetIngestPackage returns CertifyCVEResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *CertifyCVEResponse) GetIngestPackage() CertifyCVEIngestPackage { return v.IngestPackage }
-
-// GetIngestCVE returns CertifyCVEResponse.IngestCVE, and is useful for accessing the field via an interface.
-func (v *CertifyCVEResponse) GetIngestCVE() CertifyCVEIngestCVE { return v.IngestCVE }
-
 // GetIngestVulnerability returns CertifyCVEResponse.IngestVulnerability, and is useful for accessing the field via an interface.
 func (v *CertifyCVEResponse) GetIngestVulnerability() CertifyCVEIngestVulnerabilityCertifyVuln {
 	return v.IngestVulnerability
-}
-
-// CertifyGHSAIngestGHSA includes the requested fields of the GraphQL type GHSA.
-// The GraphQL type's documentation follows.
-//
-// GHSA represents GitHub security advisories.
-//
-// The advisory id field is mandatory and canonicalized to be lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type CertifyGHSAIngestGHSA struct {
-	AllGHSATree `json:"-"`
-}
-
-// GetId returns CertifyGHSAIngestGHSA.Id, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestGHSA) GetId() string { return v.AllGHSATree.Id }
-
-// GetGhsaId returns CertifyGHSAIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
-
-func (v *CertifyGHSAIngestGHSA) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyGHSAIngestGHSA
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyGHSAIngestGHSA = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllGHSATree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyGHSAIngestGHSA struct {
-	Id string `json:"id"`
-
-	GhsaId string `json:"ghsaId"`
-}
-
-func (v *CertifyGHSAIngestGHSA) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyGHSAIngestGHSA) __premarshalJSON() (*__premarshalCertifyGHSAIngestGHSA, error) {
-	var retval __premarshalCertifyGHSAIngestGHSA
-
-	retval.Id = v.AllGHSATree.Id
-	retval.GhsaId = v.AllGHSATree.GhsaId
-	return &retval, nil
-}
-
-// CertifyGHSAIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type CertifyGHSAIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns CertifyGHSAIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns CertifyGHSAIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns CertifyGHSAIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *CertifyGHSAIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyGHSAIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyGHSAIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyGHSAIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *CertifyGHSAIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyGHSAIngestPackage) __premarshalJSON() (*__premarshalCertifyGHSAIngestPackage, error) {
-	var retval __premarshalCertifyGHSAIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
 }
 
 // CertifyGHSAIngestVulnerabilityCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
@@ -3555,96 +2989,13 @@ func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__prema
 
 // CertifyGHSAResponse is returned by CertifyGHSA on success.
 type CertifyGHSAResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage CertifyGHSAIngestPackage `json:"ingestPackage"`
-	// Ingests a new GitHub Security Advisory and returns it.
-	IngestGHSA CertifyGHSAIngestGHSA `json:"ingestGHSA"`
 	// Adds a certification that a package has been scanned for vulnerabilities.
 	IngestVulnerability CertifyGHSAIngestVulnerabilityCertifyVuln `json:"ingestVulnerability"`
 }
 
-// GetIngestPackage returns CertifyGHSAResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAResponse) GetIngestPackage() CertifyGHSAIngestPackage { return v.IngestPackage }
-
-// GetIngestGHSA returns CertifyGHSAResponse.IngestGHSA, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAResponse) GetIngestGHSA() CertifyGHSAIngestGHSA { return v.IngestGHSA }
-
 // GetIngestVulnerability returns CertifyGHSAResponse.IngestVulnerability, and is useful for accessing the field via an interface.
 func (v *CertifyGHSAResponse) GetIngestVulnerability() CertifyGHSAIngestVulnerabilityCertifyVuln {
 	return v.IngestVulnerability
-}
-
-// CertifyGoodArtifactIngestArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type CertifyGoodArtifactIngestArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns CertifyGoodArtifactIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *CertifyGoodArtifactIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns CertifyGoodArtifactIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *CertifyGoodArtifactIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns CertifyGoodArtifactIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *CertifyGoodArtifactIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *CertifyGoodArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyGoodArtifactIngestArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyGoodArtifactIngestArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyGoodArtifactIngestArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *CertifyGoodArtifactIngestArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyGoodArtifactIngestArtifact) __premarshalJSON() (*__premarshalCertifyGoodArtifactIngestArtifact, error) {
-	var retval __premarshalCertifyGoodArtifactIngestArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
 }
 
 // CertifyGoodArtifactIngestCertifyGood includes the requested fields of the GraphQL type CertifyGood.
@@ -3755,15 +3106,8 @@ func (v *CertifyGoodArtifactIngestCertifyGood) __premarshalJSON() (*__premarshal
 
 // CertifyGoodArtifactResponse is returned by CertifyGoodArtifact on success.
 type CertifyGoodArtifactResponse struct {
-	// Ingests a new artifact and returns it.
-	IngestArtifact CertifyGoodArtifactIngestArtifact `json:"ingestArtifact"`
 	// Adds a certification that a package, source or artifact is considered good.
 	IngestCertifyGood CertifyGoodArtifactIngestCertifyGood `json:"ingestCertifyGood"`
-}
-
-// GetIngestArtifact returns CertifyGoodArtifactResponse.IngestArtifact, and is useful for accessing the field via an interface.
-func (v *CertifyGoodArtifactResponse) GetIngestArtifact() CertifyGoodArtifactIngestArtifact {
-	return v.IngestArtifact
 }
 
 // GetIngestCertifyGood returns CertifyGoodArtifactResponse.IngestCertifyGood, and is useful for accessing the field via an interface.
@@ -3891,99 +3235,10 @@ func (v *CertifyGoodPkgIngestCertifyGood) __premarshalJSON() (*__premarshalCerti
 	return &retval, nil
 }
 
-// CertifyGoodPkgIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type CertifyGoodPkgIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns CertifyGoodPkgIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *CertifyGoodPkgIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns CertifyGoodPkgIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *CertifyGoodPkgIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns CertifyGoodPkgIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyGoodPkgIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *CertifyGoodPkgIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyGoodPkgIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyGoodPkgIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyGoodPkgIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *CertifyGoodPkgIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyGoodPkgIngestPackage) __premarshalJSON() (*__premarshalCertifyGoodPkgIngestPackage, error) {
-	var retval __premarshalCertifyGoodPkgIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
 // CertifyGoodPkgResponse is returned by CertifyGoodPkg on success.
 type CertifyGoodPkgResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage CertifyGoodPkgIngestPackage `json:"ingestPackage"`
 	// Adds a certification that a package, source or artifact is considered good.
 	IngestCertifyGood CertifyGoodPkgIngestCertifyGood `json:"ingestCertifyGood"`
-}
-
-// GetIngestPackage returns CertifyGoodPkgResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *CertifyGoodPkgResponse) GetIngestPackage() CertifyGoodPkgIngestPackage {
-	return v.IngestPackage
 }
 
 // GetIngestCertifyGood returns CertifyGoodPkgResponse.IngestCertifyGood, and is useful for accessing the field via an interface.
@@ -4095,181 +3350,15 @@ func (v *CertifyGoodSrcIngestCertifyGood) __premarshalJSON() (*__premarshalCerti
 	return &retval, nil
 }
 
-// CertifyGoodSrcIngestSource includes the requested fields of the GraphQL type Source.
-// The GraphQL type's documentation follows.
-//
-// Source represents the root of the source trie/tree.
-//
-// We map source information to a trie, as a derivative of the pURL specification:
-// each path in the trie represents a type, namespace, name and an optional
-// qualifier that stands for tag/commit information.
-//
-// This node represents the type part of the trie path. It is used to represent
-// the version control system that is being used.
-//
-// Since this node is at the root of the source trie, it is named Source, not
-// SourceType.
-type CertifyGoodSrcIngestSource struct {
-	AllSourceTree `json:"-"`
-}
-
-// GetId returns CertifyGoodSrcIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *CertifyGoodSrcIngestSource) GetId() string { return v.AllSourceTree.Id }
-
-// GetType returns CertifyGoodSrcIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *CertifyGoodSrcIngestSource) GetType() string { return v.AllSourceTree.Type }
-
-// GetNamespaces returns CertifyGoodSrcIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyGoodSrcIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
-	return v.AllSourceTree.Namespaces
-}
-
-func (v *CertifyGoodSrcIngestSource) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyGoodSrcIngestSource
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyGoodSrcIngestSource = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllSourceTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyGoodSrcIngestSource struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
-}
-
-func (v *CertifyGoodSrcIngestSource) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyGoodSrcIngestSource) __premarshalJSON() (*__premarshalCertifyGoodSrcIngestSource, error) {
-	var retval __premarshalCertifyGoodSrcIngestSource
-
-	retval.Id = v.AllSourceTree.Id
-	retval.Type = v.AllSourceTree.Type
-	retval.Namespaces = v.AllSourceTree.Namespaces
-	return &retval, nil
-}
-
 // CertifyGoodSrcResponse is returned by CertifyGoodSrc on success.
 type CertifyGoodSrcResponse struct {
-	// Ingests a new source and returns the corresponding source trie path.
-	IngestSource CertifyGoodSrcIngestSource `json:"ingestSource"`
 	// Adds a certification that a package, source or artifact is considered good.
 	IngestCertifyGood CertifyGoodSrcIngestCertifyGood `json:"ingestCertifyGood"`
 }
 
-// GetIngestSource returns CertifyGoodSrcResponse.IngestSource, and is useful for accessing the field via an interface.
-func (v *CertifyGoodSrcResponse) GetIngestSource() CertifyGoodSrcIngestSource { return v.IngestSource }
-
 // GetIngestCertifyGood returns CertifyGoodSrcResponse.IngestCertifyGood, and is useful for accessing the field via an interface.
 func (v *CertifyGoodSrcResponse) GetIngestCertifyGood() CertifyGoodSrcIngestCertifyGood {
 	return v.IngestCertifyGood
-}
-
-// CertifyNoKnownVulnIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type CertifyNoKnownVulnIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns CertifyNoKnownVulnIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns CertifyNoKnownVulnIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns CertifyNoKnownVulnIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *CertifyNoKnownVulnIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyNoKnownVulnIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyNoKnownVulnIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyNoKnownVulnIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *CertifyNoKnownVulnIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyNoKnownVulnIngestPackage) __premarshalJSON() (*__premarshalCertifyNoKnownVulnIngestPackage, error) {
-	var retval __premarshalCertifyNoKnownVulnIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
 }
 
 // CertifyNoKnownVulnIngestVulnerabilityCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
@@ -4367,170 +3456,13 @@ func (v *CertifyNoKnownVulnIngestVulnerabilityCertifyVuln) __premarshalJSON() (*
 
 // CertifyNoKnownVulnResponse is returned by CertifyNoKnownVuln on success.
 type CertifyNoKnownVulnResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage CertifyNoKnownVulnIngestPackage `json:"ingestPackage"`
 	// Adds a certification that a package has been scanned for vulnerabilities.
 	IngestVulnerability CertifyNoKnownVulnIngestVulnerabilityCertifyVuln `json:"ingestVulnerability"`
-}
-
-// GetIngestPackage returns CertifyNoKnownVulnResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnResponse) GetIngestPackage() CertifyNoKnownVulnIngestPackage {
-	return v.IngestPackage
 }
 
 // GetIngestVulnerability returns CertifyNoKnownVulnResponse.IngestVulnerability, and is useful for accessing the field via an interface.
 func (v *CertifyNoKnownVulnResponse) GetIngestVulnerability() CertifyNoKnownVulnIngestVulnerabilityCertifyVuln {
 	return v.IngestVulnerability
-}
-
-// CertifyOSVIngestOSV includes the requested fields of the GraphQL type OSV.
-// The GraphQL type's documentation follows.
-//
-// OSV represents an Open Source Vulnerability.
-//
-// The osvId field is mandatory and canonicalized to be lowercase.
-//
-// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
-// CVE ID).
-//
-// This node can be referred to by other parts of GUAC.
-type CertifyOSVIngestOSV struct {
-	AllOSVTree `json:"-"`
-}
-
-// GetId returns CertifyOSVIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestOSV) GetId() string { return v.AllOSVTree.Id }
-
-// GetOsvId returns CertifyOSVIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
-
-func (v *CertifyOSVIngestOSV) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyOSVIngestOSV
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyOSVIngestOSV = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllOSVTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyOSVIngestOSV struct {
-	Id string `json:"id"`
-
-	OsvId string `json:"osvId"`
-}
-
-func (v *CertifyOSVIngestOSV) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyOSVIngestOSV) __premarshalJSON() (*__premarshalCertifyOSVIngestOSV, error) {
-	var retval __premarshalCertifyOSVIngestOSV
-
-	retval.Id = v.AllOSVTree.Id
-	retval.OsvId = v.AllOSVTree.OsvId
-	return &retval, nil
-}
-
-// CertifyOSVIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type CertifyOSVIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns CertifyOSVIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns CertifyOSVIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns CertifyOSVIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *CertifyOSVIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyOSVIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyOSVIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyOSVIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *CertifyOSVIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyOSVIngestPackage) __premarshalJSON() (*__premarshalCertifyOSVIngestPackage, error) {
-	var retval __premarshalCertifyOSVIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
 }
 
 // CertifyOSVIngestVulnerabilityCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
@@ -4628,19 +3560,9 @@ func (v *CertifyOSVIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premar
 
 // CertifyOSVResponse is returned by CertifyOSV on success.
 type CertifyOSVResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage CertifyOSVIngestPackage `json:"ingestPackage"`
-	// Ingests a new OSV vulnerability and returns it.
-	IngestOSV CertifyOSVIngestOSV `json:"ingestOSV"`
 	// Adds a certification that a package has been scanned for vulnerabilities.
 	IngestVulnerability CertifyOSVIngestVulnerabilityCertifyVuln `json:"ingestVulnerability"`
 }
-
-// GetIngestPackage returns CertifyOSVResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *CertifyOSVResponse) GetIngestPackage() CertifyOSVIngestPackage { return v.IngestPackage }
-
-// GetIngestOSV returns CertifyOSVResponse.IngestOSV, and is useful for accessing the field via an interface.
-func (v *CertifyOSVResponse) GetIngestOSV() CertifyOSVIngestOSV { return v.IngestOSV }
 
 // GetIngestVulnerability returns CertifyOSVResponse.IngestVulnerability, and is useful for accessing the field via an interface.
 func (v *CertifyOSVResponse) GetIngestVulnerability() CertifyOSVIngestVulnerabilityCertifyVuln {
@@ -4739,6 +3661,465 @@ const (
 	EdgePkgEqualPackage             Edge = "PKG_EQUAL_PACKAGE"
 )
 
+// FindSoftwareFindSoftwareArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type FindSoftwareFindSoftwareArtifact struct {
+	Typename        *string `json:"__typename"`
+	AllArtifactTree `json:"-"`
+}
+
+// GetTypename returns FindSoftwareFindSoftwareArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns FindSoftwareFindSoftwareArtifact.Id, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns FindSoftwareFindSoftwareArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+
+// GetDigest returns FindSoftwareFindSoftwareArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *FindSoftwareFindSoftwareArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*FindSoftwareFindSoftwareArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.FindSoftwareFindSoftwareArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalFindSoftwareFindSoftwareArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *FindSoftwareFindSoftwareArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *FindSoftwareFindSoftwareArtifact) __premarshalJSON() (*__premarshalFindSoftwareFindSoftwareArtifact, error) {
+	var retval __premarshalFindSoftwareFindSoftwareArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// FindSoftwareFindSoftwarePackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type FindSoftwareFindSoftwarePackage struct {
+	Typename   *string `json:"__typename"`
+	AllPkgTree `json:"-"`
+}
+
+// GetTypename returns FindSoftwareFindSoftwarePackage.Typename, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwarePackage) GetTypename() *string { return v.Typename }
+
+// GetId returns FindSoftwareFindSoftwarePackage.Id, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwarePackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns FindSoftwareFindSoftwarePackage.Type, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwarePackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns FindSoftwareFindSoftwarePackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwarePackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *FindSoftwareFindSoftwarePackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*FindSoftwareFindSoftwarePackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.FindSoftwareFindSoftwarePackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalFindSoftwareFindSoftwarePackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *FindSoftwareFindSoftwarePackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *FindSoftwareFindSoftwarePackage) __premarshalJSON() (*__premarshalFindSoftwareFindSoftwarePackage, error) {
+	var retval __premarshalFindSoftwareFindSoftwarePackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// FindSoftwareFindSoftwarePackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
+//
+// FindSoftwareFindSoftwarePackageSourceOrArtifact is implemented by the following types:
+// FindSoftwareFindSoftwareArtifact
+// FindSoftwareFindSoftwarePackage
+// FindSoftwareFindSoftwareSource
+// The GraphQL type's documentation follows.
+//
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
+type FindSoftwareFindSoftwarePackageSourceOrArtifact interface {
+	implementsGraphQLInterfaceFindSoftwareFindSoftwarePackageSourceOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *FindSoftwareFindSoftwareArtifact) implementsGraphQLInterfaceFindSoftwareFindSoftwarePackageSourceOrArtifact() {
+}
+func (v *FindSoftwareFindSoftwarePackage) implementsGraphQLInterfaceFindSoftwareFindSoftwarePackageSourceOrArtifact() {
+}
+func (v *FindSoftwareFindSoftwareSource) implementsGraphQLInterfaceFindSoftwareFindSoftwarePackageSourceOrArtifact() {
+}
+
+func __unmarshalFindSoftwareFindSoftwarePackageSourceOrArtifact(b []byte, v *FindSoftwareFindSoftwarePackageSourceOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Artifact":
+		*v = new(FindSoftwareFindSoftwareArtifact)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(FindSoftwareFindSoftwarePackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(FindSoftwareFindSoftwareSource)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageSourceOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for FindSoftwareFindSoftwarePackageSourceOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalFindSoftwareFindSoftwarePackageSourceOrArtifact(v *FindSoftwareFindSoftwarePackageSourceOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *FindSoftwareFindSoftwareArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalFindSoftwareFindSoftwareArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *FindSoftwareFindSoftwarePackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalFindSoftwareFindSoftwarePackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *FindSoftwareFindSoftwareSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalFindSoftwareFindSoftwareSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for FindSoftwareFindSoftwarePackageSourceOrArtifact: "%T"`, v)
+	}
+}
+
+// FindSoftwareFindSoftwareSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type FindSoftwareFindSoftwareSource struct {
+	Typename      *string `json:"__typename"`
+	AllSourceTree `json:"-"`
+}
+
+// GetTypename returns FindSoftwareFindSoftwareSource.Typename, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareSource) GetTypename() *string { return v.Typename }
+
+// GetId returns FindSoftwareFindSoftwareSource.Id, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns FindSoftwareFindSoftwareSource.Type, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns FindSoftwareFindSoftwareSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *FindSoftwareFindSoftwareSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*FindSoftwareFindSoftwareSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.FindSoftwareFindSoftwareSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalFindSoftwareFindSoftwareSource struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *FindSoftwareFindSoftwareSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *FindSoftwareFindSoftwareSource) __premarshalJSON() (*__premarshalFindSoftwareFindSoftwareSource, error) {
+	var retval __premarshalFindSoftwareFindSoftwareSource
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
+// FindSoftwareResponse is returned by FindSoftware on success.
+type FindSoftwareResponse struct {
+	// findSoftware takes in a searchText string and looks for software
+	// that may be relevant for the input text. This can be seen as fuzzy search
+	// function for Packages, Sources and Artifacts. findSoftware returns a list
+	// of Packages, Sources and Artifacts that it determines to be relevant to
+	// the input searchText.
+	//
+	// Due to the nature of full text search being implemented differently on
+	// different db platforms, the behavior of findSoftware is not guaranteed
+	// to be the same. In addition, their statistical nature may result in
+	// results being different per call and not reproducible.
+	//
+	// All that is asked in the implementation of this API is that it follows
+	// the spirit of helping to retrieve the right nodes with best effort.
+	//
+	// Warning: This is an EXPERIMENTAL feature. This is subject to change.
+	// Warning: This is an OPTIONAL feature. Backends are not required to
+	// implement this API.
+	FindSoftware []FindSoftwareFindSoftwarePackageSourceOrArtifact `json:"-"`
+}
+
+// GetFindSoftware returns FindSoftwareResponse.FindSoftware, and is useful for accessing the field via an interface.
+func (v *FindSoftwareResponse) GetFindSoftware() []FindSoftwareFindSoftwarePackageSourceOrArtifact {
+	return v.FindSoftware
+}
+
+func (v *FindSoftwareResponse) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*FindSoftwareResponse
+		FindSoftware []json.RawMessage `json:"findSoftware"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.FindSoftwareResponse = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.FindSoftware
+		src := firstPass.FindSoftware
+		*dst = make(
+			[]FindSoftwareFindSoftwarePackageSourceOrArtifact,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			if len(src) != 0 && string(src) != "null" {
+				err = __unmarshalFindSoftwareFindSoftwarePackageSourceOrArtifact(
+					src, dst)
+				if err != nil {
+					return fmt.Errorf(
+						"unable to unmarshal FindSoftwareResponse.FindSoftware: %w", err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalFindSoftwareResponse struct {
+	FindSoftware []json.RawMessage `json:"findSoftware"`
+}
+
+func (v *FindSoftwareResponse) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *FindSoftwareResponse) __premarshalJSON() (*__premarshalFindSoftwareResponse, error) {
+	var retval __premarshalFindSoftwareResponse
+
+	{
+
+		dst := &retval.FindSoftware
+		src := v.FindSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalFindSoftwareFindSoftwarePackageSourceOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal FindSoftwareResponse.FindSoftware: %w", err)
+			}
+		}
+	}
+	return &retval, nil
+}
+
 // GHSAInputSpec specifies a GitHub Security Advisory for mutations.
 type GHSAInputSpec struct {
 	GhsaId string `json:"ghsaId"`
@@ -4832,79 +4213,6 @@ type GHSAsResponse struct {
 
 // GetGhsa returns GHSAsResponse.Ghsa, and is useful for accessing the field via an interface.
 func (v *GHSAsResponse) GetGhsa() []GHSAsGhsaGHSA { return v.Ghsa }
-
-// HasSBOMArtifactIngestArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type HasSBOMArtifactIngestArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns HasSBOMArtifactIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *HasSBOMArtifactIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns HasSBOMArtifactIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *HasSBOMArtifactIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns HasSBOMArtifactIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *HasSBOMArtifactIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *HasSBOMArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*HasSBOMArtifactIngestArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.HasSBOMArtifactIngestArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalHasSBOMArtifactIngestArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *HasSBOMArtifactIngestArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *HasSBOMArtifactIngestArtifact) __premarshalJSON() (*__premarshalHasSBOMArtifactIngestArtifact, error) {
-	var retval __premarshalHasSBOMArtifactIngestArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
 
 // HasSBOMArtifactIngestHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type HasSBOMArtifactIngestHasSBOM struct {
@@ -5025,15 +4333,8 @@ func (v *HasSBOMArtifactIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMA
 
 // HasSBOMArtifactResponse is returned by HasSBOMArtifact on success.
 type HasSBOMArtifactResponse struct {
-	// Ingests a new artifact and returns it.
-	IngestArtifact HasSBOMArtifactIngestArtifact `json:"ingestArtifact"`
 	// Certifies that a package or artifact has an SBOM.
 	IngestHasSBOM HasSBOMArtifactIngestHasSBOM `json:"ingestHasSBOM"`
-}
-
-// GetIngestArtifact returns HasSBOMArtifactResponse.IngestArtifact, and is useful for accessing the field via an interface.
-func (v *HasSBOMArtifactResponse) GetIngestArtifact() HasSBOMArtifactIngestArtifact {
-	return v.IngestArtifact
 }
 
 // GetIngestHasSBOM returns HasSBOMArtifactResponse.IngestHasSBOM, and is useful for accessing the field via an interface.
@@ -5190,98 +4491,11 @@ func (v *HasSBOMPkgIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMPkgIng
 	return &retval, nil
 }
 
-// HasSBOMPkgIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type HasSBOMPkgIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns HasSBOMPkgIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *HasSBOMPkgIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns HasSBOMPkgIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *HasSBOMPkgIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns HasSBOMPkgIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *HasSBOMPkgIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *HasSBOMPkgIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*HasSBOMPkgIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.HasSBOMPkgIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalHasSBOMPkgIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *HasSBOMPkgIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *HasSBOMPkgIngestPackage) __premarshalJSON() (*__premarshalHasSBOMPkgIngestPackage, error) {
-	var retval __premarshalHasSBOMPkgIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
 // HasSBOMPkgResponse is returned by HasSBOMPkg on success.
 type HasSBOMPkgResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage HasSBOMPkgIngestPackage `json:"ingestPackage"`
 	// Certifies that a package or artifact has an SBOM.
 	IngestHasSBOM HasSBOMPkgIngestHasSBOM `json:"ingestHasSBOM"`
 }
-
-// GetIngestPackage returns HasSBOMPkgResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *HasSBOMPkgResponse) GetIngestPackage() HasSBOMPkgIngestPackage { return v.IngestPackage }
 
 // GetIngestHasSBOM returns HasSBOMPkgResponse.IngestHasSBOM, and is useful for accessing the field via an interface.
 func (v *HasSBOMPkgResponse) GetIngestHasSBOM() HasSBOMPkgIngestHasSBOM { return v.IngestHasSBOM }
@@ -5383,167 +4597,6 @@ func (v *HasSourceAtIngestHasSourceAt) __premarshalJSON() (*__premarshalHasSourc
 	return &retval, nil
 }
 
-// HasSourceAtIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type HasSourceAtIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns HasSourceAtIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *HasSourceAtIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns HasSourceAtIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *HasSourceAtIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns HasSourceAtIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *HasSourceAtIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *HasSourceAtIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*HasSourceAtIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.HasSourceAtIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalHasSourceAtIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *HasSourceAtIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *HasSourceAtIngestPackage) __premarshalJSON() (*__premarshalHasSourceAtIngestPackage, error) {
-	var retval __premarshalHasSourceAtIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
-// HasSourceAtIngestSource includes the requested fields of the GraphQL type Source.
-// The GraphQL type's documentation follows.
-//
-// Source represents the root of the source trie/tree.
-//
-// We map source information to a trie, as a derivative of the pURL specification:
-// each path in the trie represents a type, namespace, name and an optional
-// qualifier that stands for tag/commit information.
-//
-// This node represents the type part of the trie path. It is used to represent
-// the version control system that is being used.
-//
-// Since this node is at the root of the source trie, it is named Source, not
-// SourceType.
-type HasSourceAtIngestSource struct {
-	AllSourceTree `json:"-"`
-}
-
-// GetId returns HasSourceAtIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *HasSourceAtIngestSource) GetId() string { return v.AllSourceTree.Id }
-
-// GetType returns HasSourceAtIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *HasSourceAtIngestSource) GetType() string { return v.AllSourceTree.Type }
-
-// GetNamespaces returns HasSourceAtIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *HasSourceAtIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
-	return v.AllSourceTree.Namespaces
-}
-
-func (v *HasSourceAtIngestSource) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*HasSourceAtIngestSource
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.HasSourceAtIngestSource = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllSourceTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalHasSourceAtIngestSource struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
-}
-
-func (v *HasSourceAtIngestSource) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *HasSourceAtIngestSource) __premarshalJSON() (*__premarshalHasSourceAtIngestSource, error) {
-	var retval __premarshalHasSourceAtIngestSource
-
-	retval.Id = v.AllSourceTree.Id
-	retval.Type = v.AllSourceTree.Type
-	retval.Namespaces = v.AllSourceTree.Namespaces
-	return &retval, nil
-}
-
 // HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
 type HasSourceAtInputSpec struct {
 	KnownSince    time.Time `json:"knownSince"`
@@ -5566,96 +4619,13 @@ func (v *HasSourceAtInputSpec) GetCollector() string { return v.Collector }
 
 // HasSourceAtResponse is returned by HasSourceAt on success.
 type HasSourceAtResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage HasSourceAtIngestPackage `json:"ingestPackage"`
-	// Ingests a new source and returns the corresponding source trie path.
-	IngestSource HasSourceAtIngestSource `json:"ingestSource"`
 	// Adds a certification that a package (PackageName or PackageVersion) is built from the source.
 	IngestHasSourceAt HasSourceAtIngestHasSourceAt `json:"ingestHasSourceAt"`
 }
 
-// GetIngestPackage returns HasSourceAtResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *HasSourceAtResponse) GetIngestPackage() HasSourceAtIngestPackage { return v.IngestPackage }
-
-// GetIngestSource returns HasSourceAtResponse.IngestSource, and is useful for accessing the field via an interface.
-func (v *HasSourceAtResponse) GetIngestSource() HasSourceAtIngestSource { return v.IngestSource }
-
 // GetIngestHasSourceAt returns HasSourceAtResponse.IngestHasSourceAt, and is useful for accessing the field via an interface.
 func (v *HasSourceAtResponse) GetIngestHasSourceAt() HasSourceAtIngestHasSourceAt {
 	return v.IngestHasSourceAt
-}
-
-// HashEqualArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type HashEqualArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns HashEqualArtifact.Id, and is useful for accessing the field via an interface.
-func (v *HashEqualArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns HashEqualArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *HashEqualArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns HashEqualArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *HashEqualArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *HashEqualArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*HashEqualArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.HashEqualArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalHashEqualArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *HashEqualArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *HashEqualArtifact) __premarshalJSON() (*__premarshalHashEqualArtifact, error) {
-	var retval __premarshalHashEqualArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
 }
 
 // HashEqualIngestHashEqual includes the requested fields of the GraphQL type HashEqual.
@@ -5755,7 +4725,16 @@ func (v *HashEqualInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns HashEqualInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 
-// HashEqualOtherArtifact includes the requested fields of the GraphQL type Artifact.
+// HashEqualResponse is returned by HashEqual on success.
+type HashEqualResponse struct {
+	// Adds a certification that two artifacts are similar.
+	IngestHashEqual HashEqualIngestHashEqual `json:"ingestHashEqual"`
+}
+
+// GetIngestHashEqual returns HashEqualResponse.IngestHashEqual, and is useful for accessing the field via an interface.
+func (v *HashEqualResponse) GetIngestHashEqual() HashEqualIngestHashEqual { return v.IngestHashEqual }
+
+// IngestArtifactIngestArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
 //
 // Artifact represents an artifact identified by a checksum hash.
@@ -5765,30 +4744,30 @@ func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 //
 // If having a checksum Go object, algorithm can be
 // strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type HashEqualOtherArtifact struct {
+type IngestArtifactIngestArtifact struct {
 	AllArtifactTree `json:"-"`
 }
 
-// GetId returns HashEqualOtherArtifact.Id, and is useful for accessing the field via an interface.
-func (v *HashEqualOtherArtifact) GetId() string { return v.AllArtifactTree.Id }
+// GetId returns IngestArtifactIngestArtifact.Id, and is useful for accessing the field via an interface.
+func (v *IngestArtifactIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
 
-// GetAlgorithm returns HashEqualOtherArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *HashEqualOtherArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+// GetAlgorithm returns IngestArtifactIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *IngestArtifactIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
 
-// GetDigest returns HashEqualOtherArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *HashEqualOtherArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+// GetDigest returns IngestArtifactIngestArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *IngestArtifactIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
 
-func (v *HashEqualOtherArtifact) UnmarshalJSON(b []byte) error {
+func (v *IngestArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
 		return nil
 	}
 
 	var firstPass struct {
-		*HashEqualOtherArtifact
+		*IngestArtifactIngestArtifact
 		graphql.NoUnmarshalJSON
 	}
-	firstPass.HashEqualOtherArtifact = v
+	firstPass.IngestArtifactIngestArtifact = v
 
 	err := json.Unmarshal(b, &firstPass)
 	if err != nil {
@@ -5803,7 +4782,7 @@ func (v *HashEqualOtherArtifact) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type __premarshalHashEqualOtherArtifact struct {
+type __premarshalIngestArtifactIngestArtifact struct {
 	Id string `json:"id"`
 
 	Algorithm string `json:"algorithm"`
@@ -5811,7 +4790,7 @@ type __premarshalHashEqualOtherArtifact struct {
 	Digest string `json:"digest"`
 }
 
-func (v *HashEqualOtherArtifact) MarshalJSON() ([]byte, error) {
+func (v *IngestArtifactIngestArtifact) MarshalJSON() ([]byte, error) {
 	premarshaled, err := v.__premarshalJSON()
 	if err != nil {
 		return nil, err
@@ -5819,8 +4798,8 @@ func (v *HashEqualOtherArtifact) MarshalJSON() ([]byte, error) {
 	return json.Marshal(premarshaled)
 }
 
-func (v *HashEqualOtherArtifact) __premarshalJSON() (*__premarshalHashEqualOtherArtifact, error) {
-	var retval __premarshalHashEqualOtherArtifact
+func (v *IngestArtifactIngestArtifact) __premarshalJSON() (*__premarshalIngestArtifactIngestArtifact, error) {
+	var retval __premarshalIngestArtifactIngestArtifact
 
 	retval.Id = v.AllArtifactTree.Id
 	retval.Algorithm = v.AllArtifactTree.Algorithm
@@ -5828,26 +4807,448 @@ func (v *HashEqualOtherArtifact) __premarshalJSON() (*__premarshalHashEqualOther
 	return &retval, nil
 }
 
-// HashEqualResponse is returned by HashEqual on success.
-type HashEqualResponse struct {
+// IngestArtifactResponse is returned by IngestArtifact on success.
+type IngestArtifactResponse struct {
 	// Ingests a new artifact and returns it.
-	Artifact HashEqualArtifact `json:"artifact"`
-	// Ingests a new artifact and returns it.
-	OtherArtifact HashEqualOtherArtifact `json:"otherArtifact"`
-	// Adds a certification that two artifacts are similar.
-	IngestHashEqual HashEqualIngestHashEqual `json:"ingestHashEqual"`
+	IngestArtifact IngestArtifactIngestArtifact `json:"ingestArtifact"`
 }
 
-// GetArtifact returns HashEqualResponse.Artifact, and is useful for accessing the field via an interface.
-func (v *HashEqualResponse) GetArtifact() HashEqualArtifact { return v.Artifact }
+// GetIngestArtifact returns IngestArtifactResponse.IngestArtifact, and is useful for accessing the field via an interface.
+func (v *IngestArtifactResponse) GetIngestArtifact() IngestArtifactIngestArtifact {
+	return v.IngestArtifact
+}
 
-// GetOtherArtifact returns HashEqualResponse.OtherArtifact, and is useful for accessing the field via an interface.
-func (v *HashEqualResponse) GetOtherArtifact() HashEqualOtherArtifact { return v.OtherArtifact }
+// IngestArtifactsIngestArtifactsArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type IngestArtifactsIngestArtifactsArtifact struct {
+	AllArtifactTree `json:"-"`
+}
 
-// GetIngestHashEqual returns HashEqualResponse.IngestHashEqual, and is useful for accessing the field via an interface.
-func (v *HashEqualResponse) GetIngestHashEqual() HashEqualIngestHashEqual { return v.IngestHashEqual }
+// GetId returns IngestArtifactsIngestArtifactsArtifact.Id, and is useful for accessing the field via an interface.
+func (v *IngestArtifactsIngestArtifactsArtifact) GetId() string { return v.AllArtifactTree.Id }
 
-// IsDependencyDependentPkgPackage includes the requested fields of the GraphQL type Package.
+// GetAlgorithm returns IngestArtifactsIngestArtifactsArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *IngestArtifactsIngestArtifactsArtifact) GetAlgorithm() string {
+	return v.AllArtifactTree.Algorithm
+}
+
+// GetDigest returns IngestArtifactsIngestArtifactsArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *IngestArtifactsIngestArtifactsArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *IngestArtifactsIngestArtifactsArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestArtifactsIngestArtifactsArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestArtifactsIngestArtifactsArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestArtifactsIngestArtifactsArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *IngestArtifactsIngestArtifactsArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestArtifactsIngestArtifactsArtifact) __premarshalJSON() (*__premarshalIngestArtifactsIngestArtifactsArtifact, error) {
+	var retval __premarshalIngestArtifactsIngestArtifactsArtifact
+
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// IngestArtifactsResponse is returned by IngestArtifacts on success.
+type IngestArtifactsResponse struct {
+	// Bulk ingests new artifacts and returns a list of them.
+	IngestArtifacts []IngestArtifactsIngestArtifactsArtifact `json:"ingestArtifacts"`
+}
+
+// GetIngestArtifacts returns IngestArtifactsResponse.IngestArtifacts, and is useful for accessing the field via an interface.
+func (v *IngestArtifactsResponse) GetIngestArtifacts() []IngestArtifactsIngestArtifactsArtifact {
+	return v.IngestArtifacts
+}
+
+// IngestBuilderIngestBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
+//
+// Currently builders are identified by the uri field.
+type IngestBuilderIngestBuilder struct {
+	Uri string `json:"uri"`
+}
+
+// GetUri returns IngestBuilderIngestBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *IngestBuilderIngestBuilder) GetUri() string { return v.Uri }
+
+// IngestBuilderResponse is returned by IngestBuilder on success.
+type IngestBuilderResponse struct {
+	// Ingests a new builder and returns it.
+	IngestBuilder IngestBuilderIngestBuilder `json:"ingestBuilder"`
+}
+
+// GetIngestBuilder returns IngestBuilderResponse.IngestBuilder, and is useful for accessing the field via an interface.
+func (v *IngestBuilderResponse) GetIngestBuilder() IngestBuilderIngestBuilder { return v.IngestBuilder }
+
+// IngestCVEIngestCVE includes the requested fields of the GraphQL type CVE.
+// The GraphQL type's documentation follows.
+//
+// CVE represents a vulnerability in the Common Vulnerabilities and Exposures
+// schema.
+//
+// The vulnerability identifier contains a year field, so we are extracting that
+// to allow matching for vulnerabilities found in a given year.
+//
+// The vulnerability identifier field is mandatory and canonicalized to be
+// lowercase.
+//
+// This node can be referred to by other parts of GUAC.
+type IngestCVEIngestCVE struct {
+	AllCveTree `json:"-"`
+}
+
+// GetId returns IngestCVEIngestCVE.Id, and is useful for accessing the field via an interface.
+func (v *IngestCVEIngestCVE) GetId() string { return v.AllCveTree.Id }
+
+// GetYear returns IngestCVEIngestCVE.Year, and is useful for accessing the field via an interface.
+func (v *IngestCVEIngestCVE) GetYear() int { return v.AllCveTree.Year }
+
+// GetCveId returns IngestCVEIngestCVE.CveId, and is useful for accessing the field via an interface.
+func (v *IngestCVEIngestCVE) GetCveId() string { return v.AllCveTree.CveId }
+
+func (v *IngestCVEIngestCVE) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestCVEIngestCVE
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestCVEIngestCVE = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCveTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestCVEIngestCVE struct {
+	Id string `json:"id"`
+
+	Year int `json:"year"`
+
+	CveId string `json:"cveId"`
+}
+
+func (v *IngestCVEIngestCVE) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestCVEIngestCVE) __premarshalJSON() (*__premarshalIngestCVEIngestCVE, error) {
+	var retval __premarshalIngestCVEIngestCVE
+
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
+	return &retval, nil
+}
+
+// IngestCVEResponse is returned by IngestCVE on success.
+type IngestCVEResponse struct {
+	// Ingests new CVE and returns it.
+	IngestCVE IngestCVEIngestCVE `json:"ingestCVE"`
+}
+
+// GetIngestCVE returns IngestCVEResponse.IngestCVE, and is useful for accessing the field via an interface.
+func (v *IngestCVEResponse) GetIngestCVE() IngestCVEIngestCVE { return v.IngestCVE }
+
+// IngestGHSAIngestGHSA includes the requested fields of the GraphQL type GHSA.
+// The GraphQL type's documentation follows.
+//
+// GHSA represents GitHub security advisories.
+//
+// The advisory id field is mandatory and canonicalized to be lowercase.
+//
+// This node can be referred to by other parts of GUAC.
+type IngestGHSAIngestGHSA struct {
+	AllGHSATree `json:"-"`
+}
+
+// GetId returns IngestGHSAIngestGHSA.Id, and is useful for accessing the field via an interface.
+func (v *IngestGHSAIngestGHSA) GetId() string { return v.AllGHSATree.Id }
+
+// GetGhsaId returns IngestGHSAIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
+func (v *IngestGHSAIngestGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
+
+func (v *IngestGHSAIngestGHSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestGHSAIngestGHSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestGHSAIngestGHSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllGHSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestGHSAIngestGHSA struct {
+	Id string `json:"id"`
+
+	GhsaId string `json:"ghsaId"`
+}
+
+func (v *IngestGHSAIngestGHSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestGHSAIngestGHSA) __premarshalJSON() (*__premarshalIngestGHSAIngestGHSA, error) {
+	var retval __premarshalIngestGHSAIngestGHSA
+
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
+	return &retval, nil
+}
+
+// IngestGHSAResponse is returned by IngestGHSA on success.
+type IngestGHSAResponse struct {
+	// Ingests a new GitHub Security Advisory and returns it.
+	IngestGHSA IngestGHSAIngestGHSA `json:"ingestGHSA"`
+}
+
+// GetIngestGHSA returns IngestGHSAResponse.IngestGHSA, and is useful for accessing the field via an interface.
+func (v *IngestGHSAResponse) GetIngestGHSA() IngestGHSAIngestGHSA { return v.IngestGHSA }
+
+// IngestMaterialsIngestMaterialsArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type IngestMaterialsIngestMaterialsArtifact struct {
+	AllArtifactTree `json:"-"`
+}
+
+// GetId returns IngestMaterialsIngestMaterialsArtifact.Id, and is useful for accessing the field via an interface.
+func (v *IngestMaterialsIngestMaterialsArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns IngestMaterialsIngestMaterialsArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *IngestMaterialsIngestMaterialsArtifact) GetAlgorithm() string {
+	return v.AllArtifactTree.Algorithm
+}
+
+// GetDigest returns IngestMaterialsIngestMaterialsArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *IngestMaterialsIngestMaterialsArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *IngestMaterialsIngestMaterialsArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestMaterialsIngestMaterialsArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestMaterialsIngestMaterialsArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestMaterialsIngestMaterialsArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *IngestMaterialsIngestMaterialsArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestMaterialsIngestMaterialsArtifact) __premarshalJSON() (*__premarshalIngestMaterialsIngestMaterialsArtifact, error) {
+	var retval __premarshalIngestMaterialsIngestMaterialsArtifact
+
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// IngestMaterialsResponse is returned by IngestMaterials on success.
+type IngestMaterialsResponse struct {
+	// Helper mutation to ingest multiple artifacts as materials for SLSA.
+	IngestMaterials []IngestMaterialsIngestMaterialsArtifact `json:"ingestMaterials"`
+}
+
+// GetIngestMaterials returns IngestMaterialsResponse.IngestMaterials, and is useful for accessing the field via an interface.
+func (v *IngestMaterialsResponse) GetIngestMaterials() []IngestMaterialsIngestMaterialsArtifact {
+	return v.IngestMaterials
+}
+
+// IngestOSVIngestOSV includes the requested fields of the GraphQL type OSV.
+// The GraphQL type's documentation follows.
+//
+// OSV represents an Open Source Vulnerability.
+//
+// The osvId field is mandatory and canonicalized to be lowercase.
+//
+// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
+// CVE ID).
+//
+// This node can be referred to by other parts of GUAC.
+type IngestOSVIngestOSV struct {
+	AllOSVTree `json:"-"`
+}
+
+// GetId returns IngestOSVIngestOSV.Id, and is useful for accessing the field via an interface.
+func (v *IngestOSVIngestOSV) GetId() string { return v.AllOSVTree.Id }
+
+// GetOsvId returns IngestOSVIngestOSV.OsvId, and is useful for accessing the field via an interface.
+func (v *IngestOSVIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
+
+func (v *IngestOSVIngestOSV) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestOSVIngestOSV
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestOSVIngestOSV = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllOSVTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestOSVIngestOSV struct {
+	Id string `json:"id"`
+
+	OsvId string `json:"osvId"`
+}
+
+func (v *IngestOSVIngestOSV) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestOSVIngestOSV) __premarshalJSON() (*__premarshalIngestOSVIngestOSV, error) {
+	var retval __premarshalIngestOSVIngestOSV
+
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
+	return &retval, nil
+}
+
+// IngestOSVResponse is returned by IngestOSV on success.
+type IngestOSVResponse struct {
+	// Ingests a new OSV vulnerability and returns it.
+	IngestOSV IngestOSVIngestOSV `json:"ingestOSV"`
+}
+
+// GetIngestOSV returns IngestOSVResponse.IngestOSV, and is useful for accessing the field via an interface.
+func (v *IngestOSVResponse) GetIngestOSV() IngestOSVIngestOSV { return v.IngestOSV }
+
+// IngestPackageIngestPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
 //
 // Package represents the root of the package trie/tree.
@@ -5864,32 +5265,32 @@ func (v *HashEqualResponse) GetIngestHashEqual() HashEqualIngestHashEqual { retu
 //
 // Since this node is at the root of the package trie, it is named Package, not
 // PackageType.
-type IsDependencyDependentPkgPackage struct {
+type IngestPackageIngestPackage struct {
 	AllPkgTree `json:"-"`
 }
 
-// GetId returns IsDependencyDependentPkgPackage.Id, and is useful for accessing the field via an interface.
-func (v *IsDependencyDependentPkgPackage) GetId() string { return v.AllPkgTree.Id }
+// GetId returns IngestPackageIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *IngestPackageIngestPackage) GetId() string { return v.AllPkgTree.Id }
 
-// GetType returns IsDependencyDependentPkgPackage.Type, and is useful for accessing the field via an interface.
-func (v *IsDependencyDependentPkgPackage) GetType() string { return v.AllPkgTree.Type }
+// GetType returns IngestPackageIngestPackage.Type, and is useful for accessing the field via an interface.
+func (v *IngestPackageIngestPackage) GetType() string { return v.AllPkgTree.Type }
 
-// GetNamespaces returns IsDependencyDependentPkgPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *IsDependencyDependentPkgPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+// GetNamespaces returns IngestPackageIngestPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *IngestPackageIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
 	return v.AllPkgTree.Namespaces
 }
 
-func (v *IsDependencyDependentPkgPackage) UnmarshalJSON(b []byte) error {
+func (v *IngestPackageIngestPackage) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
 		return nil
 	}
 
 	var firstPass struct {
-		*IsDependencyDependentPkgPackage
+		*IngestPackageIngestPackage
 		graphql.NoUnmarshalJSON
 	}
-	firstPass.IsDependencyDependentPkgPackage = v
+	firstPass.IngestPackageIngestPackage = v
 
 	err := json.Unmarshal(b, &firstPass)
 	if err != nil {
@@ -5904,7 +5305,7 @@ func (v *IsDependencyDependentPkgPackage) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type __premarshalIsDependencyDependentPkgPackage struct {
+type __premarshalIngestPackageIngestPackage struct {
 	Id string `json:"id"`
 
 	Type string `json:"type"`
@@ -5912,7 +5313,7 @@ type __premarshalIsDependencyDependentPkgPackage struct {
 	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
 }
 
-func (v *IsDependencyDependentPkgPackage) MarshalJSON() ([]byte, error) {
+func (v *IngestPackageIngestPackage) MarshalJSON() ([]byte, error) {
 	premarshaled, err := v.__premarshalJSON()
 	if err != nil {
 		return nil, err
@@ -5920,13 +5321,327 @@ func (v *IsDependencyDependentPkgPackage) MarshalJSON() ([]byte, error) {
 	return json.Marshal(premarshaled)
 }
 
-func (v *IsDependencyDependentPkgPackage) __premarshalJSON() (*__premarshalIsDependencyDependentPkgPackage, error) {
-	var retval __premarshalIsDependencyDependentPkgPackage
+func (v *IngestPackageIngestPackage) __premarshalJSON() (*__premarshalIngestPackageIngestPackage, error) {
+	var retval __premarshalIngestPackageIngestPackage
 
 	retval.Id = v.AllPkgTree.Id
 	retval.Type = v.AllPkgTree.Type
 	retval.Namespaces = v.AllPkgTree.Namespaces
 	return &retval, nil
+}
+
+// IngestPackageResponse is returned by IngestPackage on success.
+type IngestPackageResponse struct {
+	// Ingests a new package and returns the corresponding package trie path.
+	IngestPackage IngestPackageIngestPackage `json:"ingestPackage"`
+}
+
+// GetIngestPackage returns IngestPackageResponse.IngestPackage, and is useful for accessing the field via an interface.
+func (v *IngestPackageResponse) GetIngestPackage() IngestPackageIngestPackage { return v.IngestPackage }
+
+// IngestPackagesIngestPackagesPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type IngestPackagesIngestPackagesPackage struct {
+	AllPkgTree `json:"-"`
+}
+
+// GetId returns IngestPackagesIngestPackagesPackage.Id, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns IngestPackagesIngestPackagesPackage.Type, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns IngestPackagesIngestPackagesPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *IngestPackagesIngestPackagesPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestPackagesIngestPackagesPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestPackagesIngestPackagesPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestPackagesIngestPackagesPackage struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *IngestPackagesIngestPackagesPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestPackagesIngestPackagesPackage) __premarshalJSON() (*__premarshalIngestPackagesIngestPackagesPackage, error) {
+	var retval __premarshalIngestPackagesIngestPackagesPackage
+
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// IngestPackagesResponse is returned by IngestPackages on success.
+type IngestPackagesResponse struct {
+	// Bulk ingests packages and returns the list of corresponding package trie path.
+	IngestPackages []IngestPackagesIngestPackagesPackage `json:"ingestPackages"`
+}
+
+// GetIngestPackages returns IngestPackagesResponse.IngestPackages, and is useful for accessing the field via an interface.
+func (v *IngestPackagesResponse) GetIngestPackages() []IngestPackagesIngestPackagesPackage {
+	return v.IngestPackages
+}
+
+// IngestSourceIngestSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type IngestSourceIngestSource struct {
+	AllSourceTree `json:"-"`
+}
+
+// GetId returns IngestSourceIngestSource.Id, and is useful for accessing the field via an interface.
+func (v *IngestSourceIngestSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns IngestSourceIngestSource.Type, and is useful for accessing the field via an interface.
+func (v *IngestSourceIngestSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns IngestSourceIngestSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *IngestSourceIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *IngestSourceIngestSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestSourceIngestSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestSourceIngestSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestSourceIngestSource struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *IngestSourceIngestSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestSourceIngestSource) __premarshalJSON() (*__premarshalIngestSourceIngestSource, error) {
+	var retval __premarshalIngestSourceIngestSource
+
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
+// IngestSourceResponse is returned by IngestSource on success.
+type IngestSourceResponse struct {
+	// Ingests a new source and returns the corresponding source trie path.
+	IngestSource IngestSourceIngestSource `json:"ingestSource"`
+}
+
+// GetIngestSource returns IngestSourceResponse.IngestSource, and is useful for accessing the field via an interface.
+func (v *IngestSourceResponse) GetIngestSource() IngestSourceIngestSource { return v.IngestSource }
+
+// IsDependenciesIngestDependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
+// The GraphQL type's documentation follows.
+//
+// IsDependency is an attestation to record that a package depends on another.
+type IsDependenciesIngestDependenciesIsDependency struct {
+	allIsDependencyTree `json:"-"`
+}
+
+// GetId returns IsDependenciesIngestDependenciesIsDependency.Id, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetId() string {
+	return v.allIsDependencyTree.Id
+}
+
+// GetJustification returns IsDependenciesIngestDependenciesIsDependency.Justification, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetJustification() string {
+	return v.allIsDependencyTree.Justification
+}
+
+// GetPackage returns IsDependenciesIngestDependenciesIsDependency.Package, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetPackage() allIsDependencyTreePackage {
+	return v.allIsDependencyTree.Package
+}
+
+// GetDependentPackage returns IsDependenciesIngestDependenciesIsDependency.DependentPackage, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetDependentPackage() allIsDependencyTreeDependentPackage {
+	return v.allIsDependencyTree.DependentPackage
+}
+
+// GetDependencyType returns IsDependenciesIngestDependenciesIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetDependencyType() DependencyType {
+	return v.allIsDependencyTree.DependencyType
+}
+
+// GetVersionRange returns IsDependenciesIngestDependenciesIsDependency.VersionRange, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetVersionRange() string {
+	return v.allIsDependencyTree.VersionRange
+}
+
+// GetOrigin returns IsDependenciesIngestDependenciesIsDependency.Origin, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetOrigin() string {
+	return v.allIsDependencyTree.Origin
+}
+
+// GetCollector returns IsDependenciesIngestDependenciesIsDependency.Collector, and is useful for accessing the field via an interface.
+func (v *IsDependenciesIngestDependenciesIsDependency) GetCollector() string {
+	return v.allIsDependencyTree.Collector
+}
+
+func (v *IsDependenciesIngestDependenciesIsDependency) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsDependenciesIngestDependenciesIsDependency
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsDependenciesIngestDependenciesIsDependency = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allIsDependencyTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsDependenciesIngestDependenciesIsDependency struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Package allIsDependencyTreePackage `json:"package"`
+
+	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
+
+	DependencyType DependencyType `json:"dependencyType"`
+
+	VersionRange string `json:"versionRange"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *IsDependenciesIngestDependenciesIsDependency) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsDependenciesIngestDependenciesIsDependency) __premarshalJSON() (*__premarshalIsDependenciesIngestDependenciesIsDependency, error) {
+	var retval __premarshalIsDependenciesIngestDependenciesIsDependency
+
+	retval.Id = v.allIsDependencyTree.Id
+	retval.Justification = v.allIsDependencyTree.Justification
+	retval.Package = v.allIsDependencyTree.Package
+	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
+	retval.DependencyType = v.allIsDependencyTree.DependencyType
+	retval.VersionRange = v.allIsDependencyTree.VersionRange
+	retval.Origin = v.allIsDependencyTree.Origin
+	retval.Collector = v.allIsDependencyTree.Collector
+	return &retval, nil
+}
+
+// IsDependenciesResponse is returned by IsDependencies on success.
+type IsDependenciesResponse struct {
+	// Bulk adds a dependency between two packages
+	IngestDependencies []IsDependenciesIngestDependenciesIsDependency `json:"ingestDependencies"`
+}
+
+// GetIngestDependencies returns IsDependenciesResponse.IngestDependencies, and is useful for accessing the field via an interface.
+func (v *IsDependenciesResponse) GetIngestDependencies() []IsDependenciesIngestDependenciesIsDependency {
+	return v.IngestDependencies
 }
 
 // IsDependencyIngestDependencyIsDependency includes the requested fields of the GraphQL type IsDependency.
@@ -6064,104 +5779,10 @@ func (v *IsDependencyInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns IsDependencyInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *IsDependencyInputSpec) GetCollector() string { return v.Collector }
 
-// IsDependencyPkgPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type IsDependencyPkgPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns IsDependencyPkgPackage.Id, and is useful for accessing the field via an interface.
-func (v *IsDependencyPkgPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns IsDependencyPkgPackage.Type, and is useful for accessing the field via an interface.
-func (v *IsDependencyPkgPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns IsDependencyPkgPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *IsDependencyPkgPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *IsDependencyPkgPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IsDependencyPkgPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IsDependencyPkgPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIsDependencyPkgPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *IsDependencyPkgPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IsDependencyPkgPackage) __premarshalJSON() (*__premarshalIsDependencyPkgPackage, error) {
-	var retval __premarshalIsDependencyPkgPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
 // IsDependencyResponse is returned by IsDependency on success.
 type IsDependencyResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	Pkg IsDependencyPkgPackage `json:"pkg"`
-	// Ingests a new package and returns the corresponding package trie path.
-	DependentPkg IsDependencyDependentPkgPackage `json:"dependentPkg"`
 	// Adds a dependency between two packages
 	IngestDependency IsDependencyIngestDependencyIsDependency `json:"ingestDependency"`
-}
-
-// GetPkg returns IsDependencyResponse.Pkg, and is useful for accessing the field via an interface.
-func (v *IsDependencyResponse) GetPkg() IsDependencyPkgPackage { return v.Pkg }
-
-// GetDependentPkg returns IsDependencyResponse.DependentPkg, and is useful for accessing the field via an interface.
-func (v *IsDependencyResponse) GetDependentPkg() IsDependencyDependentPkgPackage {
-	return v.DependentPkg
 }
 
 // GetIngestDependency returns IsDependencyResponse.IngestDependency, and is useful for accessing the field via an interface.
@@ -6184,79 +5805,6 @@ func (v *IsOccurrenceInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns IsOccurrenceInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *IsOccurrenceInputSpec) GetCollector() string { return v.Collector }
-
-// IsOccurrencePkgIngestArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type IsOccurrencePkgIngestArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns IsOccurrencePkgIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns IsOccurrencePkgIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns IsOccurrencePkgIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *IsOccurrencePkgIngestArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IsOccurrencePkgIngestArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IsOccurrencePkgIngestArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIsOccurrencePkgIngestArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *IsOccurrencePkgIngestArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IsOccurrencePkgIngestArtifact) __premarshalJSON() (*__premarshalIsOccurrencePkgIngestArtifact, error) {
-	var retval __premarshalIsOccurrencePkgIngestArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
 
 // IsOccurrencePkgIngestOccurrenceIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
 // The GraphQL type's documentation follows.
@@ -6368,184 +5916,15 @@ func (v *IsOccurrencePkgIngestOccurrenceIsOccurrence) __premarshalJSON() (*__pre
 	return &retval, nil
 }
 
-// IsOccurrencePkgIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type IsOccurrencePkgIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns IsOccurrencePkgIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns IsOccurrencePkgIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns IsOccurrencePkgIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *IsOccurrencePkgIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IsOccurrencePkgIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IsOccurrencePkgIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIsOccurrencePkgIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *IsOccurrencePkgIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IsOccurrencePkgIngestPackage) __premarshalJSON() (*__premarshalIsOccurrencePkgIngestPackage, error) {
-	var retval __premarshalIsOccurrencePkgIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
 // IsOccurrencePkgResponse is returned by IsOccurrencePkg on success.
 type IsOccurrencePkgResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage IsOccurrencePkgIngestPackage `json:"ingestPackage"`
-	// Ingests a new artifact and returns it.
-	IngestArtifact IsOccurrencePkgIngestArtifact `json:"ingestArtifact"`
 	// Ingest that an artifact is produced from a package or source.
 	IngestOccurrence IsOccurrencePkgIngestOccurrenceIsOccurrence `json:"ingestOccurrence"`
-}
-
-// GetIngestPackage returns IsOccurrencePkgResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgResponse) GetIngestPackage() IsOccurrencePkgIngestPackage {
-	return v.IngestPackage
-}
-
-// GetIngestArtifact returns IsOccurrencePkgResponse.IngestArtifact, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgResponse) GetIngestArtifact() IsOccurrencePkgIngestArtifact {
-	return v.IngestArtifact
 }
 
 // GetIngestOccurrence returns IsOccurrencePkgResponse.IngestOccurrence, and is useful for accessing the field via an interface.
 func (v *IsOccurrencePkgResponse) GetIngestOccurrence() IsOccurrencePkgIngestOccurrenceIsOccurrence {
 	return v.IngestOccurrence
-}
-
-// IsOccurrenceSrcIngestArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type IsOccurrenceSrcIngestArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns IsOccurrenceSrcIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns IsOccurrenceSrcIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns IsOccurrenceSrcIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *IsOccurrenceSrcIngestArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IsOccurrenceSrcIngestArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IsOccurrenceSrcIngestArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIsOccurrenceSrcIngestArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *IsOccurrenceSrcIngestArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IsOccurrenceSrcIngestArtifact) __premarshalJSON() (*__premarshalIsOccurrenceSrcIngestArtifact, error) {
-	var retval __premarshalIsOccurrenceSrcIngestArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
 }
 
 // IsOccurrenceSrcIngestOccurrenceIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
@@ -6658,103 +6037,10 @@ func (v *IsOccurrenceSrcIngestOccurrenceIsOccurrence) __premarshalJSON() (*__pre
 	return &retval, nil
 }
 
-// IsOccurrenceSrcIngestSource includes the requested fields of the GraphQL type Source.
-// The GraphQL type's documentation follows.
-//
-// Source represents the root of the source trie/tree.
-//
-// We map source information to a trie, as a derivative of the pURL specification:
-// each path in the trie represents a type, namespace, name and an optional
-// qualifier that stands for tag/commit information.
-//
-// This node represents the type part of the trie path. It is used to represent
-// the version control system that is being used.
-//
-// Since this node is at the root of the source trie, it is named Source, not
-// SourceType.
-type IsOccurrenceSrcIngestSource struct {
-	AllSourceTree `json:"-"`
-}
-
-// GetId returns IsOccurrenceSrcIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestSource) GetId() string { return v.AllSourceTree.Id }
-
-// GetType returns IsOccurrenceSrcIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestSource) GetType() string { return v.AllSourceTree.Type }
-
-// GetNamespaces returns IsOccurrenceSrcIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
-	return v.AllSourceTree.Namespaces
-}
-
-func (v *IsOccurrenceSrcIngestSource) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IsOccurrenceSrcIngestSource
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IsOccurrenceSrcIngestSource = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllSourceTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIsOccurrenceSrcIngestSource struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
-}
-
-func (v *IsOccurrenceSrcIngestSource) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IsOccurrenceSrcIngestSource) __premarshalJSON() (*__premarshalIsOccurrenceSrcIngestSource, error) {
-	var retval __premarshalIsOccurrenceSrcIngestSource
-
-	retval.Id = v.AllSourceTree.Id
-	retval.Type = v.AllSourceTree.Type
-	retval.Namespaces = v.AllSourceTree.Namespaces
-	return &retval, nil
-}
-
 // IsOccurrenceSrcResponse is returned by IsOccurrenceSrc on success.
 type IsOccurrenceSrcResponse struct {
-	// Ingests a new source and returns the corresponding source trie path.
-	IngestSource IsOccurrenceSrcIngestSource `json:"ingestSource"`
-	// Ingests a new artifact and returns it.
-	IngestArtifact IsOccurrenceSrcIngestArtifact `json:"ingestArtifact"`
 	// Ingest that an artifact is produced from a package or source.
 	IngestOccurrence IsOccurrenceSrcIngestOccurrenceIsOccurrence `json:"ingestOccurrence"`
-}
-
-// GetIngestSource returns IsOccurrenceSrcResponse.IngestSource, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcResponse) GetIngestSource() IsOccurrenceSrcIngestSource {
-	return v.IngestSource
-}
-
-// GetIngestArtifact returns IsOccurrenceSrcResponse.IngestArtifact, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcResponse) GetIngestArtifact() IsOccurrenceSrcIngestArtifact {
-	return v.IngestArtifact
 }
 
 // GetIngestOccurrence returns IsOccurrenceSrcResponse.IngestOccurrence, and is useful for accessing the field via an interface.
@@ -6762,43 +6048,57 @@ func (v *IsOccurrenceSrcResponse) GetIngestOccurrence() IsOccurrenceSrcIngestOcc
 	return v.IngestOccurrence
 }
 
-// IsVulnerabilityCVEIngestCVE includes the requested fields of the GraphQL type CVE.
+// IsOccurrencesPkgIngestOccurrencesIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
 // The GraphQL type's documentation follows.
 //
-// CVE represents a vulnerability in the Common Vulnerabilities and Exposures
-// schema.
+// IsOccurrence is an attestation to link an artifact to a package or source.
 //
-// The vulnerability identifier contains a year field, so we are extracting that
-// to allow matching for vulnerabilities found in a given year.
-//
-// The vulnerability identifier field is mandatory and canonicalized to be
-// lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type IsVulnerabilityCVEIngestCVE struct {
-	AllCveTree `json:"-"`
+// Attestation must occur at the PackageVersion or at the SourceName.
+type IsOccurrencesPkgIngestOccurrencesIsOccurrence struct {
+	AllIsOccurrencesTree `json:"-"`
 }
 
-// GetId returns IsVulnerabilityCVEIngestCVE.Id, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestCVE) GetId() string { return v.AllCveTree.Id }
+// GetId returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetId() string {
+	return v.AllIsOccurrencesTree.Id
+}
 
-// GetYear returns IsVulnerabilityCVEIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestCVE) GetYear() int { return v.AllCveTree.Year }
+// GetSubject returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
+	return v.AllIsOccurrencesTree.Subject
+}
 
-// GetCveId returns IsVulnerabilityCVEIngestCVE.CveId, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestCVE) GetCveId() string { return v.AllCveTree.CveId }
+// GetArtifact returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
+	return v.AllIsOccurrencesTree.Artifact
+}
 
-func (v *IsVulnerabilityCVEIngestCVE) UnmarshalJSON(b []byte) error {
+// GetJustification returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetJustification() string {
+	return v.AllIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetOrigin() string {
+	return v.AllIsOccurrencesTree.Origin
+}
+
+// GetCollector returns IsOccurrencesPkgIngestOccurrencesIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) GetCollector() string {
+	return v.AllIsOccurrencesTree.Collector
+}
+
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
 		return nil
 	}
 
 	var firstPass struct {
-		*IsVulnerabilityCVEIngestCVE
+		*IsOccurrencesPkgIngestOccurrencesIsOccurrence
 		graphql.NoUnmarshalJSON
 	}
-	firstPass.IsVulnerabilityCVEIngestCVE = v
+	firstPass.IsOccurrencesPkgIngestOccurrencesIsOccurrence = v
 
 	err := json.Unmarshal(b, &firstPass)
 	if err != nil {
@@ -6806,22 +6106,28 @@ func (v *IsVulnerabilityCVEIngestCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllCveTree)
+		b, &v.AllIsOccurrencesTree)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type __premarshalIsVulnerabilityCVEIngestCVE struct {
+type __premarshalIsOccurrencesPkgIngestOccurrencesIsOccurrence struct {
 	Id string `json:"id"`
 
-	Year int `json:"year"`
+	Subject json.RawMessage `json:"subject"`
 
-	CveId string `json:"cveId"`
+	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
 }
 
-func (v *IsVulnerabilityCVEIngestCVE) MarshalJSON() ([]byte, error) {
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) MarshalJSON() ([]byte, error) {
 	premarshaled, err := v.__premarshalJSON()
 	if err != nil {
 		return nil, err
@@ -6829,13 +6135,159 @@ func (v *IsVulnerabilityCVEIngestCVE) MarshalJSON() ([]byte, error) {
 	return json.Marshal(premarshaled)
 }
 
-func (v *IsVulnerabilityCVEIngestCVE) __premarshalJSON() (*__premarshalIsVulnerabilityCVEIngestCVE, error) {
-	var retval __premarshalIsVulnerabilityCVEIngestCVE
+func (v *IsOccurrencesPkgIngestOccurrencesIsOccurrence) __premarshalJSON() (*__premarshalIsOccurrencesPkgIngestOccurrencesIsOccurrence, error) {
+	var retval __premarshalIsOccurrencesPkgIngestOccurrencesIsOccurrence
 
-	retval.Id = v.AllCveTree.Id
-	retval.Year = v.AllCveTree.Year
-	retval.CveId = v.AllCveTree.CveId
+	retval.Id = v.AllIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal IsOccurrencesPkgIngestOccurrencesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.AllIsOccurrencesTree.Artifact
+	retval.Justification = v.AllIsOccurrencesTree.Justification
+	retval.Origin = v.AllIsOccurrencesTree.Origin
+	retval.Collector = v.AllIsOccurrencesTree.Collector
 	return &retval, nil
+}
+
+// IsOccurrencesPkgResponse is returned by IsOccurrencesPkg on success.
+type IsOccurrencesPkgResponse struct {
+	// Bulk ingest that an artifact is produced from a package or source.
+	IngestOccurrences []IsOccurrencesPkgIngestOccurrencesIsOccurrence `json:"ingestOccurrences"`
+}
+
+// GetIngestOccurrences returns IsOccurrencesPkgResponse.IngestOccurrences, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesPkgResponse) GetIngestOccurrences() []IsOccurrencesPkgIngestOccurrencesIsOccurrence {
+	return v.IngestOccurrences
+}
+
+// IsOccurrencesSrcIngestOccurrencesIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrence is an attestation to link an artifact to a package or source.
+//
+// Attestation must occur at the PackageVersion or at the SourceName.
+type IsOccurrencesSrcIngestOccurrencesIsOccurrence struct {
+	AllIsOccurrencesTree `json:"-"`
+}
+
+// GetId returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetId() string {
+	return v.AllIsOccurrencesTree.Id
+}
+
+// GetSubject returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
+	return v.AllIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
+	return v.AllIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetJustification() string {
+	return v.AllIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetOrigin() string {
+	return v.AllIsOccurrencesTree.Origin
+}
+
+// GetCollector returns IsOccurrencesSrcIngestOccurrencesIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) GetCollector() string {
+	return v.AllIsOccurrencesTree.Collector
+}
+
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsOccurrencesSrcIngestOccurrencesIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsOccurrencesSrcIngestOccurrencesIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsOccurrencesSrcIngestOccurrencesIsOccurrence struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsOccurrencesSrcIngestOccurrencesIsOccurrence) __premarshalJSON() (*__premarshalIsOccurrencesSrcIngestOccurrencesIsOccurrence, error) {
+	var retval __premarshalIsOccurrencesSrcIngestOccurrencesIsOccurrence
+
+	retval.Id = v.AllIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal IsOccurrencesSrcIngestOccurrencesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.AllIsOccurrencesTree.Artifact
+	retval.Justification = v.AllIsOccurrencesTree.Justification
+	retval.Origin = v.AllIsOccurrencesTree.Origin
+	retval.Collector = v.AllIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// IsOccurrencesSrcResponse is returned by IsOccurrencesSrc on success.
+type IsOccurrencesSrcResponse struct {
+	// Bulk ingest that an artifact is produced from a package or source.
+	IngestOccurrences []IsOccurrencesSrcIngestOccurrencesIsOccurrence `json:"ingestOccurrences"`
+}
+
+// GetIngestOccurrences returns IsOccurrencesSrcResponse.IngestOccurrences, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesSrcResponse) GetIngestOccurrences() []IsOccurrencesSrcIngestOccurrencesIsOccurrence {
+	return v.IngestOccurrences
 }
 
 // IsVulnerabilityCVEIngestIsVulnerability includes the requested fields of the GraphQL type IsVulnerability.
@@ -6944,158 +6396,15 @@ func (v *IsVulnerabilityCVEIngestIsVulnerability) __premarshalJSON() (*__premars
 	return &retval, nil
 }
 
-// IsVulnerabilityCVEIngestOSV includes the requested fields of the GraphQL type OSV.
-// The GraphQL type's documentation follows.
-//
-// OSV represents an Open Source Vulnerability.
-//
-// The osvId field is mandatory and canonicalized to be lowercase.
-//
-// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
-// CVE ID).
-//
-// This node can be referred to by other parts of GUAC.
-type IsVulnerabilityCVEIngestOSV struct {
-	AllOSVTree `json:"-"`
-}
-
-// GetId returns IsVulnerabilityCVEIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestOSV) GetId() string { return v.AllOSVTree.Id }
-
-// GetOsvId returns IsVulnerabilityCVEIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
-
-func (v *IsVulnerabilityCVEIngestOSV) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IsVulnerabilityCVEIngestOSV
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IsVulnerabilityCVEIngestOSV = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllOSVTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIsVulnerabilityCVEIngestOSV struct {
-	Id string `json:"id"`
-
-	OsvId string `json:"osvId"`
-}
-
-func (v *IsVulnerabilityCVEIngestOSV) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IsVulnerabilityCVEIngestOSV) __premarshalJSON() (*__premarshalIsVulnerabilityCVEIngestOSV, error) {
-	var retval __premarshalIsVulnerabilityCVEIngestOSV
-
-	retval.Id = v.AllOSVTree.Id
-	retval.OsvId = v.AllOSVTree.OsvId
-	return &retval, nil
-}
-
 // IsVulnerabilityCVEResponse is returned by IsVulnerabilityCVE on success.
 type IsVulnerabilityCVEResponse struct {
-	// Ingests a new OSV vulnerability and returns it.
-	IngestOSV IsVulnerabilityCVEIngestOSV `json:"ingestOSV"`
-	// Ingests new CVE and returns it.
-	IngestCVE IsVulnerabilityCVEIngestCVE `json:"ingestCVE"`
 	// Ingest a mapping between an OSV entry and a CVE/GHSA vulnerability.
 	IngestIsVulnerability IsVulnerabilityCVEIngestIsVulnerability `json:"ingestIsVulnerability"`
 }
 
-// GetIngestOSV returns IsVulnerabilityCVEResponse.IngestOSV, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEResponse) GetIngestOSV() IsVulnerabilityCVEIngestOSV { return v.IngestOSV }
-
-// GetIngestCVE returns IsVulnerabilityCVEResponse.IngestCVE, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEResponse) GetIngestCVE() IsVulnerabilityCVEIngestCVE { return v.IngestCVE }
-
 // GetIngestIsVulnerability returns IsVulnerabilityCVEResponse.IngestIsVulnerability, and is useful for accessing the field via an interface.
 func (v *IsVulnerabilityCVEResponse) GetIngestIsVulnerability() IsVulnerabilityCVEIngestIsVulnerability {
 	return v.IngestIsVulnerability
-}
-
-// IsVulnerabilityGHSAIngestGHSA includes the requested fields of the GraphQL type GHSA.
-// The GraphQL type's documentation follows.
-//
-// GHSA represents GitHub security advisories.
-//
-// The advisory id field is mandatory and canonicalized to be lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type IsVulnerabilityGHSAIngestGHSA struct {
-	AllGHSATree `json:"-"`
-}
-
-// GetId returns IsVulnerabilityGHSAIngestGHSA.Id, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAIngestGHSA) GetId() string { return v.AllGHSATree.Id }
-
-// GetGhsaId returns IsVulnerabilityGHSAIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAIngestGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
-
-func (v *IsVulnerabilityGHSAIngestGHSA) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IsVulnerabilityGHSAIngestGHSA
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IsVulnerabilityGHSAIngestGHSA = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllGHSATree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIsVulnerabilityGHSAIngestGHSA struct {
-	Id string `json:"id"`
-
-	GhsaId string `json:"ghsaId"`
-}
-
-func (v *IsVulnerabilityGHSAIngestGHSA) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IsVulnerabilityGHSAIngestGHSA) __premarshalJSON() (*__premarshalIsVulnerabilityGHSAIngestGHSA, error) {
-	var retval __premarshalIsVulnerabilityGHSAIngestGHSA
-
-	retval.Id = v.AllGHSATree.Id
-	retval.GhsaId = v.AllGHSATree.GhsaId
-	return &retval, nil
 }
 
 // IsVulnerabilityGHSAIngestIsVulnerability includes the requested fields of the GraphQL type IsVulnerability.
@@ -7204,90 +6513,10 @@ func (v *IsVulnerabilityGHSAIngestIsVulnerability) __premarshalJSON() (*__premar
 	return &retval, nil
 }
 
-// IsVulnerabilityGHSAIngestOSV includes the requested fields of the GraphQL type OSV.
-// The GraphQL type's documentation follows.
-//
-// OSV represents an Open Source Vulnerability.
-//
-// The osvId field is mandatory and canonicalized to be lowercase.
-//
-// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
-// CVE ID).
-//
-// This node can be referred to by other parts of GUAC.
-type IsVulnerabilityGHSAIngestOSV struct {
-	AllOSVTree `json:"-"`
-}
-
-// GetId returns IsVulnerabilityGHSAIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAIngestOSV) GetId() string { return v.AllOSVTree.Id }
-
-// GetOsvId returns IsVulnerabilityGHSAIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
-
-func (v *IsVulnerabilityGHSAIngestOSV) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IsVulnerabilityGHSAIngestOSV
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IsVulnerabilityGHSAIngestOSV = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllOSVTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIsVulnerabilityGHSAIngestOSV struct {
-	Id string `json:"id"`
-
-	OsvId string `json:"osvId"`
-}
-
-func (v *IsVulnerabilityGHSAIngestOSV) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IsVulnerabilityGHSAIngestOSV) __premarshalJSON() (*__premarshalIsVulnerabilityGHSAIngestOSV, error) {
-	var retval __premarshalIsVulnerabilityGHSAIngestOSV
-
-	retval.Id = v.AllOSVTree.Id
-	retval.OsvId = v.AllOSVTree.OsvId
-	return &retval, nil
-}
-
 // IsVulnerabilityGHSAResponse is returned by IsVulnerabilityGHSA on success.
 type IsVulnerabilityGHSAResponse struct {
-	// Ingests a new OSV vulnerability and returns it.
-	IngestOSV IsVulnerabilityGHSAIngestOSV `json:"ingestOSV"`
-	// Ingests a new GitHub Security Advisory and returns it.
-	IngestGHSA IsVulnerabilityGHSAIngestGHSA `json:"ingestGHSA"`
 	// Ingest a mapping between an OSV entry and a CVE/GHSA vulnerability.
 	IngestIsVulnerability IsVulnerabilityGHSAIngestIsVulnerability `json:"ingestIsVulnerability"`
-}
-
-// GetIngestOSV returns IsVulnerabilityGHSAResponse.IngestOSV, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAResponse) GetIngestOSV() IsVulnerabilityGHSAIngestOSV { return v.IngestOSV }
-
-// GetIngestGHSA returns IsVulnerabilityGHSAResponse.IngestGHSA, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAResponse) GetIngestGHSA() IsVulnerabilityGHSAIngestGHSA {
-	return v.IngestGHSA
 }
 
 // GetIngestIsVulnerability returns IsVulnerabilityGHSAResponse.IngestIsVulnerability, and is useful for accessing the field via an interface.
@@ -17588,167 +16817,6 @@ func (v *PkgSpec) GetMatchOnlyEmptyQualifiers() *bool { return v.MatchOnlyEmptyQ
 // GetSubpath returns PkgSpec.Subpath, and is useful for accessing the field via an interface.
 func (v *PkgSpec) GetSubpath() *string { return v.Subpath }
 
-// SLSAForArtifactIngestArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type SLSAForArtifactIngestArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns SLSAForArtifactIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns SLSAForArtifactIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns SLSAForArtifactIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *SLSAForArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*SLSAForArtifactIngestArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.SLSAForArtifactIngestArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalSLSAForArtifactIngestArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *SLSAForArtifactIngestArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *SLSAForArtifactIngestArtifact) __premarshalJSON() (*__premarshalSLSAForArtifactIngestArtifact, error) {
-	var retval __premarshalSLSAForArtifactIngestArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
-
-// SLSAForArtifactIngestBuilder includes the requested fields of the GraphQL type Builder.
-// The GraphQL type's documentation follows.
-//
-// Builder represents the builder (e.g., FRSCA or GitHub Actions).
-//
-// Currently builders are identified by the uri field.
-type SLSAForArtifactIngestBuilder struct {
-	Uri string `json:"uri"`
-}
-
-// GetUri returns SLSAForArtifactIngestBuilder.Uri, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestBuilder) GetUri() string { return v.Uri }
-
-// SLSAForArtifactIngestMaterialsArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type SLSAForArtifactIngestMaterialsArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns SLSAForArtifactIngestMaterialsArtifact.Id, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestMaterialsArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns SLSAForArtifactIngestMaterialsArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestMaterialsArtifact) GetAlgorithm() string {
-	return v.AllArtifactTree.Algorithm
-}
-
-// GetDigest returns SLSAForArtifactIngestMaterialsArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestMaterialsArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *SLSAForArtifactIngestMaterialsArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*SLSAForArtifactIngestMaterialsArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.SLSAForArtifactIngestMaterialsArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalSLSAForArtifactIngestMaterialsArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *SLSAForArtifactIngestMaterialsArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *SLSAForArtifactIngestMaterialsArtifact) __premarshalJSON() (*__premarshalSLSAForArtifactIngestMaterialsArtifact, error) {
-	var retval __premarshalSLSAForArtifactIngestMaterialsArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
-
 // SLSAForArtifactIngestSLSAHasSLSA includes the requested fields of the GraphQL type HasSLSA.
 // The GraphQL type's documentation follows.
 //
@@ -17820,29 +16888,8 @@ func (v *SLSAForArtifactIngestSLSAHasSLSA) __premarshalJSON() (*__premarshalSLSA
 
 // SLSAForArtifactResponse is returned by SLSAForArtifact on success.
 type SLSAForArtifactResponse struct {
-	// Ingests a new artifact and returns it.
-	IngestArtifact SLSAForArtifactIngestArtifact `json:"ingestArtifact"`
-	// Helper mutation to ingest multiple artifacts as materials for SLSA.
-	IngestMaterials []SLSAForArtifactIngestMaterialsArtifact `json:"ingestMaterials"`
-	// Ingests a new builder and returns it.
-	IngestBuilder SLSAForArtifactIngestBuilder `json:"ingestBuilder"`
 	// Ingests a SLSA attestation.
 	IngestSLSA SLSAForArtifactIngestSLSAHasSLSA `json:"ingestSLSA"`
-}
-
-// GetIngestArtifact returns SLSAForArtifactResponse.IngestArtifact, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactResponse) GetIngestArtifact() SLSAForArtifactIngestArtifact {
-	return v.IngestArtifact
-}
-
-// GetIngestMaterials returns SLSAForArtifactResponse.IngestMaterials, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactResponse) GetIngestMaterials() []SLSAForArtifactIngestMaterialsArtifact {
-	return v.IngestMaterials
-}
-
-// GetIngestBuilder returns SLSAForArtifactResponse.IngestBuilder, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactResponse) GetIngestBuilder() SLSAForArtifactIngestBuilder {
-	return v.IngestBuilder
 }
 
 // GetIngestSLSA returns SLSAForArtifactResponse.IngestSLSA, and is useful for accessing the field via an interface.
@@ -17978,85 +17025,6 @@ func (v *ScorecardCheckInputSpec) GetCheck() string { return v.Check }
 // GetScore returns ScorecardCheckInputSpec.Score, and is useful for accessing the field via an interface.
 func (v *ScorecardCheckInputSpec) GetScore() int { return v.Score }
 
-// ScorecardIngestSource includes the requested fields of the GraphQL type Source.
-// The GraphQL type's documentation follows.
-//
-// Source represents the root of the source trie/tree.
-//
-// We map source information to a trie, as a derivative of the pURL specification:
-// each path in the trie represents a type, namespace, name and an optional
-// qualifier that stands for tag/commit information.
-//
-// This node represents the type part of the trie path. It is used to represent
-// the version control system that is being used.
-//
-// Since this node is at the root of the source trie, it is named Source, not
-// SourceType.
-type ScorecardIngestSource struct {
-	AllSourceTree `json:"-"`
-}
-
-// GetId returns ScorecardIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *ScorecardIngestSource) GetId() string { return v.AllSourceTree.Id }
-
-// GetType returns ScorecardIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *ScorecardIngestSource) GetType() string { return v.AllSourceTree.Type }
-
-// GetNamespaces returns ScorecardIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *ScorecardIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
-	return v.AllSourceTree.Namespaces
-}
-
-func (v *ScorecardIngestSource) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*ScorecardIngestSource
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.ScorecardIngestSource = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllSourceTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalScorecardIngestSource struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
-}
-
-func (v *ScorecardIngestSource) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *ScorecardIngestSource) __premarshalJSON() (*__premarshalScorecardIngestSource, error) {
-	var retval __premarshalScorecardIngestSource
-
-	retval.Id = v.AllSourceTree.Id
-	retval.Type = v.AllSourceTree.Type
-	retval.Namespaces = v.AllSourceTree.Namespaces
-	return &retval, nil
-}
-
 // ScorecardInputSpec represents the mutation input to ingest a Scorecard.
 type ScorecardInputSpec struct {
 	Checks           []ScorecardCheckInputSpec `json:"checks"`
@@ -18091,14 +17059,9 @@ func (v *ScorecardInputSpec) GetCollector() string { return v.Collector }
 
 // ScorecardResponse is returned by Scorecard on success.
 type ScorecardResponse struct {
-	// Ingests a new source and returns the corresponding source trie path.
-	IngestSource ScorecardIngestSource `json:"ingestSource"`
 	// Adds a certification that a source repository has a Scorecard.
 	CertifyScorecard ScorecardCertifyScorecard `json:"certifyScorecard"`
 }
-
-// GetIngestSource returns ScorecardResponse.IngestSource, and is useful for accessing the field via an interface.
-func (v *ScorecardResponse) GetIngestSource() ScorecardIngestSource { return v.IngestSource }
 
 // GetCertifyScorecard returns ScorecardResponse.CertifyScorecard, and is useful for accessing the field via an interface.
 func (v *ScorecardResponse) GetCertifyScorecard() ScorecardCertifyScorecard {
@@ -18259,153 +17222,6 @@ func (v *SourcesSourcesSource) __premarshalJSON() (*__premarshalSourcesSourcesSo
 	return &retval, nil
 }
 
-// VEXPackageAndGhsaIngestGHSA includes the requested fields of the GraphQL type GHSA.
-// The GraphQL type's documentation follows.
-//
-// GHSA represents GitHub security advisories.
-//
-// The advisory id field is mandatory and canonicalized to be lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type VEXPackageAndGhsaIngestGHSA struct {
-	AllGHSATree `json:"-"`
-}
-
-// GetId returns VEXPackageAndGhsaIngestGHSA.Id, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestGHSA) GetId() string { return v.AllGHSATree.Id }
-
-// GetGhsaId returns VEXPackageAndGhsaIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
-
-func (v *VEXPackageAndGhsaIngestGHSA) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VEXPackageAndGhsaIngestGHSA
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VEXPackageAndGhsaIngestGHSA = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllGHSATree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVEXPackageAndGhsaIngestGHSA struct {
-	Id string `json:"id"`
-
-	GhsaId string `json:"ghsaId"`
-}
-
-func (v *VEXPackageAndGhsaIngestGHSA) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VEXPackageAndGhsaIngestGHSA) __premarshalJSON() (*__premarshalVEXPackageAndGhsaIngestGHSA, error) {
-	var retval __premarshalVEXPackageAndGhsaIngestGHSA
-
-	retval.Id = v.AllGHSATree.Id
-	retval.GhsaId = v.AllGHSATree.GhsaId
-	return &retval, nil
-}
-
-// VEXPackageAndGhsaIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type VEXPackageAndGhsaIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns VEXPackageAndGhsaIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns VEXPackageAndGhsaIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns VEXPackageAndGhsaIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *VEXPackageAndGhsaIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VEXPackageAndGhsaIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VEXPackageAndGhsaIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVEXPackageAndGhsaIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *VEXPackageAndGhsaIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VEXPackageAndGhsaIngestPackage) __premarshalJSON() (*__premarshalVEXPackageAndGhsaIngestPackage, error) {
-	var retval __premarshalVEXPackageAndGhsaIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
 // VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
@@ -18560,174 +17376,13 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 
 // VEXPackageAndGhsaResponse is returned by VEXPackageAndGhsa on success.
 type VEXPackageAndGhsaResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage VEXPackageAndGhsaIngestPackage `json:"ingestPackage"`
-	// Ingests a new GitHub Security Advisory and returns it.
-	IngestGHSA VEXPackageAndGhsaIngestGHSA `json:"ingestGHSA"`
 	// Adds a VEX certification for a package.
 	IngestVEXStatement VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
 
-// GetIngestPackage returns VEXPackageAndGhsaResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaResponse) GetIngestPackage() VEXPackageAndGhsaIngestPackage {
-	return v.IngestPackage
-}
-
-// GetIngestGHSA returns VEXPackageAndGhsaResponse.IngestGHSA, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaResponse) GetIngestGHSA() VEXPackageAndGhsaIngestGHSA { return v.IngestGHSA }
-
 // GetIngestVEXStatement returns VEXPackageAndGhsaResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
 func (v *VEXPackageAndGhsaResponse) GetIngestVEXStatement() VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement {
 	return v.IngestVEXStatement
-}
-
-// VexArtifactAndCveIngestArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type VexArtifactAndCveIngestArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns VexArtifactAndCveIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns VexArtifactAndCveIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns VexArtifactAndCveIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *VexArtifactAndCveIngestArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexArtifactAndCveIngestArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexArtifactAndCveIngestArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexArtifactAndCveIngestArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *VexArtifactAndCveIngestArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexArtifactAndCveIngestArtifact) __premarshalJSON() (*__premarshalVexArtifactAndCveIngestArtifact, error) {
-	var retval __premarshalVexArtifactAndCveIngestArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
-
-// VexArtifactAndCveIngestCVE includes the requested fields of the GraphQL type CVE.
-// The GraphQL type's documentation follows.
-//
-// CVE represents a vulnerability in the Common Vulnerabilities and Exposures
-// schema.
-//
-// The vulnerability identifier contains a year field, so we are extracting that
-// to allow matching for vulnerabilities found in a given year.
-//
-// The vulnerability identifier field is mandatory and canonicalized to be
-// lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type VexArtifactAndCveIngestCVE struct {
-	AllCveTree `json:"-"`
-}
-
-// GetId returns VexArtifactAndCveIngestCVE.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestCVE) GetId() string { return v.AllCveTree.Id }
-
-// GetYear returns VexArtifactAndCveIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestCVE) GetYear() int { return v.AllCveTree.Year }
-
-// GetCveId returns VexArtifactAndCveIngestCVE.CveId, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestCVE) GetCveId() string { return v.AllCveTree.CveId }
-
-func (v *VexArtifactAndCveIngestCVE) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexArtifactAndCveIngestCVE
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexArtifactAndCveIngestCVE = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCveTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexArtifactAndCveIngestCVE struct {
-	Id string `json:"id"`
-
-	Year int `json:"year"`
-
-	CveId string `json:"cveId"`
-}
-
-func (v *VexArtifactAndCveIngestCVE) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexArtifactAndCveIngestCVE) __premarshalJSON() (*__premarshalVexArtifactAndCveIngestCVE, error) {
-	var retval __premarshalVexArtifactAndCveIngestCVE
-
-	retval.Id = v.AllCveTree.Id
-	retval.Year = v.AllCveTree.Year
-	retval.CveId = v.AllCveTree.CveId
-	return &retval, nil
 }
 
 // VexArtifactAndCveIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
@@ -18884,163 +17539,13 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 
 // VexArtifactAndCveResponse is returned by VexArtifactAndCve on success.
 type VexArtifactAndCveResponse struct {
-	// Ingests a new artifact and returns it.
-	IngestArtifact VexArtifactAndCveIngestArtifact `json:"ingestArtifact"`
-	// Ingests new CVE and returns it.
-	IngestCVE VexArtifactAndCveIngestCVE `json:"ingestCVE"`
 	// Adds a VEX certification for a package.
 	IngestVEXStatement VexArtifactAndCveIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
 
-// GetIngestArtifact returns VexArtifactAndCveResponse.IngestArtifact, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveResponse) GetIngestArtifact() VexArtifactAndCveIngestArtifact {
-	return v.IngestArtifact
-}
-
-// GetIngestCVE returns VexArtifactAndCveResponse.IngestCVE, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveResponse) GetIngestCVE() VexArtifactAndCveIngestCVE { return v.IngestCVE }
-
 // GetIngestVEXStatement returns VexArtifactAndCveResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
 func (v *VexArtifactAndCveResponse) GetIngestVEXStatement() VexArtifactAndCveIngestVEXStatementCertifyVEXStatement {
 	return v.IngestVEXStatement
-}
-
-// VexArtifactAndGhsaIngestArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type VexArtifactAndGhsaIngestArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns VexArtifactAndGhsaIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns VexArtifactAndGhsaIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns VexArtifactAndGhsaIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *VexArtifactAndGhsaIngestArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexArtifactAndGhsaIngestArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexArtifactAndGhsaIngestArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexArtifactAndGhsaIngestArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *VexArtifactAndGhsaIngestArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexArtifactAndGhsaIngestArtifact) __premarshalJSON() (*__premarshalVexArtifactAndGhsaIngestArtifact, error) {
-	var retval __premarshalVexArtifactAndGhsaIngestArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
-
-// VexArtifactAndGhsaIngestGHSA includes the requested fields of the GraphQL type GHSA.
-// The GraphQL type's documentation follows.
-//
-// GHSA represents GitHub security advisories.
-//
-// The advisory id field is mandatory and canonicalized to be lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type VexArtifactAndGhsaIngestGHSA struct {
-	AllGHSATree `json:"-"`
-}
-
-// GetId returns VexArtifactAndGhsaIngestGHSA.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestGHSA) GetId() string { return v.AllGHSATree.Id }
-
-// GetGhsaId returns VexArtifactAndGhsaIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
-
-func (v *VexArtifactAndGhsaIngestGHSA) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexArtifactAndGhsaIngestGHSA
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexArtifactAndGhsaIngestGHSA = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllGHSATree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexArtifactAndGhsaIngestGHSA struct {
-	Id string `json:"id"`
-
-	GhsaId string `json:"ghsaId"`
-}
-
-func (v *VexArtifactAndGhsaIngestGHSA) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexArtifactAndGhsaIngestGHSA) __premarshalJSON() (*__premarshalVexArtifactAndGhsaIngestGHSA, error) {
-	var retval __premarshalVexArtifactAndGhsaIngestGHSA
-
-	retval.Id = v.AllGHSATree.Id
-	retval.GhsaId = v.AllGHSATree.GhsaId
-	return &retval, nil
 }
 
 // VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
@@ -19197,168 +17702,13 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJS
 
 // VexArtifactAndGhsaResponse is returned by VexArtifactAndGhsa on success.
 type VexArtifactAndGhsaResponse struct {
-	// Ingests a new artifact and returns it.
-	IngestArtifact VexArtifactAndGhsaIngestArtifact `json:"ingestArtifact"`
-	// Ingests a new GitHub Security Advisory and returns it.
-	IngestGHSA VexArtifactAndGhsaIngestGHSA `json:"ingestGHSA"`
 	// Adds a VEX certification for a package.
 	IngestVEXStatement VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
-}
-
-// GetIngestArtifact returns VexArtifactAndGhsaResponse.IngestArtifact, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaResponse) GetIngestArtifact() VexArtifactAndGhsaIngestArtifact {
-	return v.IngestArtifact
-}
-
-// GetIngestGHSA returns VexArtifactAndGhsaResponse.IngestGHSA, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaResponse) GetIngestGHSA() VexArtifactAndGhsaIngestGHSA {
-	return v.IngestGHSA
 }
 
 // GetIngestVEXStatement returns VexArtifactAndGhsaResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
 func (v *VexArtifactAndGhsaResponse) GetIngestVEXStatement() VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement {
 	return v.IngestVEXStatement
-}
-
-// VexArtifactAndOsvIngestArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type VexArtifactAndOsvIngestArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns VexArtifactAndOsvIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns VexArtifactAndOsvIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
-
-// GetDigest returns VexArtifactAndOsvIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *VexArtifactAndOsvIngestArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexArtifactAndOsvIngestArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexArtifactAndOsvIngestArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexArtifactAndOsvIngestArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *VexArtifactAndOsvIngestArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexArtifactAndOsvIngestArtifact) __premarshalJSON() (*__premarshalVexArtifactAndOsvIngestArtifact, error) {
-	var retval __premarshalVexArtifactAndOsvIngestArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
-
-// VexArtifactAndOsvIngestOSV includes the requested fields of the GraphQL type OSV.
-// The GraphQL type's documentation follows.
-//
-// OSV represents an Open Source Vulnerability.
-//
-// The osvId field is mandatory and canonicalized to be lowercase.
-//
-// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
-// CVE ID).
-//
-// This node can be referred to by other parts of GUAC.
-type VexArtifactAndOsvIngestOSV struct {
-	AllOSVTree `json:"-"`
-}
-
-// GetId returns VexArtifactAndOsvIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestOSV) GetId() string { return v.AllOSVTree.Id }
-
-// GetOsvId returns VexArtifactAndOsvIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
-
-func (v *VexArtifactAndOsvIngestOSV) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexArtifactAndOsvIngestOSV
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexArtifactAndOsvIngestOSV = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllOSVTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexArtifactAndOsvIngestOSV struct {
-	Id string `json:"id"`
-
-	OsvId string `json:"osvId"`
-}
-
-func (v *VexArtifactAndOsvIngestOSV) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexArtifactAndOsvIngestOSV) __premarshalJSON() (*__premarshalVexArtifactAndOsvIngestOSV, error) {
-	var retval __premarshalVexArtifactAndOsvIngestOSV
-
-	retval.Id = v.AllOSVTree.Id
-	retval.OsvId = v.AllOSVTree.OsvId
-	return &retval, nil
 }
 
 // VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
@@ -19515,21 +17865,9 @@ func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 
 // VexArtifactAndOsvResponse is returned by VexArtifactAndOsv on success.
 type VexArtifactAndOsvResponse struct {
-	// Ingests a new artifact and returns it.
-	IngestArtifact VexArtifactAndOsvIngestArtifact `json:"ingestArtifact"`
-	// Ingests a new OSV vulnerability and returns it.
-	IngestOSV VexArtifactAndOsvIngestOSV `json:"ingestOSV"`
 	// Adds a VEX certification for a package.
 	IngestVEXStatement VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
-
-// GetIngestArtifact returns VexArtifactAndOsvResponse.IngestArtifact, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvResponse) GetIngestArtifact() VexArtifactAndOsvIngestArtifact {
-	return v.IngestArtifact
-}
-
-// GetIngestOSV returns VexArtifactAndOsvResponse.IngestOSV, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvResponse) GetIngestOSV() VexArtifactAndOsvIngestOSV { return v.IngestOSV }
 
 // GetIngestVEXStatement returns VexArtifactAndOsvResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
 func (v *VexArtifactAndOsvResponse) GetIngestVEXStatement() VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement {
@@ -19547,164 +17885,6 @@ const (
 	VexJustificationInlineMitigationsAlreadyExist               VexJustification = "INLINE_MITIGATIONS_ALREADY_EXIST"
 	VexJustificationNotProvided                                 VexJustification = "NOT_PROVIDED"
 )
-
-// VexPackageAndCveIngestCVE includes the requested fields of the GraphQL type CVE.
-// The GraphQL type's documentation follows.
-//
-// CVE represents a vulnerability in the Common Vulnerabilities and Exposures
-// schema.
-//
-// The vulnerability identifier contains a year field, so we are extracting that
-// to allow matching for vulnerabilities found in a given year.
-//
-// The vulnerability identifier field is mandatory and canonicalized to be
-// lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type VexPackageAndCveIngestCVE struct {
-	AllCveTree `json:"-"`
-}
-
-// GetId returns VexPackageAndCveIngestCVE.Id, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestCVE) GetId() string { return v.AllCveTree.Id }
-
-// GetYear returns VexPackageAndCveIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestCVE) GetYear() int { return v.AllCveTree.Year }
-
-// GetCveId returns VexPackageAndCveIngestCVE.CveId, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestCVE) GetCveId() string { return v.AllCveTree.CveId }
-
-func (v *VexPackageAndCveIngestCVE) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexPackageAndCveIngestCVE
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexPackageAndCveIngestCVE = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCveTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexPackageAndCveIngestCVE struct {
-	Id string `json:"id"`
-
-	Year int `json:"year"`
-
-	CveId string `json:"cveId"`
-}
-
-func (v *VexPackageAndCveIngestCVE) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexPackageAndCveIngestCVE) __premarshalJSON() (*__premarshalVexPackageAndCveIngestCVE, error) {
-	var retval __premarshalVexPackageAndCveIngestCVE
-
-	retval.Id = v.AllCveTree.Id
-	retval.Year = v.AllCveTree.Year
-	retval.CveId = v.AllCveTree.CveId
-	return &retval, nil
-}
-
-// VexPackageAndCveIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type VexPackageAndCveIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns VexPackageAndCveIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns VexPackageAndCveIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns VexPackageAndCveIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *VexPackageAndCveIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexPackageAndCveIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexPackageAndCveIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexPackageAndCveIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *VexPackageAndCveIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexPackageAndCveIngestPackage) __premarshalJSON() (*__premarshalVexPackageAndCveIngestPackage, error) {
-	var retval __premarshalVexPackageAndCveIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
 
 // VexPackageAndCveIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
@@ -19860,175 +18040,13 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 
 // VexPackageAndCveResponse is returned by VexPackageAndCve on success.
 type VexPackageAndCveResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage VexPackageAndCveIngestPackage `json:"ingestPackage"`
-	// Ingests new CVE and returns it.
-	IngestCVE VexPackageAndCveIngestCVE `json:"ingestCVE"`
 	// Adds a VEX certification for a package.
 	IngestVEXStatement VexPackageAndCveIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
 
-// GetIngestPackage returns VexPackageAndCveResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveResponse) GetIngestPackage() VexPackageAndCveIngestPackage {
-	return v.IngestPackage
-}
-
-// GetIngestCVE returns VexPackageAndCveResponse.IngestCVE, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveResponse) GetIngestCVE() VexPackageAndCveIngestCVE { return v.IngestCVE }
-
 // GetIngestVEXStatement returns VexPackageAndCveResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
 func (v *VexPackageAndCveResponse) GetIngestVEXStatement() VexPackageAndCveIngestVEXStatementCertifyVEXStatement {
 	return v.IngestVEXStatement
-}
-
-// VexPackageAndOsvIngestOSV includes the requested fields of the GraphQL type OSV.
-// The GraphQL type's documentation follows.
-//
-// OSV represents an Open Source Vulnerability.
-//
-// The osvId field is mandatory and canonicalized to be lowercase.
-//
-// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
-// CVE ID).
-//
-// This node can be referred to by other parts of GUAC.
-type VexPackageAndOsvIngestOSV struct {
-	AllOSVTree `json:"-"`
-}
-
-// GetId returns VexPackageAndOsvIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestOSV) GetId() string { return v.AllOSVTree.Id }
-
-// GetOsvId returns VexPackageAndOsvIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
-
-func (v *VexPackageAndOsvIngestOSV) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexPackageAndOsvIngestOSV
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexPackageAndOsvIngestOSV = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllOSVTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexPackageAndOsvIngestOSV struct {
-	Id string `json:"id"`
-
-	OsvId string `json:"osvId"`
-}
-
-func (v *VexPackageAndOsvIngestOSV) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexPackageAndOsvIngestOSV) __premarshalJSON() (*__premarshalVexPackageAndOsvIngestOSV, error) {
-	var retval __premarshalVexPackageAndOsvIngestOSV
-
-	retval.Id = v.AllOSVTree.Id
-	retval.OsvId = v.AllOSVTree.OsvId
-	return &retval, nil
-}
-
-// VexPackageAndOsvIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents the root of the package trie/tree.
-//
-// We map package information to a trie, closely matching the pURL specification
-// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
-// but deviating from it where GUAC heuristics allow for better representation of
-// package information. Each path in the trie fully represents a package; we split
-// the trie based on the pURL components.
-//
-// This node matches a pkg:<type> partial pURL. The type field matches the
-// pURL types but we might also use "guac" for the cases where the pURL
-// representation is not complete or when we have custom rules.
-//
-// Since this node is at the root of the package trie, it is named Package, not
-// PackageType.
-type VexPackageAndOsvIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns VexPackageAndOsvIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns VexPackageAndOsvIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns VexPackageAndOsvIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *VexPackageAndOsvIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*VexPackageAndOsvIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.VexPackageAndOsvIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalVexPackageAndOsvIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *VexPackageAndOsvIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *VexPackageAndOsvIngestPackage) __premarshalJSON() (*__premarshalVexPackageAndOsvIngestPackage, error) {
-	var retval __premarshalVexPackageAndOsvIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
 }
 
 // VexPackageAndOsvIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
@@ -20185,21 +18203,9 @@ func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 
 // VexPackageAndOsvResponse is returned by VexPackageAndOsv on success.
 type VexPackageAndOsvResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
-	IngestPackage VexPackageAndOsvIngestPackage `json:"ingestPackage"`
-	// Ingests a new OSV vulnerability and returns it.
-	IngestOSV VexPackageAndOsvIngestOSV `json:"ingestOSV"`
 	// Adds a VEX certification for a package.
 	IngestVEXStatement VexPackageAndOsvIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
-
-// GetIngestPackage returns VexPackageAndOsvResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvResponse) GetIngestPackage() VexPackageAndOsvIngestPackage {
-	return v.IngestPackage
-}
-
-// GetIngestOSV returns VexPackageAndOsvResponse.IngestOSV, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvResponse) GetIngestOSV() VexPackageAndOsvIngestOSV { return v.IngestOSV }
 
 // GetIngestVEXStatement returns VexPackageAndOsvResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
 func (v *VexPackageAndOsvResponse) GetIngestVEXStatement() VexPackageAndOsvIngestVEXStatementCertifyVEXStatement {
@@ -20445,6 +18451,14 @@ func (v *__CertifyOSVInput) GetOsv() OSVInputSpec { return v.Osv }
 // GetCertifyVuln returns __CertifyOSVInput.CertifyVuln, and is useful for accessing the field via an interface.
 func (v *__CertifyOSVInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
 
+// __FindSoftwareInput is used internally by genqlient
+type __FindSoftwareInput struct {
+	SearchText string `json:"searchText"`
+}
+
+// GetSearchText returns __FindSoftwareInput.SearchText, and is useful for accessing the field via an interface.
+func (v *__FindSoftwareInput) GetSearchText() string { return v.SearchText }
+
 // __GHSAsInput is used internally by genqlient
 type __GHSAsInput struct {
 	Filter *GHSASpec `json:"filter"`
@@ -20513,6 +18527,102 @@ func (v *__HashEqualInput) GetOtherArtifact() ArtifactInputSpec { return v.Other
 // GetHashEqual returns __HashEqualInput.HashEqual, and is useful for accessing the field via an interface.
 func (v *__HashEqualInput) GetHashEqual() HashEqualInputSpec { return v.HashEqual }
 
+// __IngestArtifactInput is used internally by genqlient
+type __IngestArtifactInput struct {
+	Artifact ArtifactInputSpec `json:"artifact"`
+}
+
+// GetArtifact returns __IngestArtifactInput.Artifact, and is useful for accessing the field via an interface.
+func (v *__IngestArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// __IngestArtifactsInput is used internally by genqlient
+type __IngestArtifactsInput struct {
+	Artifacts []ArtifactInputSpec `json:"artifacts"`
+}
+
+// GetArtifacts returns __IngestArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__IngestArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// __IngestBuilderInput is used internally by genqlient
+type __IngestBuilderInput struct {
+	Builder BuilderInputSpec `json:"builder"`
+}
+
+// GetBuilder returns __IngestBuilderInput.Builder, and is useful for accessing the field via an interface.
+func (v *__IngestBuilderInput) GetBuilder() BuilderInputSpec { return v.Builder }
+
+// __IngestCVEInput is used internally by genqlient
+type __IngestCVEInput struct {
+	Cve CVEInputSpec `json:"cve"`
+}
+
+// GetCve returns __IngestCVEInput.Cve, and is useful for accessing the field via an interface.
+func (v *__IngestCVEInput) GetCve() CVEInputSpec { return v.Cve }
+
+// __IngestGHSAInput is used internally by genqlient
+type __IngestGHSAInput struct {
+	Ghsa GHSAInputSpec `json:"ghsa"`
+}
+
+// GetGhsa returns __IngestGHSAInput.Ghsa, and is useful for accessing the field via an interface.
+func (v *__IngestGHSAInput) GetGhsa() GHSAInputSpec { return v.Ghsa }
+
+// __IngestMaterialsInput is used internally by genqlient
+type __IngestMaterialsInput struct {
+	Materials []ArtifactInputSpec `json:"materials"`
+}
+
+// GetMaterials returns __IngestMaterialsInput.Materials, and is useful for accessing the field via an interface.
+func (v *__IngestMaterialsInput) GetMaterials() []ArtifactInputSpec { return v.Materials }
+
+// __IngestOSVInput is used internally by genqlient
+type __IngestOSVInput struct {
+	Osv OSVInputSpec `json:"osv"`
+}
+
+// GetOsv returns __IngestOSVInput.Osv, and is useful for accessing the field via an interface.
+func (v *__IngestOSVInput) GetOsv() OSVInputSpec { return v.Osv }
+
+// __IngestPackageInput is used internally by genqlient
+type __IngestPackageInput struct {
+	Pkg PkgInputSpec `json:"pkg"`
+}
+
+// GetPkg returns __IngestPackageInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__IngestPackageInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// __IngestPackagesInput is used internally by genqlient
+type __IngestPackagesInput struct {
+	Pkgs []PkgInputSpec `json:"pkgs"`
+}
+
+// GetPkgs returns __IngestPackagesInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__IngestPackagesInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// __IngestSourceInput is used internally by genqlient
+type __IngestSourceInput struct {
+	Source SourceInputSpec `json:"source"`
+}
+
+// GetSource returns __IngestSourceInput.Source, and is useful for accessing the field via an interface.
+func (v *__IngestSourceInput) GetSource() SourceInputSpec { return v.Source }
+
+// __IsDependenciesInput is used internally by genqlient
+type __IsDependenciesInput struct {
+	Pkgs         []PkgInputSpec          `json:"pkgs"`
+	DepPkgs      []PkgInputSpec          `json:"depPkgs"`
+	Dependencies []IsDependencyInputSpec `json:"dependencies"`
+}
+
+// GetPkgs returns __IsDependenciesInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__IsDependenciesInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetDepPkgs returns __IsDependenciesInput.DepPkgs, and is useful for accessing the field via an interface.
+func (v *__IsDependenciesInput) GetDepPkgs() []PkgInputSpec { return v.DepPkgs }
+
+// GetDependencies returns __IsDependenciesInput.Dependencies, and is useful for accessing the field via an interface.
+func (v *__IsDependenciesInput) GetDependencies() []IsDependencyInputSpec { return v.Dependencies }
+
 // __IsDependencyInput is used internally by genqlient
 type __IsDependencyInput struct {
 	Pkg        PkgInputSpec          `json:"pkg"`
@@ -20560,6 +18670,38 @@ func (v *__IsOccurrenceSrcInput) GetArtifact() ArtifactInputSpec { return v.Arti
 
 // GetOccurrence returns __IsOccurrenceSrcInput.Occurrence, and is useful for accessing the field via an interface.
 func (v *__IsOccurrenceSrcInput) GetOccurrence() IsOccurrenceInputSpec { return v.Occurrence }
+
+// __IsOccurrencesPkgInput is used internally by genqlient
+type __IsOccurrencesPkgInput struct {
+	Pkgs        []PkgInputSpec          `json:"pkgs"`
+	Artifacts   []ArtifactInputSpec     `json:"artifacts"`
+	Occurrences []IsOccurrenceInputSpec `json:"occurrences"`
+}
+
+// GetPkgs returns __IsOccurrencesPkgInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesPkgInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetArtifacts returns __IsOccurrencesPkgInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesPkgInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetOccurrences returns __IsOccurrencesPkgInput.Occurrences, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesPkgInput) GetOccurrences() []IsOccurrenceInputSpec { return v.Occurrences }
+
+// __IsOccurrencesSrcInput is used internally by genqlient
+type __IsOccurrencesSrcInput struct {
+	Sources     []SourceInputSpec       `json:"sources"`
+	Artifacts   []ArtifactInputSpec     `json:"artifacts"`
+	Occurrences []IsOccurrenceInputSpec `json:"occurrences"`
+}
+
+// GetSources returns __IsOccurrencesSrcInput.Sources, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesSrcInput) GetSources() []SourceInputSpec { return v.Sources }
+
+// GetArtifacts returns __IsOccurrencesSrcInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesSrcInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetOccurrences returns __IsOccurrencesSrcInput.Occurrences, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesSrcInput) GetOccurrences() []IsOccurrenceInputSpec { return v.Occurrences }
 
 // __IsVulnerabilityCVEInput is used internally by genqlient
 type __IsVulnerabilityCVEInput struct {
@@ -23919,17 +22061,9 @@ func CVEs(
 // The query or mutation executed by CertifyBadArtifact.
 const CertifyBadArtifact_Operation = `
 mutation CertifyBadArtifact ($artifact: ArtifactInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
 	ingestCertifyBad(subject: {artifact:$artifact}, certifyBad: $certifyBad) {
 		... AllCertifyBad
 	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
 }
 fragment AllCertifyBad on CertifyBad {
 	id
@@ -23984,6 +22118,11 @@ fragment AllSourceTree on Source {
 		}
 	}
 }
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
 `
 
 func CertifyBadArtifact(
@@ -24017,12 +22156,27 @@ func CertifyBadArtifact(
 // The query or mutation executed by CertifyBadPkg.
 const CertifyBadPkg_Operation = `
 mutation CertifyBadPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyBad: CertifyBadInputSpec!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
 	ingestCertifyBad(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyBad: $certifyBad) {
 		... AllCertifyBad
 	}
+}
+fragment AllCertifyBad on CertifyBad {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
 }
 fragment AllPkgTree on Package {
 	id
@@ -24044,24 +22198,6 @@ fragment AllPkgTree on Package {
 			}
 		}
 	}
-}
-fragment AllCertifyBad on CertifyBad {
-	id
-	justification
-	subject {
-		__typename
-		... on Package {
-			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
-		}
-		... on Artifact {
-			... AllArtifactTree
-		}
-	}
-	origin
-	collector
 }
 fragment AllSourceTree on Source {
 	id
@@ -24117,25 +22253,8 @@ func CertifyBadPkg(
 // The query or mutation executed by CertifyBadSrc.
 const CertifyBadSrc_Operation = `
 mutation CertifyBadSrc ($source: SourceInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-	ingestSource(source: $source) {
-		... AllSourceTree
-	}
 	ingestCertifyBad(subject: {source:$source}, certifyBad: $certifyBad) {
 		... AllCertifyBad
-	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
 	}
 }
 fragment AllCertifyBad on CertifyBad {
@@ -24174,6 +22293,20 @@ fragment AllPkgTree on Package {
 				}
 				subpath
 			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
 		}
 	}
 }
@@ -24308,41 +22441,9 @@ func CertifyBads(
 // The query or mutation executed by CertifyCVE.
 const CertifyCVE_Operation = `
 mutation CertifyCVE ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
-	ingestCVE(cve: $cve) {
-		... AllCveTree
-	}
 	ingestVulnerability(pkg: $pkg, vulnerability: {cve:$cve}, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
 	}
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllCveTree on CVE {
-	id
-	year
-	cveId
 }
 fragment AllCertifyVuln on CertifyVuln {
 	id
@@ -24373,6 +22474,32 @@ fragment AllCertifyVuln on CertifyVuln {
 		origin
 		collector
 	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllCveTree on CVE {
+	id
+	year
+	cveId
 }
 fragment AllOSVTree on OSV {
 	id
@@ -24417,40 +22544,9 @@ func CertifyCVE(
 // The query or mutation executed by CertifyGHSA.
 const CertifyGHSA_Operation = `
 mutation CertifyGHSA ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
-	ingestGHSA(ghsa: $ghsa) {
-		... AllGHSATree
-	}
 	ingestVulnerability(pkg: $pkg, vulnerability: {ghsa:$ghsa}, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
 	}
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllGHSATree on GHSA {
-	id
-	ghsaId
 }
 fragment AllCertifyVuln on CertifyVuln {
 	id
@@ -24482,6 +22578,27 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
 fragment AllCveTree on CVE {
 	id
 	year
@@ -24490,6 +22607,10 @@ fragment AllCveTree on CVE {
 fragment AllOSVTree on OSV {
 	id
 	osvId
+}
+fragment AllGHSATree on GHSA {
+	id
+	ghsaId
 }
 `
 
@@ -24526,17 +22647,9 @@ func CertifyGHSA(
 // The query or mutation executed by CertifyGoodArtifact.
 const CertifyGoodArtifact_Operation = `
 mutation CertifyGoodArtifact ($artifact: ArtifactInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
-	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
 	ingestCertifyGood(subject: {artifact:$artifact}, certifyGood: $certifyGood) {
 		... allCertifyGood
 	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
 }
 fragment allCertifyGood on CertifyGood {
 	id
@@ -24591,6 +22704,11 @@ fragment AllSourceTree on Source {
 		}
 	}
 }
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
 `
 
 func CertifyGoodArtifact(
@@ -24624,12 +22742,27 @@ func CertifyGoodArtifact(
 // The query or mutation executed by CertifyGoodPkg.
 const CertifyGoodPkg_Operation = `
 mutation CertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyGood: CertifyGoodInputSpec!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
 	ingestCertifyGood(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyGood: $certifyGood) {
 		... allCertifyGood
 	}
+}
+fragment allCertifyGood on CertifyGood {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
 }
 fragment AllPkgTree on Package {
 	id
@@ -24651,24 +22784,6 @@ fragment AllPkgTree on Package {
 			}
 		}
 	}
-}
-fragment allCertifyGood on CertifyGood {
-	id
-	justification
-	subject {
-		__typename
-		... on Package {
-			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
-		}
-		... on Artifact {
-			... AllArtifactTree
-		}
-	}
-	origin
-	collector
 }
 fragment AllSourceTree on Source {
 	id
@@ -24724,25 +22839,8 @@ func CertifyGoodPkg(
 // The query or mutation executed by CertifyGoodSrc.
 const CertifyGoodSrc_Operation = `
 mutation CertifyGoodSrc ($source: SourceInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
-	ingestSource(source: $source) {
-		... AllSourceTree
-	}
 	ingestCertifyGood(subject: {source:$source}, certifyGood: $certifyGood) {
 		... allCertifyGood
-	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
 	}
 }
 fragment allCertifyGood on CertifyGood {
@@ -24784,6 +22882,20 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
 fragment AllArtifactTree on Artifact {
 	id
 	algorithm
@@ -24822,32 +22934,8 @@ func CertifyGoodSrc(
 // The query or mutation executed by CertifyNoKnownVuln.
 const CertifyNoKnownVuln_Operation = `
 mutation CertifyNoKnownVuln ($pkg: PkgInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
 	ingestVulnerability(pkg: $pkg, vulnerability: {noVuln:true}, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
-	}
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
 	}
 }
 fragment AllCertifyVuln on CertifyVuln {
@@ -24878,6 +22966,27 @@ fragment AllCertifyVuln on CertifyVuln {
 		timeScanned
 		origin
 		collector
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
 	}
 }
 fragment AllCveTree on CVE {
@@ -24926,40 +23035,9 @@ func CertifyNoKnownVuln(
 // The query or mutation executed by CertifyOSV.
 const CertifyOSV_Operation = `
 mutation CertifyOSV ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
-	ingestOSV(osv: $osv) {
-		... AllOSVTree
-	}
 	ingestVulnerability(pkg: $pkg, vulnerability: {osv:$osv}, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
 	}
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllOSVTree on OSV {
-	id
-	osvId
 }
 fragment AllCertifyVuln on CertifyVuln {
 	id
@@ -24991,10 +23069,35 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
 fragment AllCveTree on CVE {
 	id
 	year
 	cveId
+}
+fragment AllOSVTree on OSV {
+	id
+	osvId
 }
 fragment AllGHSATree on GHSA {
 	id
@@ -25021,6 +23124,90 @@ func CertifyOSV(
 	var err error
 
 	var data CertifyOSVResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by FindSoftware.
+const FindSoftware_Operation = `
+query FindSoftware ($searchText: String!) {
+	findSoftware(searchText: $searchText) {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func FindSoftware(
+	ctx context.Context,
+	client graphql.Client,
+	searchText string,
+) (*FindSoftwareResponse, error) {
+	req := &graphql.Request{
+		OpName: "FindSoftware",
+		Query:  FindSoftware_Operation,
+		Variables: &__FindSoftwareInput{
+			SearchText: searchText,
+		},
+	}
+	var err error
+
+	var data FindSoftwareResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -25074,17 +23261,9 @@ func GHSAs(
 // The query or mutation executed by HasSBOMArtifact.
 const HasSBOMArtifact_Operation = `
 mutation HasSBOMArtifact ($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
 	ingestHasSBOM(subject: {artifact:$artifact}, hasSBOM: $hasSBOM) {
 		... allHasSBOMTree
 	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
 }
 fragment allHasSBOMTree on HasSBOM {
 	id
@@ -25107,6 +23286,11 @@ fragment allHasSBOMTree on HasSBOM {
 	}
 	origin
 	collector
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
 }
 fragment AllPkgTree on Package {
 	id
@@ -25162,32 +23346,8 @@ func HasSBOMArtifact(
 // The query or mutation executed by HasSBOMPkg.
 const HasSBOMPkg_Operation = `
 mutation HasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
 	ingestHasSBOM(subject: {package:$pkg}, hasSBOM: $hasSBOM) {
 		... allHasSBOMTree
-	}
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
 	}
 }
 fragment allHasSBOMTree on HasSBOM {
@@ -25216,6 +23376,27 @@ fragment AllArtifactTree on Artifact {
 	id
 	algorithm
 	digest
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
 }
 `
 
@@ -25250,15 +23431,22 @@ func HasSBOMPkg(
 // The query or mutation executed by HasSourceAt.
 const HasSourceAt_Operation = `
 mutation HasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
-	ingestSource(source: $source) {
-		... AllSourceTree
-	}
 	ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt) {
 		... allHasSourceAt
 	}
+}
+fragment allHasSourceAt on HasSourceAt {
+	id
+	justification
+	knownSince
+	package {
+		... AllPkgTree
+	}
+	source {
+		... AllSourceTree
+	}
+	origin
+	collector
 }
 fragment AllPkgTree on Package {
 	id
@@ -25294,19 +23482,6 @@ fragment AllSourceTree on Source {
 			commit
 		}
 	}
-}
-fragment allHasSourceAt on HasSourceAt {
-	id
-	justification
-	knownSince
-	package {
-		... AllPkgTree
-	}
-	source {
-		... AllSourceTree
-	}
-	origin
-	collector
 }
 `
 
@@ -25345,20 +23520,9 @@ func HasSourceAt(
 // The query or mutation executed by HashEqual.
 const HashEqual_Operation = `
 mutation HashEqual ($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
-	artifact: ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
-	otherArtifact: ingestArtifact(artifact: $otherArtifact) {
-		... AllArtifactTree
-	}
 	ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual) {
 		... allHashEqualTree
 	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
 }
 fragment allHashEqualTree on HashEqual {
 	id
@@ -25368,6 +23532,11 @@ fragment allHashEqualTree on HashEqual {
 	}
 	origin
 	collector
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
 }
 `
 
@@ -25401,17 +23570,284 @@ func HashEqual(
 	return &data, err
 }
 
-// The query or mutation executed by IsDependency.
-const IsDependency_Operation = `
-mutation IsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
-	pkg: ingestPackage(pkg: $pkg) {
-		... AllPkgTree
+// The query or mutation executed by IngestArtifact.
+const IngestArtifact_Operation = `
+mutation IngestArtifact ($artifact: ArtifactInputSpec!) {
+	ingestArtifact(artifact: $artifact) {
+		... AllArtifactTree
 	}
-	dependentPkg: ingestPackage(pkg: $depPkg) {
-		... AllPkgTree
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IngestArtifact(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+) (*IngestArtifactResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestArtifact",
+		Query:  IngestArtifact_Operation,
+		Variables: &__IngestArtifactInput{
+			Artifact: artifact,
+		},
 	}
-	ingestDependency(pkg: $pkg, depPkg: $depPkg, dependency: $dependency) {
-		... allIsDependencyTree
+	var err error
+
+	var data IngestArtifactResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestArtifacts.
+const IngestArtifacts_Operation = `
+mutation IngestArtifacts ($artifacts: [ArtifactInputSpec!]!) {
+	ingestArtifacts(artifacts: $artifacts) {
+		... AllArtifactTree
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IngestArtifacts(
+	ctx context.Context,
+	client graphql.Client,
+	artifacts []ArtifactInputSpec,
+) (*IngestArtifactsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestArtifacts",
+		Query:  IngestArtifacts_Operation,
+		Variables: &__IngestArtifactsInput{
+			Artifacts: artifacts,
+		},
+	}
+	var err error
+
+	var data IngestArtifactsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestBuilder.
+const IngestBuilder_Operation = `
+mutation IngestBuilder ($builder: BuilderInputSpec!) {
+	ingestBuilder(builder: $builder) {
+		uri
+	}
+}
+`
+
+func IngestBuilder(
+	ctx context.Context,
+	client graphql.Client,
+	builder BuilderInputSpec,
+) (*IngestBuilderResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestBuilder",
+		Query:  IngestBuilder_Operation,
+		Variables: &__IngestBuilderInput{
+			Builder: builder,
+		},
+	}
+	var err error
+
+	var data IngestBuilderResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestCVE.
+const IngestCVE_Operation = `
+mutation IngestCVE ($cve: CVEInputSpec!) {
+	ingestCVE(cve: $cve) {
+		... AllCveTree
+	}
+}
+fragment AllCveTree on CVE {
+	id
+	year
+	cveId
+}
+`
+
+func IngestCVE(
+	ctx context.Context,
+	client graphql.Client,
+	cve CVEInputSpec,
+) (*IngestCVEResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestCVE",
+		Query:  IngestCVE_Operation,
+		Variables: &__IngestCVEInput{
+			Cve: cve,
+		},
+	}
+	var err error
+
+	var data IngestCVEResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestGHSA.
+const IngestGHSA_Operation = `
+mutation IngestGHSA ($ghsa: GHSAInputSpec!) {
+	ingestGHSA(ghsa: $ghsa) {
+		... AllGHSATree
+	}
+}
+fragment AllGHSATree on GHSA {
+	id
+	ghsaId
+}
+`
+
+func IngestGHSA(
+	ctx context.Context,
+	client graphql.Client,
+	ghsa GHSAInputSpec,
+) (*IngestGHSAResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestGHSA",
+		Query:  IngestGHSA_Operation,
+		Variables: &__IngestGHSAInput{
+			Ghsa: ghsa,
+		},
+	}
+	var err error
+
+	var data IngestGHSAResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestMaterials.
+const IngestMaterials_Operation = `
+mutation IngestMaterials ($materials: [ArtifactInputSpec!]!) {
+	ingestMaterials(materials: $materials) {
+		... AllArtifactTree
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IngestMaterials(
+	ctx context.Context,
+	client graphql.Client,
+	materials []ArtifactInputSpec,
+) (*IngestMaterialsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestMaterials",
+		Query:  IngestMaterials_Operation,
+		Variables: &__IngestMaterialsInput{
+			Materials: materials,
+		},
+	}
+	var err error
+
+	var data IngestMaterialsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestOSV.
+const IngestOSV_Operation = `
+mutation IngestOSV ($osv: OSVInputSpec!) {
+	ingestOSV(osv: $osv) {
+		... AllOSVTree
+	}
+}
+fragment AllOSVTree on OSV {
+	id
+	osvId
+}
+`
+
+func IngestOSV(
+	ctx context.Context,
+	client graphql.Client,
+	osv OSVInputSpec,
+) (*IngestOSVResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestOSV",
+		Query:  IngestOSV_Operation,
+		Variables: &__IngestOSVInput{
+			Osv: osv,
+		},
+	}
+	var err error
+
+	var data IngestOSVResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestPackage.
+const IngestPackage_Operation = `
+mutation IngestPackage ($pkg: PkgInputSpec!) {
+	ingestPackage(pkg: $pkg) {
+		... AllPkgTree
 	}
 }
 fragment AllPkgTree on Package {
@@ -25435,6 +23871,146 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
+`
+
+func IngestPackage(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+) (*IngestPackageResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestPackage",
+		Query:  IngestPackage_Operation,
+		Variables: &__IngestPackageInput{
+			Pkg: pkg,
+		},
+	}
+	var err error
+
+	var data IngestPackageResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestPackages.
+const IngestPackages_Operation = `
+mutation IngestPackages ($pkgs: [PkgInputSpec!]!) {
+	ingestPackages(pkgs: $pkgs) {
+		... AllPkgTree
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func IngestPackages(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+) (*IngestPackagesResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestPackages",
+		Query:  IngestPackages_Operation,
+		Variables: &__IngestPackagesInput{
+			Pkgs: pkgs,
+		},
+	}
+	var err error
+
+	var data IngestPackagesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestSource.
+const IngestSource_Operation = `
+mutation IngestSource ($source: SourceInputSpec!) {
+	ingestSource(source: $source) {
+		... AllSourceTree
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func IngestSource(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+) (*IngestSourceResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestSource",
+		Query:  IngestSource_Operation,
+		Variables: &__IngestSourceInput{
+			Source: source,
+		},
+	}
+	var err error
+
+	var data IngestSourceResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IsDependencies.
+const IsDependencies_Operation = `
+mutation IsDependencies ($pkgs: [PkgInputSpec!]!, $depPkgs: [PkgInputSpec!]!, $dependencies: [IsDependencyInputSpec!]!) {
+	ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, dependencies: $dependencies) {
+		... allIsDependencyTree
+	}
+}
 fragment allIsDependencyTree on IsDependency {
 	id
 	justification
@@ -25448,6 +24024,101 @@ fragment allIsDependencyTree on IsDependency {
 	versionRange
 	origin
 	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func IsDependencies(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	depPkgs []PkgInputSpec,
+	dependencies []IsDependencyInputSpec,
+) (*IsDependenciesResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsDependencies",
+		Query:  IsDependencies_Operation,
+		Variables: &__IsDependenciesInput{
+			Pkgs:         pkgs,
+			DepPkgs:      depPkgs,
+			Dependencies: dependencies,
+		},
+	}
+	var err error
+
+	var data IsDependenciesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IsDependency.
+const IsDependency_Operation = `
+mutation IsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
+	ingestDependency(pkg: $pkg, depPkg: $depPkg, dependency: $dependency) {
+		... allIsDependencyTree
+	}
+}
+fragment allIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... AllPkgTree
+	}
+	dependentPackage {
+		... AllPkgTree
+	}
+	dependencyType
+	versionRange
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
 }
 `
 
@@ -25484,15 +24155,27 @@ func IsDependency(
 // The query or mutation executed by IsOccurrencePkg.
 const IsOccurrencePkg_Operation = `
 mutation IsOccurrencePkg ($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
-	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
 	ingestOccurrence(subject: {package:$pkg}, artifact: $artifact, occurrence: $occurrence) {
 		... AllIsOccurrencesTree
 	}
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
 }
 fragment AllPkgTree on Package {
 	id
@@ -25515,29 +24198,6 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
-}
-fragment AllIsOccurrencesTree on IsOccurrence {
-	id
-	subject {
-		__typename
-		... on Package {
-			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
-		}
-	}
-	artifact {
-		... AllArtifactTree
-	}
-	justification
-	origin
-	collector
-}
 fragment AllSourceTree on Source {
 	id
 	type
@@ -25551,6 +24211,11 @@ fragment AllSourceTree on Source {
 			commit
 		}
 	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
 }
 `
 
@@ -25587,34 +24252,9 @@ func IsOccurrencePkg(
 // The query or mutation executed by IsOccurrenceSrc.
 const IsOccurrenceSrc_Operation = `
 mutation IsOccurrenceSrc ($source: SourceInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
-	ingestSource(source: $source) {
-		... AllSourceTree
-	}
-	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
 	ingestOccurrence(subject: {source:$source}, artifact: $artifact, occurrence: $occurrence) {
 		... AllIsOccurrencesTree
 	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
-	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
 }
 fragment AllIsOccurrencesTree on IsOccurrence {
 	id
@@ -25655,6 +24295,25 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
 `
 
 func IsOccurrenceSrc(
@@ -25687,27 +24346,206 @@ func IsOccurrenceSrc(
 	return &data, err
 }
 
+// The query or mutation executed by IsOccurrencesPkg.
+const IsOccurrencesPkg_Operation = `
+mutation IsOccurrencesPkg ($pkgs: [PkgInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
+	ingestOccurrences(subjects: {packages:$pkgs}, artifacts: $artifacts, occurrences: $occurrences) {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IsOccurrencesPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	artifacts []ArtifactInputSpec,
+	occurrences []IsOccurrenceInputSpec,
+) (*IsOccurrencesPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsOccurrencesPkg",
+		Query:  IsOccurrencesPkg_Operation,
+		Variables: &__IsOccurrencesPkgInput{
+			Pkgs:        pkgs,
+			Artifacts:   artifacts,
+			Occurrences: occurrences,
+		},
+	}
+	var err error
+
+	var data IsOccurrencesPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IsOccurrencesSrc.
+const IsOccurrencesSrc_Operation = `
+mutation IsOccurrencesSrc ($sources: [SourceInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
+	ingestOccurrences(subjects: {sources:$sources}, artifacts: $artifacts, occurrences: $occurrences) {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IsOccurrencesSrc(
+	ctx context.Context,
+	client graphql.Client,
+	sources []SourceInputSpec,
+	artifacts []ArtifactInputSpec,
+	occurrences []IsOccurrenceInputSpec,
+) (*IsOccurrencesSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsOccurrencesSrc",
+		Query:  IsOccurrencesSrc_Operation,
+		Variables: &__IsOccurrencesSrcInput{
+			Sources:     sources,
+			Artifacts:   artifacts,
+			Occurrences: occurrences,
+		},
+	}
+	var err error
+
+	var data IsOccurrencesSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by IsVulnerabilityCVE.
 const IsVulnerabilityCVE_Operation = `
 mutation IsVulnerabilityCVE ($osv: OSVInputSpec!, $cve: CVEInputSpec!, $isVulnerability: IsVulnerabilityInputSpec!) {
-	ingestOSV(osv: $osv) {
-		... AllOSVTree
-	}
-	ingestCVE(cve: $cve) {
-		... AllCveTree
-	}
 	ingestIsVulnerability(osv: $osv, vulnerability: {cve:$cve}, isVulnerability: $isVulnerability) {
 		... allIsVulnerability
 	}
-}
-fragment AllOSVTree on OSV {
-	id
-	osvId
-}
-fragment AllCveTree on CVE {
-	id
-	year
-	cveId
 }
 fragment allIsVulnerability on IsVulnerability {
 	id
@@ -25726,6 +24564,15 @@ fragment allIsVulnerability on IsVulnerability {
 	justification
 	origin
 	collector
+}
+fragment AllOSVTree on OSV {
+	id
+	osvId
+}
+fragment AllCveTree on CVE {
+	id
+	year
+	cveId
 }
 fragment AllGHSATree on GHSA {
 	id
@@ -25766,23 +24613,9 @@ func IsVulnerabilityCVE(
 // The query or mutation executed by IsVulnerabilityGHSA.
 const IsVulnerabilityGHSA_Operation = `
 mutation IsVulnerabilityGHSA ($osv: OSVInputSpec!, $ghsa: GHSAInputSpec!, $isVulnerability: IsVulnerabilityInputSpec!) {
-	ingestOSV(osv: $osv) {
-		... AllOSVTree
-	}
-	ingestGHSA(ghsa: $ghsa) {
-		... AllGHSATree
-	}
 	ingestIsVulnerability(osv: $osv, vulnerability: {ghsa:$ghsa}, isVulnerability: $isVulnerability) {
 		... allIsVulnerability
 	}
-}
-fragment AllOSVTree on OSV {
-	id
-	osvId
-}
-fragment AllGHSATree on GHSA {
-	id
-	ghsaId
 }
 fragment allIsVulnerability on IsVulnerability {
 	id
@@ -25802,10 +24635,18 @@ fragment allIsVulnerability on IsVulnerability {
 	origin
 	collector
 }
+fragment AllOSVTree on OSV {
+	id
+	osvId
+}
 fragment AllCveTree on CVE {
 	id
 	year
 	cveId
+}
+fragment AllGHSATree on GHSA {
+	id
+	ghsaId
 }
 `
 
@@ -27624,23 +26465,9 @@ func PkgEqual(
 // The query or mutation executed by SLSAForArtifact.
 const SLSAForArtifact_Operation = `
 mutation SLSAForArtifact ($artifact: ArtifactInputSpec!, $materials: [ArtifactInputSpec!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
-	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
-	ingestMaterials(materials: $materials) {
-		... AllArtifactTree
-	}
-	ingestBuilder(builder: $builder) {
-		uri
-	}
 	ingestSLSA(subject: $artifact, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
 		... allSLSATree
 	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
 }
 fragment allSLSATree on HasSLSA {
 	id
@@ -27666,6 +26493,11 @@ fragment allSLSATree on HasSLSA {
 		origin
 		collector
 	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
 }
 `
 
@@ -27704,25 +26536,8 @@ func SLSAForArtifact(
 // The query or mutation executed by Scorecard.
 const Scorecard_Operation = `
 mutation Scorecard ($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
-	ingestSource(source: $source) {
-		... AllSourceTree
-	}
 	certifyScorecard(source: $source, scorecard: $scorecard) {
 		... AllCertifyScorecard
-	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
 	}
 }
 fragment AllCertifyScorecard on CertifyScorecard {
@@ -27741,6 +26556,20 @@ fragment AllCertifyScorecard on CertifyScorecard {
 		scorecardCommit
 		origin
 		collector
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
 	}
 }
 `
@@ -27825,40 +26654,9 @@ func Sources(
 // The query or mutation executed by VEXPackageAndGhsa.
 const VEXPackageAndGhsa_Operation = `
 mutation VEXPackageAndGhsa ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
-	ingestGHSA(ghsa: $ghsa) {
-		... AllGHSATree
-	}
 	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {ghsa:$ghsa}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
 	}
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllGHSATree on GHSA {
-	id
-	ghsaId
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
 	id
@@ -27891,6 +26689,27 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
 fragment AllArtifactTree on Artifact {
 	id
 	algorithm
@@ -27900,6 +26719,10 @@ fragment AllCveTree on CVE {
 	id
 	year
 	cveId
+}
+fragment AllGHSATree on GHSA {
+	id
+	ghsaId
 }
 fragment AllOSVTree on OSV {
 	id
@@ -27940,25 +26763,9 @@ func VEXPackageAndGhsa(
 // The query or mutation executed by VexArtifactAndCve.
 const VexArtifactAndCve_Operation = `
 mutation VexArtifactAndCve ($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
-	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
-	ingestCVE(cve: $cve) {
-		... AllCveTree
-	}
 	ingestVEXStatement(subject: {artifact:$artifact}, vulnerability: {cve:$cve}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
 	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
-}
-fragment AllCveTree on CVE {
-	id
-	year
-	cveId
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
 	id
@@ -28011,6 +26818,16 @@ fragment AllPkgTree on Package {
 			}
 		}
 	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllCveTree on CVE {
+	id
+	year
+	cveId
 }
 fragment AllGHSATree on GHSA {
 	id
@@ -28055,24 +26872,9 @@ func VexArtifactAndCve(
 // The query or mutation executed by VexArtifactAndGhsa.
 const VexArtifactAndGhsa_Operation = `
 mutation VexArtifactAndGhsa ($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
-	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
-	ingestGHSA(ghsa: $ghsa) {
-		... AllGHSATree
-	}
 	ingestVEXStatement(subject: {artifact:$artifact}, vulnerability: {ghsa:$ghsa}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
 	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
-}
-fragment AllGHSATree on GHSA {
-	id
-	ghsaId
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
 	id
@@ -28126,10 +26928,19 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
 fragment AllCveTree on CVE {
 	id
 	year
 	cveId
+}
+fragment AllGHSATree on GHSA {
+	id
+	ghsaId
 }
 fragment AllOSVTree on OSV {
 	id
@@ -28170,24 +26981,9 @@ func VexArtifactAndGhsa(
 // The query or mutation executed by VexArtifactAndOsv.
 const VexArtifactAndOsv_Operation = `
 mutation VexArtifactAndOsv ($artifact: ArtifactInputSpec!, $osv: OSVInputSpec!, $vexStatement: VexStatementInputSpec!) {
-	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
-	}
-	ingestOSV(osv: $osv) {
-		... AllOSVTree
-	}
 	ingestVEXStatement(subject: {artifact:$artifact}, vulnerability: {osv:$osv}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
 	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
-}
-fragment AllOSVTree on OSV {
-	id
-	osvId
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
 	id
@@ -28241,6 +27037,11 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
 fragment AllCveTree on CVE {
 	id
 	year
@@ -28249,6 +27050,10 @@ fragment AllCveTree on CVE {
 fragment AllGHSATree on GHSA {
 	id
 	ghsaId
+}
+fragment AllOSVTree on OSV {
+	id
+	osvId
 }
 `
 
@@ -28285,41 +27090,9 @@ func VexArtifactAndOsv(
 // The query or mutation executed by VexPackageAndCve.
 const VexPackageAndCve_Operation = `
 mutation VexPackageAndCve ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
-	ingestCVE(cve: $cve) {
-		... AllCveTree
-	}
 	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {cve:$cve}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
 	}
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllCveTree on CVE {
-	id
-	year
-	cveId
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
 	id
@@ -28352,10 +27125,36 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
 fragment AllArtifactTree on Artifact {
 	id
 	algorithm
 	digest
+}
+fragment AllCveTree on CVE {
+	id
+	year
+	cveId
 }
 fragment AllGHSATree on GHSA {
 	id
@@ -28400,40 +27199,9 @@ func VexPackageAndCve(
 // The query or mutation executed by VexPackageAndOsv.
 const VexPackageAndOsv_Operation = `
 mutation VexPackageAndOsv ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $vexStatement: VexStatementInputSpec!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
-	ingestOSV(osv: $osv) {
-		... AllOSVTree
-	}
 	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {osv:$osv}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
 	}
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllOSVTree on OSV {
-	id
-	osvId
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
 	id
@@ -28466,6 +27234,27 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
 fragment AllArtifactTree on Artifact {
 	id
 	algorithm
@@ -28479,6 +27268,10 @@ fragment AllCveTree on CVE {
 fragment AllGHSATree on GHSA {
 	id
 	ghsaId
+}
+fragment AllOSVTree on OSV {
+	id
+	osvId
 }
 `
 

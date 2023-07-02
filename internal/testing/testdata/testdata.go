@@ -50,6 +50,10 @@ var (
 	//go:embed exampledata/invalid-spdx.json
 	SpdxInvalidExample []byte
 
+	// Invalid SPDXIdentifier document
+	//go:embed exampledata/invalid-spdx-identifier-spdx.json
+	SpdxInvalidSPDXIdentifierExample []byte
+
 	// Example scorecard
 	//go:embed exampledata/kubernetes-scorecard.json
 	ScorecardExample []byte
@@ -90,6 +94,9 @@ var (
 
 	//go:embed exampledata/no-dependent-components-cyclonedx.json
 	CycloneDXExampleNoDependentComponents []byte
+
+	//go:embed exampledata/cyclonedx-no-top-level.json
+	CycloneDXExampleNoTopLevelComp []byte
 
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
