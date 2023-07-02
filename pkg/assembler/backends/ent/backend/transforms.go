@@ -41,7 +41,6 @@ func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
 		pn.Edges.Namespace.Edges.Package != nil {
 		ns := pn.Edges.Namespace
 		pt := ns.Edges.Package
-		// pn.Edges.Versions = []*ent.PackageVersion{}
 		ns.Edges.Names = []*ent.PackageName{pn}
 		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
 		return pt

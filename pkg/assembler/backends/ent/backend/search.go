@@ -30,7 +30,12 @@ import (
 // Warning: This is an OPTIONAL feature. Backends are not required to
 // implement this API.
 func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
+	// Arbitrarily only search if the search text is longer than 2 characters
+	// Search Artifacts
 	results := make([]model.PackageSourceOrArtifact, 0)
+	if len(searchText) <= 2 {
+		return results, nil
+	}
 
 	// Search by Package Name
 	packages, err := b.client.PackageVersion.Query().Where(
@@ -41,7 +46,9 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 		q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
 			q.WithPackage()
 		})
-	}).All(ctx)
+	}).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -61,6 +68,7 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 	).WithNamespace(func(q *ent.SourceNamespaceQuery) {
 		q.WithSourceType()
 	}).
+		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -69,20 +77,18 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 		return toModelSource(backReferenceSourceName(v))
 	})...)
 
-	// Arbitrarily only search shas if the search text is longer than 2 characters
-	if len(searchText) > 2 {
-		// Search Artifacts
-		artifacts, err := b.client.Artifact.Query().Where(
-			artifact.DigestContains(searchText),
-		).All(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		results = append(results, collect(artifacts, func(v *ent.Artifact) model.PackageSourceOrArtifact {
-			return toModelArtifact(v)
-		})...)
+	artifacts, err := b.client.Artifact.Query().Where(
+		artifact.DigestContains(searchText),
+	).
+		Limit(MaxPageSize).
+		All(ctx)
+	if err != nil {
+		return nil, err
 	}
+
+	results = append(results, collect(artifacts, func(v *ent.Artifact) model.PackageSourceOrArtifact {
+		return toModelArtifact(v)
+	})...)
 
 	return results, nil
 }

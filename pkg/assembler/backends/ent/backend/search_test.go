@@ -50,4 +50,12 @@ func (s *Suite) Test_FindSoftware() {
 	if diff := cmp.Diff([]model.PackageSourceOrArtifact{a1out}, results, ignoreID, ignoreEmptySlices); diff != "" {
 		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 	}
+
+	// Find with empty query
+	results, err = b.FindSoftware(s.Ctx, "")
+	s.NoError(err)
+
+	if diff := cmp.Diff([]model.PackageSourceOrArtifact{}, results, ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
 }
