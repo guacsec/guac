@@ -42,24 +42,34 @@ var (
 		IsDependency: []assembler.IsDependencyIngest{
 
 			{
+
 				Pkg: &model.PkgInputSpec{
 					Type:      "deb",
 					Namespace: ptrfrom.String("ubuntu"),
 					Name:      "dpkg",
 					Version:   ptrfrom.String("1.19.0"),
+					Qualifiers: []model.PackageQualifierInputSpec{
+						{Key: "arch", Value: "amd64"},
+					},
 				},
 				DepPkg: &model.PkgInputSpec{
 					Type:      "conan",
 					Namespace: ptrfrom.String("openssl.org"),
 					Name:      "openssl",
-					Version:   ptrfrom.String("3.0.3"),
+
+					Version: ptrfrom.String("3.0.3"),
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 			{
@@ -74,13 +84,21 @@ var (
 					Namespace: ptrfrom.String("ubuntu"),
 					Name:      "dpkg",
 					Version:   ptrfrom.String("1.19.0"),
+					Qualifiers: []model.PackageQualifierInputSpec{
+						{Key: "arch", Value: "amd64"},
+					},
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 			{
@@ -94,14 +112,20 @@ var (
 					Type:      "top",
 					Namespace: ptrfrom.String("topns"),
 					Name:      "toppkg",
-					Version:   ptrfrom.String("1.19.0"),
+
+					Version: ptrfrom.String("1.19.0"),
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 			{
@@ -115,14 +139,20 @@ var (
 					Type:      "top",
 					Namespace: ptrfrom.String("topns"),
 					Name:      "toppkg",
-					Version:   ptrfrom.String("1.19.0"),
+
+					Version: ptrfrom.String("1.19.0"),
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeIndirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 			{
@@ -152,19 +182,28 @@ var (
 					Namespace: ptrfrom.String("ubuntu"),
 					Name:      "dpkg",
 					Version:   ptrfrom.String("1.19.0"),
+					Qualifiers: []model.PackageQualifierInputSpec{
+						{Key: "arch", Value: "amd64"},
+					},
 				},
 				DepPkg: &model.PkgInputSpec{
 					Type:      "conan2",
 					Namespace: ptrfrom.String("openssl.org2"),
 					Name:      "openssl2",
-					Version:   ptrfrom.String("3.0.3"),
+
+					Version: ptrfrom.String("3.0.3"),
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 		},
@@ -174,7 +213,7 @@ var (
 func ingestTestData(graphInput string, ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 	switch graphInput {
-	case "isDependency":
+	case "isDep":
 		for _, ingest := range isDepTestData.IsDependency {
 
 			_, err := model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
@@ -187,7 +226,7 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 	}
 }
 
-func Test_SearchConnectionsFromStartNode(t *testing.T) {
+func Test_SearchSubgraphFromVuln(t *testing.T) {
 	server, logger := startTestServer()
 	ctx := logging.WithLogger(context.Background())
 
@@ -207,67 +246,66 @@ func Test_SearchConnectionsFromStartNode(t *testing.T) {
 			start:       0,
 			stop:        -1,
 			maxDepth:    10,
-			expectedLen: 5,
-			graphInput:  "isDependency",
+			expectedLen: 3,
+			graphInput:  "isDep",
 		},
 		{
 			name:        " 2: two levels of dependencies, no stopID and no limiting maxDepth",
 			start:       1,
 			stop:        -1,
 			maxDepth:    10,
-			expectedLen: 7,
-			graphInput:  "isDependency",
+			expectedLen: 4,
+			graphInput:  "isDep",
 		},
 		{
 			name:        "3: two levels of dependencies, a stopID at the first level and no limiting maxDepth",
 			start:       1,
 			stop:        0,
 			maxDepth:    10,
-			expectedLen: 3,
-			graphInput:  "isDependency",
+			expectedLen: 2,
+			graphInput:  "isDep",
 		},
 		{
 			name:        "4: two levels of dependencies, no stopID and a limiting maxDepth at the first level",
 			start:       2,
 			stop:        -1,
 			maxDepth:    1,
-			expectedLen: 3,
-			graphInput:  "isDependency",
+			expectedLen: 2,
+			graphInput:  "isDep",
 		},
 		{
 			name:        "5: indirect dependency",
 			start:       3,
 			stop:        -1,
-			maxDepth:    10,
-			expectedLen: 9,
-			graphInput:  "isDependency",
+			maxDepth:    1,
+			expectedLen: 2,
+			graphInput:  "isDep",
 		},
 		{
-			name:        "6: isDependency range that does not include the dependency",
+			name:        "// 6: isDep range that does not include the dependency",
 			start:       4,
 			stop:        -1,
 			maxDepth:    10,
 			expectedLen: 1,
-			graphInput:  "isDependency",
+			graphInput:  "isDep",
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("test case %s\n", tt.name), func(t *testing.T) {
 			ingestTestData(tt.graphInput, ctx, gqlclient)
-			startID := getPackageId("isDependency", tt.start, ctx, gqlclient)
+			startID := getPackageId("isDep", tt.start, ctx, gqlclient)
 
 			var stopID string
 			if tt.stop >= 0 {
-				stopID = getPackageId("isDependency", tt.stop, ctx, gqlclient)
+				stopID = getPackageId("isDep", tt.stop, ctx, gqlclient)
 			} else {
 				stopID = ""
 			}
 
-			gotMap, err := SearchConnectionsFromStartNode(ctx, gqlclient, startID, stopID, "packageVersion", tt.maxDepth)
-
+			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, startID, stopID, tt.maxDepth)
 			if err != nil {
-				t.Errorf("got err from SearchDependenciesFromStartNode: %v", err)
+				t.Errorf("got err from searchDependenciesFromStartNode: %v", err)
 				return
 			}
 
@@ -349,18 +387,22 @@ func getGraphqlTestServer() (*handler.Server, error) {
 }
 
 func getPackageId(graph string, entry int, ctx context.Context, gqlclient graphql.Client) string {
-	if graph == "isDependency" {
+	if graph == "isDep" {
 		pkgFilter := &model.PkgSpec{
+
 			Type:      &isDepTestData.IsDependency[entry].Pkg.Type,
 			Namespace: isDepTestData.IsDependency[entry].Pkg.Namespace,
 			Name:      &isDepTestData.IsDependency[entry].Pkg.Name,
 		}
 		pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
+
 		if err != nil {
-			fmt.Printf("Error getting id for isDependency test case: %s\n", err)
+			fmt.Printf("Error getting id for isDep test case: %s\n", err)
 			return ""
 		}
+
 		return pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id
 	}
+
 	return ""
 }
