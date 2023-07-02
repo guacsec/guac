@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -129,14 +129,14 @@ func (sau *SLSAAttestationUpdate) AddBuiltFrom(a ...*Artifact) *SLSAAttestationU
 	return sau.AddBuiltFromIDs(ids...)
 }
 
-// AddBuiltByIDs adds the "built_by" edge to the BuilderNode entity by IDs.
+// AddBuiltByIDs adds the "built_by" edge to the Builder entity by IDs.
 func (sau *SLSAAttestationUpdate) AddBuiltByIDs(ids ...int) *SLSAAttestationUpdate {
 	sau.mutation.AddBuiltByIDs(ids...)
 	return sau
 }
 
-// AddBuiltBy adds the "built_by" edges to the BuilderNode entity.
-func (sau *SLSAAttestationUpdate) AddBuiltBy(b ...*BuilderNode) *SLSAAttestationUpdate {
+// AddBuiltBy adds the "built_by" edges to the Builder entity.
+func (sau *SLSAAttestationUpdate) AddBuiltBy(b ...*Builder) *SLSAAttestationUpdate {
 	ids := make([]int, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
@@ -170,20 +170,20 @@ func (sau *SLSAAttestationUpdate) RemoveBuiltFrom(a ...*Artifact) *SLSAAttestati
 	return sau.RemoveBuiltFromIDs(ids...)
 }
 
-// ClearBuiltBy clears all "built_by" edges to the BuilderNode entity.
+// ClearBuiltBy clears all "built_by" edges to the Builder entity.
 func (sau *SLSAAttestationUpdate) ClearBuiltBy() *SLSAAttestationUpdate {
 	sau.mutation.ClearBuiltBy()
 	return sau
 }
 
-// RemoveBuiltByIDs removes the "built_by" edge to BuilderNode entities by IDs.
+// RemoveBuiltByIDs removes the "built_by" edge to Builder entities by IDs.
 func (sau *SLSAAttestationUpdate) RemoveBuiltByIDs(ids ...int) *SLSAAttestationUpdate {
 	sau.mutation.RemoveBuiltByIDs(ids...)
 	return sau
 }
 
-// RemoveBuiltBy removes "built_by" edges to BuilderNode entities.
-func (sau *SLSAAttestationUpdate) RemoveBuiltBy(b ...*BuilderNode) *SLSAAttestationUpdate {
+// RemoveBuiltBy removes "built_by" edges to Builder entities.
+func (sau *SLSAAttestationUpdate) RemoveBuiltBy(b ...*Builder) *SLSAAttestationUpdate {
 	ids := make([]int, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
@@ -315,7 +315,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(buildernode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -328,7 +328,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(buildernode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -344,7 +344,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(buildernode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -469,14 +469,14 @@ func (sauo *SLSAAttestationUpdateOne) AddBuiltFrom(a ...*Artifact) *SLSAAttestat
 	return sauo.AddBuiltFromIDs(ids...)
 }
 
-// AddBuiltByIDs adds the "built_by" edge to the BuilderNode entity by IDs.
+// AddBuiltByIDs adds the "built_by" edge to the Builder entity by IDs.
 func (sauo *SLSAAttestationUpdateOne) AddBuiltByIDs(ids ...int) *SLSAAttestationUpdateOne {
 	sauo.mutation.AddBuiltByIDs(ids...)
 	return sauo
 }
 
-// AddBuiltBy adds the "built_by" edges to the BuilderNode entity.
-func (sauo *SLSAAttestationUpdateOne) AddBuiltBy(b ...*BuilderNode) *SLSAAttestationUpdateOne {
+// AddBuiltBy adds the "built_by" edges to the Builder entity.
+func (sauo *SLSAAttestationUpdateOne) AddBuiltBy(b ...*Builder) *SLSAAttestationUpdateOne {
 	ids := make([]int, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
@@ -510,20 +510,20 @@ func (sauo *SLSAAttestationUpdateOne) RemoveBuiltFrom(a ...*Artifact) *SLSAAttes
 	return sauo.RemoveBuiltFromIDs(ids...)
 }
 
-// ClearBuiltBy clears all "built_by" edges to the BuilderNode entity.
+// ClearBuiltBy clears all "built_by" edges to the Builder entity.
 func (sauo *SLSAAttestationUpdateOne) ClearBuiltBy() *SLSAAttestationUpdateOne {
 	sauo.mutation.ClearBuiltBy()
 	return sauo
 }
 
-// RemoveBuiltByIDs removes the "built_by" edge to BuilderNode entities by IDs.
+// RemoveBuiltByIDs removes the "built_by" edge to Builder entities by IDs.
 func (sauo *SLSAAttestationUpdateOne) RemoveBuiltByIDs(ids ...int) *SLSAAttestationUpdateOne {
 	sauo.mutation.RemoveBuiltByIDs(ids...)
 	return sauo
 }
 
-// RemoveBuiltBy removes "built_by" edges to BuilderNode entities.
-func (sauo *SLSAAttestationUpdateOne) RemoveBuiltBy(b ...*BuilderNode) *SLSAAttestationUpdateOne {
+// RemoveBuiltBy removes "built_by" edges to Builder entities.
+func (sauo *SLSAAttestationUpdateOne) RemoveBuiltBy(b ...*Builder) *SLSAAttestationUpdateOne {
 	ids := make([]int, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
@@ -685,7 +685,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(buildernode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -698,7 +698,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(buildernode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -714,7 +714,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(buildernode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

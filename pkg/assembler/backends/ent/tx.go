@@ -16,8 +16,8 @@ type Tx struct {
 	Artifact *ArtifactClient
 	// BillOfMaterials is the client for interacting with the BillOfMaterials builders.
 	BillOfMaterials *BillOfMaterialsClient
-	// BuilderNode is the client for interacting with the BuilderNode builders.
-	BuilderNode *BuilderNodeClient
+	// Builder is the client for interacting with the Builder builders.
+	Builder *BuilderClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
 	// Occurrence is the client for interacting with the Occurrence builders.
@@ -171,7 +171,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Artifact = NewArtifactClient(tx.config)
 	tx.BillOfMaterials = NewBillOfMaterialsClient(tx.config)
-	tx.BuilderNode = NewBuilderNodeClient(tx.config)
+	tx.Builder = NewBuilderClient(tx.config)
 	tx.Dependency = NewDependencyClient(tx.config)
 	tx.Occurrence = NewOccurrenceClient(tx.config)
 	tx.PackageName = NewPackageNameClient(tx.config)

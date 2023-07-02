@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
@@ -25,7 +25,7 @@ type SLSAAttestationQuery struct {
 	inters        []Interceptor
 	predicates    []predicate.SLSAAttestation
 	withBuiltFrom *ArtifactQuery
-	withBuiltBy   *BuilderNodeQuery
+	withBuiltBy   *BuilderQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -85,8 +85,8 @@ func (saq *SLSAAttestationQuery) QueryBuiltFrom() *ArtifactQuery {
 }
 
 // QueryBuiltBy chains the current query on the "built_by" edge.
-func (saq *SLSAAttestationQuery) QueryBuiltBy() *BuilderNodeQuery {
-	query := (&BuilderNodeClient{config: saq.config}).Query()
+func (saq *SLSAAttestationQuery) QueryBuiltBy() *BuilderQuery {
+	query := (&BuilderClient{config: saq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := saq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -97,7 +97,7 @@ func (saq *SLSAAttestationQuery) QueryBuiltBy() *BuilderNodeQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, selector),
-			sqlgraph.To(buildernode.Table, buildernode.FieldID),
+			sqlgraph.To(builder.Table, builder.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(saq.driver.Dialect(), step)
@@ -319,8 +319,8 @@ func (saq *SLSAAttestationQuery) WithBuiltFrom(opts ...func(*ArtifactQuery)) *SL
 
 // WithBuiltBy tells the query-builder to eager-load the nodes that are connected to
 // the "built_by" edge. The optional arguments are used to configure the query builder of the edge.
-func (saq *SLSAAttestationQuery) WithBuiltBy(opts ...func(*BuilderNodeQuery)) *SLSAAttestationQuery {
-	query := (&BuilderNodeClient{config: saq.config}).Query()
+func (saq *SLSAAttestationQuery) WithBuiltBy(opts ...func(*BuilderQuery)) *SLSAAttestationQuery {
+	query := (&BuilderClient{config: saq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -438,8 +438,8 @@ func (saq *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	}
 	if query := saq.withBuiltBy; query != nil {
 		if err := saq.loadBuiltBy(ctx, query, nodes,
-			func(n *SLSAAttestation) { n.Edges.BuiltBy = []*BuilderNode{} },
-			func(n *SLSAAttestation, e *BuilderNode) { n.Edges.BuiltBy = append(n.Edges.BuiltBy, e) }); err != nil {
+			func(n *SLSAAttestation) { n.Edges.BuiltBy = []*Builder{} },
+			func(n *SLSAAttestation, e *Builder) { n.Edges.BuiltBy = append(n.Edges.BuiltBy, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -477,7 +477,7 @@ func (saq *SLSAAttestationQuery) loadBuiltFrom(ctx context.Context, query *Artif
 	}
 	return nil
 }
-func (saq *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *BuilderNodeQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *BuilderNode)) error {
+func (saq *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *BuilderQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Builder)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*SLSAAttestation)
 	for i := range nodes {
@@ -488,7 +488,7 @@ func (saq *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *Builder
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.BuilderNode(func(s *sql.Selector) {
+	query.Where(predicate.Builder(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(slsaattestation.BuiltByColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)

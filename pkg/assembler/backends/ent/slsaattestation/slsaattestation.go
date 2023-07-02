@@ -40,10 +40,10 @@ const (
 	// BuiltFromColumn is the table column denoting the built_from relation/edge.
 	BuiltFromColumn = "slsa_attestation_built_from"
 	// BuiltByTable is the table that holds the built_by relation/edge.
-	BuiltByTable = "builder_nodes"
-	// BuiltByInverseTable is the table name for the BuilderNode entity.
-	// It exists in this package in order to avoid circular dependency with the "buildernode" package.
-	BuiltByInverseTable = "builder_nodes"
+	BuiltByTable = "builders"
+	// BuiltByInverseTable is the table name for the Builder entity.
+	// It exists in this package in order to avoid circular dependency with the "builder" package.
+	BuiltByInverseTable = "builders"
 	// BuiltByColumn is the table column denoting the built_by relation/edge.
 	BuiltByColumn = "slsa_attestation_built_by"
 )

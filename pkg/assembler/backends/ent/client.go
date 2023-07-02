@@ -16,7 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -38,8 +38,8 @@ type Client struct {
 	Artifact *ArtifactClient
 	// BillOfMaterials is the client for interacting with the BillOfMaterials builders.
 	BillOfMaterials *BillOfMaterialsClient
-	// BuilderNode is the client for interacting with the BuilderNode builders.
-	BuilderNode *BuilderNodeClient
+	// Builder is the client for interacting with the Builder builders.
+	Builder *BuilderClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
 	// Occurrence is the client for interacting with the Occurrence builders.
@@ -75,7 +75,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Artifact = NewArtifactClient(c.config)
 	c.BillOfMaterials = NewBillOfMaterialsClient(c.config)
-	c.BuilderNode = NewBuilderNodeClient(c.config)
+	c.Builder = NewBuilderClient(c.config)
 	c.Dependency = NewDependencyClient(c.config)
 	c.Occurrence = NewOccurrenceClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
@@ -170,7 +170,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:           cfg,
 		Artifact:         NewArtifactClient(cfg),
 		BillOfMaterials:  NewBillOfMaterialsClient(cfg),
-		BuilderNode:      NewBuilderNodeClient(cfg),
+		Builder:          NewBuilderClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
@@ -202,7 +202,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:           cfg,
 		Artifact:         NewArtifactClient(cfg),
 		BillOfMaterials:  NewBillOfMaterialsClient(cfg),
-		BuilderNode:      NewBuilderNodeClient(cfg),
+		Builder:          NewBuilderClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
@@ -242,7 +242,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Artifact, c.BillOfMaterials, c.BuilderNode, c.Dependency, c.Occurrence,
+		c.Artifact, c.BillOfMaterials, c.Builder, c.Dependency, c.Occurrence,
 		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion,
 		c.SLSAAttestation, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
@@ -254,7 +254,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Artifact, c.BillOfMaterials, c.BuilderNode, c.Dependency, c.Occurrence,
+		c.Artifact, c.BillOfMaterials, c.Builder, c.Dependency, c.Occurrence,
 		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion,
 		c.SLSAAttestation, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
@@ -269,8 +269,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Artifact.mutate(ctx, m)
 	case *BillOfMaterialsMutation:
 		return c.BillOfMaterials.mutate(ctx, m)
-	case *BuilderNodeMutation:
-		return c.BuilderNode.mutate(ctx, m)
+	case *BuilderMutation:
+		return c.Builder.mutate(ctx, m)
 	case *DependencyMutation:
 		return c.Dependency.mutate(ctx, m)
 	case *OccurrenceMutation:
@@ -596,92 +596,92 @@ func (c *BillOfMaterialsClient) mutate(ctx context.Context, m *BillOfMaterialsMu
 	}
 }
 
-// BuilderNodeClient is a client for the BuilderNode schema.
-type BuilderNodeClient struct {
+// BuilderClient is a client for the Builder schema.
+type BuilderClient struct {
 	config
 }
 
-// NewBuilderNodeClient returns a client for the BuilderNode from the given config.
-func NewBuilderNodeClient(c config) *BuilderNodeClient {
-	return &BuilderNodeClient{config: c}
+// NewBuilderClient returns a client for the Builder from the given config.
+func NewBuilderClient(c config) *BuilderClient {
+	return &BuilderClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `buildernode.Hooks(f(g(h())))`.
-func (c *BuilderNodeClient) Use(hooks ...Hook) {
-	c.hooks.BuilderNode = append(c.hooks.BuilderNode, hooks...)
+// A call to `Use(f, g, h)` equals to `builder.Hooks(f(g(h())))`.
+func (c *BuilderClient) Use(hooks ...Hook) {
+	c.hooks.Builder = append(c.hooks.Builder, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `buildernode.Intercept(f(g(h())))`.
-func (c *BuilderNodeClient) Intercept(interceptors ...Interceptor) {
-	c.inters.BuilderNode = append(c.inters.BuilderNode, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `builder.Intercept(f(g(h())))`.
+func (c *BuilderClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Builder = append(c.inters.Builder, interceptors...)
 }
 
-// Create returns a builder for creating a BuilderNode entity.
-func (c *BuilderNodeClient) Create() *BuilderNodeCreate {
-	mutation := newBuilderNodeMutation(c.config, OpCreate)
-	return &BuilderNodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Builder entity.
+func (c *BuilderClient) Create() *BuilderCreate {
+	mutation := newBuilderMutation(c.config, OpCreate)
+	return &BuilderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of BuilderNode entities.
-func (c *BuilderNodeClient) CreateBulk(builders ...*BuilderNodeCreate) *BuilderNodeCreateBulk {
-	return &BuilderNodeCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Builder entities.
+func (c *BuilderClient) CreateBulk(builders ...*BuilderCreate) *BuilderCreateBulk {
+	return &BuilderCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for BuilderNode.
-func (c *BuilderNodeClient) Update() *BuilderNodeUpdate {
-	mutation := newBuilderNodeMutation(c.config, OpUpdate)
-	return &BuilderNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Builder.
+func (c *BuilderClient) Update() *BuilderUpdate {
+	mutation := newBuilderMutation(c.config, OpUpdate)
+	return &BuilderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *BuilderNodeClient) UpdateOne(bn *BuilderNode) *BuilderNodeUpdateOne {
-	mutation := newBuilderNodeMutation(c.config, OpUpdateOne, withBuilderNode(bn))
-	return &BuilderNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *BuilderClient) UpdateOne(b *Builder) *BuilderUpdateOne {
+	mutation := newBuilderMutation(c.config, OpUpdateOne, withBuilder(b))
+	return &BuilderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *BuilderNodeClient) UpdateOneID(id int) *BuilderNodeUpdateOne {
-	mutation := newBuilderNodeMutation(c.config, OpUpdateOne, withBuilderNodeID(id))
-	return &BuilderNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *BuilderClient) UpdateOneID(id int) *BuilderUpdateOne {
+	mutation := newBuilderMutation(c.config, OpUpdateOne, withBuilderID(id))
+	return &BuilderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for BuilderNode.
-func (c *BuilderNodeClient) Delete() *BuilderNodeDelete {
-	mutation := newBuilderNodeMutation(c.config, OpDelete)
-	return &BuilderNodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Builder.
+func (c *BuilderClient) Delete() *BuilderDelete {
+	mutation := newBuilderMutation(c.config, OpDelete)
+	return &BuilderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *BuilderNodeClient) DeleteOne(bn *BuilderNode) *BuilderNodeDeleteOne {
-	return c.DeleteOneID(bn.ID)
+func (c *BuilderClient) DeleteOne(b *Builder) *BuilderDeleteOne {
+	return c.DeleteOneID(b.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *BuilderNodeClient) DeleteOneID(id int) *BuilderNodeDeleteOne {
-	builder := c.Delete().Where(buildernode.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &BuilderNodeDeleteOne{builder}
+func (c *BuilderClient) DeleteOneID(id int) *BuilderDeleteOne {
+	builderC := c.Delete().Where(builder.ID(id))
+	builderC.mutation.id = &id
+	builderC.mutation.op = OpDeleteOne
+	return &BuilderDeleteOne{builderC}
 }
 
-// Query returns a query builder for BuilderNode.
-func (c *BuilderNodeClient) Query() *BuilderNodeQuery {
-	return &BuilderNodeQuery{
+// Query returns a query builder for Builder.
+func (c *BuilderClient) Query() *BuilderQuery {
+	return &BuilderQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeBuilderNode},
+		ctx:    &QueryContext{Type: TypeBuilder},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a BuilderNode entity by its id.
-func (c *BuilderNodeClient) Get(ctx context.Context, id int) (*BuilderNode, error) {
-	return c.Query().Where(buildernode.ID(id)).Only(ctx)
+// Get returns a Builder entity by its id.
+func (c *BuilderClient) Get(ctx context.Context, id int) (*Builder, error) {
+	return c.Query().Where(builder.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *BuilderNodeClient) GetX(ctx context.Context, id int) *BuilderNode {
+func (c *BuilderClient) GetX(ctx context.Context, id int) *Builder {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -690,27 +690,27 @@ func (c *BuilderNodeClient) GetX(ctx context.Context, id int) *BuilderNode {
 }
 
 // Hooks returns the client hooks.
-func (c *BuilderNodeClient) Hooks() []Hook {
-	return c.hooks.BuilderNode
+func (c *BuilderClient) Hooks() []Hook {
+	return c.hooks.Builder
 }
 
 // Interceptors returns the client interceptors.
-func (c *BuilderNodeClient) Interceptors() []Interceptor {
-	return c.inters.BuilderNode
+func (c *BuilderClient) Interceptors() []Interceptor {
+	return c.inters.Builder
 }
 
-func (c *BuilderNodeClient) mutate(ctx context.Context, m *BuilderNodeMutation) (Value, error) {
+func (c *BuilderClient) mutate(ctx context.Context, m *BuilderMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&BuilderNodeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&BuilderCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&BuilderNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&BuilderUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&BuilderNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&BuilderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&BuilderNodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&BuilderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown BuilderNode mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Builder mutation op: %q", m.Op())
 	}
 }
 
@@ -1740,13 +1740,13 @@ func (c *SLSAAttestationClient) QueryBuiltFrom(sa *SLSAAttestation) *ArtifactQue
 }
 
 // QueryBuiltBy queries the built_by edge of a SLSAAttestation.
-func (c *SLSAAttestationClient) QueryBuiltBy(sa *SLSAAttestation) *BuilderNodeQuery {
-	query := (&BuilderNodeClient{config: c.config}).Query()
+func (c *SLSAAttestationClient) QueryBuiltBy(sa *SLSAAttestation) *BuilderQuery {
+	query := (&BuilderClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := sa.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
-			sqlgraph.To(buildernode.Table, buildernode.FieldID),
+			sqlgraph.To(builder.Table, builder.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
 		)
 		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
@@ -2217,12 +2217,12 @@ func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (V
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BillOfMaterials, BuilderNode, Dependency, Occurrence, PackageName,
+		Artifact, BillOfMaterials, Builder, Dependency, Occurrence, PackageName,
 		PackageNamespace, PackageType, PackageVersion, SLSAAttestation, SourceName,
 		SourceNamespace, SourceType []ent.Hook
 	}
 	inters struct {
-		Artifact, BillOfMaterials, BuilderNode, Dependency, Occurrence, PackageName,
+		Artifact, BillOfMaterials, Builder, Dependency, Occurrence, PackageName,
 		PackageNamespace, PackageType, PackageVersion, SLSAAttestation, SourceName,
 		SourceNamespace, SourceType []ent.Interceptor
 	}

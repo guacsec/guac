@@ -10,36 +10,36 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 )
 
-// BuilderNodeCreate is the builder for creating a BuilderNode entity.
-type BuilderNodeCreate struct {
+// BuilderCreate is the builder for creating a Builder entity.
+type BuilderCreate struct {
 	config
-	mutation *BuilderNodeMutation
+	mutation *BuilderMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
 }
 
 // SetURI sets the "uri" field.
-func (bnc *BuilderNodeCreate) SetURI(s string) *BuilderNodeCreate {
-	bnc.mutation.SetURI(s)
-	return bnc
+func (bc *BuilderCreate) SetURI(s string) *BuilderCreate {
+	bc.mutation.SetURI(s)
+	return bc
 }
 
-// Mutation returns the BuilderNodeMutation object of the builder.
-func (bnc *BuilderNodeCreate) Mutation() *BuilderNodeMutation {
-	return bnc.mutation
+// Mutation returns the BuilderMutation object of the builder.
+func (bc *BuilderCreate) Mutation() *BuilderMutation {
+	return bc.mutation
 }
 
-// Save creates the BuilderNode in the database.
-func (bnc *BuilderNodeCreate) Save(ctx context.Context) (*BuilderNode, error) {
-	return withHooks(ctx, bnc.sqlSave, bnc.mutation, bnc.hooks)
+// Save creates the Builder in the database.
+func (bc *BuilderCreate) Save(ctx context.Context) (*Builder, error) {
+	return withHooks(ctx, bc.sqlSave, bc.mutation, bc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (bnc *BuilderNodeCreate) SaveX(ctx context.Context) *BuilderNode {
-	v, err := bnc.Save(ctx)
+func (bc *BuilderCreate) SaveX(ctx context.Context) *Builder {
+	v, err := bc.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -47,32 +47,32 @@ func (bnc *BuilderNodeCreate) SaveX(ctx context.Context) *BuilderNode {
 }
 
 // Exec executes the query.
-func (bnc *BuilderNodeCreate) Exec(ctx context.Context) error {
-	_, err := bnc.Save(ctx)
+func (bc *BuilderCreate) Exec(ctx context.Context) error {
+	_, err := bc.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bnc *BuilderNodeCreate) ExecX(ctx context.Context) {
-	if err := bnc.Exec(ctx); err != nil {
+func (bc *BuilderCreate) ExecX(ctx context.Context) {
+	if err := bc.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (bnc *BuilderNodeCreate) check() error {
-	if _, ok := bnc.mutation.URI(); !ok {
-		return &ValidationError{Name: "uri", err: errors.New(`ent: missing required field "BuilderNode.uri"`)}
+func (bc *BuilderCreate) check() error {
+	if _, ok := bc.mutation.URI(); !ok {
+		return &ValidationError{Name: "uri", err: errors.New(`ent: missing required field "Builder.uri"`)}
 	}
 	return nil
 }
 
-func (bnc *BuilderNodeCreate) sqlSave(ctx context.Context) (*BuilderNode, error) {
-	if err := bnc.check(); err != nil {
+func (bc *BuilderCreate) sqlSave(ctx context.Context) (*Builder, error) {
+	if err := bc.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := bnc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, bnc.driver, _spec); err != nil {
+	_node, _spec := bc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -80,19 +80,19 @@ func (bnc *BuilderNodeCreate) sqlSave(ctx context.Context) (*BuilderNode, error)
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	bnc.mutation.id = &_node.ID
-	bnc.mutation.done = true
+	bc.mutation.id = &_node.ID
+	bc.mutation.done = true
 	return _node, nil
 }
 
-func (bnc *BuilderNodeCreate) createSpec() (*BuilderNode, *sqlgraph.CreateSpec) {
+func (bc *BuilderCreate) createSpec() (*Builder, *sqlgraph.CreateSpec) {
 	var (
-		_node = &BuilderNode{config: bnc.config}
-		_spec = sqlgraph.NewCreateSpec(buildernode.Table, sqlgraph.NewFieldSpec(buildernode.FieldID, field.TypeInt))
+		_node = &Builder{config: bc.config}
+		_spec = sqlgraph.NewCreateSpec(builder.Table, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = bnc.conflict
-	if value, ok := bnc.mutation.URI(); ok {
-		_spec.SetField(buildernode.FieldURI, field.TypeString, value)
+	_spec.OnConflict = bc.conflict
+	if value, ok := bc.mutation.URI(); ok {
+		_spec.SetField(builder.FieldURI, field.TypeString, value)
 		_node.URI = value
 	}
 	return _node, _spec
@@ -101,7 +101,7 @@ func (bnc *BuilderNodeCreate) createSpec() (*BuilderNode, *sqlgraph.CreateSpec) 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.BuilderNode.Create().
+//	client.Builder.Create().
 //		SetURI(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -110,39 +110,39 @@ func (bnc *BuilderNodeCreate) createSpec() (*BuilderNode, *sqlgraph.CreateSpec) 
 //		).
 //		// Override some of the fields with custom
 //		// update values.
-//		Update(func(u *ent.BuilderNodeUpsert) {
+//		Update(func(u *ent.BuilderUpsert) {
 //			SetURI(v+v).
 //		}).
 //		Exec(ctx)
-func (bnc *BuilderNodeCreate) OnConflict(opts ...sql.ConflictOption) *BuilderNodeUpsertOne {
-	bnc.conflict = opts
-	return &BuilderNodeUpsertOne{
-		create: bnc,
+func (bc *BuilderCreate) OnConflict(opts ...sql.ConflictOption) *BuilderUpsertOne {
+	bc.conflict = opts
+	return &BuilderUpsertOne{
+		create: bc,
 	}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.BuilderNode.Create().
+//	client.Builder.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (bnc *BuilderNodeCreate) OnConflictColumns(columns ...string) *BuilderNodeUpsertOne {
-	bnc.conflict = append(bnc.conflict, sql.ConflictColumns(columns...))
-	return &BuilderNodeUpsertOne{
-		create: bnc,
+func (bc *BuilderCreate) OnConflictColumns(columns ...string) *BuilderUpsertOne {
+	bc.conflict = append(bc.conflict, sql.ConflictColumns(columns...))
+	return &BuilderUpsertOne{
+		create: bc,
 	}
 }
 
 type (
-	// BuilderNodeUpsertOne is the builder for "upsert"-ing
-	//  one BuilderNode node.
-	BuilderNodeUpsertOne struct {
-		create *BuilderNodeCreate
+	// BuilderUpsertOne is the builder for "upsert"-ing
+	//  one Builder node.
+	BuilderUpsertOne struct {
+		create *BuilderCreate
 	}
 
-	// BuilderNodeUpsert is the "OnConflict" setter.
-	BuilderNodeUpsert struct {
+	// BuilderUpsert is the "OnConflict" setter.
+	BuilderUpsert struct {
 		*sql.UpdateSet
 	}
 )
@@ -150,16 +150,16 @@ type (
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
-//	client.BuilderNode.Create().
+//	client.Builder.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (u *BuilderNodeUpsertOne) UpdateNewValues() *BuilderNodeUpsertOne {
+func (u *BuilderUpsertOne) UpdateNewValues() *BuilderUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.URI(); exists {
-			s.SetIgnore(buildernode.FieldURI)
+			s.SetIgnore(builder.FieldURI)
 		}
 	}))
 	return u
@@ -168,47 +168,47 @@ func (u *BuilderNodeUpsertOne) UpdateNewValues() *BuilderNodeUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.BuilderNode.Create().
+//	client.Builder.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
-func (u *BuilderNodeUpsertOne) Ignore() *BuilderNodeUpsertOne {
+func (u *BuilderUpsertOne) Ignore() *BuilderUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *BuilderNodeUpsertOne) DoNothing() *BuilderNodeUpsertOne {
+func (u *BuilderUpsertOne) DoNothing() *BuilderUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the BuilderNodeCreate.OnConflict
+// Update allows overriding fields `UPDATE` values. See the BuilderCreate.OnConflict
 // documentation for more info.
-func (u *BuilderNodeUpsertOne) Update(set func(*BuilderNodeUpsert)) *BuilderNodeUpsertOne {
+func (u *BuilderUpsertOne) Update(set func(*BuilderUpsert)) *BuilderUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&BuilderNodeUpsert{UpdateSet: update})
+		set(&BuilderUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // Exec executes the query.
-func (u *BuilderNodeUpsertOne) Exec(ctx context.Context) error {
+func (u *BuilderUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for BuilderNodeCreate.OnConflict")
+		return errors.New("ent: missing options for BuilderCreate.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *BuilderNodeUpsertOne) ExecX(ctx context.Context) {
+func (u *BuilderUpsertOne) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *BuilderNodeUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *BuilderUpsertOne) ID(ctx context.Context) (id int, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -217,7 +217,7 @@ func (u *BuilderNodeUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *BuilderNodeUpsertOne) IDX(ctx context.Context) int {
+func (u *BuilderUpsertOne) IDX(ctx context.Context) int {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -225,23 +225,23 @@ func (u *BuilderNodeUpsertOne) IDX(ctx context.Context) int {
 	return id
 }
 
-// BuilderNodeCreateBulk is the builder for creating many BuilderNode entities in bulk.
-type BuilderNodeCreateBulk struct {
+// BuilderCreateBulk is the builder for creating many Builder entities in bulk.
+type BuilderCreateBulk struct {
 	config
-	builders []*BuilderNodeCreate
+	builders []*BuilderCreate
 	conflict []sql.ConflictOption
 }
 
-// Save creates the BuilderNode entities in the database.
-func (bncb *BuilderNodeCreateBulk) Save(ctx context.Context) ([]*BuilderNode, error) {
-	specs := make([]*sqlgraph.CreateSpec, len(bncb.builders))
-	nodes := make([]*BuilderNode, len(bncb.builders))
-	mutators := make([]Mutator, len(bncb.builders))
-	for i := range bncb.builders {
+// Save creates the Builder entities in the database.
+func (bcb *BuilderCreateBulk) Save(ctx context.Context) ([]*Builder, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
+	nodes := make([]*Builder, len(bcb.builders))
+	mutators := make([]Mutator, len(bcb.builders))
+	for i := range bcb.builders {
 		func(i int, root context.Context) {
-			builder := bncb.builders[i]
+			builder := bcb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*BuilderNodeMutation)
+				mutation, ok := m.(*BuilderMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -252,12 +252,12 @@ func (bncb *BuilderNodeCreateBulk) Save(ctx context.Context) ([]*BuilderNode, er
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, bncb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = bncb.conflict
+					spec.OnConflict = bcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, bncb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, bcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -281,7 +281,7 @@ func (bncb *BuilderNodeCreateBulk) Save(ctx context.Context) ([]*BuilderNode, er
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, bncb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, bcb.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -289,8 +289,8 @@ func (bncb *BuilderNodeCreateBulk) Save(ctx context.Context) ([]*BuilderNode, er
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (bncb *BuilderNodeCreateBulk) SaveX(ctx context.Context) []*BuilderNode {
-	v, err := bncb.Save(ctx)
+func (bcb *BuilderCreateBulk) SaveX(ctx context.Context) []*Builder {
+	v, err := bcb.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -298,14 +298,14 @@ func (bncb *BuilderNodeCreateBulk) SaveX(ctx context.Context) []*BuilderNode {
 }
 
 // Exec executes the query.
-func (bncb *BuilderNodeCreateBulk) Exec(ctx context.Context) error {
-	_, err := bncb.Save(ctx)
+func (bcb *BuilderCreateBulk) Exec(ctx context.Context) error {
+	_, err := bcb.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bncb *BuilderNodeCreateBulk) ExecX(ctx context.Context) {
-	if err := bncb.Exec(ctx); err != nil {
+func (bcb *BuilderCreateBulk) ExecX(ctx context.Context) {
+	if err := bcb.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -313,7 +313,7 @@ func (bncb *BuilderNodeCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.BuilderNode.CreateBulk(builders...).
+//	client.Builder.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -321,50 +321,50 @@ func (bncb *BuilderNodeCreateBulk) ExecX(ctx context.Context) {
 //		).
 //		// Override some of the fields with custom
 //		// update values.
-//		Update(func(u *ent.BuilderNodeUpsert) {
+//		Update(func(u *ent.BuilderUpsert) {
 //			SetURI(v+v).
 //		}).
 //		Exec(ctx)
-func (bncb *BuilderNodeCreateBulk) OnConflict(opts ...sql.ConflictOption) *BuilderNodeUpsertBulk {
-	bncb.conflict = opts
-	return &BuilderNodeUpsertBulk{
-		create: bncb,
+func (bcb *BuilderCreateBulk) OnConflict(opts ...sql.ConflictOption) *BuilderUpsertBulk {
+	bcb.conflict = opts
+	return &BuilderUpsertBulk{
+		create: bcb,
 	}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.BuilderNode.Create().
+//	client.Builder.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (bncb *BuilderNodeCreateBulk) OnConflictColumns(columns ...string) *BuilderNodeUpsertBulk {
-	bncb.conflict = append(bncb.conflict, sql.ConflictColumns(columns...))
-	return &BuilderNodeUpsertBulk{
-		create: bncb,
+func (bcb *BuilderCreateBulk) OnConflictColumns(columns ...string) *BuilderUpsertBulk {
+	bcb.conflict = append(bcb.conflict, sql.ConflictColumns(columns...))
+	return &BuilderUpsertBulk{
+		create: bcb,
 	}
 }
 
-// BuilderNodeUpsertBulk is the builder for "upsert"-ing
-// a bulk of BuilderNode nodes.
-type BuilderNodeUpsertBulk struct {
-	create *BuilderNodeCreateBulk
+// BuilderUpsertBulk is the builder for "upsert"-ing
+// a bulk of Builder nodes.
+type BuilderUpsertBulk struct {
+	create *BuilderCreateBulk
 }
 
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	client.BuilderNode.Create().
+//	client.Builder.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (u *BuilderNodeUpsertBulk) UpdateNewValues() *BuilderNodeUpsertBulk {
+func (u *BuilderUpsertBulk) UpdateNewValues() *BuilderUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.URI(); exists {
-				s.SetIgnore(buildernode.FieldURI)
+				s.SetIgnore(builder.FieldURI)
 			}
 		}
 	}))
@@ -374,45 +374,45 @@ func (u *BuilderNodeUpsertBulk) UpdateNewValues() *BuilderNodeUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.BuilderNode.Create().
+//	client.Builder.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-func (u *BuilderNodeUpsertBulk) Ignore() *BuilderNodeUpsertBulk {
+func (u *BuilderUpsertBulk) Ignore() *BuilderUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *BuilderNodeUpsertBulk) DoNothing() *BuilderNodeUpsertBulk {
+func (u *BuilderUpsertBulk) DoNothing() *BuilderUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the BuilderNodeCreateBulk.OnConflict
+// Update allows overriding fields `UPDATE` values. See the BuilderCreateBulk.OnConflict
 // documentation for more info.
-func (u *BuilderNodeUpsertBulk) Update(set func(*BuilderNodeUpsert)) *BuilderNodeUpsertBulk {
+func (u *BuilderUpsertBulk) Update(set func(*BuilderUpsert)) *BuilderUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&BuilderNodeUpsert{UpdateSet: update})
+		set(&BuilderUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // Exec executes the query.
-func (u *BuilderNodeUpsertBulk) Exec(ctx context.Context) error {
+func (u *BuilderUpsertBulk) Exec(ctx context.Context) error {
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BuilderNodeCreateBulk instead", i)
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BuilderCreateBulk instead", i)
 		}
 	}
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for BuilderNodeCreateBulk.OnConflict")
+		return errors.New("ent: missing options for BuilderCreateBulk.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *BuilderNodeUpsertBulk) ExecX(ctx context.Context) {
+func (u *BuilderUpsertBulk) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}

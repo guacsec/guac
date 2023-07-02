@@ -148,32 +148,15 @@ func HasNamespacesWith(preds ...predicate.PackageNamespace) predicate.PackageTyp
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.PackageType) predicate.PackageType {
-	return predicate.PackageType(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for _, p := range predicates {
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.PackageType(sql.AndPredicates(predicates...))
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.PackageType) predicate.PackageType {
-	return predicate.PackageType(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for i, p := range predicates {
-			if i > 0 {
-				s1.Or()
-			}
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.PackageType(sql.OrPredicates(predicates...))
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.PackageType) predicate.PackageType {
-	return predicate.PackageType(func(s *sql.Selector) {
-		p(s.Not())
-	})
+	return predicate.PackageType(sql.NotPredicates(p))
 }

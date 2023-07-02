@@ -87,30 +87,30 @@ var (
 			},
 		},
 	}
-	// BuilderNodesColumns holds the columns for the "builder_nodes" table.
-	BuilderNodesColumns = []*schema.Column{
+	// BuildersColumns holds the columns for the "builders" table.
+	BuildersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "uri", Type: field.TypeString, Unique: true},
 		{Name: "slsa_attestation_built_by", Type: field.TypeInt, Nullable: true},
 	}
-	// BuilderNodesTable holds the schema information for the "builder_nodes" table.
-	BuilderNodesTable = &schema.Table{
-		Name:       "builder_nodes",
-		Columns:    BuilderNodesColumns,
-		PrimaryKey: []*schema.Column{BuilderNodesColumns[0]},
+	// BuildersTable holds the schema information for the "builders" table.
+	BuildersTable = &schema.Table{
+		Name:       "builders",
+		Columns:    BuildersColumns,
+		PrimaryKey: []*schema.Column{BuildersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "builder_nodes_slsa_attestations_built_by",
-				Columns:    []*schema.Column{BuilderNodesColumns[2]},
+				Symbol:     "builders_slsa_attestations_built_by",
+				Columns:    []*schema.Column{BuildersColumns[2]},
 				RefColumns: []*schema.Column{SlsaAttestationsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "buildernode_uri",
+				Name:    "builder_uri",
 				Unique:  true,
-				Columns: []*schema.Column{BuilderNodesColumns[1]},
+				Columns: []*schema.Column{BuildersColumns[1]},
 			},
 		},
 	}
@@ -402,7 +402,7 @@ var (
 	Tables = []*schema.Table{
 		ArtifactsTable,
 		BillOfMaterialsTable,
-		BuilderNodesTable,
+		BuildersTable,
 		DependenciesTable,
 		OccurrencesTable,
 		PackageNamesTable,
@@ -420,7 +420,7 @@ func init() {
 	ArtifactsTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	BillOfMaterialsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	BillOfMaterialsTable.ForeignKeys[1].RefTable = ArtifactsTable
-	BuilderNodesTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
+	BuildersTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
 	OccurrencesTable.ForeignKeys[0].RefTable = ArtifactsTable

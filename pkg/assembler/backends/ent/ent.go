@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -87,7 +87,7 @@ func checkColumn(table, column string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			artifact.Table:         artifact.ValidColumn,
 			billofmaterials.Table:  billofmaterials.ValidColumn,
-			buildernode.Table:      buildernode.ValidColumn,
+			builder.Table:          builder.ValidColumn,
 			dependency.Table:       dependency.ValidColumn,
 			occurrence.Table:       occurrence.ValidColumn,
 			packagename.Table:      packagename.ValidColumn,

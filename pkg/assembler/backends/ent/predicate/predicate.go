@@ -12,8 +12,8 @@ type Artifact func(*sql.Selector)
 // BillOfMaterials is the predicate function for billofmaterials builders.
 type BillOfMaterials func(*sql.Selector)
 
-// BuilderNode is the predicate function for buildernode builders.
-type BuilderNode func(*sql.Selector)
+// Builder is the predicate function for builder builders.
+type Builder func(*sql.Selector)
 
 // Dependency is the predicate function for dependency builders.
 type Dependency func(*sql.Selector)

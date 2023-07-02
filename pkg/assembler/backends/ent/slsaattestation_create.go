@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -98,14 +98,14 @@ func (sac *SLSAAttestationCreate) AddBuiltFrom(a ...*Artifact) *SLSAAttestationC
 	return sac.AddBuiltFromIDs(ids...)
 }
 
-// AddBuiltByIDs adds the "built_by" edge to the BuilderNode entity by IDs.
+// AddBuiltByIDs adds the "built_by" edge to the Builder entity by IDs.
 func (sac *SLSAAttestationCreate) AddBuiltByIDs(ids ...int) *SLSAAttestationCreate {
 	sac.mutation.AddBuiltByIDs(ids...)
 	return sac
 }
 
-// AddBuiltBy adds the "built_by" edges to the BuilderNode entity.
-func (sac *SLSAAttestationCreate) AddBuiltBy(b ...*BuilderNode) *SLSAAttestationCreate {
+// AddBuiltBy adds the "built_by" edges to the Builder entity.
+func (sac *SLSAAttestationCreate) AddBuiltBy(b ...*Builder) *SLSAAttestationCreate {
 	ids := make([]int, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
@@ -238,7 +238,7 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(buildernode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

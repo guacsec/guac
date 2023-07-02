@@ -44,7 +44,7 @@ type SLSAAttestationEdges struct {
 	// BuiltFrom holds the value of the built_from edge.
 	BuiltFrom []*Artifact `json:"built_from,omitempty"`
 	// BuiltBy holds the value of the built_by edge.
-	BuiltBy []*BuilderNode `json:"built_by,omitempty"`
+	BuiltBy []*Builder `json:"built_by,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -61,7 +61,7 @@ func (e SLSAAttestationEdges) BuiltFromOrErr() ([]*Artifact, error) {
 
 // BuiltByOrErr returns the BuiltBy value or an error if the edge
 // was not loaded in eager-loading.
-func (e SLSAAttestationEdges) BuiltByOrErr() ([]*BuilderNode, error) {
+func (e SLSAAttestationEdges) BuiltByOrErr() ([]*Builder, error) {
 	if e.loadedTypes[1] {
 		return e.BuiltBy, nil
 	}
@@ -167,7 +167,7 @@ func (sa *SLSAAttestation) QueryBuiltFrom() *ArtifactQuery {
 }
 
 // QueryBuiltBy queries the "built_by" edge of the SLSAAttestation entity.
-func (sa *SLSAAttestation) QueryBuiltBy() *BuilderNodeQuery {
+func (sa *SLSAAttestation) QueryBuiltBy() *BuilderQuery {
 	return NewSLSAAttestationClient(sa.config).QueryBuiltBy(sa)
 }
 

@@ -33,16 +33,16 @@ func (f BillOfMaterialsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BillOfMaterialsMutation", m)
 }
 
-// The BuilderNodeFunc type is an adapter to allow the use of ordinary
-// function as BuilderNode mutator.
-type BuilderNodeFunc func(context.Context, *ent.BuilderNodeMutation) (ent.Value, error)
+// The BuilderFunc type is an adapter to allow the use of ordinary
+// function as Builder mutator.
+type BuilderFunc func(context.Context, *ent.BuilderMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f BuilderNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.BuilderNodeMutation); ok {
+func (f BuilderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BuilderMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BuilderNodeMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BuilderMutation", m)
 }
 
 // The DependencyFunc type is an adapter to allow the use of ordinary

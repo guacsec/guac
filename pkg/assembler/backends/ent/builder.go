@@ -8,11 +8,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 )
 
-// BuilderNode is the model entity for the BuilderNode schema.
-type BuilderNode struct {
+// Builder is the model entity for the Builder schema.
+type Builder struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -23,15 +23,15 @@ type BuilderNode struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*BuilderNode) scanValues(columns []string) ([]any, error) {
+func (*Builder) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case buildernode.FieldID:
+		case builder.FieldID:
 			values[i] = new(sql.NullInt64)
-		case buildernode.FieldURI:
+		case builder.FieldURI:
 			values[i] = new(sql.NullString)
-		case buildernode.ForeignKeys[0]: // slsa_attestation_built_by
+		case builder.ForeignKeys[0]: // slsa_attestation_built_by
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -41,73 +41,73 @@ func (*BuilderNode) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the BuilderNode fields.
-func (bn *BuilderNode) assignValues(columns []string, values []any) error {
+// to the Builder fields.
+func (b *Builder) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case buildernode.FieldID:
+		case builder.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			bn.ID = int(value.Int64)
-		case buildernode.FieldURI:
+			b.ID = int(value.Int64)
+		case builder.FieldURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field uri", values[i])
 			} else if value.Valid {
-				bn.URI = value.String
+				b.URI = value.String
 			}
-		case buildernode.ForeignKeys[0]:
+		case builder.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field slsa_attestation_built_by", value)
 			} else if value.Valid {
-				bn.slsa_attestation_built_by = new(int)
-				*bn.slsa_attestation_built_by = int(value.Int64)
+				b.slsa_attestation_built_by = new(int)
+				*b.slsa_attestation_built_by = int(value.Int64)
 			}
 		default:
-			bn.selectValues.Set(columns[i], values[i])
+			b.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the BuilderNode.
+// Value returns the ent.Value that was dynamically selected and assigned to the Builder.
 // This includes values selected through modifiers, order, etc.
-func (bn *BuilderNode) Value(name string) (ent.Value, error) {
-	return bn.selectValues.Get(name)
+func (b *Builder) Value(name string) (ent.Value, error) {
+	return b.selectValues.Get(name)
 }
 
-// Update returns a builder for updating this BuilderNode.
-// Note that you need to call BuilderNode.Unwrap() before calling this method if this BuilderNode
+// Update returns a builder for updating this Builder.
+// Note that you need to call Builder.Unwrap() before calling this method if this Builder
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (bn *BuilderNode) Update() *BuilderNodeUpdateOne {
-	return NewBuilderNodeClient(bn.config).UpdateOne(bn)
+func (b *Builder) Update() *BuilderUpdateOne {
+	return NewBuilderClient(b.config).UpdateOne(b)
 }
 
-// Unwrap unwraps the BuilderNode entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Builder entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (bn *BuilderNode) Unwrap() *BuilderNode {
-	_tx, ok := bn.config.driver.(*txDriver)
+func (b *Builder) Unwrap() *Builder {
+	_tx, ok := b.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: BuilderNode is not a transactional entity")
+		panic("ent: Builder is not a transactional entity")
 	}
-	bn.config.driver = _tx.drv
-	return bn
+	b.config.driver = _tx.drv
+	return b
 }
 
 // String implements the fmt.Stringer.
-func (bn *BuilderNode) String() string {
+func (b *Builder) String() string {
 	var builder strings.Builder
-	builder.WriteString("BuilderNode(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", bn.ID))
+	builder.WriteString("Builder(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
 	builder.WriteString("uri=")
-	builder.WriteString(bn.URI)
+	builder.WriteString(b.URI)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// BuilderNodes is a parsable slice of BuilderNode.
-type BuilderNodes []*BuilderNode
+// Builders is a parsable slice of Builder.
+type Builders []*Builder

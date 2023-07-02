@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -39,7 +39,7 @@ const (
 	// Node types.
 	TypeArtifact         = "Artifact"
 	TypeBillOfMaterials  = "BillOfMaterials"
-	TypeBuilderNode      = "BuilderNode"
+	TypeBuilder          = "Builder"
 	TypeDependency       = "Dependency"
 	TypeOccurrence       = "Occurrence"
 	TypePackageName      = "PackageName"
@@ -1454,8 +1454,8 @@ func (m *BillOfMaterialsMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown BillOfMaterials edge %s", name)
 }
 
-// BuilderNodeMutation represents an operation that mutates the BuilderNode nodes in the graph.
-type BuilderNodeMutation struct {
+// BuilderMutation represents an operation that mutates the Builder nodes in the graph.
+type BuilderMutation struct {
 	config
 	op            Op
 	typ           string
@@ -1463,21 +1463,21 @@ type BuilderNodeMutation struct {
 	uri           *string
 	clearedFields map[string]struct{}
 	done          bool
-	oldValue      func(context.Context) (*BuilderNode, error)
-	predicates    []predicate.BuilderNode
+	oldValue      func(context.Context) (*Builder, error)
+	predicates    []predicate.Builder
 }
 
-var _ ent.Mutation = (*BuilderNodeMutation)(nil)
+var _ ent.Mutation = (*BuilderMutation)(nil)
 
-// buildernodeOption allows management of the mutation configuration using functional options.
-type buildernodeOption func(*BuilderNodeMutation)
+// builderOption allows management of the mutation configuration using functional options.
+type builderOption func(*BuilderMutation)
 
-// newBuilderNodeMutation creates new mutation for the BuilderNode entity.
-func newBuilderNodeMutation(c config, op Op, opts ...buildernodeOption) *BuilderNodeMutation {
-	m := &BuilderNodeMutation{
+// newBuilderMutation creates new mutation for the Builder entity.
+func newBuilderMutation(c config, op Op, opts ...builderOption) *BuilderMutation {
+	m := &BuilderMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeBuilderNode,
+		typ:           TypeBuilder,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -1486,20 +1486,20 @@ func newBuilderNodeMutation(c config, op Op, opts ...buildernodeOption) *Builder
 	return m
 }
 
-// withBuilderNodeID sets the ID field of the mutation.
-func withBuilderNodeID(id int) buildernodeOption {
-	return func(m *BuilderNodeMutation) {
+// withBuilderID sets the ID field of the mutation.
+func withBuilderID(id int) builderOption {
+	return func(m *BuilderMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *BuilderNode
+			value *Builder
 		)
-		m.oldValue = func(ctx context.Context) (*BuilderNode, error) {
+		m.oldValue = func(ctx context.Context) (*Builder, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().BuilderNode.Get(ctx, id)
+					value, err = m.Client().Builder.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -1508,10 +1508,10 @@ func withBuilderNodeID(id int) buildernodeOption {
 	}
 }
 
-// withBuilderNode sets the old BuilderNode of the mutation.
-func withBuilderNode(node *BuilderNode) buildernodeOption {
-	return func(m *BuilderNodeMutation) {
-		m.oldValue = func(context.Context) (*BuilderNode, error) {
+// withBuilder sets the old Builder of the mutation.
+func withBuilder(node *Builder) builderOption {
+	return func(m *BuilderMutation) {
+		m.oldValue = func(context.Context) (*Builder, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -1520,7 +1520,7 @@ func withBuilderNode(node *BuilderNode) buildernodeOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m BuilderNodeMutation) Client() *Client {
+func (m BuilderMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -1528,7 +1528,7 @@ func (m BuilderNodeMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m BuilderNodeMutation) Tx() (*Tx, error) {
+func (m BuilderMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -1539,7 +1539,7 @@ func (m BuilderNodeMutation) Tx() (*Tx, error) {
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *BuilderNodeMutation) ID() (id int, exists bool) {
+func (m *BuilderMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1550,7 +1550,7 @@ func (m *BuilderNodeMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *BuilderNodeMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *BuilderMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -1559,19 +1559,19 @@ func (m *BuilderNodeMutation) IDs(ctx context.Context) ([]int, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().BuilderNode.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().Builder.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetURI sets the "uri" field.
-func (m *BuilderNodeMutation) SetURI(s string) {
+func (m *BuilderMutation) SetURI(s string) {
 	m.uri = &s
 }
 
 // URI returns the value of the "uri" field in the mutation.
-func (m *BuilderNodeMutation) URI() (r string, exists bool) {
+func (m *BuilderMutation) URI() (r string, exists bool) {
 	v := m.uri
 	if v == nil {
 		return
@@ -1579,10 +1579,10 @@ func (m *BuilderNodeMutation) URI() (r string, exists bool) {
 	return *v, true
 }
 
-// OldURI returns the old "uri" field's value of the BuilderNode entity.
-// If the BuilderNode object wasn't provided to the builder, the object is fetched from the database.
+// OldURI returns the old "uri" field's value of the Builder entity.
+// If the Builder object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BuilderNodeMutation) OldURI(ctx context.Context) (v string, err error) {
+func (m *BuilderMutation) OldURI(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldURI is only allowed on UpdateOne operations")
 	}
@@ -1597,19 +1597,19 @@ func (m *BuilderNodeMutation) OldURI(ctx context.Context) (v string, err error) 
 }
 
 // ResetURI resets all changes to the "uri" field.
-func (m *BuilderNodeMutation) ResetURI() {
+func (m *BuilderMutation) ResetURI() {
 	m.uri = nil
 }
 
-// Where appends a list predicates to the BuilderNodeMutation builder.
-func (m *BuilderNodeMutation) Where(ps ...predicate.BuilderNode) {
+// Where appends a list predicates to the BuilderMutation builder.
+func (m *BuilderMutation) Where(ps ...predicate.Builder) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the BuilderNodeMutation builder. Using this method,
+// WhereP appends storage-level predicates to the BuilderMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *BuilderNodeMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.BuilderNode, len(ps))
+func (m *BuilderMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Builder, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -1617,27 +1617,27 @@ func (m *BuilderNodeMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *BuilderNodeMutation) Op() Op {
+func (m *BuilderMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *BuilderNodeMutation) SetOp(op Op) {
+func (m *BuilderMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (BuilderNode).
-func (m *BuilderNodeMutation) Type() string {
+// Type returns the node type of this mutation (Builder).
+func (m *BuilderMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *BuilderNodeMutation) Fields() []string {
+func (m *BuilderMutation) Fields() []string {
 	fields := make([]string, 0, 1)
 	if m.uri != nil {
-		fields = append(fields, buildernode.FieldURI)
+		fields = append(fields, builder.FieldURI)
 	}
 	return fields
 }
@@ -1645,9 +1645,9 @@ func (m *BuilderNodeMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *BuilderNodeMutation) Field(name string) (ent.Value, bool) {
+func (m *BuilderMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case buildernode.FieldURI:
+	case builder.FieldURI:
 		return m.URI()
 	}
 	return nil, false
@@ -1656,20 +1656,20 @@ func (m *BuilderNodeMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *BuilderNodeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *BuilderMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case buildernode.FieldURI:
+	case builder.FieldURI:
 		return m.OldURI(ctx)
 	}
-	return nil, fmt.Errorf("unknown BuilderNode field %s", name)
+	return nil, fmt.Errorf("unknown Builder field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *BuilderNodeMutation) SetField(name string, value ent.Value) error {
+func (m *BuilderMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case buildernode.FieldURI:
+	case builder.FieldURI:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -1677,107 +1677,107 @@ func (m *BuilderNodeMutation) SetField(name string, value ent.Value) error {
 		m.SetURI(v)
 		return nil
 	}
-	return fmt.Errorf("unknown BuilderNode field %s", name)
+	return fmt.Errorf("unknown Builder field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *BuilderNodeMutation) AddedFields() []string {
+func (m *BuilderMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *BuilderNodeMutation) AddedField(name string) (ent.Value, bool) {
+func (m *BuilderMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *BuilderNodeMutation) AddField(name string, value ent.Value) error {
+func (m *BuilderMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown BuilderNode numeric field %s", name)
+	return fmt.Errorf("unknown Builder numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *BuilderNodeMutation) ClearedFields() []string {
+func (m *BuilderMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *BuilderNodeMutation) FieldCleared(name string) bool {
+func (m *BuilderMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *BuilderNodeMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown BuilderNode nullable field %s", name)
+func (m *BuilderMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Builder nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *BuilderNodeMutation) ResetField(name string) error {
+func (m *BuilderMutation) ResetField(name string) error {
 	switch name {
-	case buildernode.FieldURI:
+	case builder.FieldURI:
 		m.ResetURI()
 		return nil
 	}
-	return fmt.Errorf("unknown BuilderNode field %s", name)
+	return fmt.Errorf("unknown Builder field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *BuilderNodeMutation) AddedEdges() []string {
+func (m *BuilderMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *BuilderNodeMutation) AddedIDs(name string) []ent.Value {
+func (m *BuilderMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *BuilderNodeMutation) RemovedEdges() []string {
+func (m *BuilderMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *BuilderNodeMutation) RemovedIDs(name string) []ent.Value {
+func (m *BuilderMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *BuilderNodeMutation) ClearedEdges() []string {
+func (m *BuilderMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *BuilderNodeMutation) EdgeCleared(name string) bool {
+func (m *BuilderMutation) EdgeCleared(name string) bool {
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *BuilderNodeMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown BuilderNode unique edge %s", name)
+func (m *BuilderMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Builder unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *BuilderNodeMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown BuilderNode edge %s", name)
+func (m *BuilderMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Builder edge %s", name)
 }
 
 // DependencyMutation represents an operation that mutates the Dependency nodes in the graph.
@@ -6065,7 +6065,7 @@ func (m *SLSAAttestationMutation) ResetBuiltFrom() {
 	m.removedbuilt_from = nil
 }
 
-// AddBuiltByIDs adds the "built_by" edge to the BuilderNode entity by ids.
+// AddBuiltByIDs adds the "built_by" edge to the Builder entity by ids.
 func (m *SLSAAttestationMutation) AddBuiltByIDs(ids ...int) {
 	if m.built_by == nil {
 		m.built_by = make(map[int]struct{})
@@ -6075,17 +6075,17 @@ func (m *SLSAAttestationMutation) AddBuiltByIDs(ids ...int) {
 	}
 }
 
-// ClearBuiltBy clears the "built_by" edge to the BuilderNode entity.
+// ClearBuiltBy clears the "built_by" edge to the Builder entity.
 func (m *SLSAAttestationMutation) ClearBuiltBy() {
 	m.clearedbuilt_by = true
 }
 
-// BuiltByCleared reports if the "built_by" edge to the BuilderNode entity was cleared.
+// BuiltByCleared reports if the "built_by" edge to the Builder entity was cleared.
 func (m *SLSAAttestationMutation) BuiltByCleared() bool {
 	return m.clearedbuilt_by
 }
 
-// RemoveBuiltByIDs removes the "built_by" edge to the BuilderNode entity by IDs.
+// RemoveBuiltByIDs removes the "built_by" edge to the Builder entity by IDs.
 func (m *SLSAAttestationMutation) RemoveBuiltByIDs(ids ...int) {
 	if m.removedbuilt_by == nil {
 		m.removedbuilt_by = make(map[int]struct{})
@@ -6096,7 +6096,7 @@ func (m *SLSAAttestationMutation) RemoveBuiltByIDs(ids ...int) {
 	}
 }
 
-// RemovedBuiltBy returns the removed IDs of the "built_by" edge to the BuilderNode entity.
+// RemovedBuiltBy returns the removed IDs of the "built_by" edge to the Builder entity.
 func (m *SLSAAttestationMutation) RemovedBuiltByIDs() (ids []int) {
 	for id := range m.removedbuilt_by {
 		ids = append(ids, id)
