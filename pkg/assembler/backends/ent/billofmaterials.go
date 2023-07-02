@@ -9,12 +9,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 )
 
-// SBOM is the model entity for the SBOM schema.
-type SBOM struct {
+// BillOfMaterials is the model entity for the BillOfMaterials schema.
+type BillOfMaterials struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -35,13 +35,13 @@ type SBOM struct {
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the SBOMQuery when eager-loading is set.
-	Edges        SBOMEdges `json:"edges"`
+	// The values are being populated by the BillOfMaterialsQuery when eager-loading is set.
+	Edges        BillOfMaterialsEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// SBOMEdges holds the relations/edges for other nodes in the graph.
-type SBOMEdges struct {
+// BillOfMaterialsEdges holds the relations/edges for other nodes in the graph.
+type BillOfMaterialsEdges struct {
 	// Package holds the value of the package edge.
 	Package *PackageVersion `json:"package,omitempty"`
 	// Artifact holds the value of the artifact edge.
@@ -53,7 +53,7 @@ type SBOMEdges struct {
 
 // PackageOrErr returns the Package value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e SBOMEdges) PackageOrErr() (*PackageVersion, error) {
+func (e BillOfMaterialsEdges) PackageOrErr() (*PackageVersion, error) {
 	if e.loadedTypes[0] {
 		if e.Package == nil {
 			// Edge was loaded but was not found.
@@ -66,7 +66,7 @@ func (e SBOMEdges) PackageOrErr() (*PackageVersion, error) {
 
 // ArtifactOrErr returns the Artifact value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e SBOMEdges) ArtifactOrErr() (*Artifact, error) {
+func (e BillOfMaterialsEdges) ArtifactOrErr() (*Artifact, error) {
 	if e.loadedTypes[1] {
 		if e.Artifact == nil {
 			// Edge was loaded but was not found.
@@ -78,13 +78,13 @@ func (e SBOMEdges) ArtifactOrErr() (*Artifact, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*SBOM) scanValues(columns []string) ([]any, error) {
+func (*BillOfMaterials) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case sbom.FieldID, sbom.FieldPackageID, sbom.FieldArtifactID:
+		case billofmaterials.FieldID, billofmaterials.FieldPackageID, billofmaterials.FieldArtifactID:
 			values[i] = new(sql.NullInt64)
-		case sbom.FieldURI, sbom.FieldAlgorithm, sbom.FieldDigest, sbom.FieldDownloadLocation, sbom.FieldOrigin, sbom.FieldCollector:
+		case billofmaterials.FieldURI, billofmaterials.FieldAlgorithm, billofmaterials.FieldDigest, billofmaterials.FieldDownloadLocation, billofmaterials.FieldOrigin, billofmaterials.FieldCollector:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -94,145 +94,145 @@ func (*SBOM) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the SBOM fields.
-func (s *SBOM) assignValues(columns []string, values []any) error {
+// to the BillOfMaterials fields.
+func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case sbom.FieldID:
+		case billofmaterials.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			s.ID = int(value.Int64)
-		case sbom.FieldPackageID:
+			bom.ID = int(value.Int64)
+		case billofmaterials.FieldPackageID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				s.PackageID = new(int)
-				*s.PackageID = int(value.Int64)
+				bom.PackageID = new(int)
+				*bom.PackageID = int(value.Int64)
 			}
-		case sbom.FieldArtifactID:
+		case billofmaterials.FieldArtifactID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				s.ArtifactID = new(int)
-				*s.ArtifactID = int(value.Int64)
+				bom.ArtifactID = new(int)
+				*bom.ArtifactID = int(value.Int64)
 			}
-		case sbom.FieldURI:
+		case billofmaterials.FieldURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field uri", values[i])
 			} else if value.Valid {
-				s.URI = value.String
+				bom.URI = value.String
 			}
-		case sbom.FieldAlgorithm:
+		case billofmaterials.FieldAlgorithm:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field algorithm", values[i])
 			} else if value.Valid {
-				s.Algorithm = value.String
+				bom.Algorithm = value.String
 			}
-		case sbom.FieldDigest:
+		case billofmaterials.FieldDigest:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field digest", values[i])
 			} else if value.Valid {
-				s.Digest = value.String
+				bom.Digest = value.String
 			}
-		case sbom.FieldDownloadLocation:
+		case billofmaterials.FieldDownloadLocation:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field downloadLocation", values[i])
 			} else if value.Valid {
-				s.DownloadLocation = value.String
+				bom.DownloadLocation = value.String
 			}
-		case sbom.FieldOrigin:
+		case billofmaterials.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				s.Origin = value.String
+				bom.Origin = value.String
 			}
-		case sbom.FieldCollector:
+		case billofmaterials.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				s.Collector = value.String
+				bom.Collector = value.String
 			}
 		default:
-			s.selectValues.Set(columns[i], values[i])
+			bom.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the SBOM.
+// Value returns the ent.Value that was dynamically selected and assigned to the BillOfMaterials.
 // This includes values selected through modifiers, order, etc.
-func (s *SBOM) Value(name string) (ent.Value, error) {
-	return s.selectValues.Get(name)
+func (bom *BillOfMaterials) Value(name string) (ent.Value, error) {
+	return bom.selectValues.Get(name)
 }
 
-// QueryPackage queries the "package" edge of the SBOM entity.
-func (s *SBOM) QueryPackage() *PackageVersionQuery {
-	return NewSBOMClient(s.config).QueryPackage(s)
+// QueryPackage queries the "package" edge of the BillOfMaterials entity.
+func (bom *BillOfMaterials) QueryPackage() *PackageVersionQuery {
+	return NewBillOfMaterialsClient(bom.config).QueryPackage(bom)
 }
 
-// QueryArtifact queries the "artifact" edge of the SBOM entity.
-func (s *SBOM) QueryArtifact() *ArtifactQuery {
-	return NewSBOMClient(s.config).QueryArtifact(s)
+// QueryArtifact queries the "artifact" edge of the BillOfMaterials entity.
+func (bom *BillOfMaterials) QueryArtifact() *ArtifactQuery {
+	return NewBillOfMaterialsClient(bom.config).QueryArtifact(bom)
 }
 
-// Update returns a builder for updating this SBOM.
-// Note that you need to call SBOM.Unwrap() before calling this method if this SBOM
+// Update returns a builder for updating this BillOfMaterials.
+// Note that you need to call BillOfMaterials.Unwrap() before calling this method if this BillOfMaterials
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (s *SBOM) Update() *SBOMUpdateOne {
-	return NewSBOMClient(s.config).UpdateOne(s)
+func (bom *BillOfMaterials) Update() *BillOfMaterialsUpdateOne {
+	return NewBillOfMaterialsClient(bom.config).UpdateOne(bom)
 }
 
-// Unwrap unwraps the SBOM entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the BillOfMaterials entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (s *SBOM) Unwrap() *SBOM {
-	_tx, ok := s.config.driver.(*txDriver)
+func (bom *BillOfMaterials) Unwrap() *BillOfMaterials {
+	_tx, ok := bom.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: SBOM is not a transactional entity")
+		panic("ent: BillOfMaterials is not a transactional entity")
 	}
-	s.config.driver = _tx.drv
-	return s
+	bom.config.driver = _tx.drv
+	return bom
 }
 
 // String implements the fmt.Stringer.
-func (s *SBOM) String() string {
+func (bom *BillOfMaterials) String() string {
 	var builder strings.Builder
-	builder.WriteString("SBOM(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
-	if v := s.PackageID; v != nil {
+	builder.WriteString("BillOfMaterials(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", bom.ID))
+	if v := bom.PackageID; v != nil {
 		builder.WriteString("package_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := s.ArtifactID; v != nil {
+	if v := bom.ArtifactID; v != nil {
 		builder.WriteString("artifact_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("uri=")
-	builder.WriteString(s.URI)
+	builder.WriteString(bom.URI)
 	builder.WriteString(", ")
 	builder.WriteString("algorithm=")
-	builder.WriteString(s.Algorithm)
+	builder.WriteString(bom.Algorithm)
 	builder.WriteString(", ")
 	builder.WriteString("digest=")
-	builder.WriteString(s.Digest)
+	builder.WriteString(bom.Digest)
 	builder.WriteString(", ")
 	builder.WriteString("downloadLocation=")
-	builder.WriteString(s.DownloadLocation)
+	builder.WriteString(bom.DownloadLocation)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(s.Origin)
+	builder.WriteString(bom.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(s.Collector)
+	builder.WriteString(bom.Collector)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// SBOMs is a parsable slice of SBOM.
-type SBOMs []*SBOM
+// BillOfMaterialsSlice is a parsable slice of BillOfMaterials.
+type BillOfMaterialsSlice []*BillOfMaterials

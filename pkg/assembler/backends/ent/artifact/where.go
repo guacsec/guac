@@ -228,7 +228,7 @@ func HasSbom() predicate.Artifact {
 }
 
 // HasSbomWith applies the HasEdge predicate on the "sbom" edge with a given conditions (other predicates).
-func HasSbomWith(preds ...predicate.SBOM) predicate.Artifact {
+func HasSbomWith(preds ...predicate.BillOfMaterials) predicate.Artifact {
 	return predicate.Artifact(func(s *sql.Selector) {
 		step := newSbomStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

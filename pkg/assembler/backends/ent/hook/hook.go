@@ -21,6 +21,18 @@ func (f ArtifactFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ArtifactMutation", m)
 }
 
+// The BillOfMaterialsFunc type is an adapter to allow the use of ordinary
+// function as BillOfMaterials mutator.
+type BillOfMaterialsFunc func(context.Context, *ent.BillOfMaterialsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BillOfMaterialsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BillOfMaterialsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BillOfMaterialsMutation", m)
+}
+
 // The BuilderNodeFunc type is an adapter to allow the use of ordinary
 // function as BuilderNode mutator.
 type BuilderNodeFunc func(context.Context, *ent.BuilderNodeMutation) (ent.Value, error)
@@ -105,16 +117,16 @@ func (f PackageVersionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageVersionMutation", m)
 }
 
-// The SBOMFunc type is an adapter to allow the use of ordinary
-// function as SBOM mutator.
-type SBOMFunc func(context.Context, *ent.SBOMMutation) (ent.Value, error)
+// The SLSAAttestationFunc type is an adapter to allow the use of ordinary
+// function as SLSAAttestation mutator.
+type SLSAAttestationFunc func(context.Context, *ent.SLSAAttestationMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f SBOMFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.SBOMMutation); ok {
+func (f SLSAAttestationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SLSAAttestationMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SBOMMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SLSAAttestationMutation", m)
 }
 
 // The SourceNameFunc type is an adapter to allow the use of ordinary

@@ -45,10 +45,10 @@ const (
 	// OccurrencesColumn is the table column denoting the occurrences relation/edge.
 	OccurrencesColumn = "package_id"
 	// SbomTable is the table that holds the sbom relation/edge.
-	SbomTable = "sbo_ms"
-	// SbomInverseTable is the table name for the SBOM entity.
-	// It exists in this package in order to avoid circular dependency with the "sbom" package.
-	SbomInverseTable = "sbo_ms"
+	SbomTable = "bill_of_materials"
+	// SbomInverseTable is the table name for the BillOfMaterials entity.
+	// It exists in this package in order to avoid circular dependency with the "billofmaterials" package.
+	SbomInverseTable = "bill_of_materials"
 	// SbomColumn is the table column denoting the sbom relation/edge.
 	SbomColumn = "package_id"
 )

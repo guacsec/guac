@@ -42,7 +42,7 @@ type PackageVersionEdges struct {
 	// Occurrences holds the value of the occurrences edge.
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// Sbom holds the value of the sbom edge.
-	Sbom []*SBOM `json:"sbom,omitempty"`
+	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -72,7 +72,7 @@ func (e PackageVersionEdges) OccurrencesOrErr() ([]*Occurrence, error) {
 
 // SbomOrErr returns the Sbom value or an error if the edge
 // was not loaded in eager-loading.
-func (e PackageVersionEdges) SbomOrErr() ([]*SBOM, error) {
+func (e PackageVersionEdges) SbomOrErr() ([]*BillOfMaterials, error) {
 	if e.loadedTypes[2] {
 		return e.Sbom, nil
 	}
@@ -167,7 +167,7 @@ func (pv *PackageVersion) QueryOccurrences() *OccurrenceQuery {
 }
 
 // QuerySbom queries the "sbom" edge of the PackageVersion entity.
-func (pv *PackageVersion) QuerySbom() *SBOMQuery {
+func (pv *PackageVersion) QuerySbom() *BillOfMaterialsQuery {
 	return NewPackageVersionClient(pv.config).QuerySbom(pv)
 }
 

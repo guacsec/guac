@@ -30,10 +30,10 @@ const (
 	// OccurrencesColumn is the table column denoting the occurrences relation/edge.
 	OccurrencesColumn = "artifact_id"
 	// SbomTable is the table that holds the sbom relation/edge.
-	SbomTable = "sbo_ms"
-	// SbomInverseTable is the table name for the SBOM entity.
-	// It exists in this package in order to avoid circular dependency with the "sbom" package.
-	SbomInverseTable = "sbo_ms"
+	SbomTable = "bill_of_materials"
+	// SbomInverseTable is the table name for the BillOfMaterials entity.
+	// It exists in this package in order to avoid circular dependency with the "billofmaterials" package.
+	SbomInverseTable = "bill_of_materials"
 	// SbomColumn is the table column denoting the sbom relation/edge.
 	SbomColumn = "artifact_id"
 )
@@ -45,10 +45,21 @@ var Columns = []string{
 	FieldDigest,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "artifacts"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"slsa_attestation_built_from",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

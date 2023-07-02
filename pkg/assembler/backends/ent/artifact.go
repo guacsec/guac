@@ -22,8 +22,9 @@ type Artifact struct {
 	Digest string `json:"digest,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ArtifactQuery when eager-loading is set.
-	Edges        ArtifactEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges                       ArtifactEdges `json:"edges"`
+	slsa_attestation_built_from *int
+	selectValues                sql.SelectValues
 }
 
 // ArtifactEdges holds the relations/edges for other nodes in the graph.
@@ -31,7 +32,7 @@ type ArtifactEdges struct {
 	// Occurrences holds the value of the occurrences edge.
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// Sbom holds the value of the sbom edge.
-	Sbom []*SBOM `json:"sbom,omitempty"`
+	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -48,7 +49,7 @@ func (e ArtifactEdges) OccurrencesOrErr() ([]*Occurrence, error) {
 
 // SbomOrErr returns the Sbom value or an error if the edge
 // was not loaded in eager-loading.
-func (e ArtifactEdges) SbomOrErr() ([]*SBOM, error) {
+func (e ArtifactEdges) SbomOrErr() ([]*BillOfMaterials, error) {
 	if e.loadedTypes[1] {
 		return e.Sbom, nil
 	}
@@ -64,6 +65,8 @@ func (*Artifact) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case artifact.FieldAlgorithm, artifact.FieldDigest:
 			values[i] = new(sql.NullString)
+		case artifact.ForeignKeys[0]: // slsa_attestation_built_from
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -97,6 +100,13 @@ func (a *Artifact) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				a.Digest = value.String
 			}
+		case artifact.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field slsa_attestation_built_from", value)
+			} else if value.Valid {
+				a.slsa_attestation_built_from = new(int)
+				*a.slsa_attestation_built_from = int(value.Int64)
+			}
 		default:
 			a.selectValues.Set(columns[i], values[i])
 		}
@@ -116,7 +126,7 @@ func (a *Artifact) QueryOccurrences() *OccurrenceQuery {
 }
 
 // QuerySbom queries the "sbom" edge of the Artifact entity.
-func (a *Artifact) QuerySbom() *SBOMQuery {
+func (a *Artifact) QuerySbom() *BillOfMaterialsQuery {
 	return NewArtifactClient(a.config).QuerySbom(a)
 }
 

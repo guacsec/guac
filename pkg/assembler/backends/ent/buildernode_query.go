@@ -21,6 +21,7 @@ type BuilderNodeQuery struct {
 	order      []buildernode.OrderOption
 	inters     []Interceptor
 	predicates []predicate.BuilderNode
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -331,9 +332,13 @@ func (bnq *BuilderNodeQuery) prepareQuery(ctx context.Context) error {
 
 func (bnq *BuilderNodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*BuilderNode, error) {
 	var (
-		nodes = []*BuilderNode{}
-		_spec = bnq.querySpec()
+		nodes   = []*BuilderNode{}
+		withFKs = bnq.withFKs
+		_spec   = bnq.querySpec()
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, buildernode.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*BuilderNode).scanValues(nil, columns)
 	}

@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 )
 
 // ArtifactCreate is the builder for creating a Artifact entity.
@@ -50,17 +50,17 @@ func (ac *ArtifactCreate) AddOccurrences(o ...*Occurrence) *ArtifactCreate {
 	return ac.AddOccurrenceIDs(ids...)
 }
 
-// AddSbomIDs adds the "sbom" edge to the SBOM entity by IDs.
+// AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
 func (ac *ArtifactCreate) AddSbomIDs(ids ...int) *ArtifactCreate {
 	ac.mutation.AddSbomIDs(ids...)
 	return ac
 }
 
-// AddSbom adds the "sbom" edges to the SBOM entity.
-func (ac *ArtifactCreate) AddSbom(s ...*SBOM) *ArtifactCreate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddSbom adds the "sbom" edges to the BillOfMaterials entity.
+func (ac *ArtifactCreate) AddSbom(b ...*BillOfMaterials) *ArtifactCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
 	return ac.AddSbomIDs(ids...)
 }
@@ -164,7 +164,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

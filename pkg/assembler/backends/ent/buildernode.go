@@ -17,8 +17,9 @@ type BuilderNode struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// The URI of the builder, used as a unique identifier in the graph query
-	URI          string `json:"uri,omitempty"`
-	selectValues sql.SelectValues
+	URI                       string `json:"uri,omitempty"`
+	slsa_attestation_built_by *int
+	selectValues              sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -30,6 +31,8 @@ func (*BuilderNode) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case buildernode.FieldURI:
 			values[i] = new(sql.NullString)
+		case buildernode.ForeignKeys[0]: // slsa_attestation_built_by
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -56,6 +59,13 @@ func (bn *BuilderNode) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field uri", values[i])
 			} else if value.Valid {
 				bn.URI = value.String
+			}
+		case buildernode.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field slsa_attestation_built_by", value)
+			} else if value.Valid {
+				bn.slsa_attestation_built_by = new(int)
+				*bn.slsa_attestation_built_by = int(value.Int64)
 			}
 		default:
 			bn.selectValues.Set(columns[i], values[i])

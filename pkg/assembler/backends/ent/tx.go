@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Artifact is the client for interacting with the Artifact builders.
 	Artifact *ArtifactClient
+	// BillOfMaterials is the client for interacting with the BillOfMaterials builders.
+	BillOfMaterials *BillOfMaterialsClient
 	// BuilderNode is the client for interacting with the BuilderNode builders.
 	BuilderNode *BuilderNodeClient
 	// Dependency is the client for interacting with the Dependency builders.
@@ -28,8 +30,8 @@ type Tx struct {
 	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
-	// SBOM is the client for interacting with the SBOM builders.
-	SBOM *SBOMClient
+	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
+	SLSAAttestation *SLSAAttestationClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// SourceNamespace is the client for interacting with the SourceNamespace builders.
@@ -168,6 +170,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Artifact = NewArtifactClient(tx.config)
+	tx.BillOfMaterials = NewBillOfMaterialsClient(tx.config)
 	tx.BuilderNode = NewBuilderNodeClient(tx.config)
 	tx.Dependency = NewDependencyClient(tx.config)
 	tx.Occurrence = NewOccurrenceClient(tx.config)
@@ -175,7 +178,7 @@ func (tx *Tx) init() {
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)
 	tx.PackageType = NewPackageTypeClient(tx.config)
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
-	tx.SBOM = NewSBOMClient(tx.config)
+	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)
 	tx.SourceType = NewSourceTypeClient(tx.config)

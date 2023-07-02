@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 )
 
 // ArtifactUpdate is the builder for updating Artifact entities.
@@ -56,17 +56,17 @@ func (au *ArtifactUpdate) AddOccurrences(o ...*Occurrence) *ArtifactUpdate {
 	return au.AddOccurrenceIDs(ids...)
 }
 
-// AddSbomIDs adds the "sbom" edge to the SBOM entity by IDs.
+// AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
 func (au *ArtifactUpdate) AddSbomIDs(ids ...int) *ArtifactUpdate {
 	au.mutation.AddSbomIDs(ids...)
 	return au
 }
 
-// AddSbom adds the "sbom" edges to the SBOM entity.
-func (au *ArtifactUpdate) AddSbom(s ...*SBOM) *ArtifactUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddSbom adds the "sbom" edges to the BillOfMaterials entity.
+func (au *ArtifactUpdate) AddSbom(b ...*BillOfMaterials) *ArtifactUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
 	return au.AddSbomIDs(ids...)
 }
@@ -97,23 +97,23 @@ func (au *ArtifactUpdate) RemoveOccurrences(o ...*Occurrence) *ArtifactUpdate {
 	return au.RemoveOccurrenceIDs(ids...)
 }
 
-// ClearSbom clears all "sbom" edges to the SBOM entity.
+// ClearSbom clears all "sbom" edges to the BillOfMaterials entity.
 func (au *ArtifactUpdate) ClearSbom() *ArtifactUpdate {
 	au.mutation.ClearSbom()
 	return au
 }
 
-// RemoveSbomIDs removes the "sbom" edge to SBOM entities by IDs.
+// RemoveSbomIDs removes the "sbom" edge to BillOfMaterials entities by IDs.
 func (au *ArtifactUpdate) RemoveSbomIDs(ids ...int) *ArtifactUpdate {
 	au.mutation.RemoveSbomIDs(ids...)
 	return au
 }
 
-// RemoveSbom removes "sbom" edges to SBOM entities.
-func (au *ArtifactUpdate) RemoveSbom(s ...*SBOM) *ArtifactUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveSbom removes "sbom" edges to BillOfMaterials entities.
+func (au *ArtifactUpdate) RemoveSbom(b ...*BillOfMaterials) *ArtifactUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
 	return au.RemoveSbomIDs(ids...)
 }
@@ -213,7 +213,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -226,7 +226,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -242,7 +242,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -297,17 +297,17 @@ func (auo *ArtifactUpdateOne) AddOccurrences(o ...*Occurrence) *ArtifactUpdateOn
 	return auo.AddOccurrenceIDs(ids...)
 }
 
-// AddSbomIDs adds the "sbom" edge to the SBOM entity by IDs.
+// AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
 func (auo *ArtifactUpdateOne) AddSbomIDs(ids ...int) *ArtifactUpdateOne {
 	auo.mutation.AddSbomIDs(ids...)
 	return auo
 }
 
-// AddSbom adds the "sbom" edges to the SBOM entity.
-func (auo *ArtifactUpdateOne) AddSbom(s ...*SBOM) *ArtifactUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddSbom adds the "sbom" edges to the BillOfMaterials entity.
+func (auo *ArtifactUpdateOne) AddSbom(b ...*BillOfMaterials) *ArtifactUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
 	return auo.AddSbomIDs(ids...)
 }
@@ -338,23 +338,23 @@ func (auo *ArtifactUpdateOne) RemoveOccurrences(o ...*Occurrence) *ArtifactUpdat
 	return auo.RemoveOccurrenceIDs(ids...)
 }
 
-// ClearSbom clears all "sbom" edges to the SBOM entity.
+// ClearSbom clears all "sbom" edges to the BillOfMaterials entity.
 func (auo *ArtifactUpdateOne) ClearSbom() *ArtifactUpdateOne {
 	auo.mutation.ClearSbom()
 	return auo
 }
 
-// RemoveSbomIDs removes the "sbom" edge to SBOM entities by IDs.
+// RemoveSbomIDs removes the "sbom" edge to BillOfMaterials entities by IDs.
 func (auo *ArtifactUpdateOne) RemoveSbomIDs(ids ...int) *ArtifactUpdateOne {
 	auo.mutation.RemoveSbomIDs(ids...)
 	return auo
 }
 
-// RemoveSbom removes "sbom" edges to SBOM entities.
-func (auo *ArtifactUpdateOne) RemoveSbom(s ...*SBOM) *ArtifactUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveSbom removes "sbom" edges to BillOfMaterials entities.
+func (auo *ArtifactUpdateOne) RemoveSbom(b ...*BillOfMaterials) *ArtifactUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
 	return auo.RemoveSbomIDs(ids...)
 }
@@ -484,7 +484,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -497,7 +497,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -513,7 +513,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sbom.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

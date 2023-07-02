@@ -8,13 +8,13 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// SBOM holds the schema definition for the SBOM entity.
-type SBOM struct {
+// BillOfMaterials holds the schema definition for the BillOfMaterials (SBOM) entity.
+type BillOfMaterials struct {
 	ent.Schema
 }
 
 // Fields of the SBOM.
-func (SBOM) Fields() []ent.Field {
+func (BillOfMaterials) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("package_id").Optional().Nillable(),
 		field.Int("artifact_id").Optional().Nillable(),
@@ -27,21 +27,20 @@ func (SBOM) Fields() []ent.Field {
 	}
 }
 
-// Edges of the SBOM.
-func (SBOM) Edges() []ent.Edge {
+// Edges of the Material.
+func (BillOfMaterials) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("package", PackageVersion.Type).Field("package_id").Unique(),
 		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique(),
 	}
 }
 
-// Indexes of the SBOM.
-func (SBOM) Indexes() []ent.Index {
+// Indexes of the Material.
+func (BillOfMaterials) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("algorithm", "digest", "uri").Edges("package").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND artifact_id IS NULL")).StorageKey("sbom_unique_package"),
 		index.Fields("algorithm", "digest", "uri").Edges("artifact").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND artifact_id IS NOT NULL")).StorageKey("sbom_unique_artifact"),
-
 	}
 }

@@ -356,7 +356,7 @@ func HasSbom() predicate.PackageVersion {
 }
 
 // HasSbomWith applies the HasEdge predicate on the "sbom" edge with a given conditions (other predicates).
-func HasSbomWith(preds ...predicate.SBOM) predicate.PackageVersion {
+func HasSbomWith(preds ...predicate.BillOfMaterials) predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {
 		step := newSbomStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
@@ -20,7 +21,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
@@ -85,6 +86,7 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			artifact.Table:         artifact.ValidColumn,
+			billofmaterials.Table:  billofmaterials.ValidColumn,
 			buildernode.Table:      buildernode.ValidColumn,
 			dependency.Table:       dependency.ValidColumn,
 			occurrence.Table:       occurrence.ValidColumn,
@@ -92,7 +94,7 @@ func checkColumn(table, column string) error {
 			packagenamespace.Table: packagenamespace.ValidColumn,
 			packagetype.Table:      packagetype.ValidColumn,
 			packageversion.Table:   packageversion.ValidColumn,
-			sbom.Table:             sbom.ValidColumn,
+			slsaattestation.Table:  slsaattestation.ValidColumn,
 			sourcename.Table:       sourcename.ValidColumn,
 			sourcenamespace.Table:  sourcenamespace.ValidColumn,
 			sourcetype.Table:       sourcetype.ValidColumn,

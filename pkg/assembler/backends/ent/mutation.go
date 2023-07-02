@@ -7,10 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
@@ -19,7 +21,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
@@ -36,6 +38,7 @@ const (
 
 	// Node types.
 	TypeArtifact         = "Artifact"
+	TypeBillOfMaterials  = "BillOfMaterials"
 	TypeBuilderNode      = "BuilderNode"
 	TypeDependency       = "Dependency"
 	TypeOccurrence       = "Occurrence"
@@ -43,7 +46,7 @@ const (
 	TypePackageNamespace = "PackageNamespace"
 	TypePackageType      = "PackageType"
 	TypePackageVersion   = "PackageVersion"
-	TypeSBOM             = "SBOM"
+	TypeSLSAAttestation  = "SLSAAttestation"
 	TypeSourceName       = "SourceName"
 	TypeSourceNamespace  = "SourceNamespace"
 	TypeSourceType       = "SourceType"
@@ -293,7 +296,7 @@ func (m *ArtifactMutation) ResetOccurrences() {
 	m.removedoccurrences = nil
 }
 
-// AddSbomIDs adds the "sbom" edge to the SBOM entity by ids.
+// AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by ids.
 func (m *ArtifactMutation) AddSbomIDs(ids ...int) {
 	if m.sbom == nil {
 		m.sbom = make(map[int]struct{})
@@ -303,17 +306,17 @@ func (m *ArtifactMutation) AddSbomIDs(ids ...int) {
 	}
 }
 
-// ClearSbom clears the "sbom" edge to the SBOM entity.
+// ClearSbom clears the "sbom" edge to the BillOfMaterials entity.
 func (m *ArtifactMutation) ClearSbom() {
 	m.clearedsbom = true
 }
 
-// SbomCleared reports if the "sbom" edge to the SBOM entity was cleared.
+// SbomCleared reports if the "sbom" edge to the BillOfMaterials entity was cleared.
 func (m *ArtifactMutation) SbomCleared() bool {
 	return m.clearedsbom
 }
 
-// RemoveSbomIDs removes the "sbom" edge to the SBOM entity by IDs.
+// RemoveSbomIDs removes the "sbom" edge to the BillOfMaterials entity by IDs.
 func (m *ArtifactMutation) RemoveSbomIDs(ids ...int) {
 	if m.removedsbom == nil {
 		m.removedsbom = make(map[int]struct{})
@@ -324,7 +327,7 @@ func (m *ArtifactMutation) RemoveSbomIDs(ids ...int) {
 	}
 }
 
-// RemovedSbom returns the removed IDs of the "sbom" edge to the SBOM entity.
+// RemovedSbom returns the removed IDs of the "sbom" edge to the BillOfMaterials entity.
 func (m *ArtifactMutation) RemovedSbomIDs() (ids []int) {
 	for id := range m.removedsbom {
 		ids = append(ids, id)
@@ -603,6 +606,852 @@ func (m *ArtifactMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Artifact edge %s", name)
+}
+
+// BillOfMaterialsMutation represents an operation that mutates the BillOfMaterials nodes in the graph.
+type BillOfMaterialsMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	uri              *string
+	algorithm        *string
+	digest           *string
+	downloadLocation *string
+	origin           *string
+	collector        *string
+	clearedFields    map[string]struct{}
+	_package         *int
+	cleared_package  bool
+	artifact         *int
+	clearedartifact  bool
+	done             bool
+	oldValue         func(context.Context) (*BillOfMaterials, error)
+	predicates       []predicate.BillOfMaterials
+}
+
+var _ ent.Mutation = (*BillOfMaterialsMutation)(nil)
+
+// billofmaterialsOption allows management of the mutation configuration using functional options.
+type billofmaterialsOption func(*BillOfMaterialsMutation)
+
+// newBillOfMaterialsMutation creates new mutation for the BillOfMaterials entity.
+func newBillOfMaterialsMutation(c config, op Op, opts ...billofmaterialsOption) *BillOfMaterialsMutation {
+	m := &BillOfMaterialsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBillOfMaterials,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBillOfMaterialsID sets the ID field of the mutation.
+func withBillOfMaterialsID(id int) billofmaterialsOption {
+	return func(m *BillOfMaterialsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BillOfMaterials
+		)
+		m.oldValue = func(ctx context.Context) (*BillOfMaterials, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BillOfMaterials.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBillOfMaterials sets the old BillOfMaterials of the mutation.
+func withBillOfMaterials(node *BillOfMaterials) billofmaterialsOption {
+	return func(m *BillOfMaterialsMutation) {
+		m.oldValue = func(context.Context) (*BillOfMaterials, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BillOfMaterialsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BillOfMaterialsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BillOfMaterialsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BillOfMaterialsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BillOfMaterials.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPackageID sets the "package_id" field.
+func (m *BillOfMaterialsMutation) SetPackageID(i int) {
+	m._package = &i
+}
+
+// PackageID returns the value of the "package_id" field in the mutation.
+func (m *BillOfMaterialsMutation) PackageID() (r int, exists bool) {
+	v := m._package
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageID returns the old "package_id" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldPackageID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageID: %w", err)
+	}
+	return oldValue.PackageID, nil
+}
+
+// ClearPackageID clears the value of the "package_id" field.
+func (m *BillOfMaterialsMutation) ClearPackageID() {
+	m._package = nil
+	m.clearedFields[billofmaterials.FieldPackageID] = struct{}{}
+}
+
+// PackageIDCleared returns if the "package_id" field was cleared in this mutation.
+func (m *BillOfMaterialsMutation) PackageIDCleared() bool {
+	_, ok := m.clearedFields[billofmaterials.FieldPackageID]
+	return ok
+}
+
+// ResetPackageID resets all changes to the "package_id" field.
+func (m *BillOfMaterialsMutation) ResetPackageID() {
+	m._package = nil
+	delete(m.clearedFields, billofmaterials.FieldPackageID)
+}
+
+// SetArtifactID sets the "artifact_id" field.
+func (m *BillOfMaterialsMutation) SetArtifactID(i int) {
+	m.artifact = &i
+}
+
+// ArtifactID returns the value of the "artifact_id" field in the mutation.
+func (m *BillOfMaterialsMutation) ArtifactID() (r int, exists bool) {
+	v := m.artifact
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldArtifactID returns the old "artifact_id" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldArtifactID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldArtifactID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldArtifactID: %w", err)
+	}
+	return oldValue.ArtifactID, nil
+}
+
+// ClearArtifactID clears the value of the "artifact_id" field.
+func (m *BillOfMaterialsMutation) ClearArtifactID() {
+	m.artifact = nil
+	m.clearedFields[billofmaterials.FieldArtifactID] = struct{}{}
+}
+
+// ArtifactIDCleared returns if the "artifact_id" field was cleared in this mutation.
+func (m *BillOfMaterialsMutation) ArtifactIDCleared() bool {
+	_, ok := m.clearedFields[billofmaterials.FieldArtifactID]
+	return ok
+}
+
+// ResetArtifactID resets all changes to the "artifact_id" field.
+func (m *BillOfMaterialsMutation) ResetArtifactID() {
+	m.artifact = nil
+	delete(m.clearedFields, billofmaterials.FieldArtifactID)
+}
+
+// SetURI sets the "uri" field.
+func (m *BillOfMaterialsMutation) SetURI(s string) {
+	m.uri = &s
+}
+
+// URI returns the value of the "uri" field in the mutation.
+func (m *BillOfMaterialsMutation) URI() (r string, exists bool) {
+	v := m.uri
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldURI returns the old "uri" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldURI(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldURI is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldURI requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldURI: %w", err)
+	}
+	return oldValue.URI, nil
+}
+
+// ResetURI resets all changes to the "uri" field.
+func (m *BillOfMaterialsMutation) ResetURI() {
+	m.uri = nil
+}
+
+// SetAlgorithm sets the "algorithm" field.
+func (m *BillOfMaterialsMutation) SetAlgorithm(s string) {
+	m.algorithm = &s
+}
+
+// Algorithm returns the value of the "algorithm" field in the mutation.
+func (m *BillOfMaterialsMutation) Algorithm() (r string, exists bool) {
+	v := m.algorithm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAlgorithm returns the old "algorithm" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldAlgorithm(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAlgorithm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAlgorithm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAlgorithm: %w", err)
+	}
+	return oldValue.Algorithm, nil
+}
+
+// ResetAlgorithm resets all changes to the "algorithm" field.
+func (m *BillOfMaterialsMutation) ResetAlgorithm() {
+	m.algorithm = nil
+}
+
+// SetDigest sets the "digest" field.
+func (m *BillOfMaterialsMutation) SetDigest(s string) {
+	m.digest = &s
+}
+
+// Digest returns the value of the "digest" field in the mutation.
+func (m *BillOfMaterialsMutation) Digest() (r string, exists bool) {
+	v := m.digest
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDigest returns the old "digest" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldDigest(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDigest is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDigest requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDigest: %w", err)
+	}
+	return oldValue.Digest, nil
+}
+
+// ResetDigest resets all changes to the "digest" field.
+func (m *BillOfMaterialsMutation) ResetDigest() {
+	m.digest = nil
+}
+
+// SetDownloadLocation sets the "downloadLocation" field.
+func (m *BillOfMaterialsMutation) SetDownloadLocation(s string) {
+	m.downloadLocation = &s
+}
+
+// DownloadLocation returns the value of the "downloadLocation" field in the mutation.
+func (m *BillOfMaterialsMutation) DownloadLocation() (r string, exists bool) {
+	v := m.downloadLocation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDownloadLocation returns the old "downloadLocation" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldDownloadLocation(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDownloadLocation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDownloadLocation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDownloadLocation: %w", err)
+	}
+	return oldValue.DownloadLocation, nil
+}
+
+// ResetDownloadLocation resets all changes to the "downloadLocation" field.
+func (m *BillOfMaterialsMutation) ResetDownloadLocation() {
+	m.downloadLocation = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *BillOfMaterialsMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *BillOfMaterialsMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *BillOfMaterialsMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *BillOfMaterialsMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *BillOfMaterialsMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *BillOfMaterialsMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// ClearPackage clears the "package" edge to the PackageVersion entity.
+func (m *BillOfMaterialsMutation) ClearPackage() {
+	m.cleared_package = true
+}
+
+// PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
+func (m *BillOfMaterialsMutation) PackageCleared() bool {
+	return m.PackageIDCleared() || m.cleared_package
+}
+
+// PackageIDs returns the "package" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageID instead. It exists only for internal usage by the builders.
+func (m *BillOfMaterialsMutation) PackageIDs() (ids []int) {
+	if id := m._package; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackage resets all changes to the "package" edge.
+func (m *BillOfMaterialsMutation) ResetPackage() {
+	m._package = nil
+	m.cleared_package = false
+}
+
+// ClearArtifact clears the "artifact" edge to the Artifact entity.
+func (m *BillOfMaterialsMutation) ClearArtifact() {
+	m.clearedartifact = true
+}
+
+// ArtifactCleared reports if the "artifact" edge to the Artifact entity was cleared.
+func (m *BillOfMaterialsMutation) ArtifactCleared() bool {
+	return m.ArtifactIDCleared() || m.clearedartifact
+}
+
+// ArtifactIDs returns the "artifact" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ArtifactID instead. It exists only for internal usage by the builders.
+func (m *BillOfMaterialsMutation) ArtifactIDs() (ids []int) {
+	if id := m.artifact; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetArtifact resets all changes to the "artifact" edge.
+func (m *BillOfMaterialsMutation) ResetArtifact() {
+	m.artifact = nil
+	m.clearedartifact = false
+}
+
+// Where appends a list predicates to the BillOfMaterialsMutation builder.
+func (m *BillOfMaterialsMutation) Where(ps ...predicate.BillOfMaterials) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BillOfMaterialsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BillOfMaterialsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.BillOfMaterials, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BillOfMaterialsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BillOfMaterialsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (BillOfMaterials).
+func (m *BillOfMaterialsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BillOfMaterialsMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m._package != nil {
+		fields = append(fields, billofmaterials.FieldPackageID)
+	}
+	if m.artifact != nil {
+		fields = append(fields, billofmaterials.FieldArtifactID)
+	}
+	if m.uri != nil {
+		fields = append(fields, billofmaterials.FieldURI)
+	}
+	if m.algorithm != nil {
+		fields = append(fields, billofmaterials.FieldAlgorithm)
+	}
+	if m.digest != nil {
+		fields = append(fields, billofmaterials.FieldDigest)
+	}
+	if m.downloadLocation != nil {
+		fields = append(fields, billofmaterials.FieldDownloadLocation)
+	}
+	if m.origin != nil {
+		fields = append(fields, billofmaterials.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, billofmaterials.FieldCollector)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BillOfMaterialsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case billofmaterials.FieldPackageID:
+		return m.PackageID()
+	case billofmaterials.FieldArtifactID:
+		return m.ArtifactID()
+	case billofmaterials.FieldURI:
+		return m.URI()
+	case billofmaterials.FieldAlgorithm:
+		return m.Algorithm()
+	case billofmaterials.FieldDigest:
+		return m.Digest()
+	case billofmaterials.FieldDownloadLocation:
+		return m.DownloadLocation()
+	case billofmaterials.FieldOrigin:
+		return m.Origin()
+	case billofmaterials.FieldCollector:
+		return m.Collector()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BillOfMaterialsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case billofmaterials.FieldPackageID:
+		return m.OldPackageID(ctx)
+	case billofmaterials.FieldArtifactID:
+		return m.OldArtifactID(ctx)
+	case billofmaterials.FieldURI:
+		return m.OldURI(ctx)
+	case billofmaterials.FieldAlgorithm:
+		return m.OldAlgorithm(ctx)
+	case billofmaterials.FieldDigest:
+		return m.OldDigest(ctx)
+	case billofmaterials.FieldDownloadLocation:
+		return m.OldDownloadLocation(ctx)
+	case billofmaterials.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case billofmaterials.FieldCollector:
+		return m.OldCollector(ctx)
+	}
+	return nil, fmt.Errorf("unknown BillOfMaterials field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BillOfMaterialsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case billofmaterials.FieldPackageID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageID(v)
+		return nil
+	case billofmaterials.FieldArtifactID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetArtifactID(v)
+		return nil
+	case billofmaterials.FieldURI:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetURI(v)
+		return nil
+	case billofmaterials.FieldAlgorithm:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAlgorithm(v)
+		return nil
+	case billofmaterials.FieldDigest:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDigest(v)
+		return nil
+	case billofmaterials.FieldDownloadLocation:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDownloadLocation(v)
+		return nil
+	case billofmaterials.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case billofmaterials.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BillOfMaterials field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BillOfMaterialsMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BillOfMaterialsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BillOfMaterialsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown BillOfMaterials numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BillOfMaterialsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(billofmaterials.FieldPackageID) {
+		fields = append(fields, billofmaterials.FieldPackageID)
+	}
+	if m.FieldCleared(billofmaterials.FieldArtifactID) {
+		fields = append(fields, billofmaterials.FieldArtifactID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BillOfMaterialsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BillOfMaterialsMutation) ClearField(name string) error {
+	switch name {
+	case billofmaterials.FieldPackageID:
+		m.ClearPackageID()
+		return nil
+	case billofmaterials.FieldArtifactID:
+		m.ClearArtifactID()
+		return nil
+	}
+	return fmt.Errorf("unknown BillOfMaterials nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BillOfMaterialsMutation) ResetField(name string) error {
+	switch name {
+	case billofmaterials.FieldPackageID:
+		m.ResetPackageID()
+		return nil
+	case billofmaterials.FieldArtifactID:
+		m.ResetArtifactID()
+		return nil
+	case billofmaterials.FieldURI:
+		m.ResetURI()
+		return nil
+	case billofmaterials.FieldAlgorithm:
+		m.ResetAlgorithm()
+		return nil
+	case billofmaterials.FieldDigest:
+		m.ResetDigest()
+		return nil
+	case billofmaterials.FieldDownloadLocation:
+		m.ResetDownloadLocation()
+		return nil
+	case billofmaterials.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case billofmaterials.FieldCollector:
+		m.ResetCollector()
+		return nil
+	}
+	return fmt.Errorf("unknown BillOfMaterials field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BillOfMaterialsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m._package != nil {
+		edges = append(edges, billofmaterials.EdgePackage)
+	}
+	if m.artifact != nil {
+		edges = append(edges, billofmaterials.EdgeArtifact)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BillOfMaterialsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case billofmaterials.EdgePackage:
+		if id := m._package; id != nil {
+			return []ent.Value{*id}
+		}
+	case billofmaterials.EdgeArtifact:
+		if id := m.artifact; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BillOfMaterialsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BillOfMaterialsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BillOfMaterialsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleared_package {
+		edges = append(edges, billofmaterials.EdgePackage)
+	}
+	if m.clearedartifact {
+		edges = append(edges, billofmaterials.EdgeArtifact)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BillOfMaterialsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case billofmaterials.EdgePackage:
+		return m.cleared_package
+	case billofmaterials.EdgeArtifact:
+		return m.clearedartifact
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BillOfMaterialsMutation) ClearEdge(name string) error {
+	switch name {
+	case billofmaterials.EdgePackage:
+		m.ClearPackage()
+		return nil
+	case billofmaterials.EdgeArtifact:
+		m.ClearArtifact()
+		return nil
+	}
+	return fmt.Errorf("unknown BillOfMaterials unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BillOfMaterialsMutation) ResetEdge(name string) error {
+	switch name {
+	case billofmaterials.EdgePackage:
+		m.ResetPackage()
+		return nil
+	case billofmaterials.EdgeArtifact:
+		m.ResetArtifact()
+		return nil
+	}
+	return fmt.Errorf("unknown BillOfMaterials edge %s", name)
 }
 
 // BuilderNodeMutation represents an operation that mutates the BuilderNode nodes in the graph.
@@ -4338,7 +5187,7 @@ func (m *PackageVersionMutation) ResetOccurrences() {
 	m.removedoccurrences = nil
 }
 
-// AddSbomIDs adds the "sbom" edge to the SBOM entity by ids.
+// AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by ids.
 func (m *PackageVersionMutation) AddSbomIDs(ids ...int) {
 	if m.sbom == nil {
 		m.sbom = make(map[int]struct{})
@@ -4348,17 +5197,17 @@ func (m *PackageVersionMutation) AddSbomIDs(ids ...int) {
 	}
 }
 
-// ClearSbom clears the "sbom" edge to the SBOM entity.
+// ClearSbom clears the "sbom" edge to the BillOfMaterials entity.
 func (m *PackageVersionMutation) ClearSbom() {
 	m.clearedsbom = true
 }
 
-// SbomCleared reports if the "sbom" edge to the SBOM entity was cleared.
+// SbomCleared reports if the "sbom" edge to the BillOfMaterials entity was cleared.
 func (m *PackageVersionMutation) SbomCleared() bool {
 	return m.clearedsbom
 }
 
-// RemoveSbomIDs removes the "sbom" edge to the SBOM entity by IDs.
+// RemoveSbomIDs removes the "sbom" edge to the BillOfMaterials entity by IDs.
 func (m *PackageVersionMutation) RemoveSbomIDs(ids ...int) {
 	if m.removedsbom == nil {
 		m.removedsbom = make(map[int]struct{})
@@ -4369,7 +5218,7 @@ func (m *PackageVersionMutation) RemoveSbomIDs(ids ...int) {
 	}
 }
 
-// RemovedSbom returns the removed IDs of the "sbom" edge to the SBOM entity.
+// RemovedSbom returns the removed IDs of the "sbom" edge to the BillOfMaterials entity.
 func (m *PackageVersionMutation) RemovedSbomIDs() (ids []int) {
 	for id := range m.removedsbom {
 		ids = append(ids, id)
@@ -4731,39 +5580,43 @@ func (m *PackageVersionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown PackageVersion edge %s", name)
 }
 
-// SBOMMutation represents an operation that mutates the SBOM nodes in the graph.
-type SBOMMutation struct {
+// SLSAAttestationMutation represents an operation that mutates the SLSAAttestation nodes in the graph.
+type SLSAAttestationMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	uri              *string
-	algorithm        *string
-	digest           *string
-	downloadLocation *string
-	origin           *string
-	collector        *string
-	clearedFields    map[string]struct{}
-	_package         *int
-	cleared_package  bool
-	artifact         *int
-	clearedartifact  bool
-	done             bool
-	oldValue         func(context.Context) (*SBOM, error)
-	predicates       []predicate.SBOM
+	op                   Op
+	typ                  string
+	id                   *int
+	build_type           *string
+	slsa_predicate       *[]*model.SLSAPredicate
+	appendslsa_predicate []*model.SLSAPredicate
+	slsa_version         *string
+	started_on           *time.Time
+	finished_on          *time.Time
+	origin               *string
+	collector            *string
+	clearedFields        map[string]struct{}
+	built_from           map[int]struct{}
+	removedbuilt_from    map[int]struct{}
+	clearedbuilt_from    bool
+	built_by             map[int]struct{}
+	removedbuilt_by      map[int]struct{}
+	clearedbuilt_by      bool
+	done                 bool
+	oldValue             func(context.Context) (*SLSAAttestation, error)
+	predicates           []predicate.SLSAAttestation
 }
 
-var _ ent.Mutation = (*SBOMMutation)(nil)
+var _ ent.Mutation = (*SLSAAttestationMutation)(nil)
 
-// sbomOption allows management of the mutation configuration using functional options.
-type sbomOption func(*SBOMMutation)
+// slsaattestationOption allows management of the mutation configuration using functional options.
+type slsaattestationOption func(*SLSAAttestationMutation)
 
-// newSBOMMutation creates new mutation for the SBOM entity.
-func newSBOMMutation(c config, op Op, opts ...sbomOption) *SBOMMutation {
-	m := &SBOMMutation{
+// newSLSAAttestationMutation creates new mutation for the SLSAAttestation entity.
+func newSLSAAttestationMutation(c config, op Op, opts ...slsaattestationOption) *SLSAAttestationMutation {
+	m := &SLSAAttestationMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeSBOM,
+		typ:           TypeSLSAAttestation,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -4772,20 +5625,20 @@ func newSBOMMutation(c config, op Op, opts ...sbomOption) *SBOMMutation {
 	return m
 }
 
-// withSBOMID sets the ID field of the mutation.
-func withSBOMID(id int) sbomOption {
-	return func(m *SBOMMutation) {
+// withSLSAAttestationID sets the ID field of the mutation.
+func withSLSAAttestationID(id int) slsaattestationOption {
+	return func(m *SLSAAttestationMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *SBOM
+			value *SLSAAttestation
 		)
-		m.oldValue = func(ctx context.Context) (*SBOM, error) {
+		m.oldValue = func(ctx context.Context) (*SLSAAttestation, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().SBOM.Get(ctx, id)
+					value, err = m.Client().SLSAAttestation.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -4794,10 +5647,10 @@ func withSBOMID(id int) sbomOption {
 	}
 }
 
-// withSBOM sets the old SBOM of the mutation.
-func withSBOM(node *SBOM) sbomOption {
-	return func(m *SBOMMutation) {
-		m.oldValue = func(context.Context) (*SBOM, error) {
+// withSLSAAttestation sets the old SLSAAttestation of the mutation.
+func withSLSAAttestation(node *SLSAAttestation) slsaattestationOption {
+	return func(m *SLSAAttestationMutation) {
+		m.oldValue = func(context.Context) (*SLSAAttestation, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -4806,7 +5659,7 @@ func withSBOM(node *SBOM) sbomOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m SBOMMutation) Client() *Client {
+func (m SLSAAttestationMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -4814,7 +5667,7 @@ func (m SBOMMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m SBOMMutation) Tx() (*Tx, error) {
+func (m SLSAAttestationMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -4825,7 +5678,7 @@ func (m SBOMMutation) Tx() (*Tx, error) {
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *SBOMMutation) ID() (id int, exists bool) {
+func (m *SLSAAttestationMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -4836,7 +5689,7 @@ func (m *SBOMMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *SBOMMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *SLSAAttestationMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -4845,261 +5698,254 @@ func (m *SBOMMutation) IDs(ctx context.Context) ([]int, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().SBOM.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().SLSAAttestation.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
-// SetPackageID sets the "package_id" field.
-func (m *SBOMMutation) SetPackageID(i int) {
-	m._package = &i
+// SetBuildType sets the "build_type" field.
+func (m *SLSAAttestationMutation) SetBuildType(s string) {
+	m.build_type = &s
 }
 
-// PackageID returns the value of the "package_id" field in the mutation.
-func (m *SBOMMutation) PackageID() (r int, exists bool) {
-	v := m._package
+// BuildType returns the value of the "build_type" field in the mutation.
+func (m *SLSAAttestationMutation) BuildType() (r string, exists bool) {
+	v := m.build_type
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPackageID returns the old "package_id" field's value of the SBOM entity.
-// If the SBOM object wasn't provided to the builder, the object is fetched from the database.
+// OldBuildType returns the old "build_type" field's value of the SLSAAttestation entity.
+// If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SBOMMutation) OldPackageID(ctx context.Context) (v *int, err error) {
+func (m *SLSAAttestationMutation) OldBuildType(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
+		return v, errors.New("OldBuildType is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPackageID requires an ID field in the mutation")
+		return v, errors.New("OldBuildType requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPackageID: %w", err)
+		return v, fmt.Errorf("querying old value for OldBuildType: %w", err)
 	}
-	return oldValue.PackageID, nil
+	return oldValue.BuildType, nil
 }
 
-// ClearPackageID clears the value of the "package_id" field.
-func (m *SBOMMutation) ClearPackageID() {
-	m._package = nil
-	m.clearedFields[sbom.FieldPackageID] = struct{}{}
+// ResetBuildType resets all changes to the "build_type" field.
+func (m *SLSAAttestationMutation) ResetBuildType() {
+	m.build_type = nil
 }
 
-// PackageIDCleared returns if the "package_id" field was cleared in this mutation.
-func (m *SBOMMutation) PackageIDCleared() bool {
-	_, ok := m.clearedFields[sbom.FieldPackageID]
+// SetSlsaPredicate sets the "slsa_predicate" field.
+func (m *SLSAAttestationMutation) SetSlsaPredicate(mp []*model.SLSAPredicate) {
+	m.slsa_predicate = &mp
+	m.appendslsa_predicate = nil
+}
+
+// SlsaPredicate returns the value of the "slsa_predicate" field in the mutation.
+func (m *SLSAAttestationMutation) SlsaPredicate() (r []*model.SLSAPredicate, exists bool) {
+	v := m.slsa_predicate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlsaPredicate returns the old "slsa_predicate" field's value of the SLSAAttestation entity.
+// If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SLSAAttestationMutation) OldSlsaPredicate(ctx context.Context) (v []*model.SLSAPredicate, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlsaPredicate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlsaPredicate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlsaPredicate: %w", err)
+	}
+	return oldValue.SlsaPredicate, nil
+}
+
+// AppendSlsaPredicate adds mp to the "slsa_predicate" field.
+func (m *SLSAAttestationMutation) AppendSlsaPredicate(mp []*model.SLSAPredicate) {
+	m.appendslsa_predicate = append(m.appendslsa_predicate, mp...)
+}
+
+// AppendedSlsaPredicate returns the list of values that were appended to the "slsa_predicate" field in this mutation.
+func (m *SLSAAttestationMutation) AppendedSlsaPredicate() ([]*model.SLSAPredicate, bool) {
+	if len(m.appendslsa_predicate) == 0 {
+		return nil, false
+	}
+	return m.appendslsa_predicate, true
+}
+
+// ClearSlsaPredicate clears the value of the "slsa_predicate" field.
+func (m *SLSAAttestationMutation) ClearSlsaPredicate() {
+	m.slsa_predicate = nil
+	m.appendslsa_predicate = nil
+	m.clearedFields[slsaattestation.FieldSlsaPredicate] = struct{}{}
+}
+
+// SlsaPredicateCleared returns if the "slsa_predicate" field was cleared in this mutation.
+func (m *SLSAAttestationMutation) SlsaPredicateCleared() bool {
+	_, ok := m.clearedFields[slsaattestation.FieldSlsaPredicate]
 	return ok
 }
 
-// ResetPackageID resets all changes to the "package_id" field.
-func (m *SBOMMutation) ResetPackageID() {
-	m._package = nil
-	delete(m.clearedFields, sbom.FieldPackageID)
+// ResetSlsaPredicate resets all changes to the "slsa_predicate" field.
+func (m *SLSAAttestationMutation) ResetSlsaPredicate() {
+	m.slsa_predicate = nil
+	m.appendslsa_predicate = nil
+	delete(m.clearedFields, slsaattestation.FieldSlsaPredicate)
 }
 
-// SetArtifactID sets the "artifact_id" field.
-func (m *SBOMMutation) SetArtifactID(i int) {
-	m.artifact = &i
+// SetSlsaVersion sets the "slsa_version" field.
+func (m *SLSAAttestationMutation) SetSlsaVersion(s string) {
+	m.slsa_version = &s
 }
 
-// ArtifactID returns the value of the "artifact_id" field in the mutation.
-func (m *SBOMMutation) ArtifactID() (r int, exists bool) {
-	v := m.artifact
+// SlsaVersion returns the value of the "slsa_version" field in the mutation.
+func (m *SLSAAttestationMutation) SlsaVersion() (r string, exists bool) {
+	v := m.slsa_version
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldArtifactID returns the old "artifact_id" field's value of the SBOM entity.
-// If the SBOM object wasn't provided to the builder, the object is fetched from the database.
+// OldSlsaVersion returns the old "slsa_version" field's value of the SLSAAttestation entity.
+// If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SBOMMutation) OldArtifactID(ctx context.Context) (v *int, err error) {
+func (m *SLSAAttestationMutation) OldSlsaVersion(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
+		return v, errors.New("OldSlsaVersion is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldArtifactID requires an ID field in the mutation")
+		return v, errors.New("OldSlsaVersion requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldArtifactID: %w", err)
+		return v, fmt.Errorf("querying old value for OldSlsaVersion: %w", err)
 	}
-	return oldValue.ArtifactID, nil
+	return oldValue.SlsaVersion, nil
 }
 
-// ClearArtifactID clears the value of the "artifact_id" field.
-func (m *SBOMMutation) ClearArtifactID() {
-	m.artifact = nil
-	m.clearedFields[sbom.FieldArtifactID] = struct{}{}
+// ResetSlsaVersion resets all changes to the "slsa_version" field.
+func (m *SLSAAttestationMutation) ResetSlsaVersion() {
+	m.slsa_version = nil
 }
 
-// ArtifactIDCleared returns if the "artifact_id" field was cleared in this mutation.
-func (m *SBOMMutation) ArtifactIDCleared() bool {
-	_, ok := m.clearedFields[sbom.FieldArtifactID]
+// SetStartedOn sets the "started_on" field.
+func (m *SLSAAttestationMutation) SetStartedOn(t time.Time) {
+	m.started_on = &t
+}
+
+// StartedOn returns the value of the "started_on" field in the mutation.
+func (m *SLSAAttestationMutation) StartedOn() (r time.Time, exists bool) {
+	v := m.started_on
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartedOn returns the old "started_on" field's value of the SLSAAttestation entity.
+// If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SLSAAttestationMutation) OldStartedOn(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartedOn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartedOn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartedOn: %w", err)
+	}
+	return oldValue.StartedOn, nil
+}
+
+// ClearStartedOn clears the value of the "started_on" field.
+func (m *SLSAAttestationMutation) ClearStartedOn() {
+	m.started_on = nil
+	m.clearedFields[slsaattestation.FieldStartedOn] = struct{}{}
+}
+
+// StartedOnCleared returns if the "started_on" field was cleared in this mutation.
+func (m *SLSAAttestationMutation) StartedOnCleared() bool {
+	_, ok := m.clearedFields[slsaattestation.FieldStartedOn]
 	return ok
 }
 
-// ResetArtifactID resets all changes to the "artifact_id" field.
-func (m *SBOMMutation) ResetArtifactID() {
-	m.artifact = nil
-	delete(m.clearedFields, sbom.FieldArtifactID)
+// ResetStartedOn resets all changes to the "started_on" field.
+func (m *SLSAAttestationMutation) ResetStartedOn() {
+	m.started_on = nil
+	delete(m.clearedFields, slsaattestation.FieldStartedOn)
 }
 
-// SetURI sets the "uri" field.
-func (m *SBOMMutation) SetURI(s string) {
-	m.uri = &s
+// SetFinishedOn sets the "finished_on" field.
+func (m *SLSAAttestationMutation) SetFinishedOn(t time.Time) {
+	m.finished_on = &t
 }
 
-// URI returns the value of the "uri" field in the mutation.
-func (m *SBOMMutation) URI() (r string, exists bool) {
-	v := m.uri
+// FinishedOn returns the value of the "finished_on" field in the mutation.
+func (m *SLSAAttestationMutation) FinishedOn() (r time.Time, exists bool) {
+	v := m.finished_on
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldURI returns the old "uri" field's value of the SBOM entity.
-// If the SBOM object wasn't provided to the builder, the object is fetched from the database.
+// OldFinishedOn returns the old "finished_on" field's value of the SLSAAttestation entity.
+// If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SBOMMutation) OldURI(ctx context.Context) (v string, err error) {
+func (m *SLSAAttestationMutation) OldFinishedOn(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldURI is only allowed on UpdateOne operations")
+		return v, errors.New("OldFinishedOn is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldURI requires an ID field in the mutation")
+		return v, errors.New("OldFinishedOn requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldURI: %w", err)
+		return v, fmt.Errorf("querying old value for OldFinishedOn: %w", err)
 	}
-	return oldValue.URI, nil
+	return oldValue.FinishedOn, nil
 }
 
-// ResetURI resets all changes to the "uri" field.
-func (m *SBOMMutation) ResetURI() {
-	m.uri = nil
+// ClearFinishedOn clears the value of the "finished_on" field.
+func (m *SLSAAttestationMutation) ClearFinishedOn() {
+	m.finished_on = nil
+	m.clearedFields[slsaattestation.FieldFinishedOn] = struct{}{}
 }
 
-// SetAlgorithm sets the "algorithm" field.
-func (m *SBOMMutation) SetAlgorithm(s string) {
-	m.algorithm = &s
+// FinishedOnCleared returns if the "finished_on" field was cleared in this mutation.
+func (m *SLSAAttestationMutation) FinishedOnCleared() bool {
+	_, ok := m.clearedFields[slsaattestation.FieldFinishedOn]
+	return ok
 }
 
-// Algorithm returns the value of the "algorithm" field in the mutation.
-func (m *SBOMMutation) Algorithm() (r string, exists bool) {
-	v := m.algorithm
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAlgorithm returns the old "algorithm" field's value of the SBOM entity.
-// If the SBOM object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SBOMMutation) OldAlgorithm(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAlgorithm is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAlgorithm requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAlgorithm: %w", err)
-	}
-	return oldValue.Algorithm, nil
-}
-
-// ResetAlgorithm resets all changes to the "algorithm" field.
-func (m *SBOMMutation) ResetAlgorithm() {
-	m.algorithm = nil
-}
-
-// SetDigest sets the "digest" field.
-func (m *SBOMMutation) SetDigest(s string) {
-	m.digest = &s
-}
-
-// Digest returns the value of the "digest" field in the mutation.
-func (m *SBOMMutation) Digest() (r string, exists bool) {
-	v := m.digest
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDigest returns the old "digest" field's value of the SBOM entity.
-// If the SBOM object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SBOMMutation) OldDigest(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDigest is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDigest requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDigest: %w", err)
-	}
-	return oldValue.Digest, nil
-}
-
-// ResetDigest resets all changes to the "digest" field.
-func (m *SBOMMutation) ResetDigest() {
-	m.digest = nil
-}
-
-// SetDownloadLocation sets the "downloadLocation" field.
-func (m *SBOMMutation) SetDownloadLocation(s string) {
-	m.downloadLocation = &s
-}
-
-// DownloadLocation returns the value of the "downloadLocation" field in the mutation.
-func (m *SBOMMutation) DownloadLocation() (r string, exists bool) {
-	v := m.downloadLocation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDownloadLocation returns the old "downloadLocation" field's value of the SBOM entity.
-// If the SBOM object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SBOMMutation) OldDownloadLocation(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDownloadLocation is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDownloadLocation requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDownloadLocation: %w", err)
-	}
-	return oldValue.DownloadLocation, nil
-}
-
-// ResetDownloadLocation resets all changes to the "downloadLocation" field.
-func (m *SBOMMutation) ResetDownloadLocation() {
-	m.downloadLocation = nil
+// ResetFinishedOn resets all changes to the "finished_on" field.
+func (m *SLSAAttestationMutation) ResetFinishedOn() {
+	m.finished_on = nil
+	delete(m.clearedFields, slsaattestation.FieldFinishedOn)
 }
 
 // SetOrigin sets the "origin" field.
-func (m *SBOMMutation) SetOrigin(s string) {
+func (m *SLSAAttestationMutation) SetOrigin(s string) {
 	m.origin = &s
 }
 
 // Origin returns the value of the "origin" field in the mutation.
-func (m *SBOMMutation) Origin() (r string, exists bool) {
+func (m *SLSAAttestationMutation) Origin() (r string, exists bool) {
 	v := m.origin
 	if v == nil {
 		return
@@ -5107,10 +5953,10 @@ func (m *SBOMMutation) Origin() (r string, exists bool) {
 	return *v, true
 }
 
-// OldOrigin returns the old "origin" field's value of the SBOM entity.
-// If the SBOM object wasn't provided to the builder, the object is fetched from the database.
+// OldOrigin returns the old "origin" field's value of the SLSAAttestation entity.
+// If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SBOMMutation) OldOrigin(ctx context.Context) (v string, err error) {
+func (m *SLSAAttestationMutation) OldOrigin(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
 	}
@@ -5125,17 +5971,17 @@ func (m *SBOMMutation) OldOrigin(ctx context.Context) (v string, err error) {
 }
 
 // ResetOrigin resets all changes to the "origin" field.
-func (m *SBOMMutation) ResetOrigin() {
+func (m *SLSAAttestationMutation) ResetOrigin() {
 	m.origin = nil
 }
 
 // SetCollector sets the "collector" field.
-func (m *SBOMMutation) SetCollector(s string) {
+func (m *SLSAAttestationMutation) SetCollector(s string) {
 	m.collector = &s
 }
 
 // Collector returns the value of the "collector" field in the mutation.
-func (m *SBOMMutation) Collector() (r string, exists bool) {
+func (m *SLSAAttestationMutation) Collector() (r string, exists bool) {
 	v := m.collector
 	if v == nil {
 		return
@@ -5143,10 +5989,10 @@ func (m *SBOMMutation) Collector() (r string, exists bool) {
 	return *v, true
 }
 
-// OldCollector returns the old "collector" field's value of the SBOM entity.
-// If the SBOM object wasn't provided to the builder, the object is fetched from the database.
+// OldCollector returns the old "collector" field's value of the SLSAAttestation entity.
+// If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SBOMMutation) OldCollector(ctx context.Context) (v string, err error) {
+func (m *SLSAAttestationMutation) OldCollector(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
 	}
@@ -5161,71 +6007,127 @@ func (m *SBOMMutation) OldCollector(ctx context.Context) (v string, err error) {
 }
 
 // ResetCollector resets all changes to the "collector" field.
-func (m *SBOMMutation) ResetCollector() {
+func (m *SLSAAttestationMutation) ResetCollector() {
 	m.collector = nil
 }
 
-// ClearPackage clears the "package" edge to the PackageVersion entity.
-func (m *SBOMMutation) ClearPackage() {
-	m.cleared_package = true
+// AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by ids.
+func (m *SLSAAttestationMutation) AddBuiltFromIDs(ids ...int) {
+	if m.built_from == nil {
+		m.built_from = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.built_from[ids[i]] = struct{}{}
+	}
 }
 
-// PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
-func (m *SBOMMutation) PackageCleared() bool {
-	return m.PackageIDCleared() || m.cleared_package
+// ClearBuiltFrom clears the "built_from" edge to the Artifact entity.
+func (m *SLSAAttestationMutation) ClearBuiltFrom() {
+	m.clearedbuilt_from = true
 }
 
-// PackageIDs returns the "package" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PackageID instead. It exists only for internal usage by the builders.
-func (m *SBOMMutation) PackageIDs() (ids []int) {
-	if id := m._package; id != nil {
-		ids = append(ids, *id)
+// BuiltFromCleared reports if the "built_from" edge to the Artifact entity was cleared.
+func (m *SLSAAttestationMutation) BuiltFromCleared() bool {
+	return m.clearedbuilt_from
+}
+
+// RemoveBuiltFromIDs removes the "built_from" edge to the Artifact entity by IDs.
+func (m *SLSAAttestationMutation) RemoveBuiltFromIDs(ids ...int) {
+	if m.removedbuilt_from == nil {
+		m.removedbuilt_from = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.built_from, ids[i])
+		m.removedbuilt_from[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedBuiltFrom returns the removed IDs of the "built_from" edge to the Artifact entity.
+func (m *SLSAAttestationMutation) RemovedBuiltFromIDs() (ids []int) {
+	for id := range m.removedbuilt_from {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPackage resets all changes to the "package" edge.
-func (m *SBOMMutation) ResetPackage() {
-	m._package = nil
-	m.cleared_package = false
-}
-
-// ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (m *SBOMMutation) ClearArtifact() {
-	m.clearedartifact = true
-}
-
-// ArtifactCleared reports if the "artifact" edge to the Artifact entity was cleared.
-func (m *SBOMMutation) ArtifactCleared() bool {
-	return m.ArtifactIDCleared() || m.clearedartifact
-}
-
-// ArtifactIDs returns the "artifact" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ArtifactID instead. It exists only for internal usage by the builders.
-func (m *SBOMMutation) ArtifactIDs() (ids []int) {
-	if id := m.artifact; id != nil {
-		ids = append(ids, *id)
+// BuiltFromIDs returns the "built_from" edge IDs in the mutation.
+func (m *SLSAAttestationMutation) BuiltFromIDs() (ids []int) {
+	for id := range m.built_from {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetArtifact resets all changes to the "artifact" edge.
-func (m *SBOMMutation) ResetArtifact() {
-	m.artifact = nil
-	m.clearedartifact = false
+// ResetBuiltFrom resets all changes to the "built_from" edge.
+func (m *SLSAAttestationMutation) ResetBuiltFrom() {
+	m.built_from = nil
+	m.clearedbuilt_from = false
+	m.removedbuilt_from = nil
 }
 
-// Where appends a list predicates to the SBOMMutation builder.
-func (m *SBOMMutation) Where(ps ...predicate.SBOM) {
+// AddBuiltByIDs adds the "built_by" edge to the BuilderNode entity by ids.
+func (m *SLSAAttestationMutation) AddBuiltByIDs(ids ...int) {
+	if m.built_by == nil {
+		m.built_by = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.built_by[ids[i]] = struct{}{}
+	}
+}
+
+// ClearBuiltBy clears the "built_by" edge to the BuilderNode entity.
+func (m *SLSAAttestationMutation) ClearBuiltBy() {
+	m.clearedbuilt_by = true
+}
+
+// BuiltByCleared reports if the "built_by" edge to the BuilderNode entity was cleared.
+func (m *SLSAAttestationMutation) BuiltByCleared() bool {
+	return m.clearedbuilt_by
+}
+
+// RemoveBuiltByIDs removes the "built_by" edge to the BuilderNode entity by IDs.
+func (m *SLSAAttestationMutation) RemoveBuiltByIDs(ids ...int) {
+	if m.removedbuilt_by == nil {
+		m.removedbuilt_by = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.built_by, ids[i])
+		m.removedbuilt_by[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedBuiltBy returns the removed IDs of the "built_by" edge to the BuilderNode entity.
+func (m *SLSAAttestationMutation) RemovedBuiltByIDs() (ids []int) {
+	for id := range m.removedbuilt_by {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// BuiltByIDs returns the "built_by" edge IDs in the mutation.
+func (m *SLSAAttestationMutation) BuiltByIDs() (ids []int) {
+	for id := range m.built_by {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetBuiltBy resets all changes to the "built_by" edge.
+func (m *SLSAAttestationMutation) ResetBuiltBy() {
+	m.built_by = nil
+	m.clearedbuilt_by = false
+	m.removedbuilt_by = nil
+}
+
+// Where appends a list predicates to the SLSAAttestationMutation builder.
+func (m *SLSAAttestationMutation) Where(ps ...predicate.SLSAAttestation) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the SBOMMutation builder. Using this method,
+// WhereP appends storage-level predicates to the SLSAAttestationMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *SBOMMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.SBOM, len(ps))
+func (m *SLSAAttestationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SLSAAttestation, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -5233,48 +6135,45 @@ func (m *SBOMMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *SBOMMutation) Op() Op {
+func (m *SLSAAttestationMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *SBOMMutation) SetOp(op Op) {
+func (m *SLSAAttestationMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (SBOM).
-func (m *SBOMMutation) Type() string {
+// Type returns the node type of this mutation (SLSAAttestation).
+func (m *SLSAAttestationMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *SBOMMutation) Fields() []string {
-	fields := make([]string, 0, 8)
-	if m._package != nil {
-		fields = append(fields, sbom.FieldPackageID)
+func (m *SLSAAttestationMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.build_type != nil {
+		fields = append(fields, slsaattestation.FieldBuildType)
 	}
-	if m.artifact != nil {
-		fields = append(fields, sbom.FieldArtifactID)
+	if m.slsa_predicate != nil {
+		fields = append(fields, slsaattestation.FieldSlsaPredicate)
 	}
-	if m.uri != nil {
-		fields = append(fields, sbom.FieldURI)
+	if m.slsa_version != nil {
+		fields = append(fields, slsaattestation.FieldSlsaVersion)
 	}
-	if m.algorithm != nil {
-		fields = append(fields, sbom.FieldAlgorithm)
+	if m.started_on != nil {
+		fields = append(fields, slsaattestation.FieldStartedOn)
 	}
-	if m.digest != nil {
-		fields = append(fields, sbom.FieldDigest)
-	}
-	if m.downloadLocation != nil {
-		fields = append(fields, sbom.FieldDownloadLocation)
+	if m.finished_on != nil {
+		fields = append(fields, slsaattestation.FieldFinishedOn)
 	}
 	if m.origin != nil {
-		fields = append(fields, sbom.FieldOrigin)
+		fields = append(fields, slsaattestation.FieldOrigin)
 	}
 	if m.collector != nil {
-		fields = append(fields, sbom.FieldCollector)
+		fields = append(fields, slsaattestation.FieldCollector)
 	}
 	return fields
 }
@@ -5282,23 +6181,21 @@ func (m *SBOMMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *SBOMMutation) Field(name string) (ent.Value, bool) {
+func (m *SLSAAttestationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case sbom.FieldPackageID:
-		return m.PackageID()
-	case sbom.FieldArtifactID:
-		return m.ArtifactID()
-	case sbom.FieldURI:
-		return m.URI()
-	case sbom.FieldAlgorithm:
-		return m.Algorithm()
-	case sbom.FieldDigest:
-		return m.Digest()
-	case sbom.FieldDownloadLocation:
-		return m.DownloadLocation()
-	case sbom.FieldOrigin:
+	case slsaattestation.FieldBuildType:
+		return m.BuildType()
+	case slsaattestation.FieldSlsaPredicate:
+		return m.SlsaPredicate()
+	case slsaattestation.FieldSlsaVersion:
+		return m.SlsaVersion()
+	case slsaattestation.FieldStartedOn:
+		return m.StartedOn()
+	case slsaattestation.FieldFinishedOn:
+		return m.FinishedOn()
+	case slsaattestation.FieldOrigin:
 		return m.Origin()
-	case sbom.FieldCollector:
+	case slsaattestation.FieldCollector:
 		return m.Collector()
 	}
 	return nil, false
@@ -5307,83 +6204,74 @@ func (m *SBOMMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *SBOMMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *SLSAAttestationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case sbom.FieldPackageID:
-		return m.OldPackageID(ctx)
-	case sbom.FieldArtifactID:
-		return m.OldArtifactID(ctx)
-	case sbom.FieldURI:
-		return m.OldURI(ctx)
-	case sbom.FieldAlgorithm:
-		return m.OldAlgorithm(ctx)
-	case sbom.FieldDigest:
-		return m.OldDigest(ctx)
-	case sbom.FieldDownloadLocation:
-		return m.OldDownloadLocation(ctx)
-	case sbom.FieldOrigin:
+	case slsaattestation.FieldBuildType:
+		return m.OldBuildType(ctx)
+	case slsaattestation.FieldSlsaPredicate:
+		return m.OldSlsaPredicate(ctx)
+	case slsaattestation.FieldSlsaVersion:
+		return m.OldSlsaVersion(ctx)
+	case slsaattestation.FieldStartedOn:
+		return m.OldStartedOn(ctx)
+	case slsaattestation.FieldFinishedOn:
+		return m.OldFinishedOn(ctx)
+	case slsaattestation.FieldOrigin:
 		return m.OldOrigin(ctx)
-	case sbom.FieldCollector:
+	case slsaattestation.FieldCollector:
 		return m.OldCollector(ctx)
 	}
-	return nil, fmt.Errorf("unknown SBOM field %s", name)
+	return nil, fmt.Errorf("unknown SLSAAttestation field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *SBOMMutation) SetField(name string, value ent.Value) error {
+func (m *SLSAAttestationMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case sbom.FieldPackageID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPackageID(v)
-		return nil
-	case sbom.FieldArtifactID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetArtifactID(v)
-		return nil
-	case sbom.FieldURI:
+	case slsaattestation.FieldBuildType:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetURI(v)
+		m.SetBuildType(v)
 		return nil
-	case sbom.FieldAlgorithm:
+	case slsaattestation.FieldSlsaPredicate:
+		v, ok := value.([]*model.SLSAPredicate)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlsaPredicate(v)
+		return nil
+	case slsaattestation.FieldSlsaVersion:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAlgorithm(v)
+		m.SetSlsaVersion(v)
 		return nil
-	case sbom.FieldDigest:
-		v, ok := value.(string)
+	case slsaattestation.FieldStartedOn:
+		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDigest(v)
+		m.SetStartedOn(v)
 		return nil
-	case sbom.FieldDownloadLocation:
-		v, ok := value.(string)
+	case slsaattestation.FieldFinishedOn:
+		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDownloadLocation(v)
+		m.SetFinishedOn(v)
 		return nil
-	case sbom.FieldOrigin:
+	case slsaattestation.FieldOrigin:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOrigin(v)
 		return nil
-	case sbom.FieldCollector:
+	case slsaattestation.FieldCollector:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -5391,190 +6279,208 @@ func (m *SBOMMutation) SetField(name string, value ent.Value) error {
 		m.SetCollector(v)
 		return nil
 	}
-	return fmt.Errorf("unknown SBOM field %s", name)
+	return fmt.Errorf("unknown SLSAAttestation field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *SBOMMutation) AddedFields() []string {
-	var fields []string
-	return fields
+func (m *SLSAAttestationMutation) AddedFields() []string {
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *SBOMMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
+func (m *SLSAAttestationMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *SBOMMutation) AddField(name string, value ent.Value) error {
+func (m *SLSAAttestationMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown SBOM numeric field %s", name)
+	return fmt.Errorf("unknown SLSAAttestation numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *SBOMMutation) ClearedFields() []string {
+func (m *SLSAAttestationMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(sbom.FieldPackageID) {
-		fields = append(fields, sbom.FieldPackageID)
+	if m.FieldCleared(slsaattestation.FieldSlsaPredicate) {
+		fields = append(fields, slsaattestation.FieldSlsaPredicate)
 	}
-	if m.FieldCleared(sbom.FieldArtifactID) {
-		fields = append(fields, sbom.FieldArtifactID)
+	if m.FieldCleared(slsaattestation.FieldStartedOn) {
+		fields = append(fields, slsaattestation.FieldStartedOn)
+	}
+	if m.FieldCleared(slsaattestation.FieldFinishedOn) {
+		fields = append(fields, slsaattestation.FieldFinishedOn)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *SBOMMutation) FieldCleared(name string) bool {
+func (m *SLSAAttestationMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *SBOMMutation) ClearField(name string) error {
+func (m *SLSAAttestationMutation) ClearField(name string) error {
 	switch name {
-	case sbom.FieldPackageID:
-		m.ClearPackageID()
+	case slsaattestation.FieldSlsaPredicate:
+		m.ClearSlsaPredicate()
 		return nil
-	case sbom.FieldArtifactID:
-		m.ClearArtifactID()
+	case slsaattestation.FieldStartedOn:
+		m.ClearStartedOn()
+		return nil
+	case slsaattestation.FieldFinishedOn:
+		m.ClearFinishedOn()
 		return nil
 	}
-	return fmt.Errorf("unknown SBOM nullable field %s", name)
+	return fmt.Errorf("unknown SLSAAttestation nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *SBOMMutation) ResetField(name string) error {
+func (m *SLSAAttestationMutation) ResetField(name string) error {
 	switch name {
-	case sbom.FieldPackageID:
-		m.ResetPackageID()
+	case slsaattestation.FieldBuildType:
+		m.ResetBuildType()
 		return nil
-	case sbom.FieldArtifactID:
-		m.ResetArtifactID()
+	case slsaattestation.FieldSlsaPredicate:
+		m.ResetSlsaPredicate()
 		return nil
-	case sbom.FieldURI:
-		m.ResetURI()
+	case slsaattestation.FieldSlsaVersion:
+		m.ResetSlsaVersion()
 		return nil
-	case sbom.FieldAlgorithm:
-		m.ResetAlgorithm()
+	case slsaattestation.FieldStartedOn:
+		m.ResetStartedOn()
 		return nil
-	case sbom.FieldDigest:
-		m.ResetDigest()
+	case slsaattestation.FieldFinishedOn:
+		m.ResetFinishedOn()
 		return nil
-	case sbom.FieldDownloadLocation:
-		m.ResetDownloadLocation()
-		return nil
-	case sbom.FieldOrigin:
+	case slsaattestation.FieldOrigin:
 		m.ResetOrigin()
 		return nil
-	case sbom.FieldCollector:
+	case slsaattestation.FieldCollector:
 		m.ResetCollector()
 		return nil
 	}
-	return fmt.Errorf("unknown SBOM field %s", name)
+	return fmt.Errorf("unknown SLSAAttestation field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *SBOMMutation) AddedEdges() []string {
+func (m *SLSAAttestationMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m._package != nil {
-		edges = append(edges, sbom.EdgePackage)
+	if m.built_from != nil {
+		edges = append(edges, slsaattestation.EdgeBuiltFrom)
 	}
-	if m.artifact != nil {
-		edges = append(edges, sbom.EdgeArtifact)
+	if m.built_by != nil {
+		edges = append(edges, slsaattestation.EdgeBuiltBy)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *SBOMMutation) AddedIDs(name string) []ent.Value {
+func (m *SLSAAttestationMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case sbom.EdgePackage:
-		if id := m._package; id != nil {
-			return []ent.Value{*id}
+	case slsaattestation.EdgeBuiltFrom:
+		ids := make([]ent.Value, 0, len(m.built_from))
+		for id := range m.built_from {
+			ids = append(ids, id)
 		}
-	case sbom.EdgeArtifact:
-		if id := m.artifact; id != nil {
-			return []ent.Value{*id}
+		return ids
+	case slsaattestation.EdgeBuiltBy:
+		ids := make([]ent.Value, 0, len(m.built_by))
+		for id := range m.built_by {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *SBOMMutation) RemovedEdges() []string {
+func (m *SLSAAttestationMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
+	if m.removedbuilt_from != nil {
+		edges = append(edges, slsaattestation.EdgeBuiltFrom)
+	}
+	if m.removedbuilt_by != nil {
+		edges = append(edges, slsaattestation.EdgeBuiltBy)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *SBOMMutation) RemovedIDs(name string) []ent.Value {
+func (m *SLSAAttestationMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case slsaattestation.EdgeBuiltFrom:
+		ids := make([]ent.Value, 0, len(m.removedbuilt_from))
+		for id := range m.removedbuilt_from {
+			ids = append(ids, id)
+		}
+		return ids
+	case slsaattestation.EdgeBuiltBy:
+		ids := make([]ent.Value, 0, len(m.removedbuilt_by))
+		for id := range m.removedbuilt_by {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *SBOMMutation) ClearedEdges() []string {
+func (m *SLSAAttestationMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.cleared_package {
-		edges = append(edges, sbom.EdgePackage)
+	if m.clearedbuilt_from {
+		edges = append(edges, slsaattestation.EdgeBuiltFrom)
 	}
-	if m.clearedartifact {
-		edges = append(edges, sbom.EdgeArtifact)
+	if m.clearedbuilt_by {
+		edges = append(edges, slsaattestation.EdgeBuiltBy)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *SBOMMutation) EdgeCleared(name string) bool {
+func (m *SLSAAttestationMutation) EdgeCleared(name string) bool {
 	switch name {
-	case sbom.EdgePackage:
-		return m.cleared_package
-	case sbom.EdgeArtifact:
-		return m.clearedartifact
+	case slsaattestation.EdgeBuiltFrom:
+		return m.clearedbuilt_from
+	case slsaattestation.EdgeBuiltBy:
+		return m.clearedbuilt_by
 	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *SBOMMutation) ClearEdge(name string) error {
+func (m *SLSAAttestationMutation) ClearEdge(name string) error {
 	switch name {
-	case sbom.EdgePackage:
-		m.ClearPackage()
-		return nil
-	case sbom.EdgeArtifact:
-		m.ClearArtifact()
-		return nil
 	}
-	return fmt.Errorf("unknown SBOM unique edge %s", name)
+	return fmt.Errorf("unknown SLSAAttestation unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *SBOMMutation) ResetEdge(name string) error {
+func (m *SLSAAttestationMutation) ResetEdge(name string) error {
 	switch name {
-	case sbom.EdgePackage:
-		m.ResetPackage()
+	case slsaattestation.EdgeBuiltFrom:
+		m.ResetBuiltFrom()
 		return nil
-	case sbom.EdgeArtifact:
-		m.ResetArtifact()
+	case slsaattestation.EdgeBuiltBy:
+		m.ResetBuiltBy()
 		return nil
 	}
-	return fmt.Errorf("unknown SBOM edge %s", name)
+	return fmt.Errorf("unknown SLSAAttestation edge %s", name)
 }
 
 // SourceNameMutation represents an operation that mutates the SourceName nodes in the graph.

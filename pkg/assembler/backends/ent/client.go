@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
@@ -22,7 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
@@ -35,6 +36,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Artifact is the client for interacting with the Artifact builders.
 	Artifact *ArtifactClient
+	// BillOfMaterials is the client for interacting with the BillOfMaterials builders.
+	BillOfMaterials *BillOfMaterialsClient
 	// BuilderNode is the client for interacting with the BuilderNode builders.
 	BuilderNode *BuilderNodeClient
 	// Dependency is the client for interacting with the Dependency builders.
@@ -49,8 +52,8 @@ type Client struct {
 	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
-	// SBOM is the client for interacting with the SBOM builders.
-	SBOM *SBOMClient
+	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
+	SLSAAttestation *SLSAAttestationClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// SourceNamespace is the client for interacting with the SourceNamespace builders.
@@ -71,6 +74,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Artifact = NewArtifactClient(c.config)
+	c.BillOfMaterials = NewBillOfMaterialsClient(c.config)
 	c.BuilderNode = NewBuilderNodeClient(c.config)
 	c.Dependency = NewDependencyClient(c.config)
 	c.Occurrence = NewOccurrenceClient(c.config)
@@ -78,7 +82,7 @@ func (c *Client) init() {
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
 	c.PackageType = NewPackageTypeClient(c.config)
 	c.PackageVersion = NewPackageVersionClient(c.config)
-	c.SBOM = NewSBOMClient(c.config)
+	c.SLSAAttestation = NewSLSAAttestationClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
 	c.SourceNamespace = NewSourceNamespaceClient(c.config)
 	c.SourceType = NewSourceTypeClient(c.config)
@@ -165,6 +169,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:              ctx,
 		config:           cfg,
 		Artifact:         NewArtifactClient(cfg),
+		BillOfMaterials:  NewBillOfMaterialsClient(cfg),
 		BuilderNode:      NewBuilderNodeClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
@@ -172,7 +177,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
-		SBOM:             NewSBOMClient(cfg),
+		SLSAAttestation:  NewSLSAAttestationClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
 		SourceType:       NewSourceTypeClient(cfg),
@@ -196,6 +201,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:              ctx,
 		config:           cfg,
 		Artifact:         NewArtifactClient(cfg),
+		BillOfMaterials:  NewBillOfMaterialsClient(cfg),
 		BuilderNode:      NewBuilderNodeClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
@@ -203,7 +209,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
-		SBOM:             NewSBOMClient(cfg),
+		SLSAAttestation:  NewSLSAAttestationClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
 		SourceType:       NewSourceTypeClient(cfg),
@@ -236,9 +242,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SBOM, c.SourceName,
-		c.SourceNamespace, c.SourceType,
+		c.Artifact, c.BillOfMaterials, c.BuilderNode, c.Dependency, c.Occurrence,
+		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion,
+		c.SLSAAttestation, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
 		n.Use(hooks...)
 	}
@@ -248,9 +254,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SBOM, c.SourceName,
-		c.SourceNamespace, c.SourceType,
+		c.Artifact, c.BillOfMaterials, c.BuilderNode, c.Dependency, c.Occurrence,
+		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion,
+		c.SLSAAttestation, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -261,6 +267,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *ArtifactMutation:
 		return c.Artifact.mutate(ctx, m)
+	case *BillOfMaterialsMutation:
+		return c.BillOfMaterials.mutate(ctx, m)
 	case *BuilderNodeMutation:
 		return c.BuilderNode.mutate(ctx, m)
 	case *DependencyMutation:
@@ -275,8 +283,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PackageType.mutate(ctx, m)
 	case *PackageVersionMutation:
 		return c.PackageVersion.mutate(ctx, m)
-	case *SBOMMutation:
-		return c.SBOM.mutate(ctx, m)
+	case *SLSAAttestationMutation:
+		return c.SLSAAttestation.mutate(ctx, m)
 	case *SourceNameMutation:
 		return c.SourceName.mutate(ctx, m)
 	case *SourceNamespaceMutation:
@@ -398,13 +406,13 @@ func (c *ArtifactClient) QueryOccurrences(a *Artifact) *OccurrenceQuery {
 }
 
 // QuerySbom queries the sbom edge of a Artifact.
-func (c *ArtifactClient) QuerySbom(a *Artifact) *SBOMQuery {
-	query := (&SBOMClient{config: c.config}).Query()
+func (c *ArtifactClient) QuerySbom(a *Artifact) *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
-			sqlgraph.To(sbom.Table, sbom.FieldID),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.SbomTable, artifact.SbomColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
@@ -435,6 +443,156 @@ func (c *ArtifactClient) mutate(ctx context.Context, m *ArtifactMutation) (Value
 		return (&ArtifactDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Artifact mutation op: %q", m.Op())
+	}
+}
+
+// BillOfMaterialsClient is a client for the BillOfMaterials schema.
+type BillOfMaterialsClient struct {
+	config
+}
+
+// NewBillOfMaterialsClient returns a client for the BillOfMaterials from the given config.
+func NewBillOfMaterialsClient(c config) *BillOfMaterialsClient {
+	return &BillOfMaterialsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `billofmaterials.Hooks(f(g(h())))`.
+func (c *BillOfMaterialsClient) Use(hooks ...Hook) {
+	c.hooks.BillOfMaterials = append(c.hooks.BillOfMaterials, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `billofmaterials.Intercept(f(g(h())))`.
+func (c *BillOfMaterialsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BillOfMaterials = append(c.inters.BillOfMaterials, interceptors...)
+}
+
+// Create returns a builder for creating a BillOfMaterials entity.
+func (c *BillOfMaterialsClient) Create() *BillOfMaterialsCreate {
+	mutation := newBillOfMaterialsMutation(c.config, OpCreate)
+	return &BillOfMaterialsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BillOfMaterials entities.
+func (c *BillOfMaterialsClient) CreateBulk(builders ...*BillOfMaterialsCreate) *BillOfMaterialsCreateBulk {
+	return &BillOfMaterialsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BillOfMaterials.
+func (c *BillOfMaterialsClient) Update() *BillOfMaterialsUpdate {
+	mutation := newBillOfMaterialsMutation(c.config, OpUpdate)
+	return &BillOfMaterialsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BillOfMaterialsClient) UpdateOne(bom *BillOfMaterials) *BillOfMaterialsUpdateOne {
+	mutation := newBillOfMaterialsMutation(c.config, OpUpdateOne, withBillOfMaterials(bom))
+	return &BillOfMaterialsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BillOfMaterialsClient) UpdateOneID(id int) *BillOfMaterialsUpdateOne {
+	mutation := newBillOfMaterialsMutation(c.config, OpUpdateOne, withBillOfMaterialsID(id))
+	return &BillOfMaterialsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BillOfMaterials.
+func (c *BillOfMaterialsClient) Delete() *BillOfMaterialsDelete {
+	mutation := newBillOfMaterialsMutation(c.config, OpDelete)
+	return &BillOfMaterialsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BillOfMaterialsClient) DeleteOne(bom *BillOfMaterials) *BillOfMaterialsDeleteOne {
+	return c.DeleteOneID(bom.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BillOfMaterialsClient) DeleteOneID(id int) *BillOfMaterialsDeleteOne {
+	builder := c.Delete().Where(billofmaterials.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BillOfMaterialsDeleteOne{builder}
+}
+
+// Query returns a query builder for BillOfMaterials.
+func (c *BillOfMaterialsClient) Query() *BillOfMaterialsQuery {
+	return &BillOfMaterialsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBillOfMaterials},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BillOfMaterials entity by its id.
+func (c *BillOfMaterialsClient) Get(ctx context.Context, id int) (*BillOfMaterials, error) {
+	return c.Query().Where(billofmaterials.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BillOfMaterialsClient) GetX(ctx context.Context, id int) *BillOfMaterials {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPackage queries the package edge of a BillOfMaterials.
+func (c *BillOfMaterialsClient) QueryPackage(bom *BillOfMaterials) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bom.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, billofmaterials.PackageTable, billofmaterials.PackageColumn),
+		)
+		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryArtifact queries the artifact edge of a BillOfMaterials.
+func (c *BillOfMaterialsClient) QueryArtifact(bom *BillOfMaterials) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bom.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, billofmaterials.ArtifactTable, billofmaterials.ArtifactColumn),
+		)
+		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BillOfMaterialsClient) Hooks() []Hook {
+	return c.hooks.BillOfMaterials
+}
+
+// Interceptors returns the client interceptors.
+func (c *BillOfMaterialsClient) Interceptors() []Interceptor {
+	return c.inters.BillOfMaterials
+}
+
+func (c *BillOfMaterialsClient) mutate(ctx context.Context, m *BillOfMaterialsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BillOfMaterialsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BillOfMaterialsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BillOfMaterialsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BillOfMaterialsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown BillOfMaterials mutation op: %q", m.Op())
 	}
 }
 
@@ -1432,13 +1590,13 @@ func (c *PackageVersionClient) QueryOccurrences(pv *PackageVersion) *OccurrenceQ
 }
 
 // QuerySbom queries the sbom edge of a PackageVersion.
-func (c *PackageVersionClient) QuerySbom(pv *PackageVersion) *SBOMQuery {
-	query := (&SBOMClient{config: c.config}).Query()
+func (c *PackageVersionClient) QuerySbom(pv *PackageVersion) *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pv.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
-			sqlgraph.To(sbom.Table, sbom.FieldID),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.SbomTable, packageversion.SbomColumn),
 		)
 		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
@@ -1472,92 +1630,92 @@ func (c *PackageVersionClient) mutate(ctx context.Context, m *PackageVersionMuta
 	}
 }
 
-// SBOMClient is a client for the SBOM schema.
-type SBOMClient struct {
+// SLSAAttestationClient is a client for the SLSAAttestation schema.
+type SLSAAttestationClient struct {
 	config
 }
 
-// NewSBOMClient returns a client for the SBOM from the given config.
-func NewSBOMClient(c config) *SBOMClient {
-	return &SBOMClient{config: c}
+// NewSLSAAttestationClient returns a client for the SLSAAttestation from the given config.
+func NewSLSAAttestationClient(c config) *SLSAAttestationClient {
+	return &SLSAAttestationClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `sbom.Hooks(f(g(h())))`.
-func (c *SBOMClient) Use(hooks ...Hook) {
-	c.hooks.SBOM = append(c.hooks.SBOM, hooks...)
+// A call to `Use(f, g, h)` equals to `slsaattestation.Hooks(f(g(h())))`.
+func (c *SLSAAttestationClient) Use(hooks ...Hook) {
+	c.hooks.SLSAAttestation = append(c.hooks.SLSAAttestation, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `sbom.Intercept(f(g(h())))`.
-func (c *SBOMClient) Intercept(interceptors ...Interceptor) {
-	c.inters.SBOM = append(c.inters.SBOM, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `slsaattestation.Intercept(f(g(h())))`.
+func (c *SLSAAttestationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SLSAAttestation = append(c.inters.SLSAAttestation, interceptors...)
 }
 
-// Create returns a builder for creating a SBOM entity.
-func (c *SBOMClient) Create() *SBOMCreate {
-	mutation := newSBOMMutation(c.config, OpCreate)
-	return &SBOMCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a SLSAAttestation entity.
+func (c *SLSAAttestationClient) Create() *SLSAAttestationCreate {
+	mutation := newSLSAAttestationMutation(c.config, OpCreate)
+	return &SLSAAttestationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of SBOM entities.
-func (c *SBOMClient) CreateBulk(builders ...*SBOMCreate) *SBOMCreateBulk {
-	return &SBOMCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of SLSAAttestation entities.
+func (c *SLSAAttestationClient) CreateBulk(builders ...*SLSAAttestationCreate) *SLSAAttestationCreateBulk {
+	return &SLSAAttestationCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for SBOM.
-func (c *SBOMClient) Update() *SBOMUpdate {
-	mutation := newSBOMMutation(c.config, OpUpdate)
-	return &SBOMUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for SLSAAttestation.
+func (c *SLSAAttestationClient) Update() *SLSAAttestationUpdate {
+	mutation := newSLSAAttestationMutation(c.config, OpUpdate)
+	return &SLSAAttestationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *SBOMClient) UpdateOne(s *SBOM) *SBOMUpdateOne {
-	mutation := newSBOMMutation(c.config, OpUpdateOne, withSBOM(s))
-	return &SBOMUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *SLSAAttestationClient) UpdateOne(sa *SLSAAttestation) *SLSAAttestationUpdateOne {
+	mutation := newSLSAAttestationMutation(c.config, OpUpdateOne, withSLSAAttestation(sa))
+	return &SLSAAttestationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SBOMClient) UpdateOneID(id int) *SBOMUpdateOne {
-	mutation := newSBOMMutation(c.config, OpUpdateOne, withSBOMID(id))
-	return &SBOMUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *SLSAAttestationClient) UpdateOneID(id int) *SLSAAttestationUpdateOne {
+	mutation := newSLSAAttestationMutation(c.config, OpUpdateOne, withSLSAAttestationID(id))
+	return &SLSAAttestationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for SBOM.
-func (c *SBOMClient) Delete() *SBOMDelete {
-	mutation := newSBOMMutation(c.config, OpDelete)
-	return &SBOMDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for SLSAAttestation.
+func (c *SLSAAttestationClient) Delete() *SLSAAttestationDelete {
+	mutation := newSLSAAttestationMutation(c.config, OpDelete)
+	return &SLSAAttestationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *SBOMClient) DeleteOne(s *SBOM) *SBOMDeleteOne {
-	return c.DeleteOneID(s.ID)
+func (c *SLSAAttestationClient) DeleteOne(sa *SLSAAttestation) *SLSAAttestationDeleteOne {
+	return c.DeleteOneID(sa.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SBOMClient) DeleteOneID(id int) *SBOMDeleteOne {
-	builder := c.Delete().Where(sbom.ID(id))
+func (c *SLSAAttestationClient) DeleteOneID(id int) *SLSAAttestationDeleteOne {
+	builder := c.Delete().Where(slsaattestation.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &SBOMDeleteOne{builder}
+	return &SLSAAttestationDeleteOne{builder}
 }
 
-// Query returns a query builder for SBOM.
-func (c *SBOMClient) Query() *SBOMQuery {
-	return &SBOMQuery{
+// Query returns a query builder for SLSAAttestation.
+func (c *SLSAAttestationClient) Query() *SLSAAttestationQuery {
+	return &SLSAAttestationQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeSBOM},
+		ctx:    &QueryContext{Type: TypeSLSAAttestation},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a SBOM entity by its id.
-func (c *SBOMClient) Get(ctx context.Context, id int) (*SBOM, error) {
-	return c.Query().Where(sbom.ID(id)).Only(ctx)
+// Get returns a SLSAAttestation entity by its id.
+func (c *SLSAAttestationClient) Get(ctx context.Context, id int) (*SLSAAttestation, error) {
+	return c.Query().Where(slsaattestation.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SBOMClient) GetX(ctx context.Context, id int) *SBOM {
+func (c *SLSAAttestationClient) GetX(ctx context.Context, id int) *SLSAAttestation {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1565,60 +1723,60 @@ func (c *SBOMClient) GetX(ctx context.Context, id int) *SBOM {
 	return obj
 }
 
-// QueryPackage queries the package edge of a SBOM.
-func (c *SBOMClient) QueryPackage(s *SBOM) *PackageVersionQuery {
-	query := (&PackageVersionClient{config: c.config}).Query()
+// QueryBuiltFrom queries the built_from edge of a SLSAAttestation.
+func (c *SLSAAttestationClient) QueryBuiltFrom(sa *SLSAAttestation) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
+		id := sa.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(sbom.Table, sbom.FieldID, id),
-			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, sbom.PackageTable, sbom.PackageColumn),
+			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, slsaattestation.BuiltFromTable, slsaattestation.BuiltFromColumn),
 		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QueryArtifact queries the artifact edge of a SBOM.
-func (c *SBOMClient) QueryArtifact(s *SBOM) *ArtifactQuery {
-	query := (&ArtifactClient{config: c.config}).Query()
+// QueryBuiltBy queries the built_by edge of a SLSAAttestation.
+func (c *SLSAAttestationClient) QueryBuiltBy(sa *SLSAAttestation) *BuilderNodeQuery {
+	query := (&BuilderNodeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
+		id := sa.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(sbom.Table, sbom.FieldID, id),
-			sqlgraph.To(artifact.Table, artifact.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, sbom.ArtifactTable, sbom.ArtifactColumn),
+			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
+			sqlgraph.To(buildernode.Table, buildernode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
 		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *SBOMClient) Hooks() []Hook {
-	return c.hooks.SBOM
+func (c *SLSAAttestationClient) Hooks() []Hook {
+	return c.hooks.SLSAAttestation
 }
 
 // Interceptors returns the client interceptors.
-func (c *SBOMClient) Interceptors() []Interceptor {
-	return c.inters.SBOM
+func (c *SLSAAttestationClient) Interceptors() []Interceptor {
+	return c.inters.SLSAAttestation
 }
 
-func (c *SBOMClient) mutate(ctx context.Context, m *SBOMMutation) (Value, error) {
+func (c *SLSAAttestationClient) mutate(ctx context.Context, m *SLSAAttestationMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&SBOMCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&SLSAAttestationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&SBOMUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&SLSAAttestationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&SBOMUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&SLSAAttestationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&SBOMDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&SLSAAttestationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown SBOM mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown SLSAAttestation mutation op: %q", m.Op())
 	}
 }
 
@@ -2059,13 +2217,13 @@ func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (V
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, SBOM, SourceName, SourceNamespace,
-		SourceType []ent.Hook
+		Artifact, BillOfMaterials, BuilderNode, Dependency, Occurrence, PackageName,
+		PackageNamespace, PackageType, PackageVersion, SLSAAttestation, SourceName,
+		SourceNamespace, SourceType []ent.Hook
 	}
 	inters struct {
-		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, SBOM, SourceName, SourceNamespace,
-		SourceType []ent.Interceptor
+		Artifact, BillOfMaterials, BuilderNode, Dependency, Occurrence, PackageName,
+		PackageNamespace, PackageType, PackageVersion, SLSAAttestation, SourceName,
+		SourceNamespace, SourceType []ent.Interceptor
 	}
 )

@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 )
 
 // ArtifactQuery is the builder for querying Artifact entities.
@@ -25,7 +25,8 @@ type ArtifactQuery struct {
 	inters          []Interceptor
 	predicates      []predicate.Artifact
 	withOccurrences *OccurrenceQuery
-	withSbom        *SBOMQuery
+	withSbom        *BillOfMaterialsQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -85,8 +86,8 @@ func (aq *ArtifactQuery) QueryOccurrences() *OccurrenceQuery {
 }
 
 // QuerySbom chains the current query on the "sbom" edge.
-func (aq *ArtifactQuery) QuerySbom() *SBOMQuery {
-	query := (&SBOMClient{config: aq.config}).Query()
+func (aq *ArtifactQuery) QuerySbom() *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: aq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -97,7 +98,7 @@ func (aq *ArtifactQuery) QuerySbom() *SBOMQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
-			sqlgraph.To(sbom.Table, sbom.FieldID),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.SbomTable, artifact.SbomColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
@@ -319,8 +320,8 @@ func (aq *ArtifactQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *Artifa
 
 // WithSbom tells the query-builder to eager-load the nodes that are connected to
 // the "sbom" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithSbom(opts ...func(*SBOMQuery)) *ArtifactQuery {
-	query := (&SBOMClient{config: aq.config}).Query()
+func (aq *ArtifactQuery) WithSbom(opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
+	query := (&BillOfMaterialsClient{config: aq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -405,12 +406,16 @@ func (aq *ArtifactQuery) prepareQuery(ctx context.Context) error {
 func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Artifact, error) {
 	var (
 		nodes       = []*Artifact{}
+		withFKs     = aq.withFKs
 		_spec       = aq.querySpec()
 		loadedTypes = [2]bool{
 			aq.withOccurrences != nil,
 			aq.withSbom != nil,
 		}
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, artifact.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Artifact).scanValues(nil, columns)
 	}
@@ -438,8 +443,8 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	}
 	if query := aq.withSbom; query != nil {
 		if err := aq.loadSbom(ctx, query, nodes,
-			func(n *Artifact) { n.Edges.Sbom = []*SBOM{} },
-			func(n *Artifact, e *SBOM) { n.Edges.Sbom = append(n.Edges.Sbom, e) }); err != nil {
+			func(n *Artifact) { n.Edges.Sbom = []*BillOfMaterials{} },
+			func(n *Artifact, e *BillOfMaterials) { n.Edges.Sbom = append(n.Edges.Sbom, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -476,7 +481,7 @@ func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQ
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *SBOMQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SBOM)) error {
+func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Artifact)
 	for i := range nodes {
@@ -487,9 +492,9 @@ func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *SBOMQuery, nodes [
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(sbom.FieldArtifactID)
+		query.ctx.AppendFieldOnce(billofmaterials.FieldArtifactID)
 	}
-	query.Where(predicate.SBOM(func(s *sql.Selector) {
+	query.Where(predicate.BillOfMaterials(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(artifact.SbomColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)

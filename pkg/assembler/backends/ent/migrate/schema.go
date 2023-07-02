@@ -14,12 +14,21 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "algorithm", Type: field.TypeString},
 		{Name: "digest", Type: field.TypeString},
+		{Name: "slsa_attestation_built_from", Type: field.TypeInt, Nullable: true},
 	}
 	// ArtifactsTable holds the schema information for the "artifacts" table.
 	ArtifactsTable = &schema.Table{
 		Name:       "artifacts",
 		Columns:    ArtifactsColumns,
 		PrimaryKey: []*schema.Column{ArtifactsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "artifacts_slsa_attestations_built_from",
+				Columns:    []*schema.Column{ArtifactsColumns[3]},
+				RefColumns: []*schema.Column{SlsaAttestationsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "artifact_algorithm_digest",
@@ -28,16 +37,75 @@ var (
 			},
 		},
 	}
+	// BillOfMaterialsColumns holds the columns for the "bill_of_materials" table.
+	BillOfMaterialsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "uri", Type: field.TypeString},
+		{Name: "algorithm", Type: field.TypeString},
+		{Name: "digest", Type: field.TypeString},
+		{Name: "download_location", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "package_id", Type: field.TypeInt, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
+	}
+	// BillOfMaterialsTable holds the schema information for the "bill_of_materials" table.
+	BillOfMaterialsTable = &schema.Table{
+		Name:       "bill_of_materials",
+		Columns:    BillOfMaterialsColumns,
+		PrimaryKey: []*schema.Column{BillOfMaterialsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "bill_of_materials_package_versions_package",
+				Columns:    []*schema.Column{BillOfMaterialsColumns[7]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "bill_of_materials_artifacts_artifact",
+				Columns:    []*schema.Column{BillOfMaterialsColumns[8]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "sbom_unique_package",
+				Unique:  true,
+				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[7]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NOT NULL AND artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "sbom_unique_artifact",
+				Unique:  true,
+				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NULL AND artifact_id IS NOT NULL",
+				},
+			},
+		},
+	}
 	// BuilderNodesColumns holds the columns for the "builder_nodes" table.
 	BuilderNodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "uri", Type: field.TypeString, Unique: true},
+		{Name: "slsa_attestation_built_by", Type: field.TypeInt, Nullable: true},
 	}
 	// BuilderNodesTable holds the schema information for the "builder_nodes" table.
 	BuilderNodesTable = &schema.Table{
 		Name:       "builder_nodes",
 		Columns:    BuilderNodesColumns,
 		PrimaryKey: []*schema.Column{BuilderNodesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "builder_nodes_slsa_attestations_built_by",
+				Columns:    []*schema.Column{BuilderNodesColumns[2]},
+				RefColumns: []*schema.Column{SlsaAttestationsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "buildernode_uri",
@@ -243,55 +311,22 @@ var (
 			},
 		},
 	}
-	// SboMsColumns holds the columns for the "sbo_ms" table.
-	SboMsColumns = []*schema.Column{
+	// SlsaAttestationsColumns holds the columns for the "slsa_attestations" table.
+	SlsaAttestationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "uri", Type: field.TypeString},
-		{Name: "algorithm", Type: field.TypeString},
-		{Name: "digest", Type: field.TypeString},
-		{Name: "download_location", Type: field.TypeString},
+		{Name: "build_type", Type: field.TypeString},
+		{Name: "slsa_predicate", Type: field.TypeJSON, Nullable: true},
+		{Name: "slsa_version", Type: field.TypeString},
+		{Name: "started_on", Type: field.TypeTime, Nullable: true},
+		{Name: "finished_on", Type: field.TypeTime, Nullable: true},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "package_id", Type: field.TypeInt, Nullable: true},
-		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
 	}
-	// SboMsTable holds the schema information for the "sbo_ms" table.
-	SboMsTable = &schema.Table{
-		Name:       "sbo_ms",
-		Columns:    SboMsColumns,
-		PrimaryKey: []*schema.Column{SboMsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "sbo_ms_package_versions_package",
-				Columns:    []*schema.Column{SboMsColumns[7]},
-				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "sbo_ms_artifacts_artifact",
-				Columns:    []*schema.Column{SboMsColumns[8]},
-				RefColumns: []*schema.Column{ArtifactsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "sbom_unique_package",
-				Unique:  true,
-				Columns: []*schema.Column{SboMsColumns[2], SboMsColumns[3], SboMsColumns[1], SboMsColumns[7]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "package_id IS NOT NULL AND artifact_id IS NULL",
-				},
-			},
-			{
-				Name:    "sbom_unique_artifact",
-				Unique:  true,
-				Columns: []*schema.Column{SboMsColumns[2], SboMsColumns[3], SboMsColumns[1], SboMsColumns[8]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "package_id IS NULL AND artifact_id IS NOT NULL",
-				},
-			},
-		},
+	// SlsaAttestationsTable holds the schema information for the "slsa_attestations" table.
+	SlsaAttestationsTable = &schema.Table{
+		Name:       "slsa_attestations",
+		Columns:    SlsaAttestationsColumns,
+		PrimaryKey: []*schema.Column{SlsaAttestationsColumns[0]},
 	}
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
@@ -366,6 +401,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArtifactsTable,
+		BillOfMaterialsTable,
 		BuilderNodesTable,
 		DependenciesTable,
 		OccurrencesTable,
@@ -373,7 +409,7 @@ var (
 		PackageNamespacesTable,
 		PackageTypesTable,
 		PackageVersionsTable,
-		SboMsTable,
+		SlsaAttestationsTable,
 		SourceNamesTable,
 		SourceNamespacesTable,
 		SourceTypesTable,
@@ -381,6 +417,10 @@ var (
 )
 
 func init() {
+	ArtifactsTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
+	BillOfMaterialsTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	BillOfMaterialsTable.ForeignKeys[1].RefTable = ArtifactsTable
+	BuilderNodesTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
 	OccurrencesTable.ForeignKeys[0].RefTable = ArtifactsTable
@@ -389,8 +429,9 @@ func init() {
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageTypesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
-	SboMsTable.ForeignKeys[0].RefTable = PackageVersionsTable
-	SboMsTable.ForeignKeys[1].RefTable = ArtifactsTable
+	SlsaAttestationsTable.Annotation = &entsql.Annotation{
+		Table: "slsa_attestations",
+	}
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
 }

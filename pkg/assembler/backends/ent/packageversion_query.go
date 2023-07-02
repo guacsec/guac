@@ -11,11 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sbom"
 )
 
 // PackageVersionQuery is the builder for querying PackageVersion entities.
@@ -27,7 +27,7 @@ type PackageVersionQuery struct {
 	predicates      []predicate.PackageVersion
 	withName        *PackageNameQuery
 	withOccurrences *OccurrenceQuery
-	withSbom        *SBOMQuery
+	withSbom        *BillOfMaterialsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -109,8 +109,8 @@ func (pvq *PackageVersionQuery) QueryOccurrences() *OccurrenceQuery {
 }
 
 // QuerySbom chains the current query on the "sbom" edge.
-func (pvq *PackageVersionQuery) QuerySbom() *SBOMQuery {
-	query := (&SBOMClient{config: pvq.config}).Query()
+func (pvq *PackageVersionQuery) QuerySbom() *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: pvq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pvq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -121,7 +121,7 @@ func (pvq *PackageVersionQuery) QuerySbom() *SBOMQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
-			sqlgraph.To(sbom.Table, sbom.FieldID),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.SbomTable, packageversion.SbomColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
@@ -355,8 +355,8 @@ func (pvq *PackageVersionQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) 
 
 // WithSbom tells the query-builder to eager-load the nodes that are connected to
 // the "sbom" edge. The optional arguments are used to configure the query builder of the edge.
-func (pvq *PackageVersionQuery) WithSbom(opts ...func(*SBOMQuery)) *PackageVersionQuery {
-	query := (&SBOMClient{config: pvq.config}).Query()
+func (pvq *PackageVersionQuery) WithSbom(opts ...func(*BillOfMaterialsQuery)) *PackageVersionQuery {
+	query := (&BillOfMaterialsClient{config: pvq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -481,8 +481,8 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	}
 	if query := pvq.withSbom; query != nil {
 		if err := pvq.loadSbom(ctx, query, nodes,
-			func(n *PackageVersion) { n.Edges.Sbom = []*SBOM{} },
-			func(n *PackageVersion, e *SBOM) { n.Edges.Sbom = append(n.Edges.Sbom, e) }); err != nil {
+			func(n *PackageVersion) { n.Edges.Sbom = []*BillOfMaterials{} },
+			func(n *PackageVersion, e *BillOfMaterials) { n.Edges.Sbom = append(n.Edges.Sbom, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -551,7 +551,7 @@ func (pvq *PackageVersionQuery) loadOccurrences(ctx context.Context, query *Occu
 	}
 	return nil
 }
-func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *SBOMQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *SBOM)) error {
+func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *BillOfMaterials)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*PackageVersion)
 	for i := range nodes {
@@ -562,9 +562,9 @@ func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *SBOMQuery, 
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(sbom.FieldPackageID)
+		query.ctx.AppendFieldOnce(billofmaterials.FieldPackageID)
 	}
-	query.Where(predicate.SBOM(func(s *sql.Selector) {
+	query.Where(predicate.BillOfMaterials(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(packageversion.SbomColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)

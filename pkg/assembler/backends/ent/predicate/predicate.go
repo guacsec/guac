@@ -9,6 +9,9 @@ import (
 // Artifact is the predicate function for artifact builders.
 type Artifact func(*sql.Selector)
 
+// BillOfMaterials is the predicate function for billofmaterials builders.
+type BillOfMaterials func(*sql.Selector)
+
 // BuilderNode is the predicate function for buildernode builders.
 type BuilderNode func(*sql.Selector)
 
@@ -30,8 +33,8 @@ type PackageType func(*sql.Selector)
 // PackageVersion is the predicate function for packageversion builders.
 type PackageVersion func(*sql.Selector)
 
-// SBOM is the predicate function for sbom builders.
-type SBOM func(*sql.Selector)
+// SLSAAttestation is the predicate function for slsaattestation builders.
+type SLSAAttestation func(*sql.Selector)
 
 // SourceName is the predicate function for sourcename builders.
 type SourceName func(*sql.Selector)
