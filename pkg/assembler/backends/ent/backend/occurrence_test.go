@@ -1,9 +1,6 @@
 package backend
 
 import (
-	"reflect"
-	"strings"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -553,17 +550,6 @@ func (s *Suite) TestOccurrence() {
 			ExpQueryErr: true,
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
-
-	ignoreEmptySlices := cmp.FilterValues(func(x, y interface{}) bool {
-		xv, yv := reflect.ValueOf(x), reflect.ValueOf(y)
-		if xv.Kind() == reflect.Slice && yv.Kind() == reflect.Slice {
-			return xv.Len() == 0 && yv.Len() == 0
-		}
-		return false
-	}, cmp.Ignore())
 
 	ctx := s.Ctx
 

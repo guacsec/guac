@@ -8,6 +8,8 @@ import (
 )
 
 // PackageType holds the schema definition for the PackageType entity.
+// This node maps to models.Package in the GraphQL schema. It is named PackageType
+// because Package is a reserved keyword in Ent.
 type PackageType struct {
 	ent.Schema
 }

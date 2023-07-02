@@ -33,6 +33,10 @@ func (Artifact) Edges() []ent.Edge {
 }
 
 // Indexes of the Artifact.
+//
+// NOTE: Given the nature of digests, we could treat them as unique identifiers
+// with a single index, but currently we index both alg and digest so that it is possible
+// to query all artifacts using a specific algorithm.
 func (Artifact) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("algorithm", "digest").Unique(),

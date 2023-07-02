@@ -17,6 +17,8 @@ type SourceName struct {
 func (SourceName) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
+		// Commit and tag are mutually exclusive
+		// Could this simply a single field called `ref`? Then check the length of the string to determine if it's a commit or tag?
 		field.String("commit").Optional(),
 		field.String("tag").Optional(),
 		field.Int("namespace_id"),

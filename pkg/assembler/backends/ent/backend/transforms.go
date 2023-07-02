@@ -49,6 +49,17 @@ func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
 	return nil
 }
 
+func backReferenceSourceName(sn *ent.SourceName) *ent.SourceType {
+	if sn.Edges.Namespace != nil {
+		sns := sn.Edges.Namespace
+		sns.Edges.Names = []*ent.SourceName{sn}
+		st := sns.Edges.SourceType
+		st.Edges.Namespaces = []*ent.SourceNamespace{sns}
+		return st
+	}
+	return nil
+}
+
 func toModelPackage(p *ent.PackageType) *model.Package {
 	if p == nil {
 		return nil
@@ -213,14 +224,14 @@ func toModelIsDependency(id *ent.Dependency) *model.IsDependency {
 
 func toModelHasSbom(sbom *ent.SBOM) *model.HasSbom {
 	return &model.HasSbom{
-		ID: nodeID(sbom.ID),
-		Subject: toSBOMSubject(sbom),
-		URI: sbom.URI,
-		Algorithm: sbom.Algorithm,
-		Digest: sbom.Digest,
+		ID:               nodeID(sbom.ID),
+		Subject:          toSBOMSubject(sbom),
+		URI:              sbom.URI,
+		Algorithm:        sbom.Algorithm,
+		Digest:           sbom.Digest,
 		DownloadLocation: sbom.DownloadLocation,
-		Origin: sbom.Origin,
-		Collector: sbom.Collector,
+		Origin:           sbom.Origin,
+		Collector:        sbom.Collector,
 	}
 }
 
