@@ -3,6 +3,7 @@ package backend
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/stretchr/testify/assert"
@@ -162,4 +163,34 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		s.NotEmpty(versions)
 	})
 
+}
+
+func (s *Suite) Test_IngestPackages() {
+	ctx := s.Ctx
+	tests := []struct {
+		name      string
+		pkgInputs []*model.PkgInputSpec
+		want      []*model.Package
+		wantErr   bool
+	}{{
+		name:      "tensorflow empty version",
+		pkgInputs: []*model.PkgInputSpec{p1, p2, p3, p4},
+		want:      []*model.Package{p1out, p2out, p3out, p4out},
+		wantErr:   false,
+	}}
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			c, err := GetBackend(s.Client)
+			s.NoError(err)
+
+			got, err := c.IngestPackages(ctx, tt.pkgInputs)
+			if (err != nil) != tt.wantErr {
+				s.T().Errorf("demoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
 }

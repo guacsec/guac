@@ -49,7 +49,7 @@ func artifactQueryFromQuerySpec(spec *model.ArtifactSpec) predicate.Artifact {
 
 func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
 	funcName := "IngestArtifacts"
-	records, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]*ent.Artifact, error) {
+	records, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Artifacts, error) {
 		client := ent.FromContext(ctx)
 		slc, err := ingestArtifacts(ctx, client, artifacts)
 		if err != nil {
@@ -66,28 +66,21 @@ func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.Art
 }
 
 func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.ArtifactInputSpec) (*model.Artifact, error) {
-	funcName := "IngestArtifact"
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Artifact, error) {
-		client := ent.FromContext(ctx)
-		results, err := ingestArtifacts(ctx, client, []*model.ArtifactInputSpec{art})
-		if err != nil {
-			return nil, err
-		}
-
-		if len(results) != 1 {
-			return nil, gqlerror.Errorf("%v :: expected 1 result, got %d", funcName, len(results))
-		}
-
-		return results[0], nil
-	})
+	records, err := b.IngestArtifacts(ctx, []*model.ArtifactInputSpec{art})
 	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+		return nil, err
 	}
-	return toModelArtifact(record.Unwrap()), nil
+
+	if len(records) == 0 {
+		return nil, Errorf("no records returned")
+	}
+
+	return records[0], nil
 }
 
-func ingestArtifacts(ctx context.Context, client *ent.Client, artifacts []*model.ArtifactInputSpec) ([]*ent.Artifact, error) {
+func ingestArtifacts(ctx context.Context, client *ent.Client, artifacts []*model.ArtifactInputSpec) (ent.Artifacts, error) {
 	creates := make([]*ent.ArtifactCreate, len(artifacts))
+	// TODO: (ivanvanderbyl) Split into batches to ensure we don't reach the max query size
 
 	for i, art := range artifacts {
 		creates[i] = client.Artifact.Create().

@@ -69,6 +69,19 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	return collect(pkgs, toModelPackage), nil
 }
 
+func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
+	// FIXME: (ivanvanderbyl) This will be suboptimal, but we can't batch insert relations with upserts.
+	models := make([]*model.Package, len(pkgs))
+	for i, pkg := range pkgs {
+		p, err := b.IngestPackage(ctx, *pkg)
+		if err != nil {
+			return nil, err
+		}
+		models[i] = p
+	}
+	return models, nil
+}
+
 func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
 	pkgVersion, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.PackageVersion, error) {
 		client := ent.FromContext(ctx)
@@ -87,37 +100,6 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 		return nil, err
 	}
 
-	// record, err := pkgVersion.
-	// 	QueryName().
-	// 	QueryNamespace().
-	// 	QueryPackage().
-	// 	WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-	// 		q.Order(ent.Asc(packagenamespace.FieldNamespace))
-	// 		q.Where(packagenamespace.Namespace(valueOrDefault(pkg.Namespace, "")))
-	// 		q.WithNames(func(q *ent.PackageNameQuery) {
-	// 			q.Order(ent.Asc(packagename.FieldName))
-	// 			q.Where(packagename.Name(pkg.Name))
-	// 			q.WithVersions(func(q *ent.PackageVersionQuery) {
-	// 				q.Order(ent.Asc(packageversion.FieldVersion))
-	// 				q.Where(packageversion.Hash(versionHashFromInputSpec(pkg)))
-	// 			})
-	// 		})
-	// 	}).
-	// 	Only(ctx)
-
-	// TODO: Figure out if we need to preload the edges from the graphql query
-	// record, err := b.client.PackageType.Query().Where(packagetype.ID(*pvID)).
-	// 	WithNamespaces(func(q *PackageNamespaceQuery) {
-	// 		q.Order(Asc(packagenamespace.FieldNamespace))
-	// 		q.WithNames(func(q *PackageNameQuery) {
-	// 			q.Order(Asc(packagename.FieldName))
-	// 			q.WithVersions(func(q *PackageVersionQuery) {
-	// 				q.Order(Asc(packageversion.FieldVersion))
-	// 			})
-	// 		})
-	// 	}).
-	// 	Only(ctx)
-
 	return toModelPackage(record), nil
 }
 
@@ -130,11 +112,6 @@ func upsertPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSp
 		return nil, errors.Wrap(err, "upsert package node")
 	}
 
-	if pkg.Namespace == nil {
-		empty := ""
-		pkg.Namespace = &empty
-	}
-
 	nsID, err := client.PackageNamespace.Create().SetPackageID(pkgID).SetNamespace(valueOrDefault(pkg.Namespace, "")).
 		OnConflict(sql.ConflictColumns(packagenamespace.FieldNamespace, packagenamespace.FieldPackageID)).UpdateNewValues().ID(ctx)
 	if err != nil {
@@ -145,11 +122,6 @@ func upsertPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSp
 		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespaceID)).UpdateNewValues().ID(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "upsert package name")
-	}
-
-	if pkg.Version == nil {
-		empty := ""
-		pkg.Version = &empty
 	}
 
 	pvID, err := client.PackageVersion.Create().
