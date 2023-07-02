@@ -41,16 +41,44 @@ func artifactQueryFromInputSpec(spec model.ArtifactInputSpec) predicate.Artifact
 func artifactQueryFromQuerySpec(spec *model.ArtifactSpec) predicate.Artifact {
 	return artifact.And(
 		optionalPredicate(spec.ID, IDEQ),
+		// FIXME: (ivanvanderbyl) This needs to be converted to lower as well
 		optionalPredicate(spec.Algorithm, artifact.AlgorithmEQ),
 		optionalPredicate(spec.Digest, artifact.DigestEQ),
 	)
+}
+
+func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+	funcName := "IngestArtifacts"
+	records, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]*ent.Artifact, error) {
+		client := ent.FromContext(ctx)
+		slc, err := ingestArtifacts(ctx, client, artifacts)
+		if err != nil {
+			return nil, err
+		}
+
+		return &slc, nil
+	})
+
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+	return collect(*records, toModelArtifact), nil
 }
 
 func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.ArtifactInputSpec) (*model.Artifact, error) {
 	funcName := "IngestArtifact"
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Artifact, error) {
 		client := ent.FromContext(ctx)
-		return ingestArtifact(ctx, client, art)
+		results, err := ingestArtifacts(ctx, client, []*model.ArtifactInputSpec{art})
+		if err != nil {
+			return nil, err
+		}
+
+		if len(results) != 1 {
+			return nil, gqlerror.Errorf("%v :: expected 1 result, got %d", funcName, len(results))
+		}
+
+		return results[0], nil
 	})
 	if err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
@@ -58,21 +86,28 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.ArtifactInpu
 	return toModelArtifact(record.Unwrap()), nil
 }
 
-func ingestArtifact(ctx context.Context, client *ent.Client, art *model.ArtifactInputSpec) (*ent.Artifact, error) {
-	id, err := client.Artifact.Create().
-		SetAlgorithm(strings.ToLower(art.Algorithm)).
-		SetDigest(strings.ToLower(art.Digest)).
+func ingestArtifacts(ctx context.Context, client *ent.Client, artifacts []*model.ArtifactInputSpec) ([]*ent.Artifact, error) {
+	creates := make([]*ent.ArtifactCreate, len(artifacts))
+
+	for i, art := range artifacts {
+		creates[i] = client.Artifact.Create().
+			SetAlgorithm(strings.ToLower(art.Algorithm)).
+			SetDigest(strings.ToLower(art.Digest))
+	}
+
+	err := client.Artifact.CreateBulk(creates...).
 		OnConflict(
-			sql.ConflictColumns(
-				artifact.FieldAlgorithm,
-				artifact.FieldDigest,
-			),
+			sql.ConflictColumns(artifact.FieldAlgorithm, artifact.FieldDigest),
 		).
 		UpdateNewValues().
-		ID(ctx)
+		Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return client.Artifact.Get(ctx, id)
+	predicates := make([]predicate.Artifact, len(artifacts))
+	for i, art := range artifacts {
+		predicates[i] = artifactQueryFromInputSpec(*art)
+	}
+	return client.Artifact.Query().Where(artifact.Or(predicates...)).All(ctx)
 }
