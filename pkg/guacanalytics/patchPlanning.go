@@ -28,7 +28,6 @@ type DfsNode struct {
 	expanded bool // true once all node neighbors are added to queue
 	Parent   string
 	depth    int
-	nodeType string // packageName, packageVersion
 }
 
 var path []string
@@ -38,7 +37,7 @@ var nowNode DfsNode
 var queue []string
 
 // TODO: make more robust usuing predicates
-func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, startType string, maxDepth int) (map[string]DfsNode, error) {
+func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, maxDepth int) (map[string]DfsNode, error) {
 	startNode, err := model.Node(ctx, gqlclient, startID)
 
 	if err != nil {
@@ -54,9 +53,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 
 	nodeMap = map[string]DfsNode{}
 
-	nodeMap[startID] = DfsNode{
-		nodeType: startType,
-	}
+	nodeMap[startID] = DfsNode{}
 	queue = append(queue, startID)
 
 	for len(queue) > 0 {
@@ -78,15 +75,13 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 			return nil, fmt.Errorf("failed getting package parent:%w", err)
 		}
 
-		// case on predicates and nodeType
+		// case on predicates
 		for _, neighbor := range neighborsResponse.Neighbors {
-			if nowNode.nodeType == "packageVersion" {
-				if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
-					err := exploreIsDependency(*isDependency, ctx, gqlclient)
+			if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
+				err := exploreIsDependency(*isDependency, ctx, gqlclient)
 
-					if err != nil {
-						return nil, err
-					}
+				if err != nil {
+					return nil, err
 				}
 			}
 		}
@@ -133,28 +128,15 @@ func exploreIsDependency(isDependency model.NeighborsNeighborsIsDependency, ctx 
 			depPkgResponse.Packages[0].Namespaces[0].Names[0].Id, depPkgResponse.Packages[0].Namespaces[0].Id,
 			depPkgResponse.Packages[0].Id)
 
-		dfsNVersion, seenVersion := nodeMap[matchingDepPkgVersionID]
-		dfsNName, seenName := nodeMap[depPkgResponse.Packages[0].Namespaces[0].Names[0].Id]
-		if !seenName {
-			dfsNName = DfsNode{
-				Parent:   now,
-				depth:    nowNode.depth + 1,
-				nodeType: "packageName",
+		dfsN, seen := nodeMap[matchingDepPkgVersionID]
+		if !seen {
+			dfsN = DfsNode{
+				Parent: now,
+				depth:  nowNode.depth + 1,
 			}
-			nodeMap[depPkgResponse.Packages[0].Namespaces[0].Names[0].Id] = dfsNName
+			nodeMap[matchingDepPkgVersionID] = dfsN
 		}
-		if !seenVersion {
-			dfsNVersion = DfsNode{
-				Parent:   depPkgResponse.Packages[0].Namespaces[0].Names[0].Id,
-				depth:    nowNode.depth + 1,
-				nodeType: "packageVersion",
-			}
-			nodeMap[matchingDepPkgVersionID] = dfsNVersion
-		}
-		if !dfsNName.expanded {
-			queue = append(queue, depPkgResponse.Packages[0].Namespaces[0].Names[0].Id)
-		}
-		if !dfsNVersion.expanded {
+		if !dfsN.expanded {
 			queue = append(queue, matchingDepPkgVersionID)
 		}
 	}
