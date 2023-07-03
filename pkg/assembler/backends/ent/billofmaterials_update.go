@@ -9,11 +9,13 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // BillOfMaterialsUpdate is the builder for updating BillOfMaterials entities.
@@ -87,7 +89,7 @@ func (bomu *BillOfMaterialsUpdate) SetDigest(s string) *BillOfMaterialsUpdate {
 	return bomu
 }
 
-// SetDownloadLocation sets the "downloadLocation" field.
+// SetDownloadLocation sets the "download_location" field.
 func (bomu *BillOfMaterialsUpdate) SetDownloadLocation(s string) *BillOfMaterialsUpdate {
 	bomu.mutation.SetDownloadLocation(s)
 	return bomu
@@ -102,6 +104,24 @@ func (bomu *BillOfMaterialsUpdate) SetOrigin(s string) *BillOfMaterialsUpdate {
 // SetCollector sets the "collector" field.
 func (bomu *BillOfMaterialsUpdate) SetCollector(s string) *BillOfMaterialsUpdate {
 	bomu.mutation.SetCollector(s)
+	return bomu
+}
+
+// SetAnnotations sets the "annotations" field.
+func (bomu *BillOfMaterialsUpdate) SetAnnotations(m []model.Annotation) *BillOfMaterialsUpdate {
+	bomu.mutation.SetAnnotations(m)
+	return bomu
+}
+
+// AppendAnnotations appends m to the "annotations" field.
+func (bomu *BillOfMaterialsUpdate) AppendAnnotations(m []model.Annotation) *BillOfMaterialsUpdate {
+	bomu.mutation.AppendAnnotations(m)
+	return bomu
+}
+
+// ClearAnnotations clears the value of the "annotations" field.
+func (bomu *BillOfMaterialsUpdate) ClearAnnotations() *BillOfMaterialsUpdate {
+	bomu.mutation.ClearAnnotations()
 	return bomu
 }
 
@@ -185,6 +205,17 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if value, ok := bomu.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := bomu.mutation.Annotations(); ok {
+		_spec.SetField(billofmaterials.FieldAnnotations, field.TypeJSON, value)
+	}
+	if value, ok := bomu.mutation.AppendedAnnotations(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, billofmaterials.FieldAnnotations, value)
+		})
+	}
+	if bomu.mutation.AnnotationsCleared() {
+		_spec.ClearField(billofmaterials.FieldAnnotations, field.TypeJSON)
 	}
 	if bomu.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -322,7 +353,7 @@ func (bomuo *BillOfMaterialsUpdateOne) SetDigest(s string) *BillOfMaterialsUpdat
 	return bomuo
 }
 
-// SetDownloadLocation sets the "downloadLocation" field.
+// SetDownloadLocation sets the "download_location" field.
 func (bomuo *BillOfMaterialsUpdateOne) SetDownloadLocation(s string) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.SetDownloadLocation(s)
 	return bomuo
@@ -337,6 +368,24 @@ func (bomuo *BillOfMaterialsUpdateOne) SetOrigin(s string) *BillOfMaterialsUpdat
 // SetCollector sets the "collector" field.
 func (bomuo *BillOfMaterialsUpdateOne) SetCollector(s string) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.SetCollector(s)
+	return bomuo
+}
+
+// SetAnnotations sets the "annotations" field.
+func (bomuo *BillOfMaterialsUpdateOne) SetAnnotations(m []model.Annotation) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.SetAnnotations(m)
+	return bomuo
+}
+
+// AppendAnnotations appends m to the "annotations" field.
+func (bomuo *BillOfMaterialsUpdateOne) AppendAnnotations(m []model.Annotation) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.AppendAnnotations(m)
+	return bomuo
+}
+
+// ClearAnnotations clears the value of the "annotations" field.
+func (bomuo *BillOfMaterialsUpdateOne) ClearAnnotations() *BillOfMaterialsUpdateOne {
+	bomuo.mutation.ClearAnnotations()
 	return bomuo
 }
 
@@ -450,6 +499,17 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 	}
 	if value, ok := bomuo.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := bomuo.mutation.Annotations(); ok {
+		_spec.SetField(billofmaterials.FieldAnnotations, field.TypeJSON, value)
+	}
+	if value, ok := bomuo.mutation.AppendedAnnotations(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, billofmaterials.FieldAnnotations, value)
+		})
+	}
+	if bomuo.mutation.AnnotationsCleared() {
+		_spec.ClearField(billofmaterials.FieldAnnotations, field.TypeJSON)
 	}
 	if bomuo.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{

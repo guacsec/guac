@@ -22,12 +22,14 @@ const (
 	FieldAlgorithm = "algorithm"
 	// FieldDigest holds the string denoting the digest field in the database.
 	FieldDigest = "digest"
-	// FieldDownloadLocation holds the string denoting the downloadlocation field in the database.
+	// FieldDownloadLocation holds the string denoting the download_location field in the database.
 	FieldDownloadLocation = "download_location"
 	// FieldOrigin holds the string denoting the origin field in the database.
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldAnnotations holds the string denoting the annotations field in the database.
+	FieldAnnotations = "annotations"
 	// EdgePackage holds the string denoting the package edge name in mutations.
 	EdgePackage = "package"
 	// EdgeArtifact holds the string denoting the artifact edge name in mutations.
@@ -61,6 +63,7 @@ var Columns = []string{
 	FieldDownloadLocation,
 	FieldOrigin,
 	FieldCollector,
+	FieldAnnotations,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -106,7 +109,7 @@ func ByDigest(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDigest, opts...).ToFunc()
 }
 
-// ByDownloadLocation orders the results by the downloadLocation field.
+// ByDownloadLocation orders the results by the download_location field.
 func ByDownloadLocation(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDownloadLocation, opts...).ToFunc()
 }

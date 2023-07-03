@@ -80,7 +80,7 @@ func (s *Suite) Test_get_package_helpers() {
 	})
 
 	s.Run("getPkgVersion", func() {
-		pkgVersion, err := getPkgVersion(s.Ctx, s.Client.Debug(), &spec)
+		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, &spec)
 		s.Require().NoError(err)
 		s.Require().NotNil(pkgVersion)
 	})

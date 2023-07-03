@@ -13,6 +13,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // BillOfMaterialsCreate is the builder for creating a BillOfMaterials entity.
@@ -69,7 +70,7 @@ func (bomc *BillOfMaterialsCreate) SetDigest(s string) *BillOfMaterialsCreate {
 	return bomc
 }
 
-// SetDownloadLocation sets the "downloadLocation" field.
+// SetDownloadLocation sets the "download_location" field.
 func (bomc *BillOfMaterialsCreate) SetDownloadLocation(s string) *BillOfMaterialsCreate {
 	bomc.mutation.SetDownloadLocation(s)
 	return bomc
@@ -84,6 +85,12 @@ func (bomc *BillOfMaterialsCreate) SetOrigin(s string) *BillOfMaterialsCreate {
 // SetCollector sets the "collector" field.
 func (bomc *BillOfMaterialsCreate) SetCollector(s string) *BillOfMaterialsCreate {
 	bomc.mutation.SetCollector(s)
+	return bomc
+}
+
+// SetAnnotations sets the "annotations" field.
+func (bomc *BillOfMaterialsCreate) SetAnnotations(m []model.Annotation) *BillOfMaterialsCreate {
+	bomc.mutation.SetAnnotations(m)
 	return bomc
 }
 
@@ -141,7 +148,7 @@ func (bomc *BillOfMaterialsCreate) check() error {
 		return &ValidationError{Name: "digest", err: errors.New(`ent: missing required field "BillOfMaterials.digest"`)}
 	}
 	if _, ok := bomc.mutation.DownloadLocation(); !ok {
-		return &ValidationError{Name: "downloadLocation", err: errors.New(`ent: missing required field "BillOfMaterials.downloadLocation"`)}
+		return &ValidationError{Name: "download_location", err: errors.New(`ent: missing required field "BillOfMaterials.download_location"`)}
 	}
 	if _, ok := bomc.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "BillOfMaterials.origin"`)}
@@ -199,6 +206,10 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 	if value, ok := bomc.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := bomc.mutation.Annotations(); ok {
+		_spec.SetField(billofmaterials.FieldAnnotations, field.TypeJSON, value)
+		_node.Annotations = value
 	}
 	if nodes := bomc.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -358,13 +369,13 @@ func (u *BillOfMaterialsUpsert) UpdateDigest() *BillOfMaterialsUpsert {
 	return u
 }
 
-// SetDownloadLocation sets the "downloadLocation" field.
+// SetDownloadLocation sets the "download_location" field.
 func (u *BillOfMaterialsUpsert) SetDownloadLocation(v string) *BillOfMaterialsUpsert {
 	u.Set(billofmaterials.FieldDownloadLocation, v)
 	return u
 }
 
-// UpdateDownloadLocation sets the "downloadLocation" field to the value that was provided on create.
+// UpdateDownloadLocation sets the "download_location" field to the value that was provided on create.
 func (u *BillOfMaterialsUpsert) UpdateDownloadLocation() *BillOfMaterialsUpsert {
 	u.SetExcluded(billofmaterials.FieldDownloadLocation)
 	return u
@@ -391,6 +402,24 @@ func (u *BillOfMaterialsUpsert) SetCollector(v string) *BillOfMaterialsUpsert {
 // UpdateCollector sets the "collector" field to the value that was provided on create.
 func (u *BillOfMaterialsUpsert) UpdateCollector() *BillOfMaterialsUpsert {
 	u.SetExcluded(billofmaterials.FieldCollector)
+	return u
+}
+
+// SetAnnotations sets the "annotations" field.
+func (u *BillOfMaterialsUpsert) SetAnnotations(v []model.Annotation) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldAnnotations, v)
+	return u
+}
+
+// UpdateAnnotations sets the "annotations" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateAnnotations() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldAnnotations)
+	return u
+}
+
+// ClearAnnotations clears the value of the "annotations" field.
+func (u *BillOfMaterialsUpsert) ClearAnnotations() *BillOfMaterialsUpsert {
+	u.SetNull(billofmaterials.FieldAnnotations)
 	return u
 }
 
@@ -518,14 +547,14 @@ func (u *BillOfMaterialsUpsertOne) UpdateDigest() *BillOfMaterialsUpsertOne {
 	})
 }
 
-// SetDownloadLocation sets the "downloadLocation" field.
+// SetDownloadLocation sets the "download_location" field.
 func (u *BillOfMaterialsUpsertOne) SetDownloadLocation(v string) *BillOfMaterialsUpsertOne {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.SetDownloadLocation(v)
 	})
 }
 
-// UpdateDownloadLocation sets the "downloadLocation" field to the value that was provided on create.
+// UpdateDownloadLocation sets the "download_location" field to the value that was provided on create.
 func (u *BillOfMaterialsUpsertOne) UpdateDownloadLocation() *BillOfMaterialsUpsertOne {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateDownloadLocation()
@@ -557,6 +586,27 @@ func (u *BillOfMaterialsUpsertOne) SetCollector(v string) *BillOfMaterialsUpsert
 func (u *BillOfMaterialsUpsertOne) UpdateCollector() *BillOfMaterialsUpsertOne {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetAnnotations sets the "annotations" field.
+func (u *BillOfMaterialsUpsertOne) SetAnnotations(v []model.Annotation) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetAnnotations(v)
+	})
+}
+
+// UpdateAnnotations sets the "annotations" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateAnnotations() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateAnnotations()
+	})
+}
+
+// ClearAnnotations clears the value of the "annotations" field.
+func (u *BillOfMaterialsUpsertOne) ClearAnnotations() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.ClearAnnotations()
 	})
 }
 
@@ -843,14 +893,14 @@ func (u *BillOfMaterialsUpsertBulk) UpdateDigest() *BillOfMaterialsUpsertBulk {
 	})
 }
 
-// SetDownloadLocation sets the "downloadLocation" field.
+// SetDownloadLocation sets the "download_location" field.
 func (u *BillOfMaterialsUpsertBulk) SetDownloadLocation(v string) *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.SetDownloadLocation(v)
 	})
 }
 
-// UpdateDownloadLocation sets the "downloadLocation" field to the value that was provided on create.
+// UpdateDownloadLocation sets the "download_location" field to the value that was provided on create.
 func (u *BillOfMaterialsUpsertBulk) UpdateDownloadLocation() *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateDownloadLocation()
@@ -882,6 +932,27 @@ func (u *BillOfMaterialsUpsertBulk) SetCollector(v string) *BillOfMaterialsUpser
 func (u *BillOfMaterialsUpsertBulk) UpdateCollector() *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetAnnotations sets the "annotations" field.
+func (u *BillOfMaterialsUpsertBulk) SetAnnotations(v []model.Annotation) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetAnnotations(v)
+	})
+}
+
+// UpdateAnnotations sets the "annotations" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateAnnotations() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateAnnotations()
+	})
+}
+
+// ClearAnnotations clears the value of the "annotations" field.
+func (u *BillOfMaterialsUpsertBulk) ClearAnnotations() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.ClearAnnotations()
 	})
 }
 

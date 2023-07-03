@@ -31,20 +31,27 @@ func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 	return collect(artifacts, toModelArtifact), nil
 }
 
-func artifactQueryFromInputSpec(spec model.ArtifactInputSpec) predicate.Artifact {
+func artifactQueryInputPredicates(spec model.ArtifactInputSpec) predicate.Artifact {
 	return artifact.And(
 		artifact.Algorithm(strings.ToLower(spec.Algorithm)),
 		artifact.Digest(strings.ToLower(spec.Digest)),
 	)
 }
 
-func artifactQueryFromQuerySpec(spec *model.ArtifactSpec) predicate.Artifact {
+func artifactQueryPredicates(spec *model.ArtifactSpec) predicate.Artifact {
 	return artifact.And(
 		optionalPredicate(spec.ID, IDEQ),
-		// FIXME: (ivanvanderbyl) This needs to be converted to lower as well
-		optionalPredicate(spec.Algorithm, artifact.AlgorithmEQ),
-		optionalPredicate(spec.Digest, artifact.DigestEQ),
+		optionalPredicate(toLowerPtr(spec.Algorithm), artifact.AlgorithmEQ),
+		optionalPredicate(toLowerPtr(spec.Digest), artifact.DigestEQ),
 	)
+}
+
+func toLowerPtr(s *string) *string {
+	if s == nil {
+		return nil
+	}
+	lower := strings.ToLower(*s)
+	return &lower
 }
 
 func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
@@ -100,7 +107,7 @@ func ingestArtifacts(ctx context.Context, client *ent.Client, artifacts []*model
 
 	predicates := make([]predicate.Artifact, len(artifacts))
 	for i, art := range artifacts {
-		predicates[i] = artifactQueryFromInputSpec(*art)
+		predicates[i] = artifactQueryInputPredicates(*art)
 	}
 	return client.Artifact.Query().Where(artifact.Or(predicates...)).All(ctx)
 }

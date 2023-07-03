@@ -113,7 +113,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 
 		artRecord, err := client.Artifact.Query().
 			Order(ent.Asc(artifact.FieldID)). // is order important here?
-			Where(artifactQueryFromInputSpec(art)).
+			Where(artifactQueryInputPredicates(art)).
 			Only(ctx) // should already be ingested
 		if err != nil {
 			return nil, err

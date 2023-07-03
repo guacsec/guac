@@ -78,7 +78,7 @@ func Digest(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldDigest, v))
 }
 
-// DownloadLocation applies equality check predicate on the "downloadLocation" field. It's identical to DownloadLocationEQ.
+// DownloadLocation applies equality check predicate on the "download_location" field. It's identical to DownloadLocationEQ.
 func DownloadLocation(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldDownloadLocation, v))
 }
@@ -348,67 +348,67 @@ func DigestContainsFold(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldContainsFold(FieldDigest, v))
 }
 
-// DownloadLocationEQ applies the EQ predicate on the "downloadLocation" field.
+// DownloadLocationEQ applies the EQ predicate on the "download_location" field.
 func DownloadLocationEQ(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldDownloadLocation, v))
 }
 
-// DownloadLocationNEQ applies the NEQ predicate on the "downloadLocation" field.
+// DownloadLocationNEQ applies the NEQ predicate on the "download_location" field.
 func DownloadLocationNEQ(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNEQ(FieldDownloadLocation, v))
 }
 
-// DownloadLocationIn applies the In predicate on the "downloadLocation" field.
+// DownloadLocationIn applies the In predicate on the "download_location" field.
 func DownloadLocationIn(vs ...string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldIn(FieldDownloadLocation, vs...))
 }
 
-// DownloadLocationNotIn applies the NotIn predicate on the "downloadLocation" field.
+// DownloadLocationNotIn applies the NotIn predicate on the "download_location" field.
 func DownloadLocationNotIn(vs ...string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNotIn(FieldDownloadLocation, vs...))
 }
 
-// DownloadLocationGT applies the GT predicate on the "downloadLocation" field.
+// DownloadLocationGT applies the GT predicate on the "download_location" field.
 func DownloadLocationGT(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldGT(FieldDownloadLocation, v))
 }
 
-// DownloadLocationGTE applies the GTE predicate on the "downloadLocation" field.
+// DownloadLocationGTE applies the GTE predicate on the "download_location" field.
 func DownloadLocationGTE(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldGTE(FieldDownloadLocation, v))
 }
 
-// DownloadLocationLT applies the LT predicate on the "downloadLocation" field.
+// DownloadLocationLT applies the LT predicate on the "download_location" field.
 func DownloadLocationLT(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldLT(FieldDownloadLocation, v))
 }
 
-// DownloadLocationLTE applies the LTE predicate on the "downloadLocation" field.
+// DownloadLocationLTE applies the LTE predicate on the "download_location" field.
 func DownloadLocationLTE(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldLTE(FieldDownloadLocation, v))
 }
 
-// DownloadLocationContains applies the Contains predicate on the "downloadLocation" field.
+// DownloadLocationContains applies the Contains predicate on the "download_location" field.
 func DownloadLocationContains(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldContains(FieldDownloadLocation, v))
 }
 
-// DownloadLocationHasPrefix applies the HasPrefix predicate on the "downloadLocation" field.
+// DownloadLocationHasPrefix applies the HasPrefix predicate on the "download_location" field.
 func DownloadLocationHasPrefix(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldHasPrefix(FieldDownloadLocation, v))
 }
 
-// DownloadLocationHasSuffix applies the HasSuffix predicate on the "downloadLocation" field.
+// DownloadLocationHasSuffix applies the HasSuffix predicate on the "download_location" field.
 func DownloadLocationHasSuffix(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldHasSuffix(FieldDownloadLocation, v))
 }
 
-// DownloadLocationEqualFold applies the EqualFold predicate on the "downloadLocation" field.
+// DownloadLocationEqualFold applies the EqualFold predicate on the "download_location" field.
 func DownloadLocationEqualFold(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEqualFold(FieldDownloadLocation, v))
 }
 
-// DownloadLocationContainsFold applies the ContainsFold predicate on the "downloadLocation" field.
+// DownloadLocationContainsFold applies the ContainsFold predicate on the "download_location" field.
 func DownloadLocationContainsFold(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldContainsFold(FieldDownloadLocation, v))
 }
@@ -541,6 +541,16 @@ func CollectorEqualFold(v string) predicate.BillOfMaterials {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// AnnotationsIsNil applies the IsNil predicate on the "annotations" field.
+func AnnotationsIsNil() predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldIsNull(FieldAnnotations))
+}
+
+// AnnotationsNotNil applies the NotNil predicate on the "annotations" field.
+func AnnotationsNotNil() predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNotNull(FieldAnnotations))
 }
 
 // HasPackage applies the HasEdge predicate on the "package" edge.

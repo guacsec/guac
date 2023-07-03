@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // BillOfMaterials is the model entity for the BillOfMaterials schema.
@@ -28,12 +30,14 @@ type BillOfMaterials struct {
 	Algorithm string `json:"algorithm,omitempty"`
 	// Digest holds the value of the "digest" field.
 	Digest string `json:"digest,omitempty"`
-	// DownloadLocation holds the value of the "downloadLocation" field.
-	DownloadLocation string `json:"downloadLocation,omitempty"`
+	// DownloadLocation holds the value of the "download_location" field.
+	DownloadLocation string `json:"download_location,omitempty"`
 	// Origin holds the value of the "origin" field.
 	Origin string `json:"origin,omitempty"`
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
+	// Annotations holds the value of the "annotations" field.
+	Annotations []model.Annotation `json:"annotations,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BillOfMaterialsQuery when eager-loading is set.
 	Edges        BillOfMaterialsEdges `json:"edges"`
@@ -82,6 +86,8 @@ func (*BillOfMaterials) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case billofmaterials.FieldAnnotations:
+			values[i] = new([]byte)
 		case billofmaterials.FieldID, billofmaterials.FieldPackageID, billofmaterials.FieldArtifactID:
 			values[i] = new(sql.NullInt64)
 		case billofmaterials.FieldURI, billofmaterials.FieldAlgorithm, billofmaterials.FieldDigest, billofmaterials.FieldDownloadLocation, billofmaterials.FieldOrigin, billofmaterials.FieldCollector:
@@ -141,7 +147,7 @@ func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
 			}
 		case billofmaterials.FieldDownloadLocation:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field downloadLocation", values[i])
+				return fmt.Errorf("unexpected type %T for field download_location", values[i])
 			} else if value.Valid {
 				bom.DownloadLocation = value.String
 			}
@@ -156,6 +162,14 @@ func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				bom.Collector = value.String
+			}
+		case billofmaterials.FieldAnnotations:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field annotations", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &bom.Annotations); err != nil {
+					return fmt.Errorf("unmarshal field annotations: %w", err)
+				}
 			}
 		default:
 			bom.selectValues.Set(columns[i], values[i])
@@ -222,7 +236,7 @@ func (bom *BillOfMaterials) String() string {
 	builder.WriteString("digest=")
 	builder.WriteString(bom.Digest)
 	builder.WriteString(", ")
-	builder.WriteString("downloadLocation=")
+	builder.WriteString("download_location=")
 	builder.WriteString(bom.DownloadLocation)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
@@ -230,6 +244,9 @@ func (bom *BillOfMaterials) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(bom.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("annotations=")
+	builder.WriteString(fmt.Sprintf("%v", bom.Annotations))
 	builder.WriteByte(')')
 	return builder.String()
 }

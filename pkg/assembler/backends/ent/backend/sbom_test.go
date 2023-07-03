@@ -1,6 +1,8 @@
 package backend
 
 import (
+	"strconv"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -9,8 +11,8 @@ import (
 
 func (s *Suite) Test_HasSBOM() {
 	type call struct {
-		Sub model.PackageOrArtifactInput
-		HS  *model.HasSBOMInputSpec
+		Sub  model.PackageOrArtifactInput
+		Spec *model.HasSBOMInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -18,9 +20,10 @@ func (s *Suite) Test_HasSBOM() {
 		InArt        []*model.ArtifactInputSpec
 		Calls        []call
 		Query        *model.HasSBOMSpec
-		ExpHS        []*model.HasSbom
+		Expected     []*model.HasSbom
 		ExpIngestErr bool
 		ExpQueryErr  bool
+		Only         bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -30,7 +33,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri",
 					},
 				},
@@ -38,7 +41,7 @@ func (s *Suite) Test_HasSBOM() {
 			Query: &model.HasSBOMSpec{
 				URI: ptrfrom.String("test uri"),
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:     p1out,
 					URI:         "test uri",
@@ -54,7 +57,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri",
 					},
 				},
@@ -62,7 +65,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri",
 					},
 				},
@@ -70,7 +73,7 @@ func (s *Suite) Test_HasSBOM() {
 			Query: &model.HasSBOMSpec{
 				URI: ptrfrom.String("test uri"),
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:     p1out,
 					URI:         "test uri",
@@ -86,7 +89,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri one",
 					},
 				},
@@ -94,7 +97,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri two",
 					},
 				},
@@ -102,7 +105,7 @@ func (s *Suite) Test_HasSBOM() {
 			Query: &model.HasSBOMSpec{
 				URI: ptrfrom.String("test uri one"),
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:     p1out,
 					URI:         "test uri one",
@@ -119,7 +122,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri",
 					},
 				},
@@ -127,7 +130,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p2,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri",
 					},
 				},
@@ -135,7 +138,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Artifact: a1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri",
 					},
 				},
@@ -147,7 +150,7 @@ func (s *Suite) Test_HasSBOM() {
 					},
 				},
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:     p2out,
 					URI:         "test uri",
@@ -164,7 +167,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri",
 					},
 				},
@@ -172,7 +175,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Artifact: a1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri",
 					},
 				},
@@ -180,7 +183,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Artifact: a2,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						URI: "test uri",
 					},
 				},
@@ -192,7 +195,7 @@ func (s *Suite) Test_HasSBOM() {
 					},
 				},
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:     a2out,
 					URI:         "test uri",
@@ -208,7 +211,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						Algorithm: "QWERasdf",
 					},
 				},
@@ -216,7 +219,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						Algorithm: "QWERasdf two",
 					},
 				},
@@ -224,7 +227,7 @@ func (s *Suite) Test_HasSBOM() {
 			Query: &model.HasSBOMSpec{
 				Algorithm: ptrfrom.String("QWERASDF"),
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:     p1out,
 					Algorithm:   "qwerasdf",
@@ -240,7 +243,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						Digest: "QWERasdf",
 					},
 				},
@@ -248,7 +251,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						Digest: "QWERasdf two",
 					},
 				},
@@ -256,7 +259,7 @@ func (s *Suite) Test_HasSBOM() {
 			Query: &model.HasSBOMSpec{
 				Digest: ptrfrom.String("QWERASDF"),
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:     p1out,
 					Digest:      "qwerasdf",
@@ -272,7 +275,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
 					},
 				},
@@ -280,7 +283,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
 					},
 				},
@@ -288,7 +291,7 @@ func (s *Suite) Test_HasSBOM() {
 			Query: &model.HasSBOMSpec{
 				DownloadLocation: ptrfrom.String("location two"),
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:          p1out,
 					DownloadLocation: "location two",
@@ -304,7 +307,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						Annotations: []*model.AnnotationInputSpec{
 							{Key: "k1", Value: "v1"},
 							{Key: "k2", Value: "v2"},
@@ -315,7 +318,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						Annotations: []*model.AnnotationInputSpec{
 							{Key: "k1", Value: "v1"},
 						},
@@ -328,7 +331,7 @@ func (s *Suite) Test_HasSBOM() {
 					{Key: "k2", Value: "v2"},
 				},
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject: p1out,
 					Annotations: []*model.Annotation{
@@ -346,7 +349,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
 					},
 				},
@@ -354,7 +357,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
 					},
 				},
@@ -362,7 +365,7 @@ func (s *Suite) Test_HasSBOM() {
 			Query: &model.HasSBOMSpec{
 				DownloadLocation: ptrfrom.String("location three"),
 			},
-			ExpHS: nil,
+			Expected: nil,
 		},
 		{
 			Name:  "Query multiple",
@@ -372,7 +375,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
 					},
 				},
@@ -380,7 +383,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
 					},
 				},
@@ -388,7 +391,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p2,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
 					},
 				},
@@ -396,7 +399,7 @@ func (s *Suite) Test_HasSBOM() {
 			Query: &model.HasSBOMSpec{
 				DownloadLocation: ptrfrom.String("location two"),
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:          p1out,
 					DownloadLocation: "location two",
@@ -417,7 +420,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
 					},
 				},
@@ -425,15 +428,15 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
 					},
 				},
 			},
 			Query: &model.HasSBOMSpec{
-				ID: ptrfrom.String("7"),
+				ID: ptrfrom.String("1"), // 1 = p1
 			},
-			ExpHS: []*model.HasSbom{
+			Expected: []*model.HasSbom{
 				{
 					Subject:          p1out,
 					DownloadLocation: "location two",
@@ -448,7 +451,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
 					},
 				},
@@ -465,7 +468,7 @@ func (s *Suite) Test_HasSBOM() {
 						Package:  p1,
 						Artifact: a1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
 					},
 				},
@@ -480,7 +483,7 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
 					},
 				},
@@ -488,21 +491,33 @@ func (s *Suite) Test_HasSBOM() {
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
-					HS: &model.HasSBOMInputSpec{
+					Spec: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
 					},
 				},
 			},
 			Query: &model.HasSBOMSpec{
-				ID: ptrfrom.String("-7"),
+				ID: ptrfrom.String("badID"),
 			},
 			ExpQueryErr: true,
 		},
 	}
 
+	ctx := s.Ctx
+	hasOnly := false
+	for _, t := range tests {
+		if t.Only {
+			hasOnly = true
+			break
+		}
+	}
+
 	for _, test := range tests {
+		if hasOnly && !test.Only {
+			continue
+		}
+
 		s.Run(test.Name, func() {
-			ctx := s.Ctx
 			b, err := GetBackend(s.Client)
 			if err != nil {
 				s.T().Fatalf("Could not instantiate testing backend: %v", err)
@@ -517,15 +532,31 @@ func (s *Suite) Test_HasSBOM() {
 					s.T().Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
-			for _, o := range test.Calls {
-				_, err := b.IngestHasSbom(ctx, o.Sub, *o.HS)
+
+			recordIDs := make([]string, len(test.Calls))
+			for i, o := range test.Calls {
+				dep, err := b.IngestHasSbom(ctx, o.Sub, *o.Spec)
 				if (err != nil) != test.ExpIngestErr {
 					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
+				recordIDs[i] = dep.ID
 			}
+
+			if test.Query.ID != nil {
+				idIdx, err := strconv.Atoi(*test.Query.ID)
+				if err == nil {
+					if idIdx >= len(recordIDs) {
+						s.T().Fatalf("ID index out of range, want: %d, got: %d", len(recordIDs), idIdx)
+					}
+
+					realID := recordIDs[idIdx]
+					test.Query.ID = &realID
+				}
+			}
+
 			got, err := b.HasSBOM(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				s.T().Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
@@ -537,10 +568,10 @@ func (s *Suite) Test_HasSBOM() {
 			for _, hs := range got {
 				slices.SortFunc(hs.Annotations, less)
 			}
-			for _, hs := range test.ExpHS {
+			for _, hs := range test.Expected {
 				slices.SortFunc(hs.Annotations, less)
 			}
-			if diff := cmp.Diff(test.ExpHS, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.Expected, got, ignoreID, ignoreEmptySlices); diff != "" {
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

@@ -244,28 +244,25 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 	}
 }
 
-func toModelHasSbom(sbom *ent.BillOfMaterials) *model.HasSbom {
+func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 	return &model.HasSbom{
 		ID:               nodeID(sbom.ID),
-		Subject:          toSBOMSubject(sbom),
+		Subject:          toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
 		URI:              sbom.URI,
 		Algorithm:        sbom.Algorithm,
 		Digest:           sbom.Digest,
 		DownloadLocation: sbom.DownloadLocation,
 		Origin:           sbom.Origin,
 		Collector:        sbom.Collector,
+		Annotations:      toPtrSlice(sbom.Annotations),
 	}
 }
 
-func toSBOMSubject(s *ent.BillOfMaterials) model.PackageOrArtifact {
-	if s.Edges.Package != nil {
-		if s.Edges.Package.Edges.Name != nil &&
-			s.Edges.Package.Edges.Name.Edges.Namespace != nil &&
-			s.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package != nil {
-			return toModelPackage(s.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
-		}
-	} else if s.Edges.Artifact != nil {
-		return toModelArtifact(s.Edges.Artifact)
+func toPackageOrArtifact(p *ent.PackageVersion, a *ent.Artifact) model.PackageOrArtifact {
+	if p != nil {
+		return toModelPackage(backReferencePackageVersion(p))
+	} else if a != nil {
+		return toModelArtifact(a)
 	}
 	return nil
 }

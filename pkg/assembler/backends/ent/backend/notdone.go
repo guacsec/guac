@@ -33,9 +33,7 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, certifyVEXStatemen
 func (b *EntBackend) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 	return nil, nil
 }
-func (b *EntBackend) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
-	return nil, nil
-}
+
 func (b *EntBackend) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	return nil, nil
 }
