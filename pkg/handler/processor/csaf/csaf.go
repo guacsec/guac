@@ -40,7 +40,7 @@ func (p *CSAFProcessor) ValidateSchema(d *processor.Document) error {
 		return err
 	}
 
-	return fmt.Errorf("unable to support parsing of SPDX document format: %v", d.Format)
+	return fmt.Errorf("unable to support parsing of CSAF document format: %v", d.Format)
 }
 
 // Unpack takes in the document and tries to unpack it
