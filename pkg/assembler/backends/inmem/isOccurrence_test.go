@@ -601,6 +601,113 @@ func TestOccurrence(t *testing.T) {
 	}
 }
 
+func TestIngestOccurrences(t *testing.T) {
+	type call struct {
+		PkgSrcs     model.PackageOrSourceInputs
+		Artifacts   []*model.ArtifactInputSpec
+		Occurrences []*model.IsOccurrenceInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		ExpOcc       []*model.IsOccurrence
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{{
+		Name:  "HappyPath - packages",
+		InPkg: []*model.PkgInputSpec{p1, p2},
+		InArt: []*model.ArtifactInputSpec{a1, a2},
+		Calls: []call{
+			call{
+				PkgSrcs: model.PackageOrSourceInputs{
+					Packages: []*model.PkgInputSpec{p1, p2},
+				},
+				Artifacts: []*model.ArtifactInputSpec{a1, a2},
+				Occurrences: []*model.IsOccurrenceInputSpec{{
+					Justification: "test justification",
+				}, {
+					Justification: "test justification",
+				}},
+			},
+		},
+		ExpOcc: []*model.IsOccurrence{
+			&model.IsOccurrence{
+				Subject:       p1out,
+				Artifact:      a1out,
+				Justification: "test justification",
+			}, &model.IsOccurrence{
+				Subject:       p2out,
+				Artifact:      a2out,
+				Justification: "test justification",
+			},
+		},
+	}, {
+		Name:  "HappyPath - sources",
+		InSrc: []*model.SourceInputSpec{s1},
+		InArt: []*model.ArtifactInputSpec{a1},
+		Calls: []call{
+			call{
+				PkgSrcs: model.PackageOrSourceInputs{
+					Sources: []*model.SourceInputSpec{s1},
+				},
+				Artifacts: []*model.ArtifactInputSpec{a1},
+				Occurrences: []*model.IsOccurrenceInputSpec{{
+					Justification: "test justification",
+				}},
+			},
+		},
+		ExpOcc: []*model.IsOccurrence{
+			{
+				Subject:       s1out,
+				Artifact:      a1out,
+				Justification: "test justification",
+			},
+		},
+	}}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	ctx := context.Background()
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			b, err := inmem.GetBackend(nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				got, err := b.IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpOcc, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+		})
+	}
+}
+
 func TestOccurrenceNeighbors(t *testing.T) {
 	type call struct {
 		PkgSrc     model.PackageOrSourceInput

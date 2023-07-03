@@ -65,6 +65,9 @@ func init() {
 	set.StringP("vuln-id", "v", "", "CVE, GHSA or OSV ID to check")
 	set.Int("num-path", 0, "number of paths to return, 0 means all paths")
 
+	// Google Cloud platform flags
+	set.String("gcp-credentials-path", "", "Path to the Google Cloud service account credentials json file.\nAlternatively you can set GOOGLE_APPLICATION_CREDENTIALS=<path> in your environment.")
+
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f
 	})

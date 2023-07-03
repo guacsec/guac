@@ -91,6 +91,10 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 	return result.([]*model.Artifact), nil
 }
 
+func (c *neo4jClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+	panic("not implemented")
+}
+
 func (c *neo4jClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()

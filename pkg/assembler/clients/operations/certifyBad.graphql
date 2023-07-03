@@ -18,27 +18,18 @@
 # Defines the GraphQL operations to ingest a CertifyBad into GUAC
 
 mutation CertifyBadPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyBad: CertifyBadInputSpec!) {
-  ingestPackage(pkg: $pkg) {
-    ...AllPkgTree
-  }
   ingestCertifyBad(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, certifyBad: $certifyBad) {
     ...AllCertifyBad
   }
 }
 
 mutation CertifyBadSrc($source: SourceInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-  ingestSource(source: $source) {
-    ...AllSourceTree
-  }
   ingestCertifyBad(subject: {source: $source}, certifyBad: $certifyBad) {
     ...AllCertifyBad
   }
 }
 
 mutation CertifyBadArtifact($artifact: ArtifactInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-  ingestArtifact(artifact: $artifact) {
-    ...AllArtifactTree
-  }
   ingestCertifyBad(subject: {artifact: $artifact}, certifyBad: $certifyBad) {
     ...AllCertifyBad
   }

@@ -16,6 +16,7 @@
 package spdx
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -26,28 +27,34 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/spdx/tools-golang/json"
 	spdx "github.com/spdx/tools-golang/spdx"
 	spdx_common "github.com/spdx/tools-golang/spdx/v2/common"
+	"golang.org/x/exp/slices"
 )
 
 type spdxParser struct {
 	// TODO: Add hasSBOMInputSpec when its created
-	doc               *processor.Document
-	packagePackages   map[string][]*model.PkgInputSpec
-	packageArtifacts  map[string][]*model.ArtifactInputSpec
-	filePackages      map[string][]*model.PkgInputSpec
-	fileArtifacts     map[string][]*model.ArtifactInputSpec
-	identifierStrings *common.IdentifierStrings
-	spdxDoc           *spdx.Document
+	doc                 *processor.Document
+	packagePackages     map[string][]*model.PkgInputSpec
+	packageArtifacts    map[string][]*model.ArtifactInputSpec
+	filePackages        map[string][]*model.PkgInputSpec
+	fileArtifacts       map[string][]*model.ArtifactInputSpec
+	topLevelPackages    map[string][]*model.PkgInputSpec
+	identifierStrings   *common.IdentifierStrings
+	spdxDoc             *spdx.Document
+	topLevelIsHeuristic bool
 }
 
 func NewSpdxParser() common.DocumentParser {
 	return &spdxParser{
-		packagePackages:   map[string][]*model.PkgInputSpec{},
-		packageArtifacts:  map[string][]*model.ArtifactInputSpec{},
-		filePackages:      map[string][]*model.PkgInputSpec{},
-		fileArtifacts:     map[string][]*model.ArtifactInputSpec{},
-		identifierStrings: &common.IdentifierStrings{},
+		packagePackages:     map[string][]*model.PkgInputSpec{},
+		packageArtifacts:    map[string][]*model.ArtifactInputSpec{},
+		filePackages:        map[string][]*model.PkgInputSpec{},
+		fileArtifacts:       map[string][]*model.ArtifactInputSpec{},
+		topLevelPackages:    map[string][]*model.PkgInputSpec{},
+		identifierStrings:   &common.IdentifierStrings{},
+		topLevelIsHeuristic: false,
 	}
 }
 
@@ -68,32 +75,33 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 }
 
 // creating top level package manually until https://github.com/anchore/syft/issues/1241 is resolved
-func (s *spdxParser) getTopLevelPackage() error {
+func (s *spdxParser) getTopLevelPackageSpdxIds() ([]string, error) {
 	// TODO: Add CertifyPkg to make a connection from GUAC purl to OCI purl guessed
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
-
-	// TODO (dejanb): do a quick check for SPDX to see if there are any "DESCRIBES" relationships
-	// from the document and omit this top level heuristic package otherwise.
-
-	// Currently create TopLevel package as well in some cases where we guess that the SPDX document
-	// may not encode it
-	var purl string = "pkg:guac/spdx/" + asmhelpers.SanitizeString(s.spdxDoc.DocumentName)
-
-	if purl != "" {
-		topPackage, err := asmhelpers.PurlToPkg(purl)
-		if err != nil {
-			return err
+	var spdxIds []string
+	for _, r := range s.spdxDoc.Relationships {
+		// If both sides of the relationship contain the same string,
+		// it is not a valid DESCRIBES/DESCRIBED_BY relationship.
+		if r.RefA.ElementRefID == r.RefB.ElementRefID {
+			continue
 		}
-		s.packagePackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packagePackages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
-		s.identifierStrings.PurlStrings = append(s.identifierStrings.PurlStrings, purl)
+
+		if r.RefA.ElementRefID == "DOCUMENT" && r.Relationship == spdx_common.TypeRelationshipDescribe {
+			spdxIds = append(spdxIds, string(r.RefB.ElementRefID))
+		} else if r.Relationship == spdx_common.TypeRelationshipDescribeBy && r.RefB.ElementRefID == "DOCUMENT" {
+			spdxIds = append(spdxIds, string(r.RefA.ElementRefID))
+		}
 	}
-	return nil
+
+	return spdxIds, nil
 }
 
 func (s *spdxParser) getPackages() error {
-	if err := s.getTopLevelPackage(); err != nil {
+	topLevelSpdxIds, err := s.getTopLevelPackageSpdxIds()
+	if err != nil {
 		return err
 	}
+
 	for _, pac := range s.spdxDoc.Packages {
 		// for each package create a package for each of them
 		purl := ""
@@ -101,7 +109,6 @@ func (s *spdxParser) getPackages() error {
 			if ext.RefType == spdx_common.TypePackageManagerPURL {
 				purl = ext.Locator
 			}
-
 		}
 		if purl == "" {
 			purl = asmhelpers.GuacPkgPurl(pac.PackageName, &pac.PackageVersion)
@@ -113,7 +120,12 @@ func (s *spdxParser) getPackages() error {
 		if err != nil {
 			return err
 		}
-		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
+
+		if slices.Contains(topLevelSpdxIds, string(pac.PackageSPDXIdentifier)) {
+			s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)], pkg)
+		} else {
+			s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
+		}
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range pac.PackageChecksums {
@@ -125,6 +137,19 @@ func (s *spdxParser) getPackages() error {
 		}
 
 	}
+
+	// If there is no top level Spdx Id that can be derived from the relationships, we take a best guess for the SpdxId.
+	if _, ok := s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)]; !ok {
+		purl := "pkg:guac/spdx/" + asmhelpers.SanitizeString(s.spdxDoc.DocumentName)
+		topPackage, err := asmhelpers.PurlToPkg(purl)
+		if err != nil {
+			return err
+		}
+		s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
+		s.identifierStrings.PurlStrings = append(s.identifierStrings.PurlStrings, purl)
+		s.topLevelIsHeuristic = true
+	}
+
 	return nil
 }
 
@@ -152,15 +177,18 @@ func (s *spdxParser) getFiles() error {
 }
 
 func parseSpdxBlob(p []byte) (*spdx.Document, error) {
-	doc := &spdx.Document{}
-	if err := doc.UnmarshalJSON(p); err != nil {
-		return nil, err
-	}
-	return doc, nil
+	return json.Read(bytes.NewReader(p))
 }
 
 func (s *spdxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
 	if packNode, ok := s.packagePackages[string(elementID)]; ok {
+		return packNode
+	}
+	return nil
+}
+
+func (s *spdxParser) getTopLevelPackageElement(elementID string) []*model.PkgInputSpec {
+	if packNode, ok := s.topLevelPackages[string(elementID)]; ok {
 		return packNode
 	}
 	return nil
@@ -175,14 +203,23 @@ func (s *spdxParser) getFileElement(elementID string) []*model.PkgInputSpec {
 
 func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
-
 	preds := &assembler.IngestPredicates{}
 
-	toplevel := s.getPackageElement("DOCUMENT")
-	// adding top level package edge manually for all depends on package
-	if toplevel != nil {
-		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages, "top-level package GUAC heuristic connecting to each file/package")...)
-		preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(toplevel[0], s.doc))
+	topLevel := s.getTopLevelPackageElement(string(s.spdxDoc.SPDXIdentifier))
+	if topLevel == nil {
+		logger.Errorf("error getting predicates: unable to find top level package element")
+		return preds
+	} else {
+		// adding top level package edge manually for all depends on package
+		for _, topLevelPkg := range topLevel {
+			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(topLevelPkg, s.doc))
+		}
+
+		if s.topLevelIsHeuristic {
+			preds.IsDependency = append(preds.IsDependency,
+				common.CreateTopLevelIsDeps(topLevel[0], s.packagePackages, s.filePackages,
+					"top-level package GUAC heuristic connecting to each file/package")...)
+		}
 	}
 	for _, rel := range s.spdxDoc.Relationships {
 		var foundId string

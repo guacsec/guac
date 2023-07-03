@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -123,22 +122,7 @@ func (d *depsDevParser) GetIdentifiers(ctx context.Context) (*common.IdentifierS
 	idstrings := &common.IdentifierStrings{}
 	for _, depComp := range d.packComponent.DepPackages {
 		pkg := depComp.CurrentPackage
-		idstrings.PurlStrings = append(idstrings.PurlStrings, pkgInputSpecToPurl(pkg))
+		idstrings.PurlStrings = append(idstrings.PurlStrings, helpers.PkgInputSpecToPurl(pkg))
 	}
 	return idstrings, nil
-}
-
-func pkgInputSpecToPurl(currentPkg *model.PkgInputSpec) string {
-	qualifiersMap := map[string]string{}
-	keys := []string{}
-	for _, kv := range currentPkg.Qualifiers {
-		qualifiersMap[kv.Key] = kv.Value
-		keys = append(keys, kv.Key)
-	}
-	sort.Strings(keys)
-	qualifiers := []string{}
-	for _, k := range keys {
-		qualifiers = append(qualifiers, k, qualifiersMap[k])
-	}
-	return helpers.PkgToPurl(currentPkg.Type, *currentPkg.Namespace, currentPkg.Name, *currentPkg.Version, *currentPkg.Subpath, qualifiers)
 }

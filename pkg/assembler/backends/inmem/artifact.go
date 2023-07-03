@@ -84,6 +84,18 @@ func (n *artStruct) setCertifyGoodLinks(id uint32) { n.goodLinks = append(n.good
 
 // Ingest Artifacts
 
+func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+	var modelArtifacts []*model.Artifact
+	for _, art := range artifacts {
+		modelArt, err := c.IngestArtifact(ctx, art)
+		if err != nil {
+			return nil, gqlerror.Errorf("ingestArtifact failed with err: %v", err)
+		}
+		modelArtifacts = append(modelArtifacts, modelArt)
+	}
+	return modelArtifacts, nil
+}
+
 func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
 	return c.ingestArtifact(ctx, artifact, true)
 }

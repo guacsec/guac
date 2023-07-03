@@ -5,7 +5,7 @@ PKG=github.com/guacsec/guac/pkg/version
 LDFLAGS="-X $(PKG).Version=$(VERSION) -X $(PKG).Commit=$(COMMIT) -X $(PKG).Date=$(BUILD)"
 
 CONTAINER ?= docker
-CPUTYPE=$(shell uname -m)
+CPUTYPE=$(shell uname -m | sed 's/x86_64/amd64/')
 GITHUB_REPOSITORY ?= guacsec/guac
 LOCAL_IMAGE_NAME ?= local-organic-guac
 
@@ -97,7 +97,7 @@ build_bins:
 # Build bins and copy to ./bin to align with docs
 # Separate build_bins as its own target to ensure (workaround) goreleaser finish writing dist/artifacts.json
 .PHONY: build
-build: build_bins
+build: check-goreleaser-tool-check build_bins
 	@mkdir -p bin
 	@echo "$(shell cat dist/artifacts.json | jq '.[]| { path: .path, name: .extra.ID } | join(" ")' -r)" | xargs -n 2 sh -c 'cp $$0 ./bin/$$1'
 	@echo "\nThe guac bins are available in ./bin"
@@ -105,9 +105,10 @@ build: build_bins
 .PHONY: build_local_container
 build_local_container: GORELEASER_CURRENT_TAG ?= v0.0.0-$(LOCAL_IMAGE_NAME)
 build_local_container:
+    # docker CLI options are inconsistent across platforms; had to use the pretty print output here to extract the current context
 	GITHUB_REPOSITORY=$(GITHUB_REPOSITORY) \
 	GORELEASER_CURRENT_TAG=$(GORELEASER_CURRENT_TAG) \
-	DOCKER_CONTEXT=$(shell docker context show) \
+	DOCKER_CONTEXT=$(shell docker context ls | grep '*' | awk '{print $$1}') \
 	goreleaser release --clean --snapshot --skip-sign --skip-sbom
 
 # Build and package a guac container for local testing

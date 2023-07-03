@@ -16,10 +16,11 @@
 package spdx
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/spdx/tools-golang/spdx"
+	"github.com/spdx/tools-golang/json"
 )
 
 // SPDXProcessor processes SPDX documents.
@@ -34,8 +35,14 @@ func (p *SPDXProcessor) ValidateSchema(d *processor.Document) error {
 
 	switch d.Format {
 	case processor.FormatJSON:
-		doc := &spdx.Document{}
-		return doc.UnmarshalJSON(d.Blob)
+		doc, err := json.Read(bytes.NewReader(d.Blob))
+		if err != nil {
+			return err
+		}
+		if doc.SPDXIdentifier != "DOCUMENT" {
+			return fmt.Errorf("document SPDXIdentifier should be DOCUMENT")
+		}
+		return nil
 	}
 
 	return fmt.Errorf("unable to support parsing of SPDX document format: %v", d.Format)

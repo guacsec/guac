@@ -20,16 +20,25 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
+
+func pUrlToPkgDiscardError(pUrl string) *generated.PkgInputSpec {
+	pkg, _ := asmhelpers.PurlToPkg(pUrl)
+	return pkg
+}
 
 func Test_spdxParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
 		name           string
+		additionalOpts []cmp.Option
 		doc            *processor.Document
 		wantPredicates *assembler.IngestPredicates
 		wantErr        bool
@@ -46,7 +55,200 @@ func Test_spdxParser(t *testing.T) {
 		},
 		wantPredicates: &testdata.SpdxIngestionPredicates,
 		wantErr:        false,
-	}}
+	},
+		{
+			name: "SPDX with DESCRIBES relationship populates pUrl from described element",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM")},
+			doc: &processor.Document{
+				Blob: []byte(`
+			{
+			"spdxVersion": "SPDX-2.3",
+			"SPDXID":"SPDXRef-DOCUMENT",
+			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+			"packages":[
+				{
+					"SPDXID":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+					"name":"sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+					"externalRefs":[
+						{
+							"referenceCategory":"PACKAGE_MANAGER",
+							"referenceLocator":"pkg:oci/image@sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10?mediaType=application%2Fvnd.oci.image.manifest.v1%2Bjson",
+							"referenceType":"purl"
+						}
+					]
+				}
+			],
+			"relationships":[
+				{
+					"spdxElementId":"SPDXRef-DOCUMENT",
+					"relationshipType":"DESCRIBES",
+					"relatedSpdxElement":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10"
+				}
+			]
+			}
+			`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{Pkg: pUrlToPkgDiscardError("pkg:oci/image@sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10?mediaType=application%2Fvnd.oci.image.manifest.v1%2Bjson")},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX with multiple DESCRIBES relationship populates multiple pUrls from described element",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM")},
+			doc: &processor.Document{
+				Blob: []byte(`
+			{
+			"spdxVersion": "SPDX-2.3",
+			"SPDXID":"SPDXRef-DOCUMENT",
+			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+			"packages":[
+				{
+					"SPDXID":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+					"name":"sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+					"externalRefs":[
+						{
+							"referenceCategory":"PACKAGE_MANAGER",
+							"referenceLocator":"pkg:oci/image@sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10?mediaType=application%2Fvnd.oci.image.manifest.v1%2Bjson",
+							"referenceType":"purl"
+						}
+					]
+				},
+				{
+					"SPDXID":"SPDXRef-Package-sha256-abc123",
+					"name":"sha256:abc123",
+					"externalRefs":[
+						{
+							"referenceCategory":"PACKAGE_MANAGER",
+							"referenceLocator":"pkg:oci/image@sha256:abc123?mediaType=application%2Fvnd.oci.image.manifest.v1%2Bjson",
+							"referenceType":"purl"
+						}
+					]
+				}
+			],
+			"relationships":[
+				{
+					"spdxElementId":"SPDXRef-DOCUMENT",
+					"relationshipType":"DESCRIBES",
+					"relatedSpdxElement":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10"
+				},
+				{
+					"spdxElementId":"SPDXRef-DOCUMENT",
+					"relationshipType":"DESCRIBES",
+					"relatedSpdxElement":"SPDXRef-Package-sha256-abc123"
+				}
+			]
+			}
+			`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{Pkg: pUrlToPkgDiscardError("pkg:oci/image@sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10?mediaType=application%2Fvnd.oci.image.manifest.v1%2Bjson")},
+					{Pkg: pUrlToPkgDiscardError("pkg:oci/image@sha256:abc123?mediaType=application%2Fvnd.oci.image.manifest.v1%2Bjson")},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX with DESCRIBED_BY relationship populates pUrl from described element",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM")},
+			doc: &processor.Document{
+				Blob: []byte(`
+		{
+		"spdxVersion": "SPDX-2.3",
+		"SPDXID":"SPDXRef-DOCUMENT",
+		"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+		"packages":[
+				{
+					"SPDXID":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+					"name":"sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+					"externalRefs":[
+						{
+							"referenceCategory":"PACKAGE_MANAGER",
+							"referenceLocator":"pkg:oci/image@sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10?mediaType=application%2Fvnd.oci.image.manifest.v1%2Bjson",
+							"referenceType":"purl"
+						}
+					]
+				}
+			],
+		"relationships":[
+			{
+				"spdxElementId":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+				"relationshipType":"DESCRIBED_BY",
+				"relatedSpdxElement":"SPDXRef-DOCUMENT"
+			}
+		]
+		}
+	`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{Pkg: pUrlToPkgDiscardError("pkg:oci/image@sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10?mediaType=application%2Fvnd.oci.image.manifest.v1%2Bjson")},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX with DESCRIBED_BY relationship but no corresponding package reverts to using heuristic top level package",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM")},
+			doc: &processor.Document{
+				Blob: []byte(`
+		{
+		"spdxVersion": "SPDX-2.3",
+		"SPDXID":"SPDXRef-DOCUMENT",
+		"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+		"relationships":[
+			{
+				"spdxElementId":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+				"relationshipType":"DESCRIBED_BY",
+				"relatedSpdxElement":"SPDXRef-DOCUMENT"
+			}
+		]
+		}
+	`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{Pkg: pUrlToPkgDiscardError("pkg:guac/spdx/sbom-sha256%3Aa743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10")},
+				},
+			},
+			wantErr: false,
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewSpdxParser()
@@ -60,7 +262,8 @@ func Test_spdxParser(t *testing.T) {
 			}
 
 			preds := s.GetPredicates(ctx)
-			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+			opts := append(testdata.IngestPredicatesCmpOpts, tt.additionalOpts...)
+			if d := cmp.Diff(tt.wantPredicates, preds, opts...); len(d) != 0 {
 				t.Errorf("spdx.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})

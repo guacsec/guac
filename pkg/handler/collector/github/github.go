@@ -24,6 +24,7 @@ import (
 
 	"github.com/guacsec/guac/internal/client"
 	"github.com/guacsec/guac/internal/client/githubclient"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -284,6 +285,12 @@ func ParseGithubReleaseDataSource(source datasource.Source) (*client.Repo, TagOr
 // URL should be in the form:
 // <vcs_tool>+<transport>://<host_name>[/<path_to_repository>][@<revision_tag_or_branch>][#<sub_path>]
 func ParseGitDataSource(source datasource.Source) (*client.Repo, TagOrLatest, error) {
+	//using vcs.go helper functions
+	var tol TagOrLatest
+	var r *client.Repo
+	/*
+		Lines 294-301 are repetitive, this check can be done in VcsToSrc function
+	*/
 	u, err := url.Parse(source.Value)
 	if err != nil {
 		return nil, "", err
@@ -292,37 +299,25 @@ func ParseGitDataSource(source datasource.Source) (*client.Repo, TagOrLatest, er
 		return nil, "", fmt.Errorf("invalid github host: %v", u.Host)
 	}
 
-	// The below split path should look something like:
-	// [ "orgName" "repoName" ] or
-	// [ "orgName" "repoName@tag" ]
-	// [1:] to ignore leading slash
 	path := strings.Split(u.Path, "/")[1:]
-
 	if len(path) != 2 {
 		return nil, "", fmt.Errorf("invalid github uri path: %v invalid number of subpaths: %v", u.Path, len(path))
 	}
-
-	// If the final element has a tag it gets split out like:
-	// [ "repoName" "tag" ]
-	final := strings.Split(path[len(path)-1], "@")
-	if len(final) > 2 {
-		return nil, "", fmt.Errorf("invalid tag path, only expected one @: %v", u.Path)
+	m, err := helpers.VcsToSrc(source.Value)
+	if err != nil {
+		return nil, "", err
 	}
-	var tol TagOrLatest
-	var r *client.Repo
-	if len(final) == 2 {
-		tol = final[1]
-		r = &client.Repo{
-			Owner: path[0],
-			Repo:  final[0],
-		}
-	} else {
+
+	if m.Tag == nil && m.Commit == nil {
 		tol = Latest
-		r = &client.Repo{
-			Owner: path[0],
-			Repo:  path[1],
-		}
+	} else if m.Tag != nil {
+		tol = *m.Tag
+	} else if m.Commit != nil {
+		tol = *m.Commit
 	}
-
+	r = &client.Repo{
+		Owner: m.GetNamespace()[strings.Index(m.GetNamespace(), "/")+1:],
+		Repo:  m.GetName(),
+	}
 	return r, tol, nil
 }

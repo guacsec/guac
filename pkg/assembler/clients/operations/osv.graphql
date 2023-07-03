@@ -15,6 +15,14 @@
 
 # NOTE: This is experimental and might change in the future!
 
+# Ingest OSV
+
+mutation IngestOSV($osv: OSVInputSpec!) {
+  ingestOSV(osv: $osv) {
+    ...AllOSVTree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC OSVs
 
 query OSVs($filter: OSVSpec) {

@@ -18,15 +18,6 @@
 # Defines the GraphQL operations to ingest SLSA attestations into GUAC
 
 mutation SLSAForArtifact($artifact: ArtifactInputSpec!, $materials: [ArtifactInputSpec!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
-  ingestArtifact(artifact: $artifact) {
-    ...AllArtifactTree
-  }
-  ingestMaterials(materials: $materials) {
-    ...AllArtifactTree
-  }
-  ingestBuilder(builder: $builder) {
-    uri
-  }
   ingestSLSA(subject: $artifact, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
     ...allSLSATree
   }
