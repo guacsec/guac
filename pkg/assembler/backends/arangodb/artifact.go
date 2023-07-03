@@ -17,6 +17,7 @@ package arangodb
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -72,6 +73,73 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 	}
 
 	return collectedArtifacts, nil
+}
+
+func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+
+	listOfValues := []map[string]any{}
+
+	for i := range artifacts {
+		values := map[string]any{}
+
+		values["algorithm"] = strings.ToLower(artifacts[i].Algorithm)
+		values["digest"] = strings.ToLower(artifacts[i].Digest)
+
+		listOfValues = append(listOfValues, values)
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+
+	query := `
+UPSERT { algorithm:doc.algorithm, digest:doc.digest } 
+INSERT { algorithm:doc.algorithm, digest:doc.digest } 
+UPDATE {} IN artifacts
+RETURN NEW`
+
+	sb.WriteString(query)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestArtifacts")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+	}
+	defer cursor.Close()
+
+	var createdArtifacts []*model.Artifact
+	for {
+		var doc *model.Artifact
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+			}
+		} else {
+			createdArtifacts = append(createdArtifacts, doc)
+		}
+	}
+	return createdArtifacts, nil
+
 }
 
 func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {

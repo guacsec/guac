@@ -100,7 +100,7 @@ func startServer(cmd *cobra.Command) {
 
 func validateFlags() error {
 	if flags.backend != neo4js &&
-		flags.backend != inmems {
+		flags.backend != inmems && flags.backend != arango {
 		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
 	}
 	return nil
@@ -111,6 +111,7 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 
 	// switch flags.backend {
 
+<<<<<<< Updated upstream
 	// case neo4js:
 	// 	args := neo4j.Neo4jConfig{
 	// 		User:   flags.nUser,
@@ -118,6 +119,28 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	// 		Realm:  flags.nRealm,
 	// 		DBAddr: flags.nAddr,
 	// 	}
+=======
+	case arango:
+		args := arangodb.ArangoConfig{
+			User:   flags.arangoUser,
+			Pass:   flags.arangoPass,
+			DBAddr: flags.arangoAddr,
+		}
+		backend, err := arangodb.GetBackend(ctx, &args)
+		if err != nil {
+			return nil, fmt.Errorf("Error creating arango backend: %w", err)
+		}
+
+		topResolver = resolvers.Resolver{Backend: backend}
+
+	case neo4js:
+		args := neo4j.Neo4jConfig{
+			User:   flags.nUser,
+			Pass:   flags.nPass,
+			Realm:  flags.nRealm,
+			DBAddr: flags.nAddr,
+		}
+>>>>>>> Stashed changes
 
 	// 	backend, err := neo4j.GetBackend(&args)
 	// 	if err != nil {

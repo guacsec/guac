@@ -244,7 +244,7 @@ RETURN {
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+				return nil, fmt.Errorf("failed to ingest hashEqual: %w", err)
 			}
 		} else {
 			createdValues = append(createdValues, doc)

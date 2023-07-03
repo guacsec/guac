@@ -111,7 +111,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				if driver.IsNoMoreDocuments(err) {
 					break
 				} else {
-					return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+					return nil, fmt.Errorf("failed to ingest hasSBOM: %w", err)
 				}
 			} else {
 				createdValues = append(createdValues, doc)
@@ -194,26 +194,26 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		values["annotations"] = annotations
 
 		query := `LET firstPkg = FIRST(
-			FOR pkg IN Pkg
+		  FOR pkg IN Pkg
 			  FILTER pkg.root == "pkg"
-			  FOR pkgHasType IN OUTBOUND pkg PkgHasType
-				  FILTER pkgHasType.type == @pkgType
-				FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
-					  FILTER pkgHasNamespace.namespace == @namespace
-				  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
-						  FILTER pkgHasName.name == @name
-					FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
-							  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier
-					  RETURN {
-						"type": pkgHasType.type,
-						"namespace": pkgHasNamespace.namespace,
-						"name": pkgHasName.name,
-						"version": pkgHasVersion.version,
-						"subpath": pkgHasVersion.subpath,
-						"qualifier_list": pkgHasVersion.qualifier_list,
-						"versionDoc": pkgHasVersion
-					  }
-		  )
+			FOR pkgHasType IN OUTBOUND pkg PkgHasType
+				FILTER pkgHasType.type == @pkgType && pkgHasType._parent == pkg._id
+			  FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
+					FILTER pkgHasNamespace.namespace == @namespace && pkgHasNamespace._parent == pkgHasType._id
+				FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
+						FILTER pkgHasName.name == @name && pkgHasName._parent == pkgHasNamespace._id
+				  FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
+						FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier && pkgHasVersion._parent == pkgHasName._id
+					RETURN {
+					  "type": pkgHasType.type,
+					  "namespace": pkgHasNamespace.namespace,
+					  "name": pkgHasName.name,
+					  "version": pkgHasVersion.version,
+					  "subpath": pkgHasVersion.subpath,
+					  "qualifier_list": pkgHasVersion.qualifier_list,
+					  "versionDoc": pkgHasVersion
+					}
+		)
 		  
 		  LET hasSBOM = FIRST(
 			  UPSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, annotations:@annotations, collector:@collector, origin:@origin } 
@@ -272,7 +272,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				if driver.IsNoMoreDocuments(err) {
 					break
 				} else {
-					return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+					return nil, fmt.Errorf("failed to ingest hasSBOM: %w", err)
 				}
 			} else {
 				createdValues = append(createdValues, doc)

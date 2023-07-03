@@ -1,3 +1,8 @@
+# arangodb 
+arango-user: root
+arango-pass: rootpassword
+arango-addr: http://arangodb:8529
+
 # Neo4j details
 neo4j-user: neo4j
 neo4j-pass: s3cr3t
