@@ -180,18 +180,18 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 			_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
 
 			if err != nil {
-				logger.Errorf("Error in ingesting: %v\n", err)
+				logger.Errorf("Error in ingesting package: %v\n", err)
 			}
 
 			_, err = model.IngestPackage(context.Background(), client, *ingest.DepPkg)
 
 			if err != nil {
-				logger.Errorf("Error in ingesting: %v\n", err)
+				logger.Errorf("Error in ingesting dependency package: %v\n", err)
 			}
 			_, err = model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
 
 			if err != nil {
-				logger.Errorf("Error in ingesting: %v\n", err)
+				logger.Errorf("Error in ingesting isDependency: %v\n", err)
 			}
 		}
 	}
