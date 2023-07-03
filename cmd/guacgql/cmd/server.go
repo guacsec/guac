@@ -30,6 +30,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
+	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/logging"
@@ -109,29 +111,7 @@ func validateFlags() error {
 func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	var topResolver resolvers.Resolver
 
-	// switch flags.backend {
-
-<<<<<<< Updated upstream
-	// case neo4js:
-	// 	args := neo4j.Neo4jConfig{
-	// 		User:   flags.nUser,
-	// 		Pass:   flags.nPass,
-	// 		Realm:  flags.nRealm,
-	// 		DBAddr: flags.nAddr,
-	// 	}
-=======
-	case arango:
-		args := arangodb.ArangoConfig{
-			User:   flags.arangoUser,
-			Pass:   flags.arangoPass,
-			DBAddr: flags.arangoAddr,
-		}
-		backend, err := arangodb.GetBackend(ctx, &args)
-		if err != nil {
-			return nil, fmt.Errorf("Error creating arango backend: %w", err)
-		}
-
-		topResolver = resolvers.Resolver{Backend: backend}
+	switch flags.backend {
 
 	case neo4js:
 		args := neo4j.Neo4jConfig{
@@ -140,39 +120,37 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 			Realm:  flags.nRealm,
 			DBAddr: flags.nAddr,
 		}
->>>>>>> Stashed changes
 
-	// 	backend, err := neo4j.GetBackend(&args)
-	// 	if err != nil {
-	// 		return nil, fmt.Errorf("Error creating neo4j backend: %w", err)
-	// 	}
+		backend, err := neo4j.GetBackend(&args)
+		if err != nil {
+			return nil, fmt.Errorf("error creating neo4j backend: %w", err)
+		}
 
-	// 	topResolver = resolvers.Resolver{Backend: backend}
+		topResolver = resolvers.Resolver{Backend: backend}
 
-	// case arango:
-	args := arangodb.ArangoConfig{
-		User:   "root",
-		Pass:   "test123",
-		DBAddr: "http://localhost:8529",
+	case arango:
+		args := arangodb.ArangoConfig{
+			User:   flags.arangoUser,
+			Pass:   flags.arangoPass,
+			DBAddr: flags.arangoAddr,
+		}
+		backend, err := arangodb.GetBackend(ctx, &args)
+		if err != nil {
+			return nil, fmt.Errorf("error creating arango backend: %w", err)
+		}
+
+		topResolver = resolvers.Resolver{Backend: backend}
+	case inmems:
+		args := inmem.DemoCredentials{}
+		backend, err := inmem.GetBackend(&args)
+		if err != nil {
+			return nil, fmt.Errorf("error creating inmem backend: %w", err)
+		}
+
+		topResolver = resolvers.Resolver{Backend: backend}
+	default:
+		return nil, fmt.Errorf("invalid backend specified: %v", flags.backend)
 	}
-
-	backend, err := arangodb.GetBackend(ctx, &args)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating arango backend: %w", err)
-	}
-
-	topResolver = resolvers.Resolver{Backend: backend}
-	// case inmems:
-	// 	args := inmem.DemoCredentials{}
-	// 	backend, err := inmem.GetBackend(&args)
-	// 	if err != nil {
-	// 		return nil, fmt.Errorf("Error creating inmem backend: %w", err)
-	// 	}
-
-	// 	topResolver = resolvers.Resolver{Backend: backend}
-	// default:
-	// 	return nil, fmt.Errorf("invalid backend specified: %v", flags.backend)
-	// }
 
 	config := generated.Config{Resolvers: &topResolver}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))

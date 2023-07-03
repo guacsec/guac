@@ -409,66 +409,12 @@ func (aqb *arangoQueryBuilder) ForOutBound(edgeCollectionName string, counterNam
 	return aqb
 }
 
-func (aqb *arangoQueryBuilder) search() *arangoQuerySearch {
-	aqb.query.WriteString(" ")
-	aqb.query.WriteString("SEARCH")
-	return newArangoQuerySearch(aqb)
-}
-
 func (aqb *arangoQueryBuilder) filter(fieldName string, counterName string, condition string, value string) *arangoQueryFilter {
 	aqb.query.WriteString(" ")
 
 	aqb.query.WriteString(fmt.Sprintf("FILTER %s.%s %s %s", counterName, fieldName, condition, value))
 
 	return newArangoQueryFilter(aqb)
-}
-
-func (aqb *arangoQueryBuilder) lIMIT(offset int, count int) *arangoQueryBuilder {
-	aqb.query.WriteString(" ")
-	aqb.query.WriteString(fmt.Sprintf("LIMIT %d,%d", offset, count))
-	return aqb
-}
-
-func (aqb *arangoQueryBuilder) sortBM25(desc bool, counterName string) *arangoQueryBuilder {
-	aqb.query.WriteString(" ")
-	aqb.query.WriteString(fmt.Sprintf("SORT BM25(%s)", counterName))
-
-	if desc {
-		aqb.query.WriteString(" ")
-		aqb.query.WriteString("DESC")
-	}
-
-	return aqb
-}
-
-func (aqb *arangoQueryBuilder) sort(fieldName string, desc bool, counterName string) *arangoQueryBuilder {
-	aqb.query.WriteString(" ")
-	aqb.query.WriteString(fmt.Sprintf("SORT %s.%s", counterName, fieldName))
-
-	if desc {
-		aqb.query.WriteString(" ")
-		aqb.query.WriteString("DESC")
-	}
-
-	return aqb
-}
-
-func (aqb *arangoQueryBuilder) sortBM25WithFreqScaling(desc bool, k float32, b float32, counterName string) *arangoQueryBuilder {
-	aqb.query.WriteString(" ")
-	aqb.query.WriteString(fmt.Sprintf("SORT BM25(%s, %.2f, %.2f)", counterName, k, b))
-
-	if desc {
-		aqb.query.WriteString(" ")
-		aqb.query.WriteString("DESC")
-	}
-
-	return aqb
-}
-
-func (aqb *arangoQueryBuilder) returnStatement(counterName string) *arangoQueryBuilder {
-	aqb.query.WriteString(" ")
-	aqb.query.WriteString(fmt.Sprintf("RETURN %s", counterName))
-	return aqb
 }
 
 func (aqb *arangoQueryBuilder) string() string {
@@ -498,69 +444,6 @@ func (aqf *arangoQueryFilter) and(fieldName string, condition string, value inte
 	}
 
 	return aqf
-}
-
-func (aqf *arangoQueryFilter) or(fieldName string, condition string, value interface{}, counterName string) *arangoQueryFilter {
-	aqf.arangoQueryBuilder.query.WriteString(" ")
-	aqf.arangoQueryBuilder.query.WriteString("OR")
-	aqf.arangoQueryBuilder.query.WriteString(" ")
-
-	switch value.(type) {
-	case string:
-		aqf.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %q", counterName, fieldName, condition, value))
-	default:
-		aqf.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %v", counterName, fieldName, condition, value))
-	}
-	return aqf
-}
-
-func (aqf *arangoQueryFilter) done() *arangoQueryBuilder {
-	return aqf.arangoQueryBuilder
-}
-
-type arangoQuerySearch struct {
-	arangoQueryBuilder *arangoQueryBuilder
-}
-
-func newArangoQuerySearch(queryBuilder *arangoQueryBuilder) *arangoQuerySearch {
-	return &arangoQuerySearch{
-		arangoQueryBuilder: queryBuilder,
-	}
-}
-
-func (aqs *arangoQuerySearch) phrase(fieldName string, searchKeyword string, analyzer string, counterName string) *arangoQuerySearch {
-	aqs.arangoQueryBuilder.query.WriteString(" ")
-	aqs.arangoQueryBuilder.query.WriteString(fmt.Sprintf("PHRASE(%s.%s, %q, %q)", counterName, fieldName, searchKeyword, analyzer))
-	return aqs
-}
-
-func (aqs *arangoQuerySearch) condition(fieldName string, condition string, value interface{}, counterName string) *arangoQuerySearch {
-	aqs.arangoQueryBuilder.query.WriteString(" ")
-
-	switch value.(type) {
-	case string:
-		aqs.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %q", counterName, fieldName, condition, value))
-	default:
-		aqs.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %v", counterName, fieldName, condition, value))
-	}
-
-	return aqs
-}
-
-func (aqs *arangoQuerySearch) or() *arangoQuerySearch {
-	aqs.arangoQueryBuilder.query.WriteString(" ")
-	aqs.arangoQueryBuilder.query.WriteString("OR")
-	return aqs
-}
-
-func (aqs *arangoQuerySearch) and() *arangoQuerySearch {
-	aqs.arangoQueryBuilder.query.WriteString(" ")
-	aqs.arangoQueryBuilder.query.WriteString("AND")
-	return aqs
-}
-
-func (aqs *arangoQuerySearch) done() *arangoQueryBuilder {
-	return aqs.arangoQueryBuilder
 }
 
 // getPreloads get the specific graphQL query fields that are requested.

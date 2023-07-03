@@ -180,32 +180,6 @@ RETURN NEW`
 	}
 }
 
-// func setArtifactMatchValues(sb *strings.Builder, art *model.ArtifactSpec, objectArt bool, firstMatch *bool, queryValues map[string]any) {
-// 	if art != nil {
-// 		if art.Algorithm != nil {
-// 			if !objectArt {
-// 				matchProperties(sb, *firstMatch, "a", "algorithm", "$algorithm")
-// 				queryValues["algorithm"] = strings.ToLower(*art.Algorithm)
-// 			} else {
-// 				matchProperties(sb, *firstMatch, "objArt", "algorithm", "$objAlgorithm")
-// 				queryValues["objAlgorithm"] = strings.ToLower(*art.Algorithm)
-// 			}
-// 			*firstMatch = false
-// 		}
-
-// 		if art.Digest != nil {
-// 			if !objectArt {
-// 				matchProperties(sb, *firstMatch, "a", "digest", "$digest")
-// 				queryValues["digest"] = strings.ToLower(*art.Digest)
-// 			} else {
-// 				matchProperties(sb, *firstMatch, "objArt", "digest", "$objDigest")
-// 				queryValues["objDigest"] = strings.ToLower(*art.Digest)
-// 			}
-// 			*firstMatch = false
-// 		}
-// 	}
-// }
-
 func generateModelArtifact(algorithm, digest string) *model.Artifact {
 	artifact := model.Artifact{
 		Algorithm: algorithm,
