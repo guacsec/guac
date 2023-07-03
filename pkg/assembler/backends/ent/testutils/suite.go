@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	dsql "entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
 
 	// Import regular postgres driver
 	_ "github.com/lib/pq"
@@ -67,7 +68,12 @@ func (s *Suite) BeforeTest(suiteName, testName string) {
 	s.db = db
 	entSqlDriver := dsql.OpenDB("postgres", db)
 	// enttest automatically runs migrations to create the schema in the test database.
-	client := enttest.NewClient(s.T(), enttest.WithOptions(ent.Driver(entSqlDriver)))
+	client := enttest.NewClient(s.T(),
+		enttest.WithOptions(ent.Driver(entSqlDriver)),
+		enttest.WithMigrateOptions(
+			schema.WithGlobalUniqueID(true),
+		),
+	)
 	s.Client = client
 
 	// Populate context with ent client so that transactions work
