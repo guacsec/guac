@@ -186,16 +186,40 @@ func normalizeInputQualifiers(inputs []*model.PackageQualifierInputSpec) []model
 	return qualifiers
 }
 
-func pkgVersionPredicates(spec *model.PkgSpec) []predicate.PackageVersion {
+func pkgVersionInputPredicates(spec *model.PkgInputSpec) predicate.PackageVersion {
 	if spec == nil {
-		return nil
+		return NoOpSelector()
 	}
+
+	rv := []predicate.PackageVersion{
+		packageversion.VersionEQ(stringOrEmpty(spec.Version)),
+		packageversion.SubpathEQ(stringOrEmpty(spec.Subpath)),
+		packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(spec.Qualifiers)),
+		packageversion.HasNameWith(
+			packagename.NameEQ(spec.Name),
+			packagename.HasNamespaceWith(
+				packagenamespace.Namespace(stringOrEmpty(spec.Namespace)),
+				packagenamespace.HasPackageWith(
+					packagetype.TypeEQ(spec.Type),
+				),
+			),
+		),
+	}
+
+	return packageversion.And(rv...)
+}
+
+func pkgVersionPredicates(spec *model.PkgSpec) predicate.PackageVersion {
+	if spec == nil {
+		return NoOpSelector()
+	}
+
 	rv := []predicate.PackageVersion{
 		optionalPredicate(spec.ID, IDEQ),
-		packageversion.VersionEQ(valueOrDefault(spec.Version, "")),
-		// optionalPredicate(spec.Version, packageversion.Version),
-		optionalPredicate(spec.Subpath, packageversion.Subpath),
+		optionalPredicate(spec.Version, packageversion.VersionEQ),
+		optionalPredicate(spec.Subpath, packageversion.SubpathEQ),
 		packageversion.QualifiersMatchSpec(spec.Qualifiers),
+
 		packageversion.HasNameWith(
 			optionalPredicate(spec.Name, packagename.Name),
 			packagename.HasNamespaceWith(
@@ -207,7 +231,7 @@ func pkgVersionPredicates(spec *model.PkgSpec) []predicate.PackageVersion {
 		),
 	}
 
-	return rv
+	return packageversion.And(rv...)
 }
 
 func pkgNamePredicates(spec *model.PkgNameSpec) []predicate.PackageName {

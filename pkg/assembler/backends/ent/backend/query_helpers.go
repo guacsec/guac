@@ -27,21 +27,19 @@ import (
 func getPkgName(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
 	return client.PackageType.Query().
 		Where(packagetype.Type(pkgin.Type)).
-		QueryNamespaces().Where(packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, ""))).
-		QueryNames().Where(packagename.Name(pkgin.Name)).
+		QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
+		QueryNames().Where(packagename.NameEQ(pkgin.Name)).
 		Only(ctx)
 }
 
 func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
 	return client.PackageType.Query().
 		Where(packagetype.Type(pkgin.Type)).
-		QueryNamespaces().Where(packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, ""))).
-		QueryNames().Where(packagename.Name(pkgin.Name)).
+		QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
+		QueryNames().Where(packagename.NameEQ(pkgin.Name)).
 		QueryVersions().
 		Where(
-			packageversion.VersionEQ(valueOrDefault(pkgin.Version, "")),
-			optionalPredicate(pkgin.Subpath, packageversion.SubpathEQ),
-			packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(pkgin.Qualifiers)),
+			pkgVersionInputPredicates(pkgin),
 		).
 		Only(ctx)
 }

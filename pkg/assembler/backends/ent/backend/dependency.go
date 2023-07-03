@@ -17,19 +17,24 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 	if spec != nil {
 		query.Where(
 			optionalPredicate(spec.ID, IDEQ),
-			dependency.HasPackageWith(pkgVersionPredicates(spec.Package)...),
-			dependency.HasDependentPackageWith(pkgNamePredicates(spec.DependentPackage)...),
 			optionalPredicate(spec.VersionRange, dependency.VersionRange),
 			optionalPredicate(spec.Justification, dependency.Justification),
 			optionalPredicate(spec.Origin, dependency.Origin),
 			optionalPredicate(spec.Collector, dependency.Collector),
 		)
+		if spec.DependentPackage != nil {
+			query.Where(dependency.HasDependentPackageWith(pkgNamePredicates(spec.DependentPackage)...))
+		}
+		if spec.Package != nil {
+			query.Where(dependency.HasPackageWith(pkgVersionPredicates(spec.Package)))
+		}
+
 		if spec.DependencyType != nil {
 			query.Where(dependency.DependencyType(string(*spec.DependencyType)))
 		}
 	}
 
-	ids, err := query.
+	deps, err := query.
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {
 				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
@@ -47,7 +52,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 		return nil, errors.Wrap(err, funcName)
 	}
 
-	return collect(ids, toModelIsDependency), nil
+	return collect(deps, toModelIsDependencyWithBackrefs), nil
 }
 
 func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, spec model.IsDependencyInputSpec) (*model.IsDependency, error) {
@@ -82,7 +87,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 					dependency.FieldCollector,
 				),
 			).
-			UpdateNewValues().
+			Ignore().
 			ID(ctx)
 		if err != nil {
 			return nil, err
@@ -113,5 +118,5 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 		return nil, errors.Wrap(err, funcName)
 	}
 
-	return toModelIsDependency(record), nil
+	return toModelIsDependencyWithBackrefs(record), nil
 }

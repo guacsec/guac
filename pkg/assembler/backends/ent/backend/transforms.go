@@ -36,6 +36,7 @@ func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageType {
 	}
 	return nil
 }
+
 func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
 	if pn.Edges.Namespace != nil &&
 		pn.Edges.Namespace.Edges.Package != nil {
@@ -146,6 +147,10 @@ func nodeID(id int) string {
 	return fmt.Sprintf("%d", id)
 }
 
+func stringOrEmpty(s *string) string {
+	return valueOrDefault(s, "")
+}
+
 func valueOrDefault[T any](v *T, def T) T {
 	if v == nil {
 		return def
@@ -208,11 +213,29 @@ func pkgQualifierInputSpecToQuerySpec(input []*model.PackageQualifierInputSpec) 
 	return out
 }
 
-func toModelIsDependency(id *ent.Dependency) *model.IsDependency {
+func toModelIsDependencyWithBackrefs(id *ent.Dependency) *model.IsDependency {
+	return toModelIsDependency(id, true)
+}
+
+func toModelIsDependencyWithoutBackrefs(id *ent.Dependency) *model.IsDependency {
+	return toModelIsDependency(id, false)
+}
+
+func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency {
+	var pkg *model.Package
+	var depPkg *model.Package
+	if backrefs {
+		pkg = toModelPackage(backReferencePackageVersion(id.Edges.Package))
+		depPkg = toModelPackage(backReferencePackageName(id.Edges.DependentPackage))
+	} else {
+		pkg = toModelPackage(id.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
+		depPkg = toModelPackage(id.Edges.DependentPackage.Edges.Namespace.Edges.Package)
+	}
+
 	return &model.IsDependency{
 		ID:               nodeID(id.ID),
-		Package:          toModelPackage(backReferencePackageVersion(id.Edges.Package)),
-		DependentPackage: toModelPackage(backReferencePackageName(id.Edges.DependentPackage)),
+		Package:          pkg,
+		DependentPackage: depPkg,
 		VersionRange:     id.VersionRange,
 		DependencyType:   model.DependencyType(id.DependencyType),
 		Justification:    id.Justification,

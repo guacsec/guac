@@ -85,8 +85,8 @@ var p2outName = &model.Package{
 	Type: "pypi",
 	Namespaces: []*model.PackageNamespace{{
 		Names: []*model.PackageName{{
-			Name: "tensorflow",
-			// Versions: []*model.PackageVersion{},
+			Name:     "tensorflow",
+			Versions: []*model.PackageVersion{},
 		}},
 	}},
 }
@@ -201,7 +201,7 @@ func (s *Suite) TestOccurrenceHappyPath() {
 
 	if pkgSrc, ok := occ.Subject.(*model.Package); ok && pkgSrc != nil {
 		s.Equal(p1.Type, pkgSrc.Type)
-		s.Equal("1", pkgSrc.Namespaces[0].Names[0].Versions[0].ID)
+		s.NotEmpty(pkgSrc.Namespaces[0].Names[0].Versions[0].ID)
 	} else {
 		s.Failf("fail", "subject is not a package, got %T", occ.Subject)
 	}

@@ -1,8 +1,7 @@
 package backend
 
 import (
-	"context"
-	"reflect"
+	"strconv"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -155,10 +154,7 @@ func (s *Suite) TestIsDependency() {
 			},
 			Query: &model.IsDependencySpec{
 				Package: &model.PkgSpec{
-					// ID: ptrfrom.String("9"),
-					Type: ptrfrom.String("pypi"),
-					Name: ptrfrom.String("tensorflow"),
-					// Version: ptrfrom.String("2.11.1"),
+					ID: ptrfrom.String("0"), // 0 == p1
 				},
 			},
 			ExpectedDep: []*model.IsDependency{
@@ -304,7 +300,7 @@ func (s *Suite) TestIsDependency() {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				ID: ptrfrom.String("9"),
+				ID: ptrfrom.String("1"), // ID's are replaced with real IDs later on, this is the index in the array of calls
 			},
 			ExpectedDep: []*model.IsDependency{
 				{
@@ -423,17 +419,6 @@ func (s *Suite) TestIsDependency() {
 			ExpectedQueryErr: true,
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return p.Last().String() == ".ID"
-	}, cmp.Ignore())
-
-	ignoreEmptySlices := cmp.FilterValues(func(x, y interface{}) bool {
-		xv, yv := reflect.ValueOf(x), reflect.ValueOf(y)
-		if xv.Kind() == reflect.Slice && yv.Kind() == reflect.Slice {
-			return xv.Len() == 0 && yv.Len() == 0
-		}
-		return false
-	}, cmp.Ignore())
 
 	hasOnly := false
 	for _, t := range tests {
@@ -443,7 +428,7 @@ func (s *Suite) TestIsDependency() {
 		}
 	}
 
-	ctx := context.Background()
+	ctx := s.Ctx
 	for _, test := range tests {
 		if hasOnly && !test.Only {
 			continue
@@ -458,15 +443,47 @@ func (s *Suite) TestIsDependency() {
 					s.Require().NoError(err, "Could not ingest pkg")
 				}
 			}
-			for _, o := range test.Calls {
-				_, err := b.IngestDependency(ctx, *o.P1, *o.P2, *o.Input)
+
+			depIDs := make([]string, len(test.Calls))
+			pksIDs := make([]string, 0)
+			for i, o := range test.Calls {
+				dep, err := b.IngestDependency(ctx, *o.P1, *o.P2, *o.Input)
 				if (err != nil) != test.ExpectedIngestErr {
 					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpectedIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
+				depIDs[i] = dep.ID
+				if dep.Package != nil && len(dep.Package.Namespaces) == 1 && len(dep.Package.Namespaces[0].Names) == 1 && len(dep.Package.Namespaces[0].Names[0].Versions) == 1 {
+					pksIDs = append(pksIDs, dep.Package.Namespaces[0].Names[0].Versions[0].ID)
+				}
 			}
+
+			if test.Query.ID != nil {
+				idIdx, err := strconv.Atoi(*test.Query.ID)
+				if err == nil {
+					if idIdx >= len(depIDs) {
+						s.T().Fatalf("ID index out of range, want: %d, got: %d", len(depIDs), idIdx)
+					}
+
+					realID := depIDs[idIdx]
+					test.Query.ID = &realID
+				}
+			}
+
+			if test.Query.Package != nil && test.Query.Package.ID != nil {
+				idIdx, err := strconv.Atoi(*test.Query.Package.ID)
+				if err == nil {
+					if idIdx >= len(pksIDs) {
+						s.T().Fatalf("ID index out of range, want: %d, got: %d", len(pksIDs), idIdx)
+					}
+
+					realID := pksIDs[idIdx]
+					test.Query.Package.ID = &realID
+				}
+			}
+
 			got, err := b.IsDependency(ctx, test.Query)
 			if (err != nil) != test.ExpectedQueryErr {
 				s.T().Fatalf("did not get expected query error, want: %v, got: %v", test.ExpectedQueryErr, err)
