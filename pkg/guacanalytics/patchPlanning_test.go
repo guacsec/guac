@@ -180,7 +180,6 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 			_, err := model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
 
 			if err != nil {
-
 				logger.Errorf("Error in ingesting: %v\n", err)
 			}
 		}
@@ -273,9 +272,10 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		},
 	}
 
+	ingestTestData("isDependency", ctx, gqlclient)
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("Test case %s\n", tt.name), func(t *testing.T) {
-			ingestTestData(tt.graphInput, ctx, gqlclient)
+
 			startID := getPackageId("isDependency", tt.startType, tt.startNamespace, tt.startName, ctx, gqlclient)
 
 			var stopID string
