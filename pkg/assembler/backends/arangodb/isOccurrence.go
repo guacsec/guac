@@ -31,17 +31,6 @@ func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model
 	panic(fmt.Errorf("not implemented: IsOccurrence - IsOccurrence"))
 }
 
-func generateModelIsOccurrence(subject model.PackageOrSource, artifact *model.Artifact, justification, origin, collector string) *model.IsOccurrence {
-	isOccurrence := model.IsOccurrence{
-		Subject:       subject,
-		Artifact:      artifact,
-		Justification: justification,
-		Origin:        origin,
-		Collector:     collector,
-	}
-	return &isOccurrence
-}
-
 // Ingest IngestOccurrence
 
 func (c *arangoClient) IngestOccurrences(ctx context.Context, subject model.PackageOrSourceInputs, artifact []*model.ArtifactInputSpec, occurrence []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
@@ -59,7 +48,7 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subject model.Pack
 
 	listOfValues := []map[string]any{}
 
-	for i, _ := range subject.Packages {
+	for i := range subject.Packages {
 		values := map[string]any{}
 
 		// add guac keys

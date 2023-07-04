@@ -94,7 +94,10 @@ func arangoDBConnect(address, user, password string) (driver.Client, error) {
 }
 
 func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {
-	config := args.(*ArangoConfig)
+	config, ok := args.(*ArangoConfig)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert arango config from backend args")
+	}
 	arangodbClient, err := arangoDBConnect(config.DBAddr, config.User, config.Pass)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to arango DB %s database with error: %w", config.DBAddr, err)
@@ -316,36 +319,6 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 	}
 
 	arangoClient := &arangoClient{client: arangodbClient, db: db, graph: graph, pkgRoot: collectedRootData, pkgTypeMap: collectedPkgTypes}
-	registerAllArtifacts(ctx, arangoClient)
-	registerAllPackages(ctx, arangoClient)
-	if err != nil {
-		return nil, err
-	}
-	// err = registerAllPackages(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// err = registerAllBuilders(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllSources(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCVE(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllGHSA(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllOSV(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	return arangoClient, nil
 }
@@ -431,20 +404,20 @@ func newArangoQueryFilter(queryBuilder *arangoQueryBuilder) *arangoQueryFilter {
 	}
 }
 
-func (aqf *arangoQueryFilter) and(fieldName string, condition string, value interface{}, counterName string) *arangoQueryFilter {
-	aqf.arangoQueryBuilder.query.WriteString(" ")
-	aqf.arangoQueryBuilder.query.WriteString("AND")
-	aqf.arangoQueryBuilder.query.WriteString(" ")
+// func (aqf *arangoQueryFilter) and(fieldName string, condition string, value interface{}, counterName string) *arangoQueryFilter {
+// 	aqf.arangoQueryBuilder.query.WriteString(" ")
+// 	aqf.arangoQueryBuilder.query.WriteString("AND")
+// 	aqf.arangoQueryBuilder.query.WriteString(" ")
 
-	switch value.(type) {
-	case string:
-		aqf.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %q", counterName, fieldName, condition, value))
-	default:
-		aqf.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %v", counterName, fieldName, condition, value))
-	}
+// 	switch value.(type) {
+// 	case string:
+// 		aqf.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %q", counterName, fieldName, condition, value))
+// 	default:
+// 		aqf.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %v", counterName, fieldName, condition, value))
+// 	}
 
-	return aqf
-}
+// 	return aqf
+// }
 
 // getPreloads get the specific graphQL query fields that are requested.
 // graphql.CollectAllFields only provides the top level fields and none of the nested fields below it.

@@ -25,13 +25,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func registerAllArtifacts(ctx context.Context, client *arangoClient) {
-	// strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
-	client.IngestArtifact(ctx, &model.ArtifactInputSpec{Algorithm: "sha256", Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"})
-	client.IngestArtifact(ctx, &model.ArtifactInputSpec{Algorithm: "sha1", Digest: "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"})
-	client.IngestArtifact(ctx, &model.ArtifactInputSpec{Algorithm: "sha512", Digest: "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7"})
-}
-
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	values := map[string]any{}
 	arangoQueryBuilder := newForQuery("artifacts", "art")
