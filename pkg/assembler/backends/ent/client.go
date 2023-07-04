@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
@@ -54,6 +55,8 @@ type Client struct {
 	PackageVersion *PackageVersionClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
+	// SecurityAdvisory is the client for interacting with the SecurityAdvisory builders.
+	SecurityAdvisory *SecurityAdvisoryClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// SourceNamespace is the client for interacting with the SourceNamespace builders.
@@ -83,6 +86,7 @@ func (c *Client) init() {
 	c.PackageType = NewPackageTypeClient(c.config)
 	c.PackageVersion = NewPackageVersionClient(c.config)
 	c.SLSAAttestation = NewSLSAAttestationClient(c.config)
+	c.SecurityAdvisory = NewSecurityAdvisoryClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
 	c.SourceNamespace = NewSourceNamespaceClient(c.config)
 	c.SourceType = NewSourceTypeClient(c.config)
@@ -178,6 +182,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
 		SLSAAttestation:  NewSLSAAttestationClient(cfg),
+		SecurityAdvisory: NewSecurityAdvisoryClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
 		SourceType:       NewSourceTypeClient(cfg),
@@ -210,6 +215,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
 		SLSAAttestation:  NewSLSAAttestationClient(cfg),
+		SecurityAdvisory: NewSecurityAdvisoryClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
 		SourceType:       NewSourceTypeClient(cfg),
@@ -244,7 +250,8 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Dependency, c.Occurrence,
 		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion,
-		c.SLSAAttestation, c.SourceName, c.SourceNamespace, c.SourceType,
+		c.SLSAAttestation, c.SecurityAdvisory, c.SourceName, c.SourceNamespace,
+		c.SourceType,
 	} {
 		n.Use(hooks...)
 	}
@@ -256,7 +263,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Dependency, c.Occurrence,
 		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion,
-		c.SLSAAttestation, c.SourceName, c.SourceNamespace, c.SourceType,
+		c.SLSAAttestation, c.SecurityAdvisory, c.SourceName, c.SourceNamespace,
+		c.SourceType,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -285,6 +293,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PackageVersion.mutate(ctx, m)
 	case *SLSAAttestationMutation:
 		return c.SLSAAttestation.mutate(ctx, m)
+	case *SecurityAdvisoryMutation:
+		return c.SecurityAdvisory.mutate(ctx, m)
 	case *SourceNameMutation:
 		return c.SourceName.mutate(ctx, m)
 	case *SourceNamespaceMutation:
@@ -1812,6 +1822,124 @@ func (c *SLSAAttestationClient) mutate(ctx context.Context, m *SLSAAttestationMu
 	}
 }
 
+// SecurityAdvisoryClient is a client for the SecurityAdvisory schema.
+type SecurityAdvisoryClient struct {
+	config
+}
+
+// NewSecurityAdvisoryClient returns a client for the SecurityAdvisory from the given config.
+func NewSecurityAdvisoryClient(c config) *SecurityAdvisoryClient {
+	return &SecurityAdvisoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `securityadvisory.Hooks(f(g(h())))`.
+func (c *SecurityAdvisoryClient) Use(hooks ...Hook) {
+	c.hooks.SecurityAdvisory = append(c.hooks.SecurityAdvisory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `securityadvisory.Intercept(f(g(h())))`.
+func (c *SecurityAdvisoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SecurityAdvisory = append(c.inters.SecurityAdvisory, interceptors...)
+}
+
+// Create returns a builder for creating a SecurityAdvisory entity.
+func (c *SecurityAdvisoryClient) Create() *SecurityAdvisoryCreate {
+	mutation := newSecurityAdvisoryMutation(c.config, OpCreate)
+	return &SecurityAdvisoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SecurityAdvisory entities.
+func (c *SecurityAdvisoryClient) CreateBulk(builders ...*SecurityAdvisoryCreate) *SecurityAdvisoryCreateBulk {
+	return &SecurityAdvisoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SecurityAdvisory.
+func (c *SecurityAdvisoryClient) Update() *SecurityAdvisoryUpdate {
+	mutation := newSecurityAdvisoryMutation(c.config, OpUpdate)
+	return &SecurityAdvisoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SecurityAdvisoryClient) UpdateOne(sa *SecurityAdvisory) *SecurityAdvisoryUpdateOne {
+	mutation := newSecurityAdvisoryMutation(c.config, OpUpdateOne, withSecurityAdvisory(sa))
+	return &SecurityAdvisoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SecurityAdvisoryClient) UpdateOneID(id int) *SecurityAdvisoryUpdateOne {
+	mutation := newSecurityAdvisoryMutation(c.config, OpUpdateOne, withSecurityAdvisoryID(id))
+	return &SecurityAdvisoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SecurityAdvisory.
+func (c *SecurityAdvisoryClient) Delete() *SecurityAdvisoryDelete {
+	mutation := newSecurityAdvisoryMutation(c.config, OpDelete)
+	return &SecurityAdvisoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SecurityAdvisoryClient) DeleteOne(sa *SecurityAdvisory) *SecurityAdvisoryDeleteOne {
+	return c.DeleteOneID(sa.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SecurityAdvisoryClient) DeleteOneID(id int) *SecurityAdvisoryDeleteOne {
+	builder := c.Delete().Where(securityadvisory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SecurityAdvisoryDeleteOne{builder}
+}
+
+// Query returns a query builder for SecurityAdvisory.
+func (c *SecurityAdvisoryClient) Query() *SecurityAdvisoryQuery {
+	return &SecurityAdvisoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSecurityAdvisory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SecurityAdvisory entity by its id.
+func (c *SecurityAdvisoryClient) Get(ctx context.Context, id int) (*SecurityAdvisory, error) {
+	return c.Query().Where(securityadvisory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SecurityAdvisoryClient) GetX(ctx context.Context, id int) *SecurityAdvisory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SecurityAdvisoryClient) Hooks() []Hook {
+	return c.hooks.SecurityAdvisory
+}
+
+// Interceptors returns the client interceptors.
+func (c *SecurityAdvisoryClient) Interceptors() []Interceptor {
+	return c.inters.SecurityAdvisory
+}
+
+func (c *SecurityAdvisoryClient) mutate(ctx context.Context, m *SecurityAdvisoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SecurityAdvisoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SecurityAdvisoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SecurityAdvisoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SecurityAdvisoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SecurityAdvisory mutation op: %q", m.Op())
+	}
+}
+
 // SourceNameClient is a client for the SourceName schema.
 type SourceNameClient struct {
 	config
@@ -2250,12 +2378,12 @@ func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (V
 type (
 	hooks struct {
 		Artifact, BillOfMaterials, Builder, Dependency, Occurrence, PackageName,
-		PackageNamespace, PackageType, PackageVersion, SLSAAttestation, SourceName,
-		SourceNamespace, SourceType []ent.Hook
+		PackageNamespace, PackageType, PackageVersion, SLSAAttestation,
+		SecurityAdvisory, SourceName, SourceNamespace, SourceType []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Dependency, Occurrence, PackageName,
-		PackageNamespace, PackageType, PackageVersion, SLSAAttestation, SourceName,
-		SourceNamespace, SourceType []ent.Interceptor
+		PackageNamespace, PackageType, PackageVersion, SLSAAttestation,
+		SecurityAdvisory, SourceName, SourceNamespace, SourceType []ent.Interceptor
 	}
 )

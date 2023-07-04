@@ -32,6 +32,8 @@ type Tx struct {
 	PackageVersion *PackageVersionClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
+	// SecurityAdvisory is the client for interacting with the SecurityAdvisory builders.
+	SecurityAdvisory *SecurityAdvisoryClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// SourceNamespace is the client for interacting with the SourceNamespace builders.
@@ -179,6 +181,7 @@ func (tx *Tx) init() {
 	tx.PackageType = NewPackageTypeClient(tx.config)
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
 	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
+	tx.SecurityAdvisory = NewSecurityAdvisoryClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)
 	tx.SourceType = NewSourceTypeClient(tx.config)

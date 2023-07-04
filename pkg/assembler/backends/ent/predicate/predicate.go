@@ -36,6 +36,9 @@ type PackageVersion func(*sql.Selector)
 // SLSAAttestation is the predicate function for slsaattestation builders.
 type SLSAAttestation func(*sql.Selector)
 
+// SecurityAdvisory is the predicate function for securityadvisory builders.
+type SecurityAdvisory func(*sql.Selector)
+
 // SourceName is the predicate function for sourcename builders.
 type SourceName func(*sql.Selector)
 

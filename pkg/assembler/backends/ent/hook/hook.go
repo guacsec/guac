@@ -129,6 +129,18 @@ func (f SLSAAttestationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SLSAAttestationMutation", m)
 }
 
+// The SecurityAdvisoryFunc type is an adapter to allow the use of ordinary
+// function as SecurityAdvisory mutator.
+type SecurityAdvisoryFunc func(context.Context, *ent.SecurityAdvisoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SecurityAdvisoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SecurityAdvisoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SecurityAdvisoryMutation", m)
+}
+
 // The SourceNameFunc type is an adapter to allow the use of ordinary
 // function as SourceName mutator.
 type SourceNameFunc func(context.Context, *ent.SourceNameMutation) (ent.Value, error)

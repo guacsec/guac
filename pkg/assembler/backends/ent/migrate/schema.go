@@ -320,6 +320,37 @@ var (
 		Columns:    SlsaAttestationsColumns,
 		PrimaryKey: []*schema.Column{SlsaAttestationsColumns[0]},
 	}
+	// SecurityAdvisoriesColumns holds the columns for the "security_advisories" table.
+	SecurityAdvisoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "ghsa_id", Type: field.TypeString, Nullable: true},
+		{Name: "cve_id", Type: field.TypeString, Nullable: true},
+		{Name: "cve_year", Type: field.TypeInt, Nullable: true},
+	}
+	// SecurityAdvisoriesTable holds the schema information for the "security_advisories" table.
+	SecurityAdvisoriesTable = &schema.Table{
+		Name:       "security_advisories",
+		Columns:    SecurityAdvisoriesColumns,
+		PrimaryKey: []*schema.Column{SecurityAdvisoriesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "securityadvisory_ghsa_id",
+				Unique:  true,
+				Columns: []*schema.Column{SecurityAdvisoriesColumns[1]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "ghsa_id IS NOT NULL AND cve_id IS NULL",
+				},
+			},
+			{
+				Name:    "securityadvisory_cve_id",
+				Unique:  true,
+				Columns: []*schema.Column{SecurityAdvisoriesColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "cve_id IS NOT NULL AND ghsa_id IS NULL",
+				},
+			},
+		},
+	}
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -427,6 +458,7 @@ var (
 		PackageTypesTable,
 		PackageVersionsTable,
 		SlsaAttestationsTable,
+		SecurityAdvisoriesTable,
 		SourceNamesTable,
 		SourceNamespacesTable,
 		SourceTypesTable,
