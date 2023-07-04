@@ -42,8 +42,8 @@ func (dc *DependencyCreate) SetVersionRange(s string) *DependencyCreate {
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (dc *DependencyCreate) SetDependencyType(s string) *DependencyCreate {
-	dc.mutation.SetDependencyType(s)
+func (dc *DependencyCreate) SetDependencyType(dt dependency.DependencyType) *DependencyCreate {
+	dc.mutation.SetDependencyType(dt)
 	return dc
 }
 
@@ -121,6 +121,11 @@ func (dc *DependencyCreate) check() error {
 	if _, ok := dc.mutation.DependencyType(); !ok {
 		return &ValidationError{Name: "dependency_type", err: errors.New(`ent: missing required field "Dependency.dependency_type"`)}
 	}
+	if v, ok := dc.mutation.DependencyType(); ok {
+		if err := dependency.DependencyTypeValidator(v); err != nil {
+			return &ValidationError{Name: "dependency_type", err: fmt.Errorf(`ent: validator failed for field "Dependency.dependency_type": %w`, err)}
+		}
+	}
 	if _, ok := dc.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "Dependency.justification"`)}
 	}
@@ -168,7 +173,7 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 		_node.VersionRange = value
 	}
 	if value, ok := dc.mutation.DependencyType(); ok {
-		_spec.SetField(dependency.FieldDependencyType, field.TypeString, value)
+		_spec.SetField(dependency.FieldDependencyType, field.TypeEnum, value)
 		_node.DependencyType = value
 	}
 	if value, ok := dc.mutation.Justification(); ok {
@@ -306,7 +311,7 @@ func (u *DependencyUpsert) UpdateVersionRange() *DependencyUpsert {
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (u *DependencyUpsert) SetDependencyType(v string) *DependencyUpsert {
+func (u *DependencyUpsert) SetDependencyType(v dependency.DependencyType) *DependencyUpsert {
 	u.Set(dependency.FieldDependencyType, v)
 	return u
 }
@@ -436,7 +441,7 @@ func (u *DependencyUpsertOne) UpdateVersionRange() *DependencyUpsertOne {
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (u *DependencyUpsertOne) SetDependencyType(v string) *DependencyUpsertOne {
+func (u *DependencyUpsertOne) SetDependencyType(v dependency.DependencyType) *DependencyUpsertOne {
 	return u.Update(func(s *DependencyUpsert) {
 		s.SetDependencyType(v)
 	})
@@ -733,7 +738,7 @@ func (u *DependencyUpsertBulk) UpdateVersionRange() *DependencyUpsertBulk {
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (u *DependencyUpsertBulk) SetDependencyType(v string) *DependencyUpsertBulk {
+func (u *DependencyUpsertBulk) SetDependencyType(v dependency.DependencyType) *DependencyUpsertBulk {
 	return u.Update(func(s *DependencyUpsert) {
 		s.SetDependencyType(v)
 	})

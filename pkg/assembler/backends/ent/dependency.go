@@ -25,7 +25,7 @@ type Dependency struct {
 	// VersionRange holds the value of the "version_range" field.
 	VersionRange string `json:"version_range,omitempty"`
 	// DependencyType holds the value of the "dependency_type" field.
-	DependencyType string `json:"dependency_type,omitempty"`
+	DependencyType dependency.DependencyType `json:"dependency_type,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
 	// Origin holds the value of the "origin" field.
@@ -127,7 +127,7 @@ func (d *Dependency) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field dependency_type", values[i])
 			} else if value.Valid {
-				d.DependencyType = value.String
+				d.DependencyType = dependency.DependencyType(value.String)
 			}
 		case dependency.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -203,7 +203,7 @@ func (d *Dependency) String() string {
 	builder.WriteString(d.VersionRange)
 	builder.WriteString(", ")
 	builder.WriteString("dependency_type=")
-	builder.WriteString(d.DependencyType)
+	builder.WriteString(fmt.Sprintf("%v", d.DependencyType))
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
 	builder.WriteString(d.Justification)

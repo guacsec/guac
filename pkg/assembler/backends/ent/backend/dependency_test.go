@@ -44,6 +44,7 @@ func (s *Suite) TestIsDependency() {
 					Package:          p1out,
 					DependentPackage: p2outName,
 					Justification:    "test justification",
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -74,6 +75,7 @@ func (s *Suite) TestIsDependency() {
 					Package:          p1out,
 					DependentPackage: p2outName,
 					Justification:    "test justification",
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -85,14 +87,16 @@ func (s *Suite) TestIsDependency() {
 					P1: p1,
 					P2: p2,
 					Input: &model.IsDependencyInputSpec{
-						Justification: "test justification",
+						Justification:  "test justification",
+						DependencyType: model.DependencyTypeDirect,
 					},
 				},
 				{
 					P1: p1,
 					P2: p3,
 					Input: &model.IsDependencyInputSpec{
-						Justification: "test justification",
+						Justification:  "test justification",
+						DependencyType: model.DependencyTypeDirect,
 					},
 				},
 			},
@@ -104,6 +108,7 @@ func (s *Suite) TestIsDependency() {
 					Package:          p1out,
 					DependentPackage: p2outName,
 					Justification:    "test justification",
+					DependencyType:   model.DependencyTypeDirect,
 				},
 			},
 		},
@@ -134,6 +139,7 @@ func (s *Suite) TestIsDependency() {
 					Package:          p1out,
 					DependentPackage: p2outName,
 					Justification:    "test justification one",
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -161,6 +167,7 @@ func (s *Suite) TestIsDependency() {
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -188,6 +195,7 @@ func (s *Suite) TestIsDependency() {
 				{
 					Package:          p2out,
 					DependentPackage: p4outName,
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -215,10 +223,12 @@ func (s *Suite) TestIsDependency() {
 				{
 					Package:          p1out,
 					DependentPackage: p1outName,
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 				{
 					Package:          p3out,
 					DependentPackage: p1outName,
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -249,6 +259,7 @@ func (s *Suite) TestIsDependency() {
 				{
 					Package:          p3out,
 					DependentPackage: p4outName,
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -306,6 +317,7 @@ func (s *Suite) TestIsDependency() {
 				{
 					Package:          p2out,
 					DependentPackage: p1outName,
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -336,6 +348,7 @@ func (s *Suite) TestIsDependency() {
 					Package:          p1out,
 					DependentPackage: p1outName,
 					VersionRange:     "1-3",
+					DependencyType:   model.DependencyTypeUnknown,
 				},
 			},
 		},

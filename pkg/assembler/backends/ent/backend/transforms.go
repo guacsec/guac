@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -237,10 +238,21 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 		Package:          pkg,
 		DependentPackage: depPkg,
 		VersionRange:     id.VersionRange,
-		DependencyType:   model.DependencyType(id.DependencyType),
+		DependencyType:   dependencyTypeFromEnum(id.DependencyType),
 		Justification:    id.Justification,
 		Origin:           id.Origin,
 		Collector:        id.Collector,
+	}
+}
+
+func dependencyTypeFromEnum(t dependency.DependencyType) model.DependencyType {
+	switch t {
+	case dependency.DependencyTypeDIRECT:
+		return model.DependencyTypeDirect
+	case dependency.DependencyTypeINDIRECT:
+		return model.DependencyTypeIndirect
+	default:
+		return model.DependencyTypeUnknown
 	}
 }
 

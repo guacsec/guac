@@ -110,7 +110,7 @@ var (
 	DependenciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "version_range", Type: field.TypeString},
-		{Name: "dependency_type", Type: field.TypeString},
+		{Name: "dependency_type", Type: field.TypeEnum, Enums: []string{"UNSPECIFIED", "DIRECT", "INDIRECT"}},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},

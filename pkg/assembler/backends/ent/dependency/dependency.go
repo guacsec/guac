@@ -3,6 +3,8 @@
 package dependency
 
 import (
+	"fmt"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -68,6 +70,30 @@ func ValidColumn(column string) bool {
 		}
 	}
 	return false
+}
+
+// DependencyType defines the type for the "dependency_type" enum field.
+type DependencyType string
+
+// DependencyType values.
+const (
+	DependencyTypeUNSPECIFIED DependencyType = "UNSPECIFIED"
+	DependencyTypeDIRECT      DependencyType = "DIRECT"
+	DependencyTypeINDIRECT    DependencyType = "INDIRECT"
+)
+
+func (dt DependencyType) String() string {
+	return string(dt)
+}
+
+// DependencyTypeValidator is a validator for the "dependency_type" field enum values. It is called by the builders before save.
+func DependencyTypeValidator(dt DependencyType) error {
+	switch dt {
+	case DependencyTypeUNSPECIFIED, DependencyTypeDIRECT, DependencyTypeINDIRECT:
+		return nil
+	default:
+		return fmt.Errorf("dependency: invalid enum value for dependency_type field: %q", dt)
+	}
 }
 
 // OrderOption defines the ordering options for the Dependency queries.

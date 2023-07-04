@@ -68,11 +68,6 @@ func VersionRange(v string) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldVersionRange, v))
 }
 
-// DependencyType applies equality check predicate on the "dependency_type" field. It's identical to DependencyTypeEQ.
-func DependencyType(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldEQ(FieldDependencyType, v))
-}
-
 // Justification applies equality check predicate on the "justification" field. It's identical to JustificationEQ.
 func Justification(v string) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldJustification, v))
@@ -194,68 +189,23 @@ func VersionRangeContainsFold(v string) predicate.Dependency {
 }
 
 // DependencyTypeEQ applies the EQ predicate on the "dependency_type" field.
-func DependencyTypeEQ(v string) predicate.Dependency {
+func DependencyTypeEQ(v DependencyType) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldDependencyType, v))
 }
 
 // DependencyTypeNEQ applies the NEQ predicate on the "dependency_type" field.
-func DependencyTypeNEQ(v string) predicate.Dependency {
+func DependencyTypeNEQ(v DependencyType) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNEQ(FieldDependencyType, v))
 }
 
 // DependencyTypeIn applies the In predicate on the "dependency_type" field.
-func DependencyTypeIn(vs ...string) predicate.Dependency {
+func DependencyTypeIn(vs ...DependencyType) predicate.Dependency {
 	return predicate.Dependency(sql.FieldIn(FieldDependencyType, vs...))
 }
 
 // DependencyTypeNotIn applies the NotIn predicate on the "dependency_type" field.
-func DependencyTypeNotIn(vs ...string) predicate.Dependency {
+func DependencyTypeNotIn(vs ...DependencyType) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNotIn(FieldDependencyType, vs...))
-}
-
-// DependencyTypeGT applies the GT predicate on the "dependency_type" field.
-func DependencyTypeGT(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldGT(FieldDependencyType, v))
-}
-
-// DependencyTypeGTE applies the GTE predicate on the "dependency_type" field.
-func DependencyTypeGTE(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldGTE(FieldDependencyType, v))
-}
-
-// DependencyTypeLT applies the LT predicate on the "dependency_type" field.
-func DependencyTypeLT(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldLT(FieldDependencyType, v))
-}
-
-// DependencyTypeLTE applies the LTE predicate on the "dependency_type" field.
-func DependencyTypeLTE(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldLTE(FieldDependencyType, v))
-}
-
-// DependencyTypeContains applies the Contains predicate on the "dependency_type" field.
-func DependencyTypeContains(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldContains(FieldDependencyType, v))
-}
-
-// DependencyTypeHasPrefix applies the HasPrefix predicate on the "dependency_type" field.
-func DependencyTypeHasPrefix(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldHasPrefix(FieldDependencyType, v))
-}
-
-// DependencyTypeHasSuffix applies the HasSuffix predicate on the "dependency_type" field.
-func DependencyTypeHasSuffix(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldHasSuffix(FieldDependencyType, v))
-}
-
-// DependencyTypeEqualFold applies the EqualFold predicate on the "dependency_type" field.
-func DependencyTypeEqualFold(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldEqualFold(FieldDependencyType, v))
-}
-
-// DependencyTypeContainsFold applies the ContainsFold predicate on the "dependency_type" field.
-func DependencyTypeContainsFold(v string) predicate.Dependency {
-	return predicate.Dependency(sql.FieldContainsFold(FieldDependencyType, v))
 }
 
 // JustificationEQ applies the EQ predicate on the "justification" field.

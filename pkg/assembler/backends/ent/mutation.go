@@ -2029,7 +2029,7 @@ type DependencyMutation struct {
 	typ                      string
 	id                       *int
 	version_range            *string
-	dependency_type          *string
+	dependency_type          *dependency.DependencyType
 	justification            *string
 	origin                   *string
 	collector                *string
@@ -2250,12 +2250,12 @@ func (m *DependencyMutation) ResetVersionRange() {
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (m *DependencyMutation) SetDependencyType(s string) {
-	m.dependency_type = &s
+func (m *DependencyMutation) SetDependencyType(dt dependency.DependencyType) {
+	m.dependency_type = &dt
 }
 
 // DependencyType returns the value of the "dependency_type" field in the mutation.
-func (m *DependencyMutation) DependencyType() (r string, exists bool) {
+func (m *DependencyMutation) DependencyType() (r dependency.DependencyType, exists bool) {
 	v := m.dependency_type
 	if v == nil {
 		return
@@ -2266,7 +2266,7 @@ func (m *DependencyMutation) DependencyType() (r string, exists bool) {
 // OldDependencyType returns the old "dependency_type" field's value of the Dependency entity.
 // If the Dependency object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DependencyMutation) OldDependencyType(ctx context.Context) (v string, err error) {
+func (m *DependencyMutation) OldDependencyType(ctx context.Context) (v dependency.DependencyType, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDependencyType is only allowed on UpdateOne operations")
 	}
@@ -2577,7 +2577,7 @@ func (m *DependencyMutation) SetField(name string, value ent.Value) error {
 		m.SetVersionRange(v)
 		return nil
 	case dependency.FieldDependencyType:
-		v, ok := value.(string)
+		v, ok := value.(dependency.DependencyType)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

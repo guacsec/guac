@@ -30,7 +30,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 		}
 
 		if spec.DependencyType != nil {
-			query.Where(dependency.DependencyType(string(*spec.DependencyType)))
+			query.Where(dependency.DependencyTypeEQ(dependencyTypeToEnum(*spec.DependencyType)))
 		}
 	}
 
@@ -72,7 +72,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 			SetPackage(p).
 			SetDependentPackage(dp).
 			SetVersionRange(spec.VersionRange).
-			SetDependencyType(string(spec.DependencyType)).
+			SetDependencyType(dependencyTypeToEnum(spec.DependencyType)).
 			SetJustification(spec.Justification).
 			SetOrigin(spec.Origin).
 			SetCollector(spec.Collector).
@@ -119,4 +119,15 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 	}
 
 	return toModelIsDependencyWithBackrefs(record), nil
+}
+
+func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
+	switch t {
+	case model.DependencyTypeDirect:
+		return dependency.DependencyTypeDIRECT
+	case model.DependencyTypeIndirect:
+		return dependency.DependencyTypeINDIRECT
+	default:
+		return dependency.DependencyTypeUNSPECIFIED
+	}
 }

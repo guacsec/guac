@@ -48,8 +48,8 @@ func (du *DependencyUpdate) SetVersionRange(s string) *DependencyUpdate {
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (du *DependencyUpdate) SetDependencyType(s string) *DependencyUpdate {
-	du.mutation.SetDependencyType(s)
+func (du *DependencyUpdate) SetDependencyType(dt dependency.DependencyType) *DependencyUpdate {
+	du.mutation.SetDependencyType(dt)
 	return du
 }
 
@@ -127,6 +127,11 @@ func (du *DependencyUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (du *DependencyUpdate) check() error {
+	if v, ok := du.mutation.DependencyType(); ok {
+		if err := dependency.DependencyTypeValidator(v); err != nil {
+			return &ValidationError{Name: "dependency_type", err: fmt.Errorf(`ent: validator failed for field "Dependency.dependency_type": %w`, err)}
+		}
+	}
 	if _, ok := du.mutation.PackageID(); du.mutation.PackageCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
 	}
@@ -152,7 +157,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(dependency.FieldVersionRange, field.TypeString, value)
 	}
 	if value, ok := du.mutation.DependencyType(); ok {
-		_spec.SetField(dependency.FieldDependencyType, field.TypeString, value)
+		_spec.SetField(dependency.FieldDependencyType, field.TypeEnum, value)
 	}
 	if value, ok := du.mutation.Justification(); ok {
 		_spec.SetField(dependency.FieldJustification, field.TypeString, value)
@@ -260,8 +265,8 @@ func (duo *DependencyUpdateOne) SetVersionRange(s string) *DependencyUpdateOne {
 }
 
 // SetDependencyType sets the "dependency_type" field.
-func (duo *DependencyUpdateOne) SetDependencyType(s string) *DependencyUpdateOne {
-	duo.mutation.SetDependencyType(s)
+func (duo *DependencyUpdateOne) SetDependencyType(dt dependency.DependencyType) *DependencyUpdateOne {
+	duo.mutation.SetDependencyType(dt)
 	return duo
 }
 
@@ -352,6 +357,11 @@ func (duo *DependencyUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (duo *DependencyUpdateOne) check() error {
+	if v, ok := duo.mutation.DependencyType(); ok {
+		if err := dependency.DependencyTypeValidator(v); err != nil {
+			return &ValidationError{Name: "dependency_type", err: fmt.Errorf(`ent: validator failed for field "Dependency.dependency_type": %w`, err)}
+		}
+	}
 	if _, ok := duo.mutation.PackageID(); duo.mutation.PackageCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
 	}
@@ -394,7 +404,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		_spec.SetField(dependency.FieldVersionRange, field.TypeString, value)
 	}
 	if value, ok := duo.mutation.DependencyType(); ok {
-		_spec.SetField(dependency.FieldDependencyType, field.TypeString, value)
+		_spec.SetField(dependency.FieldDependencyType, field.TypeEnum, value)
 	}
 	if value, ok := duo.mutation.Justification(); ok {
 		_spec.SetField(dependency.FieldJustification, field.TypeString, value)

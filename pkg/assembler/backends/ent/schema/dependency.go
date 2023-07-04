@@ -26,7 +26,7 @@ func (Dependency) Fields() []ent.Field {
 		field.Int("package_id"),
 		field.Int("dependent_package_id"),
 		field.String("version_range"),
-		field.String("dependency_type"),
+		field.Enum("dependency_type").Values("UNSPECIFIED", "DIRECT", "INDIRECT"),
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
