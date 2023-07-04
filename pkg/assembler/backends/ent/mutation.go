@@ -15,6 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -42,6 +43,7 @@ const (
 	TypeBillOfMaterials  = "BillOfMaterials"
 	TypeBuilder          = "Builder"
 	TypeDependency       = "Dependency"
+	TypeIsVulnerability  = "IsVulnerability"
 	TypeOccurrence       = "Occurrence"
 	TypePackageName      = "PackageName"
 	TypePackageNamespace = "PackageNamespace"
@@ -2771,6 +2773,649 @@ func (m *DependencyMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency edge %s", name)
+}
+
+// IsVulnerabilityMutation represents an operation that mutates the IsVulnerability nodes in the graph.
+type IsVulnerabilityMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *int
+	justification        *string
+	origin               *string
+	collector            *string
+	clearedFields        map[string]struct{}
+	osv                  *int
+	clearedosv           bool
+	vulnerability        *int
+	clearedvulnerability bool
+	done                 bool
+	oldValue             func(context.Context) (*IsVulnerability, error)
+	predicates           []predicate.IsVulnerability
+}
+
+var _ ent.Mutation = (*IsVulnerabilityMutation)(nil)
+
+// isvulnerabilityOption allows management of the mutation configuration using functional options.
+type isvulnerabilityOption func(*IsVulnerabilityMutation)
+
+// newIsVulnerabilityMutation creates new mutation for the IsVulnerability entity.
+func newIsVulnerabilityMutation(c config, op Op, opts ...isvulnerabilityOption) *IsVulnerabilityMutation {
+	m := &IsVulnerabilityMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeIsVulnerability,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withIsVulnerabilityID sets the ID field of the mutation.
+func withIsVulnerabilityID(id int) isvulnerabilityOption {
+	return func(m *IsVulnerabilityMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *IsVulnerability
+		)
+		m.oldValue = func(ctx context.Context) (*IsVulnerability, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().IsVulnerability.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withIsVulnerability sets the old IsVulnerability of the mutation.
+func withIsVulnerability(node *IsVulnerability) isvulnerabilityOption {
+	return func(m *IsVulnerabilityMutation) {
+		m.oldValue = func(context.Context) (*IsVulnerability, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m IsVulnerabilityMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m IsVulnerabilityMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *IsVulnerabilityMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *IsVulnerabilityMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().IsVulnerability.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetOsvID sets the "osv_id" field.
+func (m *IsVulnerabilityMutation) SetOsvID(i int) {
+	m.osv = &i
+}
+
+// OsvID returns the value of the "osv_id" field in the mutation.
+func (m *IsVulnerabilityMutation) OsvID() (r int, exists bool) {
+	v := m.osv
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOsvID returns the old "osv_id" field's value of the IsVulnerability entity.
+// If the IsVulnerability object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsVulnerabilityMutation) OldOsvID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOsvID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOsvID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOsvID: %w", err)
+	}
+	return oldValue.OsvID, nil
+}
+
+// ResetOsvID resets all changes to the "osv_id" field.
+func (m *IsVulnerabilityMutation) ResetOsvID() {
+	m.osv = nil
+}
+
+// SetVulnerabilityID sets the "vulnerability_id" field.
+func (m *IsVulnerabilityMutation) SetVulnerabilityID(i int) {
+	m.vulnerability = &i
+}
+
+// VulnerabilityID returns the value of the "vulnerability_id" field in the mutation.
+func (m *IsVulnerabilityMutation) VulnerabilityID() (r int, exists bool) {
+	v := m.vulnerability
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVulnerabilityID returns the old "vulnerability_id" field's value of the IsVulnerability entity.
+// If the IsVulnerability object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsVulnerabilityMutation) OldVulnerabilityID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVulnerabilityID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVulnerabilityID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVulnerabilityID: %w", err)
+	}
+	return oldValue.VulnerabilityID, nil
+}
+
+// ResetVulnerabilityID resets all changes to the "vulnerability_id" field.
+func (m *IsVulnerabilityMutation) ResetVulnerabilityID() {
+	m.vulnerability = nil
+}
+
+// SetJustification sets the "justification" field.
+func (m *IsVulnerabilityMutation) SetJustification(s string) {
+	m.justification = &s
+}
+
+// Justification returns the value of the "justification" field in the mutation.
+func (m *IsVulnerabilityMutation) Justification() (r string, exists bool) {
+	v := m.justification
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJustification returns the old "justification" field's value of the IsVulnerability entity.
+// If the IsVulnerability object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsVulnerabilityMutation) OldJustification(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJustification is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJustification requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJustification: %w", err)
+	}
+	return oldValue.Justification, nil
+}
+
+// ResetJustification resets all changes to the "justification" field.
+func (m *IsVulnerabilityMutation) ResetJustification() {
+	m.justification = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *IsVulnerabilityMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *IsVulnerabilityMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the IsVulnerability entity.
+// If the IsVulnerability object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsVulnerabilityMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *IsVulnerabilityMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *IsVulnerabilityMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *IsVulnerabilityMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the IsVulnerability entity.
+// If the IsVulnerability object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsVulnerabilityMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *IsVulnerabilityMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// ClearOsv clears the "osv" edge to the SecurityAdvisory entity.
+func (m *IsVulnerabilityMutation) ClearOsv() {
+	m.clearedosv = true
+}
+
+// OsvCleared reports if the "osv" edge to the SecurityAdvisory entity was cleared.
+func (m *IsVulnerabilityMutation) OsvCleared() bool {
+	return m.clearedosv
+}
+
+// OsvIDs returns the "osv" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// OsvID instead. It exists only for internal usage by the builders.
+func (m *IsVulnerabilityMutation) OsvIDs() (ids []int) {
+	if id := m.osv; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOsv resets all changes to the "osv" edge.
+func (m *IsVulnerabilityMutation) ResetOsv() {
+	m.osv = nil
+	m.clearedosv = false
+}
+
+// ClearVulnerability clears the "vulnerability" edge to the SecurityAdvisory entity.
+func (m *IsVulnerabilityMutation) ClearVulnerability() {
+	m.clearedvulnerability = true
+}
+
+// VulnerabilityCleared reports if the "vulnerability" edge to the SecurityAdvisory entity was cleared.
+func (m *IsVulnerabilityMutation) VulnerabilityCleared() bool {
+	return m.clearedvulnerability
+}
+
+// VulnerabilityIDs returns the "vulnerability" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// VulnerabilityID instead. It exists only for internal usage by the builders.
+func (m *IsVulnerabilityMutation) VulnerabilityIDs() (ids []int) {
+	if id := m.vulnerability; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetVulnerability resets all changes to the "vulnerability" edge.
+func (m *IsVulnerabilityMutation) ResetVulnerability() {
+	m.vulnerability = nil
+	m.clearedvulnerability = false
+}
+
+// Where appends a list predicates to the IsVulnerabilityMutation builder.
+func (m *IsVulnerabilityMutation) Where(ps ...predicate.IsVulnerability) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the IsVulnerabilityMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *IsVulnerabilityMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.IsVulnerability, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *IsVulnerabilityMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *IsVulnerabilityMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (IsVulnerability).
+func (m *IsVulnerabilityMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *IsVulnerabilityMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.osv != nil {
+		fields = append(fields, isvulnerability.FieldOsvID)
+	}
+	if m.vulnerability != nil {
+		fields = append(fields, isvulnerability.FieldVulnerabilityID)
+	}
+	if m.justification != nil {
+		fields = append(fields, isvulnerability.FieldJustification)
+	}
+	if m.origin != nil {
+		fields = append(fields, isvulnerability.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, isvulnerability.FieldCollector)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *IsVulnerabilityMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case isvulnerability.FieldOsvID:
+		return m.OsvID()
+	case isvulnerability.FieldVulnerabilityID:
+		return m.VulnerabilityID()
+	case isvulnerability.FieldJustification:
+		return m.Justification()
+	case isvulnerability.FieldOrigin:
+		return m.Origin()
+	case isvulnerability.FieldCollector:
+		return m.Collector()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *IsVulnerabilityMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case isvulnerability.FieldOsvID:
+		return m.OldOsvID(ctx)
+	case isvulnerability.FieldVulnerabilityID:
+		return m.OldVulnerabilityID(ctx)
+	case isvulnerability.FieldJustification:
+		return m.OldJustification(ctx)
+	case isvulnerability.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case isvulnerability.FieldCollector:
+		return m.OldCollector(ctx)
+	}
+	return nil, fmt.Errorf("unknown IsVulnerability field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IsVulnerabilityMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case isvulnerability.FieldOsvID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOsvID(v)
+		return nil
+	case isvulnerability.FieldVulnerabilityID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVulnerabilityID(v)
+		return nil
+	case isvulnerability.FieldJustification:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJustification(v)
+		return nil
+	case isvulnerability.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case isvulnerability.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	}
+	return fmt.Errorf("unknown IsVulnerability field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *IsVulnerabilityMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *IsVulnerabilityMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IsVulnerabilityMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown IsVulnerability numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *IsVulnerabilityMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *IsVulnerabilityMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *IsVulnerabilityMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown IsVulnerability nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *IsVulnerabilityMutation) ResetField(name string) error {
+	switch name {
+	case isvulnerability.FieldOsvID:
+		m.ResetOsvID()
+		return nil
+	case isvulnerability.FieldVulnerabilityID:
+		m.ResetVulnerabilityID()
+		return nil
+	case isvulnerability.FieldJustification:
+		m.ResetJustification()
+		return nil
+	case isvulnerability.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case isvulnerability.FieldCollector:
+		m.ResetCollector()
+		return nil
+	}
+	return fmt.Errorf("unknown IsVulnerability field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *IsVulnerabilityMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.osv != nil {
+		edges = append(edges, isvulnerability.EdgeOsv)
+	}
+	if m.vulnerability != nil {
+		edges = append(edges, isvulnerability.EdgeVulnerability)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *IsVulnerabilityMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case isvulnerability.EdgeOsv:
+		if id := m.osv; id != nil {
+			return []ent.Value{*id}
+		}
+	case isvulnerability.EdgeVulnerability:
+		if id := m.vulnerability; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *IsVulnerabilityMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *IsVulnerabilityMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *IsVulnerabilityMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedosv {
+		edges = append(edges, isvulnerability.EdgeOsv)
+	}
+	if m.clearedvulnerability {
+		edges = append(edges, isvulnerability.EdgeVulnerability)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *IsVulnerabilityMutation) EdgeCleared(name string) bool {
+	switch name {
+	case isvulnerability.EdgeOsv:
+		return m.clearedosv
+	case isvulnerability.EdgeVulnerability:
+		return m.clearedvulnerability
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *IsVulnerabilityMutation) ClearEdge(name string) error {
+	switch name {
+	case isvulnerability.EdgeOsv:
+		m.ClearOsv()
+		return nil
+	case isvulnerability.EdgeVulnerability:
+		m.ClearVulnerability()
+		return nil
+	}
+	return fmt.Errorf("unknown IsVulnerability unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *IsVulnerabilityMutation) ResetEdge(name string) error {
+	switch name {
+	case isvulnerability.EdgeOsv:
+		m.ResetOsv()
+		return nil
+	case isvulnerability.EdgeVulnerability:
+		m.ResetVulnerability()
+		return nil
+	}
+	return fmt.Errorf("unknown IsVulnerability edge %s", name)
 }
 
 // OccurrenceMutation represents an operation that mutates the Occurrence nodes in the graph.

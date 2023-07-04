@@ -16,6 +16,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -90,6 +91,7 @@ func checkColumn(table, column string) error {
 			billofmaterials.Table:  billofmaterials.ValidColumn,
 			builder.Table:          builder.ValidColumn,
 			dependency.Table:       dependency.ValidColumn,
+			isvulnerability.Table:  isvulnerability.ValidColumn,
 			occurrence.Table:       occurrence.ValidColumn,
 			packagename.Table:      packagename.ValidColumn,
 			packagenamespace.Table: packagenamespace.ValidColumn,

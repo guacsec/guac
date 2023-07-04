@@ -57,6 +57,18 @@ func (f DependencyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DependencyMutation", m)
 }
 
+// The IsVulnerabilityFunc type is an adapter to allow the use of ordinary
+// function as IsVulnerability mutator.
+type IsVulnerabilityFunc func(context.Context, *ent.IsVulnerabilityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f IsVulnerabilityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.IsVulnerabilityMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IsVulnerabilityMutation", m)
+}
+
 // The OccurrenceFunc type is an adapter to allow the use of ordinary
 // function as Occurrence mutator.
 type OccurrenceFunc func(context.Context, *ent.OccurrenceMutation) (ent.Value, error)

@@ -18,6 +18,9 @@ type Builder func(*sql.Selector)
 // Dependency is the predicate function for dependency builders.
 type Dependency func(*sql.Selector)
 
+// IsVulnerability is the predicate function for isvulnerability builders.
+type IsVulnerability func(*sql.Selector)
+
 // Occurrence is the predicate function for occurrence builders.
 type Occurrence func(*sql.Selector)
 

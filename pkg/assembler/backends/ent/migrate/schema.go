@@ -144,6 +144,42 @@ var (
 			},
 		},
 	}
+	// IsVulnerabilitiesColumns holds the columns for the "is_vulnerabilities" table.
+	IsVulnerabilitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "osv_id", Type: field.TypeInt},
+		{Name: "vulnerability_id", Type: field.TypeInt},
+	}
+	// IsVulnerabilitiesTable holds the schema information for the "is_vulnerabilities" table.
+	IsVulnerabilitiesTable = &schema.Table{
+		Name:       "is_vulnerabilities",
+		Columns:    IsVulnerabilitiesColumns,
+		PrimaryKey: []*schema.Column{IsVulnerabilitiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "is_vulnerabilities_security_advisories_osv",
+				Columns:    []*schema.Column{IsVulnerabilitiesColumns[4]},
+				RefColumns: []*schema.Column{SecurityAdvisoriesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "is_vulnerabilities_security_advisories_vulnerability",
+				Columns:    []*schema.Column{IsVulnerabilitiesColumns[5]},
+				RefColumns: []*schema.Column{SecurityAdvisoriesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "isvulnerability_origin_justification_osv_id_vulnerability_id",
+				Unique:  true,
+				Columns: []*schema.Column{IsVulnerabilitiesColumns[2], IsVulnerabilitiesColumns[1], IsVulnerabilitiesColumns[4], IsVulnerabilitiesColumns[5]},
+			},
+		},
+	}
 	// OccurrencesColumns holds the columns for the "occurrences" table.
 	OccurrencesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -461,6 +497,7 @@ var (
 		BillOfMaterialsTable,
 		BuildersTable,
 		DependenciesTable,
+		IsVulnerabilitiesTable,
 		OccurrencesTable,
 		PackageNamesTable,
 		PackageNamespacesTable,
@@ -481,6 +518,8 @@ func init() {
 	BuildersTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
+	IsVulnerabilitiesTable.ForeignKeys[0].RefTable = SecurityAdvisoriesTable
+	IsVulnerabilitiesTable.ForeignKeys[1].RefTable = SecurityAdvisoriesTable
 	OccurrencesTable.ForeignKeys[0].RefTable = ArtifactsTable
 	OccurrencesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	OccurrencesTable.ForeignKeys[2].RefTable = SourceNamesTable

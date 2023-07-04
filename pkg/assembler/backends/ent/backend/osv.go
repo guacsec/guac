@@ -30,6 +30,10 @@ func (b *EntBackend) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*m
 }
 
 func toModelOSV(osv *ent.SecurityAdvisory) *model.Osv {
+	if osv == nil {
+		return nil
+	}
+
 	if osv.OsvID == nil {
 		return nil
 	}

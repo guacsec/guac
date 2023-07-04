@@ -20,6 +20,8 @@ type Tx struct {
 	Builder *BuilderClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
+	// IsVulnerability is the client for interacting with the IsVulnerability builders.
+	IsVulnerability *IsVulnerabilityClient
 	// Occurrence is the client for interacting with the Occurrence builders.
 	Occurrence *OccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
@@ -175,6 +177,7 @@ func (tx *Tx) init() {
 	tx.BillOfMaterials = NewBillOfMaterialsClient(tx.config)
 	tx.Builder = NewBuilderClient(tx.config)
 	tx.Dependency = NewDependencyClient(tx.config)
+	tx.IsVulnerability = NewIsVulnerabilityClient(tx.config)
 	tx.Occurrence = NewOccurrenceClient(tx.config)
 	tx.PackageName = NewPackageNameClient(tx.config)
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)

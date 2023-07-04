@@ -22,9 +22,6 @@ func (b *EntBackend) CertifyGood(ctx context.Context, certifyGoodSpec *model.Cer
 func (b *EntBackend) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	return nil, nil
 }
-func (b *EntBackend) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	return nil, nil
-}
 
 func (b *EntBackend) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	return nil, nil
@@ -36,9 +33,6 @@ func (b *EntBackend) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqu
 	return nil, nil
 }
 
-func (b *EntBackend) IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error) {
-	return nil, nil
-}
 func (b *EntBackend) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	return nil, nil
 }
@@ -68,9 +62,6 @@ func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSp
 func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 	return nil, nil
 }
-func (b *EntBackend) IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error) {
-	return nil, nil
-}
 
 //	func (b *EntBackend) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 //		return nil, nil
@@ -82,9 +73,6 @@ func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.ArtifactInput
 	return nil, nil
 }
 func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
-	return nil, nil
-}
-func (b *EntBackend) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 	return nil, nil
 }
 
