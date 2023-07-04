@@ -180,7 +180,7 @@ require (
 	github.com/package-url/packageurl-go v0.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.15.1
-	github.com/regclient/regclient v0.4.8
+	github.com/regclient/regclient v0.5.0
 	github.com/sigstore/sigstore v1.7.1
 	github.com/spdx/tools-golang v0.5.2
 	github.com/spf13/viper v1.16.0
