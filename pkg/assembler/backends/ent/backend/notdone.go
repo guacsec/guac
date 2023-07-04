@@ -8,9 +8,6 @@ import (
 
 // Retrieval read-only queries for software trees
 
-func (b *EntBackend) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
-	return nil, nil
-}
 func (b *EntBackend) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 	return nil, nil
 }
@@ -51,9 +48,6 @@ func (b *EntBackend) Scorecards(ctx context.Context, certifyScorecardSpec *model
 
 // Mutations for software trees (read-write queries)
 func (b *EntBackend) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	return nil, nil
-}
-func (b *EntBackend) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
 	return nil, nil
 }
 

@@ -2,20 +2,16 @@ package backend
 
 import (
 	"context"
-	"strings"
 
-	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func (b *EntBackend) Ghsa(ctx context.Context, spec *model.GHSASpec) ([]*model.Ghsa, error) {
-	results, err := b.client.SecurityAdvisory.Query().
-		Where(
-			optionalPredicate(spec.GhsaID, securityadvisory.GhsaIDEqualFold),
-			optionalPredicate(spec.ID, IDEQ),
-		).All(ctx)
+	results, err := getAdvisories(ctx, b.client, &advisoryQuerySpec{
+		ID:     spec.ID,
+		GhsaID: spec.GhsaID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -24,24 +20,8 @@ func (b *EntBackend) Ghsa(ctx context.Context, spec *model.GHSASpec) ([]*model.G
 }
 
 func (b *EntBackend) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
-	advisory, err := WithinTX(ctx, b.client, func(context.Context) (*ent.SecurityAdvisory, error) {
-		client := ent.FromContext(ctx)
-		id, err := client.SecurityAdvisory.Create().
-			SetGhsaID(strings.ToLower(ghsa.GhsaID)).
-			OnConflict(
-				sql.ConflictColumns(securityadvisory.FieldGhsaID),
-				sql.ConflictWhere(sql.And(
-					sql.NotNull(securityadvisory.FieldGhsaID),
-					sql.IsNull(securityadvisory.FieldCveID),
-					sql.IsNull(securityadvisory.FieldOsvID),
-				)),
-			).
-			Ignore().
-			ID(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return client.SecurityAdvisory.Get(ctx, id)
+	advisory, err := upsertAdvisory(ctx, b.client, advisoryQuerySpec{
+		GhsaID: &ghsa.GhsaID,
 	})
 	if err != nil {
 		return nil, err
