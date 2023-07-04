@@ -5,6 +5,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 )
 
 func (b *EntBackend) Osv(ctx context.Context, spec *model.OSVSpec) ([]*model.Osv, error) {
@@ -13,7 +14,7 @@ func (b *EntBackend) Osv(ctx context.Context, spec *model.OSVSpec) ([]*model.Osv
 		OsvID: spec.OsvID,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Osv")
 	}
 
 	return collect(results, toModelOSV), nil
@@ -24,7 +25,7 @@ func (b *EntBackend) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*m
 		OsvID: &osv.OsvID,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "IngestOsv")
 	}
 	return toModelOSV(advisory), nil
 }
