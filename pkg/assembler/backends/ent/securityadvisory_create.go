@@ -63,6 +63,20 @@ func (sac *SecurityAdvisoryCreate) SetNillableCveYear(i *int) *SecurityAdvisoryC
 	return sac
 }
 
+// SetOsvID sets the "osv_id" field.
+func (sac *SecurityAdvisoryCreate) SetOsvID(s string) *SecurityAdvisoryCreate {
+	sac.mutation.SetOsvID(s)
+	return sac
+}
+
+// SetNillableOsvID sets the "osv_id" field if the given value is not nil.
+func (sac *SecurityAdvisoryCreate) SetNillableOsvID(s *string) *SecurityAdvisoryCreate {
+	if s != nil {
+		sac.SetOsvID(*s)
+	}
+	return sac
+}
+
 // Mutation returns the SecurityAdvisoryMutation object of the builder.
 func (sac *SecurityAdvisoryCreate) Mutation() *SecurityAdvisoryMutation {
 	return sac.mutation
@@ -135,6 +149,10 @@ func (sac *SecurityAdvisoryCreate) createSpec() (*SecurityAdvisory, *sqlgraph.Cr
 	if value, ok := sac.mutation.CveYear(); ok {
 		_spec.SetField(securityadvisory.FieldCveYear, field.TypeInt, value)
 		_node.CveYear = &value
+	}
+	if value, ok := sac.mutation.OsvID(); ok {
+		_spec.SetField(securityadvisory.FieldOsvID, field.TypeString, value)
+		_node.OsvID = &value
 	}
 	return _node, _spec
 }
@@ -248,6 +266,24 @@ func (u *SecurityAdvisoryUpsert) ClearCveYear() *SecurityAdvisoryUpsert {
 	return u
 }
 
+// SetOsvID sets the "osv_id" field.
+func (u *SecurityAdvisoryUpsert) SetOsvID(v string) *SecurityAdvisoryUpsert {
+	u.Set(securityadvisory.FieldOsvID, v)
+	return u
+}
+
+// UpdateOsvID sets the "osv_id" field to the value that was provided on create.
+func (u *SecurityAdvisoryUpsert) UpdateOsvID() *SecurityAdvisoryUpsert {
+	u.SetExcluded(securityadvisory.FieldOsvID)
+	return u
+}
+
+// ClearOsvID clears the value of the "osv_id" field.
+func (u *SecurityAdvisoryUpsert) ClearOsvID() *SecurityAdvisoryUpsert {
+	u.SetNull(securityadvisory.FieldOsvID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -355,6 +391,27 @@ func (u *SecurityAdvisoryUpsertOne) UpdateCveYear() *SecurityAdvisoryUpsertOne {
 func (u *SecurityAdvisoryUpsertOne) ClearCveYear() *SecurityAdvisoryUpsertOne {
 	return u.Update(func(s *SecurityAdvisoryUpsert) {
 		s.ClearCveYear()
+	})
+}
+
+// SetOsvID sets the "osv_id" field.
+func (u *SecurityAdvisoryUpsertOne) SetOsvID(v string) *SecurityAdvisoryUpsertOne {
+	return u.Update(func(s *SecurityAdvisoryUpsert) {
+		s.SetOsvID(v)
+	})
+}
+
+// UpdateOsvID sets the "osv_id" field to the value that was provided on create.
+func (u *SecurityAdvisoryUpsertOne) UpdateOsvID() *SecurityAdvisoryUpsertOne {
+	return u.Update(func(s *SecurityAdvisoryUpsert) {
+		s.UpdateOsvID()
+	})
+}
+
+// ClearOsvID clears the value of the "osv_id" field.
+func (u *SecurityAdvisoryUpsertOne) ClearOsvID() *SecurityAdvisoryUpsertOne {
+	return u.Update(func(s *SecurityAdvisoryUpsert) {
+		s.ClearOsvID()
 	})
 }
 
@@ -624,6 +681,27 @@ func (u *SecurityAdvisoryUpsertBulk) UpdateCveYear() *SecurityAdvisoryUpsertBulk
 func (u *SecurityAdvisoryUpsertBulk) ClearCveYear() *SecurityAdvisoryUpsertBulk {
 	return u.Update(func(s *SecurityAdvisoryUpsert) {
 		s.ClearCveYear()
+	})
+}
+
+// SetOsvID sets the "osv_id" field.
+func (u *SecurityAdvisoryUpsertBulk) SetOsvID(v string) *SecurityAdvisoryUpsertBulk {
+	return u.Update(func(s *SecurityAdvisoryUpsert) {
+		s.SetOsvID(v)
+	})
+}
+
+// UpdateOsvID sets the "osv_id" field to the value that was provided on create.
+func (u *SecurityAdvisoryUpsertBulk) UpdateOsvID() *SecurityAdvisoryUpsertBulk {
+	return u.Update(func(s *SecurityAdvisoryUpsert) {
+		s.UpdateOsvID()
+	})
+}
+
+// ClearOsvID clears the value of the "osv_id" field.
+func (u *SecurityAdvisoryUpsertBulk) ClearOsvID() *SecurityAdvisoryUpsertBulk {
+	return u.Update(func(s *SecurityAdvisoryUpsert) {
+		s.ClearOsvID()
 	})
 }
 

@@ -19,6 +19,7 @@ func (SecurityAdvisory) Fields() []ent.Field {
 		field.String("ghsa_id").Optional().Nillable(),
 		field.String("cve_id").Optional().Nillable(),
 		field.Int("cve_year").Optional().Nillable(),
+		field.String("osv_id").Optional().Nillable(),
 	}
 }
 
@@ -31,10 +32,13 @@ func (SecurityAdvisory) Edges() []ent.Edge {
 func (SecurityAdvisory) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("ghsa_id").Unique().Annotations(
-			entsql.IndexWhere("ghsa_id IS NOT NULL AND cve_id IS NULL"),
+			entsql.IndexWhere("osv_id IS NULL AND cve_id IS NULL AND ghsa_id IS NOT NULL"),
 		),
 		index.Fields("cve_id").Unique().Annotations(
-			entsql.IndexWhere("cve_id IS NOT NULL AND ghsa_id IS NULL"),
+			entsql.IndexWhere("osv_id IS NULL AND cve_id IS NOT NULL AND ghsa_id IS NULL"),
+		),
+		index.Fields("osv_id").Unique().Annotations(
+			entsql.IndexWhere("osv_id IS NOT NULL AND cve_id IS NULL AND ghsa_id IS NULL"),
 		),
 	}
 }

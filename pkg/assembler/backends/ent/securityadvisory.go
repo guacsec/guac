@@ -21,7 +21,9 @@ type SecurityAdvisory struct {
 	// CveID holds the value of the "cve_id" field.
 	CveID *string `json:"cve_id,omitempty"`
 	// CveYear holds the value of the "cve_year" field.
-	CveYear      *int `json:"cve_year,omitempty"`
+	CveYear *int `json:"cve_year,omitempty"`
+	// OsvID holds the value of the "osv_id" field.
+	OsvID        *string `json:"osv_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -32,7 +34,7 @@ func (*SecurityAdvisory) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case securityadvisory.FieldID, securityadvisory.FieldCveYear:
 			values[i] = new(sql.NullInt64)
-		case securityadvisory.FieldGhsaID, securityadvisory.FieldCveID:
+		case securityadvisory.FieldGhsaID, securityadvisory.FieldCveID, securityadvisory.FieldOsvID:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -75,6 +77,13 @@ func (sa *SecurityAdvisory) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				sa.CveYear = new(int)
 				*sa.CveYear = int(value.Int64)
+			}
+		case securityadvisory.FieldOsvID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field osv_id", values[i])
+			} else if value.Valid {
+				sa.OsvID = new(string)
+				*sa.OsvID = value.String
 			}
 		default:
 			sa.selectValues.Set(columns[i], values[i])
@@ -125,6 +134,11 @@ func (sa *SecurityAdvisory) String() string {
 	if v := sa.CveYear; v != nil {
 		builder.WriteString("cve_year=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := sa.OsvID; v != nil {
+		builder.WriteString("osv_id=")
+		builder.WriteString(*v)
 	}
 	builder.WriteByte(')')
 	return builder.String()

@@ -67,6 +67,11 @@ func CveYear(v int) predicate.SecurityAdvisory {
 	return predicate.SecurityAdvisory(sql.FieldEQ(FieldCveYear, v))
 }
 
+// OsvID applies equality check predicate on the "osv_id" field. It's identical to OsvIDEQ.
+func OsvID(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldEQ(FieldOsvID, v))
+}
+
 // GhsaIDEQ applies the EQ predicate on the "ghsa_id" field.
 func GhsaIDEQ(v string) predicate.SecurityAdvisory {
 	return predicate.SecurityAdvisory(sql.FieldEQ(FieldGhsaID, v))
@@ -265,6 +270,81 @@ func CveYearIsNil() predicate.SecurityAdvisory {
 // CveYearNotNil applies the NotNil predicate on the "cve_year" field.
 func CveYearNotNil() predicate.SecurityAdvisory {
 	return predicate.SecurityAdvisory(sql.FieldNotNull(FieldCveYear))
+}
+
+// OsvIDEQ applies the EQ predicate on the "osv_id" field.
+func OsvIDEQ(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldEQ(FieldOsvID, v))
+}
+
+// OsvIDNEQ applies the NEQ predicate on the "osv_id" field.
+func OsvIDNEQ(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldNEQ(FieldOsvID, v))
+}
+
+// OsvIDIn applies the In predicate on the "osv_id" field.
+func OsvIDIn(vs ...string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldIn(FieldOsvID, vs...))
+}
+
+// OsvIDNotIn applies the NotIn predicate on the "osv_id" field.
+func OsvIDNotIn(vs ...string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldNotIn(FieldOsvID, vs...))
+}
+
+// OsvIDGT applies the GT predicate on the "osv_id" field.
+func OsvIDGT(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldGT(FieldOsvID, v))
+}
+
+// OsvIDGTE applies the GTE predicate on the "osv_id" field.
+func OsvIDGTE(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldGTE(FieldOsvID, v))
+}
+
+// OsvIDLT applies the LT predicate on the "osv_id" field.
+func OsvIDLT(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldLT(FieldOsvID, v))
+}
+
+// OsvIDLTE applies the LTE predicate on the "osv_id" field.
+func OsvIDLTE(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldLTE(FieldOsvID, v))
+}
+
+// OsvIDContains applies the Contains predicate on the "osv_id" field.
+func OsvIDContains(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldContains(FieldOsvID, v))
+}
+
+// OsvIDHasPrefix applies the HasPrefix predicate on the "osv_id" field.
+func OsvIDHasPrefix(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldHasPrefix(FieldOsvID, v))
+}
+
+// OsvIDHasSuffix applies the HasSuffix predicate on the "osv_id" field.
+func OsvIDHasSuffix(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldHasSuffix(FieldOsvID, v))
+}
+
+// OsvIDIsNil applies the IsNil predicate on the "osv_id" field.
+func OsvIDIsNil() predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldIsNull(FieldOsvID))
+}
+
+// OsvIDNotNil applies the NotNil predicate on the "osv_id" field.
+func OsvIDNotNil() predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldNotNull(FieldOsvID))
+}
+
+// OsvIDEqualFold applies the EqualFold predicate on the "osv_id" field.
+func OsvIDEqualFold(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldEqualFold(FieldOsvID, v))
+}
+
+// OsvIDContainsFold applies the ContainsFold predicate on the "osv_id" field.
+func OsvIDContainsFold(v string) predicate.SecurityAdvisory {
+	return predicate.SecurityAdvisory(sql.FieldContainsFold(FieldOsvID, v))
 }
 
 // And groups predicates with the AND operator between them.

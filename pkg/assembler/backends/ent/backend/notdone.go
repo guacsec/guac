@@ -7,9 +7,7 @@ import (
 )
 
 // Retrieval read-only queries for software trees
-func (b *EntBackend) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
-	return nil, nil
-}
+
 func (b *EntBackend) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
 	return nil, nil
 }
@@ -52,9 +50,6 @@ func (b *EntBackend) Scorecards(ctx context.Context, certifyScorecardSpec *model
 }
 
 // Mutations for software trees (read-write queries)
-func (b *EntBackend) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
-	return nil, nil
-}
 func (b *EntBackend) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
 	return nil, nil
 }

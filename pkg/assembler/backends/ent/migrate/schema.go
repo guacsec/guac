@@ -326,6 +326,7 @@ var (
 		{Name: "ghsa_id", Type: field.TypeString, Nullable: true},
 		{Name: "cve_id", Type: field.TypeString, Nullable: true},
 		{Name: "cve_year", Type: field.TypeInt, Nullable: true},
+		{Name: "osv_id", Type: field.TypeString, Nullable: true},
 	}
 	// SecurityAdvisoriesTable holds the schema information for the "security_advisories" table.
 	SecurityAdvisoriesTable = &schema.Table{
@@ -338,7 +339,7 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{SecurityAdvisoriesColumns[1]},
 				Annotation: &entsql.IndexAnnotation{
-					Where: "ghsa_id IS NOT NULL AND cve_id IS NULL",
+					Where: "osv_id IS NULL AND cve_id IS NULL AND ghsa_id IS NOT NULL",
 				},
 			},
 			{
@@ -346,7 +347,15 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{SecurityAdvisoriesColumns[2]},
 				Annotation: &entsql.IndexAnnotation{
-					Where: "cve_id IS NOT NULL AND ghsa_id IS NULL",
+					Where: "osv_id IS NULL AND cve_id IS NOT NULL AND ghsa_id IS NULL",
+				},
+			},
+			{
+				Name:    "securityadvisory_osv_id",
+				Unique:  true,
+				Columns: []*schema.Column{SecurityAdvisoriesColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "osv_id IS NOT NULL AND cve_id IS NULL AND ghsa_id IS NULL",
 				},
 			},
 		},

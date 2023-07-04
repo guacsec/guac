@@ -16,7 +16,7 @@ type Predicate interface {
 	~func(*sql.Selector)
 }
 
-func optionalPredicate[P Predicate](value *string, fn func(s string) P) P {
+func optionalPredicate[P Predicate, T any](value *T, fn func(s T) P) P {
 	if value == nil {
 		return NoOpSelector()
 	}

@@ -10,29 +10,31 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func (b *EntBackend) Ghsa(ctx context.Context, spec *model.GHSASpec) ([]*model.Ghsa, error) {
+func (b *EntBackend) Cve(ctx context.Context, spec *model.CVESpec) ([]*model.Cve, error) {
 	results, err := b.client.SecurityAdvisory.Query().
 		Where(
-			optionalPredicate(spec.GhsaID, securityadvisory.GhsaIDEqualFold),
+			optionalPredicate(spec.CveID, securityadvisory.CveIDEqualFold),
+			optionalPredicate(spec.Year, securityadvisory.CveYearEQ),
 			optionalPredicate(spec.ID, IDEQ),
 		).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return collect(results, toModelGHSA), nil
+	return collect(results, toModelCVE), nil
 }
 
-func (b *EntBackend) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
+func (b *EntBackend) IngestCve(ctx context.Context, spec *model.CVEInputSpec) (*model.Cve, error) {
 	advisory, err := WithinTX(ctx, b.client, func(context.Context) (*ent.SecurityAdvisory, error) {
 		client := ent.FromContext(ctx)
 		id, err := client.SecurityAdvisory.Create().
-			SetGhsaID(strings.ToLower(ghsa.GhsaID)).
+			SetCveID(strings.ToLower(spec.CveID)).
+			SetCveYear(spec.Year).
 			OnConflict(
-				sql.ConflictColumns(securityadvisory.FieldGhsaID),
+				sql.ConflictColumns(securityadvisory.FieldCveID),
 				sql.ConflictWhere(sql.And(
-					sql.NotNull(securityadvisory.FieldGhsaID),
-					sql.IsNull(securityadvisory.FieldCveID),
+					sql.IsNull(securityadvisory.FieldGhsaID),
+					sql.NotNull(securityadvisory.FieldCveID),
 					sql.IsNull(securityadvisory.FieldOsvID),
 				)),
 			).
@@ -46,16 +48,17 @@ func (b *EntBackend) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) 
 	if err != nil {
 		return nil, err
 	}
-	return toModelGHSA(advisory), nil
+	return toModelCVE(advisory), nil
 }
 
-func toModelGHSA(ghsa *ent.SecurityAdvisory) *model.Ghsa {
-	if ghsa.GhsaID == nil {
+func toModelCVE(cve *ent.SecurityAdvisory) *model.Cve {
+	if cve.CveID == nil {
 		return nil
 	}
 
-	return &model.Ghsa{
-		ID:     nodeID(ghsa.ID),
-		GhsaID: *ghsa.GhsaID,
+	return &model.Cve{
+		ID:    nodeID(cve.ID),
+		CveID: *cve.CveID,
+		Year:  *cve.CveYear,
 	}
 }

@@ -94,6 +94,26 @@ func (sau *SecurityAdvisoryUpdate) ClearCveYear() *SecurityAdvisoryUpdate {
 	return sau
 }
 
+// SetOsvID sets the "osv_id" field.
+func (sau *SecurityAdvisoryUpdate) SetOsvID(s string) *SecurityAdvisoryUpdate {
+	sau.mutation.SetOsvID(s)
+	return sau
+}
+
+// SetNillableOsvID sets the "osv_id" field if the given value is not nil.
+func (sau *SecurityAdvisoryUpdate) SetNillableOsvID(s *string) *SecurityAdvisoryUpdate {
+	if s != nil {
+		sau.SetOsvID(*s)
+	}
+	return sau
+}
+
+// ClearOsvID clears the value of the "osv_id" field.
+func (sau *SecurityAdvisoryUpdate) ClearOsvID() *SecurityAdvisoryUpdate {
+	sau.mutation.ClearOsvID()
+	return sau
+}
+
 // Mutation returns the SecurityAdvisoryMutation object of the builder.
 func (sau *SecurityAdvisoryUpdate) Mutation() *SecurityAdvisoryMutation {
 	return sau.mutation
@@ -155,6 +175,12 @@ func (sau *SecurityAdvisoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if sau.mutation.CveYearCleared() {
 		_spec.ClearField(securityadvisory.FieldCveYear, field.TypeInt)
+	}
+	if value, ok := sau.mutation.OsvID(); ok {
+		_spec.SetField(securityadvisory.FieldOsvID, field.TypeString, value)
+	}
+	if sau.mutation.OsvIDCleared() {
+		_spec.ClearField(securityadvisory.FieldOsvID, field.TypeString)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, sau.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -240,6 +266,26 @@ func (sauo *SecurityAdvisoryUpdateOne) AddCveYear(i int) *SecurityAdvisoryUpdate
 // ClearCveYear clears the value of the "cve_year" field.
 func (sauo *SecurityAdvisoryUpdateOne) ClearCveYear() *SecurityAdvisoryUpdateOne {
 	sauo.mutation.ClearCveYear()
+	return sauo
+}
+
+// SetOsvID sets the "osv_id" field.
+func (sauo *SecurityAdvisoryUpdateOne) SetOsvID(s string) *SecurityAdvisoryUpdateOne {
+	sauo.mutation.SetOsvID(s)
+	return sauo
+}
+
+// SetNillableOsvID sets the "osv_id" field if the given value is not nil.
+func (sauo *SecurityAdvisoryUpdateOne) SetNillableOsvID(s *string) *SecurityAdvisoryUpdateOne {
+	if s != nil {
+		sauo.SetOsvID(*s)
+	}
+	return sauo
+}
+
+// ClearOsvID clears the value of the "osv_id" field.
+func (sauo *SecurityAdvisoryUpdateOne) ClearOsvID() *SecurityAdvisoryUpdateOne {
+	sauo.mutation.ClearOsvID()
 	return sauo
 }
 
@@ -334,6 +380,12 @@ func (sauo *SecurityAdvisoryUpdateOne) sqlSave(ctx context.Context) (_node *Secu
 	}
 	if sauo.mutation.CveYearCleared() {
 		_spec.ClearField(securityadvisory.FieldCveYear, field.TypeInt)
+	}
+	if value, ok := sauo.mutation.OsvID(); ok {
+		_spec.SetField(securityadvisory.FieldOsvID, field.TypeString, value)
+	}
+	if sauo.mutation.OsvIDCleared() {
+		_spec.ClearField(securityadvisory.FieldOsvID, field.TypeString)
 	}
 	_node = &SecurityAdvisory{config: sauo.config}
 	_spec.Assign = _node.assignValues

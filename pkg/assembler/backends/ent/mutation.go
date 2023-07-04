@@ -6711,6 +6711,7 @@ type SecurityAdvisoryMutation struct {
 	cve_id        *string
 	cve_year      *int
 	addcve_year   *int
+	osv_id        *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*SecurityAdvisory, error)
@@ -6983,6 +6984,55 @@ func (m *SecurityAdvisoryMutation) ResetCveYear() {
 	delete(m.clearedFields, securityadvisory.FieldCveYear)
 }
 
+// SetOsvID sets the "osv_id" field.
+func (m *SecurityAdvisoryMutation) SetOsvID(s string) {
+	m.osv_id = &s
+}
+
+// OsvID returns the value of the "osv_id" field in the mutation.
+func (m *SecurityAdvisoryMutation) OsvID() (r string, exists bool) {
+	v := m.osv_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOsvID returns the old "osv_id" field's value of the SecurityAdvisory entity.
+// If the SecurityAdvisory object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SecurityAdvisoryMutation) OldOsvID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOsvID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOsvID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOsvID: %w", err)
+	}
+	return oldValue.OsvID, nil
+}
+
+// ClearOsvID clears the value of the "osv_id" field.
+func (m *SecurityAdvisoryMutation) ClearOsvID() {
+	m.osv_id = nil
+	m.clearedFields[securityadvisory.FieldOsvID] = struct{}{}
+}
+
+// OsvIDCleared returns if the "osv_id" field was cleared in this mutation.
+func (m *SecurityAdvisoryMutation) OsvIDCleared() bool {
+	_, ok := m.clearedFields[securityadvisory.FieldOsvID]
+	return ok
+}
+
+// ResetOsvID resets all changes to the "osv_id" field.
+func (m *SecurityAdvisoryMutation) ResetOsvID() {
+	m.osv_id = nil
+	delete(m.clearedFields, securityadvisory.FieldOsvID)
+}
+
 // Where appends a list predicates to the SecurityAdvisoryMutation builder.
 func (m *SecurityAdvisoryMutation) Where(ps ...predicate.SecurityAdvisory) {
 	m.predicates = append(m.predicates, ps...)
@@ -7017,7 +7067,7 @@ func (m *SecurityAdvisoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SecurityAdvisoryMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.ghsa_id != nil {
 		fields = append(fields, securityadvisory.FieldGhsaID)
 	}
@@ -7026,6 +7076,9 @@ func (m *SecurityAdvisoryMutation) Fields() []string {
 	}
 	if m.cve_year != nil {
 		fields = append(fields, securityadvisory.FieldCveYear)
+	}
+	if m.osv_id != nil {
+		fields = append(fields, securityadvisory.FieldOsvID)
 	}
 	return fields
 }
@@ -7041,6 +7094,8 @@ func (m *SecurityAdvisoryMutation) Field(name string) (ent.Value, bool) {
 		return m.CveID()
 	case securityadvisory.FieldCveYear:
 		return m.CveYear()
+	case securityadvisory.FieldOsvID:
+		return m.OsvID()
 	}
 	return nil, false
 }
@@ -7056,6 +7111,8 @@ func (m *SecurityAdvisoryMutation) OldField(ctx context.Context, name string) (e
 		return m.OldCveID(ctx)
 	case securityadvisory.FieldCveYear:
 		return m.OldCveYear(ctx)
+	case securityadvisory.FieldOsvID:
+		return m.OldOsvID(ctx)
 	}
 	return nil, fmt.Errorf("unknown SecurityAdvisory field %s", name)
 }
@@ -7085,6 +7142,13 @@ func (m *SecurityAdvisoryMutation) SetField(name string, value ent.Value) error 
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCveYear(v)
+		return nil
+	case securityadvisory.FieldOsvID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOsvID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown SecurityAdvisory field %s", name)
@@ -7140,6 +7204,9 @@ func (m *SecurityAdvisoryMutation) ClearedFields() []string {
 	if m.FieldCleared(securityadvisory.FieldCveYear) {
 		fields = append(fields, securityadvisory.FieldCveYear)
 	}
+	if m.FieldCleared(securityadvisory.FieldOsvID) {
+		fields = append(fields, securityadvisory.FieldOsvID)
+	}
 	return fields
 }
 
@@ -7163,6 +7230,9 @@ func (m *SecurityAdvisoryMutation) ClearField(name string) error {
 	case securityadvisory.FieldCveYear:
 		m.ClearCveYear()
 		return nil
+	case securityadvisory.FieldOsvID:
+		m.ClearOsvID()
+		return nil
 	}
 	return fmt.Errorf("unknown SecurityAdvisory nullable field %s", name)
 }
@@ -7179,6 +7249,9 @@ func (m *SecurityAdvisoryMutation) ResetField(name string) error {
 		return nil
 	case securityadvisory.FieldCveYear:
 		m.ResetCveYear()
+		return nil
+	case securityadvisory.FieldOsvID:
+		m.ResetOsvID()
 		return nil
 	}
 	return fmt.Errorf("unknown SecurityAdvisory field %s", name)

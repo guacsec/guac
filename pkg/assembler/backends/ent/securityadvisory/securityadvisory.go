@@ -17,6 +17,8 @@ const (
 	FieldCveID = "cve_id"
 	// FieldCveYear holds the string denoting the cve_year field in the database.
 	FieldCveYear = "cve_year"
+	// FieldOsvID holds the string denoting the osv_id field in the database.
+	FieldOsvID = "osv_id"
 	// Table holds the table name of the securityadvisory in the database.
 	Table = "security_advisories"
 )
@@ -27,6 +29,7 @@ var Columns = []string{
 	FieldGhsaID,
 	FieldCveID,
 	FieldCveYear,
+	FieldOsvID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -60,4 +63,9 @@ func ByCveID(opts ...sql.OrderTermOption) OrderOption {
 // ByCveYear orders the results by the cve_year field.
 func ByCveYear(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCveYear, opts...).ToFunc()
+}
+
+// ByOsvID orders the results by the osv_id field.
+func ByOsvID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOsvID, opts...).ToFunc()
 }
