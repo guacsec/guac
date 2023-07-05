@@ -108,6 +108,17 @@ type ComplexityRoot struct {
 		ID     func(childComplexity int) int
 	}
 
+	HasMetadata struct {
+		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Key           func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Subject       func(childComplexity int) int
+		Timestamp     func(childComplexity int) int
+		Value         func(childComplexity int) int
+	}
+
 	HasSBOM struct {
 		Algorithm        func(childComplexity int) int
 		Annotations      func(childComplexity int) int
@@ -625,6 +636,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.GHSA.ID(childComplexity), true
+
+	case "HasMetadata.collector":
+		if e.complexity.HasMetadata.Collector == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Collector(childComplexity), true
+
+	case "HasMetadata.id":
+		if e.complexity.HasMetadata.ID == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.ID(childComplexity), true
+
+	case "HasMetadata.justification":
+		if e.complexity.HasMetadata.Justification == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Justification(childComplexity), true
+
+	case "HasMetadata.key":
+		if e.complexity.HasMetadata.Key == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Key(childComplexity), true
+
+	case "HasMetadata.origin":
+		if e.complexity.HasMetadata.Origin == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Origin(childComplexity), true
+
+	case "HasMetadata.subject":
+		if e.complexity.HasMetadata.Subject == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Subject(childComplexity), true
+
+	case "HasMetadata.timestamp":
+		if e.complexity.HasMetadata.Timestamp == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Timestamp(childComplexity), true
+
+	case "HasMetadata.value":
+		if e.complexity.HasMetadata.Value == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Value(childComplexity), true
 
 	case "HasSBOM.algorithm":
 		if e.complexity.HasSBOM.Algorithm == nil {
@@ -3619,6 +3686,52 @@ extend type Query {
 extend type Mutation {
   "Ingest a mapping between an OSV entry and a CVE/GHSA vulnerability."
   ingestIsVulnerability(osv: OSVInputSpec!, vulnerability: CveOrGhsaInput!, isVulnerability: IsVulnerabilityInputSpec!): IsVulnerability!
+}
+`, BuiltIn: false},
+	{Name: "../schema/metadata.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the HasMetadata
+
+"""
+HasMetadata is an attestation that a package, source, or artifact has a certain
+attested property (key) with value (value). For example, a source may have
+metadata "SourceRepo2FAEnabled=true".
+
+The intent of this evidence tree predicate is to allow extensibility of metadata
+expressible within the GUAC ontology. Metadata that is commonly used will then
+be promoted to a predicate on its own.
+
+Justification indicates how the metadata was determined.
+
+The metadata applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
+"""
+type HasMetadata {
+  id: ID!
+  subject: PackageSourceOrArtifact!
+  timestamp: Time!
+  justification: String!
+  key: String!
+  value: String!
+  origin: String!
+  collector: String!
 }
 `, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#

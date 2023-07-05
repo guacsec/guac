@@ -396,6 +396,31 @@ type GHSASpec struct {
 	GhsaID *string `json:"ghsaId,omitempty"`
 }
 
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type HasMetadata struct {
+	ID            string                  `json:"id"`
+	Subject       PackageSourceOrArtifact `json:"subject"`
+	Timestamp     time.Time               `json:"timestamp"`
+	Justification string                  `json:"justification"`
+	Key           string                  `json:"key"`
+	Value         string                  `json:"value"`
+	Origin        string                  `json:"origin"`
+	Collector     string                  `json:"collector"`
+}
+
 type HasSbom struct {
 	ID string `json:"id"`
 	// SBOM subject
