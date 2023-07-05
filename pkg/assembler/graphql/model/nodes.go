@@ -413,12 +413,44 @@ type GHSASpec struct {
 type HasMetadata struct {
 	ID            string                  `json:"id"`
 	Subject       PackageSourceOrArtifact `json:"subject"`
-	Timestamp     time.Time               `json:"timestamp"`
-	Justification string                  `json:"justification"`
 	Key           string                  `json:"key"`
 	Value         string                  `json:"value"`
+	Timestamp     time.Time               `json:"timestamp"`
+	Justification string                  `json:"justification"`
 	Origin        string                  `json:"origin"`
 	Collector     string                  `json:"collector"`
+}
+
+// HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
+type HasMetadataInputSpec struct {
+	Key           string    `json:"key"`
+	Value         string    `json:"value"`
+	Timestamp     time.Time `json:"timestamp"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// HasMetadataSpec allows filtering the list of HasMetadata evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// since specified indicates filtering timestamps after the specified time
+type HasMetadataSpec struct {
+	ID            *string                      `json:"id,omitempty"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
+	Since         *time.Time                   `json:"since,omitempty"`
+	Key           *string                      `json:"key,omitempty"`
+	Value         *string                      `json:"value,omitempty"`
+	Justification *string                      `json:"justification,omitempty"`
+	Origin        *string                      `json:"origin,omitempty"`
+	Collector     *string                      `json:"collector,omitempty"`
 }
 
 type HasSbom struct {

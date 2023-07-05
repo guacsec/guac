@@ -39,6 +39,7 @@ type MutationResolver interface {
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
 	IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error)
 	IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error)
+	IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
 	IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error)
@@ -62,6 +63,7 @@ type QueryResolver interface {
 	IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error)
 	IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
 	IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error)
+	HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error)
 	Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error)
 	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
 	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
@@ -305,6 +307,39 @@ func (ec *executionContext) field_Mutation_ingestGHSA_args(ctx context.Context, 
 		}
 	}
 	args["ghsa"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHasMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PackageSourceOrArtifactInput
+	if tmp, ok := rawArgs["subject"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+		arg0, err = ec.unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subject"] = arg0
+	var arg1 *model.MatchFlags
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+		arg1, err = ec.unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkgMatchType"] = arg1
+	var arg2 model.HasMetadataInputSpec
+	if tmp, ok := rawArgs["hasMetadata"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadata"))
+		arg2, err = ec.unmarshalNHasMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hasMetadata"] = arg2
 	return args, nil
 }
 
@@ -779,6 +814,21 @@ func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, ra
 		}
 	}
 	args["certifyVulnSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.HasMetadataSpec
+	if tmp, ok := rawArgs["hasMetadataSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadataSpec"))
+		arg0, err = ec.unmarshalOHasMetadataSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hasMetadataSpec"] = arg0
 	return args, nil
 }
 
@@ -2630,6 +2680,79 @@ func (ec *executionContext) fieldContext_Mutation_ingestIsVulnerability(ctx cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_ingestHasMetadata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestHasMetadata(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestHasMetadata(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(*model.MatchFlags), fc.Args["hasMetadata"].(model.HasMetadataInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.HasMetadata)
+	fc.Result = res
+	return ec.marshalNHasMetadata2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadata(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestHasMetadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_HasMetadata_id(ctx, field)
+			case "subject":
+				return ec.fieldContext_HasMetadata_subject(ctx, field)
+			case "key":
+				return ec.fieldContext_HasMetadata_key(ctx, field)
+			case "value":
+				return ec.fieldContext_HasMetadata_value(ctx, field)
+			case "timestamp":
+				return ec.fieldContext_HasMetadata_timestamp(ctx, field)
+			case "justification":
+				return ec.fieldContext_HasMetadata_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_HasMetadata_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_HasMetadata_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HasMetadata", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestHasMetadata_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_ingestOSV(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_ingestOSV(ctx, field)
 	if err != nil {
@@ -4021,6 +4144,79 @@ func (ec *executionContext) fieldContext_Query_IsVulnerability(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_HasMetadata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_HasMetadata(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().HasMetadata(rctx, fc.Args["hasMetadataSpec"].(*model.HasMetadataSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.HasMetadata)
+	fc.Result = res
+	return ec.marshalNHasMetadata2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_HasMetadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_HasMetadata_id(ctx, field)
+			case "subject":
+				return ec.fieldContext_HasMetadata_subject(ctx, field)
+			case "key":
+				return ec.fieldContext_HasMetadata_key(ctx, field)
+			case "value":
+				return ec.fieldContext_HasMetadata_value(ctx, field)
+			case "timestamp":
+				return ec.fieldContext_HasMetadata_timestamp(ctx, field)
+			case "justification":
+				return ec.fieldContext_HasMetadata_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_HasMetadata_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_HasMetadata_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HasMetadata", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_HasMetadata_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_osv(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_osv(ctx, field)
 	if err != nil {
@@ -4984,6 +5180,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "ingestHasMetadata":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestHasMetadata(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "ingestOSV":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestOSV(ctx, field)
@@ -5401,6 +5604,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_IsVulnerability(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "HasMetadata":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_HasMetadata(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
