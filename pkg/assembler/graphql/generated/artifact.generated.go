@@ -2039,8 +2039,6 @@ func (ec *executionContext) fieldContext_Mutation_ingestHasSBOM(ctx context.Cont
 				return ec.fieldContext_HasSBOM_digest(ctx, field)
 			case "downloadLocation":
 				return ec.fieldContext_HasSBOM_downloadLocation(ctx, field)
-			case "annotations":
-				return ec.fieldContext_HasSBOM_annotations(ctx, field)
 			case "origin":
 				return ec.fieldContext_HasSBOM_origin(ctx, field)
 			case "collector":
@@ -3708,8 +3706,6 @@ func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, fiel
 				return ec.fieldContext_HasSBOM_digest(ctx, field)
 			case "downloadLocation":
 				return ec.fieldContext_HasSBOM_downloadLocation(ctx, field)
-			case "annotations":
-				return ec.fieldContext_HasSBOM_annotations(ctx, field)
 			case "origin":
 				return ec.fieldContext_HasSBOM_origin(ctx, field)
 			case "collector":

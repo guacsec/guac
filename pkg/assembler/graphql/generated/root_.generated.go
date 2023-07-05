@@ -39,11 +39,6 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Annotation struct {
-		Key   func(childComplexity int) int
-		Value func(childComplexity int) int
-	}
-
 	Artifact struct {
 		Algorithm func(childComplexity int) int
 		Digest    func(childComplexity int) int
@@ -121,7 +116,6 @@ type ComplexityRoot struct {
 
 	HasSBOM struct {
 		Algorithm        func(childComplexity int) int
-		Annotations      func(childComplexity int) int
 		Collector        func(childComplexity int) int
 		Digest           func(childComplexity int) int
 		DownloadLocation func(childComplexity int) int
@@ -365,20 +359,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "Annotation.key":
-		if e.complexity.Annotation.Key == nil {
-			break
-		}
-
-		return e.complexity.Annotation.Key(childComplexity), true
-
-	case "Annotation.value":
-		if e.complexity.Annotation.Value == nil {
-			break
-		}
-
-		return e.complexity.Annotation.Value(childComplexity), true
 
 	case "Artifact.algorithm":
 		if e.complexity.Artifact.Algorithm == nil {
@@ -701,13 +681,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSBOM.Algorithm(childComplexity), true
-
-	case "HasSBOM.annotations":
-		if e.complexity.HasSBOM.Annotations == nil {
-			break
-		}
-
-		return e.complexity.HasSBOM.Annotations(childComplexity), true
 
 	case "HasSBOM.collector":
 		if e.complexity.HasSBOM.Collector == nil {
@@ -2055,8 +2028,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputAnnotationInputSpec,
-		ec.unmarshalInputAnnotationSpec,
 		ec.unmarshalInputArtifactInputSpec,
 		ec.unmarshalInputArtifactSpec,
 		ec.unmarshalInputBuilderInputSpec,
@@ -3083,21 +3054,10 @@ type HasSBOM {
   digest: String!
   "Location from which the SBOM can be downloaded"
   downloadLocation: String!
-  "SBOM annotations (e.g., SBOM Scorecard information)"
-  annotations: [Annotation!]!
   "Document from which this attestation is generated from"
   origin: String!
   "GUAC collector for the document"
   collector: String!
-}
-
-"""
-Annotation is a key-value pair to provide additional information or metadata
-about an SBOM.
-"""
-type Annotation {
-  key: String!
-  value: String!
 }
 
 """
@@ -3112,15 +3072,8 @@ input HasSBOMSpec {
   algorithm: String
   digest: String
   downloadLocation: String
-  annotations: [AnnotationSpec!] = []
   origin: String
   collector: String
-}
-
-"AnnotationSpec allows creating query filters for Annotation objects."
-input AnnotationSpec {
-  key: String!
-  value: String!
 }
 
 "HasSBOMInputSpec is the same as HasSBOM but for mutation input."
@@ -3129,15 +3082,8 @@ input HasSBOMInputSpec {
   algorithm: String!
   digest: String!
   downloadLocation: String!
-  annotations: [AnnotationInputSpec!]!
   origin: String!
   collector: String!
-}
-
-"AnnotationInputSpec allows ingesting Annotation objects."
-input AnnotationInputSpec {
-  key: String!
-  value: String!
 }
 
 extend type Query {
