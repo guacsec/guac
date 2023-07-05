@@ -209,8 +209,8 @@ var (
 					Uri: "testUri",
 				},
 				Materials: []model.ArtifactInputSpec{{
-					Algorithm: "testArtifactAlgorithm2",
-					Digest:    "testArtifactDigest2",
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
 				}},
 				HasSlsa: &model.SLSAInputSpec{
 					BuildType:   "testBuildType",
@@ -227,7 +227,7 @@ var (
 func ingestTestData(graphInput string, ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 	switch graphInput {
-	case "isDependency":
+	case "simpleIsDependencyGraph":
 		for _, ingest := range testData.IsDependency {
 
 			_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
@@ -247,7 +247,7 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 				logger.Errorf("Error in ingesting isDependency: %v\n", err)
 			}
 		}
-	case "hasSLSA":
+	case "simpleHasSLSAGraph":
 		for _, ingest := range testData.IsOccurrence {
 			_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
 
@@ -317,7 +317,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    5,
-			graphInput:     "isDependency",
+			graphInput:     "simpleIsDependencyGraph",
 		},
 		{
 			name:           "2: two levels of dependencies, no stopID and no limiting maxDepth",
@@ -327,7 +327,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    7,
-			graphInput:     "isDependency",
+			graphInput:     "simpleIsDependencyGraph",
 		},
 
 		{
@@ -340,7 +340,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopName:       "dpkg",
 			maxDepth:       10,
 			expectedLen:    3,
-			graphInput:     "isDependency",
+			graphInput:     "simpleIsDependencyGraph",
 		},
 
 		{
@@ -351,7 +351,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopType:       "",
 			maxDepth:       1,
 			expectedLen:    3,
-			graphInput:     "isDependency",
+			graphInput:     "simpleIsDependencyGraph",
 		},
 		{
 			name:           "5: isDependency indirect dependency",
@@ -361,7 +361,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    9,
-			graphInput:     "isDependency",
+			graphInput:     "simpleIsDependencyGraph",
 		},
 		{
 			name:           "6: isDependency range that does not include the dependency",
@@ -371,7 +371,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    1,
-			graphInput:     "isDependency",
+			graphInput:     "simpleIsDependencyGraph",
 		},
 		{
 			name:           "7: hasSlsa simpleton case", // TODOL implement HasSLSA case in the code
@@ -381,7 +381,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    1, // TODO: change once implemented to two
-			graphInput:     "hasSLSA",
+			graphInput:     "simpleHasSLSAGraph",
 		},
 		{
 			name:           "8: hasSlsa case with no dependent isOccurences",
@@ -391,7 +391,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    1,
-			graphInput:     "hasSLSA",
+			graphInput:     "simpleHasSLSAGraph",
 		},
 	}
 
