@@ -115,6 +115,7 @@ type ComplexityRoot struct {
 		Key           func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
+		Timestamp     func(childComplexity int) int
 		Value         func(childComplexity int) int
 	}
 
@@ -672,6 +673,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasMetadata.Subject(childComplexity), true
+
+	case "HasMetadata.timestamp":
+		if e.complexity.HasMetadata.Timestamp == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Timestamp(childComplexity), true
 
 	case "HasMetadata.value":
 		if e.complexity.HasMetadata.Value == nil {
@@ -3620,7 +3628,7 @@ extend type Mutation {
 """
 HasMetadata is an attestation that a package, source, or artifact has a certain
 attested property (key) with value (value). For example, a source may have
-metadata "SourceRepo2FAEnabled=true". 
+metadata "SourceRepo2FAEnabled=true".
 
 The intent of this evidence tree predicate is to allow extensibility of metadata
 expressible within the GUAC ontology. Metadata that is commonly used will then
@@ -3636,6 +3644,7 @@ SourceName.
 type HasMetadata {
   id: ID!
   subject: PackageSourceOrArtifact!
+  timestamp: Time!
   justification: String!
   key: String!
   value: String!

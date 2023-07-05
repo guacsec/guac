@@ -413,6 +413,7 @@ type GHSASpec struct {
 type HasMetadata struct {
 	ID            string                  `json:"id"`
 	Subject       PackageSourceOrArtifact `json:"subject"`
+	Timestamp     time.Time               `json:"timestamp"`
 	Justification string                  `json:"justification"`
 	Key           string                  `json:"key"`
 	Value         string                  `json:"value"`
