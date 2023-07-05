@@ -37,7 +37,7 @@ import (
 )
 
 var (
-	testData = assembler.IngestPredicates{
+	simpleTestData = assembler.IngestPredicates{
 
 		IsDependency: []assembler.IsDependencyIngest{
 			{
@@ -198,6 +198,51 @@ var (
 					Justification: "connect pkg2 and artifact2",
 				},
 			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType4",
+					Namespace: ptrfrom.String("pkgNamespace4"),
+					Name:      "pkgName4",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg4 and artifact1",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType4",
+					Namespace: ptrfrom.String("pkgNamespace4"),
+					Name:      "pkgName4",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg1 and artifact4",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType5",
+					Namespace: ptrfrom.String("pkgNamespace5"),
+					Name:      "pkgName5",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm3",
+					Digest:    "testArtifactDigest3",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg5 and artifact3",
+				},
+			},
 		},
 		HasSlsa: []assembler.HasSlsaIngest{
 			{
@@ -220,35 +265,91 @@ var (
 					},
 				},
 			},
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm3",
+					Digest:    "testArtifactDigest3",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "testUri",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "testArtifactAlgorithm4",
+					Digest:    "testArtifactDigest4",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "testBuildType",
+					SlsaVersion: "testSlsaVersion",
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.testKey", Value: "testValue"},
+					},
+				},
+			},
+		},
+	}
+
+	isDependencyAndHasSLSAGraph = assembler.IngestPredicates{
+		IsDependency: []assembler.IsDependencyIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType3",
+					Namespace: ptrfrom.String("pkgNamespace3"),
+					Name:      "pkgName3",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "pkgType1",
+					Namespace: ptrfrom.String("pkgNamespace1"),
+					Name:      "pkgName1",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				IsDependency: &model.IsDependencyInputSpec{
+					VersionRange:   ">=1.19.0",
+					DependencyType: model.DependencyTypeDirect,
+					Justification:  "test justification one",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+			},
 		},
 	}
 )
 
+func ingestIsDependency(ctx context.Context, client graphql.Client, logger *zap.SugaredLogger, graph assembler.IngestPredicates) {
+	for _, ingest := range graph.IsDependency {
+
+		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting package: %v\n", err)
+		}
+
+		_, err = model.IngestPackage(context.Background(), client, *ingest.DepPkg)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting dependency package: %v\n", err)
+		}
+		_, err = model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting isDependency: %v\n", err)
+		}
+	}
+}
+
 func ingestTestData(graphInput string, ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
+
 	switch graphInput {
+	case "isDependencyAndHasSLSAGraph":
+		ingestIsDependency(ctx, client, logger, isDependencyAndHasSLSAGraph)
+		ingestIsDependency(ctx, client, logger, simpleTestData)
+		// Change graph input so hasSLSA simple graph is ingested too
+		graphInput = "simpleHasSLSAGraph"
 	case "simpleIsDependencyGraph":
-		for _, ingest := range testData.IsDependency {
-
-			_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
-
-			if err != nil {
-				logger.Errorf("Error in ingesting package: %v\n", err)
-			}
-
-			_, err = model.IngestPackage(context.Background(), client, *ingest.DepPkg)
-
-			if err != nil {
-				logger.Errorf("Error in ingesting dependency package: %v\n", err)
-			}
-			_, err = model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
-
-			if err != nil {
-				logger.Errorf("Error in ingesting isDependency: %v\n", err)
-			}
-		}
+		ingestIsDependency(ctx, client, logger, simpleTestData)
 	case "simpleHasSLSAGraph":
-		for _, ingest := range testData.IsOccurrence {
+		for _, ingest := range simpleTestData.IsOccurrence {
 			_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
 
 			if err != nil {
@@ -267,7 +368,7 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 				logger.Errorf("Error in ingesting isOccurrence: %v\n", err)
 			}
 		}
-		for _, ingest := range testData.HasSlsa {
+		for _, ingest := range simpleTestData.HasSlsa {
 			_, err := model.IngestBuilder(context.Background(), client, *ingest.Builder)
 
 			if err != nil {
@@ -309,7 +410,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		expectedPkgs   []string
 		graphInput     string
 	}{
-
+		//TODO: add expectedPkgs to the isDependency tests
 		{
 			name:           "1: test case with two dependencies at the same depth, no stopID and no limiting maxDepth",
 			startType:      "deb",
@@ -395,6 +496,28 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedLen:    1,
 			expectedPkgs:   []string{"pkgType2"},
 			graphInput:     "simpleHasSLSAGraph",
+		},
+		{
+			name:           "9: hasSlsa two levels",
+			startType:      "pkgType5",
+			startNamespace: ptrfrom.String("pkgNamespace5"),
+			startName:      "pkgName5",
+			stopType:       "",
+			maxDepth:       10,
+			expectedLen:    1,
+			expectedPkgs:   []string{"pkgType5"}, // TODO: add pkgType2 and pkgType4 once implemented
+			graphInput:     "simpleHasSLSAGraph",
+		},
+		{
+			name:           "10: hasSlsa & isDependency combined case",
+			startType:      "pkgType3",
+			startNamespace: ptrfrom.String("pkgNamespace3"),
+			startName:      "pkgName3",
+			stopType:       "",
+			maxDepth:       10,
+			expectedLen:    4,
+			expectedPkgs:   []string{"pkgType3"}, // TODO: add pkgType2 and pkgType1 once implemented
+			graphInput:     "isDependencyAndHasSLSAGraph",
 		},
 	}
 
