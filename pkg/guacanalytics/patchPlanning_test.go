@@ -306,6 +306,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		stopName       string
 		maxDepth       int
 		expectedLen    int
+		expectedPkgs   []string
 		graphInput     string
 	}{
 
@@ -380,7 +381,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:      "pkgName1",
 			stopType:       "",
 			maxDepth:       10,
-			expectedLen:    1, // TODO: change once implemented to two
+			expectedLen:    1,                    // TODO: change once implemented to two
+			expectedPkgs:   []string{"pkgType1"}, // TODO: add "pkgType2" once implemented
 			graphInput:     "simpleHasSLSAGraph",
 		},
 		{
@@ -391,6 +393,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    1,
+			expectedPkgs:   []string{"pkgType2"},
 			graphInput:     "simpleHasSLSAGraph",
 		},
 	}
@@ -398,7 +401,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("Test case %s\n", tt.name), func(t *testing.T) {
 			ingestTestData(tt.graphInput, ctx, gqlclient)
-			startID, err := getPackageId(tt.graphInput, tt.startType, tt.startNamespace, tt.startName, ctx, gqlclient)
+			startID, err := getPackageId(ctx, gqlclient, tt.startType, tt.startNamespace, tt.startName)
 
 			if err != nil {
 				t.Errorf("got err from getting start package ID: %v", err)
@@ -407,7 +410,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 			var stopID string
 			if tt.stopType != "" {
-				stopID, err = getPackageId(tt.graphInput, tt.stopType, tt.stopNamespace, tt.stopName, ctx, gqlclient)
+				stopID, err = getPackageId(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName)
 
 				if err != nil {
 					t.Errorf("got err from getting stop package ID: %v", err)
@@ -434,6 +437,20 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 			if diff := cmp.Diff(tt.expectedLen, len(gotMap)); len(diff) > 0 {
 				t.Errorf("Number of map entries (-want +got):\n%s", diff)
+			}
+
+			if len(tt.expectedPkgs) > 0 {
+				for _, pkg := range tt.expectedPkgs {
+					nodeID, err := getPackageId(ctx, gqlclient, pkg, ptrfrom.String(""), "")
+
+					if err != nil {
+						t.Errorf("Expected node not found in graph %s", err)
+					}
+
+					if _, ok := gotMap[nodeID]; !ok {
+						t.Errorf("Expected node %s not found in output map", pkg)
+					}
+				}
 			}
 
 			for k, v := range gotMap {
@@ -501,13 +518,21 @@ func getGraphqlTestServer() (*handler.Server, error) {
 	return srv, nil
 }
 
-func getPackageId(graph string, nodeType string, nodeNamespace *string, nodeName string, ctx context.Context, gqlclient graphql.Client) (string, error) {
-	pkgFilter := &model.PkgSpec{
-		Type:      &nodeType,
-		Namespace: nodeNamespace,
-		Name:      &nodeName,
+func getPackageId(ctx context.Context, gqlclient graphql.Client, nodeType string, nodeNamespace *string, nodeName string) (string, error) {
+	var pkgFilter model.PkgSpec
+	if nodeName != "" {
+		pkgFilter = model.PkgSpec{
+			Type:      &nodeType,
+			Namespace: nodeNamespace,
+			Name:      &nodeName,
+		}
+	} else {
+		pkgFilter = model.PkgSpec{
+			Type: &nodeType,
+		}
 	}
-	pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
+
+	pkgResponse, err := model.Packages(ctx, gqlclient, &pkgFilter)
 
 	if err != nil {
 		return "", fmt.Errorf("Error getting id for test case: %s\n", err)
