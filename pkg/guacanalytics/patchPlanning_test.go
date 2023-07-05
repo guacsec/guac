@@ -37,10 +37,9 @@ import (
 )
 
 var (
-	isDepTestData = assembler.IngestPredicates{
+	testData = assembler.IngestPredicates{
 
 		IsDependency: []assembler.IsDependencyIngest{
-
 			{
 				Pkg: &model.PkgInputSpec{
 					Type:      "deb",
@@ -168,6 +167,60 @@ var (
 				},
 			},
 		},
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType1",
+					Namespace: ptrfrom.String("pkgNamespace1"),
+					Name:      "pkgName1",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg1 and artifact1",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType2",
+					Namespace: ptrfrom.String("pkgNamespace2"),
+					Name:      "pkgName2",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm2",
+					Digest:    "testArtifactDigest2",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg2 and artifact2",
+				},
+			},
+		},
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm2",
+					Digest:    "testArtifactDigest2",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "testUri",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "testArtifactAlgorithm2",
+					Digest:    "testArtifactDigest2",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "testBuildType",
+					SlsaVersion: "testSlsaVersion",
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.testKey", Value: "testValue"},
+					},
+				},
+			},
+		},
 	}
 )
 
@@ -175,7 +228,7 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 	logger := logging.FromContext(ctx)
 	switch graphInput {
 	case "isDependency":
-		for _, ingest := range isDepTestData.IsDependency {
+		for _, ingest := range testData.IsDependency {
 
 			_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
 
@@ -192,6 +245,45 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 
 			if err != nil {
 				logger.Errorf("Error in ingesting isDependency: %v\n", err)
+			}
+		}
+	case "hasSLSA":
+		for _, ingest := range testData.IsOccurrence {
+			_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+
+			if err != nil {
+				logger.Errorf("Error in ingesting package for IsOccurence: %v\n", err)
+			}
+
+			_, err = model.IngestArtifact(context.Background(), client, *ingest.Artifact)
+
+			if err != nil {
+				logger.Errorf("Error in ingesting artifact for IsOccurence: %v\n", err)
+			}
+
+			_, err = model.IsOccurrencePkg(context.Background(), client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
+
+			if err != nil {
+				logger.Errorf("Error in ingesting isOccurrence: %v\n", err)
+			}
+		}
+		for _, ingest := range testData.HasSlsa {
+			_, err := model.IngestBuilder(context.Background(), client, *ingest.Builder)
+
+			if err != nil {
+				logger.Errorf("Error in ingesting Builder for HasSlsa: %v\n", err)
+			}
+
+			_, err = model.IngestMaterials(context.Background(), client, ingest.Materials)
+
+			if err != nil {
+				logger.Errorf("Error in ingesting Material for HasSlsa: %v\n", err)
+			}
+
+			_, err = model.SLSAForArtifact(context.Background(), client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
+
+			if err != nil {
+				logger.Errorf("Error in ingesting HasSlsa: %v\n", err)
 			}
 		}
 	}
@@ -281,16 +373,36 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedLen:    1,
 			graphInput:     "isDependency",
 		},
+		{
+			name:           "7: hasSlsa simpleton case",
+			startType:      "pkgType1",
+			startNamespace: ptrfrom.String("pkgNamespace1"),
+			startName:      "pkgName1",
+			stopType:       "",
+			maxDepth:       10,
+			expectedLen:    1, // TODO: unimplemented, change once implemented to two
+			graphInput:     "hasSLSA",
+		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("Test case %s\n", tt.name), func(t *testing.T) {
 			ingestTestData(tt.graphInput, ctx, gqlclient)
-			startID := getPackageId("isDependency", tt.startType, tt.startNamespace, tt.startName, ctx, gqlclient)
+			startID, err := getPackageId(tt.graphInput, tt.startType, tt.startNamespace, tt.startName, ctx, gqlclient)
+
+			if err != nil {
+				t.Errorf("got err from getting start package ID: %v", err)
+				return
+			}
 
 			var stopID string
 			if tt.stopType != "" {
-				stopID = getPackageId("isDependency", tt.stopType, tt.stopNamespace, tt.stopName, ctx, gqlclient)
+				stopID, err = getPackageId(tt.graphInput, tt.stopType, tt.stopNamespace, tt.stopName, ctx, gqlclient)
+
+				if err != nil {
+					t.Errorf("got err from getting stop package ID: %v", err)
+					return
+				}
 			} else {
 				stopID = ""
 			}
@@ -379,21 +491,16 @@ func getGraphqlTestServer() (*handler.Server, error) {
 	return srv, nil
 }
 
-func getPackageId(graph string, nodeType string, nodeNamespace *string, nodeName string, ctx context.Context, gqlclient graphql.Client) string {
-	if graph == "isDependency" {
-		pkgFilter := &model.PkgSpec{
-			Type:      &nodeType,
-			Namespace: nodeNamespace,
-			Name:      &nodeName,
-		}
-		pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
-
-		if err != nil {
-			fmt.Printf("Error getting id for isDependency test case: %s\n", err)
-			return ""
-		}
-		return pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id
+func getPackageId(graph string, nodeType string, nodeNamespace *string, nodeName string, ctx context.Context, gqlclient graphql.Client) (string, error) {
+	pkgFilter := &model.PkgSpec{
+		Type:      &nodeType,
+		Namespace: nodeNamespace,
+		Name:      &nodeName,
 	}
+	pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
 
-	return ""
+	if err != nil {
+		return "", fmt.Errorf("Error getting id for test case: %s\n", err)
+	}
+	return pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id, nil
 }
