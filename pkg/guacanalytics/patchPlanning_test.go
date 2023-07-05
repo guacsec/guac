@@ -374,13 +374,23 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInput:     "isDependency",
 		},
 		{
-			name:           "7: hasSlsa simpleton case",
+			name:           "7: hasSlsa simpleton case", // TODOL implement HasSLSA case in the code
 			startType:      "pkgType1",
 			startNamespace: ptrfrom.String("pkgNamespace1"),
 			startName:      "pkgName1",
 			stopType:       "",
 			maxDepth:       10,
-			expectedLen:    1, // TODO: unimplemented, change once implemented to two
+			expectedLen:    1, // TODO: change once implemented to two
+			graphInput:     "hasSLSA",
+		},
+		{
+			name:           "8: hasSlsa case with no dependent isOccurences",
+			startType:      "pkgType2",
+			startNamespace: ptrfrom.String("pkgNamespace2"),
+			startName:      "pkgName2",
+			stopType:       "",
+			maxDepth:       10,
+			expectedLen:    1,
 			graphInput:     "hasSLSA",
 		},
 	}
