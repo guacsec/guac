@@ -346,6 +346,7 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 		ingestIsDependency(ctx, client, logger, simpleTestData)
 		// Change graph input so hasSLSA simple graph is ingested too
 		graphInput = "simpleHasSLSAGraph"
+		break
 	case "simpleIsDependencyGraph":
 		ingestIsDependency(ctx, client, logger, simpleTestData)
 	case "simpleHasSLSAGraph":
