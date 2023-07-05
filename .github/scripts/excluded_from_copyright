@@ -51,5 +51,7 @@
 ./pkg/assembler/graphql/generated/path.generated.go
 ./pkg/assembler/graphql/generated/metadata.generated.go
 ./pkg/assembler/graphql/resolvers/metadata.resolvers.go
+./pkg/assembler/graphql/resolvers/contact.resolvers.go
+./pkg/assembler/graphql/generated/contact.generated.go
 ./internal/testing/mocks/scorecard.go
 ./internal/testing/mocks/documentparser.go
