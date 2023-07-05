@@ -559,7 +559,7 @@ func (ec *executionContext) unmarshalInputHasMetadataSpec(ctx context.Context, o
 
 // region    **************************** object.gotpl ****************************
 
-var hasMetadataImplementors = []string{"HasMetadata"}
+var hasMetadataImplementors = []string{"HasMetadata", "Node"}
 
 func (ec *executionContext) _HasMetadata(ctx context.Context, sel ast.SelectionSet, obj *model.HasMetadata) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, hasMetadataImplementors)
