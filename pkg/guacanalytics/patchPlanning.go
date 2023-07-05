@@ -98,8 +98,9 @@ func caseOnPredicates(neighbor model.NeighborsNeighborsNode, nowNode DfsNode, ct
 	// case on predicates and nodeType
 	switch nowNode.nodeType {
 	case "packageVersion":
-		if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
-			err := exploreIsDependency(*isDependency, ctx, gqlclient)
+		switch neighbor.(type) {
+		case *model.NeighborsNeighborsIsDependency:
+			err := exploreIsDependency(*neighbor.(*model.NeighborsNeighborsIsDependency), ctx, gqlclient)
 
 			if err != nil {
 				return err
