@@ -337,6 +337,47 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, logger *zap.
 	}
 }
 
+func ingestHasSLSA(ctx context.Context, client graphql.Client, logger *zap.SugaredLogger, graph assembler.IngestPredicates) {
+	for _, ingest := range graph.IsOccurrence {
+		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting package for IsOccurence: %v\n", err)
+		}
+
+		_, err = model.IngestArtifact(context.Background(), client, *ingest.Artifact)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting artifact for IsOccurence: %v\n", err)
+		}
+
+		_, err = model.IsOccurrencePkg(context.Background(), client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting isOccurrence: %v\n", err)
+		}
+	}
+	for _, ingest := range graph.HasSlsa {
+		_, err := model.IngestBuilder(context.Background(), client, *ingest.Builder)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting Builder for HasSlsa: %v\n", err)
+		}
+
+		_, err = model.IngestMaterials(context.Background(), client, ingest.Materials)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting Material for HasSlsa: %v\n", err)
+		}
+
+		_, err = model.SLSAForArtifact(context.Background(), client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting HasSlsa: %v\n", err)
+		}
+	}
+}
+
 func ingestTestData(graphInput string, ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 
@@ -344,50 +385,11 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 	case "isDependencyAndHasSLSAGraph":
 		ingestIsDependency(ctx, client, logger, isDependencyAndHasSLSAGraph)
 		ingestIsDependency(ctx, client, logger, simpleTestData)
-		// Change graph input so hasSLSA simple graph is ingested too
-		graphInput = "simpleHasSLSAGraph"
-		break
+		ingestHasSLSA(ctx, client, logger, simpleTestData)
 	case "simpleIsDependencyGraph":
 		ingestIsDependency(ctx, client, logger, simpleTestData)
 	case "simpleHasSLSAGraph":
-		for _, ingest := range simpleTestData.IsOccurrence {
-			_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
-
-			if err != nil {
-				logger.Errorf("Error in ingesting package for IsOccurence: %v\n", err)
-			}
-
-			_, err = model.IngestArtifact(context.Background(), client, *ingest.Artifact)
-
-			if err != nil {
-				logger.Errorf("Error in ingesting artifact for IsOccurence: %v\n", err)
-			}
-
-			_, err = model.IsOccurrencePkg(context.Background(), client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
-
-			if err != nil {
-				logger.Errorf("Error in ingesting isOccurrence: %v\n", err)
-			}
-		}
-		for _, ingest := range simpleTestData.HasSlsa {
-			_, err := model.IngestBuilder(context.Background(), client, *ingest.Builder)
-
-			if err != nil {
-				logger.Errorf("Error in ingesting Builder for HasSlsa: %v\n", err)
-			}
-
-			_, err = model.IngestMaterials(context.Background(), client, ingest.Materials)
-
-			if err != nil {
-				logger.Errorf("Error in ingesting Material for HasSlsa: %v\n", err)
-			}
-
-			_, err = model.SLSAForArtifact(context.Background(), client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
-
-			if err != nil {
-				logger.Errorf("Error in ingesting HasSlsa: %v\n", err)
-			}
-		}
+		ingestHasSLSA(ctx, client, logger, simpleTestData)
 	}
 }
 
