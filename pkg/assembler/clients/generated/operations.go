@@ -3601,6 +3601,7 @@ const (
 	EdgeArtifactHasSbom             Edge = "ARTIFACT_HAS_SBOM"
 	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
 	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
+	EdgeArtifactHasMetadata         Edge = "ARTIFACT_HAS_METADATA"
 	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
 	EdgeCveCertifyVexStatement      Edge = "CVE_CERTIFY_VEX_STATEMENT"
 	EdgeCveCertifyVuln              Edge = "CVE_CERTIFY_VULN"
@@ -3621,11 +3622,13 @@ const (
 	EdgePackageIsDependency         Edge = "PACKAGE_IS_DEPENDENCY"
 	EdgePackageIsOccurrence         Edge = "PACKAGE_IS_OCCURRENCE"
 	EdgePackagePkgEqual             Edge = "PACKAGE_PKG_EQUAL"
+	EdgePackageHasMetadata          Edge = "PACKAGE_HAS_METADATA"
 	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
 	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
 	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
+	EdgeSourceHasMetadata           Edge = "SOURCE_HAS_METADATA"
 	EdgeCertifyBadArtifact          Edge = "CERTIFY_BAD_ARTIFACT"
 	EdgeCertifyBadPackage           Edge = "CERTIFY_BAD_PACKAGE"
 	EdgeCertifyBadSource            Edge = "CERTIFY_BAD_SOURCE"
@@ -3659,6 +3662,9 @@ const (
 	EdgeIsVulnerabilityGhsa         Edge = "IS_VULNERABILITY_GHSA"
 	EdgeIsVulnerabilityOsv          Edge = "IS_VULNERABILITY_OSV"
 	EdgePkgEqualPackage             Edge = "PKG_EQUAL_PACKAGE"
+	EdgeHasMetadataPackage          Edge = "HAS_METADATA_PACKAGE"
+	EdgeHasMetadataArtifact         Edge = "HAS_METADATA_ARTIFACT"
+	EdgeHasMetadataSource           Edge = "HAS_METADATA_SOURCE"
 )
 
 // FindSoftwareFindSoftwareArtifact includes the requested fields of the GraphQL type Artifact.
@@ -7411,6 +7417,30 @@ func (v *NeighborsNeighborsGHSA) __premarshalJSON() (*__premarshalNeighborsNeigh
 	return &retval, nil
 }
 
+// NeighborsNeighborsHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type NeighborsNeighborsHasMetadata struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NeighborsNeighborsHasMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetTypename() *string { return v.Typename }
+
 // NeighborsNeighborsHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type NeighborsNeighborsHasSBOM struct {
 	Typename       *string `json:"__typename"`
@@ -8175,6 +8205,7 @@ func (v *NeighborsNeighborsNoVuln) GetId() string { return v.Id }
 // NeighborsNeighborsCertifyVEXStatement
 // NeighborsNeighborsCertifyVuln
 // NeighborsNeighborsGHSA
+// NeighborsNeighborsHasMetadata
 // NeighborsNeighborsHasSBOM
 // NeighborsNeighborsHasSLSA
 // NeighborsNeighborsHasSourceAt
@@ -8209,6 +8240,7 @@ func (v *NeighborsNeighborsCertifyScorecard) implementsGraphQLInterfaceNeighbors
 func (v *NeighborsNeighborsCertifyVEXStatement) implementsGraphQLInterfaceNeighborsNeighborsNode() {}
 func (v *NeighborsNeighborsCertifyVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
 func (v *NeighborsNeighborsGHSA) implementsGraphQLInterfaceNeighborsNeighborsNode()                {}
+func (v *NeighborsNeighborsHasMetadata) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
 func (v *NeighborsNeighborsHasSBOM) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsHasSLSA) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsHasSourceAt) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
@@ -8262,6 +8294,9 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 		return json.Unmarshal(b, *v)
 	case "GHSA":
 		*v = new(NeighborsNeighborsGHSA)
+		return json.Unmarshal(b, *v)
+	case "HasMetadata":
+		*v = new(NeighborsNeighborsHasMetadata)
 		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(NeighborsNeighborsHasSBOM)
@@ -8419,6 +8454,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsHasMetadata:
+		typename = "HasMetadata"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NeighborsNeighborsHasMetadata
+		}{typename, v}
 		return json.Marshal(result)
 	case *NeighborsNeighborsHasSBOM:
 		typename = "HasSBOM"
@@ -9007,6 +9050,7 @@ func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, 
 // NodeNodeCertifyVEXStatement
 // NodeNodeCertifyVuln
 // NodeNodeGHSA
+// NodeNodeHasMetadata
 // NodeNodeHasSBOM
 // NodeNodeHasSLSA
 // NodeNodeHasSourceAt
@@ -9041,6 +9085,7 @@ func (v *NodeNodeCertifyScorecard) implementsGraphQLInterfaceNodeNode()    {}
 func (v *NodeNodeCertifyVEXStatement) implementsGraphQLInterfaceNodeNode() {}
 func (v *NodeNodeCertifyVuln) implementsGraphQLInterfaceNodeNode()         {}
 func (v *NodeNodeGHSA) implementsGraphQLInterfaceNodeNode()                {}
+func (v *NodeNodeHasMetadata) implementsGraphQLInterfaceNodeNode()         {}
 func (v *NodeNodeHasSBOM) implementsGraphQLInterfaceNodeNode()             {}
 func (v *NodeNodeHasSLSA) implementsGraphQLInterfaceNodeNode()             {}
 func (v *NodeNodeHasSourceAt) implementsGraphQLInterfaceNodeNode()         {}
@@ -9094,6 +9139,9 @@ func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 		return json.Unmarshal(b, *v)
 	case "GHSA":
 		*v = new(NodeNodeGHSA)
+		return json.Unmarshal(b, *v)
+	case "HasMetadata":
+		*v = new(NodeNodeHasMetadata)
 		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(NodeNodeHasSBOM)
@@ -9251,6 +9299,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodeGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeHasMetadata:
+		typename = "HasMetadata"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodeNodeHasMetadata
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodeNodeHasSBOM:
 		typename = "HasSBOM"
@@ -10252,6 +10308,30 @@ func (v *NodeNodeGHSA) __premarshalJSON() (*__premarshalNodeNodeGHSA, error) {
 	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
+
+// NodeNodeHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type NodeNodeHasMetadata struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodeNodeHasMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetTypename() *string { return v.Typename }
 
 // NodeNodeHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type NodeNodeHasSBOM struct {
@@ -12242,6 +12322,30 @@ func (v *NodesNodesGHSA) __premarshalJSON() (*__premarshalNodesNodesGHSA, error)
 	return &retval, nil
 }
 
+// NodesNodesHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type NodesNodesHasMetadata struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodesNodesHasMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetTypename() *string { return v.Typename }
+
 // NodesNodesHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type NodesNodesHasSBOM struct {
 	Typename       *string `json:"__typename"`
@@ -12986,6 +13090,7 @@ func (v *NodesNodesNoVuln) GetId() string { return v.Id }
 // NodesNodesCertifyVEXStatement
 // NodesNodesCertifyVuln
 // NodesNodesGHSA
+// NodesNodesHasMetadata
 // NodesNodesHasSBOM
 // NodesNodesHasSLSA
 // NodesNodesHasSourceAt
@@ -13020,6 +13125,7 @@ func (v *NodesNodesCertifyScorecard) implementsGraphQLInterfaceNodesNodesNode() 
 func (v *NodesNodesCertifyVEXStatement) implementsGraphQLInterfaceNodesNodesNode() {}
 func (v *NodesNodesCertifyVuln) implementsGraphQLInterfaceNodesNodesNode()         {}
 func (v *NodesNodesGHSA) implementsGraphQLInterfaceNodesNodesNode()                {}
+func (v *NodesNodesHasMetadata) implementsGraphQLInterfaceNodesNodesNode()         {}
 func (v *NodesNodesHasSBOM) implementsGraphQLInterfaceNodesNodesNode()             {}
 func (v *NodesNodesHasSLSA) implementsGraphQLInterfaceNodesNodesNode()             {}
 func (v *NodesNodesHasSourceAt) implementsGraphQLInterfaceNodesNodesNode()         {}
@@ -13073,6 +13179,9 @@ func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 		return json.Unmarshal(b, *v)
 	case "GHSA":
 		*v = new(NodesNodesGHSA)
+		return json.Unmarshal(b, *v)
+	case "HasMetadata":
+		*v = new(NodesNodesHasMetadata)
 		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(NodesNodesHasSBOM)
@@ -13230,6 +13339,14 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesHasMetadata:
+		typename = "HasMetadata"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodesNodesHasMetadata
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodesNodesHasSBOM:
 		typename = "HasSBOM"
@@ -14893,6 +15010,30 @@ func (v *PathPathGHSA) __premarshalJSON() (*__premarshalPathPathGHSA, error) {
 	return &retval, nil
 }
 
+// PathPathHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type PathPathHasMetadata struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns PathPathHasMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetTypename() *string { return v.Typename }
+
 // PathPathHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type PathPathHasSBOM struct {
 	Typename       *string `json:"__typename"`
@@ -15631,6 +15772,7 @@ func (v *PathPathNoVuln) GetId() string { return v.Id }
 // PathPathCertifyVEXStatement
 // PathPathCertifyVuln
 // PathPathGHSA
+// PathPathHasMetadata
 // PathPathHasSBOM
 // PathPathHasSLSA
 // PathPathHasSourceAt
@@ -15665,6 +15807,7 @@ func (v *PathPathCertifyScorecard) implementsGraphQLInterfacePathPathNode()    {
 func (v *PathPathCertifyVEXStatement) implementsGraphQLInterfacePathPathNode() {}
 func (v *PathPathCertifyVuln) implementsGraphQLInterfacePathPathNode()         {}
 func (v *PathPathGHSA) implementsGraphQLInterfacePathPathNode()                {}
+func (v *PathPathHasMetadata) implementsGraphQLInterfacePathPathNode()         {}
 func (v *PathPathHasSBOM) implementsGraphQLInterfacePathPathNode()             {}
 func (v *PathPathHasSLSA) implementsGraphQLInterfacePathPathNode()             {}
 func (v *PathPathHasSourceAt) implementsGraphQLInterfacePathPathNode()         {}
@@ -15718,6 +15861,9 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 		return json.Unmarshal(b, *v)
 	case "GHSA":
 		*v = new(PathPathGHSA)
+		return json.Unmarshal(b, *v)
+	case "HasMetadata":
+		*v = new(PathPathHasMetadata)
 		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(PathPathHasSBOM)
@@ -15875,6 +16021,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathHasMetadata:
+		typename = "HasMetadata"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*PathPathHasMetadata
+		}{typename, v}
 		return json.Marshal(result)
 	case *PathPathHasSBOM:
 		typename = "HasSBOM"
