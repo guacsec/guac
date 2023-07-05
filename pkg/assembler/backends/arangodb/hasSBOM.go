@@ -25,7 +25,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// TODO: noe4j backend does not match the schema. This needs updating before use!
 func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 	panic(fmt.Errorf("not implemented: HasSBOM - HasSBOM"))
 }

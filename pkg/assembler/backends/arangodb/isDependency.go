@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/arangodb/go-driver"
@@ -50,47 +49,6 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgI
 		depPkgId := guacPkgId(*depPkg[i])
 		values["pkgVersionGuacKey"] = pkgId.VersionId
 		values["secondPkgNameGuacKey"] = depPkgId.NameId
-
-		values["pkgType"] = pkg[i].Type
-		values["name"] = pkg[i].Name
-		if pkg[i].Namespace != nil {
-			values["namespace"] = *pkg[i].Namespace
-		} else {
-			values["namespace"] = ""
-		}
-		if pkg[i].Version != nil {
-			values["version"] = *pkg[i].Version
-		} else {
-			values["version"] = ""
-		}
-		if pkg[i].Subpath != nil {
-			values["subpath"] = *pkg[i].Subpath
-		} else {
-			values["subpath"] = ""
-		}
-
-		// To ensure consistency, always sort the qualifiers by key
-		qualifiersMap := map[string]string{}
-		keys := []string{}
-		for _, kv := range pkg[i].Qualifiers {
-			qualifiersMap[kv.Key] = kv.Value
-			keys = append(keys, kv.Key)
-		}
-		sort.Strings(keys)
-		qualifiers := []string{}
-		for _, k := range keys {
-			qualifiers = append(qualifiers, k, qualifiersMap[k])
-		}
-		values["qualifier"] = qualifiers
-
-		// dependent package
-		values["secondPkgType"] = depPkg[i].Type
-		if depPkg[i].Namespace != nil {
-			values["secondNamespace"] = *depPkg[i].Namespace
-		} else {
-			values["secondNamespace"] = ""
-		}
-		values["secondName"] = depPkg[i].Name
 
 		// isDependency
 

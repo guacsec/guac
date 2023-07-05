@@ -1,6 +1,6 @@
 # arangodb 
 arango-user: root
-arango-pass: rootpassword
+arango-pass: test123
 arango-addr: http://arangodb:8529
 
 # neo4j
