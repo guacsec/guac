@@ -37,7 +37,7 @@ var now string
 var nowNode DfsNode
 var queue []string
 
-// TODO: make more robust usuing predicates
+// TODO: make more robust using predicates
 func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, startType string, maxDepth int) (map[string]DfsNode, error) {
 	startNode, err := model.Node(ctx, gqlclient, startID)
 
@@ -68,26 +68,21 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 			break
 		}
 
-		if maxDepth != 0 && nowNode.depth >= maxDepth {
+		if nowNode.depth >= maxDepth {
 			break
 		}
 
 		neighborsResponse, err := model.Neighbors(ctx, gqlclient, now, []model.Edge{})
 
 		if err != nil {
-			return nil, fmt.Errorf("failed getting package parent:%w", err)
+			return nil, fmt.Errorf("failed getting neighbors:%w", err)
 		}
 
-		// case on predicates and nodeType
 		for _, neighbor := range neighborsResponse.Neighbors {
-			if nowNode.nodeType == "packageVersion" {
-				if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
-					err := exploreIsDependency(*isDependency, ctx, gqlclient)
+			err = caseOnPredicates(neighbor, nowNode, ctx, gqlclient)
 
-					if err != nil {
-						return nil, err
-					}
-				}
+			if err != nil {
+				return nil, err
 			}
 		}
 
@@ -97,6 +92,22 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 
 	return nodeMap, nil
 
+}
+
+func caseOnPredicates(neighbor model.NeighborsNeighborsNode, nowNode DfsNode, ctx context.Context, gqlclient graphql.Client) error {
+	// case on predicates and nodeType
+	switch nowNode.nodeType {
+	case "packageVersion":
+		if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
+			err := exploreIsDependency(*isDependency, ctx, gqlclient)
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func exploreIsDependency(isDependency model.NeighborsNeighborsIsDependency, ctx context.Context, gqlclient graphql.Client) error {
