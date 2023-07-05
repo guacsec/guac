@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/arangodb/go-driver"
@@ -54,38 +53,6 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subject model.Pack
 		// add guac keys
 		pkgId := guacPkgId(*subject.Packages[i])
 		values["pkgVersionGuacKey"] = pkgId.VersionId
-
-		values["pkgType"] = subject.Packages[i].Type
-		values["name"] = subject.Packages[i].Name
-		if subject.Packages[i].Namespace != nil {
-			values["namespace"] = *subject.Packages[i].Namespace
-		} else {
-			values["namespace"] = ""
-		}
-		if subject.Packages[i].Version != nil {
-			values["version"] = *subject.Packages[i].Version
-		} else {
-			values["version"] = ""
-		}
-		if subject.Packages[i].Subpath != nil {
-			values["subpath"] = *subject.Packages[i].Subpath
-		} else {
-			values["subpath"] = ""
-		}
-
-		// To ensure consistency, always sort the qualifiers by key
-		qualifiersMap := map[string]string{}
-		keys := []string{}
-		for _, kv := range subject.Packages[i].Qualifiers {
-			qualifiersMap[kv.Key] = kv.Value
-			keys = append(keys, kv.Key)
-		}
-		sort.Strings(keys)
-		qualifiers := []string{}
-		for _, k := range keys {
-			qualifiers = append(qualifiers, k, qualifiersMap[k])
-		}
-		values["qualifier"] = qualifiers
 
 		// dependent package
 		values["art_algorithm"] = strings.ToLower(artifact[i].Algorithm)
@@ -125,23 +92,23 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subject model.Pack
 	LET firstPkg = FIRST(
 		FOR pVersion in PkgVersion
 		  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-		  FOR pName in PkgName
+		FOR pName in PkgName
 		  FILTER pName._id == pVersion._parent
-		  FOR pNs in PkgNamespace
+		FOR pNs in PkgNamespace
 		  FILTER pNs._id == pName._parent
-		  FOR pType in PkgType
+		FOR pType in PkgType
 		  FILTER pType._id == pNs._parent
 
-			  RETURN {
-			  'type': pType.type,
-			  'namespace': pNs.namespace,
-			  'name': pName.name,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
-			  }
-		)
+		RETURN {
+		  'type': pType.type,
+		  'namespace': pNs.namespace,
+		  'name': pName.name,
+		  'version': pVersion.version,
+		  'subpath': pVersion.subpath,
+		  'qualifier_list': pVersion.qualifier_list,
+		  'versionDoc': pVersion
+		}
+	)
 	  
 	  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 	  
@@ -212,8 +179,11 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subject model.Pack
 
 	var isOccurrenceList []*model.IsOccurrence
 	for _, createdValue := range createdValues {
-		pkg := generateModelPackage(createdValue.FirstPkgType, createdValue.FirstPkgNamespace,
+		pkg, err := generateModelPackage(createdValue.FirstPkgType, createdValue.FirstPkgNamespace,
 			createdValue.FirstPkgName, createdValue.FirstPkgVersion, createdValue.FirstPkgSubpath, createdValue.FirstPkgQualifierList)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
+		}
 
 		algorithm := createdValue.ArtAlgo
 		digest := createdValue.ArtDigest
@@ -240,37 +210,9 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		return nil, fmt.Errorf("source as a subject is currently unimplemented for the IngestOccurrence")
 	}
 
-	values["pkgType"] = subject.Package.Type
-	values["name"] = subject.Package.Name
-	if subject.Package.Namespace != nil {
-		values["namespace"] = *subject.Package.Namespace
-	} else {
-		values["namespace"] = ""
-	}
-	if subject.Package.Version != nil {
-		values["version"] = *subject.Package.Version
-	} else {
-		values["version"] = ""
-	}
-	if subject.Package.Subpath != nil {
-		values["subpath"] = *subject.Package.Subpath
-	} else {
-		values["subpath"] = ""
-	}
-
-	// To ensure consistency, always sort the qualifiers by key
-	qualifiersMap := map[string]string{}
-	keys := []string{}
-	for _, kv := range subject.Package.Qualifiers {
-		qualifiersMap[kv.Key] = kv.Value
-		keys = append(keys, kv.Key)
-	}
-	sort.Strings(keys)
-	qualifiers := []string{}
-	for _, k := range keys {
-		qualifiers = append(qualifiers, k, qualifiersMap[k])
-	}
-	values["qualifier"] = qualifiers
+	// add guac keys
+	pkgId := guacPkgId(*subject.Package)
+	values["pkgVersionGuacKey"] = pkgId.VersionId
 
 	values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
 	values["art_digest"] = strings.ToLower(artifact.Digest)
@@ -280,43 +222,43 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 	// values["typeID"] = c.pkgTypeMap[subject.Package.Type].Id
 	// values["typeValue"] = c.pkgTypeMap[subject.Package.Type].PkgType
 
-	query := `LET firstPkg = FIRST(
-		FOR pkg IN Pkg
-		  FILTER pkg.root == "pkg"
-		  FOR pkgHasType IN OUTBOUND pkg PkgHasType
-			  FILTER pkgHasType.type == @pkgType && pkgHasType._parent == pkg._id
-		    FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
-				  FILTER pkgHasNamespace.namespace == @namespace && pkgHasNamespace._parent == pkgHasType._id
-			  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
-					  FILTER pkgHasName.name == @name && pkgHasName._parent == pkgHasNamespace._id
-				FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
-						  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier && pkgHasVersion._parent == pkgHasName._id
-				  RETURN {
-					"type": pkgHasType.type,
-					"namespace": pkgHasNamespace.namespace,
-					"name": pkgHasName.name,
-					"version": pkgHasVersion.version,
-					"subpath": pkgHasVersion.subpath,
-					"qualifier_list": pkgHasVersion.qualifier_list,
-					"versionDoc": pkgHasVersion
-				  }
-	  )
+	query := `
+	LET firstPkg = FIRST(
+		FOR pVersion in PkgVersion
+		  FILTER pVersion.guacKey == @pkgVersionGuacKey
+		FOR pName in PkgName
+		  FILTER pName._id == pVersion._parent
+		FOR pNs in PkgNamespace
+		  FILTER pNs._id == pName._parent
+		FOR pType in PkgType
+		  FILTER pType._id == pNs._parent
+
+		RETURN {
+		  'type': pType.type,
+		  'namespace': pNs.namespace,
+		  'name': pName.name,
+		  'version': pVersion.version,
+		  'subpath': pVersion.subpath,
+		  'qualifier_list': pVersion.qualifier_list,
+		  'versionDoc': pVersion
+		}
+	)
 	  
-	  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
+	LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 	  
-	  LET isOccurrence = FIRST(
+	LET isOccurrence = FIRST(
 		  UPSERT { packageID:firstPkg.versionDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
 			  INSERT { packageID:firstPkg.versionDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
 			  UPDATE {} IN isOccurrences
 			  RETURN NEW
-	  )
+	)
 	  
-	  LET edgeCollection = (FOR edgeData IN [
+	LET edgeCollection = (FOR edgeData IN [
 		{fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
 		{fromKey: firstPkg.versionDoc._key, toKey: isOccurrence._key, from: firstPkg.versionDoc._id, to: isOccurrence._id, label: "subject"}]
 	
 	  INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
-	  )
+	)
 	  
 	  RETURN {
 		  "firstPkgType": firstPkg.type,
@@ -368,9 +310,11 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 	}
 	if len(createdValues) == 1 {
 
-		pkg := generateModelPackage(createdValues[0].FirstPkgType, createdValues[0].FirstPkgNamespace,
+		pkg, err := generateModelPackage(createdValues[0].FirstPkgType, createdValues[0].FirstPkgNamespace,
 			createdValues[0].FirstPkgName, createdValues[0].FirstPkgVersion, createdValues[0].FirstPkgSubpath, createdValues[0].FirstPkgQualifierList)
-
+		if err != nil {
+			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
+		}
 		algorithm := createdValues[0].ArtAlgo
 		digest := createdValues[0].ArtDigest
 		artifact := generateModelArtifact(algorithm, digest)

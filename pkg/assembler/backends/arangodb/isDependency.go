@@ -34,9 +34,6 @@ const (
 // Ingest IsDependency
 
 func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgInputSpec, depPkg []*model.PkgInputSpec, dependency []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
-
-	//return []*model.IsDependency{}, nil
-
 	if len(pkg) != len(depPkg) {
 		return nil, fmt.Errorf("uneven packages and dependent packages for ingestion")
 	} else if len(pkg) != len(dependency) {
@@ -130,41 +127,41 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgI
 	query := `
 
 	LET firstPkg = FIRST(
-		  FOR pVersion in PkgVersion
-			FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-			FOR pName in PkgName
-			FILTER pName._id == pVersion._parent
-			FOR pNs in PkgNamespace
-			FILTER pNs._id == pName._parent
-			FOR pType in PkgType
-			FILTER pType._id == pNs._parent
+		FOR pVersion in PkgVersion
+		  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
+		FOR pName in PkgName
+		  FILTER pName._id == pVersion._parent
+		FOR pNs in PkgNamespace
+		  FILTER pNs._id == pName._parent
+		FOR pType in PkgType
+		  FILTER pType._id == pNs._parent
 
-				RETURN {
-				'type': pType.type,
-				'namespace': pNs.namespace,
-				'name': pName.name,
-				'version': pVersion.version,
-				'subpath': pVersion.subpath,
-				'qualifier_list': pVersion.qualifier_list,
-				'versionDoc': pVersion
-				}
-		  )
+		RETURN {
+		  'type': pType.type,
+		  'namespace': pNs.namespace,
+		  'name': pName.name,
+		  'version': pVersion.version,
+		  'subpath': pVersion.subpath,
+		  'qualifier_list': pVersion.qualifier_list,
+		  'versionDoc': pVersion
+		}
+	)
 
-  LET secondPkg = FIRST(
-      FOR pName in PkgName
-        FILTER pName.guacKey == doc.secondPkgNameGuacKey
+    LET secondPkg = FIRST(
+        FOR pName in PkgName
+          FILTER pName.guacKey == doc.secondPkgNameGuacKey
         FOR pNs in PkgNamespace
-        FILTER pNs._id == pName._parent
+          FILTER pNs._id == pName._parent
         FOR pType in PkgType
-        FILTER pType._id == pNs._parent
+          FILTER pType._id == pNs._parent
 
-            RETURN {
-            'type': pType.type,
-            'namespace': pNs.namespace,
-            'name': pName.name,
-            'nameDoc': pName
-            }
-      )
+        RETURN {
+          'type': pType.type,
+          'namespace': pNs.namespace,
+          'name': pName.name,
+          'nameDoc': pName
+        }
+    )
 		
 	LET isDependency = FIRST(
 		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
@@ -239,12 +236,16 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgI
 
 	var isDependencyList []*model.IsDependency
 	for _, createdValue := range createdValues {
-		pkg := generateModelPackage(createdValue.FirstPkgType, createdValue.FirstPkgNamespace,
+		pkg, err := generateModelPackage(createdValue.FirstPkgType, createdValue.FirstPkgNamespace,
 			createdValue.FirstPkgName, createdValue.FirstPkgVersion, createdValue.FirstPkgSubpath, createdValue.FirstPkgQualifierList)
-
-		depPkg := generateModelPackage(createdValue.SecondPkgType, createdValue.SecondPkgNamespace,
+		if err != nil {
+			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
+		}
+		depPkg, err := generateModelPackage(createdValue.SecondPkgType, createdValue.SecondPkgNamespace,
 			createdValue.SecondPkgName, nil, nil, nil)
-
+		if err != nil {
+			return nil, fmt.Errorf("failed to get dependent model.package with err: %w", err)
+		}
 		dependencyTypeEnum, err := convertDependencyTypeToEnum(createdValue.DependencyType)
 		if err != nil {
 			return nil, fmt.Errorf("convertDependencyTypeToEnum failed with error: %w", err)
@@ -268,89 +269,55 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgI
 func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
 	values := map[string]any{}
 
-	values["pkgType"] = pkg.Type
-	values["name"] = pkg.Name
-	if pkg.Namespace != nil {
-		values["namespace"] = *pkg.Namespace
-	} else {
-		values["namespace"] = ""
-	}
-	if pkg.Version != nil {
-		values["version"] = *pkg.Version
-	} else {
-		values["version"] = ""
-	}
-	if pkg.Subpath != nil {
-		values["subpath"] = *pkg.Subpath
-	} else {
-		values["subpath"] = ""
-	}
+	// add guac keys
+	pkgId := guacPkgId(pkg)
+	depPkgId := guacPkgId(depPkg)
+	values["pkgVersionGuacKey"] = pkgId.VersionId
+	values["secondPkgNameGuacKey"] = depPkgId.NameId
 
-	// To ensure consistency, always sort the qualifiers by key
-	qualifiersMap := map[string]string{}
-	keys := []string{}
-	for _, kv := range pkg.Qualifiers {
-		qualifiersMap[kv.Key] = kv.Value
-		keys = append(keys, kv.Key)
-	}
-	sort.Strings(keys)
-	qualifiers := []string{}
-	for _, k := range keys {
-		qualifiers = append(qualifiers, k, qualifiersMap[k])
-	}
-	values["qualifier"] = qualifiers
-
-	values["secondPkgType"] = depPkg.Type
-	values["secondNamespace"] = depPkg.Namespace
-	values["secondName"] = depPkg.Name
 	values[versionRange] = dependency.VersionRange
 	values[dependencyType] = dependency.DependencyType.String()
 	values[justification] = dependency.Justification
 	values[origin] = dependency.Origin
 	values[collector] = dependency.Collector
-	// values["typeID"] = c.pkgTypeMap[pkg.Type].Id
-	// values["typeValue"] = c.pkgTypeMap[pkg.Type].PkgType
-	// values["secondTypeID"] = c.pkgTypeMap[depPkg.Type].Id
-	// values["secondTypeValue"] = c.pkgTypeMap[depPkg.Type].PkgType
 
-	query := `LET firstPkg = FIRST(
-		FOR pkg IN Pkg
-		FILTER pkg.root == "pkg"
-		FOR pkgHasType IN OUTBOUND pkg PkgHasType
-			FILTER pkgHasType.type == @pkgType && pkgHasType._parent == pkg._id
-		  FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
-				  FILTER pkgHasNamespace.namespace == @namespace && pkgHasNamespace._parent == pkgHasType._id
-			  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
-					  FILTER pkgHasName.name == @name && pkgHasName._parent == pkgHasNamespace._id
-				FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
-						  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier && pkgHasVersion._parent == pkgHasName._id
-				  RETURN {
-					"type": pkgHasType.type,
-					"namespace": pkgHasNamespace.namespace,
-					"name": pkgHasName.name,
-					"version": pkgHasVersion.version,
-					"subpath": pkgHasVersion.subpath,
-					"qualifier_list": pkgHasVersion.qualifier_list,
-					"versionDoc": pkgHasVersion
-				  }
-	  )
-	  
-	  LET secondPkg = FIRST(
-		FOR pkg IN Pkg
-		  FILTER pkg.root == "pkg"
-		  FOR pkgHasType IN OUTBOUND pkg PkgHasType
-			  FILTER pkgHasType.type == @secondPkgType && pkgHasType._parent == pkg._id
-			FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
-				FILTER pkgHasNamespace.namespace == @secondNamespace && pkgHasNamespace._parent == pkgHasType._id
-			  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
-					  FILTER pkgHasName.name == @secondName && pkgHasName._parent == pkgHasNamespace._id
-				  RETURN {
-					"type": pkgHasType.type,
-					"namespace": pkgHasNamespace.namespace,
-					"name": pkgHasName.name,
-					"nameDoc": pkgHasName
-				  }
-	  )
+	query := `
+	LET firstPkg = FIRST(
+		FOR pVersion in PkgVersion
+		  FILTER pVersion.guacKey == @pkgVersionGuacKey
+		FOR pName in PkgName
+		  FILTER pName._id == pVersion._parent
+		FOR pNs in PkgNamespace
+		  FILTER pNs._id == pName._parent
+		FOR pType in PkgType
+		  FILTER pType._id == pNs._parent
+
+		RETURN {
+		  'type': pType.type,
+		  'namespace': pNs.namespace,
+		  'name': pName.name,
+		  'version': pVersion.version,
+		  'subpath': pVersion.subpath,
+		  'qualifier_list': pVersion.qualifier_list,
+		  'versionDoc': pVersion
+		}
+	)
+
+    LET secondPkg = FIRST(
+        FOR pName in PkgName
+          FILTER pName.guacKey == @secondPkgNameGuacKey
+        FOR pNs in PkgNamespace
+          FILTER pNs._id == pName._parent
+        FOR pType in PkgType
+          FILTER pType._id == pNs._parent
+
+        RETURN {
+          'type': pType.type,
+          'namespace': pNs.namespace,
+          'name': pName.name,
+          'nameDoc': pName
+        }
+    )
 	  
 	  LET isDependency = FIRST(
 		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
@@ -422,12 +389,16 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	}
 	if len(createdValues) == 1 {
 
-		pkg := generateModelPackage(createdValues[0].FirstPkgType, createdValues[0].FirstPkgNamespace,
+		pkg, err := generateModelPackage(createdValues[0].FirstPkgType, createdValues[0].FirstPkgNamespace,
 			createdValues[0].FirstPkgName, createdValues[0].FirstPkgVersion, createdValues[0].FirstPkgSubpath, createdValues[0].FirstPkgQualifierList)
-
-		depPkg := generateModelPackage(createdValues[0].SecondPkgType, createdValues[0].SecondPkgNamespace,
+		if err != nil {
+			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
+		}
+		depPkg, err := generateModelPackage(createdValues[0].SecondPkgType, createdValues[0].SecondPkgNamespace,
 			createdValues[0].SecondPkgName, nil, nil, nil)
-
+		if err != nil {
+			return nil, fmt.Errorf("failed to get dependent model.package with err: %w", err)
+		}
 		dependencyTypeEnum, err := convertDependencyTypeToEnum(createdValues[0].DependencyType)
 		if err != nil {
 			return nil, fmt.Errorf("convertDependencyTypeToEnum failed with error: %w", err)

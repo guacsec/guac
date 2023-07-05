@@ -32,13 +32,9 @@ const (
 	namespaces    string        = "namespaces"
 	names         string        = namespaces + ".names"
 	versions      string        = names + ".versions"
-	cvdID         string        = "cveId"
 	origin        string        = "origin"
 	collector     string        = "collector"
 	justification string        = "justification"
-	status        string        = "status"
-	statement     string        = "statement"
-	statusNotes   string        = "statusNotes"
 	maxRetires    int           = 20
 	retryTImer    time.Duration = time.Microsecond
 )
@@ -346,27 +342,12 @@ func executeQueryWithRetry(ctx context.Context, db driver.Database, query string
 			return cursor, nil
 		}
 
-		// Check if the error is due to a lock timeout or a temporary issue
-		//if isRetryableError(err) {
 		fmt.Printf("Retrying query (attempt %d), executed from: %s, %v, ...\n", retry+1, executedFrom, err)
 		time.Sleep(retryTImer)
-		continue
-		//}
-
-		// Return the error if it's not retryable
-		//return nil, err
 	}
 
 	return nil, fmt.Errorf("query execution failed after %d retries", maxRetires)
 }
-
-// func isRetryableError(err error) bool {
-// 	// Check the error type or message to determine if it's a retryable error
-// 	// For example, you can check for specific error codes or strings
-// 	// from the ArangoDB driver and return true if it's a retryable error.
-// 	// Customize this function based on your specific use case.
-// 	return false
-// }
 
 func newForQuery(repositoryName string, counterName string) *arangoQueryBuilder {
 	aqb := &arangoQueryBuilder{}

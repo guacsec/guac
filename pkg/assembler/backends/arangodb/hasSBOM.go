@@ -123,13 +123,18 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			digest := createdValues[0].ArtDigest
 			artifact := generateModelArtifact(algorithm, digest)
 
+			annotations, err := getAnnotations(createdValues[0].Annotations)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get hasSBOM annotations with error: %w", err)
+			}
+
 			isOccurrence := &model.HasSbom{
 				Subject:          artifact,
 				URI:              createdValues[0].Uri,
 				Algorithm:        createdValues[0].Algorithm,
 				Digest:           createdValues[0].Digest,
 				DownloadLocation: createdValues[0].DownloadLocation,
-				Annotations:      getAnnotations(createdValues[0].Annotations),
+				Annotations:      annotations,
 				Origin:           createdValues[0].Collector,
 				Collector:        createdValues[0].Origin,
 			}
@@ -139,37 +144,9 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			return nil, fmt.Errorf("number of hashEqual ingested is too great")
 		}
 	} else {
-		values["pkgType"] = subject.Package.Type
-		values["name"] = subject.Package.Name
-		if subject.Package.Namespace != nil {
-			values["namespace"] = *subject.Package.Namespace
-		} else {
-			values["namespace"] = ""
-		}
-		if subject.Package.Version != nil {
-			values["version"] = *subject.Package.Version
-		} else {
-			values["version"] = ""
-		}
-		if subject.Package.Subpath != nil {
-			values["subpath"] = *subject.Package.Subpath
-		} else {
-			values["subpath"] = ""
-		}
-
-		// To ensure consistency, always sort the qualifiers by key
-		qualifiersMap := map[string]string{}
-		keys := []string{}
-		for _, kv := range subject.Package.Qualifiers {
-			qualifiersMap[kv.Key] = kv.Value
-			keys = append(keys, kv.Key)
-		}
-		sort.Strings(keys)
-		qualifiers := []string{}
-		for _, k := range keys {
-			qualifiers = append(qualifiers, k, qualifiersMap[k])
-		}
-		values["qualifier"] = qualifiers
+		// add guac keys
+		pkgId := guacPkgId(*subject.Package)
+		values["pkgVersionGuacKey"] = pkgId.VersionId
 
 		values["uri"] = hasSbom.URI
 		values["algorithm"] = hasSbom.Algorithm
@@ -193,26 +170,26 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		}
 		values["annotations"] = annotations
 
-		query := `LET firstPkg = FIRST(
-		  FOR pkg IN Pkg
-			  FILTER pkg.root == "pkg"
-			FOR pkgHasType IN OUTBOUND pkg PkgHasType
-				FILTER pkgHasType.type == @pkgType && pkgHasType._parent == pkg._id
-			  FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
-					FILTER pkgHasNamespace.namespace == @namespace && pkgHasNamespace._parent == pkgHasType._id
-				FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
-						FILTER pkgHasName.name == @name && pkgHasName._parent == pkgHasNamespace._id
-				  FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
-						FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier && pkgHasVersion._parent == pkgHasName._id
-					RETURN {
-					  "type": pkgHasType.type,
-					  "namespace": pkgHasNamespace.namespace,
-					  "name": pkgHasName.name,
-					  "version": pkgHasVersion.version,
-					  "subpath": pkgHasVersion.subpath,
-					  "qualifier_list": pkgHasVersion.qualifier_list,
-					  "versionDoc": pkgHasVersion
-					}
+		query := `
+		LET firstPkg = FIRST(
+			FOR pVersion in PkgVersion
+			  FILTER pVersion.guacKey == @pkgVersionGuacKey
+			FOR pName in PkgName
+			  FILTER pName._id == pVersion._parent
+			FOR pNs in PkgNamespace
+			  FILTER pNs._id == pName._parent
+			FOR pType in PkgType
+			  FILTER pType._id == pNs._parent
+	
+			RETURN {
+			  'type': pType.type,
+			  'namespace': pNs.namespace,
+			  'name': pName.name,
+			  'version': pVersion.version,
+			  'subpath': pVersion.subpath,
+			  'qualifier_list': pVersion.qualifier_list,
+			  'versionDoc': pVersion
+			}
 		)
 		  
 		  LET hasSBOM = FIRST(
@@ -280,8 +257,15 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		}
 		if len(createdValues) == 1 {
 
-			pkg := generateModelPackage(createdValues[0].FirstPkgType, createdValues[0].FirstPkgNamespace,
+			pkg, err := generateModelPackage(createdValues[0].FirstPkgType, createdValues[0].FirstPkgNamespace,
 				createdValues[0].FirstPkgName, createdValues[0].FirstPkgVersion, createdValues[0].FirstPkgSubpath, createdValues[0].FirstPkgQualifierList)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get model.package with err: %w", err)
+			}
+			annotations, err := getAnnotations(createdValues[0].Annotations)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get hasSBOM annotations with error: %w", err)
+			}
 
 			isOccurrence := &model.HasSbom{
 				Subject:          pkg,
@@ -289,7 +273,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				Algorithm:        createdValues[0].Algorithm,
 				Digest:           createdValues[0].Digest,
 				DownloadLocation: createdValues[0].DownloadLocation,
-				Annotations:      getAnnotations(createdValues[0].Annotations),
+				Annotations:      annotations,
 				Origin:           createdValues[0].Collector,
 				Collector:        createdValues[0].Origin,
 			}
@@ -301,16 +285,24 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 	}
 }
 
-func getAnnotations(annotationList []interface{}) []*model.Annotation {
+func getAnnotations(annotationList []interface{}) ([]*model.Annotation, error) {
 	annotations := []*model.Annotation{}
 	for i := range annotationList {
 		if i%2 == 0 {
+			key, ok := annotationList[i].(string)
+			if !ok {
+				return nil, fmt.Errorf("failed to assert string value for hasSBOM annotation's key")
+			}
+			value, ok := annotationList[i+1].(string)
+			if !ok {
+				return nil, fmt.Errorf("failed to assert string value for hasSBOM annotation's value")
+			}
 			qualifier := &model.Annotation{
-				Key:   annotationList[i].(string),
-				Value: annotationList[i+1].(string),
+				Key:   key,
+				Value: value,
 			}
 			annotations = append(annotations, qualifier)
 		}
 	}
-	return annotations
+	return annotations, nil
 }

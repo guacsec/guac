@@ -235,8 +235,11 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 
 	var packageList []*model.Package
 	for _, createdValue := range createdValues {
-		pkg := generateModelPackage(createdValue.PkgType, createdValue.Namespace,
+		pkg, err := generateModelPackage(createdValue.PkgType, createdValue.Namespace,
 			createdValue.Name, createdValue.Version, createdValue.Subpath, createdValue.QualifierList)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
+		}
 		packageList = append(packageList, pkg)
 	}
 
@@ -362,33 +365,53 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	}
 	if len(createdValues) == 1 {
 		return generateModelPackage(createdValues[0].PkgType, createdValues[0].Namespace,
-			createdValues[0].Name, createdValues[0].Version, createdValues[0].Subpath, createdValues[0].QualifierList), nil
+			createdValues[0].Name, createdValues[0].Version, createdValues[0].Subpath, createdValues[0].QualifierList)
 	} else {
 		return nil, fmt.Errorf("number of hashEqual ingested is too great")
 	}
 }
 
-func getCollectedPackageQualifiers(qualifierList []interface{}) []*model.PackageQualifier {
+func getCollectedPackageQualifiers(qualifierList []interface{}) ([]*model.PackageQualifier, error) {
 	qualifiers := []*model.PackageQualifier{}
 	for i := range qualifierList {
 		if i%2 == 0 {
+			key, ok := qualifierList[i].(string)
+			if !ok {
+				return nil, fmt.Errorf("failed to assert string value for pkg qualifier's key")
+			}
+			value, ok := qualifierList[i+1].(string)
+			if !ok {
+				return nil, fmt.Errorf("failed to assert string value for pkg qualifier's value")
+			}
 			qualifier := &model.PackageQualifier{
-				Key:   qualifierList[i].(string),
-				Value: qualifierList[i+1].(string),
+				Key:   key,
+				Value: value,
 			}
 			qualifiers = append(qualifiers, qualifier)
 		}
 	}
-	return qualifiers
+	return qualifiers, nil
 }
 
-func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, subPathValue, qualifiersValue interface{}) *model.Package {
+func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, subPathValue, qualifiersValue interface{}) (*model.Package, error) {
 	var version *model.PackageVersion = nil
 	if versionValue != nil && subPathValue != nil && qualifiersValue != nil {
-		qualifiersList := qualifiersValue.([]interface{})
-		subPathString := subPathValue.(string)
-		versionString := versionValue.(string)
-		qualifiers := getCollectedPackageQualifiers(qualifiersList)
+		qualifiersList, ok := qualifiersValue.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("failed to assert slice for pkg qualifiers")
+		}
+		subPathString, ok := subPathValue.(string)
+		if !ok {
+			return nil, fmt.Errorf("failed to assert string value for pkg subpath")
+		}
+		versionString, ok := versionValue.(string)
+		if !ok {
+			return nil, fmt.Errorf("failed to assert string value for pkg version")
+		}
+		qualifiers, err := getCollectedPackageQualifiers(qualifiersList)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get qualifiers with error: %w", err)
+		}
 		version = &model.PackageVersion{
 			Version:    versionString,
 			Subpath:    subPathString,
@@ -412,7 +435,7 @@ func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, s
 		Type:       pkgType,
 		Namespaces: []*model.PackageNamespace{namespace},
 	}
-	return &pkg
+	return &pkg, nil
 }
 
 func getQualifiers(qualifiersSpec []*model.PackageQualifierSpec) []string {
@@ -547,7 +570,10 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 		} else {
 			var pkgQualifiers []*model.PackageQualifier
 			if doc.QualifierList != nil {
-				pkgQualifiers = getCollectedPackageQualifiers(doc.QualifierList)
+				pkgQualifiers, err = getCollectedPackageQualifiers(doc.QualifierList)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get package qualifiers with error: %w", err)
+				}
 			}
 
 			subPathString := doc.Subpath
