@@ -225,10 +225,6 @@ fragment allHasSBOMTree on HasSBOM {
   algorithm
   digest
   downloadLocation
-  annotations {
-      key
-      value
-  }
   origin
   collector
 }
@@ -337,4 +333,27 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
   knownSince
   origin
   collector
+}
+
+fragment allHasMetadata on HasMetadata {
+    id
+    subject {
+    __typename
+    ... on Package {
+      ...AllPkgTree
+    }
+    ... on Source {
+      ...AllSourceTree
+    }
+    ... on Artifact {
+      ...AllArtifactTree
+    }
+  }
+
+    key
+    value
+    timestamp
+    justification
+    origin
+    collector
 }

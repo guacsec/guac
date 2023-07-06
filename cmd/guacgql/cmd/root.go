@@ -38,6 +38,11 @@ var flags = struct {
 	nUser  string
 	nPass  string
 	nRealm string
+
+	// Needed only if using arangodb backend
+	arangoAddr string
+	arangoUser string
+	arangoPass string
 }{}
 
 var rootCmd = &cobra.Command{
@@ -56,6 +61,10 @@ var rootCmd = &cobra.Command{
 		flags.nAddr = viper.GetString("neo4j-addr")
 		flags.nRealm = viper.GetString("neo4j-realm")
 
+		flags.arangoUser = viper.GetString("arango-user")
+		flags.arangoPass = viper.GetString("arango-pass")
+		flags.arangoAddr = viper.GetString("arango-addr")
+
 		startServer(cmd)
 	},
 }
@@ -64,6 +73,7 @@ func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
 	set, err := cli.BuildFlags([]string{
+		"arango-addr", "arango-user", "arango-pass",
 		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm", "gql-test-data",
 		"gql-listen-port", "gql-debug", "gql-backend", "gql-trace"})
 	if err != nil {

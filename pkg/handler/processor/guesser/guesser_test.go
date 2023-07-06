@@ -199,6 +199,16 @@ func Test_GuessDocument(t *testing.T) {
 		},
 		expectedType:   processor.DocumentDepsDev,
 		expectedFormat: processor.FormatJSON,
+	}, {
+		name: "valid CSAF Document",
+		document: &processor.Document{
+			Blob:              []byte(testdata.CsafExampleRedHat),
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectedType:   processor.DocumentCsaf,
+		expectedFormat: processor.FormatJSON,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {

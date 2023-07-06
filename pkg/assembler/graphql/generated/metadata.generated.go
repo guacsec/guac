@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -28,8 +29,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _HasSBOM_id(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_id(ctx, field)
+func (ec *executionContext) _HasMetadata_id(ctx context.Context, field graphql.CollectedField, obj *model.HasMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasMetadata_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -59,9 +60,9 @@ func (ec *executionContext) _HasSBOM_id(ctx context.Context, field graphql.Colle
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasMetadata_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSBOM",
+		Object:     "HasMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -72,8 +73,8 @@ func (ec *executionContext) fieldContext_HasSBOM_id(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSBOM_subject(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_subject(ctx, field)
+func (ec *executionContext) _HasMetadata_subject(ctx context.Context, field graphql.CollectedField, obj *model.HasMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasMetadata_subject(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -98,26 +99,26 @@ func (ec *executionContext) _HasSBOM_subject(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.PackageOrArtifact)
+	res := resTmp.(model.PackageSourceOrArtifact)
 	fc.Result = res
-	return ec.marshalNPackageOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifact(ctx, field.Selections, res)
+	return ec.marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasMetadata_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSBOM",
+		Object:     "HasMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type PackageOrArtifact does not have child fields")
+			return nil, errors.New("field of type PackageSourceOrArtifact does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSBOM_uri(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_uri(ctx, field)
+func (ec *executionContext) _HasMetadata_key(ctx context.Context, field graphql.CollectedField, obj *model.HasMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasMetadata_key(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -130,7 +131,7 @@ func (ec *executionContext) _HasSBOM_uri(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.URI, nil
+		return obj.Key, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -147,9 +148,9 @@ func (ec *executionContext) _HasSBOM_uri(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_uri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasMetadata_key(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSBOM",
+		Object:     "HasMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -160,8 +161,8 @@ func (ec *executionContext) fieldContext_HasSBOM_uri(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSBOM_algorithm(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_algorithm(ctx, field)
+func (ec *executionContext) _HasMetadata_value(ctx context.Context, field graphql.CollectedField, obj *model.HasMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasMetadata_value(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -174,7 +175,7 @@ func (ec *executionContext) _HasSBOM_algorithm(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Algorithm, nil
+		return obj.Value, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -191,9 +192,9 @@ func (ec *executionContext) _HasSBOM_algorithm(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_algorithm(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasMetadata_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSBOM",
+		Object:     "HasMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -204,8 +205,8 @@ func (ec *executionContext) fieldContext_HasSBOM_algorithm(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSBOM_digest(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_digest(ctx, field)
+func (ec *executionContext) _HasMetadata_timestamp(ctx context.Context, field graphql.CollectedField, obj *model.HasMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasMetadata_timestamp(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -218,7 +219,51 @@ func (ec *executionContext) _HasSBOM_digest(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Digest, nil
+		return obj.Timestamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_HasMetadata_timestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "HasMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _HasMetadata_justification(ctx context.Context, field graphql.CollectedField, obj *model.HasMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasMetadata_justification(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Justification, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -235,9 +280,9 @@ func (ec *executionContext) _HasSBOM_digest(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_digest(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasMetadata_justification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSBOM",
+		Object:     "HasMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -248,52 +293,8 @@ func (ec *executionContext) fieldContext_HasSBOM_digest(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSBOM_downloadLocation(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_downloadLocation(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DownloadLocation, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_HasSBOM_downloadLocation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "HasSBOM",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _HasSBOM_origin(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_origin(ctx, field)
+func (ec *executionContext) _HasMetadata_origin(ctx context.Context, field graphql.CollectedField, obj *model.HasMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasMetadata_origin(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -323,9 +324,9 @@ func (ec *executionContext) _HasSBOM_origin(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasMetadata_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSBOM",
+		Object:     "HasMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -336,8 +337,8 @@ func (ec *executionContext) fieldContext_HasSBOM_origin(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSBOM_collector(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_collector(ctx, field)
+func (ec *executionContext) _HasMetadata_collector(ctx context.Context, field graphql.CollectedField, obj *model.HasMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasMetadata_collector(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -367,9 +368,9 @@ func (ec *executionContext) _HasSBOM_collector(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasMetadata_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSBOM",
+		Object:     "HasMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -384,56 +385,56 @@ func (ec *executionContext) fieldContext_HasSBOM_collector(ctx context.Context, 
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, obj interface{}) (model.HasSBOMInputSpec, error) {
-	var it model.HasSBOMInputSpec
+func (ec *executionContext) unmarshalInputHasMetadataInputSpec(ctx context.Context, obj interface{}) (model.HasMetadataInputSpec, error) {
+	var it model.HasMetadataInputSpec
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"uri", "algorithm", "digest", "downloadLocation", "origin", "collector"}
+	fieldsInOrder := [...]string{"key", "value", "timestamp", "justification", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "uri":
+		case "key":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uri"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.URI = data
-		case "algorithm":
+			it.Key = data
+		case "value":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Algorithm = data
-		case "digest":
+			it.Value = data
+		case "timestamp":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("digest"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
+			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Timestamp = data
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Digest = data
-		case "downloadLocation":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("downloadLocation"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.DownloadLocation = data
+			it.Justification = data
 		case "origin":
 			var err error
 
@@ -458,14 +459,14 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj interface{}) (model.HasSBOMSpec, error) {
-	var it model.HasSBOMSpec
+func (ec *executionContext) unmarshalInputHasMetadataSpec(ctx context.Context, obj interface{}) (model.HasMetadataSpec, error) {
+	var it model.HasMetadataSpec
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "subject", "uri", "algorithm", "digest", "downloadLocation", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "subject", "since", "key", "value", "justification", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -485,47 +486,47 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-			data, err := ec.unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx, v)
+			data, err := ec.unmarshalOPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Subject = data
-		case "uri":
+		case "since":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uri"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("since"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Since = data
+		case "key":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.URI = data
-		case "algorithm":
+			it.Key = data
+		case "value":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Algorithm = data
-		case "digest":
+			it.Value = data
+		case "justification":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("digest"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Digest = data
-		case "downloadLocation":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("downloadLocation"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.DownloadLocation = data
+			it.Justification = data
 		case "origin":
 			var err error
 
@@ -558,54 +559,54 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 
 // region    **************************** object.gotpl ****************************
 
-var hasSBOMImplementors = []string{"HasSBOM", "Node"}
+var hasMetadataImplementors = []string{"HasMetadata", "Node"}
 
-func (ec *executionContext) _HasSBOM(ctx context.Context, sel ast.SelectionSet, obj *model.HasSbom) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, hasSBOMImplementors)
+func (ec *executionContext) _HasMetadata(ctx context.Context, sel ast.SelectionSet, obj *model.HasMetadata) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, hasMetadataImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("HasSBOM")
+			out.Values[i] = graphql.MarshalString("HasMetadata")
 		case "id":
-			out.Values[i] = ec._HasSBOM_id(ctx, field, obj)
+			out.Values[i] = ec._HasMetadata_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "subject":
-			out.Values[i] = ec._HasSBOM_subject(ctx, field, obj)
+			out.Values[i] = ec._HasMetadata_subject(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "uri":
-			out.Values[i] = ec._HasSBOM_uri(ctx, field, obj)
+		case "key":
+			out.Values[i] = ec._HasMetadata_key(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "algorithm":
-			out.Values[i] = ec._HasSBOM_algorithm(ctx, field, obj)
+		case "value":
+			out.Values[i] = ec._HasMetadata_value(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "digest":
-			out.Values[i] = ec._HasSBOM_digest(ctx, field, obj)
+		case "timestamp":
+			out.Values[i] = ec._HasMetadata_timestamp(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "downloadLocation":
-			out.Values[i] = ec._HasSBOM_downloadLocation(ctx, field, obj)
+		case "justification":
+			out.Values[i] = ec._HasMetadata_justification(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "origin":
-			out.Values[i] = ec._HasSBOM_origin(ctx, field, obj)
+			out.Values[i] = ec._HasMetadata_origin(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "collector":
-			out.Values[i] = ec._HasSBOM_collector(ctx, field, obj)
+			out.Values[i] = ec._HasMetadata_collector(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -636,11 +637,11 @@ func (ec *executionContext) _HasSBOM(ctx context.Context, sel ast.SelectionSet, 
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNHasSBOM2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbom(ctx context.Context, sel ast.SelectionSet, v model.HasSbom) graphql.Marshaler {
-	return ec._HasSBOM(ctx, sel, &v)
+func (ec *executionContext) marshalNHasMetadata2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadata(ctx context.Context, sel ast.SelectionSet, v model.HasMetadata) graphql.Marshaler {
+	return ec._HasMetadata(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNHasSBOM2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbomᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HasSbom) graphql.Marshaler {
+func (ec *executionContext) marshalNHasMetadata2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HasMetadata) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -664,7 +665,7 @@ func (ec *executionContext) marshalNHasSBOM2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNHasSBOM2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbom(ctx, sel, v[i])
+			ret[i] = ec.marshalNHasMetadata2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadata(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -684,26 +685,26 @@ func (ec *executionContext) marshalNHasSBOM2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 	return ret
 }
 
-func (ec *executionContext) marshalNHasSBOM2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbom(ctx context.Context, sel ast.SelectionSet, v *model.HasSbom) graphql.Marshaler {
+func (ec *executionContext) marshalNHasMetadata2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadata(ctx context.Context, sel ast.SelectionSet, v *model.HasMetadata) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._HasSBOM(ctx, sel, v)
+	return ec._HasMetadata(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec(ctx context.Context, v interface{}) (model.HasSBOMInputSpec, error) {
-	res, err := ec.unmarshalInputHasSBOMInputSpec(ctx, v)
+func (ec *executionContext) unmarshalNHasMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataInputSpec(ctx context.Context, v interface{}) (model.HasMetadataInputSpec, error) {
+	res, err := ec.unmarshalInputHasMetadataInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOHasSBOMSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx context.Context, v interface{}) (*model.HasSBOMSpec, error) {
+func (ec *executionContext) unmarshalOHasMetadataSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx context.Context, v interface{}) (*model.HasMetadataSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputHasSBOMSpec(ctx, v)
+	res, err := ec.unmarshalInputHasMetadataSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -103,6 +103,7 @@ type pkgVersionStruct struct {
 	isDependencyLinks []uint32
 	badLinks          []uint32
 	goodLinks         []uint32
+	hasMetadataLinks  []uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
@@ -119,6 +120,7 @@ type pkgVersionNode struct {
 	vexLinks          []uint32
 	badLinks          []uint32
 	goodLinks         []uint32
+	hasMetadataLinks  []uint32
 	pkgEquals         []uint32
 }
 
@@ -133,6 +135,8 @@ type pkgNameOrVersion interface {
 	getCertifyBadLinks() []uint32
 	setCertifyGoodLinks(id uint32)
 	getCertifyGoodLinks() []uint32
+	setHasMetadataLinks(id uint32)
+	getHasMetadataLinks() []uint32
 	node
 }
 
@@ -174,6 +178,9 @@ func (n *pkgVersionStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	if allowedEdges[model.EdgePackageCertifyGood] {
 		out = append(out, n.goodLinks...)
 	}
+	if allowedEdges[model.EdgePackageHasMetadata] {
+		out = append(out, n.hasMetadataLinks...)
+	}
 	return out
 }
 func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []uint32 {
@@ -205,6 +212,9 @@ func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	}
 	if allowedEdges[model.EdgePackagePkgEqual] {
 		out = append(out, n.pkgEquals...)
+	}
+	if allowedEdges[model.EdgePackageHasMetadata] {
+		out = append(out, n.hasMetadataLinks...)
 	}
 
 	return out
@@ -269,6 +279,16 @@ func (p *pkgVersionStruct) setCertifyGoodLinks(id uint32) { p.goodLinks = append
 func (p *pkgVersionNode) setCertifyGoodLinks(id uint32)   { p.goodLinks = append(p.goodLinks, id) }
 func (p *pkgVersionStruct) getCertifyGoodLinks() []uint32 { return p.goodLinks }
 func (p *pkgVersionNode) getCertifyGoodLinks() []uint32   { return p.goodLinks }
+
+// hasMetadata back edges
+func (p *pkgVersionStruct) setHasMetadataLinks(id uint32) {
+	p.hasMetadataLinks = append(p.hasMetadataLinks, id)
+}
+func (p *pkgVersionNode) setHasMetadataLinks(id uint32) {
+	p.hasMetadataLinks = append(p.hasMetadataLinks, id)
+}
+func (p *pkgVersionStruct) getHasMetadataLinks() []uint32 { return p.hasMetadataLinks }
+func (p *pkgVersionNode) getHasMetadataLinks() []uint32   { return p.hasMetadataLinks }
 
 // pkgEqual back edges
 func (p *pkgVersionNode) setPkgEquals(id uint32) { p.pkgEquals = append(p.pkgEquals, id) }

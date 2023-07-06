@@ -1138,14 +1138,8 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				Algorithm:        "sha256",
 				Digest:           "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 				DownloadLocation: "uri: download location of the SBOM",
-				Annotations: []model.AnnotationInputSpec{
-					{
-						Key:   "scorecard",
-						Value: "7",
-					},
-				},
-				Origin:    "Demo ingestion",
-				Collector: "Demo ingestion",
+				Origin:           "Demo ingestion",
+				Collector:        "Demo ingestion",
 			},
 		},
 		{
@@ -1159,14 +1153,8 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				Algorithm:        "sha1",
 				Digest:           "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
 				DownloadLocation: "uri: download location of the SBOM",
-				Annotations: []model.AnnotationInputSpec{
-					{
-						Key:   "scorecard",
-						Value: "10",
-					},
-				},
-				Origin:    "Demo ingestion",
-				Collector: "Demo ingestion",
+				Origin:           "Demo ingestion",
+				Collector:        "Demo ingestion",
 			},
 		},
 		{
@@ -1183,14 +1171,8 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				Algorithm:        "sha256",
 				Digest:           "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 				DownloadLocation: "uri: download location of the SBOM",
-				Annotations: []model.AnnotationInputSpec{
-					{
-						Key:   "scorecard",
-						Value: "7",
-					},
-				},
-				Origin:    "Demo ingestion",
-				Collector: "Demo ingestion",
+				Origin:           "Demo ingestion",
+				Collector:        "Demo ingestion",
 			},
 		},
 		{
@@ -1204,14 +1186,8 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				Algorithm:        "sha1",
 				Digest:           "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
 				DownloadLocation: "uri: download location of the SBOM",
-				Annotations: []model.AnnotationInputSpec{
-					{
-						Key:   "scorecard",
-						Value: "10",
-					},
-				},
-				Origin:    "Demo ingestion",
-				Collector: "Demo ingestion",
+				Origin:           "Demo ingestion",
+				Collector:        "Demo ingestion",
 			},
 		},
 	}

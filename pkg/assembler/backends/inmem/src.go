@@ -76,16 +76,17 @@ type srcNameStruct struct {
 }
 type srcNameList []*srcNameNode
 type srcNameNode struct {
-	id             uint32
-	parent         uint32
-	name           string
-	tag            string
-	commit         string
-	srcMapLinks    []uint32
-	scorecardLinks []uint32
-	occurrences    []uint32
-	badLinks       []uint32
-	goodLinks      []uint32
+	id               uint32
+	parent           uint32
+	name             string
+	tag              string
+	commit           string
+	srcMapLinks      []uint32
+	scorecardLinks   []uint32
+	occurrences      []uint32
+	badLinks         []uint32
+	goodLinks        []uint32
+	hasMetadataLinks []uint32
 }
 
 func (n *srcNamespaceStruct) ID() uint32 { return n.id }
@@ -125,6 +126,10 @@ func (n *srcNameNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	if allowedEdges[model.EdgeSourceCertifyGood] {
 		out = append(out, n.goodLinks...)
 	}
+	if allowedEdges[model.EdgeSourceHasMetadata] {
+		out = append(out, n.hasMetadataLinks...)
+	}
+
 	return out
 }
 
@@ -143,6 +148,9 @@ func (p *srcNameNode) setScorecardLinks(id uint32)   { p.scorecardLinks = append
 func (p *srcNameNode) setOccurrenceLinks(id uint32)  { p.occurrences = append(p.occurrences, id) }
 func (p *srcNameNode) setCertifyBadLinks(id uint32)  { p.badLinks = append(p.badLinks, id) }
 func (p *srcNameNode) setCertifyGoodLinks(id uint32) { p.goodLinks = append(p.goodLinks, id) }
+func (p *srcNameNode) setHasMetadataLinks(id uint32) {
+	p.hasMetadataLinks = append(p.hasMetadataLinks, id)
+}
 
 // Ingest Source
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {

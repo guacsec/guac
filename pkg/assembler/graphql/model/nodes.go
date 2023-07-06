@@ -43,25 +43,6 @@ type Vulnerability interface {
 	IsVulnerability()
 }
 
-// Annotation is a key-value pair to provide additional information or metadata
-// about an SBOM.
-type Annotation struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-// AnnotationInputSpec allows ingesting Annotation objects.
-type AnnotationInputSpec struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-// AnnotationSpec allows creating query filters for Annotation objects.
-type AnnotationSpec struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
 // Artifact represents an artifact identified by a checksum hash.
 //
 // The checksum is split into the digest value and the algorithm used to generate
@@ -396,6 +377,65 @@ type GHSASpec struct {
 	GhsaID *string `json:"ghsaId,omitempty"`
 }
 
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type HasMetadata struct {
+	ID            string                  `json:"id"`
+	Subject       PackageSourceOrArtifact `json:"subject"`
+	Key           string                  `json:"key"`
+	Value         string                  `json:"value"`
+	Timestamp     time.Time               `json:"timestamp"`
+	Justification string                  `json:"justification"`
+	Origin        string                  `json:"origin"`
+	Collector     string                  `json:"collector"`
+}
+
+func (HasMetadata) IsNode() {}
+
+// HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
+type HasMetadataInputSpec struct {
+	Key           string    `json:"key"`
+	Value         string    `json:"value"`
+	Timestamp     time.Time `json:"timestamp"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// HasMetadataSpec allows filtering the list of HasMetadata evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// since specified indicates filtering timestamps after the specified time
+type HasMetadataSpec struct {
+	ID            *string                      `json:"id,omitempty"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
+	Since         *time.Time                   `json:"since,omitempty"`
+	Key           *string                      `json:"key,omitempty"`
+	Value         *string                      `json:"value,omitempty"`
+	Justification *string                      `json:"justification,omitempty"`
+	Origin        *string                      `json:"origin,omitempty"`
+	Collector     *string                      `json:"collector,omitempty"`
+}
+
 type HasSbom struct {
 	ID string `json:"id"`
 	// SBOM subject
@@ -408,8 +448,6 @@ type HasSbom struct {
 	Digest string `json:"digest"`
 	// Location from which the SBOM can be downloaded
 	DownloadLocation string `json:"downloadLocation"`
-	// SBOM annotations (e.g., SBOM Scorecard information)
-	Annotations []*Annotation `json:"annotations"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
 	// GUAC collector for the document
@@ -420,13 +458,12 @@ func (HasSbom) IsNode() {}
 
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
-	URI              string                 `json:"uri"`
-	Algorithm        string                 `json:"algorithm"`
-	Digest           string                 `json:"digest"`
-	DownloadLocation string                 `json:"downloadLocation"`
-	Annotations      []*AnnotationInputSpec `json:"annotations"`
-	Origin           string                 `json:"origin"`
-	Collector        string                 `json:"collector"`
+	URI              string `json:"uri"`
+	Algorithm        string `json:"algorithm"`
+	Digest           string `json:"digest"`
+	DownloadLocation string `json:"downloadLocation"`
+	Origin           string `json:"origin"`
+	Collector        string `json:"collector"`
 }
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
@@ -439,7 +476,6 @@ type HasSBOMSpec struct {
 	Algorithm        *string                `json:"algorithm,omitempty"`
 	Digest           *string                `json:"digest,omitempty"`
 	DownloadLocation *string                `json:"downloadLocation,omitempty"`
-	Annotations      []*AnnotationSpec      `json:"annotations,omitempty"`
 	Origin           *string                `json:"origin,omitempty"`
 	Collector        *string                `json:"collector,omitempty"`
 }
@@ -966,6 +1002,70 @@ type PkgSpec struct {
 	Subpath                  *string                 `json:"subpath,omitempty"`
 }
 
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContact struct {
+	ID            string                  `json:"id"`
+	Subject       PackageSourceOrArtifact `json:"subject"`
+	Email         string                  `json:"email"`
+	Info          string                  `json:"info"`
+	Since         time.Time               `json:"since"`
+	Justification string                  `json:"justification"`
+	Origin        string                  `json:"origin"`
+	Collector     string                  `json:"collector"`
+}
+
+// PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
+type PointOfContactInputSpec struct {
+	Email         string    `json:"email"`
+	Info          string    `json:"info"`
+	Since         time.Time `json:"since"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// PointOfContactSpec allows filtering the list of PointOfContact evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// since filters attestations with a value of since later or equal to the provided filter.
+type PointOfContactSpec struct {
+	ID            *string                      `json:"id,omitempty"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
+	Email         *string                      `json:"email,omitempty"`
+	Info          *string                      `json:"info,omitempty"`
+	Since         *time.Time                   `json:"since,omitempty"`
+	Justification *string                      `json:"justification,omitempty"`
+	Origin        *string                      `json:"origin,omitempty"`
+	Collector     *string                      `json:"collector,omitempty"`
+}
+
 // SLSA contains all of the fields present in a SLSA attestation.
 //
 // The materials and builders are objects of the HasSLSA predicate, everything
@@ -1335,6 +1435,7 @@ const (
 	EdgeArtifactHasSbom             Edge = "ARTIFACT_HAS_SBOM"
 	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
 	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
+	EdgeArtifactHasMetadata         Edge = "ARTIFACT_HAS_METADATA"
 	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
 	EdgeCveCertifyVexStatement      Edge = "CVE_CERTIFY_VEX_STATEMENT"
 	EdgeCveCertifyVuln              Edge = "CVE_CERTIFY_VULN"
@@ -1355,11 +1456,13 @@ const (
 	EdgePackageIsDependency         Edge = "PACKAGE_IS_DEPENDENCY"
 	EdgePackageIsOccurrence         Edge = "PACKAGE_IS_OCCURRENCE"
 	EdgePackagePkgEqual             Edge = "PACKAGE_PKG_EQUAL"
+	EdgePackageHasMetadata          Edge = "PACKAGE_HAS_METADATA"
 	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
 	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
 	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
+	EdgeSourceHasMetadata           Edge = "SOURCE_HAS_METADATA"
 	EdgeCertifyBadArtifact          Edge = "CERTIFY_BAD_ARTIFACT"
 	EdgeCertifyBadPackage           Edge = "CERTIFY_BAD_PACKAGE"
 	EdgeCertifyBadSource            Edge = "CERTIFY_BAD_SOURCE"
@@ -1393,6 +1496,9 @@ const (
 	EdgeIsVulnerabilityGhsa         Edge = "IS_VULNERABILITY_GHSA"
 	EdgeIsVulnerabilityOsv          Edge = "IS_VULNERABILITY_OSV"
 	EdgePkgEqualPackage             Edge = "PKG_EQUAL_PACKAGE"
+	EdgeHasMetadataPackage          Edge = "HAS_METADATA_PACKAGE"
+	EdgeHasMetadataArtifact         Edge = "HAS_METADATA_ARTIFACT"
+	EdgeHasMetadataSource           Edge = "HAS_METADATA_SOURCE"
 )
 
 var AllEdge = []Edge{
@@ -1403,6 +1509,7 @@ var AllEdge = []Edge{
 	EdgeArtifactHasSbom,
 	EdgeArtifactHasSlsa,
 	EdgeArtifactIsOccurrence,
+	EdgeArtifactHasMetadata,
 	EdgeBuilderHasSlsa,
 	EdgeCveCertifyVexStatement,
 	EdgeCveCertifyVuln,
@@ -1423,11 +1530,13 @@ var AllEdge = []Edge{
 	EdgePackageIsDependency,
 	EdgePackageIsOccurrence,
 	EdgePackagePkgEqual,
+	EdgePackageHasMetadata,
 	EdgeSourceCertifyBad,
 	EdgeSourceCertifyGood,
 	EdgeSourceCertifyScorecard,
 	EdgeSourceHasSourceAt,
 	EdgeSourceIsOccurrence,
+	EdgeSourceHasMetadata,
 	EdgeCertifyBadArtifact,
 	EdgeCertifyBadPackage,
 	EdgeCertifyBadSource,
@@ -1461,11 +1570,14 @@ var AllEdge = []Edge{
 	EdgeIsVulnerabilityGhsa,
 	EdgeIsVulnerabilityOsv,
 	EdgePkgEqualPackage,
+	EdgeHasMetadataPackage,
+	EdgeHasMetadataArtifact,
+	EdgeHasMetadataSource,
 }
 
 func (e Edge) IsValid() bool {
 	switch e {
-	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeBuilderHasSlsa, EdgeCveCertifyVexStatement, EdgeCveCertifyVuln, EdgeCveIsVulnerability, EdgeGhsaCertifyVexStatement, EdgeGhsaCertifyVuln, EdgeGhsaIsVulnerability, EdgeNoVulnCertifyVuln, EdgeOsvCertifyVexStatement, EdgeOsvCertifyVuln, EdgeOsvIsVulnerability, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementCve, EdgeCertifyVexStatementGhsa, EdgeCertifyVexStatementOsv, EdgeCertifyVexStatementPackage, EdgeCertifyVulnCve, EdgeCertifyVulnGhsa, EdgeCertifyVulnNoVuln, EdgeCertifyVulnOsv, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeIsVulnerabilityCve, EdgeIsVulnerabilityGhsa, EdgeIsVulnerabilityOsv, EdgePkgEqualPackage:
+	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeBuilderHasSlsa, EdgeCveCertifyVexStatement, EdgeCveCertifyVuln, EdgeCveIsVulnerability, EdgeGhsaCertifyVexStatement, EdgeGhsaCertifyVuln, EdgeGhsaIsVulnerability, EdgeNoVulnCertifyVuln, EdgeOsvCertifyVexStatement, EdgeOsvCertifyVuln, EdgeOsvIsVulnerability, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementCve, EdgeCertifyVexStatementGhsa, EdgeCertifyVexStatementOsv, EdgeCertifyVexStatementPackage, EdgeCertifyVulnCve, EdgeCertifyVulnGhsa, EdgeCertifyVulnNoVuln, EdgeCertifyVulnOsv, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeIsVulnerabilityCve, EdgeIsVulnerabilityGhsa, EdgeIsVulnerabilityOsv, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource:
 		return true
 	}
 	return false
