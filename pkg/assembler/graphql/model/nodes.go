@@ -43,25 +43,6 @@ type Vulnerability interface {
 	IsVulnerability()
 }
 
-// Annotation is a key-value pair to provide additional information or metadata
-// about an SBOM.
-type Annotation struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-// AnnotationInputSpec allows ingesting Annotation objects.
-type AnnotationInputSpec struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-// AnnotationSpec allows creating query filters for Annotation objects.
-type AnnotationSpec struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
 // Artifact represents an artifact identified by a checksum hash.
 //
 // The checksum is split into the digest value and the algorithm used to generate
@@ -467,8 +448,6 @@ type HasSbom struct {
 	Digest string `json:"digest"`
 	// Location from which the SBOM can be downloaded
 	DownloadLocation string `json:"downloadLocation"`
-	// SBOM annotations (e.g., SBOM Scorecard information)
-	Annotations []*Annotation `json:"annotations"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
 	// GUAC collector for the document
@@ -479,13 +458,12 @@ func (HasSbom) IsNode() {}
 
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
-	URI              string                 `json:"uri"`
-	Algorithm        string                 `json:"algorithm"`
-	Digest           string                 `json:"digest"`
-	DownloadLocation string                 `json:"downloadLocation"`
-	Annotations      []*AnnotationInputSpec `json:"annotations"`
-	Origin           string                 `json:"origin"`
-	Collector        string                 `json:"collector"`
+	URI              string `json:"uri"`
+	Algorithm        string `json:"algorithm"`
+	Digest           string `json:"digest"`
+	DownloadLocation string `json:"downloadLocation"`
+	Origin           string `json:"origin"`
+	Collector        string `json:"collector"`
 }
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
@@ -498,7 +476,6 @@ type HasSBOMSpec struct {
 	Algorithm        *string                `json:"algorithm,omitempty"`
 	Digest           *string                `json:"digest,omitempty"`
 	DownloadLocation *string                `json:"downloadLocation,omitempty"`
-	Annotations      []*AnnotationSpec      `json:"annotations,omitempty"`
 	Origin           *string                `json:"origin,omitempty"`
 	Collector        *string                `json:"collector,omitempty"`
 }

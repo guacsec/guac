@@ -225,10 +225,6 @@ fragment allHasSBOMTree on HasSBOM {
   algorithm
   digest
   downloadLocation
-  annotations {
-      key
-      value
-  }
   origin
   collector
 }

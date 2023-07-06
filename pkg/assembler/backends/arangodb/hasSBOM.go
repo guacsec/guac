@@ -18,7 +18,6 @@ package arangodb
 import (
 	"context"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/arangodb/go-driver"
@@ -40,29 +39,14 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		values["algorithm"] = hasSbom.Algorithm
 		values["digest"] = hasSbom.Digest
 		values["downloadLocation"] = hasSbom.DownloadLocation
-		values["annotations"] = hasSbom.Annotations
 		values["origin"] = hasSbom.Origin
 		values["collector"] = hasSbom.Collector
-
-		// To ensure consistency, always sort the qualifiers by key
-		annotationsMap := map[string]string{}
-		keys := []string{}
-		for _, kv := range hasSbom.Annotations {
-			annotationsMap[kv.Key] = kv.Value
-			keys = append(keys, kv.Key)
-		}
-		sort.Strings(keys)
-		annotations := []string{}
-		for _, k := range keys {
-			annotations = append(annotations, k, annotationsMap[k])
-		}
-		values["annotations"] = annotations
 
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		  LET hasSBOM = FIRST(
-			  UPSERT { artifactID:artifact._id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, annotations:@annotations, collector:@collector, origin:@origin } 
-				  INSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, annotations:@annotations, collector:@collector, origin:@origin } 
+			  UPSERT { artifactID:artifact._id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
+				  INSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN NEW
 		  )
@@ -78,7 +62,6 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			  "algorithm": hasSBOM.algorithm,
 			  "digest": hasSBOM.digest,
 			  "downloadLocation": hasSBOM.downloadLocation,
-			  "annotations": hasSBOM.annotations,
 			  "collector": hasSBOM.collector,
 			  "origin": hasSBOM.origin
 			  
@@ -91,15 +74,14 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		defer cursor.Close()
 
 		type collectedData struct {
-			ArtAlgo          string        `json:"artAlgo"`
-			ArtDigest        string        `json:"artDigest"`
-			Uri              string        `json:"uri"`
-			Algorithm        string        `json:"algorithm"`
-			Digest           string        `json:"digest"`
-			DownloadLocation string        `json:"downloadLocation"`
-			Annotations      []interface{} `json:"annotations"`
-			Collector        string        `json:"collector"`
-			Origin           string        `json:"origin"`
+			ArtAlgo          string `json:"artAlgo"`
+			ArtDigest        string `json:"artDigest"`
+			Uri              string `json:"uri"`
+			Algorithm        string `json:"algorithm"`
+			Digest           string `json:"digest"`
+			DownloadLocation string `json:"downloadLocation"`
+			Collector        string `json:"collector"`
+			Origin           string `json:"origin"`
 		}
 
 		var createdValues []collectedData
@@ -122,18 +104,12 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			digest := createdValues[0].ArtDigest
 			artifact := generateModelArtifact(algorithm, digest)
 
-			annotations, err := getAnnotations(createdValues[0].Annotations)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get hasSBOM annotations with error: %w", err)
-			}
-
 			isOccurrence := &model.HasSbom{
 				Subject:          artifact,
 				URI:              createdValues[0].Uri,
 				Algorithm:        createdValues[0].Algorithm,
 				Digest:           createdValues[0].Digest,
 				DownloadLocation: createdValues[0].DownloadLocation,
-				Annotations:      annotations,
 				Origin:           createdValues[0].Collector,
 				Collector:        createdValues[0].Origin,
 			}
@@ -151,23 +127,8 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		values["algorithm"] = hasSbom.Algorithm
 		values["digest"] = hasSbom.Digest
 		values["downloadLocation"] = hasSbom.DownloadLocation
-		values["annotations"] = hasSbom.Annotations
 		values["origin"] = hasSbom.Origin
 		values["collector"] = hasSbom.Collector
-
-		// To ensure consistency, always sort the qualifiers by key
-		annotationsMap := map[string]string{}
-		annotationsKeys := []string{}
-		for _, kv := range hasSbom.Annotations {
-			annotationsMap[kv.Key] = kv.Value
-			annotationsKeys = append(annotationsKeys, kv.Key)
-		}
-		sort.Strings(annotationsKeys)
-		annotations := []string{}
-		for _, k := range annotationsKeys {
-			annotations = append(annotations, k, annotationsMap[k])
-		}
-		values["annotations"] = annotations
 
 		query := `
 		LET firstPkg = FIRST(
@@ -192,8 +153,8 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		)
 		  
 		  LET hasSBOM = FIRST(
-			  UPSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, annotations:@annotations, collector:@collector, origin:@origin } 
-				  INSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, annotations:@annotations, collector:@collector, origin:@origin } 
+			  UPSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
+				  INSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN NEW
 		  )
@@ -213,7 +174,6 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			  "algorithm": hasSBOM.algorithm,
 			  "digest": hasSBOM.digest,
 			  "downloadLocation": hasSBOM.downloadLocation,
-			  "annotations": hasSBOM.annotations,
 			  "collector": hasSBOM.collector,
 			  "origin": hasSBOM.origin  
 		  }`
@@ -225,19 +185,18 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		defer cursor.Close()
 
 		type collectedData struct {
-			FirstPkgType          string        `json:"firstPkgType"`
-			FirstPkgNamespace     string        `json:"firstPkgNamespace"`
-			FirstPkgName          string        `json:"firstPkgName"`
-			FirstPkgVersion       string        `json:"firstPkgVersion"`
-			FirstPkgSubpath       string        `json:"firstPkgSubpath"`
-			FirstPkgQualifierList interface{}   `json:"firstPkgQualifier_list"`
-			Uri                   string        `json:"uri"`
-			Algorithm             string        `json:"algorithm"`
-			Digest                string        `json:"digest"`
-			DownloadLocation      string        `json:"downloadLocation"`
-			Annotations           []interface{} `json:"annotations"`
-			Collector             string        `json:"collector"`
-			Origin                string        `json:"origin"`
+			FirstPkgType          string      `json:"firstPkgType"`
+			FirstPkgNamespace     string      `json:"firstPkgNamespace"`
+			FirstPkgName          string      `json:"firstPkgName"`
+			FirstPkgVersion       string      `json:"firstPkgVersion"`
+			FirstPkgSubpath       string      `json:"firstPkgSubpath"`
+			FirstPkgQualifierList interface{} `json:"firstPkgQualifier_list"`
+			Uri                   string      `json:"uri"`
+			Algorithm             string      `json:"algorithm"`
+			Digest                string      `json:"digest"`
+			DownloadLocation      string      `json:"downloadLocation"`
+			Collector             string      `json:"collector"`
+			Origin                string      `json:"origin"`
 		}
 
 		var createdValues []collectedData
@@ -261,10 +220,6 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			if err != nil {
 				return nil, fmt.Errorf("failed to get model.package with err: %w", err)
 			}
-			annotations, err := getAnnotations(createdValues[0].Annotations)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get hasSBOM annotations with error: %w", err)
-			}
 
 			isOccurrence := &model.HasSbom{
 				Subject:          pkg,
@@ -272,7 +227,6 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				Algorithm:        createdValues[0].Algorithm,
 				Digest:           createdValues[0].Digest,
 				DownloadLocation: createdValues[0].DownloadLocation,
-				Annotations:      annotations,
 				Origin:           createdValues[0].Collector,
 				Collector:        createdValues[0].Origin,
 			}
@@ -282,26 +236,4 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			return nil, fmt.Errorf("number of hashEqual ingested is too great")
 		}
 	}
-}
-
-func getAnnotations(annotationList []interface{}) ([]*model.Annotation, error) {
-	annotations := []*model.Annotation{}
-	for i := range annotationList {
-		if i%2 == 0 {
-			key, ok := annotationList[i].(string)
-			if !ok {
-				return nil, fmt.Errorf("failed to assert string value for hasSBOM annotation's key")
-			}
-			value, ok := annotationList[i+1].(string)
-			if !ok {
-				return nil, fmt.Errorf("failed to assert string value for hasSBOM annotation's value")
-			}
-			qualifier := &model.Annotation{
-				Key:   key,
-				Value: value,
-			}
-			annotations = append(annotations, qualifier)
-		}
-	}
-	return annotations, nil
 }
