@@ -36,10 +36,56 @@ SourceName.
 type HasMetadata {
   id: ID!
   subject: PackageSourceOrArtifact!
-  timestamp: Time!
-  justification: String!
   key: String!
   value: String!
+  timestamp: Time!
+  justification: String!
   origin: String!
   collector: String!
+}
+
+"""
+HasMetadataSpec allows filtering the list of HasMetadata evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
+
+since specified indicates filtering timestamps after the specified time
+"""
+input HasMetadataSpec {
+  id: ID
+  subject: PackageSourceOrArtifactSpec
+  since: Time
+  key: String
+  value: String
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
+"""
+input HasMetadataInputSpec {
+  key: String!
+  value: String!
+  timestamp: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all HasMetdata attestations matching a filter."
+  HasMetadata(hasMetadataSpec: HasMetadataSpec): [HasMetadata!]!
+}
+
+extend type Mutation {
+  "Adds metadata about a package, source or artifact."
+  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, hasMetadata: HasMetadataInputSpec!): HasMetadata!
 }

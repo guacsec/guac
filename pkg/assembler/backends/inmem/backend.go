@@ -83,6 +83,7 @@ type demoClient struct {
 	cves                 cveMap
 	equalVulnerabilities equalVulnerabilityList
 	ghsas                ghsaMap
+	hasMetadatas         hasMetadataList
 	hasSBOMs             hasSBOMList
 	hasSLSAs             hasSLSAList
 	hasSources           hasSrcList

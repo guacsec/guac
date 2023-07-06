@@ -195,6 +195,7 @@ type ComplexityRoot struct {
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
+		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
@@ -269,6 +270,7 @@ type ComplexityRoot struct {
 		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
 		FindSoftware        func(childComplexity int, searchText string) int
 		Ghsa                func(childComplexity int, ghsaSpec *model.GHSASpec) int
+		HasMetadata         func(childComplexity int, hasMetadataSpec *model.HasMetadataSpec) int
 		HasSbom             func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
 		HasSlsa             func(childComplexity int, hasSLSASpec *model.HasSLSASpec) int
 		HasSourceAt         func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
@@ -1121,6 +1123,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestGhsa(childComplexity, args["ghsa"].(*model.GHSAInputSpec)), true
 
+	case "Mutation.ingestHasMetadata":
+		if e.complexity.Mutation.IngestHasMetadata == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHasMetadata_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHasMetadata(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["hasMetadata"].(model.HasMetadataInputSpec)), true
+
 	case "Mutation.ingestHasSBOM":
 		if e.complexity.Mutation.IngestHasSbom == nil {
 			break
@@ -1569,6 +1583,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(*model.GHSASpec)), true
+
+	case "Query.HasMetadata":
+		if e.complexity.Query.HasMetadata == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HasMetadata_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HasMetadata(childComplexity, args["hasMetadataSpec"].(*model.HasMetadataSpec)), true
 
 	case "Query.HasSBOM":
 		if e.complexity.Query.HasSbom == nil {
@@ -2048,6 +2074,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCveOrGhsaSpec,
 		ec.unmarshalInputGHSAInputSpec,
 		ec.unmarshalInputGHSASpec,
+		ec.unmarshalInputHasMetadataInputSpec,
+		ec.unmarshalInputHasMetadataSpec,
 		ec.unmarshalInputHasSBOMInputSpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSLSASpec,
@@ -3726,12 +3754,58 @@ SourceName.
 type HasMetadata {
   id: ID!
   subject: PackageSourceOrArtifact!
-  timestamp: Time!
-  justification: String!
   key: String!
   value: String!
+  timestamp: Time!
+  justification: String!
   origin: String!
   collector: String!
+}
+
+"""
+HasMetadataSpec allows filtering the list of HasMetadata evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
+
+since specified indicates filtering timestamps after the specified time
+"""
+input HasMetadataSpec {
+  id: ID
+  subject: PackageSourceOrArtifactSpec
+  since: Time
+  key: String
+  value: String
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
+"""
+input HasMetadataInputSpec {
+  key: String!
+  value: String!
+  timestamp: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all HasMetdata attestations matching a filter."
+  HasMetadata(hasMetadataSpec: HasMetadataSpec): [HasMetadata!]!
+}
+
+extend type Mutation {
+  "Adds metadata about a package, source or artifact."
+  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, hasMetadata: HasMetadataInputSpec!): HasMetadata!
 }
 `, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#
@@ -4026,6 +4100,7 @@ union Node
   | HasSourceAt
   | HasSBOM
   | HasSLSA
+  | HasMetadata
 
 """
 Edge allows filtering path/neighbors output to only contain a subset of all
@@ -4047,6 +4122,7 @@ enum Edge {
   ARTIFACT_HAS_SBOM
   ARTIFACT_HAS_SLSA
   ARTIFACT_IS_OCCURRENCE
+  ARTIFACT_HAS_METADATA
   BUILDER_HAS_SLSA
   CVE_CERTIFY_VEX_STATEMENT
   CVE_CERTIFY_VULN
@@ -4067,11 +4143,13 @@ enum Edge {
   PACKAGE_IS_DEPENDENCY
   PACKAGE_IS_OCCURRENCE
   PACKAGE_PKG_EQUAL
+  PACKAGE_HAS_METADATA
   SOURCE_CERTIFY_BAD
   SOURCE_CERTIFY_GOOD
   SOURCE_CERTIFY_SCORECARD
   SOURCE_HAS_SOURCE_AT
   SOURCE_IS_OCCURRENCE
+  SOURCE_HAS_METADATA
 
   CERTIFY_BAD_ARTIFACT
   CERTIFY_BAD_PACKAGE
@@ -4106,6 +4184,9 @@ enum Edge {
   IS_VULNERABILITY_GHSA
   IS_VULNERABILITY_OSV
   PKG_EQUAL_PACKAGE
+  HAS_METADATA_PACKAGE
+  HAS_METADATA_ARTIFACT
+  HAS_METADATA_SOURCE
 }
 
 extend type Query {
