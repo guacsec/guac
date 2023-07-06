@@ -201,6 +201,7 @@ type ComplexityRoot struct {
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestPackages        func(childComplexity int, pkgs []*model.PkgInputSpec) int
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
+		IngestPointOfContact  func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) int
@@ -254,6 +255,17 @@ type ComplexityRoot struct {
 		Packages      func(childComplexity int) int
 	}
 
+	PointOfContact struct {
+		Collector     func(childComplexity int) int
+		Email         func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Info          func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Since         func(childComplexity int) int
+		Subject       func(childComplexity int) int
+	}
+
 	Query struct {
 		Artifacts           func(childComplexity int, artifactSpec *model.ArtifactSpec) int
 		Builders            func(childComplexity int, builderSpec *model.BuilderSpec) int
@@ -279,6 +291,7 @@ type ComplexityRoot struct {
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
 		Path                func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
 		PkgEqual            func(childComplexity int, pkgEqualSpec *model.PkgEqualSpec) int
+		PointOfContact      func(childComplexity int, pointOfContactSpec *model.PointOfContactSpec) int
 		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
@@ -1240,6 +1253,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestPkgEqual(childComplexity, args["pkg"].(model.PkgInputSpec), args["otherPackage"].(model.PkgInputSpec), args["pkgEqual"].(model.PkgEqualInputSpec)), true
 
+	case "Mutation.ingestPointOfContact":
+		if e.complexity.Mutation.IngestPointOfContact == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestPointOfContact_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
+
 	case "Mutation.ingestSLSA":
 		if e.complexity.Mutation.IngestSlsa == nil {
 			break
@@ -1448,6 +1473,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PkgEqual.Packages(childComplexity), true
+
+	case "PointOfContact.collector":
+		if e.complexity.PointOfContact.Collector == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Collector(childComplexity), true
+
+	case "PointOfContact.email":
+		if e.complexity.PointOfContact.Email == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Email(childComplexity), true
+
+	case "PointOfContact.id":
+		if e.complexity.PointOfContact.ID == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.ID(childComplexity), true
+
+	case "PointOfContact.info":
+		if e.complexity.PointOfContact.Info == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Info(childComplexity), true
+
+	case "PointOfContact.justification":
+		if e.complexity.PointOfContact.Justification == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Justification(childComplexity), true
+
+	case "PointOfContact.origin":
+		if e.complexity.PointOfContact.Origin == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Origin(childComplexity), true
+
+	case "PointOfContact.since":
+		if e.complexity.PointOfContact.Since == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Since(childComplexity), true
+
+	case "PointOfContact.subject":
+		if e.complexity.PointOfContact.Subject == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Subject(childComplexity), true
 
 	case "Query.artifacts":
 		if e.complexity.Query.Artifacts == nil {
@@ -1736,6 +1817,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.PkgEqual(childComplexity, args["pkgEqualSpec"].(*model.PkgEqualSpec)), true
+
+	case "Query.PointOfContact":
+		if e.complexity.Query.PointOfContact == nil {
+			break
+		}
+
+		args, err := ec.field_Query_PointOfContact_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PointOfContact(childComplexity, args["pointOfContactSpec"].(*model.PointOfContactSpec)), true
 
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
@@ -2077,6 +2170,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPkgInputSpec,
 		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
+		ec.unmarshalInputPointOfContactInputSpec,
+		ec.unmarshalInputPointOfContactSpec,
 		ec.unmarshalInputSLSAInputSpec,
 		ec.unmarshalInputSLSAPredicateInputSpec,
 		ec.unmarshalInputSLSAPredicateSpec,
@@ -2911,6 +3006,103 @@ extend type Query {
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
   ingestVulnerability(pkg: PkgInputSpec!, vulnerability: VulnerabilityInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+}
+`, BuiltIn: false},
+	{Name: "../schema/contact.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+"""
+PointOfContact is an attestation of how to get in touch with the person(s) responsible
+for a package, source, or artifact.
+
+All evidence trees record a justification for the property they represent as
+well as the document that contains the attestation (origin) and the collector
+that collected the document (collector).
+
+The attestation applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
+
+email is the email address (singular) of the point of contact.
+
+info is additional contact information other than email address. This is free
+form.
+
+NOTE: the identifiers for point of contact should be part of software trees.
+This will benefit from identifier look up and traversal as well as organization
+hierarchy. However, until the use case arises, PointOfContact will be a flat
+reference to the contact details.
+"""
+type PointOfContact {
+  id: ID!
+  subject: PackageSourceOrArtifact!
+  email: String!
+  info: String!
+  since: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+PointOfContactSpec allows filtering the list of PointOfContact evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
+
+since filters attestations with a value of since later or equal to the provided filter.
+"""
+input PointOfContactSpec {
+  id: ID
+  subject: PackageSourceOrArtifactSpec
+  email: String
+  info: String
+  since: Time
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
+"""
+input PointOfContactInputSpec {
+  email: String!
+  info: String!
+  since: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all PointOfContact attestations matching a filter."
+  PointOfContact (pointOfContactSpec: PointOfContactSpec): [PointOfContact!]!
+}
+
+extend type Mutation {
+  "Adds a PointOfContact attestation to a package, source or artifact."
+  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, pointOfContact: PointOfContactInputSpec!): PointOfContact!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#

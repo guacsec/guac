@@ -1002,6 +1002,70 @@ type PkgSpec struct {
 	Subpath                  *string                 `json:"subpath,omitempty"`
 }
 
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContact struct {
+	ID            string                  `json:"id"`
+	Subject       PackageSourceOrArtifact `json:"subject"`
+	Email         string                  `json:"email"`
+	Info          string                  `json:"info"`
+	Since         time.Time               `json:"since"`
+	Justification string                  `json:"justification"`
+	Origin        string                  `json:"origin"`
+	Collector     string                  `json:"collector"`
+}
+
+// PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
+type PointOfContactInputSpec struct {
+	Email         string    `json:"email"`
+	Info          string    `json:"info"`
+	Since         time.Time `json:"since"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// PointOfContactSpec allows filtering the list of PointOfContact evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// since filters attestations with a value of since later or equal to the provided filter.
+type PointOfContactSpec struct {
+	ID            *string                      `json:"id,omitempty"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
+	Email         *string                      `json:"email,omitempty"`
+	Info          *string                      `json:"info,omitempty"`
+	Since         *time.Time                   `json:"since,omitempty"`
+	Justification *string                      `json:"justification,omitempty"`
+	Origin        *string                      `json:"origin,omitempty"`
+	Collector     *string                      `json:"collector,omitempty"`
+}
+
 // SLSA contains all of the fields present in a SLSA attestation.
 //
 // The materials and builders are objects of the HasSLSA predicate, everything
