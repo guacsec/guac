@@ -28,7 +28,6 @@ type DfsNode struct {
 	expanded bool // true once all node neighbors are added to queue
 	Parent   string
 	depth    int
-	nodeType string // packageName, packageVersion
 }
 
 type queueValues struct {
@@ -58,9 +57,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 		nodeMap: map[string]DfsNode{},
 	}
 
-	q.nodeMap[startID] = DfsNode{
-		nodeType: startType,
-	}
+	q.nodeMap[startID] = DfsNode{}
 
 	q.queue = append(q.queue, startID)
 
@@ -100,16 +97,13 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 }
 
 func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode) (queueValues, error) {
-	// case on predicates and nodeType
-	switch q.nowNode.nodeType {
-	case "packageVersion":
-		switch neighbor := neighbor.(type) {
-		case *model.NeighborsNeighborsIsDependency:
-			q, err := exploreIsDependency(ctx, gqlclient, q, *neighbor)
+	// case on predicates
+	switch neighbor := neighbor.(type) {
+	case *model.NeighborsNeighborsIsDependency:
+		q, err := exploreIsDependency(ctx, gqlclient, q, *neighbor)
 
-			if err != nil {
-				return q, err
-			}
+		if err != nil {
+			return q, err
 		}
 	}
 
@@ -151,26 +145,15 @@ func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queue
 			depPkgResponse.Packages[0].Id)
 
 		dfsNVersion, seenVersion := q.nodeMap[matchingDepPkgVersionID]
-		dfsNName, seenName := q.nodeMap[depPkgResponse.Packages[0].Namespaces[0].Names[0].Id]
-		if !seenName {
-			dfsNName = DfsNode{
-				Parent:   q.now,
-				depth:    q.nowNode.depth + 1,
-				nodeType: "packageName",
-			}
-			q.nodeMap[depPkgResponse.Packages[0].Namespaces[0].Names[0].Id] = dfsNName
-		}
+
 		if !seenVersion {
 			dfsNVersion = DfsNode{
-				Parent:   depPkgResponse.Packages[0].Namespaces[0].Names[0].Id,
-				depth:    q.nowNode.depth + 1,
-				nodeType: "packageVersion",
+				Parent: depPkgResponse.Packages[0].Namespaces[0].Names[0].Id,
+				depth:  q.nowNode.depth + 1,
 			}
 			q.nodeMap[matchingDepPkgVersionID] = dfsNVersion
 		}
-		if !dfsNName.expanded {
-			q.queue = append(q.queue, depPkgResponse.Packages[0].Namespaces[0].Names[0].Id)
-		}
+
 		if !dfsNVersion.expanded {
 			q.queue = append(q.queue, matchingDepPkgVersionID)
 		}

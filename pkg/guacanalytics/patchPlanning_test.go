@@ -224,7 +224,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:      "dpkg",
 			stopType:       "",
 			maxDepth:       10,
-			expectedLen:    5,
+			expectedLen:    3,
 			graphInput:     "isDependency",
 		},
 		{
@@ -234,7 +234,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:      "toppkg",
 			stopType:       "",
 			maxDepth:       10,
-			expectedLen:    7,
+			expectedLen:    4,
 			graphInput:     "isDependency",
 		},
 
@@ -247,7 +247,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			stopNamespace:  ptrfrom.String("ubuntu"),
 			stopName:       "dpkg",
 			maxDepth:       10,
-			expectedLen:    3,
+			expectedLen:    2,
 			graphInput:     "isDependency",
 		},
 
@@ -258,7 +258,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:      "toppkg1",
 			stopType:       "",
 			maxDepth:       1,
-			expectedLen:    3,
+			expectedLen:    2,
 			graphInput:     "isDependency",
 		},
 		{
@@ -268,7 +268,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:      "toppkg2",
 			stopType:       "",
 			maxDepth:       10,
-			expectedLen:    9,
+			expectedLen:    5,
 			graphInput:     "isDependency",
 		},
 		{
