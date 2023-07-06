@@ -81,7 +81,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 		}
 
 		for _, neighbor := range neighborsResponse.Neighbors {
-			q, err = caseOnPredicates(ctx, gqlclient, &q, neighbor)
+			err = caseOnPredicates(ctx, gqlclient, &q, neighbor)
 
 			if err != nil {
 				return nil, err
@@ -96,21 +96,21 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 
 }
 
-func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode) (queueValues, error) {
+func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode) error {
 	// case on predicates
 	switch neighbor := neighbor.(type) {
 	case *model.NeighborsNeighborsIsDependency:
-		q, err := exploreIsDependency(ctx, gqlclient, q, *neighbor)
+		err := exploreIsDependency(ctx, gqlclient, q, *neighbor)
 
 		if err != nil {
-			return q, err
+			return err
 		}
 	}
 
-	return *q, nil
+	return nil
 }
 
-func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) (queueValues, error) {
+func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) error {
 	dependentPkgFilter := &model.PkgSpec{
 		Type:      &isDependency.DependentPackage.Type,
 		Namespace: &isDependency.DependentPackage.Namespaces[0].Namespace,
@@ -119,7 +119,7 @@ func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queue
 
 	depPkgResponse, err := model.Packages(ctx, gqlclient, dependentPkgFilter)
 	if err != nil {
-		return *q, fmt.Errorf("error querying for dependent package: %w", err)
+		return fmt.Errorf("error querying for dependent package: %w", err)
 	}
 
 	depPkgVersionsMap := map[string]string{}
@@ -131,13 +131,13 @@ func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queue
 
 	matchingDepPkgVersions, err := depversion.WhichVersionMatches(depPkgVersions, isDependency.VersionRange)
 	if err != nil {
-		return *q, fmt.Errorf("error determining dependent version matches: %w", err)
+		return fmt.Errorf("error determining dependent version matches: %w", err)
 	}
 
 	for matchingDepPkgVersion := range matchingDepPkgVersions {
 		matchingDepPkgVersionID := depPkgVersionsMap[matchingDepPkgVersion]
 		if err != nil {
-			return *q, fmt.Errorf("error querying neighbor: %w", err)
+			return fmt.Errorf("error querying neighbor: %w", err)
 		}
 
 		q.path = append(q.path, isDependency.Id, matchingDepPkgVersionID,
@@ -158,5 +158,5 @@ func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queue
 			q.queue = append(q.queue, matchingDepPkgVersionID)
 		}
 	}
-	return *q, nil
+	return nil
 }
