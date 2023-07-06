@@ -313,6 +313,62 @@ var (
 			},
 		},
 	}
+
+	shouldNotBeExplored = assembler.IngestPredicates{
+		IsDependency: []assembler.IsDependencyIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType1",
+					Namespace: ptrfrom.String("pkgNamespace1"),
+					Name:      "pkgName1",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "pkgType2",
+					Namespace: ptrfrom.String("pkgNamespace2"),
+					Name:      "pkgName2",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				IsDependency: &model.IsDependencyInputSpec{
+					VersionRange:   ">=1.19.0",
+					DependencyType: model.DependencyTypeDirect,
+					Justification:  "test justification one",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+			},
+		},
+		CertifyGood: []assembler.CertifyGoodIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType1",
+					Namespace: ptrfrom.String("pkgNamespace1"),
+					Name:      "pkgName1",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				PkgMatchFlag: model.MatchFlags{
+					Pkg: model.PkgMatchTypeAllVersions,
+				},
+				CertifyGood: &model.CertifyGoodInputSpec{
+					Justification: "good package",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType2",
+					Namespace: ptrfrom.String("pkgNamespace2"),
+					Name:      "pkgName2",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				PkgMatchFlag: model.MatchFlags{
+					Pkg: model.PkgMatchTypeAllVersions,
+				},
+				CertifyGood: &model.CertifyGoodInputSpec{
+					Justification: "good package",
+				},
+			},
+		},
+	}
 )
 
 func ingestIsDependency(ctx context.Context, client graphql.Client, logger *zap.SugaredLogger, graph assembler.IngestPredicates) {
@@ -378,7 +434,23 @@ func ingestHasSLSA(ctx context.Context, client graphql.Client, logger *zap.Sugar
 	}
 }
 
-func ingestTestData(graphInput string, ctx context.Context, client graphql.Client) {
+func ingestCertifyGood(ctx context.Context, client graphql.Client, logger *zap.SugaredLogger, graph assembler.IngestPredicates) {
+	for _, ingest := range graph.CertifyGood {
+		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting Package for CertifyGood: %v\n", err)
+		}
+
+		_, err = model.CertifyGoodPkg(context.Background(), client, *ingest.Pkg, &ingest.PkgMatchFlag, *ingest.CertifyGood)
+
+		if err != nil {
+			logger.Errorf("Error in ingesting CertifyGood: %v\n", err)
+		}
+	}
+}
+
+func ingestTestData(ctx context.Context, client graphql.Client, graphInput string) {
 	logger := logging.FromContext(ctx)
 
 	switch graphInput {
@@ -390,6 +462,9 @@ func ingestTestData(graphInput string, ctx context.Context, client graphql.Clien
 		ingestIsDependency(ctx, client, logger, simpleTestData)
 	case "simpleHasSLSAGraph":
 		ingestHasSLSA(ctx, client, logger, simpleTestData)
+	case "shouldNotBeExplored":
+		ingestIsDependency(ctx, client, logger, shouldNotBeExplored)
+		ingestCertifyGood(ctx, client, logger, shouldNotBeExplored)
 	}
 }
 
@@ -522,11 +597,22 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedPkgs:   []string{"pkgType3"}, // TODO: add pkgType2 and pkgType1 once implemented
 			graphInput:     "isDependencyAndHasSLSAGraph",
 		},
+		{
+			name:           "11: should not explore certifyGood case",
+			startType:      "pkgType1",
+			startNamespace: ptrfrom.String("pkgNamespace1"),
+			startName:      "pkgName1",
+			stopType:       "",
+			maxDepth:       10,
+			expectedLen:    4,
+			expectedPkgs:   []string{"pkgType2", "pkgType1"},
+			graphInput:     "shouldNotBeExplored",
+		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("Test case %s\n", tt.name), func(t *testing.T) {
-			ingestTestData(tt.graphInput, ctx, gqlclient)
+			ingestTestData(ctx, gqlclient, tt.graphInput)
 			startID, err := getPackageId(ctx, gqlclient, tt.startType, tt.startNamespace, tt.startName)
 
 			if err != nil {
