@@ -19,7 +19,6 @@ on:
   push:
     branches:
       - main
-      - features/tilt-dev
   pull_request:
     branches:
       - main
