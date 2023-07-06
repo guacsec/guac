@@ -15,6 +15,9 @@ type BillOfMaterials func(*sql.Selector)
 // Builder is the predicate function for builder builders.
 type Builder func(*sql.Selector)
 
+// Certification is the predicate function for certification builders.
+type Certification func(*sql.Selector)
+
 // Dependency is the predicate function for dependency builders.
 type Dependency func(*sql.Selector)
 
@@ -50,3 +53,6 @@ type SourceNamespace func(*sql.Selector)
 
 // SourceType is the predicate function for sourcetype builders.
 type SourceType func(*sql.Selector)
+
+// Vulnerability is the predicate function for vulnerability builders.
+type Vulnerability func(*sql.Selector)

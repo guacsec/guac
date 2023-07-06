@@ -54,6 +54,23 @@ func toModelCVE(cve *ent.SecurityAdvisory) *model.Cve {
 	}
 }
 
+func getAdvisory(ctx context.Context, client *ent.Client, query *advisoryQuerySpec) (*ent.SecurityAdvisory, error) {
+	results, err := getAdvisories(ctx, client, query)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(results) == 0 {
+		return nil, &ent.NotFoundError{}
+	}
+
+	if len(results) > 1 {
+		return nil, &ent.NotSingularError{}
+	}
+
+	return results[0], nil
+}
+
 func getAdvisories(ctx context.Context, client *ent.Client, query *advisoryQuerySpec) (ent.SecurityAdvisories, error) {
 	results, err := client.SecurityAdvisory.Query().
 		Where(

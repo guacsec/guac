@@ -106,6 +106,16 @@ var (
 			},
 		},
 	}
+	// CertificationsColumns holds the columns for the "certifications" table.
+	CertificationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// CertificationsTable holds the schema information for the "certifications" table.
+	CertificationsTable = &schema.Table{
+		Name:       "certifications",
+		Columns:    CertificationsColumns,
+		PrimaryKey: []*schema.Column{CertificationsColumns[0]},
+	}
 	// DependenciesColumns holds the columns for the "dependencies" table.
 	DependenciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -466,6 +476,49 @@ var (
 		Columns:    SourceTypesColumns,
 		PrimaryKey: []*schema.Column{SourceTypesColumns[0]},
 	}
+	// VulnerabilitiesColumns holds the columns for the "vulnerabilities" table.
+	VulnerabilitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "time_scanned", Type: field.TypeTime},
+		{Name: "db_uri", Type: field.TypeString},
+		{Name: "db_version", Type: field.TypeString},
+		{Name: "scanner_uri", Type: field.TypeString},
+		{Name: "scanner_version", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "vulnerability_id", Type: field.TypeInt, Nullable: true},
+		{Name: "package_id", Type: field.TypeInt},
+	}
+	// VulnerabilitiesTable holds the schema information for the "vulnerabilities" table.
+	VulnerabilitiesTable = &schema.Table{
+		Name:       "vulnerabilities",
+		Columns:    VulnerabilitiesColumns,
+		PrimaryKey: []*schema.Column{VulnerabilitiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vulnerabilities_security_advisories_vulnerability",
+				Columns:    []*schema.Column{VulnerabilitiesColumns[8]},
+				RefColumns: []*schema.Column{SecurityAdvisoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "vulnerabilities_package_versions_package",
+				Columns:    []*schema.Column{VulnerabilitiesColumns[9]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "vulnerability_time_scanned_db_uri_db_version_scanner_uri_scanner_version_origin_collector_vulnerability_id_package_id",
+				Unique:  true,
+				Columns: []*schema.Column{VulnerabilitiesColumns[1], VulnerabilitiesColumns[2], VulnerabilitiesColumns[3], VulnerabilitiesColumns[4], VulnerabilitiesColumns[5], VulnerabilitiesColumns[6], VulnerabilitiesColumns[7], VulnerabilitiesColumns[8], VulnerabilitiesColumns[9]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "vulnerability_id IS NOT NULL",
+				},
+			},
+		},
+	}
 	// SlsaAttestationBuiltFromColumns holds the columns for the "slsa_attestation_built_from" table.
 	SlsaAttestationBuiltFromColumns = []*schema.Column{
 		{Name: "slsa_attestation_id", Type: field.TypeInt},
@@ -496,6 +549,7 @@ var (
 		ArtifactsTable,
 		BillOfMaterialsTable,
 		BuildersTable,
+		CertificationsTable,
 		DependenciesTable,
 		IsVulnerabilitiesTable,
 		OccurrencesTable,
@@ -508,6 +562,7 @@ var (
 		SourceNamesTable,
 		SourceNamespacesTable,
 		SourceTypesTable,
+		VulnerabilitiesTable,
 		SlsaAttestationBuiltFromTable,
 	}
 )
@@ -531,6 +586,8 @@ func init() {
 	}
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
+	VulnerabilitiesTable.ForeignKeys[0].RefTable = SecurityAdvisoriesTable
+	VulnerabilitiesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
 }

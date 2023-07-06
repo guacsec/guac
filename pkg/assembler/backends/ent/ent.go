@@ -15,6 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
@@ -27,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -90,6 +92,7 @@ func checkColumn(table, column string) error {
 			artifact.Table:         artifact.ValidColumn,
 			billofmaterials.Table:  billofmaterials.ValidColumn,
 			builder.Table:          builder.ValidColumn,
+			certification.Table:    certification.ValidColumn,
 			dependency.Table:       dependency.ValidColumn,
 			isvulnerability.Table:  isvulnerability.ValidColumn,
 			occurrence.Table:       occurrence.ValidColumn,
@@ -102,6 +105,7 @@ func checkColumn(table, column string) error {
 			sourcename.Table:       sourcename.ValidColumn,
 			sourcenamespace.Table:  sourcenamespace.ValidColumn,
 			sourcetype.Table:       sourcetype.ValidColumn,
+			vulnerability.Table:    vulnerability.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

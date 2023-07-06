@@ -18,6 +18,8 @@ type Tx struct {
 	BillOfMaterials *BillOfMaterialsClient
 	// Builder is the client for interacting with the Builder builders.
 	Builder *BuilderClient
+	// Certification is the client for interacting with the Certification builders.
+	Certification *CertificationClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
 	// IsVulnerability is the client for interacting with the IsVulnerability builders.
@@ -42,6 +44,8 @@ type Tx struct {
 	SourceNamespace *SourceNamespaceClient
 	// SourceType is the client for interacting with the SourceType builders.
 	SourceType *SourceTypeClient
+	// Vulnerability is the client for interacting with the Vulnerability builders.
+	Vulnerability *VulnerabilityClient
 
 	// lazily loaded.
 	client     *Client
@@ -176,6 +180,7 @@ func (tx *Tx) init() {
 	tx.Artifact = NewArtifactClient(tx.config)
 	tx.BillOfMaterials = NewBillOfMaterialsClient(tx.config)
 	tx.Builder = NewBuilderClient(tx.config)
+	tx.Certification = NewCertificationClient(tx.config)
 	tx.Dependency = NewDependencyClient(tx.config)
 	tx.IsVulnerability = NewIsVulnerabilityClient(tx.config)
 	tx.Occurrence = NewOccurrenceClient(tx.config)
@@ -188,6 +193,7 @@ func (tx *Tx) init() {
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)
 	tx.SourceType = NewSourceTypeClient(tx.config)
+	tx.Vulnerability = NewVulnerabilityClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
