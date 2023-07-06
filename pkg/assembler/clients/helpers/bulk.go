@@ -216,14 +216,18 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 
 func ingestPackages(ctx context.Context, client graphql.Client, v []model.PkgInputSpec) error {
 	_, err := model.IngestPackages(ctx, client, v)
-	return fmt.Errorf("ingestPackages failed with error: %w", err)
-
+	if err != nil {
+		return fmt.Errorf("ingestPackages failed with error: %w", err)
+	}
+	return nil
 }
 
 func ingestArtifacts(ctx context.Context, client graphql.Client, v []model.ArtifactInputSpec) error {
 	_, err := model.IngestArtifacts(ctx, client, v)
-	return fmt.Errorf("ingestArtifacts failed with error: %w", err)
-
+	if err != nil {
+		return fmt.Errorf("ingestArtifacts failed with error: %w", err)
+	}
+	return nil
 }
 
 func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assembler.IsDependencyIngest) error {
@@ -235,9 +239,13 @@ func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assemb
 		depPkgs = append(depPkgs, *ingest.DepPkg)
 		dependencies = append(dependencies, *ingest.IsDependency)
 	}
-	_, err := model.IsDependencies(ctx, client, pkgs, depPkgs, dependencies)
-	return fmt.Errorf("isDependencies failed with error: %w", err)
-
+	if len(v) > 0 {
+		_, err := model.IsDependencies(ctx, client, pkgs, depPkgs, dependencies)
+		if err != nil {
+			return fmt.Errorf("isDependencies failed with error: %w", err)
+		}
+	}
+	return nil
 }
 
 func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembler.IsOccurrenceIngest) error {
@@ -264,10 +272,16 @@ func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembl
 	}
 	if len(sources) > 0 {
 		_, err := model.IsOccurrencesSrc(ctx, client, sources, artifacts, occurrences)
-		return fmt.Errorf("isOccurrencesSrc failed with error: %w", err)
+		if err != nil {
+			return fmt.Errorf("isOccurrencesSrc failed with error: %w", err)
+		}
 
 	}
-	_, err := model.IsOccurrencesPkg(ctx, client, pkgs, artifacts, occurrences)
-	return fmt.Errorf("isOccurrencesPkg failed with error: %w", err)
-
+	if len(pkgs) > 0 {
+		_, err := model.IsOccurrencesPkg(ctx, client, pkgs, artifacts, occurrences)
+		if err != nil {
+			return fmt.Errorf("isOccurrencesPkg failed with error: %w", err)
+		}
+	}
+	return nil
 }
