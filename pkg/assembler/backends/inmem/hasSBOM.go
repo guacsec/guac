@@ -35,7 +35,6 @@ type hasSBOMStruct struct {
 	algorithm        string
 	digest           string
 	downloadLocation string
-	annotations      map[string]string
 	origin           string
 	collector        string
 }
