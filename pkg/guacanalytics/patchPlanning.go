@@ -31,11 +31,13 @@ type DfsNode struct {
 	nodeType string // packageName, packageVersion
 }
 
-var path []string
-var nodeMap map[string]DfsNode
-var now string
-var nowNode DfsNode
-var queue []string
+type queueValues struct {
+	path    []string
+	nodeMap map[string]DfsNode
+	now     string
+	nowNode DfsNode
+	queue   []string
+}
 
 // TODO: make more robust using predicates
 func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, startType string, maxDepth int) (map[string]DfsNode, error) {
@@ -50,68 +52,71 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 	if !ok {
 		return nil, fmt.Errorf("Not a package")
 	}
-	queue = make([]string, 0) // the queue of nodes in bfs
 
-	nodeMap = map[string]DfsNode{}
+	q := queueValues{
+		queue:   make([]string, 0), // the queue of nodes in bfs
+		nodeMap: map[string]DfsNode{},
+	}
 
-	nodeMap[startID] = DfsNode{
+	q.nodeMap[startID] = DfsNode{
 		nodeType: startType,
 	}
-	queue = append(queue, startID)
 
-	for len(queue) > 0 {
-		now = queue[0]
-		queue = queue[1:]
-		nowNode = nodeMap[now]
+	q.queue = append(q.queue, startID)
 
-		if stopID == now {
+	for len(q.queue) > 0 {
+		q.now = q.queue[0]
+		q.queue = q.queue[1:]
+		q.nowNode = q.nodeMap[q.now]
+
+		if stopID == q.now {
 			break
 		}
 
-		if nowNode.depth >= maxDepth {
+		if q.nowNode.depth >= maxDepth {
 			break
 		}
 
-		neighborsResponse, err := model.Neighbors(ctx, gqlclient, now, []model.Edge{})
+		neighborsResponse, err := model.Neighbors(ctx, gqlclient, q.now, []model.Edge{})
 
 		if err != nil {
 			return nil, fmt.Errorf("failed getting neighbors:%w", err)
 		}
 
 		for _, neighbor := range neighborsResponse.Neighbors {
-			err = caseOnPredicates(neighbor, nowNode, ctx, gqlclient)
+			q, err = caseOnPredicates(ctx, gqlclient, &q, neighbor)
 
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		nowNode.expanded = true
-		nodeMap[now] = nowNode
+		q.nowNode.expanded = true
+		q.nodeMap[q.now] = q.nowNode
 	}
 
-	return nodeMap, nil
+	return q.nodeMap, nil
 
 }
 
-func caseOnPredicates(neighbor model.NeighborsNeighborsNode, nowNode DfsNode, ctx context.Context, gqlclient graphql.Client) error {
+func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode) (queueValues, error) {
 	// case on predicates and nodeType
-	switch nowNode.nodeType {
+	switch q.nowNode.nodeType {
 	case "packageVersion":
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsIsDependency:
-			err := exploreIsDependency(*neighbor, ctx, gqlclient)
+			q, err := exploreIsDependency(ctx, gqlclient, q, *neighbor)
 
 			if err != nil {
-				return err
+				return q, err
 			}
 		}
 	}
 
-	return nil
+	return *q, nil
 }
 
-func exploreIsDependency(isDependency model.NeighborsNeighborsIsDependency, ctx context.Context, gqlclient graphql.Client) error {
+func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) (queueValues, error) {
 	dependentPkgFilter := &model.PkgSpec{
 		Type:      &isDependency.DependentPackage.Type,
 		Namespace: &isDependency.DependentPackage.Namespaces[0].Namespace,
@@ -120,7 +125,7 @@ func exploreIsDependency(isDependency model.NeighborsNeighborsIsDependency, ctx 
 
 	depPkgResponse, err := model.Packages(ctx, gqlclient, dependentPkgFilter)
 	if err != nil {
-		return fmt.Errorf("error querying for dependent package: %w", err)
+		return *q, fmt.Errorf("error querying for dependent package: %w", err)
 	}
 
 	depPkgVersionsMap := map[string]string{}
@@ -132,43 +137,43 @@ func exploreIsDependency(isDependency model.NeighborsNeighborsIsDependency, ctx 
 
 	matchingDepPkgVersions, err := depversion.WhichVersionMatches(depPkgVersions, isDependency.VersionRange)
 	if err != nil {
-		return fmt.Errorf("error determining dependent version matches: %w", err)
+		return *q, fmt.Errorf("error determining dependent version matches: %w", err)
 	}
 
 	for matchingDepPkgVersion := range matchingDepPkgVersions {
 		matchingDepPkgVersionID := depPkgVersionsMap[matchingDepPkgVersion]
 		if err != nil {
-			return fmt.Errorf("error querying neighbor: %w", err)
+			return *q, fmt.Errorf("error querying neighbor: %w", err)
 		}
 
-		path = append(path, isDependency.Id, matchingDepPkgVersionID,
+		q.path = append(q.path, isDependency.Id, matchingDepPkgVersionID,
 			depPkgResponse.Packages[0].Namespaces[0].Names[0].Id, depPkgResponse.Packages[0].Namespaces[0].Id,
 			depPkgResponse.Packages[0].Id)
 
-		dfsNVersion, seenVersion := nodeMap[matchingDepPkgVersionID]
-		dfsNName, seenName := nodeMap[depPkgResponse.Packages[0].Namespaces[0].Names[0].Id]
+		dfsNVersion, seenVersion := q.nodeMap[matchingDepPkgVersionID]
+		dfsNName, seenName := q.nodeMap[depPkgResponse.Packages[0].Namespaces[0].Names[0].Id]
 		if !seenName {
 			dfsNName = DfsNode{
-				Parent:   now,
-				depth:    nowNode.depth + 1,
+				Parent:   q.now,
+				depth:    q.nowNode.depth + 1,
 				nodeType: "packageName",
 			}
-			nodeMap[depPkgResponse.Packages[0].Namespaces[0].Names[0].Id] = dfsNName
+			q.nodeMap[depPkgResponse.Packages[0].Namespaces[0].Names[0].Id] = dfsNName
 		}
 		if !seenVersion {
 			dfsNVersion = DfsNode{
 				Parent:   depPkgResponse.Packages[0].Namespaces[0].Names[0].Id,
-				depth:    nowNode.depth + 1,
+				depth:    q.nowNode.depth + 1,
 				nodeType: "packageVersion",
 			}
-			nodeMap[matchingDepPkgVersionID] = dfsNVersion
+			q.nodeMap[matchingDepPkgVersionID] = dfsNVersion
 		}
 		if !dfsNName.expanded {
-			queue = append(queue, depPkgResponse.Packages[0].Namespaces[0].Names[0].Id)
+			q.queue = append(q.queue, depPkgResponse.Packages[0].Namespaces[0].Names[0].Id)
 		}
 		if !dfsNVersion.expanded {
-			queue = append(queue, matchingDepPkgVersionID)
+			q.queue = append(q.queue, matchingDepPkgVersionID)
 		}
 	}
-	return nil
+	return *q, nil
 }
