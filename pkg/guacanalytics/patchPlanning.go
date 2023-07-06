@@ -44,7 +44,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 	startNode, err := model.Node(ctx, gqlclient, startID)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed getting intial node with given ID:%v", err)
+		return nil, fmt.Errorf("failed getting intial node with given ID:%w", err)
 	}
 
 	_, ok := startNode.Node.(*model.NodeNodePackage)
