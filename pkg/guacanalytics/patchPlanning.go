@@ -106,6 +106,15 @@ func caseOnPredicates(neighbor model.NeighborsNeighborsNode, nowNode DfsNode, ct
 				return err
 			}
 		}
+
+		// TODO: add hasSLSA case
+		// exploreIsOccurrence-
+		// Step 1: Find Artifact attached to package through IsOccurence
+		// Step 2: Find HasSLSA where Artifact is the builtFrom
+		// Step 3: Find Artifact that is the subject of the HasSLSA
+		// Step 4: Find isOccurrence attached to that Artifact
+		// Step 5: Find packageVersion attached to the isOccurence
+		// Step 6: Add packageVersion and packageName to the queue
 	}
 
 	return nil
