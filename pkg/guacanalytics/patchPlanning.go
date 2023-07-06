@@ -98,23 +98,21 @@ func caseOnPredicates(neighbor model.NeighborsNeighborsNode, nowNode DfsNode, ct
 	// case on predicates and nodeType
 	switch nowNode.nodeType {
 	case "packageVersion":
-		switch neighbor := neighbor.(type) {
-		case *model.NeighborsNeighborsIsDependency:
-			err := exploreIsDependency(*neighbor, ctx, gqlclient)
+		if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
+			err := exploreIsDependency(*isDependency, ctx, gqlclient)
 
 			if err != nil {
 				return err
 			}
 		}
 
-		// TODO: add hasSLSA case
-		// exploreIsOccurrence-
-		// Step 1: Find Artifact attached to package through IsOccurence
-		// Step 2: Find HasSLSA where Artifact is the builtFrom
-		// Step 3: Find Artifact that is the subject of the HasSLSA
-		// Step 4: Find isOccurrence attached to that Artifact
-		// Step 5: Find packageVersion attached to the isOccurence
-		// Step 6: Add packageVersion and packageName to the queue
+		if isOccurrence, ok := neighbor.(*model.NeighborsNeighborsIsOccurrence); ok {
+			err := exploreIsOccurrence(*isOccurrence, ctx, gqlclient)
+
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
@@ -177,6 +175,34 @@ func exploreIsDependency(isDependency model.NeighborsNeighborsIsDependency, ctx 
 		}
 		if !dfsNVersion.expanded {
 			queue = append(queue, matchingDepPkgVersionID)
+		}
+	}
+	return nil
+}
+
+func exploreIsOccurrence(isOccurrence model.NeighborsNeighborsIsOccurrence, ctx context.Context, gqlclient graphql.Client) error {
+	artifactFilter := &model.ArtifactSpec{
+		Id:        &isOccurrence.Artifact.Id,
+		Algorithm: &isOccurrence.Artifact.Algorithm,
+		Digest:    &isOccurrence.Artifact.Digest,
+	}
+	artifactResponse, err := model.Artifacts(ctx, gqlclient, artifactFilter)
+	if err != nil {
+		return fmt.Errorf("error querying for built from artifacts: %w", err)
+	}
+
+	if len(artifactResponse.Artifacts) != 1 {
+		return fmt.Errorf("error querying for built from artifacts")
+	}
+	neighborResponseHasSLSA, err := model.Neighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id, []model.Edge{model.EdgeArtifactHasSlsa})
+	if err != nil {
+		return fmt.Errorf("error querying for hasSLSA responses")
+	} else {
+		for _, neighborHasSLSA := range neighborResponseHasSLSA.Neighbors {
+			if hasSLSA, ok := neighborHasSLSA.(*model.NeighborsNeighborsHasSLSA); ok {
+				isOccurrenceFilter := model.
+					hasSLSA.Subject
+			}
 		}
 	}
 	return nil
