@@ -103,48 +103,6 @@ var (
 					Collector:      "Demo ingestion",
 				},
 			},
-			// {
-			// 	Pkg: &model.PkgInputSpec{
-			// 		Type:      "top2",
-			// 		Namespace: ptrfrom.String("topns2"),
-			// 		Name:      "toppkg2",
-			// 		Version:   ptrfrom.String("1.19.0"),
-			// 	},
-			// 	DepPkg: &model.PkgInputSpec{
-			// 		Type:      "top",
-			// 		Namespace: ptrfrom.String("topns"),
-			// 		Name:      "toppkg",
-			// 		Version:   ptrfrom.String("1.19.0"),
-			// 	},
-			// 	IsDependency: &model.IsDependencyInputSpec{
-			// 		VersionRange:   ">=1.19.0",
-			// 		DependencyType: model.DependencyTypeIndirect,
-			// 		Justification:  "test justification one",
-			// 		Origin:         "Demo ingestion",
-			// 		Collector:      "Demo ingestion",
-			// 	},
-			// },
-			// {
-			// 	Pkg: &model.PkgInputSpec{
-			// 		Type:      "deb",
-			// 		Namespace: ptrfrom.String("ubuntu"),
-			// 		Name:      "dpkg",
-			// 		Version:   ptrfrom.String("1.19.0"),
-			// 	},
-			// 	DepPkg: &model.PkgInputSpec{
-			// 		Type:      "conan2",
-			// 		Namespace: ptrfrom.String("openssl.org2"),
-			// 		Name:      "openssl2",
-			// 		Version:   ptrfrom.String("3.0.3"),
-			// 	},
-			// 	IsDependency: &model.IsDependencyInputSpec{
-			// 		VersionRange:   ">=1.19.0",
-			// 		DependencyType: model.DependencyTypeDirect,
-			// 		Justification:  "test justification one",
-			// 		Origin:         "Demo ingestion",
-			// 		Collector:      "Demo ingestion",
-			// 	},
-			// },
 		},
 	}
 	isDependencyNotInRangeGraph = assembler.IngestPredicates{
@@ -355,10 +313,14 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("Test case %s\n", tt.name), func(t *testing.T) {
-			ingestTestData(ctx, gqlclient, tt.graphInput)
+			err = ingestTestData(ctx, gqlclient, tt.graphInput)
+
+			if err != nil {
+				t.Errorf("Error ingesting test data: %s", err)
+				return
+			}
 
 			var startIDs []string
-			var err error
 			if tt.startVersion != ptrfrom.String("") {
 				startIDs, err = getPackageIDs(ctx, gqlclient, tt.startType, tt.startNamespace, tt.startName, tt.startVersion, true, false)
 			} else {
@@ -366,7 +328,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Errorf("Got error finding startNode: %s", err)
+				t.Errorf("Error finding startNode: %s", err)
+				return
 			}
 
 			if len(startIDs) > 1 {
@@ -383,7 +346,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 					stopIDs, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, ptrfrom.String(""), false, true)
 				}
 				if err != nil {
-					t.Errorf("Got error finding stopNode: %s", err)
+					t.Errorf("Error finding stopNode: %s", err)
 				}
 
 				if len(stopIDs) > 1 {
