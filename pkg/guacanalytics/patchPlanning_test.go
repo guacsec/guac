@@ -201,18 +201,18 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, graph assemb
 		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting package: %v\n", err)
+			return fmt.Errorf("Error in ingesting package: %s\n", err)
 		}
 
 		_, err = model.IngestPackage(context.Background(), client, *ingest.DepPkg)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting dependent package: %v\n", err)
+			return fmt.Errorf("Error in ingesting dependent package: %s\n", err)
 		}
 		_, err = model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting isDependency: %v\n", err)
+			return fmt.Errorf("Error in ingesting isDependency: %s\n", err)
 		}
 	}
 	return nil
@@ -237,7 +237,12 @@ func ingestTestData(ctx context.Context, client graphql.Client, graphInput strin
 }
 
 func Test_SearchSubgraphFromVuln(t *testing.T) {
-	server := startTestServer()
+	server, err := startTestServer()
+
+	if err != nil {
+		t.Errorf("Error starting server: %s \n", err)
+		os.Exit(1)
+	}
 
 	ctx := logging.WithLogger(context.Background())
 
@@ -361,7 +366,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Errorf("Got error finding startNode: %v", err)
+				t.Errorf("Got error finding startNode: %s", err)
 			}
 
 			if len(startIDs) > 1 {
@@ -378,7 +383,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 					stopIDs, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, ptrfrom.String(""), false, true)
 				}
 				if err != nil {
-					t.Errorf("Got error finding stopNode: %v", err)
+					t.Errorf("Got error finding stopNode: %s", err)
 				}
 
 				if len(stopIDs) > 1 {
@@ -392,7 +397,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, startIDs[0], stopIDs[0], tt.maxDepth)
 
 			if err != nil {
-				t.Errorf("got err from SearchDependenciesFromStartNode: %v", err)
+				t.Errorf("got err from SearchDependenciesFromStartNode: %s", err)
 			}
 
 			if diff := cmp.Diff(tt.expectedLen, len(gotMap)); len(diff) > 0 {
@@ -403,12 +408,10 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			for _, pkg := range tt.expectedPkgs {
 				pkgIDs, err := getPackageIDs(ctx, gqlclient, pkg, ptrfrom.String(""), "", ptrfrom.String(""), false, false)
 				if err != nil {
-					t.Errorf("Expected package %s not found: %v\n", pkg, err)
+					t.Errorf("Expected package %s not found: %s\n", pkg, err)
 				}
 
-				for _, pkgID := range pkgIDs {
-					expectedIDs = append(expectedIDs, pkgID)
-				}
+				expectedIDs = append(expectedIDs, pkgIDs[0], pkgIDs[1])
 
 				if gotMap[pkgIDs[0]].NodeType == "" {
 					t.Errorf("Expected package %s is not in results\n", pkg)
@@ -456,14 +459,13 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	cf()
 }
 
-func startTestServer() *http.Server {
+func startTestServer() (*http.Server, error) {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
 
 	srv, err := getGraphqlTestServer()
 	if err != nil {
-		logger.Errorf("unable to initialize graphql server: %v", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("unable to initialize graphql server: %s", err)
 	}
 	http.Handle("/query", srv)
 
@@ -473,7 +475,7 @@ func startTestServer() *http.Server {
 	go func() {
 		logger.Infof("server finished: %s", server.ListenAndServe())
 	}()
-	return server
+	return server, nil
 }
 
 func getGraphqlTestServer() (*handler.Server, error) {

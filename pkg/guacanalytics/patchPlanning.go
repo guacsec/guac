@@ -41,7 +41,6 @@ type queueValues struct {
 
 // TODO: make more robust using predicates
 func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, maxDepth int) (map[string]DfsNode, error) {
-	fmt.Printf("startNode is %s \n", startID)
 	startNode, err := model.Node(ctx, gqlclient, startID)
 
 	if err != nil {
@@ -81,14 +80,12 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 		q.nodeMap[startID] = DfsNode{
 			NodeType: "packageVersion",
 		}
-		fmt.Printf("Start node is a version node %s \n", nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
 
 		// add packageName node to the frontier as well
 		q.queue = append(q.queue, nodePkg.AllPkgTree.Namespaces[0].Names[0].Id)
 
 		var versionsList []string
 		versionsList = append(versionsList, nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
-		fmt.Printf("Next node is a packageName node %s with ID %s \n", nodePkg.AllPkgTree.Namespaces[0].Names[0].Name, nodePkg.AllPkgTree.Namespaces[0].Names[0].Id)
 		q.nodeMap[nodePkg.AllPkgTree.Namespaces[0].Names[0].Id] = DfsNode{
 			NodeType:     "packageName",
 			nodeVersions: versionsList,
@@ -99,7 +96,6 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 
 	for len(q.queue) > 0 {
 		q.now = q.queue[0]
-		fmt.Printf("The node in the queue being searched is: %s\n", q.now)
 		q.queue = q.queue[1:]
 		q.nowNode = q.nodeMap[q.now]
 
@@ -118,7 +114,6 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 		}
 
 		for _, neighbor := range neighborsResponse.Neighbors {
-			fmt.Printf("The neighbor being explored is %s \n", neighbor)
 			err = caseOnPredicates(ctx, gqlclient, &q, neighbor, q.nowNode.NodeType)
 
 			if err != nil {
@@ -140,7 +135,6 @@ func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueVal
 	case "packageName":
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsIsDependency:
-			fmt.Printf("This neighbor entered is a dependency\n")
 			err := exploreIsDependency(ctx, gqlclient, q, *neighbor)
 
 			if err != nil {
@@ -153,7 +147,6 @@ func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueVal
 }
 
 func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) error {
-	fmt.Printf("When entered exploreIsDependency the Package is %s and the DepPkg is %s\n", isDependency.Package.Namespaces[0].Names[0].Name, isDependency.DependentPackage.Namespaces[0].Names[0].Name)
 	doesRangeInclude, err := depversion.DoesRangeInclude(q.nowNode.nodeVersions, isDependency.VersionRange)
 
 	if err != nil {
