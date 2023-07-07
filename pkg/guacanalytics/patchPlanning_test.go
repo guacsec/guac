@@ -293,11 +293,12 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				return
 			}
 
-			var startIDs []*string
+			var getPackageIDsValues []*string
+			var startID string
 			if tt.startVersion != nil {
-				startIDs, err = getPackageIDs(ctx, gqlclient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, tt.startVersion, true, false)
+				getPackageIDsValues, err = getPackageIDs(ctx, gqlclient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, tt.startVersion, true, false)
 			} else {
-				startIDs, err = getPackageIDs(ctx, gqlclient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, nil, false, true)
+				getPackageIDsValues, err = getPackageIDs(ctx, gqlclient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, nil, false, true)
 			}
 
 			if err != nil {
@@ -305,32 +306,35 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				return
 			}
 
-			if len(startIDs) > 1 {
-				t.Errorf("Found more than one matching node for the test case start ID input\n")
+			if getPackageIDsValues == nil || len(getPackageIDsValues) > 1 {
+				t.Errorf("Cannot locate matching startID input\n")
 				return
 			}
 
-			var stopIDs []*string
-			if tt.stopType != nil {
+			startID = *getPackageIDsValues[0]
 
+			var stopID *string
+			if tt.stopType != nil {
 				if tt.stopVersion != nil {
-					stopIDs, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, tt.stopVersion, true, false)
+					getPackageIDsValues, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, tt.stopVersion, true, false)
 				} else {
-					stopIDs, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, nil, false, true)
+					getPackageIDsValues, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, nil, false, true)
 				}
+
 				if err != nil {
 					t.Errorf("Error finding stopNode: %s", err)
-				}
-
-				if len(stopIDs) > 1 {
-					t.Errorf("Found more than one matching node for the test case stop ID input\n")
 					return
 				}
-			} else {
-				stopIDs = append(stopIDs, nil)
+
+				if getPackageIDsValues == nil || len(getPackageIDsValues) > 1 {
+					t.Errorf("Cannot locate matching stopID input\n")
+					return
+				}
+
+				stopID = getPackageIDsValues[0]
 			}
 
-			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, *startIDs[0], stopIDs[0], tt.maxDepth)
+			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, startID, stopID, tt.maxDepth)
 
 			if err != nil {
 				t.Errorf("got err from SearchDependenciesFromStartNode: %s", err)
@@ -365,7 +369,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 			for gotID, node := range gotMap {
 
-				if stopIDs[0] == nil && tt.maxDepth == 10 {
+				if stopID == nil && tt.maxDepth == 10 {
 					if !node.Expanded {
 						t.Errorf("All nodes should be expanded but this node was not: node %s \n", gotID)
 					}

@@ -68,6 +68,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 	}
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) < 1 {
+		// TODO: handle case where there are circular depedencies that introduce more versions to the version list on a node that requires revisiting
 		var versionsList []string
 		for _, versionEntry := range nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions {
 			versionsList = append(versionsList, versionEntry.Version)
@@ -81,7 +82,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 			NodeType: "packageVersion",
 		}
 
-		// add packageName node to the frontier as well
+		// Add packageName node to the frontier as well
 		q.queue = append(q.queue, nodePkg.AllPkgTree.Namespaces[0].Names[0].Id)
 
 		var versionsList []string
@@ -135,7 +136,7 @@ func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueVal
 	case "packageName":
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsIsDependency:
-			err := exploreIsDependency(ctx, gqlclient, q, *neighbor)
+			err := exploreIsDependencyFromDepPkg(ctx, gqlclient, q, *neighbor)
 
 			if err != nil {
 				return err
@@ -146,42 +147,46 @@ func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueVal
 	return nil
 }
 
-func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) error {
+func exploreIsDependencyFromDepPkg(ctx context.Context, gqlclient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) error {
 	doesRangeInclude, err := depversion.DoesRangeInclude(q.nowNode.nodeVersions, isDependency.VersionRange)
 
 	if err != nil {
 		return err
 	}
-	if doesRangeInclude {
-		dfsNVersion, seenVersion := q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id]
-		dfsNName, seenName := q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Id]
 
-		if !seenVersion {
-			dfsNVersion = DfsNode{
-				Parent:   q.now,
-				Depth:    q.nowNode.Depth + 1,
-				NodeType: "packageVersion",
-			}
-			q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id] = dfsNVersion
-		}
-
-		if !seenName {
-			dfsNName = DfsNode{
-				Parent:       q.now,
-				Depth:        q.nowNode.Depth + 1,
-				NodeType:     "packageName",
-				nodeVersions: []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version},
-			}
-			q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Id] = dfsNName
-		}
-
-		if !dfsNVersion.Expanded {
-			q.queue = append(q.queue, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
-		}
-
-		if !dfsNName.Expanded {
-			q.queue = append(q.queue, isDependency.Package.Namespaces[0].Names[0].Id)
-		}
+	if !doesRangeInclude {
+		return nil
 	}
+
+	dfsNVersion, seenVersion := q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id]
+	dfsNName, seenName := q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Id]
+
+	if !seenVersion {
+		dfsNVersion = DfsNode{
+			Parent:   q.now,
+			Depth:    q.nowNode.Depth + 1,
+			NodeType: "packageVersion",
+		}
+		q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id] = dfsNVersion
+	}
+
+	if !seenName {
+		dfsNName = DfsNode{
+			Parent:       q.now,
+			Depth:        q.nowNode.Depth + 1,
+			NodeType:     "packageName",
+			nodeVersions: []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version},
+		}
+		q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Id] = dfsNName
+	}
+
+	if !dfsNVersion.Expanded {
+		q.queue = append(q.queue, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
+	}
+
+	if !dfsNName.Expanded {
+		q.queue = append(q.queue, isDependency.Package.Namespaces[0].Names[0].Id)
+	}
+
 	return nil
 }
