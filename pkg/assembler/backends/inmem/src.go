@@ -76,17 +76,18 @@ type srcNameStruct struct {
 }
 type srcNameList []*srcNameNode
 type srcNameNode struct {
-	id               uint32
-	parent           uint32
-	name             string
-	tag              string
-	commit           string
-	srcMapLinks      []uint32
-	scorecardLinks   []uint32
-	occurrences      []uint32
-	badLinks         []uint32
-	goodLinks        []uint32
-	hasMetadataLinks []uint32
+	id                  uint32
+	parent              uint32
+	name                string
+	tag                 string
+	commit              string
+	srcMapLinks         []uint32
+	scorecardLinks      []uint32
+	occurrences         []uint32
+	badLinks            []uint32
+	goodLinks           []uint32
+	hasMetadataLinks    []uint32
+	pointOfContactLinks []uint32
 }
 
 func (n *srcNamespaceStruct) ID() uint32 { return n.id }
@@ -129,6 +130,9 @@ func (n *srcNameNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	if allowedEdges[model.EdgeSourceHasMetadata] {
 		out = append(out, n.hasMetadataLinks...)
 	}
+	if allowedEdges[model.EdgeSourcePointOfContact] {
+		out = append(out, n.pointOfContactLinks...)
+	}
 
 	return out
 }
@@ -150,6 +154,9 @@ func (p *srcNameNode) setCertifyBadLinks(id uint32)  { p.badLinks = append(p.bad
 func (p *srcNameNode) setCertifyGoodLinks(id uint32) { p.goodLinks = append(p.goodLinks, id) }
 func (p *srcNameNode) setHasMetadataLinks(id uint32) {
 	p.hasMetadataLinks = append(p.hasMetadataLinks, id)
+}
+func (p *srcNameNode) setPointOfContactLinks(id uint32) {
+	p.pointOfContactLinks = append(p.pointOfContactLinks, id)
 }
 
 // Ingest Source

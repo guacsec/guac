@@ -3590,6 +3590,7 @@ const (
 	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
 	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
 	EdgeArtifactHasMetadata         Edge = "ARTIFACT_HAS_METADATA"
+	EdgeArtifactPointOfContact      Edge = "ARTIFACT_POINT_OF_CONTACT"
 	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
 	EdgeCveCertifyVexStatement      Edge = "CVE_CERTIFY_VEX_STATEMENT"
 	EdgeCveCertifyVuln              Edge = "CVE_CERTIFY_VULN"
@@ -3611,12 +3612,14 @@ const (
 	EdgePackageIsOccurrence         Edge = "PACKAGE_IS_OCCURRENCE"
 	EdgePackagePkgEqual             Edge = "PACKAGE_PKG_EQUAL"
 	EdgePackageHasMetadata          Edge = "PACKAGE_HAS_METADATA"
+	EdgePackagePointOfContact       Edge = "PACKAGE_POINT_OF_CONTACT"
 	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
 	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
 	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
 	EdgeSourceHasMetadata           Edge = "SOURCE_HAS_METADATA"
+	EdgeSourcePointOfContact        Edge = "SOURCE_POINT_OF_CONTACT"
 	EdgeCertifyBadArtifact          Edge = "CERTIFY_BAD_ARTIFACT"
 	EdgeCertifyBadPackage           Edge = "CERTIFY_BAD_PACKAGE"
 	EdgeCertifyBadSource            Edge = "CERTIFY_BAD_SOURCE"
@@ -3653,6 +3656,9 @@ const (
 	EdgeHasMetadataPackage          Edge = "HAS_METADATA_PACKAGE"
 	EdgeHasMetadataArtifact         Edge = "HAS_METADATA_ARTIFACT"
 	EdgeHasMetadataSource           Edge = "HAS_METADATA_SOURCE"
+	EdgePointOfContactPackage       Edge = "POINT_OF_CONTACT_PACKAGE"
+	EdgePointOfContactArtifact      Edge = "POINT_OF_CONTACT_ARTIFACT"
+	EdgePointOfContactSource        Edge = "POINT_OF_CONTACT_SOURCE"
 )
 
 // FindSoftwareFindSoftwareArtifact includes the requested fields of the GraphQL type Artifact.
@@ -8617,6 +8623,7 @@ func (v *NeighborsNeighborsNoVuln) GetId() string { return v.Id }
 // NeighborsNeighborsOSV
 // NeighborsNeighborsPackage
 // NeighborsNeighborsPkgEqual
+// NeighborsNeighborsPointOfContact
 // NeighborsNeighborsSource
 // The GraphQL type's documentation follows.
 //
@@ -8652,6 +8659,7 @@ func (v *NeighborsNeighborsNoVuln) implementsGraphQLInterfaceNeighborsNeighborsN
 func (v *NeighborsNeighborsOSV) implementsGraphQLInterfaceNeighborsNeighborsNode()                 {}
 func (v *NeighborsNeighborsPackage) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsPkgEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()            {}
+func (v *NeighborsNeighborsPointOfContact) implementsGraphQLInterfaceNeighborsNeighborsNode()      {}
 func (v *NeighborsNeighborsSource) implementsGraphQLInterfaceNeighborsNeighborsNode()              {}
 
 func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) error {
@@ -8730,6 +8738,9 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 		return json.Unmarshal(b, *v)
 	case "PkgEqual":
 		*v = new(NeighborsNeighborsPkgEqual)
+		return json.Unmarshal(b, *v)
+	case "PointOfContact":
+		*v = new(NeighborsNeighborsPointOfContact)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(NeighborsNeighborsSource)
@@ -8990,6 +9001,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsPkgEqual
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsPointOfContact:
+		typename = "PointOfContact"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NeighborsNeighborsPointOfContact
+		}{typename, v}
 		return json.Marshal(result)
 	case *NeighborsNeighborsSource:
 		typename = "Source"
@@ -9263,6 +9282,37 @@ func (v *NeighborsNeighborsPkgEqual) __premarshalJSON() (*__premarshalNeighborsN
 	return &retval, nil
 }
 
+// NeighborsNeighborsPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type NeighborsNeighborsPointOfContact struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NeighborsNeighborsPointOfContact.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetTypename() *string { return v.Typename }
+
 // NeighborsNeighborsSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
 //
@@ -9462,6 +9512,7 @@ func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, 
 // NodeNodeOSV
 // NodeNodePackage
 // NodeNodePkgEqual
+// NodeNodePointOfContact
 // NodeNodeSource
 // The GraphQL type's documentation follows.
 //
@@ -9497,6 +9548,7 @@ func (v *NodeNodeNoVuln) implementsGraphQLInterfaceNodeNode()              {}
 func (v *NodeNodeOSV) implementsGraphQLInterfaceNodeNode()                 {}
 func (v *NodeNodePackage) implementsGraphQLInterfaceNodeNode()             {}
 func (v *NodeNodePkgEqual) implementsGraphQLInterfaceNodeNode()            {}
+func (v *NodeNodePointOfContact) implementsGraphQLInterfaceNodeNode()      {}
 func (v *NodeNodeSource) implementsGraphQLInterfaceNodeNode()              {}
 
 func __unmarshalNodeNode(b []byte, v *NodeNode) error {
@@ -9575,6 +9627,9 @@ func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 		return json.Unmarshal(b, *v)
 	case "PkgEqual":
 		*v = new(NodeNodePkgEqual)
+		return json.Unmarshal(b, *v)
+	case "PointOfContact":
+		*v = new(NodeNodePointOfContact)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(NodeNodeSource)
@@ -9835,6 +9890,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodePkgEqual
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodePointOfContact:
+		typename = "PointOfContact"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodeNodePointOfContact
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodeNodeSource:
 		typename = "Source"
@@ -11701,6 +11764,37 @@ func (v *NodeNodePkgEqual) __premarshalJSON() (*__premarshalNodeNodePkgEqual, er
 	return &retval, nil
 }
 
+// NodeNodePointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type NodeNodePointOfContact struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodeNodePointOfContact.Typename, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetTypename() *string { return v.Typename }
+
 // NodeNodeSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
 //
@@ -13486,6 +13580,7 @@ func (v *NodesNodesNoVuln) GetId() string { return v.Id }
 // NodesNodesOSV
 // NodesNodesPackage
 // NodesNodesPkgEqual
+// NodesNodesPointOfContact
 // NodesNodesSource
 // The GraphQL type's documentation follows.
 //
@@ -13521,6 +13616,7 @@ func (v *NodesNodesNoVuln) implementsGraphQLInterfaceNodesNodesNode()           
 func (v *NodesNodesOSV) implementsGraphQLInterfaceNodesNodesNode()                 {}
 func (v *NodesNodesPackage) implementsGraphQLInterfaceNodesNodesNode()             {}
 func (v *NodesNodesPkgEqual) implementsGraphQLInterfaceNodesNodesNode()            {}
+func (v *NodesNodesPointOfContact) implementsGraphQLInterfaceNodesNodesNode()      {}
 func (v *NodesNodesSource) implementsGraphQLInterfaceNodesNodesNode()              {}
 
 func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
@@ -13599,6 +13695,9 @@ func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 		return json.Unmarshal(b, *v)
 	case "PkgEqual":
 		*v = new(NodesNodesPkgEqual)
+		return json.Unmarshal(b, *v)
+	case "PointOfContact":
+		*v = new(NodesNodesPointOfContact)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(NodesNodesSource)
@@ -13859,6 +13958,14 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesPkgEqual
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesPointOfContact:
+		typename = "PointOfContact"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodesNodesPointOfContact
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodesNodesSource:
 		typename = "Source"
@@ -14131,6 +14238,37 @@ func (v *NodesNodesPkgEqual) __premarshalJSON() (*__premarshalNodesNodesPkgEqual
 	retval.Collector = v.allPkgEqual.Collector
 	return &retval, nil
 }
+
+// NodesNodesPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type NodesNodesPointOfContact struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodesNodesPointOfContact.Typename, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetTypename() *string { return v.Typename }
 
 // NodesNodesSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
@@ -16160,6 +16298,7 @@ func (v *PathPathNoVuln) GetId() string { return v.Id }
 // PathPathOSV
 // PathPathPackage
 // PathPathPkgEqual
+// PathPathPointOfContact
 // PathPathSource
 // The GraphQL type's documentation follows.
 //
@@ -16195,6 +16334,7 @@ func (v *PathPathNoVuln) implementsGraphQLInterfacePathPathNode()              {
 func (v *PathPathOSV) implementsGraphQLInterfacePathPathNode()                 {}
 func (v *PathPathPackage) implementsGraphQLInterfacePathPathNode()             {}
 func (v *PathPathPkgEqual) implementsGraphQLInterfacePathPathNode()            {}
+func (v *PathPathPointOfContact) implementsGraphQLInterfacePathPathNode()      {}
 func (v *PathPathSource) implementsGraphQLInterfacePathPathNode()              {}
 
 func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
@@ -16273,6 +16413,9 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 		return json.Unmarshal(b, *v)
 	case "PkgEqual":
 		*v = new(PathPathPkgEqual)
+		return json.Unmarshal(b, *v)
+	case "PointOfContact":
+		*v = new(PathPathPointOfContact)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(PathPathSource)
@@ -16533,6 +16676,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathPkgEqual
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathPointOfContact:
+		typename = "PointOfContact"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*PathPathPointOfContact
+		}{typename, v}
 		return json.Marshal(result)
 	case *PathPathSource:
 		typename = "Source"
@@ -16803,6 +16954,37 @@ func (v *PathPathPkgEqual) __premarshalJSON() (*__premarshalPathPathPkgEqual, er
 	retval.Collector = v.allPkgEqual.Collector
 	return &retval, nil
 }
+
+// PathPathPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PathPathPointOfContact struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns PathPathPointOfContact.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetTypename() *string { return v.Typename }
 
 // PathPathSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
@@ -17346,6 +17528,481 @@ func (v *PkgSpec) GetMatchOnlyEmptyQualifiers() *bool { return v.MatchOnlyEmptyQ
 
 // GetSubpath returns PkgSpec.Subpath, and is useful for accessing the field via an interface.
 func (v *PkgSpec) GetSubpath() *string { return v.Subpath }
+
+// PointOfContactArtifactIngestPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactArtifactIngestPointOfContact struct {
+	allPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactArtifactIngestPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetId() string { return v.allPointOfContact.Id }
+
+// GetSubject returns PointOfContactArtifactIngestPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetSubject() allPointOfContactSubjectPackageSourceOrArtifact {
+	return v.allPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactArtifactIngestPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetEmail() string {
+	return v.allPointOfContact.Email
+}
+
+// GetInfo returns PointOfContactArtifactIngestPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetInfo() string {
+	return v.allPointOfContact.Info
+}
+
+// GetSince returns PointOfContactArtifactIngestPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetSince() time.Time {
+	return v.allPointOfContact.Since
+}
+
+// GetJustification returns PointOfContactArtifactIngestPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetJustification() string {
+	return v.allPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactArtifactIngestPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetOrigin() string {
+	return v.allPointOfContact.Origin
+}
+
+// GetCollector returns PointOfContactArtifactIngestPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetCollector() string {
+	return v.allPointOfContact.Collector
+}
+
+func (v *PointOfContactArtifactIngestPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactArtifactIngestPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactArtifactIngestPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactArtifactIngestPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactArtifactIngestPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactArtifactIngestPointOfContact) __premarshalJSON() (*__premarshalPointOfContactArtifactIngestPointOfContact, error) {
+	var retval __premarshalPointOfContactArtifactIngestPointOfContact
+
+	retval.Id = v.allPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allPointOfContact.Subject
+		var err error
+		*dst, err = __marshalallPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactArtifactIngestPointOfContact.allPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.allPointOfContact.Email
+	retval.Info = v.allPointOfContact.Info
+	retval.Since = v.allPointOfContact.Since
+	retval.Justification = v.allPointOfContact.Justification
+	retval.Origin = v.allPointOfContact.Origin
+	retval.Collector = v.allPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactArtifactResponse is returned by PointOfContactArtifact on success.
+type PointOfContactArtifactResponse struct {
+	// Adds a PointOfContact attestation to a package, source or artifact.
+	IngestPointOfContact PointOfContactArtifactIngestPointOfContact `json:"ingestPointOfContact"`
+}
+
+// GetIngestPointOfContact returns PointOfContactArtifactResponse.IngestPointOfContact, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactResponse) GetIngestPointOfContact() PointOfContactArtifactIngestPointOfContact {
+	return v.IngestPointOfContact
+}
+
+// PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
+type PointOfContactInputSpec struct {
+	Email         string    `json:"email"`
+	Info          string    `json:"info"`
+	Since         time.Time `json:"since"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// GetEmail returns PointOfContactInputSpec.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetEmail() string { return v.Email }
+
+// GetInfo returns PointOfContactInputSpec.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetInfo() string { return v.Info }
+
+// GetSince returns PointOfContactInputSpec.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetSince() time.Time { return v.Since }
+
+// GetJustification returns PointOfContactInputSpec.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetJustification() string { return v.Justification }
+
+// GetOrigin returns PointOfContactInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns PointOfContactInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetCollector() string { return v.Collector }
+
+// PointOfContactPkgIngestPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactPkgIngestPointOfContact struct {
+	allPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactPkgIngestPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetId() string { return v.allPointOfContact.Id }
+
+// GetSubject returns PointOfContactPkgIngestPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetSubject() allPointOfContactSubjectPackageSourceOrArtifact {
+	return v.allPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactPkgIngestPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetEmail() string { return v.allPointOfContact.Email }
+
+// GetInfo returns PointOfContactPkgIngestPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetInfo() string { return v.allPointOfContact.Info }
+
+// GetSince returns PointOfContactPkgIngestPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetSince() time.Time {
+	return v.allPointOfContact.Since
+}
+
+// GetJustification returns PointOfContactPkgIngestPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetJustification() string {
+	return v.allPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactPkgIngestPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetOrigin() string { return v.allPointOfContact.Origin }
+
+// GetCollector returns PointOfContactPkgIngestPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetCollector() string {
+	return v.allPointOfContact.Collector
+}
+
+func (v *PointOfContactPkgIngestPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactPkgIngestPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactPkgIngestPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactPkgIngestPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactPkgIngestPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactPkgIngestPointOfContact) __premarshalJSON() (*__premarshalPointOfContactPkgIngestPointOfContact, error) {
+	var retval __premarshalPointOfContactPkgIngestPointOfContact
+
+	retval.Id = v.allPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allPointOfContact.Subject
+		var err error
+		*dst, err = __marshalallPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactPkgIngestPointOfContact.allPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.allPointOfContact.Email
+	retval.Info = v.allPointOfContact.Info
+	retval.Since = v.allPointOfContact.Since
+	retval.Justification = v.allPointOfContact.Justification
+	retval.Origin = v.allPointOfContact.Origin
+	retval.Collector = v.allPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactPkgResponse is returned by PointOfContactPkg on success.
+type PointOfContactPkgResponse struct {
+	// Adds a PointOfContact attestation to a package, source or artifact.
+	IngestPointOfContact PointOfContactPkgIngestPointOfContact `json:"ingestPointOfContact"`
+}
+
+// GetIngestPointOfContact returns PointOfContactPkgResponse.IngestPointOfContact, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgResponse) GetIngestPointOfContact() PointOfContactPkgIngestPointOfContact {
+	return v.IngestPointOfContact
+}
+
+// PointOfContactSrcIngestPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactSrcIngestPointOfContact struct {
+	allPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactSrcIngestPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetId() string { return v.allPointOfContact.Id }
+
+// GetSubject returns PointOfContactSrcIngestPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetSubject() allPointOfContactSubjectPackageSourceOrArtifact {
+	return v.allPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactSrcIngestPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetEmail() string { return v.allPointOfContact.Email }
+
+// GetInfo returns PointOfContactSrcIngestPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetInfo() string { return v.allPointOfContact.Info }
+
+// GetSince returns PointOfContactSrcIngestPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetSince() time.Time {
+	return v.allPointOfContact.Since
+}
+
+// GetJustification returns PointOfContactSrcIngestPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetJustification() string {
+	return v.allPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactSrcIngestPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetOrigin() string { return v.allPointOfContact.Origin }
+
+// GetCollector returns PointOfContactSrcIngestPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetCollector() string {
+	return v.allPointOfContact.Collector
+}
+
+func (v *PointOfContactSrcIngestPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactSrcIngestPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactSrcIngestPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactSrcIngestPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactSrcIngestPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactSrcIngestPointOfContact) __premarshalJSON() (*__premarshalPointOfContactSrcIngestPointOfContact, error) {
+	var retval __premarshalPointOfContactSrcIngestPointOfContact
+
+	retval.Id = v.allPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allPointOfContact.Subject
+		var err error
+		*dst, err = __marshalallPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactSrcIngestPointOfContact.allPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.allPointOfContact.Email
+	retval.Info = v.allPointOfContact.Info
+	retval.Since = v.allPointOfContact.Since
+	retval.Justification = v.allPointOfContact.Justification
+	retval.Origin = v.allPointOfContact.Origin
+	retval.Collector = v.allPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactSrcResponse is returned by PointOfContactSrc on success.
+type PointOfContactSrcResponse struct {
+	// Adds a PointOfContact attestation to a package, source or artifact.
+	IngestPointOfContact PointOfContactSrcIngestPointOfContact `json:"ingestPointOfContact"`
+}
+
+// GetIngestPointOfContact returns PointOfContactSrcResponse.IngestPointOfContact, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcResponse) GetIngestPointOfContact() PointOfContactSrcIngestPointOfContact {
+	return v.IngestPointOfContact
+}
 
 // SLSAForArtifactIngestSLSAHasSLSA includes the requested fields of the GraphQL type HasSLSA.
 // The GraphQL type's documentation follows.
@@ -19388,6 +20045,52 @@ func (v *__PkgEqualInput) GetOtherPackage() PkgInputSpec { return v.OtherPackage
 
 // GetPkgEqual returns __PkgEqualInput.PkgEqual, and is useful for accessing the field via an interface.
 func (v *__PkgEqualInput) GetPkgEqual() PkgEqualInputSpec { return v.PkgEqual }
+
+// __PointOfContactArtifactInput is used internally by genqlient
+type __PointOfContactArtifactInput struct {
+	Artifact       ArtifactInputSpec       `json:"artifact"`
+	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
+}
+
+// GetArtifact returns __PointOfContactArtifactInput.Artifact, and is useful for accessing the field via an interface.
+func (v *__PointOfContactArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// GetPointOfContact returns __PointOfContactArtifactInput.PointOfContact, and is useful for accessing the field via an interface.
+func (v *__PointOfContactArtifactInput) GetPointOfContact() PointOfContactInputSpec {
+	return v.PointOfContact
+}
+
+// __PointOfContactPkgInput is used internally by genqlient
+type __PointOfContactPkgInput struct {
+	Pkg            PkgInputSpec            `json:"pkg"`
+	PkgMatchType   *MatchFlags             `json:"pkgMatchType"`
+	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
+}
+
+// GetPkg returns __PointOfContactPkgInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__PointOfContactPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetPkgMatchType returns __PointOfContactPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__PointOfContactPkgInput) GetPkgMatchType() *MatchFlags { return v.PkgMatchType }
+
+// GetPointOfContact returns __PointOfContactPkgInput.PointOfContact, and is useful for accessing the field via an interface.
+func (v *__PointOfContactPkgInput) GetPointOfContact() PointOfContactInputSpec {
+	return v.PointOfContact
+}
+
+// __PointOfContactSrcInput is used internally by genqlient
+type __PointOfContactSrcInput struct {
+	Source         SourceInputSpec         `json:"source"`
+	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
+}
+
+// GetSource returns __PointOfContactSrcInput.Source, and is useful for accessing the field via an interface.
+func (v *__PointOfContactSrcInput) GetSource() SourceInputSpec { return v.Source }
+
+// GetPointOfContact returns __PointOfContactSrcInput.PointOfContact, and is useful for accessing the field via an interface.
+func (v *__PointOfContactSrcInput) GetPointOfContact() PointOfContactInputSpec {
+	return v.PointOfContact
+}
 
 // __SLSAForArtifactInput is used internally by genqlient
 type __SLSAForArtifactInput struct {
@@ -22726,6 +23429,508 @@ func (v *allPkgEqualPackagesPackage) __premarshalJSON() (*__premarshalallPkgEqua
 	retval.Id = v.AllPkgTree.Id
 	retval.Type = v.AllPkgTree.Type
 	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// allPointOfContact includes the GraphQL fields of PointOfContact requested by the fragment allPointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type allPointOfContact struct {
+	Id            string                                          `json:"id"`
+	Subject       allPointOfContactSubjectPackageSourceOrArtifact `json:"-"`
+	Email         string                                          `json:"email"`
+	Info          string                                          `json:"info"`
+	Since         time.Time                                       `json:"since"`
+	Justification string                                          `json:"justification"`
+	Origin        string                                          `json:"origin"`
+	Collector     string                                          `json:"collector"`
+}
+
+// GetId returns allPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetId() string { return v.Id }
+
+// GetSubject returns allPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetSubject() allPointOfContactSubjectPackageSourceOrArtifact {
+	return v.Subject
+}
+
+// GetEmail returns allPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetEmail() string { return v.Email }
+
+// GetInfo returns allPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetInfo() string { return v.Info }
+
+// GetSince returns allPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetSince() time.Time { return v.Since }
+
+// GetJustification returns allPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetJustification() string { return v.Justification }
+
+// GetOrigin returns allPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetCollector() string { return v.Collector }
+
+func (v *allPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allPointOfContact
+		Subject json.RawMessage `json:"subject"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Subject
+		src := firstPass.Subject
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalallPointOfContactSubjectPackageSourceOrArtifact(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal allPointOfContact.Subject: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalallPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *allPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allPointOfContact) __premarshalJSON() (*__premarshalallPointOfContact, error) {
+	var retval __premarshalallPointOfContact
+
+	retval.Id = v.Id
+	{
+
+		dst := &retval.Subject
+		src := v.Subject
+		var err error
+		*dst, err = __marshalallPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal allPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.Email
+	retval.Info = v.Info
+	retval.Since = v.Since
+	retval.Justification = v.Justification
+	retval.Origin = v.Origin
+	retval.Collector = v.Collector
+	return &retval, nil
+}
+
+// allPointOfContactSubjectArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type allPointOfContactSubjectArtifact struct {
+	Typename        *string `json:"__typename"`
+	AllArtifactTree `json:"-"`
+}
+
+// GetTypename returns allPointOfContactSubjectArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns allPointOfContactSubjectArtifact.Id, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns allPointOfContactSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+
+// GetDigest returns allPointOfContactSubjectArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *allPointOfContactSubjectArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allPointOfContactSubjectArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allPointOfContactSubjectArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallPointOfContactSubjectArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *allPointOfContactSubjectArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allPointOfContactSubjectArtifact) __premarshalJSON() (*__premarshalallPointOfContactSubjectArtifact, error) {
+	var retval __premarshalallPointOfContactSubjectArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// allPointOfContactSubjectPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type allPointOfContactSubjectPackage struct {
+	Typename   *string `json:"__typename"`
+	AllPkgTree `json:"-"`
+}
+
+// GetTypename returns allPointOfContactSubjectPackage.Typename, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectPackage) GetTypename() *string { return v.Typename }
+
+// GetId returns allPointOfContactSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns allPointOfContactSubjectPackage.Type, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns allPointOfContactSubjectPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *allPointOfContactSubjectPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allPointOfContactSubjectPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allPointOfContactSubjectPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallPointOfContactSubjectPackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *allPointOfContactSubjectPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allPointOfContactSubjectPackage) __premarshalJSON() (*__premarshalallPointOfContactSubjectPackage, error) {
+	var retval __premarshalallPointOfContactSubjectPackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// allPointOfContactSubjectPackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
+//
+// allPointOfContactSubjectPackageSourceOrArtifact is implemented by the following types:
+// allPointOfContactSubjectArtifact
+// allPointOfContactSubjectPackage
+// allPointOfContactSubjectSource
+// The GraphQL type's documentation follows.
+//
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
+type allPointOfContactSubjectPackageSourceOrArtifact interface {
+	implementsGraphQLInterfaceallPointOfContactSubjectPackageSourceOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *allPointOfContactSubjectArtifact) implementsGraphQLInterfaceallPointOfContactSubjectPackageSourceOrArtifact() {
+}
+func (v *allPointOfContactSubjectPackage) implementsGraphQLInterfaceallPointOfContactSubjectPackageSourceOrArtifact() {
+}
+func (v *allPointOfContactSubjectSource) implementsGraphQLInterfaceallPointOfContactSubjectPackageSourceOrArtifact() {
+}
+
+func __unmarshalallPointOfContactSubjectPackageSourceOrArtifact(b []byte, v *allPointOfContactSubjectPackageSourceOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Artifact":
+		*v = new(allPointOfContactSubjectArtifact)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(allPointOfContactSubjectPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(allPointOfContactSubjectSource)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageSourceOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for allPointOfContactSubjectPackageSourceOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalallPointOfContactSubjectPackageSourceOrArtifact(v *allPointOfContactSubjectPackageSourceOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *allPointOfContactSubjectArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallPointOfContactSubjectArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allPointOfContactSubjectPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallPointOfContactSubjectPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allPointOfContactSubjectSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallPointOfContactSubjectSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for allPointOfContactSubjectPackageSourceOrArtifact: "%T"`, v)
+	}
+}
+
+// allPointOfContactSubjectSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type allPointOfContactSubjectSource struct {
+	Typename      *string `json:"__typename"`
+	AllSourceTree `json:"-"`
+}
+
+// GetTypename returns allPointOfContactSubjectSource.Typename, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectSource) GetTypename() *string { return v.Typename }
+
+// GetId returns allPointOfContactSubjectSource.Id, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns allPointOfContactSubjectSource.Type, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns allPointOfContactSubjectSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *allPointOfContactSubjectSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allPointOfContactSubjectSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allPointOfContactSubjectSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallPointOfContactSubjectSource struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *allPointOfContactSubjectSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allPointOfContactSubjectSource) __premarshalJSON() (*__premarshalallPointOfContactSubjectSource, error) {
+	var retval __premarshalallPointOfContactSubjectSource
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -28635,6 +29840,369 @@ func PkgEqual(
 	var err error
 
 	var data PkgEqualResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PointOfContactArtifact.
+const PointOfContactArtifact_Operation = `
+mutation PointOfContactArtifact ($artifact: ArtifactInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
+	ingestPointOfContact(subject: {artifact:$artifact}, pointOfContact: $pointOfContact) {
+		... allPointOfContact
+	}
+}
+fragment allPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContactArtifact(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	pointOfContact PointOfContactInputSpec,
+) (*PointOfContactArtifactResponse, error) {
+	req := &graphql.Request{
+		OpName: "PointOfContactArtifact",
+		Query:  PointOfContactArtifact_Operation,
+		Variables: &__PointOfContactArtifactInput{
+			Artifact:       artifact,
+			PointOfContact: pointOfContact,
+		},
+	}
+	var err error
+
+	var data PointOfContactArtifactResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PointOfContactPkg.
+const PointOfContactPkg_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest a PointOfContact into GUAC
+mutation PointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $pointOfContact: PointOfContactInputSpec!) {
+	ingestPointOfContact(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, pointOfContact: $pointOfContact) {
+		... allPointOfContact
+	}
+}
+fragment allPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContactPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	pkgMatchType *MatchFlags,
+	pointOfContact PointOfContactInputSpec,
+) (*PointOfContactPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "PointOfContactPkg",
+		Query:  PointOfContactPkg_Operation,
+		Variables: &__PointOfContactPkgInput{
+			Pkg:            pkg,
+			PkgMatchType:   pkgMatchType,
+			PointOfContact: pointOfContact,
+		},
+	}
+	var err error
+
+	var data PointOfContactPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PointOfContactSrc.
+const PointOfContactSrc_Operation = `
+mutation PointOfContactSrc ($source: SourceInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
+	ingestPointOfContact(subject: {source:$source}, pointOfContact: $pointOfContact) {
+		... allPointOfContact
+	}
+}
+fragment allPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContactSrc(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+	pointOfContact PointOfContactInputSpec,
+) (*PointOfContactSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "PointOfContactSrc",
+		Query:  PointOfContactSrc_Operation,
+		Variables: &__PointOfContactSrcInput{
+			Source:         source,
+			PointOfContact: pointOfContact,
+		},
+	}
+	var err error
+
+	var data PointOfContactSrcResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

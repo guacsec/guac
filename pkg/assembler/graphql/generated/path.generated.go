@@ -192,6 +192,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._HasMetadata(ctx, sel, obj)
+	case model.PointOfContact:
+		return ec._PointOfContact(ctx, sel, &obj)
+	case *model.PointOfContact:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PointOfContact(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
