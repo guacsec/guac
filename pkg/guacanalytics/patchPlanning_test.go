@@ -439,7 +439,7 @@ func getGraphqlTestServer() (*handler.Server, error) {
 	return srv, nil
 }
 
-// This function return matching packageName and/or packageVersion node IDs
+// This function return matching packageName and/or packageVersion node IDs depending on if you specified to only find name nodes or version nodes
 func getPackageIDs(ctx context.Context, gqlclient graphql.Client, nodeType *string, nodeNamespace string, nodeName string, nodeVersion *string, justFindVersion bool, justFindName bool) ([]*string, error) {
 	var pkgFilter model.PkgSpec
 	if nodeVersion != nil {
