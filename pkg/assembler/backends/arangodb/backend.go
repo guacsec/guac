@@ -531,9 +531,6 @@ func (c *arangoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*m
 func (c *arangoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
 	panic(fmt.Errorf("not implemented: Osv - Osv"))
 }
-func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	panic(fmt.Errorf("not implemented: Sources - Sources"))
-}
 
 // Retrieval read-only queries for evidence trees
 func (c *arangoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
@@ -583,9 +580,6 @@ func (c *arangoClient) IngestMaterials(ctx context.Context, materials []*model.A
 }
 func (c *arangoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
 	panic(fmt.Errorf("not implemented: IngestOsv - IngestOsv"))
-}
-func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
-	panic(fmt.Errorf("not implemented: IngestSource - IngestSource"))
 }
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
