@@ -24,6 +24,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/arangodb/go-driver"
 	arangodbdriverhttp "github.com/arangodb/go-driver/http"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -302,6 +303,60 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate guackey index for PkgVersion: %w", err)
 		}
 
+		if err := createAnalyzer(ctx, db, driver.ArangoSearchAnalyzerDefinition{
+			Name: "customgram",
+			Type: driver.ArangoSearchAnalyzerTypeNGram,
+			Properties: driver.ArangoSearchAnalyzerProperties{
+				Min:              ptrfrom.Int64(4),
+				Max:              ptrfrom.Int64(7),
+				PreserveOriginal: ptrfrom.Bool(true),
+				StreamType:       ptrfromArangoSearchNGramStreamType(driver.ArangoSearchNGramStreamBinary),
+				StartMarker:      ptrfrom.String(""),
+				EndMarker:        ptrfrom.String(""),
+			},
+			Features: []driver.ArangoSearchAnalyzerFeature{
+				// required for phrase and ngram match
+				driver.ArangoSearchAnalyzerFeatureFrequency,
+				driver.ArangoSearchAnalyzerFeatureNorm,
+				driver.ArangoSearchAnalyzerFeaturePosition,
+			},
+		}); err != nil {
+			return nil, fmt.Errorf("failed to create analyzer customgram: %w", err)
+		}
+
+		if err := createView(ctx, db, "GuacSearch", &driver.ArangoSearchViewProperties{
+			Links: driver.ArangoSearchLinks{
+				"PkgVersion": driver.ArangoSearchElementProperties{
+					Analyzers:          []string{"identity", "text_en", "customgram"},
+					IncludeAllFields:   ptrfrom.Bool(false),
+					TrackListPositions: ptrfrom.Bool(false),
+					StoreValues:        driver.ArangoSearchStoreValuesNone,
+					Fields: map[string]driver.ArangoSearchElementProperties{
+						"guacKey": {},
+					},
+				},
+				"PkgName": driver.ArangoSearchElementProperties{
+					Analyzers:          []string{"identity", "text_en", "customgram"},
+					IncludeAllFields:   ptrfrom.Bool(false),
+					TrackListPositions: ptrfrom.Bool(false),
+					StoreValues:        driver.ArangoSearchStoreValuesNone,
+					Fields: map[string]driver.ArangoSearchElementProperties{
+						"guacKey": {},
+					},
+				},
+				"artifacts": driver.ArangoSearchElementProperties{
+					Analyzers:          []string{"identity"},
+					IncludeAllFields:   ptrfrom.Bool(false),
+					TrackListPositions: ptrfrom.Bool(false),
+					StoreValues:        driver.ArangoSearchStoreValuesNone,
+					Fields: map[string]driver.ArangoSearchElementProperties{
+						"digest": {},
+					},
+				},
+			},
+		}); err != nil {
+			return nil, fmt.Errorf("failed to create GuacSearch view: %w", err)
+		}
 	}
 
 	collectedRootData, err := preIngestPkgRoot(ctx, db)
@@ -330,6 +385,24 @@ func createIndexPerCollection(ctx context.Context, db driver.Database, collectio
 		return err
 	}
 	return nil
+}
+
+func createView(ctx context.Context, db driver.Database, viewName string, opts *driver.ArangoSearchViewProperties) error {
+	_, err := db.CreateArangoSearchView(ctx, viewName, opts)
+	if err != nil {
+		// return nil if it already exists, for now we assume that behavior
+		if driver.IsConflict(err) {
+			return nil
+		}
+		return err
+	}
+
+	return nil
+}
+
+func createAnalyzer(ctx context.Context, db driver.Database, analyzer driver.ArangoSearchAnalyzerDefinition) error {
+	_, _, err := db.EnsureAnalyzer(ctx, analyzer)
+	return err
 }
 
 func executeQueryWithRetry(ctx context.Context, db driver.Database, query string, values map[string]any, executedFrom string) (driver.Cursor, error) {
@@ -648,4 +721,8 @@ func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRoot
 		}
 	}
 	return collectedPkgTypes, nil
+}
+
+func ptrfromArangoSearchNGramStreamType(s driver.ArangoSearchNGramStreamType) *driver.ArangoSearchNGramStreamType {
+	return &s
 }
