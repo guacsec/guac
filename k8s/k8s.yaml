@@ -64,6 +64,9 @@ spec:
           image: local-organic-guac
           command: ["/opt/guac/guacgql"]
           workingDir: /tmp
+          env:
+            - name: GUAC_GQL_DEBUG
+              value: "true"
           ports:
             - name: http-port
               containerPort: 8080
