@@ -38,6 +38,7 @@ const (
 	justification string        = "justification"
 	maxRetires    int           = 20
 	retryTImer    time.Duration = time.Microsecond
+	guacEmpty     string        = "guac-empty-@@"
 )
 
 type ArangoConfig struct {
@@ -144,47 +145,47 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var pkgHasType driver.EdgeDefinition
 		pkgHasType.Collection = "PkgHasType"
 		// define a set of collections where an edge is going out...
-		pkgHasType.From = []string{"Pkg"}
+		pkgHasType.From = []string{"PkgRoots"}
 
 		// repeat this for the collections where an edge is going into
-		pkgHasType.To = []string{"PkgType"}
+		pkgHasType.To = []string{"PkgTypes"}
 
 		var pkgHasNamespace driver.EdgeDefinition
 		pkgHasNamespace.Collection = "PkgHasNamespace"
 		// define a set of collections where an edge is going out...
-		pkgHasNamespace.From = []string{"PkgType"}
+		pkgHasNamespace.From = []string{"PkgTypes"}
 
 		// repeat this for the collections where an edge is going into
-		pkgHasNamespace.To = []string{"PkgNamespace"}
+		pkgHasNamespace.To = []string{"PkgNamespaces"}
 
 		var pkgHasName driver.EdgeDefinition
 		pkgHasName.Collection = "PkgHasName"
 		// define a set of collections where an edge is going out...
-		pkgHasName.From = []string{"PkgNamespace"}
+		pkgHasName.From = []string{"PkgNamespaces"}
 
 		// repeat this for the collections where an edge is going into
-		pkgHasName.To = []string{"PkgName"}
+		pkgHasName.To = []string{"PkgNames"}
 
 		var pkgHasVersion driver.EdgeDefinition
 		pkgHasVersion.Collection = "PkgHasVersion"
 		// define a set of collections where an edge is going out...
-		pkgHasVersion.From = []string{"PkgName"}
+		pkgHasVersion.From = []string{"PkgNames"}
 
 		// repeat this for the collections where an edge is going into
-		pkgHasVersion.To = []string{"PkgVersion"}
+		pkgHasVersion.To = []string{"PkgVersions"}
 
 		var isDependencyEdges driver.EdgeDefinition
 		isDependencyEdges.Collection = "isDependencyEdges"
 		// define a set of collections where an edge is going out...
-		isDependencyEdges.From = []string{"isDependencies", "PkgVersion"}
+		isDependencyEdges.From = []string{"isDependencies", "PkgVersions"}
 
 		// repeat this for the collections where an edge is going into
-		isDependencyEdges.To = []string{"isDependencies", "PkgName"}
+		isDependencyEdges.To = []string{"isDependencies", "PkgNames"}
 
 		var isOccurrencesEdges driver.EdgeDefinition
 		isOccurrencesEdges.Collection = "isOccurrencesEdges"
 		// define a set of collections where an edge is going out...
-		isOccurrencesEdges.From = []string{"isOccurrences", "PkgVersion"}
+		isOccurrencesEdges.From = []string{"isOccurrences", "PkgVersions"}
 
 		// repeat this for the collections where an edge is going into
 		isOccurrencesEdges.To = []string{"isOccurrences", "artifacts"}
@@ -192,7 +193,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var hasSBOMEdges driver.EdgeDefinition
 		hasSBOMEdges.Collection = "hasSBOMEdges"
 		// define a set of collections where an edge is going out...
-		hasSBOMEdges.From = []string{"PkgVersion", "artifacts"}
+		hasSBOMEdges.From = []string{"PkgVersions", "artifacts"}
 
 		// repeat this for the collections where an edge is going into
 		hasSBOMEdges.To = []string{"hasSBOMs"}
@@ -223,43 +224,43 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for hashEqualsEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgType", []string{"_parent", "type"}, true, "byTypeParent"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgType: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgTypes", []string{"_parent", "type"}, true, "byTypeParent"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgTypes: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, "PkgHasType", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasType: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"_parent", "namespace"}, false, "byNamespaceParent"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgNamespace: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgNamespaces", []string{"_parent", "namespace"}, false, "byNamespaceParent"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgNamespaces: %w", err)
 		}
 		if err := createIndexPerCollection(ctx, db, "PkgHasNamespace", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasNamespace: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"_parent", "name"}, false, "byNameParent"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgName: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgNames", []string{"_parent", "name"}, false, "byNameParent"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgNames: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, "PkgHasName", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasName: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"version"}, false, "byVersion"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgVersions", []string{"version"}, false, "byVersion"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgVersions: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"subpath"}, false, "bySubpath"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgVersions", []string{"subpath"}, false, "bySubpath"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgVersions: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"qualifier_list[*]"}, false, "byQualifierList"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgVersions", []string{"qualifier_list[*]"}, false, "byQualifierList"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgVersions: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"_parent", "version", "subpath", "qualifier_list[*]"}, false, "byAllVersionParent"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgVersions", []string{"_parent", "version", "subpath", "qualifier_list[*]"}, false, "byAllVersionParent"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgVersions: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, "PkgHasVersion", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
@@ -291,16 +292,16 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		}
 
 		// GUAC key indices
-		if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
-			return nil, fmt.Errorf("failed to generate guackey index for PkgNamespace: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgNamespaces", []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
+			return nil, fmt.Errorf("failed to generate guackey index for PkgNamespaces: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
-			return nil, fmt.Errorf("failed to generate guackey index for PkgName: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgNames", []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
+			return nil, fmt.Errorf("failed to generate guackey index for PkgNames: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"guacKey"}, true, "byVersionGuacKey"); err != nil {
-			return nil, fmt.Errorf("failed to generate guackey index for PkgVersion: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgVersions", []string{"guacKey"}, true, "byVersionGuacKey"); err != nil {
+			return nil, fmt.Errorf("failed to generate guackey index for PkgVersions: %w", err)
 		}
 
 		if err := createAnalyzer(ctx, db, driver.ArangoSearchAnalyzerDefinition{
@@ -326,7 +327,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		if err := createView(ctx, db, "GuacSearch", &driver.ArangoSearchViewProperties{
 			Links: driver.ArangoSearchLinks{
-				"PkgVersion": driver.ArangoSearchElementProperties{
+				"PkgVersions": driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
 					IncludeAllFields:   ptrfrom.Bool(false),
 					TrackListPositions: ptrfrom.Bool(false),
@@ -335,7 +336,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 						"guacKey": {},
 					},
 				},
-				"PkgName": driver.ArangoSearchElementProperties{
+				"PkgNames": driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
 					IncludeAllFields:   ptrfrom.Bool(false),
 					TrackListPositions: ptrfrom.Bool(false),
@@ -631,7 +632,7 @@ func preIngestPkgRoot(ctx context.Context, db driver.Database) (*pkgRootData, er
 		UPSERT { root: "pkg" }
 		INSERT { root: "pkg" }
 		UPDATE {}
-		IN Pkg
+		IN PkgRoots
 		RETURN NEW`
 
 	cursor, err := executeQueryWithRetry(ctx, db, query, nil, "preIngestPkgRoot")
@@ -674,7 +675,98 @@ func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRoot
 			UPSERT { type: @pkgType, _parent: @rootID }
 			INSERT { type: @pkgType, _parent: @rootID }
 			UPDATE {}
-			IN PkgType OPTIONS { indexHint: "byType" }
+			IN PkgTypes OPTIONS { indexHint: "byType" }
+			RETURN NEW
+		  )
+	
+		  LET pkgHasTypeCollection = (
+			INSERT { _key: CONCAT("pkgHasType", @rootKey, type._key), _from: @rootID, _to: type._id, label : "PkgHasType" } INTO PkgHasType OPTIONS { overwriteMode: "ignore" }
+		  )
+	
+		RETURN {
+		"type": type.type,
+		"_id": type._id,
+		"_key": type._key
+		}`
+
+		cursor, err := executeQueryWithRetry(ctx, db, query, values, "preIngestPkgTypes")
+		if err != nil {
+			return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+		}
+
+		var createdValues []pkgTypeData
+		for {
+			var doc pkgTypeData
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					cursor.Close()
+					break
+				} else {
+					return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+				}
+			} else {
+				createdValues = append(createdValues, doc)
+			}
+		}
+		if len(createdValues) == 1 {
+			collectedPkgTypes[createdValues[0].PkgType] = &createdValues[0]
+		} else {
+			return nil, fmt.Errorf("number of hashEqual ingested is too great")
+		}
+	}
+	return collectedPkgTypes, nil
+}
+
+func preIngestSrcRoot(ctx context.Context, db driver.Database) (*pkgRootData, error) {
+	query := `
+		UPSERT { root: "src" }
+		INSERT { root: "src" }
+		UPDATE {}
+		IN SrcRoots
+		RETURN NEW`
+
+	cursor, err := executeQueryWithRetry(ctx, db, query, nil, "preIngestPkgRoot")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+	}
+
+	var createdValues []pkgRootData
+	for {
+		var doc pkgRootData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				cursor.Close()
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest pkg root: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	if len(createdValues) == 1 {
+		return &createdValues[0], nil
+	} else {
+		return nil, fmt.Errorf("number of pkg root ingested is too great")
+	}
+}
+
+func preIngestSrcTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRootData, pkgTypes []string) (map[string]*pkgTypeData, error) {
+	collectedPkgTypes := map[string]*pkgTypeData{}
+	for _, pkgType := range pkgTypes {
+		values := map[string]any{}
+		values["pkgType"] = pkgType
+		values["rootID"] = pkgRoot.Id
+		values["rootKey"] = pkgRoot.Key
+		query := `
+		  LET type = FIRST(
+			UPSERT { type: @pkgType, _parent: @rootID }
+			INSERT { type: @pkgType, _parent: @rootID }
+			UPDATE {}
+			IN PkgTypes OPTIONS { indexHint: "byType" }
 			RETURN NEW
 		  )
 	

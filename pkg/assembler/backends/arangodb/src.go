@@ -17,12 +17,345 @@ package arangodb
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"sort"
 	"strings"
 
+	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+type SrcIds struct {
+	TypeId      string
+	NamespaceId string
+	NameId      string
+}
+
+func guacSrcId(src model.SourceInputSpec) SrcIds {
+	ids := SrcIds{}
+
+	ids.TypeId = src.Type
+
+	var ns string
+	if src.Namespace != "" {
+		ns = src.Namespace
+	} else {
+		ns = guacEmpty
+	}
+	ids.NamespaceId = fmt.Sprintf("%s::%s", ids.TypeId, ns)
+
+	var tag string
+	if src.Tag != nil {
+		if *src.Tag != "" {
+			tag = *src.Tag
+		} else {
+			tag = guacEmpty
+		}
+	}
+
+	var commit string
+	if src.Commit != nil {
+		if *src.Commit != "" {
+			commit = *src.Commit
+		} else {
+			commit = guacEmpty
+		}
+	}
+
+	ids.NameId = fmt.Sprintf("%s::%s::%s::%s?", ids.NamespaceId, src.Name, tag, commit)
+	return ids
+}
+
+func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
+	listOfValues := []map[string]any{}
+
+	for i := range sources {
+		values := map[string]any{}
+
+		// add guac keys
+		values["typeID"] = c.pkgTypeMap[pkgs[i].Type].Id
+		values["typeKey"] = c.pkgTypeMap[pkgs[i].Type].Key
+		values["typeValue"] = c.pkgTypeMap[pkgs[i].Type].PkgType
+
+		guacIds := guacPkgId(*pkgs[i])
+		values["guacNsKey"] = guacIds.NamespaceId
+		values["guacNameKey"] = guacIds.NameId
+		values["guacVersionKey"] = guacIds.VersionId
+
+		values["name"] = pkgs[i].Name
+		if pkgs[i].Namespace != nil {
+			values["namespace"] = *pkgs[i].Namespace
+		} else {
+			values["namespace"] = ""
+		}
+		if pkgs[i].Version != nil {
+			values["version"] = *pkgs[i].Version
+		} else {
+			values["version"] = ""
+		}
+		if pkgs[i].Subpath != nil {
+			values["subpath"] = *pkgs[i].Subpath
+		} else {
+			values["subpath"] = ""
+		}
+
+		// To ensure consistency, always sort the qualifiers by key
+		qualifiersMap := map[string]string{}
+		keys := []string{}
+		for _, kv := range pkgs[i].Qualifiers {
+			qualifiersMap[kv.Key] = kv.Value
+			keys = append(keys, kv.Key)
+		}
+		sort.Strings(keys)
+		qualifiers := []string{}
+		for _, k := range keys {
+			qualifiers = append(qualifiers, k, qualifiersMap[k])
+		}
+		values["qualifier"] = qualifiers
+
+		listOfValues = append(listOfValues, values)
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+
+	query := `	  
+	LET ns = FIRST(
+	  UPSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
+	  INSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
+	  UPDATE {}
+	  IN PkgNamespace OPTIONS { indexHint: "byNamespaceParent" }
+	  RETURN NEW
+	)
+	
+	LET name = FIRST(
+	  UPSERT { name: doc.name, _parent: ns._id, guacKey: doc.guacNameKey}
+	  INSERT { name: doc.name, _parent: ns._id, guacKey: doc.guacNameKey}
+	  UPDATE {}
+	  IN PkgName OPTIONS { indexHint: "byNameParent" }
+	  RETURN NEW
+	)
+	
+	LET pkgVersionObj = FIRST(
+	  UPSERT { version: doc.version, subpath: doc.subpath, qualifier_list: doc.qualifier, _parent: name._id, guacKey: doc.guacVersionKey}
+	  INSERT { version: doc.version, subpath: doc.subpath, qualifier_list: doc.qualifier, _parent: name._id, guacKey: doc.guacVersionKey}
+	  UPDATE {}
+	  IN PkgVersion OPTIONS { indexHint: "byAllVersionParent" }
+	  RETURN NEW
+	)
+  
+	LET pkgHasNamespaceCollection = (
+	  INSERT { _key: CONCAT("pkgHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "PkgHasNamespace"} INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+	)
+	
+	LET pkgHasNameCollection = (
+	  INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "PkgHasName"} INTO PkgHasName OPTIONS { overwriteMode: "ignore" }
+	)
+	
+	LET pkgHasVersionCollection = (
+	  INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion"} INTO PkgHasVersion OPTIONS { overwriteMode: "ignore" }
+	)
+	  
+  RETURN {
+  "type": doc.typeValue,
+  "namespace": ns.namespace,
+  "name": name.name,
+  "version": pkgVersionObj.version,
+  "subpath": pkgVersionObj.subpath,
+  "qualifier_list": pkgVersionObj.qualifier_list
+}`
+
+	sb.WriteString(query)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPackages")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+	}
+
+	type collectedData struct {
+		PkgType       string      `json:"type"`
+		Namespace     string      `json:"namespace"`
+		Name          string      `json:"name"`
+		Version       string      `json:"version"`
+		Subpath       string      `json:"subpath"`
+		QualifierList interface{} `json:"qualifier_list"`
+	}
+
+	var createdValues []collectedData
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				cursor.Close()
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest package: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	var packageList []*model.Package
+	for _, createdValue := range createdValues {
+		pkg, err := generateModelPackage(createdValue.PkgType, createdValue.Namespace,
+			createdValue.Name, createdValue.Version, createdValue.Subpath, createdValue.QualifierList)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
+		}
+		packageList = append(packageList, pkg)
+	}
+
+	return packageList, nil
+}
+
+func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
+
+	values := map[string]any{}
+	values["name"] = pkg.Name
+	if pkg.Namespace != nil {
+		values["namespace"] = *pkg.Namespace
+	} else {
+		values["namespace"] = ""
+	}
+	if pkg.Version != nil {
+		values["version"] = *pkg.Version
+	} else {
+		values["version"] = ""
+	}
+	if pkg.Subpath != nil {
+		values["subpath"] = *pkg.Subpath
+	} else {
+		values["subpath"] = ""
+	}
+
+	// To ensure consistency, always sort the qualifiers by key
+	qualifiersMap := map[string]string{}
+	keys := []string{}
+	for _, kv := range pkg.Qualifiers {
+		qualifiersMap[kv.Key] = kv.Value
+		keys = append(keys, kv.Key)
+	}
+	sort.Strings(keys)
+	qualifiers := []string{}
+	for _, k := range keys {
+		qualifiers = append(qualifiers, k, qualifiersMap[k])
+	}
+	values["qualifier"] = qualifiers
+	values["typeID"] = c.pkgTypeMap[pkg.Type].Id
+	values["typeKey"] = c.pkgTypeMap[pkg.Type].Key
+	values["typeValue"] = c.pkgTypeMap[pkg.Type].PkgType
+
+	guacIds := guacPkgId(pkg)
+	values["guacNsKey"] = guacIds.NamespaceId
+	values["guacNameKey"] = guacIds.NameId
+	values["guacVersionKey"] = guacIds.VersionId
+
+	query := `	  
+	  LET ns = FIRST(
+		UPSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
+		INSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
+		UPDATE {}
+		IN PkgNamespace OPTIONS { indexHint: "byNamespaceParent" }
+		RETURN NEW
+	  )
+	  
+	  LET name = FIRST(
+		UPSERT { name: @name, _parent: ns._id, guacKey: @guacNameKey}
+		INSERT { name: @name, _parent: ns._id, guacKey: @guacNameKey}
+		UPDATE {}
+		IN PkgName OPTIONS { indexHint: "byNameParent" }
+		RETURN NEW
+	  )
+	  
+	  LET pkgVersionObj = FIRST(
+		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id, guacKey: @guacVersionKey}
+		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id, guacKey: @guacVersionKey}
+		UPDATE {}
+		IN PkgVersion OPTIONS { indexHint: "byAllVersionParent" }
+		RETURN NEW
+	  )
+	
+	  LET pkgHasNamespaceCollection = (
+		INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "PkgHasNamespace"} INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  )
+	  
+	  LET pkgHasNameCollection = (
+		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "PkgHasName"} INTO PkgHasName OPTIONS { overwriteMode: "ignore" }
+	  )
+	  
+	  LET pkgHasVersionCollection = (
+		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion"} INTO PkgHasVersion OPTIONS { overwriteMode: "ignore" }
+	  )
+		
+	RETURN {
+    "type": @typeValue,
+    "namespace": ns.namespace,
+    "name": name.name,
+    "version": pkgVersionObj.version,
+    "subpath": pkgVersionObj.subpath,
+    "qualifier_list": pkgVersionObj.qualifier_list
+  }`
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestPackage")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+	}
+
+	type collectedData struct {
+		PkgType       string      `json:"type"`
+		Namespace     string      `json:"namespace"`
+		Name          string      `json:"name"`
+		Version       string      `json:"version"`
+		Subpath       string      `json:"subpath"`
+		QualifierList interface{} `json:"qualifier_list"`
+	}
+
+	var createdValues []collectedData
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				cursor.Close()
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest package: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+	if len(createdValues) == 1 {
+		return generateModelPackage(createdValues[0].PkgType, createdValues[0].Namespace,
+			createdValues[0].Name, createdValues[0].Version, createdValues[0].Subpath, createdValues[0].QualifierList)
+	} else {
+		return nil, fmt.Errorf("number of hashEqual ingested is too great")
+	}
+}
 
 func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 
@@ -237,68 +570,6 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 	}
 
 	return result.([]*model.Source), nil
-}
-
-func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-	defer session.Close()
-
-	values := map[string]any{}
-	values["sourceType"] = source.Type
-	values["namespace"] = source.Namespace
-	values["name"] = source.Name
-
-	if source.Commit != nil && source.Tag != nil {
-		if *source.Commit != "" && *source.Tag != "" {
-			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
-		}
-	}
-
-	if source.Commit != nil {
-		values["commit"] = *source.Commit
-	} else {
-		values["commit"] = ""
-	}
-
-	if source.Tag != nil {
-		values["tag"] = *source.Tag
-	} else {
-		values["tag"] = ""
-	}
-
-	result, err := session.WriteTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-			query := `MERGE (root:Src)
-MERGE (root) -[:SrcHasType]-> (type:SrcType{type:$sourceType})
-MERGE (type) -[:SrcHasNamespace]-> (ns:SrcNamespace{namespace:$namespace})
-MERGE (ns) -[:SrcHasName]-> (name:SrcName{name:$name,commit:$commit,tag:$tag})
-RETURN type.type, ns.namespace, name.name, name.commit, name.tag`
-			result, err := tx.Run(query, values)
-			if err != nil {
-				return nil, err
-			}
-
-			// query returns a single record
-			record, err := result.Single()
-			if err != nil {
-				return nil, err
-			}
-
-			tag := record.Values[4]
-			commit := record.Values[3]
-			nameStr := record.Values[2].(string)
-			namespaceStr := record.Values[1].(string)
-			srcType := record.Values[0].(string)
-
-			src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
-
-			return src, nil
-		})
-	if err != nil {
-		return nil, err
-	}
-
-	return result.(*model.Source), nil
 }
 
 func generateModelSource(srcType, namespaceStr, nameStr string, commitValue, tagValue interface{}) *model.Source {

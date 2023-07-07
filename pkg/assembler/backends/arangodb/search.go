@@ -36,10 +36,10 @@ LET parsedDoc =
     IS_SAME_COLLECTION(doc, "PkgName") ?
     // PkgName case
     (
-        FOR pNs in PkgNamespace
+        FOR pNs in PkgNamespaces
           FILTER pNs._id == doc._parent
 
-        FOR pType in PkgType
+        FOR pType in PkgTypes
           FILTER pType._id == pNs._parent
 
         RETURN {
@@ -52,14 +52,14 @@ LET parsedDoc =
               'nameDoc': doc
           }
         }
-    ) : (IS_SAME_COLLECTION(doc, "PkgVersion") ?
-    // PkgVersion case
+    ) : (IS_SAME_COLLECTION(doc, "PkgVersions") ?
+    // PkgVersions case
     (
         FOR pName in PkgName
           FILTER pName._id == doc._parent
-        FOR pNs in PkgNamespace
+        FOR pNs in PkgNamespaces
           FILTER pNs._id == pName._parent
-        FOR pType in PkgType
+        FOR pType in PkgTypes
           FILTER pType._id == pNs._parent
 
         RETURN {

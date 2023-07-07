@@ -247,7 +247,7 @@ func getAssembler(ctx context.Context, graphqlEndpoint string) func([]assembler.
 	}
 	httpClient := http.Client{Transport: customTransport}
 	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
-	f := helpers.GetParallelAssembler(ctx, gqlclient)
+	f := helpers.GetBulkAssembler(ctx, gqlclient)
 	return f
 }
 
