@@ -135,7 +135,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 }
 
 func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode, nodeType string) error {
-	// case on predicates
+	// case on predicates and nodeType
 	switch nodeType {
 	case "packageName":
 		switch neighbor := neighbor.(type) {
@@ -174,9 +174,10 @@ func exploreIsDependency(ctx context.Context, gqlclient graphql.Client, q *queue
 
 		if !seenName {
 			dfsNName = DfsNode{
-				Parent:   q.now,
-				Depth:    q.nowNode.Depth + 1,
-				NodeType: "packageName",
+				Parent:       q.now,
+				Depth:        q.nowNode.Depth + 1,
+				NodeType:     "packageName",
+				nodeVersions: []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version},
 			}
 			q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Id] = dfsNName
 		}

@@ -82,27 +82,27 @@ var (
 					Collector:      "Demo ingestion",
 				},
 			},
-			// {
-			// 	Pkg: &model.PkgInputSpec{
-			// 		Type:      "top1",
-			// 		Namespace: ptrfrom.String("topns1"),
-			// 		Name:      "toppkg1",
-			// 		Version:   ptrfrom.String("1.19.0"),
-			// 	},
-			// 	DepPkg: &model.PkgInputSpec{
-			// 		Type:      "top",
-			// 		Namespace: ptrfrom.String("topns"),
-			// 		Name:      "toppkg",
-			// 		Version:   ptrfrom.String("1.19.0"),
-			// 	},
-			// 	IsDependency: &model.IsDependencyInputSpec{
-			// 		VersionRange:   ">=1.19.0",
-			// 		DependencyType: model.DependencyTypeDirect,
-			// 		Justification:  "test justification one",
-			// 		Origin:         "Demo ingestion",
-			// 		Collector:      "Demo ingestion",
-			// 	},
-			// },
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "conan",
+					Namespace: ptrfrom.String("openssl.org"),
+					Name:      "openssl",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "bottom",
+					Namespace: ptrfrom.String("bottomns"),
+					Name:      "bottompkg",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				IsDependency: &model.IsDependencyInputSpec{
+					VersionRange:   ">=1.19.0",
+					DependencyType: model.DependencyTypeIndirect,
+					Justification:  "test justification one",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+			},
 			// {
 			// 	Pkg: &model.PkgInputSpec{
 			// 		Type:      "top2",
@@ -145,21 +145,46 @@ var (
 			// 		Collector:      "Demo ingestion",
 			// 	},
 			// },
+		},
+	}
+	isDependencyNotInRangeGraph = assembler.IngestPredicates{
+		IsDependency: []assembler.IsDependencyIngest{
 			{
 				Pkg: &model.PkgInputSpec{
-					Type:      "extraType",
-					Namespace: ptrfrom.String("extraNamespace"),
-					Name:      "extraName",
-					Version:   ptrfrom.String("1.19.0"),
-				},
-				DepPkg: &model.PkgInputSpec{
 					Type:      "conan3",
 					Namespace: ptrfrom.String("openssl.org3"),
 					Name:      "openssl3",
 					Version:   ptrfrom.String("3.0.3"),
 				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "extraType",
+					Namespace: ptrfrom.String("extraNamespace"),
+					Name:      "extraName",
+					Version:   ptrfrom.String("1.19.0"),
+				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=1.19.0",
+					VersionRange:   "=3.0.3",
+					DependencyType: model.DependencyTypeDirect,
+					Justification:  "test justification one",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "conan3",
+					Namespace: ptrfrom.String("openssl.org3"),
+					Name:      "openssl3",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "extraType",
+					Namespace: ptrfrom.String("extraNamespace"),
+					Name:      "extraName",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				IsDependency: &model.IsDependencyInputSpec{
+					VersionRange:   "=3.0.3",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -201,6 +226,12 @@ func ingestTestData(ctx context.Context, client graphql.Client, graphInput strin
 			return err
 		}
 		return nil
+	case "isDependencyNotInRangeGraph":
+		err := ingestIsDependency(ctx, client, isDependencyNotInRangeGraph)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 	return fmt.Errorf("Graph input did not match any test graph")
 }
@@ -225,113 +256,185 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		stopVersion    *string
 		maxDepth       int
 		expectedLen    int
+		expectedPkgs   []string
 		graphInput     string
 	}{
-
 		{
-			name:           "1: test case with two dependencies at the same depth, no stopID and no limiting maxDepth",
+			name:           "1: two levels of dependencies, no stopID and no limiting maxDepth",
 			startType:      "conan",
 			startNamespace: ptrfrom.String("openssl.org"),
 			startName:      "openssl",
 			startVersion:   ptrfrom.String("3.0.3"),
 			stopType:       "",
 			maxDepth:       10,
-			expectedLen:    4,
+			expectedLen:    6,
+			expectedPkgs:   []string{"top", "deb", "conan"},
 			graphInput:     "isDependencySimpleGraph",
 		},
-		// {
-		// 	name:           "2: two levels of dependencies, no stopID and no limiting maxDepth",
-		// 	startType:      "top",
-		// 	startNamespace: ptrfrom.String("topns"),
-		// 	startName:      "toppkg",
-		// 	startVersion:   ptrfrom.String("1.19.0"),
-		// 	stopType:       "",
-		// 	maxDepth:       10,
-		// 	expectedLen:    4,
-		// 	graphInput:     "isDependency",
-		// },
-
-		// {
-		// 	name:           "3: two levels of dependencies, a stopID at the first level and no limiting maxDepth",
-		// 	startType:      "top",
-		// 	startNamespace: ptrfrom.String("topns"),
-		// 	startName:      "toppkg",
-		// 	startVersion:   ptrfrom.String("1.19.0"),
-		// 	stopType:       "deb",
-		// 	stopNamespace:  ptrfrom.String("ubuntu"),
-		// 	stopName:       "dpkg",
-		// 	stopVersion:    ptrfrom.String("1.19.0"),
-		// 	maxDepth:       10,
-		// 	expectedLen:    2,
-		// 	graphInput:     "isDependency",
-		// },
-
-		// {
-		// 	name:           "4: two levels of dependencies, no stopID and a limiting maxDepth at the first level",
-		// 	startType:      "top1",
-		// 	startNamespace: ptrfrom.String("topns1"),
-		// 	startName:      "toppkg1",
-		// 	startVersion:   ptrfrom.String("1.19.0"),
-		// 	stopType:       "",
-		// 	maxDepth:       1,
-		// 	expectedLen:    2,
-		// 	graphInput:     "isDependency",
-		// },
-		// {
-		// 	name:           "5: isDependency indirect dependency",
-		// 	startType:      "top2",
-		// 	startNamespace: ptrfrom.String("topns2"),
-		// 	startName:      "toppkg2",
-		// 	startVersion:   ptrfrom.String("1.19.0"),
-		// 	stopType:       "",
-		// 	maxDepth:       10,
-		// 	expectedLen:    5,
-		// 	graphInput:     "isDependency",
-		// },
-		// {
-		// 	name:           "6: direct isDependency not included in range",
-		// 	startType:      "extraType",
-		// 	startNamespace: ptrfrom.String("extraNamespace"),
-		// 	startName:      "extraName",
-		// 	startVersion:   ptrfrom.String("1.19.0"),
-		// 	stopType:       "",
-		// 	maxDepth:       10,
-		// 	expectedLen:    1,
-		// 	graphInput:     "isDependency",
-		// },
+		{
+			name:           "2:  one level of dependencies, no stopID and no limiting maxDepth",
+			startType:      "deb",
+			startNamespace: ptrfrom.String("ubuntu"),
+			startName:      "dpkg",
+			startVersion:   ptrfrom.String("1.19.0"),
+			stopType:       "",
+			maxDepth:       10,
+			expectedLen:    4,
+			expectedPkgs:   []string{"top", "deb"},
+			graphInput:     "isDependencySimpleGraph",
+		},
+		{
+			name:           "3: two levels of dependencies, a stopID at the first level and no limiting maxDepth",
+			startType:      "conan",
+			startNamespace: ptrfrom.String("openssl.org"),
+			startName:      "openssl",
+			startVersion:   ptrfrom.String("3.0.3"),
+			stopType:       "deb",
+			stopNamespace:  ptrfrom.String("ubuntu"),
+			stopName:       "dpkg",
+			stopVersion:    ptrfrom.String("1.19.0"),
+			maxDepth:       10,
+			expectedLen:    4,
+			expectedPkgs:   []string{"deb", "conan"},
+			graphInput:     "isDependencySimpleGraph",
+		},
+		{
+			name:           "4: two levels of dependencies, no stopID and a limiting maxDepth at the first level",
+			startType:      "conan",
+			startNamespace: ptrfrom.String("openssl.org"),
+			startName:      "openssl",
+			startVersion:   ptrfrom.String("3.0.3"),
+			stopType:       "",
+			maxDepth:       1,
+			expectedLen:    4,
+			expectedPkgs:   []string{"deb", "conan"},
+			graphInput:     "isDependencySimpleGraph",
+		},
+		{
+			name:           "5: isDependency indirect dependency",
+			startType:      "bottom",
+			startNamespace: ptrfrom.String("bottomns"),
+			startName:      "bottompkg",
+			startVersion:   ptrfrom.String("1.19.0"),
+			stopType:       "",
+			maxDepth:       10,
+			expectedLen:    8,
+			expectedPkgs:   []string{"top", "deb", "conan", "bottom"},
+			graphInput:     "isDependencySimpleGraph",
+		},
+		{
+			name:           "6: isDependency no dependents returns no extra",
+			startType:      "top",
+			startNamespace: ptrfrom.String("topns"),
+			startName:      "toppkg",
+			startVersion:   ptrfrom.String("1.19.0"),
+			stopType:       "",
+			maxDepth:       10,
+			expectedLen:    2,
+			expectedPkgs:   []string{"top"},
+			graphInput:     "isDependencySimpleGraph",
+		},
+		{
+			name:           "7: direct isDependency not included in range",
+			startType:      "extraType",
+			startNamespace: ptrfrom.String("extraNamespace"),
+			startName:      "extraName",
+			startVersion:   ptrfrom.String("1.19.0"),
+			stopType:       "",
+			maxDepth:       10,
+			expectedLen:    2,
+			expectedPkgs:   []string{"extraType"},
+			graphInput:     "isDependencyNotInRangeGraph",
+		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("Test case %s\n", tt.name), func(t *testing.T) {
 			ingestTestData(ctx, gqlclient, tt.graphInput)
-			startID := getPackageId(ctx, gqlclient, "isDependency", tt.startType, tt.startNamespace, tt.startName, tt.startVersion)
 
-			var stopID string
-			if tt.stopType != "" {
-				stopID = getPackageId(ctx, gqlclient, "isDependency", tt.stopType, tt.stopNamespace, tt.stopName, tt.stopVersion)
+			var startIDs []string
+			var err error
+			if tt.startVersion != ptrfrom.String("") {
+				startIDs, err = getPackageIDs(ctx, gqlclient, tt.startType, tt.startNamespace, tt.startName, tt.startVersion, true, false)
 			} else {
-				stopID = ""
+				startIDs, err = getPackageIDs(ctx, gqlclient, tt.startType, tt.startNamespace, tt.startName, ptrfrom.String(""), false, true)
 			}
 
-			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, startID, stopID, tt.maxDepth)
-
 			if err != nil {
-				t.Errorf("got err from SearchDependenciesFromStartNode: %v", err)
+				t.Errorf("Got error finding startNode: %v", err)
+			}
+
+			if len(startIDs) > 1 {
+				t.Errorf("Found more than one matching node for the test case start ID input %s\n", startIDs)
 				return
 			}
 
-			if stopID == "" && tt.maxDepth == 10 {
-				for k, v := range gotMap {
-					if !v.Expanded {
-						t.Errorf("All nodes should be expanded but this node was not: node %s \n", k)
-					}
+			var stopIDs []string
+			if tt.stopType != "" {
 
-					fmt.Printf("key: %s\n", k)
+				if tt.stopVersion != ptrfrom.String("") {
+					stopIDs, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, tt.stopVersion, true, false)
+				} else {
+					stopIDs, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, ptrfrom.String(""), false, true)
 				}
+				if err != nil {
+					t.Errorf("Got error finding stopNode: %v", err)
+				}
+
+				if len(stopIDs) > 1 {
+					t.Errorf("Found more than one matching node for the test case stop ID input %s\n", stopIDs)
+					return
+				}
+			} else {
+				stopIDs = append(stopIDs, "")
+			}
+
+			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, startIDs[0], stopIDs[0], tt.maxDepth)
+
+			if err != nil {
+				t.Errorf("got err from SearchDependenciesFromStartNode: %v", err)
 			}
 
 			if diff := cmp.Diff(tt.expectedLen, len(gotMap)); len(diff) > 0 {
 				t.Errorf("Number of map entries (-want +got):\n%s", diff)
+			}
+
+			var expectedIDs []string
+			for _, pkg := range tt.expectedPkgs {
+				pkgIDs, err := getPackageIDs(ctx, gqlclient, pkg, ptrfrom.String(""), "", ptrfrom.String(""), false, false)
+				if err != nil {
+					t.Errorf("Expected package %s not found: %v\n", pkg, err)
+				}
+
+				for _, pkgID := range pkgIDs {
+					expectedIDs = append(expectedIDs, pkgID)
+				}
+
+				if gotMap[pkgIDs[0]].NodeType == "" {
+					t.Errorf("Expected package %s is not in results\n", pkg)
+				}
+			}
+
+			for gotID, node := range gotMap {
+
+				if stopIDs[0] == "" && tt.maxDepth == 10 {
+					if !node.Expanded {
+						t.Errorf("All nodes should be expanded but this node was not: node %s \n", gotID)
+					}
+				}
+				//check that other pkgs are not present in return map
+				inExpected := false
+				for _, expectedID := range expectedIDs {
+					if expectedID == gotID {
+						inExpected = true
+						break
+					}
+				}
+
+				if !inExpected {
+					t.Errorf("This ID appears in the returned map but is not expected: %s \n", gotID)
+					return
+				}
 			}
 
 		})
@@ -389,20 +492,42 @@ func getGraphqlTestServer() (*handler.Server, error) {
 	return srv, nil
 }
 
-func getPackageId(ctx context.Context, gqlclient graphql.Client, graph string, nodeType string, nodeNamespace *string, nodeName string, nodeVersion *string) string {
-	pkgFilter := &model.PkgSpec{
-		Type:      &nodeType,
-		Namespace: nodeNamespace,
-		Name:      &nodeName,
-		Version:   nodeVersion,
+// This function return matching packageName and/or packageVersion node IDs
+func getPackageIDs(ctx context.Context, gqlclient graphql.Client, nodeType string, nodeNamespace *string, nodeName string, nodeVersion *string, justFindVersion bool, justFindName bool) ([]string, error) {
+	var pkgFilter model.PkgSpec
+	if *nodeVersion != "" {
+		pkgFilter = model.PkgSpec{
+			Type:      &nodeType,
+			Namespace: nodeNamespace,
+			Name:      &nodeName,
+			Version:   nodeVersion,
+		}
+	} else {
+		pkgFilter = model.PkgSpec{
+			Type: &nodeType,
+		}
 	}
-	pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
+	pkgResponse, err := model.Packages(ctx, gqlclient, &pkgFilter)
 
 	if err != nil {
-		fmt.Printf("Error getting id for isDependency test case: %s\n", err)
-		return ""
+		return nil, fmt.Errorf("Error getting id for test case: %s\n", err)
+	}
+	var foundIDs []string
+
+	if len(pkgResponse.Packages[0].Namespaces[0].Names) > 0 && !justFindVersion {
+		for _, name := range pkgResponse.Packages[0].Namespaces[0].Names {
+			foundIDs = append(foundIDs, name.Id)
+		}
 	}
 
-	fmt.Printf(pkgResponse.Packages[0].Namespaces[0].Names[0].Name)
-	return pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id
+	if len(pkgResponse.Packages[0].Namespaces[0].Names[0].Versions) > 0 && !justFindName {
+		for _, version := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+			foundIDs = append(foundIDs, version.Id)
+		}
+	}
+
+	if len(foundIDs) < 1 {
+		return nil, fmt.Errorf("No matching nodes found\n")
+	}
+	return foundIDs, nil
 }
