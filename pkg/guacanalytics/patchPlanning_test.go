@@ -128,27 +128,6 @@ var (
 					Collector:      "Demo ingestion",
 				},
 			},
-			{
-				Pkg: &model.PkgInputSpec{
-					Type:      "conan3",
-					Namespace: ptrfrom.String("openssl.org3"),
-					Name:      "openssl3",
-					Version:   ptrfrom.String("3.0.3"),
-				},
-				DepPkg: &model.PkgInputSpec{
-					Type:      "extraType",
-					Namespace: ptrfrom.String("extraNamespace"),
-					Name:      "extraName",
-					Version:   ptrfrom.String("3.0.3"),
-				},
-				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=3.0.3",
-					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
-				},
-			},
 		},
 	}
 )
@@ -210,11 +189,11 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	testCases := []struct {
 		name           string
 		startType      string
-		startNamespace *string
+		startNamespace string
 		startName      string
 		startVersion   *string
-		stopType       string
-		stopNamespace  *string
+		stopType       *string
+		stopNamespace  string
 		stopName       string
 		stopVersion    *string
 		maxDepth       int
@@ -225,10 +204,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		{
 			name:           "1: two levels of dependencies, no stopID and no limiting maxDepth",
 			startType:      "conan",
-			startNamespace: ptrfrom.String("openssl.org"),
+			startNamespace: "openssl.org",
 			startName:      "openssl",
 			startVersion:   ptrfrom.String("3.0.3"),
-			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    6,
 			expectedPkgs:   []string{"top", "deb", "conan"},
@@ -237,10 +215,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		{
 			name:           "2:  one level of dependencies, no stopID and no limiting maxDepth",
 			startType:      "deb",
-			startNamespace: ptrfrom.String("ubuntu"),
+			startNamespace: "ubuntu",
 			startName:      "dpkg",
 			startVersion:   ptrfrom.String("1.19.0"),
-			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    4,
 			expectedPkgs:   []string{"top", "deb"},
@@ -249,11 +226,11 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		{
 			name:           "3: two levels of dependencies, a stopID at the first level and no limiting maxDepth",
 			startType:      "conan",
-			startNamespace: ptrfrom.String("openssl.org"),
+			startNamespace: "openssl.org",
 			startName:      "openssl",
 			startVersion:   ptrfrom.String("3.0.3"),
-			stopType:       "deb",
-			stopNamespace:  ptrfrom.String("ubuntu"),
+			stopType:       ptrfrom.String("deb"),
+			stopNamespace:  "ubuntu",
 			stopName:       "dpkg",
 			stopVersion:    ptrfrom.String("1.19.0"),
 			maxDepth:       10,
@@ -264,10 +241,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		{
 			name:           "4: two levels of dependencies, no stopID and a limiting maxDepth at the first level",
 			startType:      "conan",
-			startNamespace: ptrfrom.String("openssl.org"),
+			startNamespace: "openssl.org",
 			startName:      "openssl",
 			startVersion:   ptrfrom.String("3.0.3"),
-			stopType:       "",
 			maxDepth:       1,
 			expectedLen:    4,
 			expectedPkgs:   []string{"deb", "conan"},
@@ -276,10 +252,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		{
 			name:           "5: isDependency indirect dependency",
 			startType:      "bottom",
-			startNamespace: ptrfrom.String("bottomns"),
+			startNamespace: "bottomns",
 			startName:      "bottompkg",
 			startVersion:   ptrfrom.String("1.19.0"),
-			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    8,
 			expectedPkgs:   []string{"top", "deb", "conan", "bottom"},
@@ -288,10 +263,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		{
 			name:           "6: isDependency no dependents returns no extra",
 			startType:      "top",
-			startNamespace: ptrfrom.String("topns"),
+			startNamespace: "topns",
 			startName:      "toppkg",
 			startVersion:   ptrfrom.String("1.19.0"),
-			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    2,
 			expectedPkgs:   []string{"top"},
@@ -300,10 +274,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		{
 			name:           "7: direct isDependency not included in range",
 			startType:      "extraType",
-			startNamespace: ptrfrom.String("extraNamespace"),
+			startNamespace: "extraNamespace",
 			startName:      "extraName",
 			startVersion:   ptrfrom.String("1.19.0"),
-			stopType:       "",
 			maxDepth:       10,
 			expectedLen:    2,
 			expectedPkgs:   []string{"extraType"},
@@ -320,11 +293,11 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				return
 			}
 
-			var startIDs []string
-			if tt.startVersion != ptrfrom.String("") {
-				startIDs, err = getPackageIDs(ctx, gqlclient, tt.startType, tt.startNamespace, tt.startName, tt.startVersion, true, false)
+			var startIDs []*string
+			if tt.startVersion != nil {
+				startIDs, err = getPackageIDs(ctx, gqlclient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, tt.startVersion, true, false)
 			} else {
-				startIDs, err = getPackageIDs(ctx, gqlclient, tt.startType, tt.startNamespace, tt.startName, ptrfrom.String(""), false, true)
+				startIDs, err = getPackageIDs(ctx, gqlclient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, nil, false, true)
 			}
 
 			if err != nil {
@@ -333,31 +306,31 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			}
 
 			if len(startIDs) > 1 {
-				t.Errorf("Found more than one matching node for the test case start ID input %s\n", startIDs)
+				t.Errorf("Found more than one matching node for the test case start ID input\n")
 				return
 			}
 
-			var stopIDs []string
-			if tt.stopType != "" {
+			var stopIDs []*string
+			if tt.stopType != nil {
 
-				if tt.stopVersion != ptrfrom.String("") {
+				if tt.stopVersion != nil {
 					stopIDs, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, tt.stopVersion, true, false)
 				} else {
-					stopIDs, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, ptrfrom.String(""), false, true)
+					stopIDs, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, nil, false, true)
 				}
 				if err != nil {
 					t.Errorf("Error finding stopNode: %s", err)
 				}
 
 				if len(stopIDs) > 1 {
-					t.Errorf("Found more than one matching node for the test case stop ID input %s\n", stopIDs)
+					t.Errorf("Found more than one matching node for the test case stop ID input\n")
 					return
 				}
 			} else {
-				stopIDs = append(stopIDs, "")
+				stopIDs = append(stopIDs, nil)
 			}
 
-			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, startIDs[0], stopIDs[0], tt.maxDepth)
+			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, *startIDs[0], stopIDs[0], tt.maxDepth)
 
 			if err != nil {
 				t.Errorf("got err from SearchDependenciesFromStartNode: %s", err)
@@ -369,21 +342,30 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 			var expectedIDs []string
 			for _, pkg := range tt.expectedPkgs {
-				pkgIDs, err := getPackageIDs(ctx, gqlclient, pkg, ptrfrom.String(""), "", ptrfrom.String(""), false, false)
+				pkgIDs, err := getPackageIDs(ctx, gqlclient, &pkg, "", "", nil, false, false)
 				if err != nil {
 					t.Errorf("Expected package %s not found: %s\n", pkg, err)
 				}
 
-				expectedIDs = append(expectedIDs, pkgIDs[0], pkgIDs[1])
+				for _, ID := range pkgIDs {
+					expectedIDs = append(expectedIDs, *ID)
+				}
 
-				if gotMap[pkgIDs[0]].NodeType == "" {
-					t.Errorf("Expected package %s is not in results\n", pkg)
+				// only applicable to cases with one version node
+				if len(pkgIDs) == 2 {
+					if gotMap[*pkgIDs[0]].NodeType == "" {
+						t.Errorf("First expected package %s is not in results\n", pkg)
+					}
+
+					if gotMap[*pkgIDs[1]].NodeType == "" {
+						t.Errorf("Second expected package %s is not in results\n", pkg)
+					}
 				}
 			}
 
 			for gotID, node := range gotMap {
 
-				if stopIDs[0] == "" && tt.maxDepth == 10 {
+				if stopIDs[0] == nil && tt.maxDepth == 10 {
 					if !node.Expanded {
 						t.Errorf("All nodes should be expanded but this node was not: node %s \n", gotID)
 					}
@@ -458,18 +440,18 @@ func getGraphqlTestServer() (*handler.Server, error) {
 }
 
 // This function return matching packageName and/or packageVersion node IDs
-func getPackageIDs(ctx context.Context, gqlclient graphql.Client, nodeType string, nodeNamespace *string, nodeName string, nodeVersion *string, justFindVersion bool, justFindName bool) ([]string, error) {
+func getPackageIDs(ctx context.Context, gqlclient graphql.Client, nodeType *string, nodeNamespace string, nodeName string, nodeVersion *string, justFindVersion bool, justFindName bool) ([]*string, error) {
 	var pkgFilter model.PkgSpec
-	if *nodeVersion != "" {
+	if nodeVersion != nil {
 		pkgFilter = model.PkgSpec{
-			Type:      &nodeType,
-			Namespace: nodeNamespace,
+			Type:      nodeType,
+			Namespace: &nodeNamespace,
 			Name:      &nodeName,
 			Version:   nodeVersion,
 		}
 	} else {
 		pkgFilter = model.PkgSpec{
-			Type: &nodeType,
+			Type: nodeType,
 		}
 	}
 	pkgResponse, err := model.Packages(ctx, gqlclient, &pkgFilter)
@@ -477,22 +459,23 @@ func getPackageIDs(ctx context.Context, gqlclient graphql.Client, nodeType strin
 	if err != nil {
 		return nil, fmt.Errorf("Error getting id for test case: %s\n", err)
 	}
-	var foundIDs []string
+	var foundIDs []*string
 
 	if len(pkgResponse.Packages[0].Namespaces[0].Names) > 0 && !justFindVersion {
 		for _, name := range pkgResponse.Packages[0].Namespaces[0].Names {
-			foundIDs = append(foundIDs, name.Id)
+			foundIDs = append(foundIDs, &name.Id)
 		}
 	}
 
 	if len(pkgResponse.Packages[0].Namespaces[0].Names[0].Versions) > 0 && !justFindName {
 		for _, version := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-			foundIDs = append(foundIDs, version.Id)
+			foundIDs = append(foundIDs, &version.Id)
 		}
 	}
 
 	if len(foundIDs) < 1 {
 		return nil, fmt.Errorf("No matching nodes found\n")
 	}
+
 	return foundIDs, nil
 }

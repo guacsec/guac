@@ -40,7 +40,7 @@ type queueValues struct {
 }
 
 // TODO: make more robust using predicates
-func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, maxDepth int) (map[string]DfsNode, error) {
+func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID *string, maxDepth int) (map[string]DfsNode, error) {
 	startNode, err := model.Node(ctx, gqlclient, startID)
 
 	if err != nil {
@@ -99,7 +99,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 		q.queue = q.queue[1:]
 		q.nowNode = q.nodeMap[q.now]
 
-		if stopID == q.now {
+		if stopID != nil && *stopID == q.now {
 			break
 		}
 
