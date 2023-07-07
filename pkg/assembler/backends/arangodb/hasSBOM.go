@@ -116,7 +116,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 			return isOccurrence, nil
 		} else {
-			return nil, fmt.Errorf("number of hashEqual ingested is too great")
+			return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
 		}
 	} else {
 		// add guac keys
@@ -233,7 +233,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 			return isOccurrence, nil
 		} else {
-			return nil, fmt.Errorf("number of hashEqual ingested is too great")
+			return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
 		}
 	}
 }

@@ -64,12 +64,26 @@ type pkgTypeData struct {
 	PkgType string `json:"type"`
 }
 
+type srcRootData struct {
+	Key     string `json:"_key"`
+	Id      string `json:"_id"`
+	SrcRoot string `json:"root"`
+}
+
+type srcTypeData struct {
+	Key     string `json:"_key"`
+	Id      string `json:"_id"`
+	SrcType string `json:"type"`
+}
+
 type arangoClient struct {
 	client     driver.Client
 	db         driver.Database
 	graph      driver.Graph
 	pkgRoot    *pkgRootData
 	pkgTypeMap map[string]*pkgTypeData
+	srcRoot    *srcRootData
+	srcTypeMap map[string]*srcTypeData
 }
 
 func arangoDBConnect(address, user, password string) (driver.Client, error) {
@@ -133,15 +147,8 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to get graph with error: %w", err)
 		}
 	} else {
-		// define the edgeCollection to store the edges
-		var hashEqualsEdges driver.EdgeDefinition
-		hashEqualsEdges.Collection = "hashEqualsEdges"
-		// define a set of collections where an edge is going out...
-		hashEqualsEdges.From = []string{"artifacts", "hashEquals"}
 
-		// repeat this for the collections where an edge is going into
-		hashEqualsEdges.To = []string{"artifacts", "hashEquals"}
-
+		// setup package collections
 		var pkgHasType driver.EdgeDefinition
 		pkgHasType.Collection = "PkgHasType"
 		// define a set of collections where an edge is going out...
@@ -174,6 +181,31 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// repeat this for the collections where an edge is going into
 		pkgHasVersion.To = []string{"PkgVersions"}
 
+		// setup source collections
+		var srcHasType driver.EdgeDefinition
+		srcHasType.Collection = "SrcHasType"
+		// define a set of collections where an edge is going out...
+		srcHasType.From = []string{"SrcRoots"}
+
+		// repeat this for the collections where an edge is going into
+		srcHasType.To = []string{"SrcTypes"}
+
+		var srcHasNamespace driver.EdgeDefinition
+		srcHasNamespace.Collection = "SrcHasNamespace"
+		// define a set of collections where an edge is going out...
+		srcHasNamespace.From = []string{"SrcTypes"}
+
+		// repeat this for the collections where an edge is going into
+		srcHasNamespace.To = []string{"SrcNamespaces"}
+
+		var srcHasName driver.EdgeDefinition
+		srcHasName.Collection = "SrcHasName"
+		// define a set of collections where an edge is going out...
+		srcHasName.From = []string{"SrcNamespaces"}
+
+		// repeat this for the collections where an edge is going into
+		pkgHasName.To = []string{"SrcNames"}
+
 		var isDependencyEdges driver.EdgeDefinition
 		isDependencyEdges.Collection = "isDependencyEdges"
 		// define a set of collections where an edge is going out...
@@ -189,6 +221,15 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		// repeat this for the collections where an edge is going into
 		isOccurrencesEdges.To = []string{"isOccurrences", "artifacts"}
+
+		// define the edgeCollection to store the edges
+		var hashEqualsEdges driver.EdgeDefinition
+		hashEqualsEdges.Collection = "hashEqualsEdges"
+		// define a set of collections where an edge is going out...
+		hashEqualsEdges.From = []string{"artifacts", "hashEquals"}
+
+		// repeat this for the collections where an edge is going into
+		hashEqualsEdges.To = []string{"artifacts", "hashEquals"}
 
 		var hasSBOMEdges driver.EdgeDefinition
 		hasSBOMEdges.Collection = "hasSBOMEdges"
@@ -360,17 +401,27 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		}
 	}
 
-	collectedRootData, err := preIngestPkgRoot(ctx, db)
+	collectedPkgRootData, err := preIngestPkgRoot(ctx, db)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create package root: %w", err)
 	}
 	ingestPkgTypes := []string{"pypi", "conan", "guac", "deb", "maven", "alpine", "golang"}
-	collectedPkgTypes, err := preIngestPkgTypes(ctx, db, collectedRootData, ingestPkgTypes)
+	collectedPkgTypes, err := preIngestPkgTypes(ctx, db, collectedPkgRootData, ingestPkgTypes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create package root: %w", err)
+		return nil, fmt.Errorf("failed to create package types: %w", err)
 	}
 
-	arangoClient := &arangoClient{client: arangodbClient, db: db, graph: graph, pkgRoot: collectedRootData, pkgTypeMap: collectedPkgTypes}
+	collectedSrcRootData, err := preIngestSrcRoot(ctx, db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create source root: %w", err)
+	}
+	ingestSrcTypes := []string{"git"}
+	collectedSrcTypes, err := preIngestSrcTypes(ctx, db, collectedSrcRootData, ingestSrcTypes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create source types: %w", err)
+	}
+
+	arangoClient := &arangoClient{client: arangodbClient, db: db, graph: graph, pkgRoot: collectedPkgRootData, pkgTypeMap: collectedPkgTypes, srcRoot: collectedSrcRootData, srcTypeMap: collectedSrcTypes}
 
 	return arangoClient, nil
 }
@@ -659,7 +710,7 @@ func preIngestPkgRoot(ctx context.Context, db driver.Database) (*pkgRootData, er
 	if len(createdValues) == 1 {
 		return &createdValues[0], nil
 	} else {
-		return nil, fmt.Errorf("number of pkg root ingested is too great")
+		return nil, fmt.Errorf("number of pkg root ingested is greater than one")
 	}
 }
 
@@ -703,7 +754,7 @@ func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRoot
 					cursor.Close()
 					break
 				} else {
-					return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+					return nil, fmt.Errorf("failed to ingest package type: %w", err)
 				}
 			} else {
 				createdValues = append(createdValues, doc)
@@ -712,13 +763,13 @@ func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRoot
 		if len(createdValues) == 1 {
 			collectedPkgTypes[createdValues[0].PkgType] = &createdValues[0]
 		} else {
-			return nil, fmt.Errorf("number of hashEqual ingested is too great")
+			return nil, fmt.Errorf("number of package types is greater than one")
 		}
 	}
 	return collectedPkgTypes, nil
 }
 
-func preIngestSrcRoot(ctx context.Context, db driver.Database) (*pkgRootData, error) {
+func preIngestSrcRoot(ctx context.Context, db driver.Database) (*srcRootData, error) {
 	query := `
 		UPSERT { root: "src" }
 		INSERT { root: "src" }
@@ -726,14 +777,14 @@ func preIngestSrcRoot(ctx context.Context, db driver.Database) (*pkgRootData, er
 		IN SrcRoots
 		RETURN NEW`
 
-	cursor, err := executeQueryWithRetry(ctx, db, query, nil, "preIngestPkgRoot")
+	cursor, err := executeQueryWithRetry(ctx, db, query, nil, "preIngestSrcRoot")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
 
-	var createdValues []pkgRootData
+	var createdValues []srcRootData
 	for {
-		var doc pkgRootData
+		var doc srcRootData
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -750,28 +801,28 @@ func preIngestSrcRoot(ctx context.Context, db driver.Database) (*pkgRootData, er
 	if len(createdValues) == 1 {
 		return &createdValues[0], nil
 	} else {
-		return nil, fmt.Errorf("number of pkg root ingested is too great")
+		return nil, fmt.Errorf("number of src root ingested is greater than one")
 	}
 }
 
-func preIngestSrcTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRootData, pkgTypes []string) (map[string]*pkgTypeData, error) {
-	collectedPkgTypes := map[string]*pkgTypeData{}
-	for _, pkgType := range pkgTypes {
+func preIngestSrcTypes(ctx context.Context, db driver.Database, srcRoot *srcRootData, srcTypes []string) (map[string]*srcTypeData, error) {
+	collectedSrcTypes := map[string]*srcTypeData{}
+	for _, srcType := range srcTypes {
 		values := map[string]any{}
-		values["pkgType"] = pkgType
-		values["rootID"] = pkgRoot.Id
-		values["rootKey"] = pkgRoot.Key
+		values["srcType"] = srcType
+		values["rootID"] = srcRoot.Id
+		values["rootKey"] = srcRoot.Key
 		query := `
 		  LET type = FIRST(
-			UPSERT { type: @pkgType, _parent: @rootID }
-			INSERT { type: @pkgType, _parent: @rootID }
+			UPSERT { type: @srcType, _parent: @rootID }
+			INSERT { type: @srcType, _parent: @rootID }
 			UPDATE {}
-			IN PkgTypes OPTIONS { indexHint: "byType" }
+			IN SrcTypes OPTIONS { indexHint: "byType" }
 			RETURN NEW
 		  )
 	
 		  LET pkgHasTypeCollection = (
-			INSERT { _key: CONCAT("pkgHasType", @rootKey, type._key), _from: @rootID, _to: type._id, label : "PkgHasType" } INTO PkgHasType OPTIONS { overwriteMode: "ignore" }
+			INSERT { _key: CONCAT("srcHasType", @rootKey, type._key), _from: @rootID, _to: type._id, label : "SrcHasType" } INTO SrcHasType OPTIONS { overwriteMode: "ignore" }
 		  )
 	
 		RETURN {
@@ -785,28 +836,28 @@ func preIngestSrcTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRoot
 			return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
 		}
 
-		var createdValues []pkgTypeData
+		var createdValues []srcTypeData
 		for {
-			var doc pkgTypeData
+			var doc srcTypeData
 			_, err := cursor.ReadDocument(ctx, &doc)
 			if err != nil {
 				if driver.IsNoMoreDocuments(err) {
 					cursor.Close()
 					break
 				} else {
-					return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+					return nil, fmt.Errorf("failed to ingest source type: %w", err)
 				}
 			} else {
 				createdValues = append(createdValues, doc)
 			}
 		}
 		if len(createdValues) == 1 {
-			collectedPkgTypes[createdValues[0].PkgType] = &createdValues[0]
+			collectedSrcTypes[createdValues[0].SrcType] = &createdValues[0]
 		} else {
-			return nil, fmt.Errorf("number of hashEqual ingested is too great")
+			return nil, fmt.Errorf("number of source type ingested is greater than one")
 		}
 	}
-	return collectedPkgTypes, nil
+	return collectedSrcTypes, nil
 }
 
 func ptrfromArangoSearchNGramStreamType(s driver.ArangoSearchNGramStreamType) *driver.ArangoSearchNGramStreamType {

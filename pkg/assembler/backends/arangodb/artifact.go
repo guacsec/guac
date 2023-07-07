@@ -169,7 +169,7 @@ RETURN NEW`
 	if len(createdArtifacts) == 1 {
 		return createdArtifacts[0], nil
 	} else {
-		return nil, fmt.Errorf("number of artifacts ingested is too great")
+		return nil, fmt.Errorf("number of artifacts ingested is greater than one")
 	}
 }
 

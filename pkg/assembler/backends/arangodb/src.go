@@ -353,7 +353,7 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 		return generateModelPackage(createdValues[0].PkgType, createdValues[0].Namespace,
 			createdValues[0].Name, createdValues[0].Version, createdValues[0].Subpath, createdValues[0].QualifierList)
 	} else {
-		return nil, fmt.Errorf("number of hashEqual ingested is too great")
+		return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
 	}
 }
 
