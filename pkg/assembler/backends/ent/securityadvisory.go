@@ -16,13 +16,13 @@ type SecurityAdvisory struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// GhsaID holds the value of the "ghsa_id" field.
+	// GHSA represents GitHub security advisories
 	GhsaID *string `json:"ghsa_id,omitempty"`
-	// CveID holds the value of the "cve_id" field.
+	// CVE represents Common Vulnerabilities and Exposures
 	CveID *string `json:"cve_id,omitempty"`
-	// CveYear holds the value of the "cve_year" field.
+	// CVE year
 	CveYear *int `json:"cve_year,omitempty"`
-	// OsvID holds the value of the "osv_id" field.
+	// OSV represents Open Source Vulnerabilities
 	OsvID        *string `json:"osv_id,omitempty"`
 	selectValues sql.SelectValues
 }

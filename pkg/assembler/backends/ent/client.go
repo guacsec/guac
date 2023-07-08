@@ -18,6 +18,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
@@ -30,7 +31,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
 )
 
 // Client is the client that holds all ent builders.
@@ -46,6 +46,8 @@ type Client struct {
 	Builder *BuilderClient
 	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
+	// CertifyVuln is the client for interacting with the CertifyVuln builders.
+	CertifyVuln *CertifyVulnClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
 	// IsVulnerability is the client for interacting with the IsVulnerability builders.
@@ -70,8 +72,6 @@ type Client struct {
 	SourceNamespace *SourceNamespaceClient
 	// SourceType is the client for interacting with the SourceType builders.
 	SourceType *SourceTypeClient
-	// Vulnerability is the client for interacting with the Vulnerability builders.
-	Vulnerability *VulnerabilityClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -89,6 +89,7 @@ func (c *Client) init() {
 	c.BillOfMaterials = NewBillOfMaterialsClient(c.config)
 	c.Builder = NewBuilderClient(c.config)
 	c.Certification = NewCertificationClient(c.config)
+	c.CertifyVuln = NewCertifyVulnClient(c.config)
 	c.Dependency = NewDependencyClient(c.config)
 	c.IsVulnerability = NewIsVulnerabilityClient(c.config)
 	c.Occurrence = NewOccurrenceClient(c.config)
@@ -101,7 +102,6 @@ func (c *Client) init() {
 	c.SourceName = NewSourceNameClient(c.config)
 	c.SourceNamespace = NewSourceNamespaceClient(c.config)
 	c.SourceType = NewSourceTypeClient(c.config)
-	c.Vulnerability = NewVulnerabilityClient(c.config)
 }
 
 type (
@@ -188,6 +188,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		BillOfMaterials:  NewBillOfMaterialsClient(cfg),
 		Builder:          NewBuilderClient(cfg),
 		Certification:    NewCertificationClient(cfg),
+		CertifyVuln:      NewCertifyVulnClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
 		IsVulnerability:  NewIsVulnerabilityClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
@@ -200,7 +201,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
 		SourceType:       NewSourceTypeClient(cfg),
-		Vulnerability:    NewVulnerabilityClient(cfg),
 	}, nil
 }
 
@@ -224,6 +224,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		BillOfMaterials:  NewBillOfMaterialsClient(cfg),
 		Builder:          NewBuilderClient(cfg),
 		Certification:    NewCertificationClient(cfg),
+		CertifyVuln:      NewCertifyVulnClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
 		IsVulnerability:  NewIsVulnerabilityClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
@@ -236,7 +237,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
 		SourceType:       NewSourceTypeClient(cfg),
-		Vulnerability:    NewVulnerabilityClient(cfg),
 	}, nil
 }
 
@@ -266,10 +266,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.Dependency,
-		c.IsVulnerability, c.Occurrence, c.PackageName, c.PackageNamespace,
-		c.PackageType, c.PackageVersion, c.SLSAAttestation, c.SecurityAdvisory,
-		c.SourceName, c.SourceNamespace, c.SourceType, c.Vulnerability,
+		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
+		c.Dependency, c.IsVulnerability, c.Occurrence, c.PackageName,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SLSAAttestation,
+		c.SecurityAdvisory, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
 		n.Use(hooks...)
 	}
@@ -279,10 +279,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.Dependency,
-		c.IsVulnerability, c.Occurrence, c.PackageName, c.PackageNamespace,
-		c.PackageType, c.PackageVersion, c.SLSAAttestation, c.SecurityAdvisory,
-		c.SourceName, c.SourceNamespace, c.SourceType, c.Vulnerability,
+		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
+		c.Dependency, c.IsVulnerability, c.Occurrence, c.PackageName,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SLSAAttestation,
+		c.SecurityAdvisory, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -299,6 +299,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Builder.mutate(ctx, m)
 	case *CertificationMutation:
 		return c.Certification.mutate(ctx, m)
+	case *CertifyVulnMutation:
+		return c.CertifyVuln.mutate(ctx, m)
 	case *DependencyMutation:
 		return c.Dependency.mutate(ctx, m)
 	case *IsVulnerabilityMutation:
@@ -323,8 +325,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SourceNamespace.mutate(ctx, m)
 	case *SourceTypeMutation:
 		return c.SourceType.mutate(ctx, m)
-	case *VulnerabilityMutation:
-		return c.Vulnerability.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -895,6 +895,156 @@ func (c *CertificationClient) mutate(ctx context.Context, m *CertificationMutati
 		return (&CertificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Certification mutation op: %q", m.Op())
+	}
+}
+
+// CertifyVulnClient is a client for the CertifyVuln schema.
+type CertifyVulnClient struct {
+	config
+}
+
+// NewCertifyVulnClient returns a client for the CertifyVuln from the given config.
+func NewCertifyVulnClient(c config) *CertifyVulnClient {
+	return &CertifyVulnClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `certifyvuln.Hooks(f(g(h())))`.
+func (c *CertifyVulnClient) Use(hooks ...Hook) {
+	c.hooks.CertifyVuln = append(c.hooks.CertifyVuln, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `certifyvuln.Intercept(f(g(h())))`.
+func (c *CertifyVulnClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CertifyVuln = append(c.inters.CertifyVuln, interceptors...)
+}
+
+// Create returns a builder for creating a CertifyVuln entity.
+func (c *CertifyVulnClient) Create() *CertifyVulnCreate {
+	mutation := newCertifyVulnMutation(c.config, OpCreate)
+	return &CertifyVulnCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CertifyVuln entities.
+func (c *CertifyVulnClient) CreateBulk(builders ...*CertifyVulnCreate) *CertifyVulnCreateBulk {
+	return &CertifyVulnCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CertifyVuln.
+func (c *CertifyVulnClient) Update() *CertifyVulnUpdate {
+	mutation := newCertifyVulnMutation(c.config, OpUpdate)
+	return &CertifyVulnUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CertifyVulnClient) UpdateOne(cv *CertifyVuln) *CertifyVulnUpdateOne {
+	mutation := newCertifyVulnMutation(c.config, OpUpdateOne, withCertifyVuln(cv))
+	return &CertifyVulnUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CertifyVulnClient) UpdateOneID(id int) *CertifyVulnUpdateOne {
+	mutation := newCertifyVulnMutation(c.config, OpUpdateOne, withCertifyVulnID(id))
+	return &CertifyVulnUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CertifyVuln.
+func (c *CertifyVulnClient) Delete() *CertifyVulnDelete {
+	mutation := newCertifyVulnMutation(c.config, OpDelete)
+	return &CertifyVulnDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CertifyVulnClient) DeleteOne(cv *CertifyVuln) *CertifyVulnDeleteOne {
+	return c.DeleteOneID(cv.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CertifyVulnClient) DeleteOneID(id int) *CertifyVulnDeleteOne {
+	builder := c.Delete().Where(certifyvuln.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CertifyVulnDeleteOne{builder}
+}
+
+// Query returns a query builder for CertifyVuln.
+func (c *CertifyVulnClient) Query() *CertifyVulnQuery {
+	return &CertifyVulnQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCertifyVuln},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CertifyVuln entity by its id.
+func (c *CertifyVulnClient) Get(ctx context.Context, id int) (*CertifyVuln, error) {
+	return c.Query().Where(certifyvuln.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CertifyVulnClient) GetX(ctx context.Context, id int) *CertifyVuln {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryVulnerability queries the vulnerability edge of a CertifyVuln.
+func (c *CertifyVulnClient) QueryVulnerability(cv *CertifyVuln) *SecurityAdvisoryQuery {
+	query := (&SecurityAdvisoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifyvuln.Table, certifyvuln.FieldID, id),
+			sqlgraph.To(securityadvisory.Table, securityadvisory.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certifyvuln.VulnerabilityTable, certifyvuln.VulnerabilityColumn),
+		)
+		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPackage queries the package edge of a CertifyVuln.
+func (c *CertifyVulnClient) QueryPackage(cv *CertifyVuln) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifyvuln.Table, certifyvuln.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certifyvuln.PackageTable, certifyvuln.PackageColumn),
+		)
+		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CertifyVulnClient) Hooks() []Hook {
+	return c.hooks.CertifyVuln
+}
+
+// Interceptors returns the client interceptors.
+func (c *CertifyVulnClient) Interceptors() []Interceptor {
+	return c.inters.CertifyVuln
+}
+
+func (c *CertifyVulnClient) mutate(ctx context.Context, m *CertifyVulnMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CertifyVulnCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CertifyVulnUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CertifyVulnUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CertifyVulnDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CertifyVuln mutation op: %q", m.Op())
 	}
 }
 
@@ -2666,168 +2816,18 @@ func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (V
 	}
 }
 
-// VulnerabilityClient is a client for the Vulnerability schema.
-type VulnerabilityClient struct {
-	config
-}
-
-// NewVulnerabilityClient returns a client for the Vulnerability from the given config.
-func NewVulnerabilityClient(c config) *VulnerabilityClient {
-	return &VulnerabilityClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `vulnerability.Hooks(f(g(h())))`.
-func (c *VulnerabilityClient) Use(hooks ...Hook) {
-	c.hooks.Vulnerability = append(c.hooks.Vulnerability, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `vulnerability.Intercept(f(g(h())))`.
-func (c *VulnerabilityClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Vulnerability = append(c.inters.Vulnerability, interceptors...)
-}
-
-// Create returns a builder for creating a Vulnerability entity.
-func (c *VulnerabilityClient) Create() *VulnerabilityCreate {
-	mutation := newVulnerabilityMutation(c.config, OpCreate)
-	return &VulnerabilityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Vulnerability entities.
-func (c *VulnerabilityClient) CreateBulk(builders ...*VulnerabilityCreate) *VulnerabilityCreateBulk {
-	return &VulnerabilityCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Vulnerability.
-func (c *VulnerabilityClient) Update() *VulnerabilityUpdate {
-	mutation := newVulnerabilityMutation(c.config, OpUpdate)
-	return &VulnerabilityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *VulnerabilityClient) UpdateOne(v *Vulnerability) *VulnerabilityUpdateOne {
-	mutation := newVulnerabilityMutation(c.config, OpUpdateOne, withVulnerability(v))
-	return &VulnerabilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *VulnerabilityClient) UpdateOneID(id int) *VulnerabilityUpdateOne {
-	mutation := newVulnerabilityMutation(c.config, OpUpdateOne, withVulnerabilityID(id))
-	return &VulnerabilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Vulnerability.
-func (c *VulnerabilityClient) Delete() *VulnerabilityDelete {
-	mutation := newVulnerabilityMutation(c.config, OpDelete)
-	return &VulnerabilityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *VulnerabilityClient) DeleteOne(v *Vulnerability) *VulnerabilityDeleteOne {
-	return c.DeleteOneID(v.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *VulnerabilityClient) DeleteOneID(id int) *VulnerabilityDeleteOne {
-	builder := c.Delete().Where(vulnerability.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &VulnerabilityDeleteOne{builder}
-}
-
-// Query returns a query builder for Vulnerability.
-func (c *VulnerabilityClient) Query() *VulnerabilityQuery {
-	return &VulnerabilityQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeVulnerability},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Vulnerability entity by its id.
-func (c *VulnerabilityClient) Get(ctx context.Context, id int) (*Vulnerability, error) {
-	return c.Query().Where(vulnerability.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *VulnerabilityClient) GetX(ctx context.Context, id int) *Vulnerability {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryVulnerability queries the vulnerability edge of a Vulnerability.
-func (c *VulnerabilityClient) QueryVulnerability(v *Vulnerability) *SecurityAdvisoryQuery {
-	query := (&SecurityAdvisoryClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := v.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(vulnerability.Table, vulnerability.FieldID, id),
-			sqlgraph.To(securityadvisory.Table, securityadvisory.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, vulnerability.VulnerabilityTable, vulnerability.VulnerabilityColumn),
-		)
-		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPackage queries the package edge of a Vulnerability.
-func (c *VulnerabilityClient) QueryPackage(v *Vulnerability) *PackageVersionQuery {
-	query := (&PackageVersionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := v.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(vulnerability.Table, vulnerability.FieldID, id),
-			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, vulnerability.PackageTable, vulnerability.PackageColumn),
-		)
-		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *VulnerabilityClient) Hooks() []Hook {
-	return c.hooks.Vulnerability
-}
-
-// Interceptors returns the client interceptors.
-func (c *VulnerabilityClient) Interceptors() []Interceptor {
-	return c.inters.Vulnerability
-}
-
-func (c *VulnerabilityClient) mutate(ctx context.Context, m *VulnerabilityMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&VulnerabilityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&VulnerabilityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&VulnerabilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&VulnerabilityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown Vulnerability mutation op: %q", m.Op())
-	}
-}
-
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BillOfMaterials, Builder, Certification, Dependency, IsVulnerability,
-		Occurrence, PackageName, PackageNamespace, PackageType, PackageVersion,
-		SLSAAttestation, SecurityAdvisory, SourceName, SourceNamespace, SourceType,
-		Vulnerability []ent.Hook
+		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
+		IsVulnerability, Occurrence, PackageName, PackageNamespace, PackageType,
+		PackageVersion, SLSAAttestation, SecurityAdvisory, SourceName, SourceNamespace,
+		SourceType []ent.Hook
 	}
 	inters struct {
-		Artifact, BillOfMaterials, Builder, Certification, Dependency, IsVulnerability,
-		Occurrence, PackageName, PackageNamespace, PackageType, PackageVersion,
-		SLSAAttestation, SecurityAdvisory, SourceName, SourceNamespace, SourceType,
-		Vulnerability []ent.Interceptor
+		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
+		IsVulnerability, Occurrence, PackageName, PackageNamespace, PackageType,
+		PackageVersion, SLSAAttestation, SecurityAdvisory, SourceName, SourceNamespace,
+		SourceType []ent.Interceptor
 	}
 )

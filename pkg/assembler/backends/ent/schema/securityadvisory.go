@@ -16,10 +16,10 @@ type SecurityAdvisory struct {
 // Fields of the GitHubSecurityAdvisory.
 func (SecurityAdvisory) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("ghsa_id").Optional().Nillable(),
-		field.String("cve_id").Optional().Nillable(),
-		field.Int("cve_year").Optional().Nillable(),
-		field.String("osv_id").Optional().Nillable(),
+		field.String("ghsa_id").Optional().Nillable().Comment("GHSA represents GitHub security advisories"),
+		field.String("cve_id").Optional().Nillable().Comment("CVE represents Common Vulnerabilities and Exposures"),
+		field.Int("cve_year").Optional().Nillable().Comment("CVE year"),
+		field.String("osv_id").Optional().Nillable().Comment("OSV represents Open Source Vulnerabilities"),
 	}
 }
 

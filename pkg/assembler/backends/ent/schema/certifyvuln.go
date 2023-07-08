@@ -8,13 +8,13 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// Vulnerability holds the schema definition for the Vulnerability entity.
-type Vulnerability struct {
+// CertifyVuln holds the schema definition for the CertifyVuln entity.
+type CertifyVuln struct {
 	ent.Schema
 }
 
 // Fields of the Vulnerability.
-func (Vulnerability) Fields() []ent.Field {
+func (CertifyVuln) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("vulnerability_id").Optional().Nillable().Comment("Advisory is one of OSV, GHSA, or CVE, or nil if not vulnerable"),
 		field.Int("package_id"),
@@ -29,7 +29,7 @@ func (Vulnerability) Fields() []ent.Field {
 }
 
 // Edges of the Vulnerability.
-func (Vulnerability) Edges() []ent.Edge {
+func (CertifyVuln) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("vulnerability", SecurityAdvisory.Type).Unique().Field("vulnerability_id").Comment("Vulnerability is one of OSV, GHSA, or CVE"),
 		edge.To("package", PackageVersion.Type).Unique().Field("package_id").Required(),
@@ -37,9 +37,8 @@ func (Vulnerability) Edges() []ent.Edge {
 }
 
 // Indexes of the Vulnerability.
-func (Vulnerability) Indexes() []ent.Index {
+func (CertifyVuln) Indexes() []ent.Index {
 	return []ent.Index{
-		// index.Fields("vulnerability_id", "package_id").Unique().Annotations(entsql.IndexWhere("vulnerability_id IS NOT NULL")),
 		index.Fields("time_scanned", "db_uri", "db_version", "scanner_uri", "scanner_version", "origin", "collector").Edges("vulnerability", "package").Unique().Annotations(entsql.IndexWhere("vulnerability_id IS NOT NULL")),
 	}
 }

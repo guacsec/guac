@@ -9,13 +9,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
 )
 
-// Vulnerability is the model entity for the Vulnerability schema.
-type Vulnerability struct {
+// CertifyVuln is the model entity for the CertifyVuln schema.
+type CertifyVuln struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -38,13 +38,13 @@ type Vulnerability struct {
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the VulnerabilityQuery when eager-loading is set.
-	Edges        VulnerabilityEdges `json:"edges"`
+	// The values are being populated by the CertifyVulnQuery when eager-loading is set.
+	Edges        CertifyVulnEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// VulnerabilityEdges holds the relations/edges for other nodes in the graph.
-type VulnerabilityEdges struct {
+// CertifyVulnEdges holds the relations/edges for other nodes in the graph.
+type CertifyVulnEdges struct {
 	// Vulnerability is one of OSV, GHSA, or CVE
 	Vulnerability *SecurityAdvisory `json:"vulnerability,omitempty"`
 	// Package holds the value of the package edge.
@@ -56,7 +56,7 @@ type VulnerabilityEdges struct {
 
 // VulnerabilityOrErr returns the Vulnerability value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e VulnerabilityEdges) VulnerabilityOrErr() (*SecurityAdvisory, error) {
+func (e CertifyVulnEdges) VulnerabilityOrErr() (*SecurityAdvisory, error) {
 	if e.loadedTypes[0] {
 		if e.Vulnerability == nil {
 			// Edge was loaded but was not found.
@@ -69,7 +69,7 @@ func (e VulnerabilityEdges) VulnerabilityOrErr() (*SecurityAdvisory, error) {
 
 // PackageOrErr returns the Package value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e VulnerabilityEdges) PackageOrErr() (*PackageVersion, error) {
+func (e CertifyVulnEdges) PackageOrErr() (*PackageVersion, error) {
 	if e.loadedTypes[1] {
 		if e.Package == nil {
 			// Edge was loaded but was not found.
@@ -81,15 +81,15 @@ func (e VulnerabilityEdges) PackageOrErr() (*PackageVersion, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Vulnerability) scanValues(columns []string) ([]any, error) {
+func (*CertifyVuln) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case vulnerability.FieldID, vulnerability.FieldVulnerabilityID, vulnerability.FieldPackageID:
+		case certifyvuln.FieldID, certifyvuln.FieldVulnerabilityID, certifyvuln.FieldPackageID:
 			values[i] = new(sql.NullInt64)
-		case vulnerability.FieldDbURI, vulnerability.FieldDbVersion, vulnerability.FieldScannerURI, vulnerability.FieldScannerVersion, vulnerability.FieldOrigin, vulnerability.FieldCollector:
+		case certifyvuln.FieldDbURI, certifyvuln.FieldDbVersion, certifyvuln.FieldScannerURI, certifyvuln.FieldScannerVersion, certifyvuln.FieldOrigin, certifyvuln.FieldCollector:
 			values[i] = new(sql.NullString)
-		case vulnerability.FieldTimeScanned:
+		case certifyvuln.FieldTimeScanned:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -99,151 +99,151 @@ func (*Vulnerability) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Vulnerability fields.
-func (v *Vulnerability) assignValues(columns []string, values []any) error {
+// to the CertifyVuln fields.
+func (cv *CertifyVuln) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case vulnerability.FieldID:
+		case certifyvuln.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			v.ID = int(value.Int64)
-		case vulnerability.FieldVulnerabilityID:
+			cv.ID = int(value.Int64)
+		case certifyvuln.FieldVulnerabilityID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field vulnerability_id", values[i])
 			} else if value.Valid {
-				v.VulnerabilityID = new(int)
-				*v.VulnerabilityID = int(value.Int64)
+				cv.VulnerabilityID = new(int)
+				*cv.VulnerabilityID = int(value.Int64)
 			}
-		case vulnerability.FieldPackageID:
+		case certifyvuln.FieldPackageID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				v.PackageID = int(value.Int64)
+				cv.PackageID = int(value.Int64)
 			}
-		case vulnerability.FieldTimeScanned:
+		case certifyvuln.FieldTimeScanned:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field time_scanned", values[i])
 			} else if value.Valid {
-				v.TimeScanned = value.Time
+				cv.TimeScanned = value.Time
 			}
-		case vulnerability.FieldDbURI:
+		case certifyvuln.FieldDbURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field db_uri", values[i])
 			} else if value.Valid {
-				v.DbURI = value.String
+				cv.DbURI = value.String
 			}
-		case vulnerability.FieldDbVersion:
+		case certifyvuln.FieldDbVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field db_version", values[i])
 			} else if value.Valid {
-				v.DbVersion = value.String
+				cv.DbVersion = value.String
 			}
-		case vulnerability.FieldScannerURI:
+		case certifyvuln.FieldScannerURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scanner_uri", values[i])
 			} else if value.Valid {
-				v.ScannerURI = value.String
+				cv.ScannerURI = value.String
 			}
-		case vulnerability.FieldScannerVersion:
+		case certifyvuln.FieldScannerVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scanner_version", values[i])
 			} else if value.Valid {
-				v.ScannerVersion = value.String
+				cv.ScannerVersion = value.String
 			}
-		case vulnerability.FieldOrigin:
+		case certifyvuln.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				v.Origin = value.String
+				cv.Origin = value.String
 			}
-		case vulnerability.FieldCollector:
+		case certifyvuln.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				v.Collector = value.String
+				cv.Collector = value.String
 			}
 		default:
-			v.selectValues.Set(columns[i], values[i])
+			cv.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Vulnerability.
+// Value returns the ent.Value that was dynamically selected and assigned to the CertifyVuln.
 // This includes values selected through modifiers, order, etc.
-func (v *Vulnerability) Value(name string) (ent.Value, error) {
-	return v.selectValues.Get(name)
+func (cv *CertifyVuln) Value(name string) (ent.Value, error) {
+	return cv.selectValues.Get(name)
 }
 
-// QueryVulnerability queries the "vulnerability" edge of the Vulnerability entity.
-func (v *Vulnerability) QueryVulnerability() *SecurityAdvisoryQuery {
-	return NewVulnerabilityClient(v.config).QueryVulnerability(v)
+// QueryVulnerability queries the "vulnerability" edge of the CertifyVuln entity.
+func (cv *CertifyVuln) QueryVulnerability() *SecurityAdvisoryQuery {
+	return NewCertifyVulnClient(cv.config).QueryVulnerability(cv)
 }
 
-// QueryPackage queries the "package" edge of the Vulnerability entity.
-func (v *Vulnerability) QueryPackage() *PackageVersionQuery {
-	return NewVulnerabilityClient(v.config).QueryPackage(v)
+// QueryPackage queries the "package" edge of the CertifyVuln entity.
+func (cv *CertifyVuln) QueryPackage() *PackageVersionQuery {
+	return NewCertifyVulnClient(cv.config).QueryPackage(cv)
 }
 
-// Update returns a builder for updating this Vulnerability.
-// Note that you need to call Vulnerability.Unwrap() before calling this method if this Vulnerability
+// Update returns a builder for updating this CertifyVuln.
+// Note that you need to call CertifyVuln.Unwrap() before calling this method if this CertifyVuln
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (v *Vulnerability) Update() *VulnerabilityUpdateOne {
-	return NewVulnerabilityClient(v.config).UpdateOne(v)
+func (cv *CertifyVuln) Update() *CertifyVulnUpdateOne {
+	return NewCertifyVulnClient(cv.config).UpdateOne(cv)
 }
 
-// Unwrap unwraps the Vulnerability entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the CertifyVuln entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (v *Vulnerability) Unwrap() *Vulnerability {
-	_tx, ok := v.config.driver.(*txDriver)
+func (cv *CertifyVuln) Unwrap() *CertifyVuln {
+	_tx, ok := cv.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Vulnerability is not a transactional entity")
+		panic("ent: CertifyVuln is not a transactional entity")
 	}
-	v.config.driver = _tx.drv
-	return v
+	cv.config.driver = _tx.drv
+	return cv
 }
 
 // String implements the fmt.Stringer.
-func (v *Vulnerability) String() string {
+func (cv *CertifyVuln) String() string {
 	var builder strings.Builder
-	builder.WriteString("Vulnerability(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", v.ID))
-	if v := v.VulnerabilityID; v != nil {
+	builder.WriteString("CertifyVuln(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", cv.ID))
+	if v := cv.VulnerabilityID; v != nil {
 		builder.WriteString("vulnerability_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("package_id=")
-	builder.WriteString(fmt.Sprintf("%v", v.PackageID))
+	builder.WriteString(fmt.Sprintf("%v", cv.PackageID))
 	builder.WriteString(", ")
 	builder.WriteString("time_scanned=")
-	builder.WriteString(v.TimeScanned.Format(time.ANSIC))
+	builder.WriteString(cv.TimeScanned.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("db_uri=")
-	builder.WriteString(v.DbURI)
+	builder.WriteString(cv.DbURI)
 	builder.WriteString(", ")
 	builder.WriteString("db_version=")
-	builder.WriteString(v.DbVersion)
+	builder.WriteString(cv.DbVersion)
 	builder.WriteString(", ")
 	builder.WriteString("scanner_uri=")
-	builder.WriteString(v.ScannerURI)
+	builder.WriteString(cv.ScannerURI)
 	builder.WriteString(", ")
 	builder.WriteString("scanner_version=")
-	builder.WriteString(v.ScannerVersion)
+	builder.WriteString(cv.ScannerVersion)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(v.Origin)
+	builder.WriteString(cv.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(v.Collector)
+	builder.WriteString(cv.Collector)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// Vulnerabilities is a parsable slice of Vulnerability.
-type Vulnerabilities []*Vulnerability
+// CertifyVulns is a parsable slice of CertifyVuln.
+type CertifyVulns []*CertifyVuln
