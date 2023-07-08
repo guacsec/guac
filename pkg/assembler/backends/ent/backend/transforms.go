@@ -24,7 +24,7 @@ func toModelBuilder(b *ent.Builder) *model.Builder {
 }
 
 func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageType {
-	if pv.Edges.Name != nil &&
+	if pv != nil && pv.Edges.Name != nil &&
 		pv.Edges.Name.Edges.Namespace != nil &&
 		pv.Edges.Name.Edges.Namespace.Edges.Package != nil {
 		pn := pv.Edges.Name

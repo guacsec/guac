@@ -8,7 +8,7 @@ import (
 )
 
 // SecurityAdvisory holds the schema definition for the SecurityAdvisory entity.
-// This wraps both GHSA and CVE nodes.
+// This wraps OSV, GHSA and CVE nodes. This is synonymous with the GQL Vulnerability interface.
 type SecurityAdvisory struct {
 	ent.Schema
 }
