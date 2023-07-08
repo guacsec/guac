@@ -265,23 +265,28 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for hashEqualsEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgTypes", []string{"_parent", "type"}, true, "byTypeParent"); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgTypes", []string{"_parent", "type"}, true, "byPkgTypeParent"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgTypes: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgTypes", []string{"type"}, true, "byPkgType"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgTypes: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgNamespaces", []string{"namespace"}, false, "byPkgNamespace"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgNamespace: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgNames", []string{"name"}, false, "byPkgNames"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgName: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, "PkgHasType", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasType: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgNamespaces", []string{"_parent", "namespace"}, false, "byNamespaceParent"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgNamespaces: %w", err)
-		}
 		if err := createIndexPerCollection(ctx, db, "PkgHasNamespace", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasNamespace: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, "PkgNames", []string{"_parent", "name"}, false, "byNameParent"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgNames: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, "PkgHasName", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
@@ -300,12 +305,36 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for PkgVersions: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersions", []string{"_parent", "version", "subpath", "qualifier_list[*]"}, false, "byAllVersionParent"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgVersions: %w", err)
-		}
-
 		if err := createIndexPerCollection(ctx, db, "PkgHasVersion", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasVersion: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "SrcTypes", []string{"_parent", "type"}, true, "bySrcTypeParent"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for SrcTypes: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "SrcTypes", []string{"type"}, true, "bySrcType"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for SrcTypes: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "SrcNamespaces", []string{"namespace"}, false, "bySrcNamespace"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for SrcNamespaces: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "SrcNames", []string{"name"}, false, "bySrcNames"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for SrcNames: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "SrcHasType", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for SrcHasType: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "SrcHasNamespace", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for SrcHasNamespace: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "SrcHasName", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for SrcHasName: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID", "origin"}, true, "byPkgIDDepPkgIDOrigin"); err != nil {
@@ -332,7 +361,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for hasSBOMEdges: %w", err)
 		}
 
-		// GUAC key indices
+		// GUAC key indices for package
 		if err := createIndexPerCollection(ctx, db, "PkgNamespaces", []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
 			return nil, fmt.Errorf("failed to generate guackey index for PkgNamespaces: %w", err)
 		}
@@ -343,6 +372,15 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		if err := createIndexPerCollection(ctx, db, "PkgVersions", []string{"guacKey"}, true, "byVersionGuacKey"); err != nil {
 			return nil, fmt.Errorf("failed to generate guackey index for PkgVersions: %w", err)
+		}
+
+		// GUAC key indices for source
+		if err := createIndexPerCollection(ctx, db, "SrcNamespaces", []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
+			return nil, fmt.Errorf("failed to generate guackey index for SrcNamespaces: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "SrcNames", []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
+			return nil, fmt.Errorf("failed to generate guackey index for SrcNames: %w", err)
 		}
 
 		if err := createAnalyzer(ctx, db, driver.ArangoSearchAnalyzerDefinition{
@@ -488,7 +526,7 @@ func (aqb *arangoQueryBuilder) ForOutBound(edgeCollectionName string, counterNam
 	return aqb
 }
 
-func (aqb *arangoQueryBuilder) filter(fieldName string, counterName string, condition string, value string) *arangoQueryFilter {
+func (aqb *arangoQueryBuilder) filter(counterName string, fieldName string, condition string, value string) *arangoQueryFilter {
 	aqb.query.WriteString(" ")
 
 	aqb.query.WriteString(fmt.Sprintf("FILTER %s.%s %s %s", counterName, fieldName, condition, value))
@@ -726,7 +764,7 @@ func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRoot
 			UPSERT { type: @pkgType, _parent: @rootID }
 			INSERT { type: @pkgType, _parent: @rootID }
 			UPDATE {}
-			IN PkgTypes OPTIONS { indexHint: "byType" }
+			IN PkgTypes OPTIONS { indexHint: "byPkgTypeParent" }
 			RETURN NEW
 		  )
 	
@@ -791,7 +829,7 @@ func preIngestSrcRoot(ctx context.Context, db driver.Database) (*srcRootData, er
 				cursor.Close()
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest pkg root: %w", err)
+				return nil, fmt.Errorf("failed to ingest src root: %w", err)
 			}
 		} else {
 			createdValues = append(createdValues, doc)

@@ -19,13 +19,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type SrcIds struct {
@@ -76,45 +73,28 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 		values := map[string]any{}
 
 		// add guac keys
-		values["typeID"] = c.pkgTypeMap[pkgs[i].Type].Id
-		values["typeKey"] = c.pkgTypeMap[pkgs[i].Type].Key
-		values["typeValue"] = c.pkgTypeMap[pkgs[i].Type].PkgType
+		values["typeID"] = c.srcTypeMap[sources[i].Type].Id
+		values["typeKey"] = c.srcTypeMap[sources[i].Type].Key
+		values["typeValue"] = c.srcTypeMap[sources[i].Type].SrcType
 
-		guacIds := guacPkgId(*pkgs[i])
+		guacIds := guacSrcId(*sources[i])
 		values["guacNsKey"] = guacIds.NamespaceId
 		values["guacNameKey"] = guacIds.NameId
-		values["guacVersionKey"] = guacIds.VersionId
 
-		values["name"] = pkgs[i].Name
-		if pkgs[i].Namespace != nil {
-			values["namespace"] = *pkgs[i].Namespace
-		} else {
-			values["namespace"] = ""
-		}
-		if pkgs[i].Version != nil {
-			values["version"] = *pkgs[i].Version
-		} else {
-			values["version"] = ""
-		}
-		if pkgs[i].Subpath != nil {
-			values["subpath"] = *pkgs[i].Subpath
-		} else {
-			values["subpath"] = ""
-		}
+		values["name"] = sources[i].Name
 
-		// To ensure consistency, always sort the qualifiers by key
-		qualifiersMap := map[string]string{}
-		keys := []string{}
-		for _, kv := range pkgs[i].Qualifiers {
-			qualifiersMap[kv.Key] = kv.Value
-			keys = append(keys, kv.Key)
+		values["namespace"] = sources[i].Namespace
+
+		if sources[i].Tag != nil {
+			values["tag"] = *sources[i].Tag
+		} else {
+			values["tag"] = ""
 		}
-		sort.Strings(keys)
-		qualifiers := []string{}
-		for _, k := range keys {
-			qualifiers = append(qualifiers, k, qualifiersMap[k])
+		if sources[i].Commit != nil {
+			values["commit"] = *sources[i].Commit
+		} else {
+			values["commit"] = ""
 		}
-		values["qualifier"] = qualifiers
 
 		listOfValues = append(listOfValues, values)
 	}
@@ -146,214 +126,165 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 	  UPSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
 	  INSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
 	  UPDATE {}
-	  IN PkgNamespace OPTIONS { indexHint: "byNamespaceParent" }
+	  IN SrcNamespaces OPTIONS { indexHint: "byNsGuacKey" }
 	  RETURN NEW
 	)
 	
 	LET name = FIRST(
-	  UPSERT { name: doc.name, _parent: ns._id, guacKey: doc.guacNameKey}
-	  INSERT { name: doc.name, _parent: ns._id, guacKey: doc.guacNameKey}
+	  UPSERT { name: doc.name, commit: doc.commit, tag: doc.tag, _parent: ns._id, guacKey: doc.guacNameKey}
+	  INSERT { name: doc.name, commit: doc.commit, tag: doc.tag, _parent: ns._id, guacKey: doc.guacNameKey}
 	  UPDATE {}
-	  IN PkgName OPTIONS { indexHint: "byNameParent" }
-	  RETURN NEW
-	)
-	
-	LET pkgVersionObj = FIRST(
-	  UPSERT { version: doc.version, subpath: doc.subpath, qualifier_list: doc.qualifier, _parent: name._id, guacKey: doc.guacVersionKey}
-	  INSERT { version: doc.version, subpath: doc.subpath, qualifier_list: doc.qualifier, _parent: name._id, guacKey: doc.guacVersionKey}
-	  UPDATE {}
-	  IN PkgVersion OPTIONS { indexHint: "byAllVersionParent" }
+	  IN SrcNames OPTIONS { indexHint: "byNameGuacKey" }
 	  RETURN NEW
 	)
   
 	LET pkgHasNamespaceCollection = (
-	  INSERT { _key: CONCAT("pkgHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "PkgHasNamespace"} INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("srcHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "SrcHasNamespace"} INTO SrcHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET pkgHasNameCollection = (
-	  INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "PkgHasName"} INTO PkgHasName OPTIONS { overwriteMode: "ignore" }
-	)
-	
-	LET pkgHasVersionCollection = (
-	  INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion"} INTO PkgHasVersion OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("srcHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "SrcHasName"} INTO SrcHasName OPTIONS { overwriteMode: "ignore" }
 	)
 	  
-  RETURN {
-  "type": doc.typeValue,
-  "namespace": ns.namespace,
-  "name": name.name,
-  "version": pkgVersionObj.version,
-  "subpath": pkgVersionObj.subpath,
-  "qualifier_list": pkgVersionObj.qualifier_list
-}`
+    RETURN {
+  	  "type": doc.typeValue,
+  	  "namespace": ns.namespace,
+  	  "name": name.name,
+  	  "commit": name.commit,
+  	  "tag": name.tag,
+	}`
 
 	sb.WriteString(query)
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPackages")
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestSources")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
 
-	type collectedData struct {
-		PkgType       string      `json:"type"`
-		Namespace     string      `json:"namespace"`
-		Name          string      `json:"name"`
-		Version       string      `json:"version"`
-		Subpath       string      `json:"subpath"`
-		QualifierList interface{} `json:"qualifier_list"`
+	type ingestedSource struct {
+		SrcType   string `json:"type"`
+		Namespace string `json:"namespace"`
+		Name      string `json:"name"`
+		Commit    string `json:"commit"`
+		Tag       string `json:"tag"`
 	}
 
-	var createdValues []collectedData
+	var ingestedSources []ingestedSource
 	for {
-		var doc collectedData
+		var doc ingestedSource
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
 				cursor.Close()
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest package: %w", err)
+				return nil, fmt.Errorf("failed to ingest source: %w", err)
 			}
 		} else {
-			createdValues = append(createdValues, doc)
+			ingestedSources = append(ingestedSources, doc)
 		}
 	}
 
-	var packageList []*model.Package
-	for _, createdValue := range createdValues {
-		pkg, err := generateModelPackage(createdValue.PkgType, createdValue.Namespace,
-			createdValue.Name, createdValue.Version, createdValue.Subpath, createdValue.QualifierList)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-		}
-		packageList = append(packageList, pkg)
+	var sourceList []*model.Source
+	for _, is := range ingestedSources {
+		src := generateModelSource(is.SrcType, is.Namespace, is.Name, &is.Commit, &is.Tag)
+		sourceList = append(sourceList, src)
 	}
 
-	return packageList, nil
+	return sourceList, nil
 }
 
 func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
 
 	values := map[string]any{}
-	values["name"] = pkg.Name
-	if pkg.Namespace != nil {
-		values["namespace"] = *pkg.Namespace
-	} else {
-		values["namespace"] = ""
-	}
-	if pkg.Version != nil {
-		values["version"] = *pkg.Version
-	} else {
-		values["version"] = ""
-	}
-	if pkg.Subpath != nil {
-		values["subpath"] = *pkg.Subpath
-	} else {
-		values["subpath"] = ""
-	}
+	values["typeID"] = c.srcTypeMap[source.Type].Id
+	values["typeKey"] = c.srcTypeMap[source.Type].Key
+	values["typeValue"] = c.srcTypeMap[source.Type].SrcType
 
-	// To ensure consistency, always sort the qualifiers by key
-	qualifiersMap := map[string]string{}
-	keys := []string{}
-	for _, kv := range pkg.Qualifiers {
-		qualifiersMap[kv.Key] = kv.Value
-		keys = append(keys, kv.Key)
-	}
-	sort.Strings(keys)
-	qualifiers := []string{}
-	for _, k := range keys {
-		qualifiers = append(qualifiers, k, qualifiersMap[k])
-	}
-	values["qualifier"] = qualifiers
-	values["typeID"] = c.pkgTypeMap[pkg.Type].Id
-	values["typeKey"] = c.pkgTypeMap[pkg.Type].Key
-	values["typeValue"] = c.pkgTypeMap[pkg.Type].PkgType
-
-	guacIds := guacPkgId(pkg)
+	guacIds := guacSrcId(source)
 	values["guacNsKey"] = guacIds.NamespaceId
 	values["guacNameKey"] = guacIds.NameId
-	values["guacVersionKey"] = guacIds.VersionId
+
+	values["name"] = source.Name
+
+	values["namespace"] = source.Namespace
+
+	if source.Tag != nil {
+		values["tag"] = *source.Tag
+	} else {
+		values["tag"] = ""
+	}
+	if source.Commit != nil {
+		values["commit"] = *source.Commit
+	} else {
+		values["commit"] = ""
+	}
 
 	query := `	  
-	  LET ns = FIRST(
-		UPSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
-		INSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
-		UPDATE {}
-		IN PkgNamespace OPTIONS { indexHint: "byNamespaceParent" }
-		RETURN NEW
-	  )
-	  
-	  LET name = FIRST(
-		UPSERT { name: @name, _parent: ns._id, guacKey: @guacNameKey}
-		INSERT { name: @name, _parent: ns._id, guacKey: @guacNameKey}
-		UPDATE {}
-		IN PkgName OPTIONS { indexHint: "byNameParent" }
-		RETURN NEW
-	  )
-	  
-	  LET pkgVersionObj = FIRST(
-		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id, guacKey: @guacVersionKey}
-		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id, guacKey: @guacVersionKey}
-		UPDATE {}
-		IN PkgVersion OPTIONS { indexHint: "byAllVersionParent" }
-		RETURN NEW
-	  )
+	LET ns = FIRST(
+	  UPSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
+	  INSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
+	  UPDATE {}
+	  IN SrcNamespaces OPTIONS { indexHint: "byNsGuacKey" }
+	  RETURN NEW
+	)
 	
-	  LET pkgHasNamespaceCollection = (
-		INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "PkgHasNamespace"} INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
-	  )
+	LET name = FIRST(
+	  UPSERT { name: doc.name, commit: doc.commit, tag: doc.tag, _parent: ns._id, guacKey: doc.guacNameKey}
+	  INSERT { name: doc.name, commit: doc.commit, tag: doc.tag, _parent: ns._id, guacKey: doc.guacNameKey}
+	  UPDATE {}
+	  IN SrcNames OPTIONS { indexHint: "byNameGuacKey" }
+	  RETURN NEW
+	)
+  
+	LET pkgHasNamespaceCollection = (
+	  INSERT { _key: CONCAT("srcHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "SrcHasNamespace"} INTO SrcHasNamespace OPTIONS { overwriteMode: "ignore" }
+	)
+	
+	LET pkgHasNameCollection = (
+	  INSERT { _key: CONCAT("srcHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "SrcHasName"} INTO SrcHasName OPTIONS { overwriteMode: "ignore" }
+	)
 	  
-	  LET pkgHasNameCollection = (
-		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "PkgHasName"} INTO PkgHasName OPTIONS { overwriteMode: "ignore" }
-	  )
-	  
-	  LET pkgHasVersionCollection = (
-		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion"} INTO PkgHasVersion OPTIONS { overwriteMode: "ignore" }
-	  )
-		
-	RETURN {
-    "type": @typeValue,
-    "namespace": ns.namespace,
-    "name": name.name,
-    "version": pkgVersionObj.version,
-    "subpath": pkgVersionObj.subpath,
-    "qualifier_list": pkgVersionObj.qualifier_list
-  }`
+    RETURN {
+  	  "type": doc.typeValue,
+  	  "namespace": ns.namespace,
+  	  "name": name.name,
+  	  "commit": name.commit,
+  	  "tag": name.tag,
+	}`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestPackage")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestSource")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
 	}
 
-	type collectedData struct {
-		PkgType       string      `json:"type"`
-		Namespace     string      `json:"namespace"`
-		Name          string      `json:"name"`
-		Version       string      `json:"version"`
-		Subpath       string      `json:"subpath"`
-		QualifierList interface{} `json:"qualifier_list"`
+	type ingestedSource struct {
+		SrcType   string `json:"type"`
+		Namespace string `json:"namespace"`
+		Name      string `json:"name"`
+		Commit    string `json:"commit"`
+		Tag       string `json:"tag"`
 	}
 
-	var createdValues []collectedData
+	var ingestedSources []ingestedSource
 	for {
-		var doc collectedData
+		var doc ingestedSource
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
 				cursor.Close()
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest package: %w", err)
+				return nil, fmt.Errorf("failed to ingest source: %w", err)
 			}
 		} else {
-			createdValues = append(createdValues, doc)
+			ingestedSources = append(ingestedSources, doc)
 		}
 	}
-	if len(createdValues) == 1 {
-		return generateModelPackage(createdValues[0].PkgType, createdValues[0].Namespace,
-			createdValues[0].Name, createdValues[0].Version, createdValues[0].Subpath, createdValues[0].QualifierList)
+	if len(ingestedSources) == 1 {
+		return generateModelSource(ingestedSources[0].SrcType, ingestedSources[0].Namespace, ingestedSources[0].Name, &ingestedSources[0].Commit, &ingestedSources[0].Tag), nil
 	} else {
-		return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
+		return nil, fmt.Errorf("number of sources ingested is greater than one")
 	}
 }
 
@@ -375,218 +306,259 @@ func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec
 
 	if !namespaceRequired && !nameRequired {
 		return c.sourcesType(ctx, sourceSpec)
-	} else if namespaceRequired && !nameRequired {
+	} else if !nameRequired {
 		return c.sourcesNamespace(ctx, sourceSpec)
 	}
 
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	values := map[string]any{}
 
-	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
-		if *sourceSpec.Commit != "" && *sourceSpec.Tag != "" {
-			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
+	arangoQueryBuilder := newForQuery("SrcRoots", "sRoot")
+	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
+	values["src"] = "src"
+	arangoQueryBuilder.ForOutBound("SrcHasType", "sType", "sRoot")
+	if sourceSpec.Type != nil {
+		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
+		values["srcType"] = *sourceSpec.Type
+	}
+	arangoQueryBuilder.ForOutBound("SrcHasNamespace", "sNs", "sType")
+	if sourceSpec.Namespace != nil {
+		arangoQueryBuilder.filter("sNs", "namespace", "==", "@namespace")
+		values["namespace"] = *sourceSpec.Namespace
+	}
+	arangoQueryBuilder.ForOutBound("SrcHasName", "sName", "sNs")
+	if sourceSpec.Name != nil {
+		arangoQueryBuilder.filter("sName", "name", "==", "@name")
+		values["name"] = *sourceSpec.Name
+	}
+	if sourceSpec.Commit != nil {
+		arangoQueryBuilder.filter("sName", "commit", "==", "@commit")
+		values["commit"] = *sourceSpec.Commit
+	}
+	if sourceSpec.Tag != nil {
+		arangoQueryBuilder.filter("sName", "tag", "==", "@tag")
+		values["tag"] = *sourceSpec.Tag
+	}
+
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"type_id": sType._id,
+		"type": sType.type,
+		"namespace_id": sNs._id,
+		"namespace": sNs.namespace,
+		"name_id": sName._id,
+		"name": sName.name,
+		"commit": sName.commit,
+		"tag": sName.tag
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Sources")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type ingestedSource struct {
+		TypeID      string `json:"type_id"`
+		SrcType     string `json:"type"`
+		NamespaceID string `json:"namespace_id"`
+		Namespace   string `json:"namespace"`
+		NameID      string `json:"name_id"`
+		Name        string `json:"name"`
+		Commit      string `json:"commit"`
+		Tag         string `json:"tag"`
+	}
+
+	srcTypes := map[string]map[string][]*model.SourceName{}
+	var doc ingestedSource
+	for {
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to query source: %w", err)
+			}
+		} else {
+			commitString := doc.Commit
+			tagString := doc.Tag
+			nameString := doc.Name
+			namespaceString := doc.Namespace + "," + doc.NamespaceID
+			typeString := doc.SrcType + "," + doc.TypeID
+
+			srcName := &model.SourceName{
+				ID:     doc.NameID,
+				Name:   nameString,
+				Tag:    &tagString,
+				Commit: &commitString,
+			}
+			if srcNamespaces, ok := srcTypes[typeString]; ok {
+				srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
+			} else {
+				srcNamespaces := map[string][]*model.SourceName{}
+				srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
+				srcTypes[typeString] = srcNamespaces
+			}
 		}
 	}
-
-	var sb strings.Builder
-	var firstMatch bool = true
-	queryValues := map[string]any{}
-
-	sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)-[:SrcHasName]->(name:SrcName)")
-
-	setSrcMatchValues(&sb, sourceSpec, false, &firstMatch, queryValues)
-
-	sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")
-
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-
-			result, err := tx.Run(sb.String(), queryValues)
-			if err != nil {
-				return nil, err
+	sources := []*model.Source{}
+	for srcType, namespaces := range srcTypes {
+		sourceNamespaces := []*model.SourceNamespace{}
+		for namespace, sourceNames := range namespaces {
+			namespaceValues := strings.Split(namespace, ",")
+			srcNamespace := &model.SourceNamespace{
+				ID:        namespaceValues[1],
+				Namespace: namespaceValues[0],
+				Names:     sourceNames,
 			}
-
-			srcTypes := map[string]map[string][]*model.SourceName{}
-			for result.Next() {
-
-				commitString := result.Record().Values[4].(string)
-				tagString := result.Record().Values[3].(string)
-				nameString := result.Record().Values[2].(string)
-				namespaceString := result.Record().Values[1].(string)
-				typeString := result.Record().Values[0].(string)
-
-				srcName := &model.SourceName{
-					Name:   nameString,
-					Tag:    &tagString,
-					Commit: &commitString,
-				}
-				if srcNamespaces, ok := srcTypes[typeString]; ok {
-					srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
-				} else {
-					srcNamespaces := map[string][]*model.SourceName{}
-					srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
-					srcTypes[typeString] = srcNamespaces
-				}
-			}
-			if err = result.Err(); err != nil {
-				return nil, err
-			}
-
-			sources := []*model.Source{}
-			for srcType, namespaces := range srcTypes {
-				sourceNamespaces := []*model.SourceNamespace{}
-				for namespace, sourceNames := range namespaces {
-					srcNamespace := &model.SourceNamespace{
-						Namespace: namespace,
-						Names:     sourceNames,
-					}
-					sourceNamespaces = append(sourceNamespaces, srcNamespace)
-				}
-
-				source := &model.Source{
-					Type:       srcType,
-					Namespaces: sourceNamespaces,
-				}
-				sources = append(sources, source)
-			}
-
-			return sources, nil
-		})
-	if err != nil {
-		return nil, err
+			sourceNamespaces = append(sourceNamespaces, srcNamespace)
+		}
+		typeValues := strings.Split(srcType, ",")
+		source := &model.Source{
+			ID:         typeValues[1],
+			Type:       typeValues[0],
+			Namespaces: sourceNamespaces,
+		}
+		sources = append(sources, source)
 	}
-
-	return result.([]*model.Source), nil
+	return sources, nil
 }
 
 func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
 
-	var sb strings.Builder
-	var firstMatch bool = true
-	queryValues := map[string]any{}
-	sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)")
+	values := map[string]any{}
 
+	arangoQueryBuilder := newForQuery("SrcRoots", "sRoot")
+	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
+	values["src"] = "src"
+	arangoQueryBuilder.ForOutBound("SrcHasType", "sType", "sRoot")
 	if sourceSpec.Type != nil {
-
-		matchProperties(&sb, firstMatch, "type", "type", "$srcType")
-		queryValues["srcType"] = sourceSpec.Type
+		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
+		values["srcType"] = *sourceSpec.Type
 	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"type_id": sType._id,
+		"type": sType.type
+	}`)
 
-	sb.WriteString(" RETURN type.type")
+	fmt.Println(arangoQueryBuilder.string())
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-
-			result, err := tx.Run(sb.String(), queryValues)
-			if err != nil {
-				return nil, err
-			}
-
-			sources := []*model.Source{}
-			for result.Next() {
-
-				source := &model.Source{
-					Type:       result.Record().Values[0].(string),
-					Namespaces: []*model.SourceNamespace{},
-				}
-
-				sources = append(sources, source)
-			}
-			if err = result.Err(); err != nil {
-				return nil, err
-			}
-
-			return sources, nil
-		})
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "sourcesType")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type collectedData struct {
+		TypeID  string `json:"type_id"`
+		SrcType string `json:"type"`
 	}
 
-	return result.([]*model.Source), nil
+	var sources []*model.Source
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to query source type: %w", err)
+			}
+		} else {
+			collectedSource := &model.Source{
+				ID:         doc.TypeID,
+				Type:       doc.SrcType,
+				Namespaces: []*model.SourceNamespace{},
+			}
+			sources = append(sources, collectedSource)
+		}
+	}
+
+	return sources, nil
 }
 
 func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
+	values := map[string]any{}
 
-	var sb strings.Builder
-	var firstMatch bool = true
-	queryValues := map[string]any{}
-	sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)")
-
+	arangoQueryBuilder := newForQuery("SrcRoots", "sRoot")
+	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
+	values["src"] = "src"
+	arangoQueryBuilder.ForOutBound("SrcHasType", "sType", "sRoot")
 	if sourceSpec.Type != nil {
-
-		matchProperties(&sb, firstMatch, "type", "type", "$srcType")
-		firstMatch = false
-		queryValues["srcType"] = sourceSpec.Type
+		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
+		values["srcType"] = *sourceSpec.Type
 	}
+	arangoQueryBuilder.ForOutBound("SrcHasNamespace", "sNs", "sType")
 	if sourceSpec.Namespace != nil {
-
-		matchProperties(&sb, firstMatch, "namespace", "namespace", "$srcNamespace")
-		queryValues["srcNamespace"] = sourceSpec.Namespace
+		arangoQueryBuilder.filter("sNs", "namespace", "==", "@namespace")
+		values["namespace"] = *sourceSpec.Namespace
 	}
-	sb.WriteString(" RETURN type.type, namespace.namespace")
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"type_id": sType._id,
+		"type": sType.type,
+		"namespace_id": sNs._id,
+		"namespace": sNs.namespace
+	  }`)
 
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
+	fmt.Println(arangoQueryBuilder.string())
 
-			result, err := tx.Run(sb.String(), queryValues)
-			if err != nil {
-				return nil, err
-			}
-
-			srcTypes := map[string][]*model.SourceNamespace{}
-			for result.Next() {
-
-				namespaceString := result.Record().Values[1].(string)
-				typeString := result.Record().Values[0].(string)
-
-				srcNamespace := &model.SourceNamespace{
-					Namespace: namespaceString,
-					Names:     []*model.SourceName{},
-				}
-				srcTypes[typeString] = append(srcTypes[typeString], srcNamespace)
-
-			}
-			if err = result.Err(); err != nil {
-				return nil, err
-			}
-
-			sources := []*model.Source{}
-			for srcType, namespaces := range srcTypes {
-				source := &model.Source{
-					Type:       srcType,
-					Namespaces: namespaces,
-				}
-				sources = append(sources, source)
-			}
-
-			return sources, nil
-		})
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "sourcesNamespace")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type collectedData struct {
+		TypeID      string `json:"type_id"`
+		SrcType     string `json:"type"`
+		NamespaceID string `json:"namespace_id"`
+		Namespace   string `json:"namespace"`
 	}
 
-	return result.([]*model.Source), nil
+	srcTypes := map[string][]*model.SourceNamespace{}
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to query source namespace: %w", err)
+			}
+		} else {
+			namespaceString := doc.Namespace
+			typeString := doc.SrcType + "," + doc.TypeID
+
+			srcNamespace := &model.SourceNamespace{
+				ID:        doc.NamespaceID,
+				Namespace: namespaceString,
+				Names:     []*model.SourceName{},
+			}
+			srcTypes[typeString] = append(srcTypes[typeString], srcNamespace)
+		}
+	}
+	sources := []*model.Source{}
+	for pkgType, namespaces := range srcTypes {
+		typeValues := strings.Split(pkgType, ",")
+		collectedSource := &model.Source{
+			ID:         typeValues[1],
+			Type:       typeValues[0],
+			Namespaces: namespaces,
+		}
+		sources = append(sources, collectedSource)
+	}
+
+	return sources, nil
 }
 
-func generateModelSource(srcType, namespaceStr, nameStr string, commitValue, tagValue interface{}) *model.Source {
-	tag := (*string)(nil)
-	if tagValue != nil {
-		tagStr := tagValue.(string)
-		tag = &tagStr
-	}
-	commit := (*string)(nil)
-	if commitValue != nil {
-		commitStr := commitValue.(string)
-		commit = &commitStr
-	}
+func generateModelSource(srcType, namespaceStr, nameStr string, commitValue, tagValue *string) *model.Source {
 	name := &model.SourceName{
 		Name:   nameStr,
-		Tag:    tag,
-		Commit: commit,
+		Tag:    tagValue,
+		Commit: commitValue,
 	}
 
 	namespace := &model.SourceNamespace{

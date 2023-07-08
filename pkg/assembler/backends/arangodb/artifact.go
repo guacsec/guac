@@ -58,7 +58,7 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+				return nil, fmt.Errorf("failed to query artifact: %w", err)
 			}
 		} else {
 			collectedArtifacts = append(collectedArtifacts, doc)
