@@ -19,30 +19,32 @@ import (
 )
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	query := b.client.PackageType.Query().Order(ent.Asc(packagetype.FieldType))
-
-	paths := getPreloads(ctx)
-
 	if pkgSpec == nil {
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	query.Where(optionalPredicate(pkgSpec.Type, packagetype.TypeEQ))
+	query := b.client.PackageType.Query().Limit(MaxPageSize)
+	paths, isGQL := getPreloads(ctx)
 
-	if PathContains(paths, "namespaces") {
+	query.Where(
+		optionalPredicate(pkgSpec.Type, packagetype.TypeEQ),
+	)
+
+	if PathContains(paths, "namespaces") || !isGQL {
 		query.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
 			q.Order(ent.Asc(packagenamespace.FieldNamespace))
 			q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
 
-			if PathContains(paths, "namespaces.names") {
+			if PathContains(paths, "namespaces.names") || !isGQL {
 				q.WithNames(func(q *ent.PackageNameQuery) {
 					q.Order(ent.Asc(packagename.FieldName))
 					q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
 
-					if PathContains(paths, "namespaces.names.versions") {
+					if PathContains(paths, "namespaces.names.versions") || !isGQL {
 						q.WithVersions(func(q *ent.PackageVersionQuery) {
 							q.Order(ent.Asc(packageversion.FieldVersion))
 							q.Where(
+								optionalPredicate(pkgSpec.ID, IDEQ),
 								optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
 								optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEQ),
 								packageversion.QualifiersMatchSpec(pkgSpec.Qualifiers),
@@ -54,13 +56,6 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		})
 	}
 
-	// FIXME: (ivanvanderbyl) This could be much more compact and use a single query as above.
-	if pkgSpec != nil {
-		query.Where(optionalPredicate(pkgSpec.ID, IDEQ))
-	} else {
-		query.Limit(100)
-	}
-
 	pkgs, err := query.All(ctx)
 	if err != nil {
 		return nil, err
@@ -70,7 +65,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 }
 
 func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
-	// FIXME: (ivanvanderbyl) This will be suboptimal, but we can't batch insert relations with upserts.
+	// FIXME: (ivanvanderbyl) This will be suboptimal because we can't batch insert relations with upserts. See Readme.
 	models := make([]*model.Package, len(pkgs))
 	for i, pkg := range pkgs {
 		p, err := b.IngestPackage(ctx, *pkg)
@@ -84,8 +79,7 @@ func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputS
 
 func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
 	pkgVersion, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.PackageVersion, error) {
-		client := ent.FromContext(ctx)
-		p, err := upsertPackage(ctx, client, pkg)
+		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), pkg)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to upsert package")
 		}
@@ -95,17 +89,12 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 		return nil, err
 	}
 
-	record, err := pkgTreeFromVersion(ctx, pkgVersion.Unwrap())
-	if err != nil {
-		return nil, err
-	}
-
-	return toModelPackage(record), nil
+	return toModelPackage(backReferencePackageVersion(pkgVersion.Unwrap())), nil
 }
 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
-func upsertPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
+func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
 	pkgID, err := client.PackageType.Create().SetType(pkg.Type).
 		OnConflict(sql.ConflictColumns(packagetype.FieldType)).UpdateNewValues().ID(ctx)
 	if err != nil {
@@ -142,12 +131,28 @@ func upsertPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSp
 		return nil, errors.Wrap(err, "upsert package version")
 	}
 
-	pv, err := client.PackageVersion.Get(ctx, pvID)
+	pv, err := client.PackageVersion.Query().Where(packageversion.IDEQ(pvID)).
+		WithName(withPackageNameTree()).
+		Only(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "get package version")
 	}
 
 	return pv, nil
+}
+
+func withPackageVersionTree() func(*ent.PackageVersionQuery) {
+	return func(q *ent.PackageVersionQuery) {
+		q.WithName(withPackageNameTree())
+	}
+}
+
+func withPackageNameTree() func(q *ent.PackageNameQuery) {
+	return func(q *ent.PackageNameQuery) {
+		q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
+			q.WithPackage()
+		})
+	}
 }
 
 func versionHashFromInputSpec(pkg model.PkgInputSpec) string {

@@ -23,12 +23,16 @@ import (
   will return:
   fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
 */
-func getPreloads(ctx context.Context) []string {
+func getPreloads(ctx context.Context) ([]string, bool) {
+	if !graphql.HasOperationContext(ctx) {
+		return []string{}, false
+	}
+
 	visited := make(map[string]bool)
 	return getNestedPreloads(
 		graphql.GetOperationContext(ctx),
 		graphql.CollectFieldsCtx(ctx, nil),
-		"", visited)
+		"", visited), true
 }
 
 func getNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string, visited map[string]bool) []string {
