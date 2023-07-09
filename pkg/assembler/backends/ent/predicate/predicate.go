@@ -24,6 +24,9 @@ type CertifyVuln func(*sql.Selector)
 // Dependency is the predicate function for dependency builders.
 type Dependency func(*sql.Selector)
 
+// HashEqual is the predicate function for hashequal builders.
+type HashEqual func(*sql.Selector)
+
 // IsVulnerability is the predicate function for isvulnerability builders.
 type IsVulnerability func(*sql.Selector)
 

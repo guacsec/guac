@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
@@ -87,6 +88,21 @@ func (au *ArtifactUpdate) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdate
 	return au.AddAttestationIDs(ids...)
 }
 
+// AddSameIDs adds the "same" edge to the HashEqual entity by IDs.
+func (au *ArtifactUpdate) AddSameIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.AddSameIDs(ids...)
+	return au
+}
+
+// AddSame adds the "same" edges to the HashEqual entity.
+func (au *ArtifactUpdate) AddSame(h ...*HashEqual) *ArtifactUpdate {
+	ids := make([]int, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return au.AddSameIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (au *ArtifactUpdate) Mutation() *ArtifactMutation {
 	return au.mutation
@@ -153,6 +169,27 @@ func (au *ArtifactUpdate) RemoveAttestations(s ...*SLSAAttestation) *ArtifactUpd
 		ids[i] = s[i].ID
 	}
 	return au.RemoveAttestationIDs(ids...)
+}
+
+// ClearSame clears all "same" edges to the HashEqual entity.
+func (au *ArtifactUpdate) ClearSame() *ArtifactUpdate {
+	au.mutation.ClearSame()
+	return au
+}
+
+// RemoveSameIDs removes the "same" edge to HashEqual entities by IDs.
+func (au *ArtifactUpdate) RemoveSameIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.RemoveSameIDs(ids...)
+	return au
+}
+
+// RemoveSame removes "same" edges to HashEqual entities.
+func (au *ArtifactUpdate) RemoveSame(h ...*HashEqual) *ArtifactUpdate {
+	ids := make([]int, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return au.RemoveSameIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -332,6 +369,51 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if au.mutation.SameCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.SameTable,
+			Columns: artifact.SamePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedSameIDs(); len(nodes) > 0 && !au.mutation.SameCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.SameTable,
+			Columns: artifact.SamePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.SameIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.SameTable,
+			Columns: artifact.SamePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{artifact.Label}
@@ -409,6 +491,21 @@ func (auo *ArtifactUpdateOne) AddAttestations(s ...*SLSAAttestation) *ArtifactUp
 	return auo.AddAttestationIDs(ids...)
 }
 
+// AddSameIDs adds the "same" edge to the HashEqual entity by IDs.
+func (auo *ArtifactUpdateOne) AddSameIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.AddSameIDs(ids...)
+	return auo
+}
+
+// AddSame adds the "same" edges to the HashEqual entity.
+func (auo *ArtifactUpdateOne) AddSame(h ...*HashEqual) *ArtifactUpdateOne {
+	ids := make([]int, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return auo.AddSameIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (auo *ArtifactUpdateOne) Mutation() *ArtifactMutation {
 	return auo.mutation
@@ -475,6 +572,27 @@ func (auo *ArtifactUpdateOne) RemoveAttestations(s ...*SLSAAttestation) *Artifac
 		ids[i] = s[i].ID
 	}
 	return auo.RemoveAttestationIDs(ids...)
+}
+
+// ClearSame clears all "same" edges to the HashEqual entity.
+func (auo *ArtifactUpdateOne) ClearSame() *ArtifactUpdateOne {
+	auo.mutation.ClearSame()
+	return auo
+}
+
+// RemoveSameIDs removes the "same" edge to HashEqual entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveSameIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.RemoveSameIDs(ids...)
+	return auo
+}
+
+// RemoveSame removes "same" edges to HashEqual entities.
+func (auo *ArtifactUpdateOne) RemoveSame(h ...*HashEqual) *ArtifactUpdateOne {
+	ids := make([]int, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return auo.RemoveSameIDs(ids...)
 }
 
 // Where appends a list predicates to the ArtifactUpdate builder.
@@ -677,6 +795,51 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.SameCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.SameTable,
+			Columns: artifact.SamePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedSameIDs(); len(nodes) > 0 && !auo.mutation.SameCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.SameTable,
+			Columns: artifact.SamePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.SameIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.SameTable,
+			Columns: artifact.SamePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

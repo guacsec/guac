@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
@@ -28,6 +29,7 @@ type ArtifactQuery struct {
 	withOccurrences  *OccurrenceQuery
 	withSbom         *BillOfMaterialsQuery
 	withAttestations *SLSAAttestationQuery
+	withSame         *HashEqualQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -123,6 +125,28 @@ func (aq *ArtifactQuery) QueryAttestations() *SLSAAttestationQuery {
 			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, artifact.AttestationsTable, artifact.AttestationsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySame chains the current query on the "same" edge.
+func (aq *ArtifactQuery) QuerySame() *HashEqualQuery {
+	query := (&HashEqualClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(hashequal.Table, hashequal.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, artifact.SameTable, artifact.SamePrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -325,6 +349,7 @@ func (aq *ArtifactQuery) Clone() *ArtifactQuery {
 		withOccurrences:  aq.withOccurrences.Clone(),
 		withSbom:         aq.withSbom.Clone(),
 		withAttestations: aq.withAttestations.Clone(),
+		withSame:         aq.withSame.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -361,6 +386,17 @@ func (aq *ArtifactQuery) WithAttestations(opts ...func(*SLSAAttestationQuery)) *
 		opt(query)
 	}
 	aq.withAttestations = query
+	return aq
+}
+
+// WithSame tells the query-builder to eager-load the nodes that are connected to
+// the "same" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithSame(opts ...func(*HashEqualQuery)) *ArtifactQuery {
+	query := (&HashEqualClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withSame = query
 	return aq
 }
 
@@ -442,10 +478,11 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	var (
 		nodes       = []*Artifact{}
 		_spec       = aq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			aq.withOccurrences != nil,
 			aq.withSbom != nil,
 			aq.withAttestations != nil,
+			aq.withSame != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -484,6 +521,13 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 		if err := aq.loadAttestations(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Attestations = []*SLSAAttestation{} },
 			func(n *Artifact, e *SLSAAttestation) { n.Edges.Attestations = append(n.Edges.Attestations, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withSame; query != nil {
+		if err := aq.loadSame(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.Same = []*HashEqual{} },
+			func(n *Artifact, e *HashEqual) { n.Edges.Same = append(n.Edges.Same, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -607,6 +651,67 @@ func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttest
 		nodes, ok := nids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected "attestations" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (aq *ArtifactQuery) loadSame(ctx context.Context, query *HashEqualQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HashEqual)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Artifact)
+	nids := make(map[int]map[*Artifact]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(artifact.SameTable)
+		s.Join(joinT).On(s.C(hashequal.FieldID), joinT.C(artifact.SamePrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(artifact.SamePrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(artifact.SamePrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Artifact]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*HashEqual](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "same" node returned %v`, n.ID)
 		}
 		for kn := range nodes {
 			assign(kn, n)

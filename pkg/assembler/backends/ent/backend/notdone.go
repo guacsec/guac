@@ -29,9 +29,6 @@ func (b *EntBackend) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 func (b *EntBackend) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	return nil, nil
 }
-func (b *EntBackend) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
-	return nil, nil
-}
 
 func (b *EntBackend) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	return nil, nil
@@ -57,9 +54,6 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 }
 
 func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
-	return nil, nil
-}
-func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 	return nil, nil
 }
 

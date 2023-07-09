@@ -16,6 +16,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -46,6 +47,7 @@ const (
 	TypeCertification    = "Certification"
 	TypeCertifyVuln      = "CertifyVuln"
 	TypeDependency       = "Dependency"
+	TypeHashEqual        = "HashEqual"
 	TypeIsVulnerability  = "IsVulnerability"
 	TypeOccurrence       = "Occurrence"
 	TypePackageName      = "PackageName"
@@ -77,6 +79,9 @@ type ArtifactMutation struct {
 	attestations        map[int]struct{}
 	removedattestations map[int]struct{}
 	clearedattestations bool
+	same                map[int]struct{}
+	removedsame         map[int]struct{}
+	clearedsame         bool
 	done                bool
 	oldValue            func(context.Context) (*Artifact, error)
 	predicates          []predicate.Artifact
@@ -414,6 +419,60 @@ func (m *ArtifactMutation) ResetAttestations() {
 	m.removedattestations = nil
 }
 
+// AddSameIDs adds the "same" edge to the HashEqual entity by ids.
+func (m *ArtifactMutation) AddSameIDs(ids ...int) {
+	if m.same == nil {
+		m.same = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.same[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSame clears the "same" edge to the HashEqual entity.
+func (m *ArtifactMutation) ClearSame() {
+	m.clearedsame = true
+}
+
+// SameCleared reports if the "same" edge to the HashEqual entity was cleared.
+func (m *ArtifactMutation) SameCleared() bool {
+	return m.clearedsame
+}
+
+// RemoveSameIDs removes the "same" edge to the HashEqual entity by IDs.
+func (m *ArtifactMutation) RemoveSameIDs(ids ...int) {
+	if m.removedsame == nil {
+		m.removedsame = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.same, ids[i])
+		m.removedsame[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSame returns the removed IDs of the "same" edge to the HashEqual entity.
+func (m *ArtifactMutation) RemovedSameIDs() (ids []int) {
+	for id := range m.removedsame {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SameIDs returns the "same" edge IDs in the mutation.
+func (m *ArtifactMutation) SameIDs() (ids []int) {
+	for id := range m.same {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSame resets all changes to the "same" edge.
+func (m *ArtifactMutation) ResetSame() {
+	m.same = nil
+	m.clearedsame = false
+	m.removedsame = nil
+}
+
 // Where appends a list predicates to the ArtifactMutation builder.
 func (m *ArtifactMutation) Where(ps ...predicate.Artifact) {
 	m.predicates = append(m.predicates, ps...)
@@ -564,7 +623,7 @@ func (m *ArtifactMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ArtifactMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.occurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -573,6 +632,9 @@ func (m *ArtifactMutation) AddedEdges() []string {
 	}
 	if m.attestations != nil {
 		edges = append(edges, artifact.EdgeAttestations)
+	}
+	if m.same != nil {
+		edges = append(edges, artifact.EdgeSame)
 	}
 	return edges
 }
@@ -599,13 +661,19 @@ func (m *ArtifactMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case artifact.EdgeSame:
+		ids := make([]ent.Value, 0, len(m.same))
+		for id := range m.same {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ArtifactMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedoccurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -614,6 +682,9 @@ func (m *ArtifactMutation) RemovedEdges() []string {
 	}
 	if m.removedattestations != nil {
 		edges = append(edges, artifact.EdgeAttestations)
+	}
+	if m.removedsame != nil {
+		edges = append(edges, artifact.EdgeSame)
 	}
 	return edges
 }
@@ -640,13 +711,19 @@ func (m *ArtifactMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case artifact.EdgeSame:
+		ids := make([]ent.Value, 0, len(m.removedsame))
+		for id := range m.removedsame {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ArtifactMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedoccurrences {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -655,6 +732,9 @@ func (m *ArtifactMutation) ClearedEdges() []string {
 	}
 	if m.clearedattestations {
 		edges = append(edges, artifact.EdgeAttestations)
+	}
+	if m.clearedsame {
+		edges = append(edges, artifact.EdgeSame)
 	}
 	return edges
 }
@@ -669,6 +749,8 @@ func (m *ArtifactMutation) EdgeCleared(name string) bool {
 		return m.clearedsbom
 	case artifact.EdgeAttestations:
 		return m.clearedattestations
+	case artifact.EdgeSame:
+		return m.clearedsame
 	}
 	return false
 }
@@ -693,6 +775,9 @@ func (m *ArtifactMutation) ResetEdge(name string) error {
 		return nil
 	case artifact.EdgeAttestations:
 		m.ResetAttestations()
+		return nil
+	case artifact.EdgeSame:
+		m.ResetSame()
 		return nil
 	}
 	return fmt.Errorf("unknown Artifact edge %s", name)
@@ -3921,6 +4006,533 @@ func (m *DependencyMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency edge %s", name)
+}
+
+// HashEqualMutation represents an operation that mutates the HashEqual nodes in the graph.
+type HashEqualMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	origin           *string
+	collector        *string
+	justification    *string
+	clearedFields    map[string]struct{}
+	artifacts        map[int]struct{}
+	removedartifacts map[int]struct{}
+	clearedartifacts bool
+	done             bool
+	oldValue         func(context.Context) (*HashEqual, error)
+	predicates       []predicate.HashEqual
+}
+
+var _ ent.Mutation = (*HashEqualMutation)(nil)
+
+// hashequalOption allows management of the mutation configuration using functional options.
+type hashequalOption func(*HashEqualMutation)
+
+// newHashEqualMutation creates new mutation for the HashEqual entity.
+func newHashEqualMutation(c config, op Op, opts ...hashequalOption) *HashEqualMutation {
+	m := &HashEqualMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeHashEqual,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withHashEqualID sets the ID field of the mutation.
+func withHashEqualID(id int) hashequalOption {
+	return func(m *HashEqualMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *HashEqual
+		)
+		m.oldValue = func(ctx context.Context) (*HashEqual, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().HashEqual.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withHashEqual sets the old HashEqual of the mutation.
+func withHashEqual(node *HashEqual) hashequalOption {
+	return func(m *HashEqualMutation) {
+		m.oldValue = func(context.Context) (*HashEqual, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m HashEqualMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m HashEqualMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *HashEqualMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *HashEqualMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().HashEqual.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetOrigin sets the "origin" field.
+func (m *HashEqualMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *HashEqualMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the HashEqual entity.
+// If the HashEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HashEqualMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *HashEqualMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *HashEqualMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *HashEqualMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the HashEqual entity.
+// If the HashEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HashEqualMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *HashEqualMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// SetJustification sets the "justification" field.
+func (m *HashEqualMutation) SetJustification(s string) {
+	m.justification = &s
+}
+
+// Justification returns the value of the "justification" field in the mutation.
+func (m *HashEqualMutation) Justification() (r string, exists bool) {
+	v := m.justification
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJustification returns the old "justification" field's value of the HashEqual entity.
+// If the HashEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HashEqualMutation) OldJustification(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJustification is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJustification requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJustification: %w", err)
+	}
+	return oldValue.Justification, nil
+}
+
+// ResetJustification resets all changes to the "justification" field.
+func (m *HashEqualMutation) ResetJustification() {
+	m.justification = nil
+}
+
+// AddArtifactIDs adds the "artifacts" edge to the Artifact entity by ids.
+func (m *HashEqualMutation) AddArtifactIDs(ids ...int) {
+	if m.artifacts == nil {
+		m.artifacts = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.artifacts[ids[i]] = struct{}{}
+	}
+}
+
+// ClearArtifacts clears the "artifacts" edge to the Artifact entity.
+func (m *HashEqualMutation) ClearArtifacts() {
+	m.clearedartifacts = true
+}
+
+// ArtifactsCleared reports if the "artifacts" edge to the Artifact entity was cleared.
+func (m *HashEqualMutation) ArtifactsCleared() bool {
+	return m.clearedartifacts
+}
+
+// RemoveArtifactIDs removes the "artifacts" edge to the Artifact entity by IDs.
+func (m *HashEqualMutation) RemoveArtifactIDs(ids ...int) {
+	if m.removedartifacts == nil {
+		m.removedartifacts = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.artifacts, ids[i])
+		m.removedartifacts[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedArtifacts returns the removed IDs of the "artifacts" edge to the Artifact entity.
+func (m *HashEqualMutation) RemovedArtifactsIDs() (ids []int) {
+	for id := range m.removedartifacts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ArtifactsIDs returns the "artifacts" edge IDs in the mutation.
+func (m *HashEqualMutation) ArtifactsIDs() (ids []int) {
+	for id := range m.artifacts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetArtifacts resets all changes to the "artifacts" edge.
+func (m *HashEqualMutation) ResetArtifacts() {
+	m.artifacts = nil
+	m.clearedartifacts = false
+	m.removedartifacts = nil
+}
+
+// Where appends a list predicates to the HashEqualMutation builder.
+func (m *HashEqualMutation) Where(ps ...predicate.HashEqual) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the HashEqualMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *HashEqualMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.HashEqual, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *HashEqualMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *HashEqualMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (HashEqual).
+func (m *HashEqualMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *HashEqualMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.origin != nil {
+		fields = append(fields, hashequal.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, hashequal.FieldCollector)
+	}
+	if m.justification != nil {
+		fields = append(fields, hashequal.FieldJustification)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *HashEqualMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case hashequal.FieldOrigin:
+		return m.Origin()
+	case hashequal.FieldCollector:
+		return m.Collector()
+	case hashequal.FieldJustification:
+		return m.Justification()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *HashEqualMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case hashequal.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case hashequal.FieldCollector:
+		return m.OldCollector(ctx)
+	case hashequal.FieldJustification:
+		return m.OldJustification(ctx)
+	}
+	return nil, fmt.Errorf("unknown HashEqual field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *HashEqualMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case hashequal.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case hashequal.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	case hashequal.FieldJustification:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJustification(v)
+		return nil
+	}
+	return fmt.Errorf("unknown HashEqual field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *HashEqualMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *HashEqualMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *HashEqualMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown HashEqual numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *HashEqualMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *HashEqualMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *HashEqualMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown HashEqual nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *HashEqualMutation) ResetField(name string) error {
+	switch name {
+	case hashequal.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case hashequal.FieldCollector:
+		m.ResetCollector()
+		return nil
+	case hashequal.FieldJustification:
+		m.ResetJustification()
+		return nil
+	}
+	return fmt.Errorf("unknown HashEqual field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *HashEqualMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.artifacts != nil {
+		edges = append(edges, hashequal.EdgeArtifacts)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *HashEqualMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case hashequal.EdgeArtifacts:
+		ids := make([]ent.Value, 0, len(m.artifacts))
+		for id := range m.artifacts {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *HashEqualMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedartifacts != nil {
+		edges = append(edges, hashequal.EdgeArtifacts)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *HashEqualMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case hashequal.EdgeArtifacts:
+		ids := make([]ent.Value, 0, len(m.removedartifacts))
+		for id := range m.removedartifacts {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *HashEqualMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedartifacts {
+		edges = append(edges, hashequal.EdgeArtifacts)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *HashEqualMutation) EdgeCleared(name string) bool {
+	switch name {
+	case hashequal.EdgeArtifacts:
+		return m.clearedartifacts
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *HashEqualMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown HashEqual unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *HashEqualMutation) ResetEdge(name string) error {
+	switch name {
+	case hashequal.EdgeArtifacts:
+		m.ResetArtifacts()
+		return nil
+	}
+	return fmt.Errorf("unknown HashEqual edge %s", name)
 }
 
 // IsVulnerabilityMutation represents an operation that mutates the IsVulnerability nodes in the graph.

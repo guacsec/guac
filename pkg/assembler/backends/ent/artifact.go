@@ -34,9 +34,11 @@ type ArtifactEdges struct {
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
 	// Attestations holds the value of the attestations edge.
 	Attestations []*SLSAAttestation `json:"attestations,omitempty"`
+	// Same holds the value of the same edge.
+	Same []*HashEqual `json:"same,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
@@ -64,6 +66,15 @@ func (e ArtifactEdges) AttestationsOrErr() ([]*SLSAAttestation, error) {
 		return e.Attestations, nil
 	}
 	return nil, &NotLoadedError{edge: "attestations"}
+}
+
+// SameOrErr returns the Same value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) SameOrErr() ([]*HashEqual, error) {
+	if e.loadedTypes[3] {
+		return e.Same, nil
+	}
+	return nil, &NotLoadedError{edge: "same"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -134,6 +145,11 @@ func (a *Artifact) QuerySbom() *BillOfMaterialsQuery {
 // QueryAttestations queries the "attestations" edge of the Artifact entity.
 func (a *Artifact) QueryAttestations() *SLSAAttestationQuery {
 	return NewArtifactClient(a.config).QueryAttestations(a)
+}
+
+// QuerySame queries the "same" edge of the Artifact entity.
+func (a *Artifact) QuerySame() *HashEqualQuery {
+	return NewArtifactClient(a.config).QuerySame(a)
 }
 
 // Update returns a builder for updating this Artifact.

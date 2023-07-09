@@ -22,6 +22,8 @@ const (
 	EdgeSbom = "sbom"
 	// EdgeAttestations holds the string denoting the attestations edge name in mutations.
 	EdgeAttestations = "attestations"
+	// EdgeSame holds the string denoting the same edge name in mutations.
+	EdgeSame = "same"
 	// Table holds the table name of the artifact in the database.
 	Table = "artifacts"
 	// OccurrencesTable is the table that holds the occurrences relation/edge.
@@ -43,6 +45,11 @@ const (
 	// AttestationsInverseTable is the table name for the SLSAAttestation entity.
 	// It exists in this package in order to avoid circular dependency with the "slsaattestation" package.
 	AttestationsInverseTable = "slsa_attestations"
+	// SameTable is the table that holds the same relation/edge. The primary key declared below.
+	SameTable = "hash_equal_artifacts"
+	// SameInverseTable is the table name for the HashEqual entity.
+	// It exists in this package in order to avoid circular dependency with the "hashequal" package.
+	SameInverseTable = "hash_equals"
 )
 
 // Columns holds all SQL columns for artifact fields.
@@ -56,6 +63,9 @@ var (
 	// AttestationsPrimaryKey and AttestationsColumn2 are the table columns denoting the
 	// primary key for the attestations relation (M2M).
 	AttestationsPrimaryKey = []string{"slsa_attestation_id", "artifact_id"}
+	// SamePrimaryKey and SameColumn2 are the table columns denoting the
+	// primary key for the same relation (M2M).
+	SamePrimaryKey = []string{"hash_equal_id", "artifact_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -127,6 +137,20 @@ func ByAttestations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAttestationsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySameCount orders the results by same count.
+func BySameCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSameStep(), opts...)
+	}
+}
+
+// BySame orders the results by same terms.
+func BySame(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSameStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newOccurrencesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -146,5 +170,12 @@ func newAttestationsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AttestationsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, AttestationsTable, AttestationsPrimaryKey...),
+	)
+}
+func newSameStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SameInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, SameTable, SamePrimaryKey...),
 	)
 }

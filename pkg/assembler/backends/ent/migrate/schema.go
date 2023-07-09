@@ -205,6 +205,19 @@ var (
 			},
 		},
 	}
+	// HashEqualsColumns holds the columns for the "hash_equals" table.
+	HashEqualsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "justification", Type: field.TypeString},
+	}
+	// HashEqualsTable holds the schema information for the "hash_equals" table.
+	HashEqualsTable = &schema.Table{
+		Name:       "hash_equals",
+		Columns:    HashEqualsColumns,
+		PrimaryKey: []*schema.Column{HashEqualsColumns[0]},
+	}
 	// IsVulnerabilitiesColumns holds the columns for the "is_vulnerabilities" table.
 	IsVulnerabilitiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -527,6 +540,31 @@ var (
 		Columns:    SourceTypesColumns,
 		PrimaryKey: []*schema.Column{SourceTypesColumns[0]},
 	}
+	// HashEqualArtifactsColumns holds the columns for the "hash_equal_artifacts" table.
+	HashEqualArtifactsColumns = []*schema.Column{
+		{Name: "hash_equal_id", Type: field.TypeInt},
+		{Name: "artifact_id", Type: field.TypeInt},
+	}
+	// HashEqualArtifactsTable holds the schema information for the "hash_equal_artifacts" table.
+	HashEqualArtifactsTable = &schema.Table{
+		Name:       "hash_equal_artifacts",
+		Columns:    HashEqualArtifactsColumns,
+		PrimaryKey: []*schema.Column{HashEqualArtifactsColumns[0], HashEqualArtifactsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "hash_equal_artifacts_hash_equal_id",
+				Columns:    []*schema.Column{HashEqualArtifactsColumns[0]},
+				RefColumns: []*schema.Column{HashEqualsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "hash_equal_artifacts_artifact_id",
+				Columns:    []*schema.Column{HashEqualArtifactsColumns[1]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// SlsaAttestationBuiltFromColumns holds the columns for the "slsa_attestation_built_from" table.
 	SlsaAttestationBuiltFromColumns = []*schema.Column{
 		{Name: "slsa_attestation_id", Type: field.TypeInt},
@@ -560,6 +598,7 @@ var (
 		CertificationsTable,
 		CertifyVulnsTable,
 		DependenciesTable,
+		HashEqualsTable,
 		IsVulnerabilitiesTable,
 		OccurrencesTable,
 		PackageNamesTable,
@@ -571,6 +610,7 @@ var (
 		SourceNamesTable,
 		SourceNamespacesTable,
 		SourceTypesTable,
+		HashEqualArtifactsTable,
 		SlsaAttestationBuiltFromTable,
 	}
 )
@@ -596,6 +636,8 @@ func init() {
 	}
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
+	HashEqualArtifactsTable.ForeignKeys[0].RefTable = HashEqualsTable
+	HashEqualArtifactsTable.ForeignKeys[1].RefTable = ArtifactsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
 }

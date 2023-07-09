@@ -20,6 +20,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -50,6 +51,8 @@ type Client struct {
 	CertifyVuln *CertifyVulnClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
+	// HashEqual is the client for interacting with the HashEqual builders.
+	HashEqual *HashEqualClient
 	// IsVulnerability is the client for interacting with the IsVulnerability builders.
 	IsVulnerability *IsVulnerabilityClient
 	// Occurrence is the client for interacting with the Occurrence builders.
@@ -91,6 +94,7 @@ func (c *Client) init() {
 	c.Certification = NewCertificationClient(c.config)
 	c.CertifyVuln = NewCertifyVulnClient(c.config)
 	c.Dependency = NewDependencyClient(c.config)
+	c.HashEqual = NewHashEqualClient(c.config)
 	c.IsVulnerability = NewIsVulnerabilityClient(c.config)
 	c.Occurrence = NewOccurrenceClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
@@ -190,6 +194,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Certification:    NewCertificationClient(cfg),
 		CertifyVuln:      NewCertifyVulnClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
+		HashEqual:        NewHashEqualClient(cfg),
 		IsVulnerability:  NewIsVulnerabilityClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
@@ -226,6 +231,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Certification:    NewCertificationClient(cfg),
 		CertifyVuln:      NewCertifyVulnClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
+		HashEqual:        NewHashEqualClient(cfg),
 		IsVulnerability:  NewIsVulnerabilityClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
@@ -267,7 +273,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
-		c.Dependency, c.IsVulnerability, c.Occurrence, c.PackageName,
+		c.Dependency, c.HashEqual, c.IsVulnerability, c.Occurrence, c.PackageName,
 		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SLSAAttestation,
 		c.SecurityAdvisory, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
@@ -280,7 +286,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
-		c.Dependency, c.IsVulnerability, c.Occurrence, c.PackageName,
+		c.Dependency, c.HashEqual, c.IsVulnerability, c.Occurrence, c.PackageName,
 		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SLSAAttestation,
 		c.SecurityAdvisory, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
@@ -303,6 +309,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CertifyVuln.mutate(ctx, m)
 	case *DependencyMutation:
 		return c.Dependency.mutate(ctx, m)
+	case *HashEqualMutation:
+		return c.HashEqual.mutate(ctx, m)
 	case *IsVulnerabilityMutation:
 		return c.IsVulnerability.mutate(ctx, m)
 	case *OccurrenceMutation:
@@ -464,6 +472,22 @@ func (c *ArtifactClient) QueryAttestations(a *Artifact) *SLSAAttestationQuery {
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, artifact.AttestationsTable, artifact.AttestationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySame queries the same edge of a Artifact.
+func (c *ArtifactClient) QuerySame(a *Artifact) *HashEqualQuery {
+	query := (&HashEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, id),
+			sqlgraph.To(hashequal.Table, hashequal.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, artifact.SameTable, artifact.SamePrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -1195,6 +1219,140 @@ func (c *DependencyClient) mutate(ctx context.Context, m *DependencyMutation) (V
 		return (&DependencyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Dependency mutation op: %q", m.Op())
+	}
+}
+
+// HashEqualClient is a client for the HashEqual schema.
+type HashEqualClient struct {
+	config
+}
+
+// NewHashEqualClient returns a client for the HashEqual from the given config.
+func NewHashEqualClient(c config) *HashEqualClient {
+	return &HashEqualClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `hashequal.Hooks(f(g(h())))`.
+func (c *HashEqualClient) Use(hooks ...Hook) {
+	c.hooks.HashEqual = append(c.hooks.HashEqual, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `hashequal.Intercept(f(g(h())))`.
+func (c *HashEqualClient) Intercept(interceptors ...Interceptor) {
+	c.inters.HashEqual = append(c.inters.HashEqual, interceptors...)
+}
+
+// Create returns a builder for creating a HashEqual entity.
+func (c *HashEqualClient) Create() *HashEqualCreate {
+	mutation := newHashEqualMutation(c.config, OpCreate)
+	return &HashEqualCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of HashEqual entities.
+func (c *HashEqualClient) CreateBulk(builders ...*HashEqualCreate) *HashEqualCreateBulk {
+	return &HashEqualCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for HashEqual.
+func (c *HashEqualClient) Update() *HashEqualUpdate {
+	mutation := newHashEqualMutation(c.config, OpUpdate)
+	return &HashEqualUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *HashEqualClient) UpdateOne(he *HashEqual) *HashEqualUpdateOne {
+	mutation := newHashEqualMutation(c.config, OpUpdateOne, withHashEqual(he))
+	return &HashEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *HashEqualClient) UpdateOneID(id int) *HashEqualUpdateOne {
+	mutation := newHashEqualMutation(c.config, OpUpdateOne, withHashEqualID(id))
+	return &HashEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for HashEqual.
+func (c *HashEqualClient) Delete() *HashEqualDelete {
+	mutation := newHashEqualMutation(c.config, OpDelete)
+	return &HashEqualDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *HashEqualClient) DeleteOne(he *HashEqual) *HashEqualDeleteOne {
+	return c.DeleteOneID(he.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *HashEqualClient) DeleteOneID(id int) *HashEqualDeleteOne {
+	builder := c.Delete().Where(hashequal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &HashEqualDeleteOne{builder}
+}
+
+// Query returns a query builder for HashEqual.
+func (c *HashEqualClient) Query() *HashEqualQuery {
+	return &HashEqualQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeHashEqual},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a HashEqual entity by its id.
+func (c *HashEqualClient) Get(ctx context.Context, id int) (*HashEqual, error) {
+	return c.Query().Where(hashequal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *HashEqualClient) GetX(ctx context.Context, id int) *HashEqual {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryArtifacts queries the artifacts edge of a HashEqual.
+func (c *HashEqualClient) QueryArtifacts(he *HashEqual) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := he.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(hashequal.Table, hashequal.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, hashequal.ArtifactsTable, hashequal.ArtifactsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(he.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *HashEqualClient) Hooks() []Hook {
+	return c.hooks.HashEqual
+}
+
+// Interceptors returns the client interceptors.
+func (c *HashEqualClient) Interceptors() []Interceptor {
+	return c.inters.HashEqual
+}
+
+func (c *HashEqualClient) mutate(ctx context.Context, m *HashEqualMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&HashEqualCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&HashEqualUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&HashEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&HashEqualDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown HashEqual mutation op: %q", m.Op())
 	}
 }
 
@@ -2820,14 +2978,14 @@ func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (V
 type (
 	hooks struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
-		IsVulnerability, Occurrence, PackageName, PackageNamespace, PackageType,
-		PackageVersion, SLSAAttestation, SecurityAdvisory, SourceName, SourceNamespace,
-		SourceType []ent.Hook
+		HashEqual, IsVulnerability, Occurrence, PackageName, PackageNamespace,
+		PackageType, PackageVersion, SLSAAttestation, SecurityAdvisory, SourceName,
+		SourceNamespace, SourceType []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
-		IsVulnerability, Occurrence, PackageName, PackageNamespace, PackageType,
-		PackageVersion, SLSAAttestation, SecurityAdvisory, SourceName, SourceNamespace,
-		SourceType []ent.Interceptor
+		HashEqual, IsVulnerability, Occurrence, PackageName, PackageNamespace,
+		PackageType, PackageVersion, SLSAAttestation, SecurityAdvisory, SourceName,
+		SourceNamespace, SourceType []ent.Interceptor
 	}
 )

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
@@ -79,6 +80,21 @@ func (ac *ArtifactCreate) AddAttestations(s ...*SLSAAttestation) *ArtifactCreate
 		ids[i] = s[i].ID
 	}
 	return ac.AddAttestationIDs(ids...)
+}
+
+// AddSameIDs adds the "same" edge to the HashEqual entity by IDs.
+func (ac *ArtifactCreate) AddSameIDs(ids ...int) *ArtifactCreate {
+	ac.mutation.AddSameIDs(ids...)
+	return ac
+}
+
+// AddSame adds the "same" edges to the HashEqual entity.
+func (ac *ArtifactCreate) AddSame(h ...*HashEqual) *ArtifactCreate {
+	ids := make([]int, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return ac.AddSameIDs(ids...)
 }
 
 // Mutation returns the ArtifactMutation object of the builder.
@@ -197,6 +213,22 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.SameIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.SameTable,
+			Columns: artifact.SamePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
