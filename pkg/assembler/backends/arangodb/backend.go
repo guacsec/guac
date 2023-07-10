@@ -204,7 +204,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		srcHasName.From = []string{"SrcNamespaces"}
 
 		// repeat this for the collections where an edge is going into
-		pkgHasName.To = []string{"SrcNames"}
+		srcHasName.To = []string{"SrcNames"}
 
 		var isDependencyEdges driver.EdgeDefinition
 		isDependencyEdges.Collection = "isDependencyEdges"
@@ -241,7 +241,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
-		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName, pkgHasVersion, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges}
+		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName, pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -416,6 +416,15 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 					},
 				},
 				"PkgNames": driver.ArangoSearchElementProperties{
+					Analyzers:          []string{"identity", "text_en", "customgram"},
+					IncludeAllFields:   ptrfrom.Bool(false),
+					TrackListPositions: ptrfrom.Bool(false),
+					StoreValues:        driver.ArangoSearchStoreValuesNone,
+					Fields: map[string]driver.ArangoSearchElementProperties{
+						"guacKey": {},
+					},
+				},
+				"SrcNames": driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
 					IncludeAllFields:   ptrfrom.Bool(false),
 					TrackListPositions: ptrfrom.Bool(false),

@@ -654,8 +654,8 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
-		"type_id": pkgHasType._id,
-		"type": pkgHasType.type
+		"type_id": pType._id,
+		"type": pType.type
 	}`)
 
 	fmt.Println(arangoQueryBuilder.string())
@@ -712,10 +712,10 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
-		"type_id": pkgHasType._id,
-		"type": pkgHasType.type,
-		"namespace_id": pkgHasNamespace._id,
-		"namespace": pkgHasNamespace.namespace,
+		"type_id": pType._id,
+		"type": pType.type,
+		"namespace_id": pNs._id,
+		"namespace": pNs.namespace,
 	  }`)
 
 	fmt.Println(arangoQueryBuilder.string())
@@ -792,12 +792,12 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
-		"type_id": pkgHasType._id,
-		"type": pkgHasType.type,
-		"namespace_id": pkgHasNamespace._id,
-		"namespace": pkgHasNamespace.namespace,
-		"name_id": pkgHasName._id,
-		"name": pkgHasName.name,
+		"type_id": pType._id,
+		"type": pType.type,
+		"namespace_id": pNs._id,
+		"namespace": pNs.namespace,
+		"name_id": pName._id,
+		"name": pName.name,
 	  }`)
 
 	fmt.Println(arangoQueryBuilder.string())

@@ -222,23 +222,23 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 
 	query := `	  
 	LET ns = FIRST(
-	  UPSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
-	  INSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
+	  UPSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
+	  INSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
 	  UPDATE {}
 	  IN SrcNamespaces OPTIONS { indexHint: "byNsGuacKey" }
 	  RETURN NEW
 	)
 	
 	LET name = FIRST(
-	  UPSERT { name: doc.name, commit: doc.commit, tag: doc.tag, _parent: ns._id, guacKey: doc.guacNameKey}
-	  INSERT { name: doc.name, commit: doc.commit, tag: doc.tag, _parent: ns._id, guacKey: doc.guacNameKey}
+	  UPSERT { name: @name, commit: @commit, tag: @tag, _parent: ns._id, guacKey: @guacNameKey}
+	  INSERT { name: @name, commit: @commit, tag: @tag, _parent: ns._id, guacKey: @guacNameKey}
 	  UPDATE {}
 	  IN SrcNames OPTIONS { indexHint: "byNameGuacKey" }
 	  RETURN NEW
 	)
   
 	LET pkgHasNamespaceCollection = (
-	  INSERT { _key: CONCAT("srcHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "SrcHasNamespace"} INTO SrcHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("srcHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "SrcHasNamespace"} INTO SrcHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET pkgHasNameCollection = (
@@ -246,7 +246,7 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 	)
 	  
     RETURN {
-  	  "type": doc.typeValue,
+  	  "type": @typeValue,
   	  "namespace": ns.namespace,
   	  "name": name.name,
   	  "commit": name.commit,
