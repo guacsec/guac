@@ -263,8 +263,10 @@ func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assemb
 func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembler.IsOccurrenceIngest) error {
 	var pkgs []model.PkgInputSpec
 	var sources []model.SourceInputSpec
-	var artifacts []model.ArtifactInputSpec
-	var occurrences []model.IsOccurrenceInputSpec
+	var pkgArtifacts []model.ArtifactInputSpec
+	var pkgOccurrences []model.IsOccurrenceInputSpec
+	var srcArtifacts []model.ArtifactInputSpec
+	var srcOccurrences []model.IsOccurrenceInputSpec
 	for _, ingest := range v {
 
 		if ingest.Pkg != nil && ingest.Src != nil {
@@ -276,21 +278,23 @@ func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembl
 
 		if ingest.Pkg != nil {
 			pkgs = append(pkgs, *ingest.Pkg)
+			pkgArtifacts = append(pkgArtifacts, *ingest.Artifact)
+			pkgOccurrences = append(pkgOccurrences, *ingest.IsOccurrence)
 		} else {
 			sources = append(sources, *ingest.Src)
+			srcArtifacts = append(srcArtifacts, *ingest.Artifact)
+			srcOccurrences = append(srcOccurrences, *ingest.IsOccurrence)
 		}
-		artifacts = append(artifacts, *ingest.Artifact)
-		occurrences = append(occurrences, *ingest.IsOccurrence)
 	}
 	if len(sources) > 0 {
-		_, err := model.IsOccurrencesSrc(ctx, client, sources, artifacts, occurrences)
+		_, err := model.IsOccurrencesSrc(ctx, client, sources, srcArtifacts, srcOccurrences)
 		if err != nil {
 			return fmt.Errorf("isOccurrencesSrc failed with error: %w", err)
 		}
 
 	}
 	if len(pkgs) > 0 {
-		_, err := model.IsOccurrencesPkg(ctx, client, pkgs, artifacts, occurrences)
+		_, err := model.IsOccurrencesPkg(ctx, client, pkgs, pkgArtifacts, pkgOccurrences)
 		if err != nil {
 			return fmt.Errorf("isOccurrencesPkg failed with error: %w", err)
 		}
