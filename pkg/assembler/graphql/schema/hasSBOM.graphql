@@ -29,21 +29,10 @@ type HasSBOM {
   digest: String!
   "Location from which the SBOM can be downloaded"
   downloadLocation: String!
-  "SBOM annotations (e.g., SBOM Scorecard information)"
-  annotations: [Annotation!]!
   "Document from which this attestation is generated from"
   origin: String!
   "GUAC collector for the document"
   collector: String!
-}
-
-"""
-Annotation is a key-value pair to provide additional information or metadata
-about an SBOM.
-"""
-type Annotation {
-  key: String!
-  value: String!
 }
 
 """
@@ -58,15 +47,8 @@ input HasSBOMSpec {
   algorithm: String
   digest: String
   downloadLocation: String
-  annotations: [AnnotationSpec!] = []
   origin: String
   collector: String
-}
-
-"AnnotationSpec allows creating query filters for Annotation objects."
-input AnnotationSpec {
-  key: String!
-  value: String!
 }
 
 "HasSBOMInputSpec is the same as HasSBOM but for mutation input."
@@ -75,15 +57,8 @@ input HasSBOMInputSpec {
   algorithm: String!
   digest: String!
   downloadLocation: String!
-  annotations: [AnnotationInputSpec!]!
   origin: String!
   collector: String!
-}
-
-"AnnotationInputSpec allows ingesting Annotation objects."
-input AnnotationInputSpec {
-  key: String!
-  value: String!
 }
 
 extend type Query {

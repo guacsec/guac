@@ -1,0 +1,96 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+"""
+PointOfContact is an attestation of how to get in touch with the person(s) responsible
+for a package, source, or artifact.
+
+All evidence trees record a justification for the property they represent as
+well as the document that contains the attestation (origin) and the collector
+that collected the document (collector).
+
+The attestation applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
+
+email is the email address (singular) of the point of contact.
+
+info is additional contact information other than email address. This is free
+form.
+
+NOTE: the identifiers for point of contact should be part of software trees.
+This will benefit from identifier look up and traversal as well as organization
+hierarchy. However, until the use case arises, PointOfContact will be a flat
+reference to the contact details.
+"""
+type PointOfContact {
+  id: ID!
+  subject: PackageSourceOrArtifact!
+  email: String!
+  info: String!
+  since: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+PointOfContactSpec allows filtering the list of PointOfContact evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
+
+since filters attestations with a value of since later or equal to the provided filter.
+"""
+input PointOfContactSpec {
+  id: ID
+  subject: PackageSourceOrArtifactSpec
+  email: String
+  info: String
+  since: Time
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
+"""
+input PointOfContactInputSpec {
+  email: String!
+  info: String!
+  since: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all PointOfContact attestations matching a filter."
+  PointOfContact (pointOfContactSpec: PointOfContactSpec): [PointOfContact!]!
+}
+
+extend type Mutation {
+  "Adds a PointOfContact attestation to a package, source or artifact."
+  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, pointOfContact: PointOfContactInputSpec!): PointOfContact!
+}

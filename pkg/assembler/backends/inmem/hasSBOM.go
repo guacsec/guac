@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -36,7 +35,6 @@ type hasSBOMStruct struct {
 	algorithm        string
 	digest           string
 	downloadLocation string
-	annotations      map[string]string
 	origin           string
 	collector        string
 }
@@ -149,7 +147,6 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 			h.algorithm == algorithm &&
 			h.digest == digest &&
 			h.downloadLocation == input.DownloadLocation &&
-			reflect.DeepEqual(h.annotations, getAnnotationsFromInput(input.Annotations)) &&
 			h.origin == input.Origin &&
 			h.collector == input.Collector {
 			return c.convHasSBOM(h)
@@ -171,7 +168,6 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 		algorithm:        algorithm,
 		digest:           digest,
 		downloadLocation: input.DownloadLocation,
-		annotations:      getAnnotationsFromInput(input.Annotations),
 		origin:           input.Origin,
 		collector:        input.Collector,
 	}
@@ -192,7 +188,6 @@ func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
 		Algorithm:        in.algorithm,
 		Digest:           in.digest,
 		DownloadLocation: in.downloadLocation,
-		Annotations:      getCollectedHasSBOMAnnotations(in.annotations),
 		Origin:           in.origin,
 		Collector:        in.collector,
 	}
@@ -299,7 +294,6 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 		noMatch(toLower(filter.Algorithm), link.algorithm) ||
 		noMatch(toLower(filter.Digest), link.digest) ||
 		noMatch(filter.DownloadLocation, link.downloadLocation) ||
-		noMatchAnnotations(filter.Annotations, link.annotations) ||
 		noMatch(filter.Origin, link.origin) ||
 		noMatch(filter.Collector, link.collector) {
 		return out, nil
@@ -330,43 +324,4 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 		return nil, err
 	}
 	return append(out, sb), nil
-}
-
-func getCollectedHasSBOMAnnotations(annotationMap map[string]string) []*model.Annotation {
-	annotations := []*model.Annotation{}
-	for key, val := range annotationMap {
-		annotation := &model.Annotation{
-			Key:   key,
-			Value: val,
-		}
-		annotations = append(annotations, annotation)
-
-	}
-	return annotations
-}
-
-func getAnnotationsFromInput(annotationInput []*model.AnnotationInputSpec) map[string]string {
-	annotationMap := map[string]string{}
-	if annotationInput == nil {
-		return annotationMap
-	}
-	for _, kv := range annotationInput {
-		annotationMap[kv.Key] = kv.Value
-	}
-	return annotationMap
-}
-
-func getAnnotationsFromFilter(annotationFilter []*model.AnnotationSpec) map[string]string {
-	annotationMap := map[string]string{}
-	for _, kv := range annotationFilter {
-		annotationMap[kv.Key] = kv.Value
-	}
-	return annotationMap
-}
-
-func noMatchAnnotations(annotationFilter []*model.AnnotationSpec, v map[string]string) bool {
-	if len(annotationFilter) > 0 {
-		return !reflect.DeepEqual(v, getAnnotationsFromFilter(annotationFilter))
-	}
-	return false
 }

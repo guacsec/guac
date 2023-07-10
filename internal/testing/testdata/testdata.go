@@ -1891,6 +1891,55 @@ var (
 		},
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
+
+	// CSAF
+	//go:embed exampledata/rhsa-csaf.json
+	CsafExampleRedHat []byte
+
+	CsafVexIngest = []assembler.VexIngest{
+		{
+			Pkg: &model.PkgInputSpec{
+				Type:       "rpm",
+				Namespace:  strP("redhat"),
+				Name:       "openssl",
+				Version:    strP("1.1.1k-7.el8_6"),
+				Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "x86_64"}, {Key: "epoch", Value: "1"}},
+				Subpath:    strP(""),
+			},
+			CVE: &model.CVEInputSpec{Year: 2023, CveId: "CVE-2023-0286"},
+			VexData: &model.VexStatementInputSpec{
+				Status:           "AFFECTED",
+				VexJustification: "NOT_PROVIDED",
+				Statement: `For details on how to apply this update, which includes the changes described in this advisory, refer to:
+
+https://access.redhat.com/articles/11258
+
+For the update to take effect, all services linked to the OpenSSL library must be restarted, or the system rebooted.`,
+
+				KnownSince: parseRfc3339("2023-03-23T11:14:00Z"),
+				Origin:     "RHSA-2023:1441",
+			},
+		},
+	}
+	CsafCertifyVulnIngest = []assembler.CertifyVulnIngest{
+		{
+			Pkg: &model.PkgInputSpec{
+				Type:      "rpm",
+				Namespace: strP("redhat"),
+				Name:      "openssl",
+				Version:   strP("1.1.1k-7.el8_6"),
+				Qualifiers: []model.PackageQualifierInputSpec{
+					{Key: "arch", Value: "x86_64"},
+					{Key: "epoch", Value: "1"},
+				},
+				Subpath: strP(""),
+			},
+			CVE: &model.CVEInputSpec{Year: 2023, CveId: "CVE-2023-0286"},
+			VulnData: &model.VulnerabilityMetaDataInput{
+				TimeScanned: parseRfc3339("2023-03-23T11:14:00Z"),
+			},
+		},
+	}
 )
 
 func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
@@ -2046,4 +2095,12 @@ func gLess(e1, e2 any) bool {
 
 func strP(s string) *string {
 	return &s
+}
+
+func parseRfc3339(s string) time.Time {
+	time, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		panic(err)
+	}
+	return time
 }

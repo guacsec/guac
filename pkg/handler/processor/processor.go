@@ -61,6 +61,7 @@ const (
 	DocumentScorecard   DocumentType = "SCORECARD"
 	DocumentCycloneDX   DocumentType = "CycloneDX"
 	DocumentDepsDev     DocumentType = "DEPS_DEV"
+	DocumentCsaf        DocumentType = "CSAF"
 	DocumentUnknown     DocumentType = "UNKNOWN"
 )
 

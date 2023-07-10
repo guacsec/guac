@@ -60,9 +60,8 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					URI:         "test uri",
-					Annotations: []*model.Annotation{},
+					Subject: p1out,
+					URI:     "test uri",
 				},
 			},
 		},
@@ -92,9 +91,8 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					URI:         "test uri",
-					Annotations: []*model.Annotation{},
+					Subject: p1out,
+					URI:     "test uri",
 				},
 			},
 		},
@@ -124,9 +122,8 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					URI:         "test uri one",
-					Annotations: []*model.Annotation{},
+					Subject: p1out,
+					URI:     "test uri one",
 				},
 			},
 		},
@@ -169,9 +166,8 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject:     p2out,
-					URI:         "test uri",
-					Annotations: []*model.Annotation{},
+					Subject: p2out,
+					URI:     "test uri",
 				},
 			},
 		},
@@ -214,9 +210,8 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject:     a2out,
-					URI:         "test uri",
-					Annotations: []*model.Annotation{},
+					Subject: a2out,
+					URI:     "test uri",
 				},
 			},
 		},
@@ -246,9 +241,8 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					Algorithm:   "qwerasdf",
-					Annotations: []*model.Annotation{},
+					Subject:   p1out,
+					Algorithm: "qwerasdf",
 				},
 			},
 		},
@@ -278,9 +272,8 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					Digest:      "qwerasdf",
-					Annotations: []*model.Annotation{},
+					Subject: p1out,
+					Digest:  "qwerasdf",
 				},
 			},
 		},
@@ -312,49 +305,6 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject:          p1out,
 					DownloadLocation: "location two",
-					Annotations:      []*model.Annotation{},
-				},
-			},
-		},
-		{
-			Name:  "Query on Annotations",
-			InPkg: []*model.PkgInputSpec{p1},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					HS: &model.HasSBOMInputSpec{
-						Annotations: []*model.AnnotationInputSpec{
-							{Key: "k1", Value: "v1"},
-							{Key: "k2", Value: "v2"},
-						},
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					HS: &model.HasSBOMInputSpec{
-						Annotations: []*model.AnnotationInputSpec{
-							{Key: "k1", Value: "v1"},
-						},
-					},
-				},
-			},
-			Query: &model.HasSBOMSpec{
-				Annotations: []*model.AnnotationSpec{
-					{Key: "k1", Value: "v1"},
-					{Key: "k2", Value: "v2"},
-				},
-			},
-			ExpHS: []*model.HasSbom{
-				{
-					Subject: p1out,
-					Annotations: []*model.Annotation{
-						{Key: "k1", Value: "v1"},
-						{Key: "k2", Value: "v2"},
-					},
 				},
 			},
 		},
@@ -420,12 +370,10 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject:          p1out,
 					DownloadLocation: "location two",
-					Annotations:      []*model.Annotation{},
 				},
 				{
 					Subject:          p2out,
 					DownloadLocation: "location two",
-					Annotations:      []*model.Annotation{},
 				},
 			},
 		},
@@ -457,7 +405,6 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject:          p1out,
 					DownloadLocation: "location two",
-					Annotations:      []*model.Annotation{},
 				},
 			},
 		},
@@ -554,13 +501,6 @@ func TestHasSBOM(t *testing.T) {
 			}
 			if err != nil {
 				return
-			}
-			less := func(a, b *model.Annotation) bool { return a.Key < b.Key }
-			for _, hs := range got {
-				slices.SortFunc(hs.Annotations, less)
-			}
-			for _, hs := range test.ExpHS {
-				slices.SortFunc(hs.Annotations, less)
 			}
 			if diff := cmp.Diff(test.ExpHS, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)

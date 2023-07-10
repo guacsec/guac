@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -576,7 +577,7 @@ func removeInvalidCharFromProperty(key string) string {
 }
 
 func (c *neo4jClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
-	panic("not implemented")
+	return []*model.Package{}, fmt.Errorf("not implemented: IngestPackages")
 }
 
 func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
