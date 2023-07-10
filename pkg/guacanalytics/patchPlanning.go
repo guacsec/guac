@@ -142,8 +142,18 @@ func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueVal
 				return err
 			}
 		}
-	}
+	// two cases one after the other work like an OR statement
+	case "packageVersion":
+	case "sourceName":
+		switch neighbor := neighbor.(type) {
+		case *model.NeighborsNeighborsIsOccurrence:
+			err := exploreIsOccurrence(ctx, gqlclient, q, *neighbor)
 
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -189,4 +199,29 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlclient graphql.Client
 	}
 
 	return nil
+}
+
+// TODO: impelement this functions
+func exploreIsOccurrence(ctx context.Context, gqlclient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) error {
+	// Step 1: Find Artifact attached to package through IsOccurence
+	// -> call .Artifact on isOccurrence
+
+	// Step 2: Find HasSLSA where Artifact is the builtFrom
+	// -> call .Neighbors on the artifact id with the edge type specified as HasSLSAArtifact and loop through results
+
+	// Step 3: Find Artifact that is the subject of the HasSLSA
+	// -> call .Subject on HasSLSA result of .Neighbors call
+
+	// Step 4: Find isOccurrence attached to that Artifact
+	// -> call .Neighbors with edge type specified as IsOccurrence
+
+	// Step 5: Find packageVersion attached to the isOccurrence
+	// -> call .Subject on isOccurrence return value from previous step
+
+	// Step 6: Case on if subject returned is a source or a package
+	// Step 6a: (IF PACKAGE) Add packageVersion and packageName to the queue
+	// -> done the same way as in exploreIsDependencyFromDepPkg (perhaps abstract out to a helper)
+
+	// Step 6b: (IF SOURCE) Add sourceName to the queue
+	return fmt.Errorf("unimplemeted")
 }
