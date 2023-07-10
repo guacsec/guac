@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -46,7 +47,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-const MAX_CONCURRENT_JOBS = 2
+const maxConcurrentJobsString string = "MAX_CONCURRENT_JOBS"
 
 type fileOptions struct {
 	// path to the pem file
@@ -138,7 +139,16 @@ var filesCmd = &cobra.Command{
 		gotErr := false
 
 		// Backend can only process a few files at a time. Increasing this might cause timeout errors in the database
-		files.SetLimit(3)
+		maxConcurrentJobs, found := os.LookupEnv(maxConcurrentJobsString)
+		if found {
+			jobs, err := strconv.Atoi(maxConcurrentJobs)
+			if err != nil {
+				logger.Fatalf("failed to convert concurrent jobs value to integer ")
+			}
+			files.SetLimit(jobs)
+		} else {
+			files.SetLimit(1)
+		}
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
