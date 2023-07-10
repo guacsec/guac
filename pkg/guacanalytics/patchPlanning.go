@@ -143,8 +143,7 @@ func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueVal
 			}
 		}
 	// two cases one after the other work like an OR statement
-	case "packageVersion":
-	case "sourceName":
+	case "packageVersion", "sourceName":
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsIsOccurrence:
 			err := exploreIsOccurrence(ctx, gqlclient, q, *neighbor)
@@ -215,7 +214,7 @@ func exploreIsOccurrence(ctx context.Context, gqlclient graphql.Client, q *queue
 	//		Step 4: Find isOccurrence attached to that Artifact
 	//		-> call .Neighbors with edge type specified as IsOccurrence
 
-	// LOOP OVER ISOCCURRENCES
+	// 		LOOP OVER ISOCCURRENCES
 	//			Step 6: Case on .Subject of is occurrences returned
 	//					Step 6a: (IF PACKAGE) Add packageVersion and packageName to the queue
 	//					-> done the same way as in exploreIsDependencyFromDepPkg (perhaps abstract out to a helper)
