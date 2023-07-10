@@ -58,7 +58,7 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+				return nil, fmt.Errorf("failed to query artifact: %w", err)
 			}
 		} else {
 			collectedArtifacts = append(collectedArtifacts, doc)
@@ -106,7 +106,7 @@ func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.A
 	query := `
 UPSERT { algorithm:doc.algorithm, digest:doc.digest } 
 INSERT { algorithm:doc.algorithm, digest:doc.digest } 
-UPDATE {} IN artifacts
+UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
 RETURN NEW`
 
 	sb.WriteString(query)
@@ -143,7 +143,7 @@ func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.Artif
 	query := `
 UPSERT { algorithm:@algorithm, digest:@digest } 
 INSERT { algorithm:@algorithm, digest:@digest } 
-UPDATE {} IN artifacts
+UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
 RETURN NEW`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestArtifact")
@@ -169,7 +169,7 @@ RETURN NEW`
 	if len(createdArtifacts) == 1 {
 		return createdArtifacts[0], nil
 	} else {
-		return nil, fmt.Errorf("number of artifacts ingested is too great")
+		return nil, fmt.Errorf("number of artifacts ingested is greater than one")
 	}
 }
 

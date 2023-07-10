@@ -29,17 +29,18 @@ func (c *arangoClient) FindSoftware(ctx context.Context, searchText string) ([]m
 	queryValues := map[string]any{}
 	queryValues["searchText"] = searchText
 	query := `
+
 FOR doc in GuacSearch
 SEARCH PHRASE(doc.guacKey, @searchText, "text_en") || PHRASE(doc.guacKey, @searchText, "customgram") || doc.digest == @searchText
 
 LET parsedDoc =
-    IS_SAME_COLLECTION(doc, "PkgName") ?
-    // PkgName case
+    IS_SAME_COLLECTION(doc, "PkgNames") ?
+    // PkgNames case
     (
-        FOR pNs in PkgNamespace
+        FOR pNs in PkgNamespaces
           FILTER pNs._id == doc._parent
 
-        FOR pType in PkgType
+        FOR pType in PkgTypes
           FILTER pType._id == pNs._parent
 
         RETURN {
@@ -48,18 +49,17 @@ LET parsedDoc =
           'pkgName': {
               'type': pType.type,
               'namespace': pNs.namespace,
-              'name': doc.name,
-              'nameDoc': doc
+              'name': doc.name
           }
         }
-    ) : (IS_SAME_COLLECTION(doc, "PkgVersion") ?
-    // PkgVersion case
+    ) : IS_SAME_COLLECTION(doc, "PkgVersions") ?
+    // PkgVersions case
     (
-        FOR pName in PkgName
+        FOR pName in PkgNames
           FILTER pName._id == doc._parent
-        FOR pNs in PkgNamespace
+        FOR pNs in PkgNamespaces
           FILTER pNs._id == pName._parent
-        FOR pType in PkgType
+        FOR pType in PkgTypes
           FILTER pType._id == pNs._parent
 
         RETURN {
@@ -71,8 +71,26 @@ LET parsedDoc =
               'name': pName.name,
               'version': doc.version,
               'subpath': doc.subpath,
-              'qualifier_list': doc.qualifier_list,
-              'versionDoc': doc
+              'qualifier_list': doc.qualifier_list
+          }
+        }
+    ) : IS_SAME_COLLECTION(doc, "SrcNames") ?
+    // SrcNames case
+    (
+        FOR sNs in SrcNamespaces
+          FILTER sNs._id == doc._parent
+        FOR sType in SrcTypes
+          FILTER sType._id == sNs._parent
+
+        RETURN {
+          'nodeType': 'SrcName',
+          'id': doc._id,
+          'srcName': {
+              'type': sType.type,
+              'namespace': sNs.namespace,
+              'name': doc.name,
+              'commit': doc.commit,
+              'tag': doc.tag
           }
         }
     )
@@ -86,7 +104,7 @@ LET parsedDoc =
             'digest': doc.digest
          }
     })
-    )
+
 
 RETURN {
 "parsedDoc": parsedDoc
@@ -116,6 +134,13 @@ RETURN {
 			Subpath       string      `json:"subpath"`
 			QualifierList interface{} `json:"qualifier_list"`
 		} `json:"pkgVersion,omitempty"`
+		SrcName *struct {
+			SrcType   string `json:"type"`
+			Namespace string `json:"namespace"`
+			Name      string `json:"name"`
+			Commit    string `json:"commit"`
+			Tag       string `json:"tag"`
+		} `json:"srcName,omitempty"`
 		Artifact *model.Artifact `json:"artifact,omitempty"`
 	}
 

@@ -62,6 +62,7 @@ type Backend interface {
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
 	IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error)
 	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error)
+	IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error)
 
 	// Mutations for evidence trees (read-write queries, assume software trees ingested)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)

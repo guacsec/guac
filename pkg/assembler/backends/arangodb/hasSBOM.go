@@ -116,7 +116,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 			return isOccurrence, nil
 		} else {
-			return nil, fmt.Errorf("number of hashEqual ingested is too great")
+			return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
 		}
 	} else {
 		// add guac keys
@@ -132,13 +132,13 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 		query := `
 		LET firstPkg = FIRST(
-			FOR pVersion in PkgVersion
+			FOR pVersion in PkgVersions
 			  FILTER pVersion.guacKey == @pkgVersionGuacKey
-			FOR pName in PkgName
+			FOR pName in PkgNames
 			  FILTER pName._id == pVersion._parent
-			FOR pNs in PkgNamespace
+			FOR pNs in PkgNamespaces
 			  FILTER pNs._id == pName._parent
-			FOR pType in PkgType
+			FOR pType in PkgTypes
 			  FILTER pType._id == pNs._parent
 	
 			RETURN {
@@ -233,7 +233,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 			return isOccurrence, nil
 		} else {
-			return nil, fmt.Errorf("number of hashEqual ingested is too great")
+			return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
 		}
 	}
 }

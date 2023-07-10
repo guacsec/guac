@@ -5940,6 +5940,96 @@ type IngestSourceResponse struct {
 // GetIngestSource returns IngestSourceResponse.IngestSource, and is useful for accessing the field via an interface.
 func (v *IngestSourceResponse) GetIngestSource() IngestSourceIngestSource { return v.IngestSource }
 
+// IngestSourcesIngestSourcesSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type IngestSourcesIngestSourcesSource struct {
+	AllSourceTree `json:"-"`
+}
+
+// GetId returns IngestSourcesIngestSourcesSource.Id, and is useful for accessing the field via an interface.
+func (v *IngestSourcesIngestSourcesSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns IngestSourcesIngestSourcesSource.Type, and is useful for accessing the field via an interface.
+func (v *IngestSourcesIngestSourcesSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns IngestSourcesIngestSourcesSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *IngestSourcesIngestSourcesSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *IngestSourcesIngestSourcesSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestSourcesIngestSourcesSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestSourcesIngestSourcesSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestSourcesIngestSourcesSource struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *IngestSourcesIngestSourcesSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestSourcesIngestSourcesSource) __premarshalJSON() (*__premarshalIngestSourcesIngestSourcesSource, error) {
+	var retval __premarshalIngestSourcesIngestSourcesSource
+
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
+// IngestSourcesResponse is returned by IngestSources on success.
+type IngestSourcesResponse struct {
+	// Bulk ingests sources and returns the list of corresponding source trie path.
+	IngestSources []IngestSourcesIngestSourcesSource `json:"ingestSources"`
+}
+
+// GetIngestSources returns IngestSourcesResponse.IngestSources, and is useful for accessing the field via an interface.
+func (v *IngestSourcesResponse) GetIngestSources() []IngestSourcesIngestSourcesSource {
+	return v.IngestSources
+}
+
 // IsDependenciesIngestDependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
 // The GraphQL type's documentation follows.
 //
@@ -19834,6 +19924,14 @@ type __IngestSourceInput struct {
 // GetSource returns __IngestSourceInput.Source, and is useful for accessing the field via an interface.
 func (v *__IngestSourceInput) GetSource() SourceInputSpec { return v.Source }
 
+// __IngestSourcesInput is used internally by genqlient
+type __IngestSourcesInput struct {
+	Sources []SourceInputSpec `json:"sources"`
+}
+
+// GetSources returns __IngestSourcesInput.Sources, and is useful for accessing the field via an interface.
+func (v *__IngestSourcesInput) GetSources() []SourceInputSpec { return v.Sources }
+
 // __IsDependenciesInput is used internally by genqlient
 type __IsDependenciesInput struct {
 	Pkgs         []PkgInputSpec          `json:"pkgs"`
@@ -27110,6 +27208,56 @@ func IngestSource(
 	var err error
 
 	var data IngestSourceResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestSources.
+const IngestSources_Operation = `
+# Bulk Ingest Sources
+mutation IngestSources ($sources: [SourceInputSpec!]!) {
+	ingestSources(sources: $sources) {
+		... AllSourceTree
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func IngestSources(
+	ctx context.Context,
+	client graphql.Client,
+	sources []SourceInputSpec,
+) (*IngestSourcesResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestSources",
+		Query:  IngestSources_Operation,
+		Variables: &__IngestSourcesInput{
+			Sources: sources,
+		},
+	}
+	var err error
+
+	var data IngestSourcesResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

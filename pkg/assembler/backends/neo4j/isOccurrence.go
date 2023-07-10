@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
@@ -207,7 +208,7 @@ func generateModelIsOccurrence(subject model.PackageOrSource, artifact *model.Ar
 // Ingest IngestOccurrences
 
 func (c *neo4jClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	panic("not implemented")
+	return []*model.IsOccurrence{}, fmt.Errorf("not implemented: IngestOccurrences")
 }
 
 // Ingest IngestOccurrence

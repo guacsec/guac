@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -92,7 +93,7 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 }
 
 func (c *neo4jClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	panic("not implemented")
+	return []*model.Artifact{}, fmt.Errorf("not implemented: IngestArtifacts")
 }
 
 func (c *neo4jClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {

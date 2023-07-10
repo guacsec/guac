@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -409,6 +410,10 @@ func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.So
 	}
 
 	return result.([]*model.Source), nil
+}
+
+func (c *neo4jClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
+	return []*model.Source{}, fmt.Errorf("not implemented: IngestSources")
 }
 
 func (c *neo4jClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {

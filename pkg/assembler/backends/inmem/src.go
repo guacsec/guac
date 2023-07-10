@@ -160,6 +160,19 @@ func (p *srcNameNode) setPointOfContactLinks(id uint32) {
 }
 
 // Ingest Source
+
+func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
+	var modelSources []*model.Source
+	for _, src := range sources {
+		modelSrc, err := c.IngestSource(ctx, *src)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestSources failed with err: %v", err)
+		}
+		modelSources = append(modelSources, modelSrc)
+	}
+	return modelSources, nil
+}
+
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
 	c.m.RLock()
 	namespacesStruct, hasNamespace := c.sources[input.Type]
