@@ -54,7 +54,22 @@ func (c *demoClient) builderByKey(uri string) (*builderStruct, error) {
 	return nil, errors.New("builder not found")
 }
 
+// Ingest Builders
+
+func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
+	var modelBuilders []*model.Builder
+	for _, build := range builders {
+		modelBuild, err := c.IngestBuilder(ctx, build)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestBuilder failed with err: %v", err)
+		}
+		modelBuilders = append(modelBuilders, modelBuild)
+	}
+	return modelBuilders, nil
+}
+
 // Ingest Builder
+
 func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
 	return c.ingestBuilder(ctx, builder, true)
 }

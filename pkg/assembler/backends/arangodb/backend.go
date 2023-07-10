@@ -626,9 +626,6 @@ func getPreloadString(prefix, name string) string {
 	return name
 }
 
-func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
-	panic(fmt.Errorf("not implemented: Builders - Builders"))
-}
 func (c *arangoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
 	panic(fmt.Errorf("not implemented: Cve - Cve"))
 }
@@ -673,9 +670,7 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 }
 
 // Mutations for software trees (read-write queries)
-func (c *arangoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
-	panic(fmt.Errorf("not implemented: IngestBuilder - IngestBuilder"))
-}
+
 func (c *arangoClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
 	panic(fmt.Errorf("not implemented: IngestCve - IngestCve"))
 }

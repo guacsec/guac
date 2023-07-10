@@ -55,6 +55,7 @@ type Backend interface {
 	IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error)
 	IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error)
 	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error)
+	IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
 	IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error)

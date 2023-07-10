@@ -22,3 +22,11 @@ mutation IngestBuilder($builder: BuilderInputSpec!) {
     uri
   }
 }
+
+# Bulk Ingest Builder
+
+mutation IngestBuilders($builders: [BuilderInputSpec!]!) {
+  ingestBuilders(builders: $builders) {
+    uri
+  }
+}
