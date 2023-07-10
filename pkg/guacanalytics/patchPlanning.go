@@ -209,19 +209,21 @@ func exploreIsOccurrence(ctx context.Context, gqlclient graphql.Client, q *queue
 	// Step 2: Find HasSLSA where Artifact is the builtFrom
 	// -> call .Neighbors on the artifact id with the edge type specified as HasSLSAArtifact and loop through results
 
-	// Step 3: Find Artifact that is the subject of the HasSLSA
-	// -> call .Subject on HasSLSA result of .Neighbors call
+	// LOOP OVER SLSA NEIGHBORS RETURN
+	//		Step 3: Find Artifact that is the subject of the HasSLSA
+	//		-> call .Subject on HasSLSA result of .Neighbors call
 
-	// Step 4: Find isOccurrence attached to that Artifact
-	// -> call .Neighbors with edge type specified as IsOccurrence
+	//		Step 4: Find isOccurrence attached to that Artifact
+	//		-> call .Neighbors with edge type specified as IsOccurrence
 
-	// Step 5: Find packageVersion attached to the isOccurrence
-	// -> call .Subject on isOccurrence return value from previous step
+	//		Step 5: Find packageVersion attached to the isOccurrence
+	//		-> call .Subject on isOccurrence return value from previous step
 
-	// Step 6: Case on if subject returned is a source or a package
-	// Step 6a: (IF PACKAGE) Add packageVersion and packageName to the queue
-	// -> done the same way as in exploreIsDependencyFromDepPkg (perhaps abstract out to a helper)
+	//		Step 6: Case on if subject returned is a source or a package
 
-	// Step 6b: (IF SOURCE) Add sourceName to the queue
+	//				Step 7a: (IF PACKAGE) Add packageVersion and packageName to the queue
+	//				-> done the same way as in exploreIsDependencyFromDepPkg (perhaps abstract out to a helper)
+
+	//				Step 7b: (IF SOURCE) Add sourceName to the queue
 	return fmt.Errorf("unimplemeted")
 }
