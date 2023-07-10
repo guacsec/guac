@@ -204,6 +204,7 @@ type ComplexityRoot struct {
 		IngestPointOfContact  func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
+		IngestSources         func(childComplexity int, sources []*model.SourceInputSpec) int
 		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) int
 		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
@@ -1288,6 +1289,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestSource(childComplexity, args["source"].(model.SourceInputSpec)), true
+
+	case "Mutation.ingestSources":
+		if e.complexity.Mutation.IngestSources == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestSources_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestSources(childComplexity, args["sources"].([]*model.SourceInputSpec)), true
 
 	case "Mutation.ingestVEXStatement":
 		if e.complexity.Mutation.IngestVEXStatement == nil {
@@ -4577,6 +4590,8 @@ extend type Query {
 extend type Mutation {
   "Ingests a new source and returns the corresponding source trie path."
   ingestSource(source: SourceInputSpec!): Source!
+  "Bulk ingests sources and returns the list of corresponding source trie path."
+  ingestSources(sources: [SourceInputSpec!]!): [Source!]!
 }
 `, BuiltIn: false},
 }

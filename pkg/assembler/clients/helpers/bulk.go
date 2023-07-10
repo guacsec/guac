@@ -44,10 +44,14 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			// TODO(pxp928): add bulk ingestion for sources
 			sources := p.GetSources(ctx)
 			logger.Infof("assembling Source: %v", len(sources))
+
+			var collectedSources []model.SourceInputSpec
+			collectedSources = make([]model.SourceInputSpec, 0)
 			for _, v := range sources {
-				if err := ingestSource(ctx, gqlclient, v); err != nil {
-					return fmt.Errorf("ingestSource failed with error: %w", err)
-				}
+				collectedSources = append(collectedSources, *v)
+			}
+			if err := ingestSources(ctx, gqlclient, collectedSources); err != nil {
+				return fmt.Errorf("ingestSources failed with error: %w", err)
 			}
 
 			artifacts := p.GetArtifacts(ctx)
@@ -218,6 +222,14 @@ func ingestPackages(ctx context.Context, client graphql.Client, v []model.PkgInp
 	_, err := model.IngestPackages(ctx, client, v)
 	if err != nil {
 		return fmt.Errorf("ingestPackages failed with error: %w", err)
+	}
+	return nil
+}
+
+func ingestSources(ctx context.Context, client graphql.Client, v []model.SourceInputSpec) error {
+	_, err := model.IngestSources(ctx, client, v)
+	if err != nil {
+		return fmt.Errorf("ingestSources failed with error: %w", err)
 	}
 	return nil
 }

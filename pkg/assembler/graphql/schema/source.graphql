@@ -109,4 +109,6 @@ extend type Query {
 extend type Mutation {
   "Ingests a new source and returns the corresponding source trie path."
   ingestSource(source: SourceInputSpec!): Source!
+  "Bulk ingests sources and returns the list of corresponding source trie path."
+  ingestSources(sources: [SourceInputSpec!]!): [Source!]!
 }
