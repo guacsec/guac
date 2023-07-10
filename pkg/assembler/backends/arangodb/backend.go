@@ -37,7 +37,7 @@ const (
 	collector     string        = "collector"
 	justification string        = "justification"
 	maxRetires    int           = 20
-	retryTImer    time.Duration = time.Microsecond
+	retryTImer    time.Duration = 10 * time.Microsecond
 	guacEmpty     string        = "guac-empty-@@"
 )
 
@@ -405,6 +405,8 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		}
 
 		if err := createView(ctx, db, "GuacSearch", &driver.ArangoSearchViewProperties{
+			CommitInterval:        ptrfrom.Int64(10 * 60 * 1000),
+			ConsolidationInterval: ptrfrom.Int64(10 * 60 * 1000),
 			Links: driver.ArangoSearchLinks{
 				"PkgVersions": driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
@@ -414,6 +416,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 					Fields: map[string]driver.ArangoSearchElementProperties{
 						"guacKey": {},
 					},
+					InBackground: ptrfrom.Bool(true),
 				},
 				"PkgNames": driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
@@ -432,6 +435,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 					Fields: map[string]driver.ArangoSearchElementProperties{
 						"guacKey": {},
 					},
+					InBackground: ptrfrom.Bool(true),
 				},
 				"artifacts": driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity"},
@@ -441,6 +445,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 					Fields: map[string]driver.ArangoSearchElementProperties{
 						"digest": {},
 					},
+					InBackground: ptrfrom.Bool(true),
 				},
 			},
 		}); err != nil {
