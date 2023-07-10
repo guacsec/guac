@@ -19,7 +19,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -77,10 +76,6 @@ type osvToID struct {
 
 func (e *osvToID) Type() string {
 	return "OsvHasID"
-}
-
-func (e *osvToID) Nodes() (v, u assembler.GuacNode) {
-	return e.osv, e.id
 }
 
 func (e *osvToID) Properties() map[string]interface{} {

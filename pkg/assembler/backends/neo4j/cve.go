@@ -19,7 +19,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -102,10 +101,6 @@ func (e *cveToYear) Type() string {
 	return "CveIsYear"
 }
 
-func (e *cveToYear) Nodes() (v, u assembler.GuacNode) {
-	return e.cve, e.year
-}
-
 func (e *cveToYear) Properties() map[string]interface{} {
 	return map[string]interface{}{}
 }
@@ -125,10 +120,6 @@ type cveYearToCveID struct {
 
 func (e *cveYearToCveID) Type() string {
 	return "CveHasID"
-}
-
-func (e *cveYearToCveID) Nodes() (v, u assembler.GuacNode) {
-	return e.year, e.cveID
 }
 
 func (e *cveYearToCveID) Properties() map[string]interface{} {

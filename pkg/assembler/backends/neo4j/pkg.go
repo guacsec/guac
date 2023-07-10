@@ -20,7 +20,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -154,10 +153,6 @@ func (e *pkgToType) Type() string {
 	return "PkgHasType"
 }
 
-func (e *pkgToType) Nodes() (v, u assembler.GuacNode) {
-	return e.pkg, e.pkgType
-}
-
 func (e *pkgToType) Properties() map[string]interface{} {
 	return map[string]interface{}{}
 }
@@ -177,10 +172,6 @@ type typeToNamespace struct {
 
 func (e *typeToNamespace) Type() string {
 	return "PkgHasNamespace"
-}
-
-func (e *typeToNamespace) Nodes() (v, u assembler.GuacNode) {
-	return e.pkgType, e.namespace
 }
 
 func (e *typeToNamespace) Properties() map[string]interface{} {
@@ -204,10 +195,6 @@ func (e *namespaceToName) Type() string {
 	return "PkgHasName"
 }
 
-func (e *namespaceToName) Nodes() (v, u assembler.GuacNode) {
-	return e.namespace, e.name
-}
-
 func (e *namespaceToName) Properties() map[string]interface{} {
 	return map[string]interface{}{}
 }
@@ -227,10 +214,6 @@ type nameToVersion struct {
 
 func (e *nameToVersion) Type() string {
 	return "PkgHasVersion"
-}
-
-func (e *nameToVersion) Nodes() (v, u assembler.GuacNode) {
-	return e.name, e.version
 }
 
 func (e *nameToVersion) Properties() map[string]interface{} {

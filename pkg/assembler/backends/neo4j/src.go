@@ -19,7 +19,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -130,10 +129,6 @@ func (e *srcToType) Type() string {
 	return "SrcHasType"
 }
 
-func (e *srcToType) Nodes() (v, u assembler.GuacNode) {
-	return e.src, e.srcType
-}
-
 func (e *srcToType) Properties() map[string]interface{} {
 	return map[string]interface{}{}
 }
@@ -155,10 +150,6 @@ func (e *srcTypeToNamespace) Type() string {
 	return "SrcHasNamespace"
 }
 
-func (e *srcTypeToNamespace) Nodes() (v, u assembler.GuacNode) {
-	return e.srcType, e.namespace
-}
-
 func (e *srcTypeToNamespace) Properties() map[string]interface{} {
 	return map[string]interface{}{}
 }
@@ -178,10 +169,6 @@ type srcNamespaceToName struct {
 
 func (e *srcNamespaceToName) Type() string {
 	return "SrcHasName"
-}
-
-func (e *srcNamespaceToName) Nodes() (v, u assembler.GuacNode) {
-	return e.namespace, e.name
 }
 
 func (e *srcNamespaceToName) Properties() map[string]interface{} {

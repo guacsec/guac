@@ -19,7 +19,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -77,10 +76,6 @@ type ghsaToID struct {
 
 func (e *ghsaToID) Type() string {
 	return "GhsaHasID"
-}
-
-func (e *ghsaToID) Nodes() (v, u assembler.GuacNode) {
-	return e.ghsa, e.id
 }
 
 func (e *ghsaToID) Properties() map[string]interface{} {

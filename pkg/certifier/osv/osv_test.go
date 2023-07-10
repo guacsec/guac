@@ -22,8 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/guacsec/guac/pkg/assembler"
-
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -88,7 +86,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		wantErr: false,
 	}, {
 		name:          "bad type",
-		rootComponent: assembler.AttestationNode{},
+		rootComponent: map[string]string{},
 		wantErr:       true,
 		errMessage:    ErrOSVComponenetTypeMismatch,
 	}, {
