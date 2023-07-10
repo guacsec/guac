@@ -338,21 +338,44 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 fragment allHasMetadata on HasMetadata {
     id
     subject {
-    __typename
-    ... on Package {
-      ...AllPkgTree
+      __typename
+      ... on Package {
+        ...AllPkgTree
+      }
+      ... on Source {
+        ...AllSourceTree
+      }
+      ... on Artifact {
+        ...AllArtifactTree
+      }
     }
-    ... on Source {
-      ...AllSourceTree
-    }
-    ... on Artifact {
-      ...AllArtifactTree
-    }
-  }
 
     key
     value
     timestamp
+    justification
+    origin
+    collector
+}
+
+fragment allPointOfContact on PointOfContact {
+    id
+    subject {
+      __typename
+      ... on Package {
+        ...AllPkgTree
+      }
+      ... on Source {
+        ...AllSourceTree
+      }
+      ... on Artifact {
+        ...AllArtifactTree
+      }
+    }
+
+    email
+    info
+    since
     justification
     origin
     collector

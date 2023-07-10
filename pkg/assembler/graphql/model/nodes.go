@@ -1034,6 +1034,8 @@ type PointOfContact struct {
 	Collector     string                  `json:"collector"`
 }
 
+func (PointOfContact) IsNode() {}
+
 // PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
 type PointOfContactInputSpec struct {
 	Email         string    `json:"email"`
@@ -1436,6 +1438,7 @@ const (
 	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
 	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
 	EdgeArtifactHasMetadata         Edge = "ARTIFACT_HAS_METADATA"
+	EdgeArtifactPointOfContact      Edge = "ARTIFACT_POINT_OF_CONTACT"
 	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
 	EdgeCveCertifyVexStatement      Edge = "CVE_CERTIFY_VEX_STATEMENT"
 	EdgeCveCertifyVuln              Edge = "CVE_CERTIFY_VULN"
@@ -1457,12 +1460,14 @@ const (
 	EdgePackageIsOccurrence         Edge = "PACKAGE_IS_OCCURRENCE"
 	EdgePackagePkgEqual             Edge = "PACKAGE_PKG_EQUAL"
 	EdgePackageHasMetadata          Edge = "PACKAGE_HAS_METADATA"
+	EdgePackagePointOfContact       Edge = "PACKAGE_POINT_OF_CONTACT"
 	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
 	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
 	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
 	EdgeSourceHasMetadata           Edge = "SOURCE_HAS_METADATA"
+	EdgeSourcePointOfContact        Edge = "SOURCE_POINT_OF_CONTACT"
 	EdgeCertifyBadArtifact          Edge = "CERTIFY_BAD_ARTIFACT"
 	EdgeCertifyBadPackage           Edge = "CERTIFY_BAD_PACKAGE"
 	EdgeCertifyBadSource            Edge = "CERTIFY_BAD_SOURCE"
@@ -1499,6 +1504,9 @@ const (
 	EdgeHasMetadataPackage          Edge = "HAS_METADATA_PACKAGE"
 	EdgeHasMetadataArtifact         Edge = "HAS_METADATA_ARTIFACT"
 	EdgeHasMetadataSource           Edge = "HAS_METADATA_SOURCE"
+	EdgePointOfContactPackage       Edge = "POINT_OF_CONTACT_PACKAGE"
+	EdgePointOfContactArtifact      Edge = "POINT_OF_CONTACT_ARTIFACT"
+	EdgePointOfContactSource        Edge = "POINT_OF_CONTACT_SOURCE"
 )
 
 var AllEdge = []Edge{
@@ -1510,6 +1518,7 @@ var AllEdge = []Edge{
 	EdgeArtifactHasSlsa,
 	EdgeArtifactIsOccurrence,
 	EdgeArtifactHasMetadata,
+	EdgeArtifactPointOfContact,
 	EdgeBuilderHasSlsa,
 	EdgeCveCertifyVexStatement,
 	EdgeCveCertifyVuln,
@@ -1531,12 +1540,14 @@ var AllEdge = []Edge{
 	EdgePackageIsOccurrence,
 	EdgePackagePkgEqual,
 	EdgePackageHasMetadata,
+	EdgePackagePointOfContact,
 	EdgeSourceCertifyBad,
 	EdgeSourceCertifyGood,
 	EdgeSourceCertifyScorecard,
 	EdgeSourceHasSourceAt,
 	EdgeSourceIsOccurrence,
 	EdgeSourceHasMetadata,
+	EdgeSourcePointOfContact,
 	EdgeCertifyBadArtifact,
 	EdgeCertifyBadPackage,
 	EdgeCertifyBadSource,
@@ -1573,11 +1584,14 @@ var AllEdge = []Edge{
 	EdgeHasMetadataPackage,
 	EdgeHasMetadataArtifact,
 	EdgeHasMetadataSource,
+	EdgePointOfContactPackage,
+	EdgePointOfContactArtifact,
+	EdgePointOfContactSource,
 }
 
 func (e Edge) IsValid() bool {
 	switch e {
-	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeBuilderHasSlsa, EdgeCveCertifyVexStatement, EdgeCveCertifyVuln, EdgeCveIsVulnerability, EdgeGhsaCertifyVexStatement, EdgeGhsaCertifyVuln, EdgeGhsaIsVulnerability, EdgeNoVulnCertifyVuln, EdgeOsvCertifyVexStatement, EdgeOsvCertifyVuln, EdgeOsvIsVulnerability, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementCve, EdgeCertifyVexStatementGhsa, EdgeCertifyVexStatementOsv, EdgeCertifyVexStatementPackage, EdgeCertifyVulnCve, EdgeCertifyVulnGhsa, EdgeCertifyVulnNoVuln, EdgeCertifyVulnOsv, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeIsVulnerabilityCve, EdgeIsVulnerabilityGhsa, EdgeIsVulnerabilityOsv, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource:
+	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeCveCertifyVexStatement, EdgeCveCertifyVuln, EdgeCveIsVulnerability, EdgeGhsaCertifyVexStatement, EdgeGhsaCertifyVuln, EdgeGhsaIsVulnerability, EdgeNoVulnCertifyVuln, EdgeOsvCertifyVexStatement, EdgeOsvCertifyVuln, EdgeOsvIsVulnerability, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeSourcePointOfContact, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementCve, EdgeCertifyVexStatementGhsa, EdgeCertifyVexStatementOsv, EdgeCertifyVexStatementPackage, EdgeCertifyVulnCve, EdgeCertifyVulnGhsa, EdgeCertifyVulnNoVuln, EdgeCertifyVulnOsv, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeIsVulnerabilityCve, EdgeIsVulnerabilityGhsa, EdgeIsVulnerabilityOsv, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource, EdgePointOfContactPackage, EdgePointOfContactArtifact, EdgePointOfContactSource:
 		return true
 	}
 	return false

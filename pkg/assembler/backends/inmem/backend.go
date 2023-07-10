@@ -84,6 +84,7 @@ type demoClient struct {
 	equalVulnerabilities equalVulnerabilityList
 	ghsas                ghsaMap
 	hasMetadatas         hasMetadataList
+	pointOfContacts      pointOfContactList
 	hasSBOMs             hasSBOMList
 	hasSLSAs             hasSLSAList
 	hasSources           hasSrcList

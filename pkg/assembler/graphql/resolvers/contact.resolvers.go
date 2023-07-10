@@ -6,17 +6,16 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // IngestPointOfContact is the resolver for the ingestPointOfContact field.
 func (r *mutationResolver) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
-	panic(fmt.Errorf("not implemented: IngestPointOfContact - ingestPointOfContact"))
+	return r.Backend.IngestPointOfContact(ctx, subject, pkgMatchType, pointOfContact)
 }
 
 // PointOfContact is the resolver for the PointOfContact field.
 func (r *queryResolver) PointOfContact(ctx context.Context, pointOfContactSpec *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
-	panic(fmt.Errorf("not implemented: PointOfContact - PointOfContact"))
+	return r.Backend.PointOfContact(ctx, pointOfContactSpec)
 }

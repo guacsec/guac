@@ -95,33 +95,35 @@ type pkgNameStruct struct {
 }
 type pkgNameMap map[string]*pkgVersionStruct
 type pkgVersionStruct struct {
-	id                uint32
-	parent            uint32
-	name              string
-	versions          pkgVersionList
-	srcMapLinks       []uint32
-	isDependencyLinks []uint32
-	badLinks          []uint32
-	goodLinks         []uint32
-	hasMetadataLinks  []uint32
+	id                  uint32
+	parent              uint32
+	name                string
+	versions            pkgVersionList
+	srcMapLinks         []uint32
+	isDependencyLinks   []uint32
+	badLinks            []uint32
+	goodLinks           []uint32
+	hasMetadataLinks    []uint32
+	pointOfContactLinks []uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
-	id                uint32
-	parent            uint32
-	version           string
-	subpath           string
-	qualifiers        map[string]string
-	srcMapLinks       []uint32
-	isDependencyLinks []uint32
-	occurrences       []uint32
-	certifyVulnLinks  []uint32
-	hasSBOMs          []uint32
-	vexLinks          []uint32
-	badLinks          []uint32
-	goodLinks         []uint32
-	hasMetadataLinks  []uint32
-	pkgEquals         []uint32
+	id                  uint32
+	parent              uint32
+	version             string
+	subpath             string
+	qualifiers          map[string]string
+	srcMapLinks         []uint32
+	isDependencyLinks   []uint32
+	occurrences         []uint32
+	certifyVulnLinks    []uint32
+	hasSBOMs            []uint32
+	vexLinks            []uint32
+	badLinks            []uint32
+	goodLinks           []uint32
+	hasMetadataLinks    []uint32
+	pointOfContactLinks []uint32
+	pkgEquals           []uint32
 }
 
 // Be type safe, don't use any / interface{}
@@ -137,6 +139,9 @@ type pkgNameOrVersion interface {
 	getCertifyGoodLinks() []uint32
 	setHasMetadataLinks(id uint32)
 	getHasMetadataLinks() []uint32
+	setPointOfContactLinks(id uint32)
+	getPointOfContactLinks() []uint32
+
 	node
 }
 
@@ -181,6 +186,10 @@ func (n *pkgVersionStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	if allowedEdges[model.EdgePackageHasMetadata] {
 		out = append(out, n.hasMetadataLinks...)
 	}
+	if allowedEdges[model.EdgePackagePointOfContact] {
+		out = append(out, n.pointOfContactLinks...)
+	}
+
 	return out
 }
 func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []uint32 {
@@ -215,6 +224,9 @@ func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	}
 	if allowedEdges[model.EdgePackageHasMetadata] {
 		out = append(out, n.hasMetadataLinks...)
+	}
+	if allowedEdges[model.EdgePackagePointOfContact] {
+		out = append(out, n.pointOfContactLinks...)
 	}
 
 	return out
@@ -289,6 +301,16 @@ func (p *pkgVersionNode) setHasMetadataLinks(id uint32) {
 }
 func (p *pkgVersionStruct) getHasMetadataLinks() []uint32 { return p.hasMetadataLinks }
 func (p *pkgVersionNode) getHasMetadataLinks() []uint32   { return p.hasMetadataLinks }
+
+// pointOfContact back edges
+func (p *pkgVersionStruct) setPointOfContactLinks(id uint32) {
+	p.pointOfContactLinks = append(p.pointOfContactLinks, id)
+}
+func (p *pkgVersionNode) setPointOfContactLinks(id uint32) {
+	p.pointOfContactLinks = append(p.pointOfContactLinks, id)
+}
+func (p *pkgVersionStruct) getPointOfContactLinks() []uint32 { return p.pointOfContactLinks }
+func (p *pkgVersionNode) getPointOfContactLinks() []uint32   { return p.pointOfContactLinks }
 
 // pkgEqual back edges
 func (p *pkgVersionNode) setPkgEquals(id uint32) { p.pkgEquals = append(p.pkgEquals, id) }

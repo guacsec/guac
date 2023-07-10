@@ -30,17 +30,18 @@ import (
 // Internal data: Artifacts
 type artMap map[string]*artStruct
 type artStruct struct {
-	id               uint32
-	algorithm        string
-	digest           string
-	hashEquals       []uint32
-	occurrences      []uint32
-	hasSBOMs         []uint32
-	hasSLSAs         []uint32
-	vexLinks         []uint32
-	badLinks         []uint32
-	goodLinks        []uint32
-	hasMetadataLinks []uint32
+	id                  uint32
+	algorithm           string
+	digest              string
+	hashEquals          []uint32
+	occurrences         []uint32
+	hasSBOMs            []uint32
+	hasSLSAs            []uint32
+	vexLinks            []uint32
+	badLinks            []uint32
+	goodLinks           []uint32
+	hasMetadataLinks    []uint32
+	pointOfContactLinks []uint32
 }
 
 func (n *artStruct) ID() uint32 { return n.id }
@@ -71,6 +72,9 @@ func (n *artStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	if allowedEdges[model.EdgeArtifactHasMetadata] {
 		out = append(out, n.hasMetadataLinks...)
 	}
+	if allowedEdges[model.EdgeArtifactPointOfContact] {
+		out = append(out, n.pointOfContactLinks...)
+	}
 
 	return out
 }
@@ -88,6 +92,9 @@ func (n *artStruct) setCertifyBadLinks(id uint32)  { n.badLinks = append(n.badLi
 func (n *artStruct) setCertifyGoodLinks(id uint32) { n.goodLinks = append(n.goodLinks, id) }
 func (n *artStruct) setHasMetadataLinks(id uint32) {
 	n.hasMetadataLinks = append(n.hasMetadataLinks, id)
+}
+func (n *artStruct) setPointOfContactLinks(id uint32) {
+	n.pointOfContactLinks = append(n.pointOfContactLinks, id)
 }
 
 // Ingest Artifacts

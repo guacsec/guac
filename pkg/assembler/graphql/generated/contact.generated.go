@@ -559,7 +559,7 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 
 // region    **************************** object.gotpl ****************************
 
-var pointOfContactImplementors = []string{"PointOfContact"}
+var pointOfContactImplementors = []string{"PointOfContact", "Node"}
 
 func (ec *executionContext) _PointOfContact(ctx context.Context, sel ast.SelectionSet, obj *model.PointOfContact) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, pointOfContactImplementors)
