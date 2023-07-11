@@ -119,7 +119,7 @@ require (
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
-	github.com/prometheus/procfs v0.9.0 // indirect
+	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/rhysd/actionlint v1.6.24 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
@@ -182,7 +182,7 @@ require (
 	github.com/ossf/scorecard/v4 v4.11.0
 	github.com/package-url/packageurl-go v0.1.1
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.15.1
+	github.com/prometheus/client_golang v1.16.0
 	github.com/regclient/regclient v0.5.0
 	github.com/sigstore/sigstore v1.7.1
 	github.com/spdx/tools-golang v0.5.2
