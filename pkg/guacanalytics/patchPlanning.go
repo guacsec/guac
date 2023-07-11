@@ -30,6 +30,7 @@ type DfsNode struct {
 	Depth        int
 	NodeType     string   // packageName, packageVersion, sourceName, artifact
 	nodeVersions []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
+	slsaSubject  bool     // for an artifact, was it added from a SLSA subject
 }
 
 type queueValues struct {
@@ -78,7 +79,6 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 			nodeVersions: versionsList,
 		}
 	} else {
-		// Add packageName node to the frontier as well
 		q.queue = append(q.queue, nodePkg.AllPkgTree.Namespaces[0].Names[0].Id)
 
 		var versionsList []string
@@ -146,26 +146,14 @@ func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueVal
 	case "packageVersion", "sourceName":
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsIsOccurrence:
-			err := exploreIsOccurrenceFromSubject(ctx, gqlclient, q, *neighbor)
-
-			if err != nil {
-				return err
-			}
+			exploreIsOccurrenceFromSubject(ctx, gqlclient, q, *neighbor)
 		}
 	case "artifact":
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsHasSLSA:
-			err := exploreHasSLSAFromArtifact(ctx, gqlclient, q, *neighbor)
-
-			if err != nil {
-				return err
-			}
+			exploreHasSLSAFromArtifact(ctx, gqlclient, q, *neighbor)
 		case *model.NeighborsNeighborsIsOccurrence:
-			err := exploreIsOccurrenceFromArtifact(ctx, gqlclient, q, *neighbor)
-
-			if err != nil {
-				return err
-			}
+			exploreIsOccurrenceFromArtifact(ctx, gqlclient, q, *neighbor)
 		}
 
 	}
@@ -183,57 +171,49 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlclient graphql.Client
 		return nil
 	}
 
-	dfsNVersion, seenVersion := q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id]
-	dfsNName, seenName := q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Id]
-
-	if !seenVersion {
-		dfsNVersion = DfsNode{
-			Parent:       q.now,
-			Depth:        q.nowNode.Depth + 1,
-			NodeType:     "packageVersion",
-			nodeVersions: []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version},
-		}
-		q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id] = dfsNVersion
-	}
-
-	if !seenName {
-		dfsNName = DfsNode{
-			Parent:       q.now,
-			Depth:        q.nowNode.Depth + 1,
-			NodeType:     "packageName",
-			nodeVersions: []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version},
-		}
-		q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Id] = dfsNName
-	}
-
-	if !dfsNVersion.Expanded {
-		q.queue = append(q.queue, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
-	}
-
-	if !dfsNName.Expanded {
-		q.queue = append(q.queue, isDependency.Package.Namespaces[0].Names[0].Id)
-	}
+	addNodeToQueue(q, q.now, q.nowNode.Depth+1, "packageVersion", false, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
+	addNodeToQueue(q, q.now, q.nowNode.Depth+1, "packageName", false, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Id)
 
 	return nil
 }
 
-// TODO: impelement these functions
-func exploreIsOccurrenceFromSubject(ctx context.Context, gqlclient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) error {
-	// Step 1: Add Artifact to the queue attached to package through IsOccurence
-	// -> call .Artifact.Id on isOccurrence to find its ID
-	return fmt.Errorf("unimplemeted")
+func exploreIsOccurrenceFromSubject(ctx context.Context, gqlclient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {
+	addNodeToQueue(q, q.now, q.nowNode.Depth+1, "artifact", false, nil, isOccurrence.Artifact.Id)
 }
 
-func exploreHasSLSAFromArtifact(ctx context.Context, gqlclient graphql.Client, q *queueValues, hasSLSA model.NeighborsNeighborsHasSLSA) error {
-	// Step 1: Add Subject Artifact to the queue attached to package through the HasSLSA
-	// -> call .Subject.Id on isOccurrence to find its ID
-	return fmt.Errorf("unimplemeted")
+func exploreHasSLSAFromArtifact(ctx context.Context, gqlclient graphql.Client, q *queueValues, hasSLSA model.NeighborsNeighborsHasSLSA) {
+	addNodeToQueue(q, q.now, q.nowNode.Depth+1, "artifact", true, nil, hasSLSA.Subject.Id)
 }
 
-func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlclient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) error {
-	// Step 1: Case on .Subject of isOccurrence returned
-	//	Step 2a: (IF PACKAGE) Add packageVersion and packageName to the queue
-	//	-> done the same way as in exploreIsDependencyFromDepPkg (perhaps abstract out to a helper)
-	//	Step 2b: (IF SOURCE) Add sourceName to the queue
-	return fmt.Errorf("unimplemeted")
+func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlclient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {
+	// TODO: take into account PkgEqual case where there is another alias of the artifact package that we don't know about
+	// Right now we only explore isOccurrences if their artifact is from a HasSLSA
+	if q.nowNode.slsaSubject {
+		switch subject := isOccurrence.Subject.(type) {
+		case *model.AllIsOccurrencesTreeSubjectPackage:
+			addNodeToQueue(q, q.now, q.nowNode.Depth+1, "packageVersion", false, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Versions[0].Id)
+			addNodeToQueue(q, q.now, q.nowNode.Depth+1, "packageName", false, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Id)
+		case *model.AllIsOccurrencesTreeSubjectSource:
+			addNodeToQueue(q, q.now, q.nowNode.Depth+1, "sourceName", false, nil, subject.Namespaces[0].Names[0].Id)
+		}
+	}
+}
+
+func addNodeToQueue(q *queueValues, parent string, depth int, nodeType string, slsa bool, versions []string, id string) {
+	node, seen := q.nodeMap[id]
+
+	if !seen {
+		node = DfsNode{
+			Parent:       parent,
+			Depth:        depth,
+			NodeType:     nodeType,
+			nodeVersions: versions,
+			slsaSubject:  slsa,
+		}
+		q.nodeMap[id] = node
+	}
+
+	if !node.Expanded {
+		q.queue = append(q.queue, id)
+	}
 }

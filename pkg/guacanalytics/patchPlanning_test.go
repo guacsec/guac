@@ -36,7 +36,7 @@ import (
 )
 
 var (
-	isDependencySimpleGraph = assembler.IngestPredicates{
+	simpleGraph = assembler.IngestPredicates{
 
 		IsDependency: []assembler.IsDependencyIngest{
 
@@ -104,6 +104,151 @@ var (
 				},
 			},
 		},
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType1",
+					Namespace: ptrfrom.String("pkgNamespace1"),
+					Name:      "pkgName1",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg1 and artifact1",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType2",
+					Namespace: ptrfrom.String("pkgNamespace2"),
+					Name:      "pkgName2",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm2",
+					Digest:    "testArtifactDigest2",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg2 and artifact2",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType4",
+					Namespace: ptrfrom.String("pkgNamespace4"),
+					Name:      "pkgName4",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg4 and artifact1",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType4",
+					Namespace: ptrfrom.String("pkgNamespace4"),
+					Name:      "pkgName4",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm3",
+					Digest:    "testArtifactDigest3",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg4 and artifact3",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType5",
+					Namespace: ptrfrom.String("pkgNamespace5"),
+					Name:      "pkgName5",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm4",
+					Digest:    "testArtifactDigest4",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg5 and artifact3",
+				},
+			},
+		},
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm2",
+					Digest:    "testArtifactDigest2",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "testUri",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "testBuildType",
+					SlsaVersion: "testSlsaVersion",
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.testKey", Value: "testValue"},
+					},
+				},
+			},
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm3",
+					Digest:    "testArtifactDigest3",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "testUri",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "testArtifactAlgorithm4",
+					Digest:    "testArtifactDigest4",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "testBuildType",
+					SlsaVersion: "testSlsaVersion",
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.testKey", Value: "testValue"},
+					},
+				},
+			},
+		},
+	}
+
+	isDependencyAndHasSLSAGraph = assembler.IngestPredicates{
+		IsDependency: []assembler.IsDependencyIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType1",
+					Namespace: ptrfrom.String("pkgNamespace1"),
+					Name:      "pkgName1",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "pkgType3",
+					Namespace: ptrfrom.String("pkgNamespace3"),
+					Name:      "pkgName3",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				IsDependency: &model.IsDependencyInputSpec{
+					VersionRange:   ">=1.19.0",
+					DependencyType: model.DependencyTypeDirect,
+					Justification:  "test justification one",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+			},
+		},
 	}
 	isDependencyNotInRangeGraph = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
@@ -126,6 +271,61 @@ var (
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
 					Collector:      "Demo ingestion",
+				},
+			},
+		},
+	}
+	shouldNotBeExplored = assembler.IngestPredicates{
+		IsDependency: []assembler.IsDependencyIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgTypeA",
+					Namespace: ptrfrom.String("pkgNamespaceA"),
+					Name:      "pkgNameA",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "pkgTypeB",
+					Namespace: ptrfrom.String("pkgNamespaceB"),
+					Name:      "pkgNameB",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				IsDependency: &model.IsDependencyInputSpec{
+					VersionRange:   ">=1.19.0",
+					DependencyType: model.DependencyTypeDirect,
+					Justification:  "test justification one",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+			},
+		},
+		CertifyGood: []assembler.CertifyGoodIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgTypeB",
+					Namespace: ptrfrom.String("pkgNamespaceB"),
+					Name:      "pkgNameB",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				PkgMatchFlag: model.MatchFlags{
+					Pkg: model.PkgMatchTypeAllVersions,
+				},
+				CertifyGood: &model.CertifyGoodInputSpec{
+					Justification: "good package",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgTypeA",
+					Namespace: ptrfrom.String("pkgNamespaceA"),
+					Name:      "pkgNameA",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				PkgMatchFlag: model.MatchFlags{
+					Pkg: model.PkgMatchTypeAllVersions,
+				},
+				CertifyGood: &model.CertifyGoodInputSpec{
+					Justification: "good package",
 				},
 			},
 		},
@@ -155,10 +355,69 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, graph assemb
 	return nil
 }
 
+func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
+	for _, ingest := range graph.IsOccurrence {
+		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting package for IsOccurrence: %v\n", err)
+		}
+
+		_, err = model.IngestArtifact(context.Background(), client, *ingest.Artifact)
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting artifact for IsOccurrence: %v\n", err)
+		}
+
+		_, err = model.IsOccurrencePkg(context.Background(), client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting isOccurrence: %v\n", err)
+		}
+	}
+	for _, ingest := range graph.HasSlsa {
+		_, err := model.IngestBuilder(context.Background(), client, *ingest.Builder)
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting Builder for HasSlsa: %v\n", err)
+		}
+
+		_, err = model.IngestMaterials(context.Background(), client, ingest.Materials)
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting Material for HasSlsa: %v\n", err)
+		}
+
+		_, err = model.SLSAForArtifact(context.Background(), client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting HasSlsa: %v\n", err)
+		}
+	}
+	return nil
+}
+
+func ingestCertifyGood(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
+	for _, ingest := range graph.CertifyGood {
+		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting Package for CertifyGood: %v\n", err)
+		}
+
+		_, err = model.CertifyGoodPkg(context.Background(), client, *ingest.Pkg, &ingest.PkgMatchFlag, *ingest.CertifyGood)
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting CertifyGood: %v\n", err)
+		}
+	}
+	return nil
+}
+
 func ingestTestData(ctx context.Context, client graphql.Client, graphInput string) error {
 	switch graphInput {
 	case "isDependencySimpleGraph":
-		err := ingestIsDependency(ctx, client, isDependencySimpleGraph)
+		err := ingestIsDependency(ctx, client, simpleGraph)
 		if err != nil {
 			return err
 		}
@@ -168,6 +427,40 @@ func ingestTestData(ctx context.Context, client graphql.Client, graphInput strin
 		if err != nil {
 			return err
 		}
+		return nil
+	case "isDependencyAndHasSLSAGraph":
+		err := ingestIsDependency(ctx, client, simpleGraph)
+		if err != nil {
+			return err
+		}
+		err = ingestHasSLSA(ctx, client, simpleGraph)
+		if err != nil {
+			return err
+		}
+		err = ingestIsDependency(ctx, client, isDependencyAndHasSLSAGraph)
+		if err != nil {
+			return err
+		}
+		return nil
+	case "simpleHasSLSAGraph":
+		err := ingestHasSLSA(ctx, client, simpleGraph)
+		if err != nil {
+			return err
+		}
+		return nil
+	case "shouldNotBeExplored":
+		err := ingestIsDependency(ctx, client, shouldNotBeExplored)
+
+		if err != nil {
+			return err
+		}
+
+		err = ingestCertifyGood(ctx, client, shouldNotBeExplored)
+
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}
 	return fmt.Errorf("Graph input did not match any test graph")
@@ -187,19 +480,20 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 
 	testCases := []struct {
-		name           string
-		startType      string
-		startNamespace string
-		startName      string
-		startVersion   *string
-		stopType       *string
-		stopNamespace  string
-		stopName       string
-		stopVersion    *string
-		maxDepth       int
-		expectedLen    int
-		expectedPkgs   []string
-		graphInput     string
+		name              string
+		startType         string
+		startNamespace    string
+		startName         string
+		startVersion      *string
+		stopType          *string
+		stopNamespace     string
+		stopName          string
+		stopVersion       *string
+		maxDepth          int
+		expectedLen       int
+		expectedPkgs      []string
+		expectedArtifacts []string
+		graphInput        string
 	}{
 		{
 			name:           "1: two levels of dependencies, no stopID and no limiting maxDepth",
@@ -282,6 +576,66 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedPkgs:   []string{"extraType"},
 			graphInput:     "isDependencyNotInRangeGraph",
 		},
+		{
+			name:              "8: hasSLSA simpleton case",
+			startType:         "pkgType1",
+			startNamespace:    "pkgNamespace1",
+			startName:         "pkgName1",
+			startVersion:      ptrfrom.String("1.19.0"),
+			maxDepth:          10,
+			expectedLen:       6,
+			expectedPkgs:      []string{"pkgType1", "pkgType2"},
+			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2"},
+			graphInput:        "simpleHasSLSAGraph",
+		},
+		{
+			name:              "9: hasSLSA case with no dependent isOccurences",
+			startType:         "pkgType2",
+			startNamespace:    "pkgNamespace2",
+			startName:         "pkgName2",
+			startVersion:      ptrfrom.String("1.19.0"),
+			maxDepth:          10,
+			expectedLen:       3,
+			expectedPkgs:      []string{"pkgType2"},
+			expectedArtifacts: []string{"testArtifactAlgorithm2"},
+			graphInput:        "simpleHasSLSAGraph",
+		},
+		{
+			name:              "10: hasSLSA two levels",
+			startType:         "pkgType5",
+			startNamespace:    "pkgNamespace5",
+			startName:         "pkgName5",
+			startVersion:      ptrfrom.String("1.19.0"),
+			maxDepth:          10,
+			expectedLen:       10,
+			expectedPkgs:      []string{"pkgType5", "pkgType4", "pkgType2"},
+			expectedArtifacts: []string{"testArtifactAlgorithm4", "testArtifactAlgorithm3", "testArtifactAlgorithm1", "testArtifactAlgorithm2"},
+			graphInput:        "simpleHasSLSAGraph",
+		},
+		{
+			name:              "11: hasSLSA & isDependency combined case",
+			startType:         "pkgType3",
+			startNamespace:    "pkgNamespace3",
+			startName:         "pkgName3",
+			startVersion:      ptrfrom.String("1.19.0"),
+			maxDepth:          10,
+			expectedLen:       8,
+			expectedPkgs:      []string{"pkgType3", "pkgType2", "pkgType1"},
+			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2"},
+			graphInput:        "isDependencyAndHasSLSAGraph",
+		},
+		{
+			name:           "12: should not explore certifyGood case",
+			startType:      "pkgTypeB",
+			startNamespace: "pkgNamespaceB",
+			startName:      "pkgNameB",
+			startVersion:   ptrfrom.String("1.19.0"),
+			maxDepth:       10,
+			expectedLen:    4,
+			expectedPkgs:   []string{"pkgTypeB", "pkgTypeA"},
+			graphInput:     "shouldNotBeExplored",
+		},
+		// TODO: add testcases for sourceName nodes
 	}
 
 	for _, tt := range testCases {
@@ -344,7 +698,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				t.Errorf("Number of map entries (-want +got):\n%s", diff)
 			}
 
-			var expectedIDs []string
+			var expectedPkgIDs []string
 			for _, pkg := range tt.expectedPkgs {
 				pkgIDs, err := getPackageIDs(ctx, gqlclient, &pkg, "", "", nil, false, false)
 				if err != nil {
@@ -352,40 +706,48 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				for _, ID := range pkgIDs {
-					expectedIDs = append(expectedIDs, *ID)
-				}
-
-				// only applicable to cases with one version node
-				if len(pkgIDs) == 2 {
-					if gotMap[*pkgIDs[0]].NodeType == "" {
-						t.Errorf("First expected package %s is not in results\n", pkg)
-					}
-
-					if gotMap[*pkgIDs[1]].NodeType == "" {
-						t.Errorf("Second expected package %s is not in results\n", pkg)
-					}
+					expectedPkgIDs = append(expectedPkgIDs, *ID)
 				}
 			}
 
-			for gotID, node := range gotMap {
+			var expectedArtifactIDs []string
+			for _, artifact := range tt.expectedArtifacts {
+				artifactID, err := getArtifactID(ctx, gqlclient, artifact)
+				if err != nil {
+					t.Errorf("%s \n", err)
+				}
 
+				expectedArtifactIDs = append(expectedArtifactIDs, artifactID)
+			}
+
+			for gotID, node := range gotMap {
 				if stopID == nil && tt.maxDepth == 10 {
 					if !node.Expanded {
 						t.Errorf("All nodes should be expanded but this node was not: node %s \n", gotID)
 					}
 				}
+
 				//check that other pkgs are not present in return map
-				inExpected := false
-				for _, expectedID := range expectedIDs {
+				inExpectedPkgs := false
+				for _, expectedID := range expectedPkgIDs {
 					if expectedID == gotID {
-						inExpected = true
+						inExpectedPkgs = true
 						break
 					}
 				}
 
-				if !inExpected {
+				inExpectedArtifacts := false
+				for _, expectedID := range expectedArtifactIDs {
+					if expectedID == gotID {
+						inExpectedArtifacts = true
+						break
+					}
+				}
+
+				// if not present in expected packages or in expected artifacts
+				if !(inExpectedPkgs || inExpectedArtifacts) {
 					t.Errorf("This ID appears in the returned map but is not expected: %s \n", gotID)
-					return
+					// return
 				}
 			}
 
@@ -482,4 +844,22 @@ func getPackageIDs(ctx context.Context, gqlclient graphql.Client, nodeType *stri
 	}
 
 	return foundIDs, nil
+}
+
+func getArtifactID(ctx context.Context, gqlclient graphql.Client, algorithm string) (string, error) {
+	artifactFilter := model.ArtifactSpec{
+		Algorithm: &algorithm,
+	}
+
+	artifactResponse, err := model.Artifacts(ctx, gqlclient, &artifactFilter)
+
+	if err != nil {
+		return "", fmt.Errorf("Error filtering for expected artifact: %s\n", err)
+	}
+
+	if len(artifactResponse.Artifacts) != 1 {
+		return "", fmt.Errorf("Could not find the matching artifact\n")
+	}
+
+	return artifactResponse.Artifacts[0].Id, nil
 }
