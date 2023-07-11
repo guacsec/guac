@@ -132,13 +132,13 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 		query := `
 		LET firstPkg = FIRST(
-			FOR pVersion in PkgVersions
+			FOR pVersion in pkgVersions
 			  FILTER pVersion.guacKey == @pkgVersionGuacKey
-			FOR pName in PkgNames
+			FOR pName in pkgNames
 			  FILTER pName._id == pVersion._parent
-			FOR pNs in PkgNamespaces
+			FOR pNs in pkgNamespaces
 			  FILTER pNs._id == pName._parent
-			FOR pType in PkgTypes
+			FOR pType in pkgTypes
 			  FILTER pType._id == pNs._parent
 	
 			RETURN {

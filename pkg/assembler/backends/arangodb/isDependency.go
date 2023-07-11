@@ -85,13 +85,13 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgI
 	query := `
 
 	LET firstPkg = FIRST(
-		FOR pVersion in PkgVersions
+		FOR pVersion in pkgVersions
 		  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-		FOR pName in PkgNames
+		FOR pName in pkgNames
 		  FILTER pName._id == pVersion._parent
-		FOR pNs in PkgNamespaces
+		FOR pNs in pkgNamespaces
 		  FILTER pNs._id == pName._parent
-		FOR pType in PkgTypes
+		FOR pType in pkgTypes
 		  FILTER pType._id == pNs._parent
 
 		RETURN {
@@ -106,11 +106,11 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgI
 	)
 
     LET secondPkg = FIRST(
-        FOR pName in PkgNames
+        FOR pName in pkgNames
           FILTER pName.guacKey == doc.secondPkgNameGuacKey
-        FOR pNs in PkgNamespaces
+        FOR pNs in pkgNamespaces
           FILTER pNs._id == pName._parent
-        FOR pType in PkgTypes
+        FOR pType in pkgTypes
           FILTER pType._id == pNs._parent
 
         RETURN {
@@ -241,13 +241,13 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 
 	query := `
 	LET firstPkg = FIRST(
-		FOR pVersion in PkgVersions
+		FOR pVersion in pkgVersions
 		  FILTER pVersion.guacKey == @pkgVersionGuacKey
-		FOR pName in PkgNames
+		FOR pName in pkgNames
 		  FILTER pName._id == pVersion._parent
-		FOR pNs in PkgNamespaces
+		FOR pNs in pkgNamespaces
 		  FILTER pNs._id == pName._parent
-		FOR pType in PkgTypes
+		FOR pType in pkgTypes
 		  FILTER pType._id == pNs._parent
 
 		RETURN {
@@ -262,11 +262,11 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	)
 
     LET secondPkg = FIRST(
-        FOR pName in PkgNames
+        FOR pName in pkgNames
           FILTER pName.guacKey == @secondPkgNameGuacKey
-        FOR pNs in PkgNamespaces
+        FOR pNs in pkgNamespaces
           FILTER pNs._id == pName._parent
-        FOR pType in PkgTypes
+        FOR pType in pkgTypes
           FILTER pType._id == pNs._parent
 
         RETURN {

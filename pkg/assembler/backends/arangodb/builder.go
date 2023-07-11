@@ -27,56 +27,50 @@ import (
 
 func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	values := map[string]any{}
-	arangoQueryBuilder := newForQuery("artifacts", "art")
-	if builderSpec.Algorithm != nil {
-		arangoQueryBuilder.filter("algorithm", "art", "==", "@algorithm")
-		values["algorithm"] = strings.ToLower(*artifactSpec.Algorithm)
-	}
-	if artifactSpec.Digest != nil {
-		arangoQueryBuilder.filter("digest", "art", "==", "@digest")
-		values["digest"] = strings.ToLower(*artifactSpec.Digest)
+	arangoQueryBuilder := newForQuery("builders", "build")
+	if builderSpec.URI != nil {
+		arangoQueryBuilder.filter("build", "uri", "==", "@uri")
+		values["uri"] = builderSpec.URI
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
-		"id": art._id,
-		"algorithm": art.algorithm,
-		"digest": art.digest
+		"id": build._id,
+		"uri": build.uri,
 	  }`)
 
 	fmt.Println(arangoQueryBuilder.string())
-	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Artifacts")
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Builders")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
 	defer cursor.Close()
 
-	var collectedArtifacts []*model.Artifact
+	var collectedBuilders []*model.Builder
 	for {
-		var doc *model.Artifact
+		var doc *model.Builder
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to query artifact: %w", err)
+				return nil, fmt.Errorf("failed to query builder: %w", err)
 			}
 		} else {
-			collectedArtifacts = append(collectedArtifacts, doc)
+			collectedBuilders = append(collectedBuilders, doc)
 		}
 	}
 
-	return collectedArtifacts, nil
+	return collectedBuilders, nil
 }
 
 func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
 
 	listOfValues := []map[string]any{}
 
-	for i := range artifacts {
+	for i := range builders {
 		values := map[string]any{}
 
-		values["algorithm"] = strings.ToLower(artifacts[i].Algorithm)
-		values["digest"] = strings.ToLower(artifacts[i].Digest)
+		values["uri"] = strings.ToLower(builders[i].URI)
 
 		listOfValues = append(listOfValues, values)
 	}
@@ -104,71 +98,70 @@ func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.Bui
 	sb.WriteString("]")
 
 	query := `
-UPSERT { algorithm:doc.algorithm, digest:doc.digest } 
-INSERT { algorithm:doc.algorithm, digest:doc.digest } 
-UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
+UPSERT { uri:doc.uri } 
+INSERT { uri:doc.uri } 
+UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
 RETURN NEW`
 
 	sb.WriteString(query)
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestArtifacts")
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBuilders")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
 	defer cursor.Close()
 
-	var createdArtifacts []*model.Artifact
+	var createdBuilders []*model.Builder
 	for {
-		var doc *model.Artifact
+		var doc *model.Builder
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+				return nil, fmt.Errorf("failed to ingest builder: %w", err)
 			}
 		} else {
-			createdArtifacts = append(createdArtifacts, doc)
+			createdBuilders = append(createdBuilders, doc)
 		}
 	}
-	return createdArtifacts, nil
+	return createdBuilders, nil
 
 }
 
 func (c *arangoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
 	values := map[string]any{}
-	values["algorithm"] = strings.ToLower(artifact.Algorithm)
-	values["digest"] = strings.ToLower(artifact.Digest)
+	values["uri"] = strings.ToLower(builder.URI)
 
 	query := `
-UPSERT { algorithm:@algorithm, digest:@digest } 
-INSERT { algorithm:@algorithm, digest:@digest } 
-UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
+UPSERT { uri:@uri } 
+INSERT { uri:@uri } 
+UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
 RETURN NEW`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestArtifact")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestBuilder")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
 	defer cursor.Close()
 
-	var createdArtifacts []*model.Artifact
+	var createdBuilders []*model.Builder
 	for {
-		var doc *model.Artifact
+		var doc *model.Builder
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+				return nil, fmt.Errorf("failed to ingest builder: %w", err)
 			}
 		} else {
-			createdArtifacts = append(createdArtifacts, doc)
+			createdBuilders = append(createdBuilders, doc)
 		}
 	}
-	if len(createdArtifacts) == 1 {
-		return createdArtifacts[0], nil
+	if len(createdBuilders) == 1 {
+		return createdBuilders[0], nil
 	} else {
-		return nil, fmt.Errorf("number of artifacts ingested is greater than one")
+		return nil, fmt.Errorf("number of builders ingested is greater than one")
 	}
 }

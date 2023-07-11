@@ -34,13 +34,13 @@ FOR doc in GuacSearch
 SEARCH PHRASE(doc.guacKey, @searchText, "text_en") || PHRASE(doc.guacKey, @searchText, "customgram") || doc.digest == @searchText
 
 LET parsedDoc =
-    IS_SAME_COLLECTION(doc, "PkgNames") ?
-    // PkgNames case
+    IS_SAME_COLLECTION(doc, "pkgNames") ?
+    // pkgNames case
     (
-        FOR pNs in PkgNamespaces
+        FOR pNs in pkgNamespaces
           FILTER pNs._id == doc._parent
 
-        FOR pType in PkgTypes
+        FOR pType in pkgTypes
           FILTER pType._id == pNs._parent
 
         RETURN {
@@ -52,14 +52,14 @@ LET parsedDoc =
               'name': doc.name
           }
         }
-    ) : IS_SAME_COLLECTION(doc, "PkgVersions") ?
-    // PkgVersions case
+    ) : IS_SAME_COLLECTION(doc, "pkgVersions") ?
+    // pkgVersions case
     (
-        FOR pName in PkgNames
+        FOR pName in pkgNames
           FILTER pName._id == doc._parent
-        FOR pNs in PkgNamespaces
+        FOR pNs in pkgNamespaces
           FILTER pNs._id == pName._parent
-        FOR pType in PkgTypes
+        FOR pType in pkgTypes
           FILTER pType._id == pNs._parent
 
         RETURN {
@@ -74,12 +74,12 @@ LET parsedDoc =
               'qualifier_list': doc.qualifier_list
           }
         }
-    ) : IS_SAME_COLLECTION(doc, "SrcNames") ?
-    // SrcNames case
+    ) : IS_SAME_COLLECTION(doc, "srcNames") ?
+    // srcNames case
     (
-        FOR sNs in SrcNamespaces
+        FOR sNs in srcNamespaces
           FILTER sNs._id == doc._parent
-        FOR sType in SrcTypes
+        FOR sType in srcTypes
           FILTER sType._id == sNs._parent
 
         RETURN {

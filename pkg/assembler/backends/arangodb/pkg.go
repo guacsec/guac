@@ -160,7 +160,7 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 	  UPSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
 	  INSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
 	  UPDATE {}
-	  IN PkgNamespaces OPTIONS { indexHint: "byNsGuacKey" }
+	  IN pkgNamespaces OPTIONS { indexHint: "byNsGuacKey" }
 	  RETURN NEW
 	)
 	
@@ -168,7 +168,7 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 	  UPSERT { name: doc.name, _parent: ns._id, guacKey: doc.guacNameKey}
 	  INSERT { name: doc.name, _parent: ns._id, guacKey: doc.guacNameKey}
 	  UPDATE {}
-	  IN PkgNames OPTIONS { indexHint: "byNameGuacKey" }
+	  IN pkgNames OPTIONS { indexHint: "byNameGuacKey" }
 	  RETURN NEW
 	)
 	
@@ -176,20 +176,20 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 	  UPSERT { version: doc.version, subpath: doc.subpath, qualifier_list: doc.qualifier, _parent: name._id, guacKey: doc.guacVersionKey}
 	  INSERT { version: doc.version, subpath: doc.subpath, qualifier_list: doc.qualifier, _parent: name._id, guacKey: doc.guacVersionKey}
 	  UPDATE {}
-	  IN PkgVersions OPTIONS { indexHint: "byVersionGuacKey" }
+	  IN pkgVersions OPTIONS { indexHint: "byVersionGuacKey" }
 	  RETURN NEW
 	)
   
 	LET pkgHasNamespaceCollection = (
-	  INSERT { _key: CONCAT("pkgHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "PkgHasNamespace"} INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("pkgHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "pkgHasNamespace"} INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET pkgHasNameCollection = (
-	  INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "PkgHasName"} INTO PkgHasName OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "pkgHasName"} INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET pkgHasVersionCollection = (
-	  INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion"} INTO PkgHasVersion OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "pkgHasVersion"} INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
 	)
 	  
   RETURN {
@@ -293,7 +293,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
 		INSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
 		UPDATE {}
-		IN PkgNamespaces OPTIONS { indexHint: "byNsGuacKey" }
+		IN pkgNamespaces OPTIONS { indexHint: "byNsGuacKey" }
 		RETURN NEW
 	  )
 	  
@@ -301,7 +301,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { name: @name, _parent: ns._id, guacKey: @guacNameKey}
 		INSERT { name: @name, _parent: ns._id, guacKey: @guacNameKey}
 		UPDATE {}
-		IN PkgNames OPTIONS { indexHint: "byNameGuacKey" }
+		IN pkgNames OPTIONS { indexHint: "byNameGuacKey" }
 		RETURN NEW
 	  )
 	  
@@ -309,20 +309,20 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id, guacKey: @guacVersionKey}
 		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id, guacKey: @guacVersionKey}
 		UPDATE {}
-		IN PkgVersions OPTIONS { indexHint: "byVersionGuacKey" }
+		IN pkgVersions OPTIONS { indexHint: "byVersionGuacKey" }
 		RETURN NEW
 	  )
 	
 	  LET pkgHasNamespaceCollection = (
-		INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "PkgHasNamespace"} INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "pkgHasNamespace"} INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  LET pkgHasNameCollection = (
-		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "PkgHasName"} INTO PkgHasName OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "pkgHasName"} INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  LET pkgHasVersionCollection = (
-		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion"} INTO PkgHasVersion OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "pkgHasVersion"} INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
 	  )
 		
 	RETURN {
@@ -491,25 +491,25 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery("PkgRoots", "pRoot")
+	arangoQueryBuilder := newForQuery("pkgRoots", "pRoot")
 	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
 	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound("PkgHasType", "pType", "pRoot")
+	arangoQueryBuilder.ForOutBound("pkgHasType", "pType", "pRoot")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
 	}
-	arangoQueryBuilder.ForOutBound("PkgHasNamespace", "pNs", "pType")
+	arangoQueryBuilder.ForOutBound("pkgHasNamespace", "pNs", "pType")
 	if pkgSpec.Namespace != nil {
 		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
 	}
-	arangoQueryBuilder.ForOutBound("PkgHasName", "pName", "pNs")
+	arangoQueryBuilder.ForOutBound("pkgHasName", "pName", "pNs")
 	if pkgSpec.Name != nil {
 		arangoQueryBuilder.filter("pName", "name", "==", "@name")
 		values["name"] = *pkgSpec.Name
 	}
-	arangoQueryBuilder.ForOutBound("PkgHasVersion", "pVersion", "pName")
+	arangoQueryBuilder.ForOutBound("pkgHasVersion", "pVersion", "pName")
 	if pkgSpec.Version != nil {
 		arangoQueryBuilder.filter("pVersion", "version", "==", "@version")
 		values["version"] = *pkgSpec.Version
@@ -644,10 +644,10 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery("PkgRoots", "pRoot")
+	arangoQueryBuilder := newForQuery("pkgRoots", "pRoot")
 	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
 	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound("PkgHasType", "pType", "pRoot")
+	arangoQueryBuilder.ForOutBound("pkgHasType", "pType", "pRoot")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
@@ -697,15 +697,15 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery("PkgRoots", "pRoot")
+	arangoQueryBuilder := newForQuery("pkgRoots", "pRoot")
 	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
 	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound("PkgHasType", "pType", "pRoot")
+	arangoQueryBuilder.ForOutBound("pkgHasType", "pType", "pRoot")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
 	}
-	arangoQueryBuilder.ForOutBound("PkgHasNamespace", "pNs", "pType")
+	arangoQueryBuilder.ForOutBound("pkgHasNamespace", "pNs", "pType")
 	if pkgSpec.Namespace != nil {
 		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
@@ -772,20 +772,20 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery("PkgRoots", "pRoot")
+	arangoQueryBuilder := newForQuery("pkgRoots", "pRoot")
 	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
 	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound("PkgHasType", "pType", "pRoot")
+	arangoQueryBuilder.ForOutBound("pkgHasType", "pType", "pRoot")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
 	}
-	arangoQueryBuilder.ForOutBound("PkgHasNamespace", "pNs", "pType")
+	arangoQueryBuilder.ForOutBound("pkgHasNamespace", "pNs", "pType")
 	if pkgSpec.Namespace != nil {
 		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
 	}
-	arangoQueryBuilder.ForOutBound("PkgHasName", "pName", "pNs")
+	arangoQueryBuilder.ForOutBound("pkgHasName", "pName", "pNs")
 	if pkgSpec.Name != nil {
 		arangoQueryBuilder.filter("pName", "name", "==", "@name")
 		values["name"] = *pkgSpec.Name

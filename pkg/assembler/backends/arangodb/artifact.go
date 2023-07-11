@@ -29,11 +29,11 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 	values := map[string]any{}
 	arangoQueryBuilder := newForQuery("artifacts", "art")
 	if artifactSpec.Algorithm != nil {
-		arangoQueryBuilder.filter("algorithm", "art", "==", "@algorithm")
+		arangoQueryBuilder.filter("art", "algorithm", "==", "@algorithm")
 		values["algorithm"] = strings.ToLower(*artifactSpec.Algorithm)
 	}
 	if artifactSpec.Digest != nil {
-		arangoQueryBuilder.filter("digest", "art", "==", "@digest")
+		arangoQueryBuilder.filter("art", "digest", "==", "@digest")
 		values["digest"] = strings.ToLower(*artifactSpec.Digest)
 	}
 	arangoQueryBuilder.query.WriteString("\n")
