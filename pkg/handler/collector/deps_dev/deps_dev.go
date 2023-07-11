@@ -202,7 +202,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		depPurl := "pkg:" + pkgtype + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
 		depPackageInput, err := helpers.PurlToPkg(depPurl)
 		if err != nil {
-			logger.Infof("unable to parse purl: %v", depPurl)
+			logger.Infof("unable to parse purl: %v, error: %v", depPurl, err)
 			continue
 		}
 		// check if dependent package purl has already been queried. If found, append to the list of dependent packages for top level package
@@ -282,7 +282,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 		if link.Label == sourceRepo {
 			src, err := helpers.VcsToSrc(link.Url)
 			if err != nil {
-				logger.Infof("unable to parse source url: %v", link.Url)
+				logger.Infof("unable to parse source url: %v, error: %v", link.Url, err)
 				continue
 			}
 
@@ -303,7 +303,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 
 			project, err := d.client.GetProject(ctx, projectReq)
 			if err != nil {
-				logger.Debugf("unable to get project for: %v", projectReq.ProjectKey.Id)
+				logger.Debugf("unable to get project for: %v, error: %v", projectReq.ProjectKey.Id, err)
 				continue
 			}
 			if project.Scorecard != nil {

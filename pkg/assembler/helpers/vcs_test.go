@@ -55,6 +55,16 @@ func TestVcsUriToSrc(t *testing.T) {
 			expected: src("git", "github.com/sfackler", "rust-openssl", nil, nil),
 		},
 		{
+			uri:      "https://go.googlesource.com/net",
+			wantErr:  false,
+			expected: src("git", "go.googlesource.com", "net", nil, nil),
+		},
+		{
+			uri:      "https://go.googlesource.com/lint",
+			wantErr:  false,
+			expected: src("git", "go.googlesource.com", "lint", nil, nil),
+		},
+		{
 			uri:     "github.com/sfackler/rust-openssl",
 			wantErr: true,
 		},
