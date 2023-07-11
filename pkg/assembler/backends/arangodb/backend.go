@@ -18,6 +18,7 @@ package arangodb
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -36,8 +37,8 @@ const (
 	origin        string        = "origin"
 	collector     string        = "collector"
 	justification string        = "justification"
-	maxRetires    int           = 20
-	retryTImer    time.Duration = time.Microsecond
+	maxRetires    int           = 100
+	retryTimer    time.Duration = time.Microsecond
 	guacEmpty     string        = "guac-empty-@@"
 )
 
@@ -405,6 +406,8 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		}
 
 		if err := createView(ctx, db, "GuacSearch", &driver.ArangoSearchViewProperties{
+			CommitInterval:        ptrfrom.Int64(10 * 60 * 1000),
+			ConsolidationInterval: ptrfrom.Int64(10 * 60 * 1000),
 			Links: driver.ArangoSearchLinks{
 				"PkgVersions": driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
@@ -414,6 +417,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 					Fields: map[string]driver.ArangoSearchElementProperties{
 						"guacKey": {},
 					},
+					InBackground: ptrfrom.Bool(true),
 				},
 				"PkgNames": driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
@@ -432,6 +436,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 					Fields: map[string]driver.ArangoSearchElementProperties{
 						"guacKey": {},
 					},
+					InBackground: ptrfrom.Bool(true),
 				},
 				"artifacts": driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity"},
@@ -441,6 +446,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 					Fields: map[string]driver.ArangoSearchElementProperties{
 						"digest": {},
 					},
+					InBackground: ptrfrom.Bool(true),
 				},
 			},
 		}); err != nil {
@@ -479,7 +485,7 @@ func createIndexPerCollection(ctx context.Context, db driver.Database, collectio
 		return err
 	}
 
-	_, _, err = databaseCollection.EnsurePersistentIndex(ctx, fields, &driver.EnsurePersistentIndexOptions{Unique: unique, CacheEnabled: true, Name: indexName})
+	_, _, err = databaseCollection.EnsurePersistentIndex(ctx, fields, &driver.EnsurePersistentIndexOptions{InBackground: true, Unique: unique, CacheEnabled: true, Name: indexName})
 	if err != nil {
 		return err
 	}
@@ -507,6 +513,7 @@ func createAnalyzer(ctx context.Context, db driver.Database, analyzer driver.Ara
 func executeQueryWithRetry(ctx context.Context, db driver.Database, query string, values map[string]any, executedFrom string) (driver.Cursor, error) {
 	var cursor driver.Cursor
 	var err error
+	var retryTime = retryTimer
 
 	for retry := 0; retry < maxRetires; retry++ {
 		cursor, err = db.Query(ctx, query, values)
@@ -515,7 +522,8 @@ func executeQueryWithRetry(ctx context.Context, db driver.Database, query string
 		}
 
 		fmt.Printf("Retrying query (attempt %d), executed from: %s, %v, ...\n", retry+1, executedFrom, err)
-		time.Sleep(retryTImer)
+		time.Sleep(retryTime + (time.Microsecond * time.Duration(rand.Intn(10))))
+		retryTime *= 2
 	}
 
 	return nil, fmt.Errorf("query execution failed after %d retries", maxRetires)
