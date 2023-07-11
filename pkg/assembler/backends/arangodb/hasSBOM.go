@@ -25,23 +25,32 @@ import (
 )
 
 func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
-	panic(fmt.Errorf("not implemented: HasSBOM - HasSBOM"))
+	return []*model.HasSbom{}, fmt.Errorf("not implemented: HasSBOM")
+}
+
+func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInputSpec, hasSbom *model.HasSBOMInputSpec) map[string]any {
+	values := map[string]any{}
+	// add guac keys
+	if pkg != nil {
+		pkgId := guacPkgId(*pkg)
+		values["pkgVersionGuacKey"] = pkgId.VersionId
+	} else {
+		values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
+		values["art_digest"] = strings.ToLower(artifact.Digest)
+	}
+
+	values["uri"] = hasSbom.URI
+	values["algorithm"] = hasSbom.Algorithm
+	values["digest"] = hasSbom.Digest
+	values["downloadLocation"] = hasSbom.DownloadLocation
+	values["origin"] = hasSbom.Origin
+	values["collector"] = hasSbom.Collector
+
+	return values
 }
 
 func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
-	values := map[string]any{}
-
-	// TODO(pxp928): currently only supporting package for testing. Will add in source once testing is completed
 	if subject.Artifact != nil {
-		values["art_algorithm"] = strings.ToLower(subject.Artifact.Algorithm)
-		values["art_digest"] = strings.ToLower(subject.Artifact.Digest)
-		values["uri"] = hasSbom.URI
-		values["algorithm"] = hasSbom.Algorithm
-		values["digest"] = hasSbom.Digest
-		values["downloadLocation"] = hasSbom.DownloadLocation
-		values["origin"] = hasSbom.Origin
-		values["collector"] = hasSbom.Collector
-
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		  LET hasSBOM = FIRST(
@@ -56,80 +65,36 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		  )
 		  
 		  RETURN {
-			  "artAlgo": artifact.algorithm,
-			  "artDigest": artifact.digest,
-			  "uri": hasSBOM.uri,
-			  "algorithm": hasSBOM.algorithm,
-			  "digest": hasSBOM.digest,
-			  "downloadLocation": hasSBOM.downloadLocation,
-			  "collector": hasSBOM.collector,
-			  "origin": hasSBOM.origin
-			  
+			'artifact': {
+				'id': artifact._id,
+				'algorithm': artifact.algorithm,
+				'digest': artifact.digest
+			},
+			'hasSBOM_id': hasSBOM._id,
+			'uri': hasSBOM.uri,
+			'algorithm': hasSBOM.algorithm,
+			'digest': hasSBOM.digest,
+			'downloadLocation': hasSBOM.downloadLocation,
+			'collector': hasSBOM.collector,
+			'origin': hasSBOM.origin  
 		  }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestHasSbom - Artifact")
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(nil, subject.Artifact, &hasSbom), "IngestHasSbom - Artifact")
 		if err != nil {
-			return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+			return nil, fmt.Errorf("failed to ingest hasSBOM: %w", err)
 		}
 		defer cursor.Close()
-
-		type collectedData struct {
-			ArtAlgo          string `json:"artAlgo"`
-			ArtDigest        string `json:"artDigest"`
-			Uri              string `json:"uri"`
-			Algorithm        string `json:"algorithm"`
-			Digest           string `json:"digest"`
-			DownloadLocation string `json:"downloadLocation"`
-			Collector        string `json:"collector"`
-			Origin           string `json:"origin"`
+		hasSBOMList, err := getPkgHasSBOM(ctx, cursor)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
 		}
 
-		var createdValues []collectedData
-		for {
-			var doc collectedData
-			_, err := cursor.ReadDocument(ctx, &doc)
-			if err != nil {
-				if driver.IsNoMoreDocuments(err) {
-					break
-				} else {
-					return nil, fmt.Errorf("failed to ingest hasSBOM: %w", err)
-				}
-			} else {
-				createdValues = append(createdValues, doc)
-			}
-		}
-		if len(createdValues) == 1 {
-
-			algorithm := createdValues[0].ArtAlgo
-			digest := createdValues[0].ArtDigest
-			artifact := generateModelArtifact(algorithm, digest)
-
-			isOccurrence := &model.HasSbom{
-				Subject:          artifact,
-				URI:              createdValues[0].Uri,
-				Algorithm:        createdValues[0].Algorithm,
-				Digest:           createdValues[0].Digest,
-				DownloadLocation: createdValues[0].DownloadLocation,
-				Origin:           createdValues[0].Collector,
-				Collector:        createdValues[0].Origin,
-			}
-
-			return isOccurrence, nil
+		if len(hasSBOMList) == 1 {
+			return hasSBOMList[0], nil
 		} else {
-			return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
+			return nil, fmt.Errorf("number of hasSBOM ingested is greater than one")
 		}
 	} else {
-		// add guac keys
-		pkgId := guacPkgId(*subject.Package)
-		values["pkgVersionGuacKey"] = pkgId.VersionId
-
-		values["uri"] = hasSbom.URI
-		values["algorithm"] = hasSbom.Algorithm
-		values["digest"] = hasSbom.Digest
-		values["downloadLocation"] = hasSbom.DownloadLocation
-		values["origin"] = hasSbom.Origin
-		values["collector"] = hasSbom.Collector
-
 		query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
@@ -142,9 +107,13 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			  FILTER pType._id == pNs._parent
 	
 			RETURN {
+			  'typeID': pType._id,
 			  'type': pType.type,
+			  'namespace_id': pNs._id,
 			  'namespace': pNs.namespace,
+			  'name_id': pName._id,
 			  'name': pName.name,
+			  'version_id': pVersion._id,
 			  'version': pVersion.version,
 			  'subpath': pVersion.subpath,
 			  'qualifier_list': pVersion.qualifier_list,
@@ -164,76 +133,147 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		  )
 		  
 		  RETURN {
-			  "firstPkgType": firstPkg.type,
-			  "firstPkgNamespace": firstPkg.namespace,
-			  "firstPkgName": firstPkg.name,
-			  "firstPkgVersion": firstPkg.version,
-			  "firstPkgSubpath": firstPkg.subpath,
-			  "firstPkgQualifier_list": firstPkg.qualifier_list,
-			  "uri": hasSBOM.uri,
-			  "algorithm": hasSBOM.algorithm,
-			  "digest": hasSBOM.digest,
-			  "downloadLocation": hasSBOM.downloadLocation,
-			  "collector": hasSBOM.collector,
-			  "origin": hasSBOM.origin  
+			'pkgVersion': {
+				'type_id': firstPkg.typeID,
+				'type': firstPkg.type,
+				'namespace_id': firstPkg.namespace_id,
+				'namespace': firstPkg.namespace,
+				'name_id': firstPkg.name_id,
+				'name': firstPkg.name,
+				'version_id': firstPkg.version_id,
+				'version': firstPkg.version,
+				'subpath': firstPkg.subpath,
+				'qualifier_list': firstPkg.qualifier_list
+			},
+			'hasSBOM_id': hasSBOM._id,
+			'uri': hasSBOM.uri,
+			'algorithm': hasSBOM.algorithm,
+			'digest': hasSBOM.digest,
+			'downloadLocation': hasSBOM.downloadLocation,
+			'collector': hasSBOM.collector,
+			'origin': hasSBOM.origin  
 		  }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestHasSbom - Package")
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(subject.Package, nil, &hasSbom), "IngestHasSbom - Package")
 		if err != nil {
-			return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+			return nil, fmt.Errorf("failed to create ingest hasSBOM: %w", err)
 		}
 		defer cursor.Close()
 
-		type collectedData struct {
-			FirstPkgType          string      `json:"firstPkgType"`
-			FirstPkgNamespace     string      `json:"firstPkgNamespace"`
-			FirstPkgName          string      `json:"firstPkgName"`
-			FirstPkgVersion       string      `json:"firstPkgVersion"`
-			FirstPkgSubpath       string      `json:"firstPkgSubpath"`
-			FirstPkgQualifierList interface{} `json:"firstPkgQualifier_list"`
-			Uri                   string      `json:"uri"`
-			Algorithm             string      `json:"algorithm"`
-			Digest                string      `json:"digest"`
-			DownloadLocation      string      `json:"downloadLocation"`
-			Collector             string      `json:"collector"`
-			Origin                string      `json:"origin"`
+		hasSBOMList, err := getArtifactHasSBOM(ctx, cursor)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
 		}
 
-		var createdValues []collectedData
-		for {
-			var doc collectedData
-			_, err := cursor.ReadDocument(ctx, &doc)
-			if err != nil {
-				if driver.IsNoMoreDocuments(err) {
-					break
-				} else {
-					return nil, fmt.Errorf("failed to ingest hasSBOM: %w", err)
-				}
-			} else {
-				createdValues = append(createdValues, doc)
-			}
-		}
-		if len(createdValues) == 1 {
-
-			pkg, err := generateModelPackage(createdValues[0].FirstPkgType, createdValues[0].FirstPkgNamespace,
-				createdValues[0].FirstPkgName, createdValues[0].FirstPkgVersion, createdValues[0].FirstPkgSubpath, createdValues[0].FirstPkgQualifierList)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-			}
-
-			isOccurrence := &model.HasSbom{
-				Subject:          pkg,
-				URI:              createdValues[0].Uri,
-				Algorithm:        createdValues[0].Algorithm,
-				Digest:           createdValues[0].Digest,
-				DownloadLocation: createdValues[0].DownloadLocation,
-				Origin:           createdValues[0].Collector,
-				Collector:        createdValues[0].Origin,
-			}
-
-			return isOccurrence, nil
+		if len(hasSBOMList) == 1 {
+			return hasSBOMList[0], nil
 		} else {
-			return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
+			return nil, fmt.Errorf("number of hasSBOM ingested is greater than one")
 		}
 	}
+}
+
+func getPkgHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom, error) {
+	type collectedData struct {
+		PkgVersion struct {
+			TypeID        string        `json:"type_id"`
+			PkgType       string        `json:"type"`
+			NamespaceID   string        `json:"namespace_id"`
+			Namespace     string        `json:"namespace"`
+			NameID        string        `json:"name_id"`
+			Name          string        `json:"name"`
+			VersionID     string        `json:"version_id"`
+			Version       string        `json:"version"`
+			Subpath       string        `json:"subpath"`
+			QualifierList []interface{} `json:"qualifier_list"`
+		} `json:"pkgVersion"`
+		HasSBOMId        string `json:"hasSBOM_id"`
+		Uri              string `json:"uri"`
+		Algorithm        string `json:"algorithm"`
+		Digest           string `json:"digest"`
+		DownloadLocation string `json:"downloadLocation"`
+		Collector        string `json:"collector"`
+		Origin           string `json:"origin"`
+	}
+
+	var createdValues []collectedData
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to package hasSBOM from cursor: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	var hasSBOMList []*model.HasSbom
+	for _, createdValue := range createdValues {
+		pkg, err := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
+		}
+
+		hasSBOM := &model.HasSbom{
+			ID:               createdValue.HasSBOMId,
+			Subject:          pkg,
+			URI:              createdValue.Uri,
+			Algorithm:        createdValue.Algorithm,
+			Digest:           createdValue.Digest,
+			DownloadLocation: createdValue.DownloadLocation,
+			Origin:           createdValue.Collector,
+			Collector:        createdValue.Origin,
+		}
+		hasSBOMList = append(hasSBOMList, hasSBOM)
+	}
+	return hasSBOMList, nil
+}
+
+func getArtifactHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom, error) {
+	type collectedData struct {
+		Artifact         model.Artifact `json:"artifact"`
+		HasSBOMId        string         `json:"hasSBOM_id"`
+		Uri              string         `json:"uri"`
+		Algorithm        string         `json:"algorithm"`
+		Digest           string         `json:"digest"`
+		DownloadLocation string         `json:"downloadLocation"`
+		Collector        string         `json:"collector"`
+		Origin           string         `json:"origin"`
+	}
+
+	var createdValues []collectedData
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to artifact hasSBOM from cursor: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	var hasSBOMList []*model.HasSbom
+	for _, createdValue := range createdValues {
+		hasSBOM := &model.HasSbom{
+			ID:               createdValue.HasSBOMId,
+			Subject:          &createdValue.Artifact,
+			URI:              createdValue.Uri,
+			Algorithm:        createdValue.Algorithm,
+			Digest:           createdValue.Digest,
+			DownloadLocation: createdValue.DownloadLocation,
+			Origin:           createdValue.Collector,
+			Collector:        createdValue.Origin,
+		}
+		hasSBOMList = append(hasSBOMList, hasSBOM)
+	}
+	return hasSBOMList, nil
 }

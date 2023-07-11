@@ -45,11 +45,13 @@ LET parsedDoc =
 
         RETURN {
           'nodeType': 'pkgName',
-          'id': doc._id,
           'pkgName': {
-              'type': pType.type,
-              'namespace': pNs.namespace,
-              'name': doc.name
+		    'type_id': pType._id,
+			'type': pType.type,
+			'namespace_id': pNs._id,
+			'namespace': pNs.namespace,
+			'name_id': doc._id,
+			'name': doc.name
           }
         }
     ) : IS_SAME_COLLECTION(doc, "pkgVersions") ?
@@ -64,14 +66,17 @@ LET parsedDoc =
 
         RETURN {
           'nodeType': 'pkgVersion',
-          'id': doc._id,
           'pkgVersion': {
-              'type': pType.type,
-              'namespace': pNs.namespace,
-              'name': pName.name,
-              'version': doc.version,
-              'subpath': doc.subpath,
-              'qualifier_list': doc.qualifier_list
+			'type_id': pType._id,
+			'type': pType.type,
+			'namespace_id': pNs._id,
+			'namespace': pNs.namespace,
+			'name_id': pName._id,
+			'name': pName.name,
+			'version_id': doc._id,
+			'version': doc.version,
+			'subpath': doc.subpath,
+			'qualifier_list': doc.qualifier_list
           }
         }
     ) : IS_SAME_COLLECTION(doc, "srcNames") ?
@@ -84,13 +89,15 @@ LET parsedDoc =
 
         RETURN {
           'nodeType': 'SrcName',
-          'id': doc._id,
           'srcName': {
-              'type': sType.type,
-              'namespace': sNs.namespace,
-              'name': doc.name,
-              'commit': doc.commit,
-              'tag': doc.tag
+			"type_id": sType._id,
+			"type": sType.type,
+			"namespace_id": sNs._id,
+			"namespace": sNs.namespace,
+			"name_id": doc._id,
+			"name": doc.name,
+			"commit": doc.commit,
+			"tag": doc.tag
           }
         }
     )
@@ -98,13 +105,12 @@ LET parsedDoc =
     // Artifact case
     (RETURN {
         'nodeType': 'artifact',
-         'id': doc._id,
          'artifact': {
+			'id': doc._id,
             'algorithm': doc.algorithm,
             'digest': doc.digest
          }
     })
-
 
 RETURN {
 "parsedDoc": parsedDoc
@@ -114,32 +120,42 @@ RETURN {
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, queryValues, "FindSoftware")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+		return nil, fmt.Errorf("failed to query FindSoftware: %w", err)
 	}
 	defer cursor.Close()
 
 	type parsedDoc struct {
 		NodeType string `json:"nodeType"`
-		Id       string `json:"id"`
-		PkgName  *struct {
-			PkgType   string `json:"type"`
-			Namespace string `json:"namespace"`
-			Name      string `json:"name"`
+
+		PkgName *struct {
+			TypeID      string `json:"type_id"`
+			PkgType     string `json:"type"`
+			NamespaceID string `json:"namespace_id"`
+			Namespace   string `json:"namespace"`
+			NameID      string `json:"name_id"`
+			Name        string `json:"name"`
 		} `json:"pkgName,omitempty"`
 		PkgVersion *struct {
-			PkgType       string      `json:"type"`
-			Namespace     string      `json:"namespace"`
-			Name          string      `json:"name"`
-			Version       string      `json:"version"`
-			Subpath       string      `json:"subpath"`
-			QualifierList interface{} `json:"qualifier_list"`
+			TypeID        string        `json:"type_id"`
+			PkgType       string        `json:"type"`
+			NamespaceID   string        `json:"namespace_id"`
+			Namespace     string        `json:"namespace"`
+			NameID        string        `json:"name_id"`
+			Name          string        `json:"name"`
+			VersionID     string        `json:"version_id"`
+			Version       string        `json:"version"`
+			Subpath       string        `json:"subpath"`
+			QualifierList []interface{} `json:"qualifier_list"`
 		} `json:"pkgVersion,omitempty"`
 		SrcName *struct {
-			SrcType   string `json:"type"`
-			Namespace string `json:"namespace"`
-			Name      string `json:"name"`
-			Commit    string `json:"commit"`
-			Tag       string `json:"tag"`
+			TypeID      string `json:"type_id"`
+			SrcType     string `json:"type"`
+			NamespaceID string `json:"namespace_id"`
+			Namespace   string `json:"namespace"`
+			NameID      string `json:"name_id"`
+			Name        string `json:"name"`
+			Commit      string `json:"commit"`
+			Tag         string `json:"tag"`
 		} `json:"srcName,omitempty"`
 		Artifact *model.Artifact `json:"artifact,omitempty"`
 	}
@@ -178,7 +194,7 @@ RETURN {
 				if p == nil {
 					return nil, fmt.Errorf("failed to parse result of pkgVersion, got nil when expected non-nil")
 				}
-				pkg, err := generateModelPackage(p.PkgType, p.Namespace, p.Name, p.Version, p.Subpath, p.QualifierList)
+				pkg, err := generateModelPackage(p.TypeID, p.PkgType, p.NamespaceID, p.Namespace, p.NameID, p.Name, &p.VersionID, &p.Version, &p.Subpath, p.QualifierList)
 				if err != nil {
 					return nil, fmt.Errorf("failed to get model.package with err: %w", err)
 				}
@@ -188,12 +204,21 @@ RETURN {
 				if p == nil {
 					return nil, fmt.Errorf("failed to parse result of pkgName, got nil when expected non-nil")
 				}
-				pkg, err := generateModelPackage(p.PkgType, p.Namespace, p.Name, nil, nil, nil)
+				pkg, err := generateModelPackage(p.TypeID, p.PkgType, p.NamespaceID, p.Namespace, p.NameID, p.Name, nil, nil, nil, nil)
 				if err != nil {
 					return nil, fmt.Errorf("failed to get model.package with err: %w", err)
 				}
 				results = append(results, pkg)
+			case "SrcName":
+				s := d.SrcName
+				if s == nil {
+					return nil, fmt.Errorf("failed to parse result of SrcName, got nil when expected non-nil")
+				}
+				src := generateModelSource(s.TypeID, s.SrcType, s.NamespaceID, s.Namespace, s.NameID, s.Name, &s.Commit, &s.Tag)
+
+				results = append(results, src)
 			}
+
 		}
 	}
 	return results, nil

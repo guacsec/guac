@@ -41,26 +41,17 @@ func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderS
 	fmt.Println(arangoQueryBuilder.string())
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Builders")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+		return nil, fmt.Errorf("failed to query for builder: %w", err)
 	}
 	defer cursor.Close()
 
-	var collectedBuilders []*model.Builder
-	for {
-		var doc *model.Builder
-		_, err := cursor.ReadDocument(ctx, &doc)
-		if err != nil {
-			if driver.IsNoMoreDocuments(err) {
-				break
-			} else {
-				return nil, fmt.Errorf("failed to query builder: %w", err)
-			}
-		} else {
-			collectedBuilders = append(collectedBuilders, doc)
-		}
-	}
+	return getBuilders(ctx, cursor)
+}
 
-	return collectedBuilders, nil
+func getBuilderQueryValues(builder *model.BuilderInputSpec) map[string]any {
+	values := map[string]any{}
+	values["uri"] = strings.ToLower(builder.URI)
+	return values
 }
 
 func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
@@ -68,11 +59,7 @@ func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.Bui
 	listOfValues := []map[string]any{}
 
 	for i := range builders {
-		values := map[string]any{}
-
-		values["uri"] = strings.ToLower(builders[i].URI)
-
-		listOfValues = append(listOfValues, values)
+		listOfValues = append(listOfValues, getBuilderQueryValues(builders[i]))
 	}
 
 	var documents []string
@@ -107,44 +94,39 @@ RETURN NEW`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBuilders")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+		return nil, fmt.Errorf("failed to ingest builder: %w", err)
 	}
 	defer cursor.Close()
 
-	var createdBuilders []*model.Builder
-	for {
-		var doc *model.Builder
-		_, err := cursor.ReadDocument(ctx, &doc)
-		if err != nil {
-			if driver.IsNoMoreDocuments(err) {
-				break
-			} else {
-				return nil, fmt.Errorf("failed to ingest builder: %w", err)
-			}
-		} else {
-			createdBuilders = append(createdBuilders, doc)
-		}
-	}
-	return createdBuilders, nil
+	return getBuilders(ctx, cursor)
 
 }
 
 func (c *arangoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
-	values := map[string]any{}
-	values["uri"] = strings.ToLower(builder.URI)
-
 	query := `
 UPSERT { uri:@uri } 
 INSERT { uri:@uri } 
 UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
 RETURN NEW`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestBuilder")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getBuilderQueryValues(builder), "IngestBuilder")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+		return nil, fmt.Errorf("failed to ingest builder: %w", err)
 	}
 	defer cursor.Close()
 
+	createdBuilders, err := getBuilders(ctx, cursor)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get builders from arango cursor: %w", err)
+	}
+	if len(createdBuilders) == 1 {
+		return createdBuilders[0], nil
+	} else {
+		return nil, fmt.Errorf("number of builders ingested is greater than one")
+	}
+}
+
+func getBuilders(ctx context.Context, cursor driver.Cursor) ([]*model.Builder, error) {
 	var createdBuilders []*model.Builder
 	for {
 		var doc *model.Builder
@@ -153,15 +135,11 @@ RETURN NEW`
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest builder: %w", err)
+				return nil, fmt.Errorf("failed to get builder from cursor: %w", err)
 			}
 		} else {
 			createdBuilders = append(createdBuilders, doc)
 		}
 	}
-	if len(createdBuilders) == 1 {
-		return createdBuilders[0], nil
-	} else {
-		return nil, fmt.Errorf("number of builders ingested is greater than one")
-	}
+	return createdBuilders, nil
 }

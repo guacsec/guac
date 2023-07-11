@@ -218,7 +218,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var isOccurrencesEdges driver.EdgeDefinition
 		isOccurrencesEdges.Collection = "isOccurrencesEdges"
 		// define a set of collections where an edge is going out...
-		isOccurrencesEdges.From = []string{"isOccurrences", "pkgVersions"}
+		isOccurrencesEdges.From = []string{"isOccurrences", "pkgVersions", "srcNames"}
 
 		// repeat this for the collections where an edge is going into
 		isOccurrencesEdges.To = []string{"isOccurrences", "artifacts"}
@@ -351,7 +351,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for srcHasName: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID", "origin"}, true, "byPkgIDDepPkgIDOrigin"); err != nil {
+		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID", "versionRange", "origin"}, false, "byPkgIDDepPkgIDversionRangeOrigin"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
@@ -669,9 +669,7 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
-func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	panic(fmt.Errorf("not implemented: IsDependency - IsDependency"))
-}
+
 func (c *arangoClient) IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error) {
 	panic(fmt.Errorf("not implemented: IsVulnerability - IsVulnerability"))
 }
@@ -751,7 +749,7 @@ func preIngestPkgRoot(ctx context.Context, db driver.Database) (*pkgRootData, er
 
 	cursor, err := executeQueryWithRetry(ctx, db, query, nil, "preIngestPkgRoot")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+		return nil, fmt.Errorf("failed to ingest package root node: %w", err)
 	}
 
 	var createdValues []pkgRootData
@@ -805,7 +803,7 @@ func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRoot
 
 		cursor, err := executeQueryWithRetry(ctx, db, query, values, "preIngestPkgTypes")
 		if err != nil {
-			return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+			return nil, fmt.Errorf("failed to ingest package type: %w", err)
 		}
 
 		var createdValues []pkgTypeData
@@ -842,7 +840,7 @@ func preIngestSrcRoot(ctx context.Context, db driver.Database) (*srcRootData, er
 
 	cursor, err := executeQueryWithRetry(ctx, db, query, nil, "preIngestSrcRoot")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+		return nil, fmt.Errorf("failed to ingest source root node: %w", err)
 	}
 
 	var createdValues []srcRootData
@@ -896,7 +894,7 @@ func preIngestSrcTypes(ctx context.Context, db driver.Database, srcRoot *srcRoot
 
 		cursor, err := executeQueryWithRetry(ctx, db, query, values, "preIngestPkgTypes")
 		if err != nil {
-			return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+			return nil, fmt.Errorf("failed to ingest source type: %w", err)
 		}
 
 		var createdValues []srcTypeData
