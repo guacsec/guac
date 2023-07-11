@@ -28,8 +28,8 @@ type DfsNode struct {
 	Expanded     bool // true once all node neighbors are added to queue
 	Parent       string
 	Depth        int
-	NodeType     string   // packageName, packageVersion
-	nodeVersions []string // for a packageName, what was the packageVersion associated with this version
+	NodeType     string   // packageName, packageVersion, sourceName, artifact
+	nodeVersions []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
 }
 
 type queueValues struct {
@@ -78,15 +78,16 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 			nodeVersions: versionsList,
 		}
 	} else {
-		q.nodeMap[startID] = DfsNode{
-			NodeType: "packageVersion",
-		}
-
 		// Add packageName node to the frontier as well
 		q.queue = append(q.queue, nodePkg.AllPkgTree.Namespaces[0].Names[0].Id)
 
 		var versionsList []string
 		versionsList = append(versionsList, nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
+		q.nodeMap[startID] = DfsNode{
+			NodeType:     "packageVersion",
+			nodeVersions: versionsList,
+		}
+
 		q.nodeMap[nodePkg.AllPkgTree.Namespaces[0].Names[0].Id] = DfsNode{
 			NodeType:     "packageName",
 			nodeVersions: versionsList,
@@ -142,16 +143,31 @@ func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueVal
 				return err
 			}
 		}
-	// two cases one after the other work like an OR statement
 	case "packageVersion", "sourceName":
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsIsOccurrence:
-			err := exploreIsOccurrence(ctx, gqlclient, q, *neighbor)
+			err := exploreIsOccurrenceFromSubject(ctx, gqlclient, q, *neighbor)
 
 			if err != nil {
 				return err
 			}
 		}
+	case "artifact":
+		switch neighbor := neighbor.(type) {
+		case *model.NeighborsNeighborsHasSLSA:
+			err := exploreHasSLSAFromArtifact(ctx, gqlclient, q, *neighbor)
+
+			if err != nil {
+				return err
+			}
+		case *model.NeighborsNeighborsIsOccurrence:
+			err := exploreIsOccurrenceFromArtifact(ctx, gqlclient, q, *neighbor)
+
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 	return nil
 }
@@ -172,9 +188,10 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlclient graphql.Client
 
 	if !seenVersion {
 		dfsNVersion = DfsNode{
-			Parent:   q.now,
-			Depth:    q.nowNode.Depth + 1,
-			NodeType: "packageVersion",
+			Parent:       q.now,
+			Depth:        q.nowNode.Depth + 1,
+			NodeType:     "packageVersion",
+			nodeVersions: []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version},
 		}
 		q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id] = dfsNVersion
 	}
@@ -200,25 +217,23 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlclient graphql.Client
 	return nil
 }
 
-// TODO: impelement this functions
-func exploreIsOccurrence(ctx context.Context, gqlclient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) error {
-	// Step 1: Find Artifact attached to package through IsOccurence
-	// -> call .Artifact on isOccurrence
-	// Step 2: Find HasSLSA where Artifact is the builtFrom
-	// -> call .Neighbors on the artifact id with the edge type specified as HasSLSAArtifact and loop through results
+// TODO: impelement these functions
+func exploreIsOccurrenceFromSubject(ctx context.Context, gqlclient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) error {
+	// Step 1: Add Artifact to the queue attached to package through IsOccurence
+	// -> call .Artifact.Id on isOccurrence to find its ID
+	return fmt.Errorf("unimplemeted")
+}
 
-	// LOOP OVER SLSA NEIGHBORS RETURN
-	//		Step 3: Find Artifact that is the subject of the HasSLSA
-	//		-> call .Subject on HasSLSA result of .Neighbors call
+func exploreHasSLSAFromArtifact(ctx context.Context, gqlclient graphql.Client, q *queueValues, hasSLSA model.NeighborsNeighborsHasSLSA) error {
+	// Step 1: Add Subject Artifact to the queue attached to package through the HasSLSA
+	// -> call .Subject.Id on isOccurrence to find its ID
+	return fmt.Errorf("unimplemeted")
+}
 
-	//		Step 4: Find isOccurrence attached to that Artifact
-	//		-> call .Neighbors with edge type specified as IsOccurrence
-
-	// 		LOOP OVER ISOCCURRENCES
-	//			Step 6: Case on .Subject of is occurrences returned
-	//					Step 6a: (IF PACKAGE) Add packageVersion and packageName to the queue
-	//					-> done the same way as in exploreIsDependencyFromDepPkg (perhaps abstract out to a helper)
-
-	//					Step 6b: (IF SOURCE) Add sourceName to the queue
+func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlclient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) error {
+	// Step 1: Case on .Subject of isOccurrence returned
+	//	Step 2a: (IF PACKAGE) Add packageVersion and packageName to the queue
+	//	-> done the same way as in exploreIsDependencyFromDepPkg (perhaps abstract out to a helper)
+	//	Step 2b: (IF SOURCE) Add sourceName to the queue
 	return fmt.Errorf("unimplemeted")
 }
