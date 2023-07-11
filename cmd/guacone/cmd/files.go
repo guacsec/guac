@@ -63,7 +63,7 @@ type fileOptions struct {
 }
 
 var filesCmd = &cobra.Command{
-	Use:   "files [flags] file_path",
+	Use:   "files [flags] file_path (set environment variable MAX_CONCURRENT_JOBS to increase the number of documents to ingest in parallel. Default: 1)",
 	Short: "take a folder of files and create a GUAC graph, this command talks directly to the graphQL endpoint",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
