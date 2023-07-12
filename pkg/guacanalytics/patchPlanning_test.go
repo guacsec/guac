@@ -477,7 +477,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
 	httpClient := http.Client{}
-	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
+	gqlClient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 
 	testCases := []struct {
 		name              string
@@ -640,7 +640,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("Test case %s\n", tt.name), func(t *testing.T) {
-			err = ingestTestData(ctx, gqlclient, tt.graphInput)
+			err = ingestTestData(ctx, gqlClient, tt.graphInput)
 
 			if err != nil {
 				t.Errorf("Error ingesting test data: %s", err)
@@ -650,9 +650,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			var getPackageIDsValues []*string
 			var startID string
 			if tt.startVersion != nil {
-				getPackageIDsValues, err = getPackageIDs(ctx, gqlclient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, tt.startVersion, true, false)
+				getPackageIDsValues, err = getPackageIDs(ctx, gqlClient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, tt.startVersion, true, false)
 			} else {
-				getPackageIDsValues, err = getPackageIDs(ctx, gqlclient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, nil, false, true)
+				getPackageIDsValues, err = getPackageIDs(ctx, gqlClient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, nil, false, true)
 			}
 
 			if err != nil {
@@ -670,9 +670,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			var stopID *string
 			if tt.stopType != nil {
 				if tt.stopVersion != nil {
-					getPackageIDsValues, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, tt.stopVersion, true, false)
+					getPackageIDsValues, err = getPackageIDs(ctx, gqlClient, tt.stopType, tt.stopNamespace, tt.stopName, tt.stopVersion, true, false)
 				} else {
-					getPackageIDsValues, err = getPackageIDs(ctx, gqlclient, tt.stopType, tt.stopNamespace, tt.stopName, nil, false, true)
+					getPackageIDsValues, err = getPackageIDs(ctx, gqlClient, tt.stopType, tt.stopNamespace, tt.stopName, nil, false, true)
 				}
 
 				if err != nil {
@@ -688,7 +688,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				stopID = getPackageIDsValues[0]
 			}
 
-			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, startID, stopID, tt.maxDepth)
+			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlClient, startID, stopID, tt.maxDepth)
 
 			if err != nil {
 				t.Errorf("got err from SearchDependenciesFromStartNode: %s", err)
@@ -700,7 +700,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 			var expectedPkgIDs []string
 			for _, pkg := range tt.expectedPkgs {
-				pkgIDs, err := getPackageIDs(ctx, gqlclient, &pkg, "", "", nil, false, false)
+				pkgIDs, err := getPackageIDs(ctx, gqlClient, &pkg, "", "", nil, false, false)
 				if err != nil {
 					t.Errorf("Expected package %s not found: %s\n", pkg, err)
 				}
@@ -712,7 +712,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 			var expectedArtifactIDs []string
 			for _, artifact := range tt.expectedArtifacts {
-				artifactID, err := getArtifactID(ctx, gqlclient, artifact)
+				artifactID, err := getArtifactID(ctx, gqlClient, artifact)
 				if err != nil {
 					t.Errorf("%s \n", err)
 				}
@@ -806,7 +806,7 @@ func getGraphqlTestServer() (*handler.Server, error) {
 }
 
 // This function return matching packageName and/or packageVersion node IDs depending on if you specified to only find name nodes or version nodes
-func getPackageIDs(ctx context.Context, gqlclient graphql.Client, nodeType *string, nodeNamespace string, nodeName string, nodeVersion *string, justFindVersion bool, justFindName bool) ([]*string, error) {
+func getPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *string, nodeNamespace string, nodeName string, nodeVersion *string, justFindVersion bool, justFindName bool) ([]*string, error) {
 	var pkgFilter model.PkgSpec
 	if nodeVersion != nil {
 		pkgFilter = model.PkgSpec{
@@ -820,7 +820,7 @@ func getPackageIDs(ctx context.Context, gqlclient graphql.Client, nodeType *stri
 			Type: nodeType,
 		}
 	}
-	pkgResponse, err := model.Packages(ctx, gqlclient, &pkgFilter)
+	pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error getting id for test case: %s\n", err)
@@ -846,12 +846,12 @@ func getPackageIDs(ctx context.Context, gqlclient graphql.Client, nodeType *stri
 	return foundIDs, nil
 }
 
-func getArtifactID(ctx context.Context, gqlclient graphql.Client, algorithm string) (string, error) {
+func getArtifactID(ctx context.Context, gqlClient graphql.Client, algorithm string) (string, error) {
 	artifactFilter := model.ArtifactSpec{
 		Algorithm: &algorithm,
 	}
 
-	artifactResponse, err := model.Artifacts(ctx, gqlclient, &artifactFilter)
+	artifactResponse, err := model.Artifacts(ctx, gqlClient, &artifactFilter)
 
 	if err != nil {
 		return "", fmt.Errorf("Error filtering for expected artifact: %s\n", err)
