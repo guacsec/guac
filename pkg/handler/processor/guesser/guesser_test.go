@@ -202,12 +202,22 @@ func Test_GuessDocument(t *testing.T) {
 	}, {
 		name: "valid CSAF Document",
 		document: &processor.Document{
-			Blob:              []byte(testdata.CsafExampleRedHat),
+			Blob:              testdata.CsafExampleRedHat,
 			Type:              processor.DocumentUnknown,
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
 		expectedType:   processor.DocumentCsaf,
+		expectedFormat: processor.FormatJSON,
+	}, {
+		name: "valid IngestPredicates Document",
+		document: &processor.Document{
+			Blob:              testdata.IngestPredicatesExample,
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectedType:   processor.DocumentIngestPredicates,
 		expectedFormat: processor.FormatJSON,
 	}}
 	for _, tt := range testCases {
