@@ -96,6 +96,11 @@ func (n *osvNode) setVexLinks(id uint32) {
 }
 
 // Ingest OSV
+
+func (c *demoClient) IngestOSVs(ctx context.Context, osvs []*model.OSVInputSpec) ([]*model.Osv, error) {
+	return []*model.Osv{}, fmt.Errorf("not implemented: IngestOSVs")
+}
+
 func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (*model.Osv, error) {
 	return c.ingestOsv(ctx, input, true)
 }

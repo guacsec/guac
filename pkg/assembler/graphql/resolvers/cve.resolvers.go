@@ -15,6 +15,11 @@ func (r *mutationResolver) IngestCve(ctx context.Context, cve *model.CVEInputSpe
 	return r.Backend.IngestCve(ctx, cve)
 }
 
+// IngestCVEs is the resolver for the ingestCVEs field.
+func (r *mutationResolver) IngestCVEs(ctx context.Context, cves []*model.CVEInputSpec) ([]*model.Cve, error) {
+	return r.Backend.IngestCVEs(ctx, cves)
+}
+
 // Cve is the resolver for the cve field.
 func (r *queryResolver) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
 	return r.Backend.Cve(ctx, cveSpec)

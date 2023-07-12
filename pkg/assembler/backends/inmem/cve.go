@@ -101,6 +101,11 @@ func (n *cveNode) setVexLinks(id uint32) {
 }
 
 // Ingest CVE
+
+func (c *demoClient) IngestCVEs(ctx context.Context, cves []*model.CVEInputSpec) ([]*model.Cve, error) {
+	return []*model.Cve{}, fmt.Errorf("not implemented: IngestCVEs")
+}
+
 func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (*model.Cve, error) {
 	return c.ingestCve(ctx, input, true)
 }

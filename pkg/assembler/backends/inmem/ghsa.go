@@ -92,6 +92,11 @@ func (n *ghsaNode) setVexLinks(id uint32) {
 }
 
 // Ingest GHSA
+
+func (c *demoClient) IngestGHSAs(ctx context.Context, ghsas []*model.GHSAInputSpec) ([]*model.Ghsa, error) {
+	return []*model.Ghsa{}, fmt.Errorf("not implemented: IngestGHSAs")
+}
+
 func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec) (*model.Ghsa, error) {
 	return c.ingestGhsa(ctx, input, true)
 }

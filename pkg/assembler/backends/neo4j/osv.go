@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -77,6 +78,10 @@ func setOSVMatchValues(sb *strings.Builder, osv *model.OSVSpec, firstMatch *bool
 			*firstMatch = false
 		}
 	}
+}
+
+func (c *neo4jClient) IngestOSVs(ctx context.Context, osvs []*model.OSVInputSpec) ([]*model.Osv, error) {
+	return []*model.Osv{}, fmt.Errorf("not implemented: IngestOSVs")
 }
 
 func (c *neo4jClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
