@@ -54,7 +54,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 	startNode, err := model.Node(ctx, gqlclient, startID)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed getting intial node with given ID:%w", err)
+		return nil, fmt.Errorf("failed getting initial node with given ID:%w", err)
 	}
 
 	nodePkg, ok := startNode.Node.(*model.NodeNodePackage)
@@ -70,15 +70,15 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 
 	// TODO: add functionality to start with other nodes?
 	if len(nodePkg.AllPkgTree.Namespaces) < 1 {
-		return nil, fmt.Errorf("Start by inputting a packageName or packageVerion node")
+		return nil, fmt.Errorf("Start by inputting a packageName or packageVersion node")
 	}
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names) < 1 {
-		return nil, fmt.Errorf("Start by inputting a packageName or packageVerion node")
+		return nil, fmt.Errorf("Start by inputting a packageName or packageVersion node")
 	}
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) < 1 {
-		// TODO: handle case where there are circular depedencies that introduce more versions to the version list on a node that requires revisiting
+		// TODO: handle case where there are circular dependencies that introduce more versions to the version list on a node that requires revisiting
 		var versionsList []string
 		for _, versionEntry := range nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions {
 			versionsList = append(versionsList, versionEntry.Version)
@@ -191,7 +191,10 @@ func exploreIsOccurrenceFromSubject(ctx context.Context, gqlclient graphql.Clien
 }
 
 func exploreHasSLSAFromArtifact(ctx context.Context, gqlclient graphql.Client, q *queueValues, hasSLSA model.NeighborsNeighborsHasSLSA) {
-	addNodeToQueue(q, q.now, q.nowNode.Depth, Artifact, true, nil, hasSLSA.Subject.Id)
+	// Check that the subject is not the node inputted itself and being re-added to the queue unnecessarily
+	if q.now != hasSLSA.Subject.Id {
+		addNodeToQueue(q, q.now, q.nowNode.Depth, Artifact, true, nil, hasSLSA.Subject.Id)
+	}
 }
 
 func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlclient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {

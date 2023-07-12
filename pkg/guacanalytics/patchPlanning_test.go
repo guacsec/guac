@@ -589,7 +589,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInput:        "simpleHasSLSAGraph",
 		},
 		{
-			name:              "9: hasSLSA case with no dependent isOccurences",
+			name:              "9: hasSLSA case with no dependent isOccurrences",
 			startType:         "pkgType2",
 			startNamespace:    "pkgNamespace2",
 			startName:         "pkgName2",
@@ -635,7 +635,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedPkgs:   []string{"pkgTypeB", "pkgTypeA"},
 			graphInput:     "shouldNotBeExplored",
 		},
-		// TODO: add testcases for sourceName nodes
+		// TODO: add test cases for sourceName nodes
 	}
 
 	for _, tt := range testCases {
@@ -727,7 +727,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 					}
 				}
 
-				//check that other pkgs are not present in return map
+				//check that other packages are not present in return map
 				inExpectedPkgs := false
 				for _, expectedID := range expectedPkgIDs {
 					if expectedID == gotID {
