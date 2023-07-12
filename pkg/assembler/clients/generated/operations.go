@@ -5346,6 +5346,30 @@ type IngestBuilderResponse struct {
 // GetIngestBuilder returns IngestBuilderResponse.IngestBuilder, and is useful for accessing the field via an interface.
 func (v *IngestBuilderResponse) GetIngestBuilder() IngestBuilderIngestBuilder { return v.IngestBuilder }
 
+// IngestBuildersIngestBuildersBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
+//
+// Currently builders are identified by the uri field.
+type IngestBuildersIngestBuildersBuilder struct {
+	Uri string `json:"uri"`
+}
+
+// GetUri returns IngestBuildersIngestBuildersBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *IngestBuildersIngestBuildersBuilder) GetUri() string { return v.Uri }
+
+// IngestBuildersResponse is returned by IngestBuilders on success.
+type IngestBuildersResponse struct {
+	// Bulk ingests new builders and returns a list of them.
+	IngestBuilders []IngestBuildersIngestBuildersBuilder `json:"ingestBuilders"`
+}
+
+// GetIngestBuilders returns IngestBuildersResponse.IngestBuilders, and is useful for accessing the field via an interface.
+func (v *IngestBuildersResponse) GetIngestBuilders() []IngestBuildersIngestBuildersBuilder {
+	return v.IngestBuilders
+}
+
 // IngestCVEIngestCVE includes the requested fields of the GraphQL type CVE.
 // The GraphQL type's documentation follows.
 //
@@ -19868,6 +19892,14 @@ type __IngestBuilderInput struct {
 // GetBuilder returns __IngestBuilderInput.Builder, and is useful for accessing the field via an interface.
 func (v *__IngestBuilderInput) GetBuilder() BuilderInputSpec { return v.Builder }
 
+// __IngestBuildersInput is used internally by genqlient
+type __IngestBuildersInput struct {
+	Builders []BuilderInputSpec `json:"builders"`
+}
+
+// GetBuilders returns __IngestBuildersInput.Builders, and is useful for accessing the field via an interface.
+func (v *__IngestBuildersInput) GetBuilders() []BuilderInputSpec { return v.Builders }
+
 // __IngestCVEInput is used internally by genqlient
 type __IngestCVEInput struct {
 	Cve CVEInputSpec `json:"cve"`
@@ -26773,6 +26805,42 @@ func IngestBuilder(
 	var err error
 
 	var data IngestBuilderResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestBuilders.
+const IngestBuilders_Operation = `
+# Bulk Ingest Builder
+mutation IngestBuilders ($builders: [BuilderInputSpec!]!) {
+	ingestBuilders(builders: $builders) {
+		uri
+	}
+}
+`
+
+func IngestBuilders(
+	ctx context.Context,
+	client graphql.Client,
+	builders []BuilderInputSpec,
+) (*IngestBuildersResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestBuilders",
+		Query:  IngestBuilders_Operation,
+		Variables: &__IngestBuildersInput{
+			Builders: builders,
+		},
+	}
+	var err error
+
+	var data IngestBuildersResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

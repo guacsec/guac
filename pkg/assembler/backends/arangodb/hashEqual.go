@@ -62,10 +62,10 @@ func (c *arangoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashE
 
 	//   RETURN APPEND(a, b)`
 
-	return nil, nil
+	return []*model.HashEqual{}, fmt.Errorf("not implemented: HashEqual")
 }
 
-func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+func getHashEqualQueryValues(artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) map[string]any {
 	values := map[string]any{}
 	values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
 	values["art_digest"] = strings.ToLower(artifact.Digest)
@@ -75,6 +75,10 @@ func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.Artif
 	values["collector"] = strings.ToLower(hashEqual.Collector)
 	values["origin"] = strings.ToLower(hashEqual.Origin)
 
+	return values
+}
+
+func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 	query := `
 LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @equal_algorithm FILTER art.digest == @equal_digest RETURN art)
@@ -91,29 +95,48 @@ LET edgeCollection = (FOR edgeData IN [
     INSERT { _key: CONCAT("hashEqualsEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO hashEqualsEdges OPTIONS { overwriteMode: "ignore" }
 )
 RETURN {
-	"artAlgo": artifact.algorithm,
-	"artDigest": artifact.digest,
-	"equalArtAlgo": equalArtifact.algorithm,
-	"equalArtDigest": equalArtifact.digest,
-	"hashEqualJustification": hashEqual.justification,
-	"hashEqualOrigin": hashEqual.origin,
-	"hashEqualCollector": hashEqual.collector
+	'artifact': {
+		'id': artifact._id,
+		'algorithm': artifact.algorithm,
+		'digest': artifact.digest
+	},
+	'equalArtifact': {
+		'id': equalArtifact._id,
+		'algorithm': equalArtifact.algorithm,
+		'digest': equalArtifact.digest
+	},
+	'hashEqual_id': hashEqual._id,
+	'justification': hashEqual.justification,
+    'collector': hashEqual.collector,
+    'origin': hashEqual.origin
 }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestHashEqual")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getHashEqualQueryValues(artifact, equalArtifact, hashEqual), "IngestHashEqual")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+		return nil, fmt.Errorf("failed to ingest hashEqual: %w", err)
 	}
 	defer cursor.Close()
 
+	hashEqualList, err := getHashEqual(ctx, cursor)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hashEqual from arango cursor: %w", err)
+	}
+
+	if len(hashEqualList) == 1 {
+		return hashEqualList[0], nil
+	} else {
+		return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
+	}
+}
+
+func getHashEqual(ctx context.Context, cursor driver.Cursor) ([]*model.HashEqual, error) {
 	type collectedData struct {
-		ArtAlgo                string `json:"artAlgo"`
-		ArtDigest              string `json:"artDigest"`
-		EqualArtAlgo           string `json:"equalArtAlgo"`
-		EqualArtDigest         string `json:"equalArtDigest"`
-		HashEqualJustification string `json:"hashEqualJustification"`
-		HashEqualOrigin        string `json:"hashEqualOrigin"`
-		HashEqualCollector     string `json:"hashEqualCollector"`
+		Artifact      model.Artifact `json:"artifact"`
+		EqualArtifact model.Artifact `json:"equalArtifact"`
+		HashEqualId   string         `json:"hashEqual"`
+		Justification string         `json:"justification"`
+		Collector     string         `json:"collector"`
+		Origin        string         `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -124,30 +147,23 @@ RETURN {
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest hashEqual: %w", err)
+				return nil, fmt.Errorf("failed to hashEqual from cursor: %w", err)
 			}
 		} else {
 			createdValues = append(createdValues, doc)
 		}
 	}
-	if len(createdValues) == 1 {
 
-		algorithm := createdValues[0].ArtAlgo
-		digest := createdValues[0].ArtDigest
-		artifact := generateModelArtifact(algorithm, digest)
-
-		algorithm = createdValues[0].EqualArtAlgo
-		digest = createdValues[0].EqualArtDigest
-		depArtifact := generateModelArtifact(algorithm, digest)
-
+	var hashEqualList []*model.HashEqual
+	for _, createdValue := range createdValues {
 		hashEqual := &model.HashEqual{
-			Artifacts:     []*model.Artifact{artifact, depArtifact},
-			Justification: createdValues[0].HashEqualJustification,
-			Origin:        createdValues[0].HashEqualOrigin,
-			Collector:     createdValues[0].HashEqualCollector,
+			ID:            createdValue.HashEqualId,
+			Artifacts:     []*model.Artifact{&createdValue.Artifact, &createdValue.EqualArtifact},
+			Justification: createdValue.Justification,
+			Origin:        createdValue.Collector,
+			Collector:     createdValue.Origin,
 		}
-		return hashEqual, nil
-	} else {
-		return nil, fmt.Errorf("number of hashEqual ingested is greater than one")
+		hashEqualList = append(hashEqualList, hashEqual)
 	}
+	return hashEqualList, nil
 }

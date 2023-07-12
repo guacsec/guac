@@ -183,6 +183,7 @@ type ComplexityRoot struct {
 		IngestArtifact        func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestArtifacts       func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
+		IngestBuilders        func(childComplexity int, builders []*model.BuilderInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
@@ -1037,6 +1038,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestBuilder(childComplexity, args["builder"].(*model.BuilderInputSpec)), true
+
+	case "Mutation.ingestBuilders":
+		if e.complexity.Mutation.IngestBuilders == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestBuilders_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestBuilders(childComplexity, args["builders"].([]*model.BuilderInputSpec)), true
 
 	case "Mutation.ingestCertifyBad":
 		if e.complexity.Mutation.IngestCertifyBad == nil {
@@ -2409,6 +2422,8 @@ extend type Query {
 extend type Mutation {
   "Ingests a new builder and returns it."
   ingestBuilder(builder: BuilderInputSpec): Builder!
+  "Bulk ingests new builders and returns a list of them."
+  ingestBuilders(builders: [BuilderInputSpec!]!): [Builder!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyBad.graphql", Input: `#

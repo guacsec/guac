@@ -291,7 +291,6 @@ func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembl
 		if err != nil {
 			return fmt.Errorf("isOccurrencesSrc failed with error: %w", err)
 		}
-
 	}
 	if len(pkgs) > 0 {
 		_, err := model.IsOccurrencesPkg(ctx, client, pkgs, pkgArtifacts, pkgOccurrences)

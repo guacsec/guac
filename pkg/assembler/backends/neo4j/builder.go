@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -83,6 +84,10 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 	}
 
 	return result.([]*model.Builder), nil
+}
+
+func (c *neo4jClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
+	return []*model.Builder{}, fmt.Errorf("not implemented: IngestBuilders")
 }
 
 func (c *neo4jClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
