@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -1942,6 +1943,470 @@ For the update to take effect, all services linked to the OpenSSL library must b
 			},
 		},
 	}
+
+	IngestPredicatesExamplePredicates = assembler.IngestPredicates{
+		CertifyScorecard: []assembler.CertifyScorecardIngest{
+			{
+				Source: &generated.SourceInputSpec{
+					Type:      "git",
+					Namespace: "github.com/kubernetes",
+					Name:      "kubernetes",
+					Commit:    ptrfrom.String("5835544ca568b757a8ecae5c153f317e5736700e"),
+				},
+				Scorecard: &generated.ScorecardInputSpec{
+					Checks: []generated.ScorecardCheckInputSpec{
+						{Check: "Binary-Artifacts", Score: 10},
+						{Check: "CI-Tests", Score: 10},
+						{Check: "Code-Review", Score: 7},
+						{Check: "Dangerous-Workflow", Score: 10},
+						{Check: "License", Score: 10},
+						{Check: "Pinned-Dependencies", Score: 2},
+						{Check: "Security-Policy", Score: 10},
+						{Check: "Token-Permissions", Score: 10},
+						{Check: "Vulnerabilities", Score: 10},
+					},
+					AggregateScore:   8.9,
+					TimeScanned:      toTime("2022-10-06"),
+					ScorecardVersion: "v4.7.0",
+					ScorecardCommit:  "7cd6406aef0b80a819402e631919293d5eb6adcf",
+				},
+			},
+		},
+		IsDependency: []assembler.IsDependencyIngest{
+			{
+				Pkg:    topLevelPack,
+				DepPkg: baselayoutPack,
+				IsDependency: &generated.IsDependencyInputSpec{
+					DependencyType: generated.DependencyTypeUnknown,
+					VersionRange:   "3.2.0-r22",
+					Justification:  "top level package dependency",
+				},
+			},
+			{
+				Pkg:    topLevelPack,
+				DepPkg: baselayoutdataPack,
+				IsDependency: &generated.IsDependencyInputSpec{
+					DependencyType: generated.DependencyTypeUnknown,
+					VersionRange:   "3.2.0-r22",
+					Justification:  "top level package dependency",
+				},
+			},
+		},
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg:      worldFilePack,
+				Artifact: worldFileArtifact,
+				IsOccurrence: &generated.IsOccurrenceInputSpec{
+					Justification: "spdx file with checksum",
+				},
+			},
+			{
+				Pkg:      rootFilePack,
+				Artifact: rootFileArtifact,
+				IsOccurrence: &generated.IsOccurrenceInputSpec{
+					Justification: "spdx file with checksum",
+				},
+			},
+		},
+		HasSBOM: []assembler.HasSBOMIngest{
+			{
+				Pkg: topLevelPack,
+				HasSBOM: &generated.HasSBOMInputSpec{
+					Uri:              "TestSource",
+					Algorithm:        "sha256",
+					Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
+					DownloadLocation: "TestSource",
+				},
+			},
+		},
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				Artifact: &generated.ArtifactInputSpec{
+					Algorithm: "sha256",
+					Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+				},
+				Builder: &generated.BuilderInputSpec{
+					Uri: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1",
+				},
+				Materials: []generated.ArtifactInputSpec{{
+					Algorithm: "gitCommit",
+					Digest:    "c27d339ee6075c1f744c5d4b200f7901aad2c369",
+				}},
+				HasSlsa: &generated.SLSAInputSpec{
+					BuildType:   "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+					SlsaVersion: "https://slsa.dev/provenance/v1",
+					StartedOn:   &slsaStartTime,
+					SlsaPredicate: []generated.SLSAPredicateInputSpec{
+						{Key: "slsa.buildDefinition.buildType", Value: "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e+08"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.deploy_target", Value: "deployment_sys_1a"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.perform_deploy", Value: "true"},
+						{Key: "slsa.buildDefinition.externalParameters.vars.MASCOT", Value: "Mona"},
+						{Key: "slsa.buildDefinition.externalParameters.workflow.path", Value: ".github/workflow/release.yml"},
+						{Key: "slsa.buildDefinition.externalParameters.workflow.ref", Value: "refs/heads/main"},
+						{Key: "slsa.buildDefinition.externalParameters.workflow.repository", Value: "https://github.com/octocat/hello-world"},
+						{Key: "slsa.buildDefinition.internalParameters.github.actor_id", Value: "1234567"},
+						{Key: "slsa.buildDefinition.internalParameters.github.event_name", Value: "workflow_dispatch"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.gitCommit", Value: "c27d339ee6075c1f744c5d4b200f7901aad2c369"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.1.uri", Value: "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"},
+						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
+						{Key: "slsa.runDetails.metadata.invocationID", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
+						{Key: "slsa.runDetails.metadata.startedOn", Value: "2023-01-01T12:34:56Z"},
+					},
+				},
+			},
+		},
+		CertifyVuln: []assembler.CertifyVulnIngest{
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				CVE: &generated.CVEInputSpec{
+					Year:  2023,
+					CveId: "CVE-2023-1944",
+				},
+				VulnData: &generated.VulnerabilityMetaDataInput{
+					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-8489-44mv-ggj8",
+				},
+				VulnData: &generated.VulnerabilityMetaDataInput{
+					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-fxph-q3j8-mv87",
+				},
+				VulnData: &generated.VulnerabilityMetaDataInput{
+					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-jfh8-c2jp-5v3q",
+				},
+				VulnData: &generated.VulnerabilityMetaDataInput{
+					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-p6xc-xr62-6r2g",
+				},
+				VulnData: &generated.VulnerabilityMetaDataInput{
+					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:      "maven",
+					Namespace: ptrfrom.String("org.apache.logging.log4j"),
+					Name:      "log4j-core",
+					Version:   ptrfrom.String("2.8.1"),
+					Subpath:   ptrfrom.String(""),
+				},
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-vwqq-5vrc-xw9h",
+				},
+				VulnData: &generated.VulnerabilityMetaDataInput{
+					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+				},
+			},
+		},
+		IsVuln: []assembler.IsVulnIngest{
+			{
+				OSV: &generated.OSVInputSpec{
+					OsvId: "CVE-2023-1944",
+				},
+				CVE: &generated.CVEInputSpec{
+					Year:  2023,
+					CveId: "CVE-2023-1944",
+				},
+				GHSA: nil,
+				IsVuln: &generated.IsVulnerabilityInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-7rjr-3q55-vv33",
+				},
+				CVE: nil,
+				GHSA: &generated.GHSAInputSpec{
+					GhsaId: "GHSA-7rjr-3q55-vv33",
+				},
+				IsVuln: &generated.IsVulnerabilityInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-8489-44mv-ggj8",
+				},
+				CVE: nil,
+				GHSA: &generated.GHSAInputSpec{
+					GhsaId: "GHSA-8489-44mv-ggj8",
+				},
+				IsVuln: &generated.IsVulnerabilityInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-fxph-q3j8-mv87",
+				},
+				CVE: nil,
+				GHSA: &generated.GHSAInputSpec{
+					GhsaId: "GHSA-fxph-q3j8-mv87",
+				},
+				IsVuln: &generated.IsVulnerabilityInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-jfh8-c2jp-5v3q",
+				},
+				CVE: nil,
+				GHSA: &generated.GHSAInputSpec{
+					GhsaId: "GHSA-jfh8-c2jp-5v3q",
+				},
+				IsVuln: &generated.IsVulnerabilityInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+			{
+				OSV: &generated.OSVInputSpec{
+					OsvId: "GHSA-p6xc-xr62-6r2g",
+				},
+				CVE: nil,
+				GHSA: &generated.GHSAInputSpec{
+					GhsaId: "GHSA-p6xc-xr62-6r2g",
+				},
+				IsVuln: &generated.IsVulnerabilityInputSpec{
+					Justification: "Decoded OSV data",
+				},
+			},
+		},
+		CertifyBad: []assembler.CertifyBadIngest{
+			{
+				Pkg: topLevelPack,
+				CertifyBad: &generated.CertifyBadInputSpec{
+					Justification: "bad package",
+				},
+			},
+			{
+				Src: &generated.SourceInputSpec{
+					Type:      "git",
+					Namespace: "github.com/kubernetes",
+					Name:      "kubernetes",
+					Commit:    ptrfrom.String("5835544ca568b757a8ecae5c153f317e5736700e"),
+				},
+				CertifyBad: &generated.CertifyBadInputSpec{
+					Justification: "bad source",
+				},
+			},
+			{
+				Artifact: &generated.ArtifactInputSpec{
+					Algorithm: "sha256",
+					Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+				},
+				CertifyBad: &generated.CertifyBadInputSpec{
+					Justification: "bad artifact",
+				},
+			},
+		},
+		CertifyGood: []assembler.CertifyGoodIngest{
+			{
+				Pkg: topLevelPack,
+				CertifyGood: &generated.CertifyGoodInputSpec{
+					Justification: "good package",
+				},
+			},
+			{
+				Src: &generated.SourceInputSpec{
+					Type:      "git",
+					Namespace: "github.com/kubernetes",
+					Name:      "kubernetes",
+					Commit:    ptrfrom.String("5835544ca568b757a8ecae5c153f317e5736700e"),
+				},
+				CertifyGood: &generated.CertifyGoodInputSpec{
+					Justification: "good source",
+				},
+			},
+			{
+				Artifact: &generated.ArtifactInputSpec{
+					Algorithm: "sha256",
+					Digest:    "1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+				},
+				CertifyGood: &generated.CertifyGoodInputSpec{
+					Justification: "good artifact",
+				},
+			},
+		},
+		HasSourceAt: []assembler.HasSourceAtIngest{
+			{
+				Pkg: topLevelPack,
+				Src: &generated.SourceInputSpec{
+					Type:      "git",
+					Namespace: "github.com/kubernetes",
+					Name:      "kubernetes",
+					Commit:    ptrfrom.String("5835544ca568b757a8ecae5c153f317e5736700e"),
+				},
+				HasSourceAt: &generated.HasSourceAtInputSpec{
+					Justification: "package at this source",
+				},
+			},
+		},
+		HashEqual: []assembler.HashEqualIngest{
+			{
+				Artifact: &generated.ArtifactInputSpec{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+				EqualArtifact: &generated.ArtifactInputSpec{
+					Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+					Algorithm: "sha1",
+				},
+				HashEqual: &generated.HashEqualInputSpec{
+					Justification: "these sha1 and sha256 artifacts are the same",
+					Origin:        "Demo ingestion",
+					Collector:     "Demo ingestion",
+				},
+			},
+		},
+		PkgEqual: []assembler.PkgEqualIngest{
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:       "conan",
+					Namespace:  ptrfrom.String("openssl.org"),
+					Name:       "openssl",
+					Version:    ptrfrom.String("3.0.3"),
+					Qualifiers: []generated.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+					Subpath:    ptrfrom.String(""),
+				},
+				EqualPkg: &generated.PkgInputSpec{
+					Type:       "conan",
+					Namespace:  ptrfrom.String("openssl.org"),
+					Name:       "openssl2",
+					Version:    ptrfrom.String("3.0.3"),
+					Qualifiers: []generated.PackageQualifierInputSpec{},
+					Subpath:    ptrfrom.String(""),
+				},
+				PkgEqual: &generated.PkgEqualInputSpec{
+					Justification: "these two openssl packages are the same",
+					Origin:        "Demo ingestion",
+					Collector:     "Demo ingestion",
+				},
+			},
+		},
+		Vex: []assembler.VexIngest{
+			{
+				Pkg: &generated.PkgInputSpec{
+					Type:       "conan",
+					Namespace:  ptrfrom.String("openssl.org"),
+					Name:       "openssl",
+					Version:    ptrfrom.String("3.0.3"),
+					Qualifiers: []generated.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+					Subpath:    ptrfrom.String(""),
+				},
+				GHSA: &generated.GHSAInputSpec{
+					GhsaId: "GHSA-h45f-rjvw-2rv2",
+				},
+				VexData: &generated.VexStatementInputSpec{
+					Status:           generated.VexStatusNotAffected,
+					VexJustification: generated.VexJustificationComponentNotPresent,
+					KnownSince:       parseRfc3339("2022-11-21T17:45:50.52Z"),
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+			},
+			{
+				Artifact: &generated.ArtifactInputSpec{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+				OSV: &generated.OSVInputSpec{
+					OsvId: "CVE-2018-15710",
+				},
+				VexData: &generated.VexStatementInputSpec{
+					Status:           generated.VexStatusUnderInvestigation,
+					VexJustification: generated.VexJustificationNotProvided,
+					KnownSince:       parseRfc3339("2022-11-21T17:45:50.52Z"),
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+			},
+			{
+				Artifact: &generated.ArtifactInputSpec{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+				CVE: &generated.CVEInputSpec{
+					Year:  2018,
+					CveId: "CVE-2018-43610",
+				},
+				VexData: &generated.VexStatementInputSpec{
+					Status:           generated.VexStatusNotAffected,
+					VexJustification: generated.VexJustificationNotProvided,
+					Statement:        "this artifact is not vulnerable to this CVE",
+					StatusNotes:      "status not affected because code not in execution path",
+					KnownSince:       parseRfc3339("2022-11-21T17:45:50.52Z"),
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+			},
+		},
+	}
 )
 
 var IngestPredicatesCmpOpts = []cmp.Option{
@@ -1994,4 +2459,12 @@ func parseRfc3339(s string) time.Time {
 		panic(err)
 	}
 	return time
+}
+
+func toTime(s string) time.Time {
+	timeScanned, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		panic(err)
+	}
+	return timeScanned
 }
