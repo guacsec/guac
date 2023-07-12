@@ -30,7 +30,7 @@ enum CollectDataType {
 message CollectEntry {
     CollectDataType type = 1;
     string value = 2;
-    int64 as_of = 3;
+    int64 since_time = 3;
 }
 
 // rpc AddCollectEntry

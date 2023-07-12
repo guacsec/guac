@@ -53,10 +53,10 @@ func (s *simpleDb) containsEntry(e *pb.CollectEntry) bool {
 func (s *simpleDb) AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	var asOf = time.Now().Unix()
+	var sinceTime = time.Now().Unix()
 	for _, e := range entries {
 		if e != nil && !s.containsEntry(e) {
-			e.AsOf = asOf
+			e.SinceTime = sinceTime
 			s.collectEntries = append(s.collectEntries, e)
 		}
 	}
@@ -73,7 +73,7 @@ func (s *simpleDb) GetCollectEntries(ctx context.Context, filters []*pb.CollectE
 
 	var retList []*pb.CollectEntry
 	for _, e := range s.collectEntries {
-		if e.AsOf >= sinceTime {
+		if e.SinceTime >= sinceTime {
 			for i, f := range filters {
 				matched := filterMatchers[i].Match(e.Value)
 				if e.Type == f.Type && matched {
