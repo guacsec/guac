@@ -27,7 +27,7 @@ import (
 
 func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	values := map[string]any{}
-	arangoQueryBuilder := newForQuery("builders", "build")
+	arangoQueryBuilder := newForQuery(buildersStr, "build")
 	if builderSpec.URI != nil {
 		arangoQueryBuilder.filter("build", "uri", "==", "@uri")
 		values["uri"] = builderSpec.URI

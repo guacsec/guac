@@ -246,20 +246,20 @@ func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery("srcRoots", "sRoot")
+	arangoQueryBuilder := newForQuery(srcRootsStr, "sRoot")
 	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
 	values["src"] = "src"
-	arangoQueryBuilder.ForOutBound("srcHasType", "sType", "sRoot")
+	arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
 	if sourceSpec.Type != nil {
 		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
 		values["srcType"] = *sourceSpec.Type
 	}
-	arangoQueryBuilder.ForOutBound("srcHasNamespace", "sNs", "sType")
+	arangoQueryBuilder.ForOutBound(srcHasNamespaceStr, "sNs", "sType")
 	if sourceSpec.Namespace != nil {
 		arangoQueryBuilder.filter("sNs", "namespace", "==", "@namespace")
 		values["namespace"] = *sourceSpec.Namespace
 	}
-	arangoQueryBuilder.ForOutBound("srcHasName", "sName", "sNs")
+	arangoQueryBuilder.ForOutBound(srcHasNameStr, "sName", "sNs")
 	if sourceSpec.Name != nil {
 		arangoQueryBuilder.filter("sName", "name", "==", "@name")
 		values["name"] = *sourceSpec.Name
@@ -300,10 +300,10 @@ func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.Source
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery("srcRoots", "sRoot")
+	arangoQueryBuilder := newForQuery(srcRootsStr, "sRoot")
 	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
 	values["src"] = "src"
-	arangoQueryBuilder.ForOutBound("srcHasType", "sType", "sRoot")
+	arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
 	if sourceSpec.Type != nil {
 		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
 		values["srcType"] = *sourceSpec.Type
@@ -353,15 +353,15 @@ func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.Source
 func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery("srcRoots", "sRoot")
+	arangoQueryBuilder := newForQuery(srcRootsStr, "sRoot")
 	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
 	values["src"] = "src"
-	arangoQueryBuilder.ForOutBound("srcHasType", "sType", "sRoot")
+	arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
 	if sourceSpec.Type != nil {
 		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
 		values["srcType"] = *sourceSpec.Type
 	}
-	arangoQueryBuilder.ForOutBound("srcHasNamespace", "sNs", "sType")
+	arangoQueryBuilder.ForOutBound(srcHasNamespaceStr, "sNs", "sType")
 	if sourceSpec.Namespace != nil {
 		arangoQueryBuilder.filter("sNs", "namespace", "==", "@namespace")
 		values["namespace"] = *sourceSpec.Namespace

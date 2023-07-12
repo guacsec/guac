@@ -27,7 +27,7 @@ import (
 
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	values := map[string]any{}
-	arangoQueryBuilder := newForQuery("artifacts", "art")
+	arangoQueryBuilder := newForQuery(artifactsStr, "art")
 	if artifactSpec.Algorithm != nil {
 		arangoQueryBuilder.filter("art", "algorithm", "==", "@algorithm")
 		values["algorithm"] = strings.ToLower(*artifactSpec.Algorithm)

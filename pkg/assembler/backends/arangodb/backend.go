@@ -40,6 +40,62 @@ const (
 	maxRetires    int           = 100
 	retryTimer    time.Duration = time.Microsecond
 	guacEmpty     string        = "guac-empty-@@"
+
+	// Package collections
+	pkgHasTypeStr      string = "pkgHasType"
+	pkgRootsStr        string = "pkgRoots"
+	pkgTypesStr        string = "pkgTypes"
+	pkgHasNamespaceStr string = "pkgHasNamespace"
+	pkgNamespacesStr   string = "pkgNamespaces"
+	pkgHasNameStr      string = "pkgHasName"
+	pkgHasVersionStr   string = "pkgHasVersion"
+	pkgNamesStr        string = "pkgNames"
+	pkgVersionsStr     string = "pkgVersions"
+
+	// source collections
+	srcHasTypeStr      string = "srcHasType"
+	srcRootsStr        string = "srcRoots"
+	srcTypesStr        string = "srcTypes"
+	srcHasNamespaceStr string = "srcHasNamespace"
+	srcNamespacesStr   string = "srcNamespaces"
+	srcHasNameStr      string = "srcHasName"
+	srcNamesStr        string = "srcNames"
+
+	// isDependency collections
+
+	isDependencyEdgesStr string = "isDependencyEdges"
+	isDependenciesStr    string = "isDependencies"
+
+	//isOccurrences collections
+
+	isOccurrencesEdgesStr string = "isOccurrencesEdges"
+	isOccurrencesStr      string = "isOccurrences"
+
+	// hasSLSA collections
+
+	hasSLSAEdgesStr string = "hasSLSAEdges"
+	hasSLSAsStr     string = "hasSLSAs"
+
+	// builder collections
+
+	buildersStr string = "builders"
+
+	// hashEquals collections
+
+	hashEqualsEdgesStr string = "hashEqualsEdges"
+
+	// artifact collection
+
+	artifactsStr string = "artifacts"
+
+	// hasSBOM collection
+
+	hasSBOMEdgesStr string = "hasSBOMEdges"
+	hasSBOMsStr     string = "hasSBOMs"
+
+	// hashEqual collection
+
+	hashEqualsStr string = "hashEquals"
 )
 
 type ArangoConfig struct {
@@ -151,101 +207,101 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		// setup package collections
 		var pkgHasType driver.EdgeDefinition
-		pkgHasType.Collection = "pkgHasType"
+		pkgHasType.Collection = pkgHasTypeStr
 		// define a set of collections where an edge is going out...
-		pkgHasType.From = []string{"pkgRoots"}
+		pkgHasType.From = []string{pkgRootsStr}
 
 		// repeat this for the collections where an edge is going into
-		pkgHasType.To = []string{"pkgTypes"}
+		pkgHasType.To = []string{pkgTypesStr}
 
 		var pkgHasNamespace driver.EdgeDefinition
-		pkgHasNamespace.Collection = "pkgHasNamespace"
+		pkgHasNamespace.Collection = pkgHasNamespaceStr
 		// define a set of collections where an edge is going out...
-		pkgHasNamespace.From = []string{"pkgTypes"}
+		pkgHasNamespace.From = []string{pkgTypesStr}
 
 		// repeat this for the collections where an edge is going into
-		pkgHasNamespace.To = []string{"pkgNamespaces"}
+		pkgHasNamespace.To = []string{pkgNamespacesStr}
 
 		var pkgHasName driver.EdgeDefinition
-		pkgHasName.Collection = "pkgHasName"
+		pkgHasName.Collection = pkgHasNameStr
 		// define a set of collections where an edge is going out...
-		pkgHasName.From = []string{"pkgNamespaces"}
+		pkgHasName.From = []string{pkgNamespacesStr}
 
 		// repeat this for the collections where an edge is going into
-		pkgHasName.To = []string{"pkgNames"}
+		pkgHasName.To = []string{pkgNamesStr}
 
 		var pkgHasVersion driver.EdgeDefinition
-		pkgHasVersion.Collection = "pkgHasVersion"
+		pkgHasVersion.Collection = pkgHasVersionStr
 		// define a set of collections where an edge is going out...
-		pkgHasVersion.From = []string{"pkgNames"}
+		pkgHasVersion.From = []string{pkgNamesStr}
 
 		// repeat this for the collections where an edge is going into
-		pkgHasVersion.To = []string{"pkgVersions"}
+		pkgHasVersion.To = []string{pkgVersionsStr}
 
 		// setup source collections
 		var srcHasType driver.EdgeDefinition
-		srcHasType.Collection = "srcHasType"
+		srcHasType.Collection = srcHasTypeStr
 		// define a set of collections where an edge is going out...
-		srcHasType.From = []string{"srcRoots"}
+		srcHasType.From = []string{srcRootsStr}
 
 		// repeat this for the collections where an edge is going into
-		srcHasType.To = []string{"srcTypes"}
+		srcHasType.To = []string{srcTypesStr}
 
 		var srcHasNamespace driver.EdgeDefinition
-		srcHasNamespace.Collection = "srcHasNamespace"
+		srcHasNamespace.Collection = srcHasNamespaceStr
 		// define a set of collections where an edge is going out...
-		srcHasNamespace.From = []string{"srcTypes"}
+		srcHasNamespace.From = []string{srcTypesStr}
 
 		// repeat this for the collections where an edge is going into
-		srcHasNamespace.To = []string{"srcNamespaces"}
+		srcHasNamespace.To = []string{srcNamespacesStr}
 
 		var srcHasName driver.EdgeDefinition
-		srcHasName.Collection = "srcHasName"
+		srcHasName.Collection = srcHasNameStr
 		// define a set of collections where an edge is going out...
-		srcHasName.From = []string{"srcNamespaces"}
+		srcHasName.From = []string{srcNamespacesStr}
 
 		// repeat this for the collections where an edge is going into
-		srcHasName.To = []string{"srcNames"}
+		srcHasName.To = []string{srcNamesStr}
 
 		var isDependencyEdges driver.EdgeDefinition
-		isDependencyEdges.Collection = "isDependencyEdges"
+		isDependencyEdges.Collection = isDependencyEdgesStr
 		// define a set of collections where an edge is going out...
-		isDependencyEdges.From = []string{"isDependencies", "pkgVersions"}
+		isDependencyEdges.From = []string{isDependenciesStr, pkgVersionsStr}
 
 		// repeat this for the collections where an edge is going into
-		isDependencyEdges.To = []string{"isDependencies", "pkgNames"}
+		isDependencyEdges.To = []string{isDependenciesStr, pkgNamesStr}
 
 		var isOccurrencesEdges driver.EdgeDefinition
-		isOccurrencesEdges.Collection = "isOccurrencesEdges"
+		isOccurrencesEdges.Collection = isOccurrencesEdgesStr
 		// define a set of collections where an edge is going out...
-		isOccurrencesEdges.From = []string{"isOccurrences", "pkgVersions", "srcNames"}
+		isOccurrencesEdges.From = []string{isOccurrencesStr, pkgVersionsStr, srcNamesStr}
 
 		// repeat this for the collections where an edge is going into
-		isOccurrencesEdges.To = []string{"isOccurrences", "artifacts"}
+		isOccurrencesEdges.To = []string{isOccurrencesStr, artifactsStr}
 
 		var hasSLSAEdges driver.EdgeDefinition
-		hasSLSAEdges.Collection = "hasSLSAEdges"
+		hasSLSAEdges.Collection = hasSLSAEdgesStr
 		// define a set of collections where an edge is going out...
-		hasSLSAEdges.From = []string{"builders", "hasSLSAs"}
+		hasSLSAEdges.From = []string{hasSLSAsStr}
 
 		// repeat this for the collections where an edge is going into
-		hasSLSAEdges.To = []string{"builders", "hasSLSAs"}
+		hasSLSAEdges.To = []string{buildersStr}
 
 		var hashEqualsEdges driver.EdgeDefinition
-		hashEqualsEdges.Collection = "hashEqualsEdges"
+		hashEqualsEdges.Collection = hashEqualsEdgesStr
 		// define a set of collections where an edge is going out...
-		hashEqualsEdges.From = []string{"artifacts", "hashEquals"}
+		hashEqualsEdges.From = []string{artifactsStr, hashEqualsStr}
 
 		// repeat this for the collections where an edge is going into
-		hashEqualsEdges.To = []string{"artifacts", "hashEquals"}
+		hashEqualsEdges.To = []string{artifactsStr, hashEqualsStr}
 
 		var hasSBOMEdges driver.EdgeDefinition
-		hasSBOMEdges.Collection = "hasSBOMEdges"
+		hasSBOMEdges.Collection = hasSBOMEdgesStr
 		// define a set of collections where an edge is going out...
-		hasSBOMEdges.From = []string{"pkgVersions", "artifacts"}
+		hasSBOMEdges.From = []string{pkgVersionsStr, artifactsStr}
 
 		// repeat this for the collections where an edge is going into
-		hasSBOMEdges.To = []string{"hasSBOMs"}
+		hasSBOMEdges.To = []string{hasSBOMsStr}
 
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
@@ -259,141 +315,141 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		}
 
 		// add indexes to artifact and edge collections
-		if err := createIndexPerCollection(ctx, db, "artifacts", []string{"digest"}, true, "byDigest"); err != nil {
+		if err := createIndexPerCollection(ctx, db, artifactsStr, []string{"digest"}, true, "byDigest"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for artifacts: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "artifacts", []string{"algorithm", "digest"}, true, "byArtAndDigest"); err != nil {
+		if err := createIndexPerCollection(ctx, db, artifactsStr, []string{"algorithm", "digest"}, true, "byArtAndDigest"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for artifacts: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "builders", []string{"uri"}, true, "byUri"); err != nil {
+		if err := createIndexPerCollection(ctx, db, buildersStr, []string{"uri"}, true, "byUri"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for builders: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "hashEquals", []string{"artifactID", "equalArtifactID"}, true, "byArtIDEqualArtID"); err != nil {
+		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID"}, true, "byArtIDEqualArtID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "hashEqualsEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, hashEqualsEdgesStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hashEqualsEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgTypes", []string{"_parent", "type"}, true, "byPkgTypeParent"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgTypesStr, []string{"_parent", "type"}, true, "byPkgTypeParent"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgTypes: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgTypes", []string{"type"}, true, "byPkgType"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgTypesStr, []string{"type"}, true, "byPkgType"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgTypes: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgNamespaces", []string{"namespace"}, false, "byPkgNamespace"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgNamespacesStr, []string{"namespace"}, false, "byPkgNamespace"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgNamespaces: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgNames", []string{"name"}, false, "byPkgNames"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgNamesStr, []string{"name"}, false, "byPkgNames"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgNames: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgHasType", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgHasTypeStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgHasType: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgHasNamespace", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgHasNamespaceStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgHasNamespace: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgHasName", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgHasNameStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgHasName: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgVersions", []string{"version"}, false, "byVersion"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"version"}, false, "byVersion"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgVersions: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgVersions", []string{"subpath"}, false, "bySubpath"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"subpath"}, false, "bySubpath"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgVersions: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgVersions", []string{"qualifier_list[*]"}, false, "byQualifierList"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"qualifier_list[*]"}, false, "byQualifierList"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgVersions: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgHasVersion", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgHasVersionStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgHasVersion: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "srcTypes", []string{"_parent", "type"}, true, "bySrcTypeParent"); err != nil {
+		if err := createIndexPerCollection(ctx, db, srcTypesStr, []string{"_parent", "type"}, true, "bySrcTypeParent"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for srcTypes: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "srcTypes", []string{"type"}, true, "bySrcType"); err != nil {
+		if err := createIndexPerCollection(ctx, db, srcTypesStr, []string{"type"}, true, "bySrcType"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for srcTypes: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "srcNamespaces", []string{"namespace"}, false, "bySrcNamespace"); err != nil {
+		if err := createIndexPerCollection(ctx, db, srcNamespacesStr, []string{"namespace"}, false, "bySrcNamespace"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for srcNamespaces: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "srcNames", []string{"name"}, false, "bySrcNames"); err != nil {
+		if err := createIndexPerCollection(ctx, db, srcNamesStr, []string{"name"}, false, "bySrcNames"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for srcNames: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "srcHasType", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, srcHasTypeStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for srcHasType: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "srcHasNamespace", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, srcHasNamespaceStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for srcHasNamespace: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "srcHasName", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, srcHasNameStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for srcHasName: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID", "versionRange", "origin"}, false, "byPkgIDDepPkgIDversionRangeOrigin"); err != nil {
+		if err := createIndexPerCollection(ctx, db, isDependenciesStr, []string{"packageID", "depPackageID", "versionRange", "origin"}, false, "byPkgIDDepPkgIDversionRangeOrigin"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isDependencyEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, isDependencyEdgesStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencyEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"packageID", "artifactID", "origin"}, true, "byPkgIDArtIDOrigin"); err != nil {
+		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "origin"}, true, "byPkgIDArtIDOrigin"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isOccurrencesEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, isOccurrencesEdgesStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrencesEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "hasSBOMs", []string{"digest"}, true, "byDigest"); err != nil {
+		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"digest"}, true, "byDigest"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hasSBOMs: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "hasSBOMEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+		if err := createIndexPerCollection(ctx, db, hasSBOMEdgesStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hasSBOMEdges: %w", err)
 		}
 
 		// GUAC key indices for package
-		if err := createIndexPerCollection(ctx, db, "pkgNamespaces", []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgNamespacesStr, []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
 			return nil, fmt.Errorf("failed to generate guackey index for pkgNamespaces: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgNames", []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgNamesStr, []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
 			return nil, fmt.Errorf("failed to generate guackey index for pkgNames: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "pkgVersions", []string{"guacKey"}, true, "byVersionGuacKey"); err != nil {
+		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"guacKey"}, true, "byVersionGuacKey"); err != nil {
 			return nil, fmt.Errorf("failed to generate guackey index for pkgVersions: %w", err)
 		}
 
 		// GUAC key indices for source
-		if err := createIndexPerCollection(ctx, db, "srcNamespaces", []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
+		if err := createIndexPerCollection(ctx, db, srcNamespacesStr, []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
 			return nil, fmt.Errorf("failed to generate guackey index for srcNamespaces: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "srcNames", []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
+		if err := createIndexPerCollection(ctx, db, srcNamesStr, []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
 			return nil, fmt.Errorf("failed to generate guackey index for srcNames: %w", err)
 		}
 
@@ -422,7 +478,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			CommitInterval:        ptrfrom.Int64(10 * 60 * 1000),
 			ConsolidationInterval: ptrfrom.Int64(10 * 60 * 1000),
 			Links: driver.ArangoSearchLinks{
-				"pkgVersions": driver.ArangoSearchElementProperties{
+				pkgVersionsStr: driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
 					IncludeAllFields:   ptrfrom.Bool(false),
 					TrackListPositions: ptrfrom.Bool(false),
@@ -432,7 +488,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 					},
 					InBackground: ptrfrom.Bool(true),
 				},
-				"pkgNames": driver.ArangoSearchElementProperties{
+				pkgNamesStr: driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
 					IncludeAllFields:   ptrfrom.Bool(false),
 					TrackListPositions: ptrfrom.Bool(false),
@@ -441,7 +497,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 						"guacKey": {},
 					},
 				},
-				"srcNames": driver.ArangoSearchElementProperties{
+				srcNamesStr: driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
 					IncludeAllFields:   ptrfrom.Bool(false),
 					TrackListPositions: ptrfrom.Bool(false),
@@ -451,7 +507,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 					},
 					InBackground: ptrfrom.Bool(true),
 				},
-				"artifacts": driver.ArangoSearchElementProperties{
+				artifactsStr: driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity"},
 					IncludeAllFields:   ptrfrom.Bool(false),
 					TrackListPositions: ptrfrom.Bool(false),
