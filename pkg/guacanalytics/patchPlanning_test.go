@@ -225,7 +225,7 @@ var (
 		},
 	}
 
-	isDependencyAndHasSLSAGraph = assembler.IngestPredicates{
+	isDependencyAndHasSLSARelationship = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
 			{
 				Pkg: &model.PkgInputSpec{
@@ -250,6 +250,64 @@ var (
 			},
 		},
 	}
+
+	hasSLSASimpletonGraph = assembler.IngestPredicates{
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType1",
+					Namespace: ptrfrom.String("pkgNamespace1"),
+					Name:      "pkgName1",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg1 and artifact1",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType2",
+					Namespace: ptrfrom.String("pkgNamespace2"),
+					Name:      "pkgName2",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm2",
+					Digest:    "testArtifactDigest2",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg2 and artifact2",
+				},
+			},
+		},
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm2",
+					Digest:    "testArtifactDigest2",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "testUri",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "testBuildType",
+					SlsaVersion: "testSlsaVersion",
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.testKey", Value: "testValue"},
+					},
+				},
+			},
+		},
+	}
+
 	isDependencyNotInRangeGraph = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
 			{
@@ -326,6 +384,81 @@ var (
 				},
 				CertifyGood: &model.CertifyGoodInputSpec{
 					Justification: "good package",
+				},
+			},
+		},
+	}
+
+	sourceNameHasSLSAGraph = assembler.IngestPredicates{
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Src: &model.SourceInputSpec{
+					Type:      "srcType1",
+					Namespace: "srcNamespace1",
+					Name:      "srcName1",
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg1 and artifact1",
+				},
+			},
+			{
+				Src: &model.SourceInputSpec{
+					Type:      "srcType2",
+					Namespace: "srcNamespace2",
+					Name:      "srcName2",
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm2",
+					Digest:    "testArtifactDigest2",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg2 and artifact2",
+				},
+			},
+		},
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm2",
+					Digest:    "testArtifactDigest2",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "testUri",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "testArtifactAlgorithm1",
+					Digest:    "testArtifactDigest1",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "testBuildType",
+					SlsaVersion: "testSlsaVersion",
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.testKey", Value: "testValue"},
+					},
+				},
+			},
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm3",
+					Digest:    "testArtifactDigest3",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "testUri",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "testArtifactAlgorithm4",
+					Digest:    "testArtifactDigest4",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "testBuildType",
+					SlsaVersion: "testSlsaVersion",
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.testKey", Value: "testValue"},
+					},
 				},
 			},
 		},
@@ -437,7 +570,7 @@ func ingestTestData(ctx context.Context, client graphql.Client, graphInput strin
 		if err != nil {
 			return err
 		}
-		err = ingestIsDependency(ctx, client, isDependencyAndHasSLSAGraph)
+		err = ingestIsDependency(ctx, client, isDependencyAndHasSLSARelationship)
 		if err != nil {
 			return err
 		}
@@ -460,7 +593,12 @@ func ingestTestData(ctx context.Context, client graphql.Client, graphInput strin
 		if err != nil {
 			return err
 		}
-
+		return nil
+	case "hasSLSASimpletonGraph":
+		err := ingestHasSLSA(ctx, client, hasSLSASimpletonGraph)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	return fmt.Errorf("Graph input did not match any test graph")
@@ -586,10 +724,22 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedLen:       6,
 			expectedPkgs:      []string{"pkgType1", "pkgType2"},
 			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2"},
+			graphInput:        "hasSLSASimpletonGraph",
+		},
+		{
+			name:              "9: hasSLSA large case",
+			startType:         "pkgType1",
+			startNamespace:    "pkgNamespace1",
+			startName:         "pkgName1",
+			startVersion:      ptrfrom.String("1.19.0"),
+			maxDepth:          10,
+			expectedLen:       9,
+			expectedPkgs:      []string{"pkgType1", "pkgType2", "pkgType4"},
+			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2", "testArtifactAlgorithm3"},
 			graphInput:        "simpleHasSLSAGraph",
 		},
 		{
-			name:              "9: hasSLSA case with no dependent isOccurrences",
+			name:              "10: hasSLSA case with no dependent isOccurrences",
 			startType:         "pkgType2",
 			startNamespace:    "pkgNamespace2",
 			startName:         "pkgName2",
@@ -601,31 +751,31 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInput:        "simpleHasSLSAGraph",
 		},
 		{
-			name:              "10: hasSLSA two levels",
+			name:              "11: hasSLSA two levels",
 			startType:         "pkgType5",
 			startNamespace:    "pkgNamespace5",
 			startName:         "pkgName5",
 			startVersion:      ptrfrom.String("1.19.0"),
 			maxDepth:          10,
-			expectedLen:       10,
-			expectedPkgs:      []string{"pkgType5", "pkgType4", "pkgType2"},
+			expectedLen:       12,
+			expectedPkgs:      []string{"pkgType5", "pkgType4", "pkgType2", "pkgType1"},
 			expectedArtifacts: []string{"testArtifactAlgorithm4", "testArtifactAlgorithm3", "testArtifactAlgorithm1", "testArtifactAlgorithm2"},
 			graphInput:        "simpleHasSLSAGraph",
 		},
 		{
-			name:              "11: hasSLSA & isDependency combined case",
+			name:              "12: hasSLSA & isDependency combined case",
 			startType:         "pkgType3",
 			startNamespace:    "pkgNamespace3",
 			startName:         "pkgName3",
 			startVersion:      ptrfrom.String("1.19.0"),
 			maxDepth:          10,
-			expectedLen:       8,
-			expectedPkgs:      []string{"pkgType3", "pkgType2", "pkgType1"},
-			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2"},
+			expectedLen:       11,
+			expectedPkgs:      []string{"pkgType3", "pkgType2", "pkgType1", "pkgType4"},
+			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2", "testArtifactAlgorithm3"},
 			graphInput:        "isDependencyAndHasSLSAGraph",
 		},
 		{
-			name:           "12: should not explore certifyGood case",
+			name:           "13: should not explore certifyGood case",
 			startType:      "pkgTypeB",
 			startNamespace: "pkgNamespaceB",
 			startName:      "pkgNameB",
@@ -747,7 +897,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				// if not present in expected packages or in expected artifacts
 				if !(inExpectedPkgs || inExpectedArtifacts) {
 					t.Errorf("This ID appears in the returned map but is not expected: %s \n", gotID)
-					// return
+					return
 				}
 			}
 

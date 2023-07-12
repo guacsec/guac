@@ -39,7 +39,6 @@ type DfsNode struct {
 	Depth        int
 	Type         NodeType
 	nodeVersions []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
-	slsaSubject  bool     // for an artifact, was it added from a SLSA subject
 }
 
 type queueValues struct {
@@ -180,38 +179,34 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlClient graphql.Client
 		return nil
 	}
 
-	addNodeToQueue(q, PackageVersion, false, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
-	addNodeToQueue(q, PackageName, false, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Id)
+	addNodeToQueue(q, PackageVersion, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
+	addNodeToQueue(q, PackageName, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Id)
 
 	return nil
 }
 
 func exploreIsOccurrenceFromSubject(ctx context.Context, gqlClient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {
-	addNodeToQueue(q, Artifact, false, nil, isOccurrence.Artifact.Id)
+	addNodeToQueue(q, Artifact, nil, isOccurrence.Artifact.Id)
 }
 
 func exploreHasSLSAFromArtifact(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSLSA model.NeighborsNeighborsHasSLSA) {
 	// Check that the subject is not the node inputted itself and being re-added to the queue unnecessarily
 	if q.now != hasSLSA.Subject.Id {
-		addNodeToQueue(q, Artifact, true, nil, hasSLSA.Subject.Id)
+		addNodeToQueue(q, Artifact, nil, hasSLSA.Subject.Id)
 	}
 }
 
 func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlClient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {
-	// TODO: take into account PkgEqual case where there is another alias of the artifact package that we don't know about
-	// Right now we only explore isOccurrences if their artifact is from a HasSLSA
-	if q.nowNode.slsaSubject {
-		switch subject := isOccurrence.Subject.(type) {
-		case *model.AllIsOccurrencesTreeSubjectPackage:
-			addNodeToQueue(q, PackageVersion, false, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Versions[0].Id)
-			addNodeToQueue(q, PackageName, false, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Id)
-		case *model.AllIsOccurrencesTreeSubjectSource:
-			addNodeToQueue(q, SourceName, false, nil, subject.Namespaces[0].Names[0].Id)
-		}
+	switch subject := isOccurrence.Subject.(type) {
+	case *model.AllIsOccurrencesTreeSubjectPackage:
+		addNodeToQueue(q, PackageVersion, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Versions[0].Id)
+		addNodeToQueue(q, PackageName, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Id)
+	case *model.AllIsOccurrencesTreeSubjectSource:
+		addNodeToQueue(q, SourceName, nil, subject.Namespaces[0].Names[0].Id)
 	}
 }
 
-func addNodeToQueue(q *queueValues, nodeType NodeType, slsa bool, versions []string, id string) {
+func addNodeToQueue(q *queueValues, nodeType NodeType, versions []string, id string) {
 	node, seen := q.nodeMap[id]
 
 	if !seen {
@@ -220,7 +215,6 @@ func addNodeToQueue(q *queueValues, nodeType NodeType, slsa bool, versions []str
 			Depth:        q.nowNode.Depth + 1,
 			Type:         nodeType,
 			nodeVersions: versions,
-			slsaSubject:  slsa,
 		}
 		q.nodeMap[id] = node
 	}
