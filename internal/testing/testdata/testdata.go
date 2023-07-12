@@ -124,6 +124,9 @@ var (
 	//go:embed exampledata/go-spdx-multi-arch_3.json
 	OCIGoSPDXMulti3 []byte
 
+	//go:embed exampledata/ingest_predicates.json
+	IngestPredicatesExample []byte
+
 	// DSSE/SLSA Testdata
 
 	// Taken from: https://slsa.dev/provenance/v0.2#example

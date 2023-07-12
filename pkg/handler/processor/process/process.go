@@ -28,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/deps_dev"
 	"github.com/guacsec/guac/pkg/handler/processor/dsse"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
+	"github.com/guacsec/guac/pkg/handler/processor/ingest_predicates"
 	"github.com/guacsec/guac/pkg/handler/processor/ite6"
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
@@ -48,6 +49,7 @@ func init() {
 	_ = RegisterDocumentProcessor(&scorecard.ScorecardProcessor{}, processor.DocumentScorecard)
 	_ = RegisterDocumentProcessor(&cyclonedx.CycloneDXProcessor{}, processor.DocumentCycloneDX)
 	_ = RegisterDocumentProcessor(&deps_dev.DepsDev{}, processor.DocumentDepsDev)
+	_ = RegisterDocumentProcessor(&ingest_predicates.IngestPredicatesProcessor{}, processor.DocumentIngestPredicates)
 }
 
 func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.DocumentType) error {

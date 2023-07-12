@@ -1,0 +1,755 @@
+{
+  "certifyScorecard": [
+    {
+      "source": {
+        "type": "git",
+        "namespace": "github.com/kubernetes",
+        "name": "kubernetes",
+        "tag": null,
+        "commit": "5835544ca568b757a8ecae5c153f317e5736700e"
+      },
+      "scorecard": {
+        "checks": [
+          {
+            "check": "Binary-Artifacts",
+            "score": 10
+          },
+          {
+            "check": "CI-Tests",
+            "score": 10
+          },
+          {
+            "check": "Code-Review",
+            "score": 7
+          },
+          {
+            "check": "Dangerous-Workflow",
+            "score": 10
+          },
+          {
+            "check": "License",
+            "score": 10
+          },
+          {
+            "check": "Pinned-Dependencies",
+            "score": 2
+          },
+          {
+            "check": "Security-Policy",
+            "score": 10
+          },
+          {
+            "check": "Token-Permissions",
+            "score": 10
+          },
+          {
+            "check": "Vulnerabilities",
+            "score": 10
+          }
+        ],
+        "aggregateScore": 8.9,
+        "timeScanned": "2022-10-06T00:00:00Z",
+        "scorecardVersion": "v4.7.0",
+        "scorecardCommit": "7cd6406aef0b80a819402e631919293d5eb6adcf",
+        "origin": "",
+        "collector": ""
+      }
+    }
+  ],
+  "isDepedency": [
+    {
+      "pkg": {
+        "type": "guac",
+        "namespace": "spdx/gcr.io/google-containers",
+        "name": "alpine-latest",
+        "version": "",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "depPkg": {
+        "type": "alpine",
+        "namespace": "",
+        "name": "alpine-baselayout",
+        "version": "3.2.0-r22",
+        "qualifiers": [
+          {
+            "key": "arch",
+            "value": "x86_64"
+          },
+          {
+            "key": "upstream",
+            "value": "alpine-baselayout"
+          },
+          {
+            "key": "distro",
+            "value": "alpine-3.16.2"
+          }
+        ],
+        "subpath": ""
+      },
+      "isDependency": {
+        "versionRange": "3.2.0-r22",
+        "dependencyType": "UNKNOWN",
+        "justification": "top level package dependency",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkg": {
+        "type": "guac",
+        "namespace": "spdx/gcr.io/google-containers",
+        "name": "alpine-latest",
+        "version": "",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "depPkg": {
+        "type": "alpine",
+        "namespace": "",
+        "name": "alpine-baselayout-data",
+        "version": "3.2.0-r22",
+        "qualifiers": [
+          {
+            "key": "arch",
+            "value": "x86_64"
+          },
+          {
+            "key": "upstream",
+            "value": "alpine-baselayout"
+          },
+          {
+            "key": "distro",
+            "value": "alpine-3.16.2"
+          }
+        ],
+        "subpath": ""
+      },
+      "isDependency": {
+        "versionRange": "3.2.0-r22",
+        "dependencyType": "UNKNOWN",
+        "justification": "top level package dependency",
+        "origin": "",
+        "collector": ""
+      }
+    }
+  ],
+  "isOccurrence": [
+    {
+      "pkg": {
+        "type": "guac",
+        "namespace": "files",
+        "name": "sha256:713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201",
+        "version": "",
+        "qualifiers": null,
+        "subpath": "etc/apk/world"
+      },
+      "artifact": {
+        "algorithm": "sha256",
+        "digest": "713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201"
+      },
+      "isOccurrence": {
+        "justification": "spdx file with checksum",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkg": {
+        "type": "guac",
+        "namespace": "files",
+        "name": "sha256:575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
+        "version": "",
+        "qualifiers": null,
+        "subpath": "etc/crontabs/root"
+      },
+      "artifact": {
+        "algorithm": "sha256",
+        "digest": "575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3"
+      },
+      "isOccurrence": {
+        "justification": "spdx file with checksum",
+        "origin": "",
+        "collector": ""
+      }
+    }
+  ],
+  "hasSlsa": [
+    {
+      "Artifact": {
+        "algorithm": "sha256",
+        "digest": "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4"
+      },
+      "HasSlsa": {
+        "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+        "slsaPredicate": [
+          {
+            "key": "slsa.buildDefinition.buildType",
+            "value": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1"
+          },
+          {
+            "key": "slsa.buildDefinition.externalParameters.inputs.build_id",
+            "value": "1.23456768e+08"
+          },
+          {
+            "key": "slsa.buildDefinition.externalParameters.inputs.deploy_target",
+            "value": "deployment_sys_1a"
+          },
+          {
+            "key": "slsa.buildDefinition.externalParameters.inputs.perform_deploy",
+            "value": "true"
+          },
+          {
+            "key": "slsa.buildDefinition.externalParameters.vars.MASCOT",
+            "value": "Mona"
+          },
+          {
+            "key": "slsa.buildDefinition.externalParameters.workflow.path",
+            "value": ".github/workflow/release.yml"
+          },
+          {
+            "key": "slsa.buildDefinition.externalParameters.workflow.ref",
+            "value": "refs/heads/main"
+          },
+          {
+            "key": "slsa.buildDefinition.externalParameters.workflow.repository",
+            "value": "https://github.com/octocat/hello-world"
+          },
+          {
+            "key": "slsa.buildDefinition.internalParameters.github.actor_id",
+            "value": "1234567"
+          },
+          {
+            "key": "slsa.buildDefinition.internalParameters.github.event_name",
+            "value": "workflow_dispatch"
+          },
+          {
+            "key": "slsa.buildDefinition.resolvedDependencies.0.digest.gitCommit",
+            "value": "c27d339ee6075c1f744c5d4b200f7901aad2c369"
+          },
+          {
+            "key": "slsa.buildDefinition.resolvedDependencies.0.uri",
+            "value": "git+https://github.com/octocat/hello-world@refs/heads/main"
+          },
+          {
+            "key": "slsa.buildDefinition.resolvedDependencies.1.uri",
+            "value": "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"
+          },
+          {
+            "key": "slsa.runDetails.builder.id",
+            "value": "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"
+          },
+          {
+            "key": "slsa.runDetails.metadata.invocationID",
+            "value": "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"
+          },
+          {
+            "key": "slsa.runDetails.metadata.startedOn",
+            "value": "2023-01-01T12:34:56Z"
+          }
+        ],
+        "slsaVersion": "https://slsa.dev/provenance/v1",
+        "startedOn": "2020-08-19T08:38:00Z",
+        "finishedOn": null,
+        "origin": "",
+        "collector": ""
+      },
+      "Materials": [
+        {
+          "algorithm": "gitCommit",
+          "digest": "c27d339ee6075c1f744c5d4b200f7901aad2c369"
+        }
+      ],
+      "Builder": {
+        "uri": "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"
+      }
+    }
+  ],
+  "certifyVuln": [
+    {
+      "pkg": {
+        "type": "maven",
+        "namespace": "org.apache.logging.log4j",
+        "name": "log4j-core",
+        "version": "2.8.1",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "cve": {
+        "year": 2023,
+        "cveId": "CVE-2023-1944"
+      },
+      "vulnData": {
+        "timeScanned": "2022-11-21T17:45:50.52Z",
+        "dbUri": "",
+        "dbVersion": "",
+        "scannerUri": "osv.dev",
+        "scannerVersion": "0.0.14",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkg": {
+        "type": "maven",
+        "namespace": "org.apache.logging.log4j",
+        "name": "log4j-core",
+        "version": "2.8.1",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "osv": {
+        "osvId": "GHSA-8489-44mv-ggj8"
+      },
+      "vulnData": {
+        "timeScanned": "2022-11-21T17:45:50.52Z",
+        "dbUri": "",
+        "dbVersion": "",
+        "scannerUri": "osv.dev",
+        "scannerVersion": "0.0.14",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkg": {
+        "type": "maven",
+        "namespace": "org.apache.logging.log4j",
+        "name": "log4j-core",
+        "version": "2.8.1",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "osv": {
+        "osvId": "GHSA-fxph-q3j8-mv87"
+      },
+      "vulnData": {
+        "timeScanned": "2022-11-21T17:45:50.52Z",
+        "dbUri": "",
+        "dbVersion": "",
+        "scannerUri": "osv.dev",
+        "scannerVersion": "0.0.14",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkg": {
+        "type": "maven",
+        "namespace": "org.apache.logging.log4j",
+        "name": "log4j-core",
+        "version": "2.8.1",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "osv": {
+        "osvId": "GHSA-jfh8-c2jp-5v3q"
+      },
+      "vulnData": {
+        "timeScanned": "2022-11-21T17:45:50.52Z",
+        "dbUri": "",
+        "dbVersion": "",
+        "scannerUri": "osv.dev",
+        "scannerVersion": "0.0.14",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkg": {
+        "type": "maven",
+        "namespace": "org.apache.logging.log4j",
+        "name": "log4j-core",
+        "version": "2.8.1",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "osv": {
+        "osvId": "GHSA-p6xc-xr62-6r2g"
+      },
+      "vulnData": {
+        "timeScanned": "2022-11-21T17:45:50.52Z",
+        "dbUri": "",
+        "dbVersion": "",
+        "scannerUri": "osv.dev",
+        "scannerVersion": "0.0.14",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkg": {
+        "type": "maven",
+        "namespace": "org.apache.logging.log4j",
+        "name": "log4j-core",
+        "version": "2.8.1",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "osv": {
+        "osvId": "GHSA-vwqq-5vrc-xw9h"
+      },
+      "vulnData": {
+        "timeScanned": "2022-11-21T17:45:50.52Z",
+        "dbUri": "",
+        "dbVersion": "",
+        "scannerUri": "osv.dev",
+        "scannerVersion": "0.0.14",
+        "origin": "",
+        "collector": ""
+      }
+    }
+  ],
+  "isVuln": [
+    {
+      "osv": {
+        "osvId": "CVE-2023-1944"
+      },
+      "cve": {
+        "year": 2023,
+        "cveId": "CVE-2023-1944"
+      },
+      "isVuln": {
+        "justification": "Decoded OSV data",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "osv": {
+        "osvId": "GHSA-7rjr-3q55-vv33"
+      },
+      "ghsa": {
+        "ghsaId": "GHSA-7rjr-3q55-vv33"
+      },
+      "isVuln": {
+        "justification": "Decoded OSV data",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "osv": {
+        "osvId": "GHSA-8489-44mv-ggj8"
+      },
+      "ghsa": {
+        "ghsaId": "GHSA-8489-44mv-ggj8"
+      },
+      "isVuln": {
+        "justification": "Decoded OSV data",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "osv": {
+        "osvId": "GHSA-fxph-q3j8-mv87"
+      },
+      "ghsa": {
+        "ghsaId": "GHSA-fxph-q3j8-mv87"
+      },
+      "isVuln": {
+        "justification": "Decoded OSV data",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "osv": {
+        "osvId": "GHSA-jfh8-c2jp-5v3q"
+      },
+      "ghsa": {
+        "ghsaId": "GHSA-jfh8-c2jp-5v3q"
+      },
+      "isVuln": {
+        "justification": "Decoded OSV data",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "osv": {
+        "osvId": "GHSA-p6xc-xr62-6r2g"
+      },
+      "ghsa": {
+        "ghsaId": "GHSA-p6xc-xr62-6r2g"
+      },
+      "isVuln": {
+        "justification": "Decoded OSV data",
+        "origin": "",
+        "collector": ""
+      }
+    }
+  ],
+  "hasSourceAt": [
+    {
+      "pkg": {
+        "type": "guac",
+        "namespace": "spdx/gcr.io/google-containers",
+        "name": "alpine-latest",
+        "version": "",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "pkgMatchFlag": {
+        "pkg": ""
+      },
+      "src": {
+        "type": "git",
+        "namespace": "github.com/kubernetes",
+        "name": "kubernetes",
+        "tag": null,
+        "commit": "5835544ca568b757a8ecae5c153f317e5736700e"
+      },
+      "hasSourceAt": {
+        "knownSince": "0001-01-01T00:00:00Z",
+        "justification": "package at this source",
+        "origin": "",
+        "collector": ""
+      }
+    }
+  ],
+  "certifyBad": [
+    {
+      "pkg": {
+        "type": "guac",
+        "namespace": "spdx/gcr.io/google-containers",
+        "name": "alpine-latest",
+        "version": "",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "pkgMatchFlag": {
+        "pkg": ""
+      },
+      "certifyBad": {
+        "justification": "bad package",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkgMatchFlag": {
+        "pkg": ""
+      },
+      "src": {
+        "type": "git",
+        "namespace": "github.com/kubernetes",
+        "name": "kubernetes",
+        "tag": null,
+        "commit": "5835544ca568b757a8ecae5c153f317e5736700e"
+      },
+      "certifyBad": {
+        "justification": "bad source",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkgMatchFlag": {
+        "pkg": ""
+      },
+      "artifact": {
+        "algorithm": "sha256",
+        "digest": "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4"
+      },
+      "certifyBad": {
+        "justification": "bad artifact",
+        "origin": "",
+        "collector": ""
+      }
+    }
+  ],
+  "certifyGood": [
+    {
+      "pkg": {
+        "type": "guac",
+        "namespace": "spdx/gcr.io/google-containers",
+        "name": "alpine-latest",
+        "version": "",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "pkgMatchFlag": {
+        "pkg": ""
+      },
+      "certifyGood": {
+        "justification": "good package",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkgMatchFlag": {
+        "pkg": ""
+      },
+      "src": {
+        "type": "git",
+        "namespace": "github.com/kubernetes",
+        "name": "kubernetes",
+        "tag": null,
+        "commit": "5835544ca568b757a8ecae5c153f317e5736700e"
+      },
+      "certifyGood": {
+        "justification": "good source",
+        "origin": "",
+        "collector": ""
+      }
+    },
+    {
+      "pkgMatchFlag": {
+        "pkg": ""
+      },
+      "artifact": {
+        "algorithm": "sha256",
+        "digest": "1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4"
+      },
+      "certifyGood": {
+        "justification": "good artifact",
+        "origin": "",
+        "collector": ""
+      }
+    }
+  ],
+  "hasSBOM": [
+    {
+      "pkg": {
+        "type": "guac",
+        "namespace": "spdx/gcr.io/google-containers",
+        "name": "alpine-latest",
+        "version": "",
+        "qualifiers": null,
+        "subpath": ""
+      },
+      "hasSbom": {
+        "uri": "TestSource",
+        "algorithm": "sha256",
+        "digest": "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
+        "downloadLocation": "TestSource",
+        "origin": "",
+        "collector": ""
+      }
+    }
+  ],
+  "hashEqual": [
+    {
+      "artifact": {
+        "algorithm": "sha256",
+        "digest": "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
+      },
+      "equalArtifact": {
+        "algorithm": "sha1",
+        "digest": "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"
+      },
+      "hashEqual": {
+        "justification": "these sha1 and sha256 artifacts are the same",
+        "origin": "Demo ingestion",
+        "collector": "Demo ingestion"
+      }
+    }
+  ],
+  "pkgEqual": [
+    {
+      "pkg": {
+        "type": "conan",
+        "namespace": "openssl.org",
+        "name": "openssl",
+        "version": "3.0.3",
+        "qualifiers": [
+          {
+            "key": "user",
+            "value": "bincrafters"
+          },
+          {
+            "key": "channel",
+            "value": "stable"
+          }
+        ],
+        "subpath": ""
+      },
+      "equalPkg": {
+        "type": "conan",
+        "namespace": "openssl.org",
+        "name": "openssl2",
+        "version": "3.0.3",
+        "qualifiers": [],
+        "subpath": ""
+      },
+      "pkgEqual": {
+        "justification": "these two openssl packages are the same",
+        "origin": "Demo ingestion",
+        "collector": "Demo ingestion"
+      }
+    }
+  ],
+  "vex": [
+    {
+      "pkg": {
+        "type": "conan",
+        "namespace": "openssl.org",
+        "name": "openssl",
+        "version": "3.0.3",
+        "qualifiers": [
+          {
+            "key": "user",
+            "value": "bincrafters"
+          },
+          {
+            "key": "channel",
+            "value": "stable"
+          }
+        ],
+        "subpath": ""
+      },
+      "ghsa": {
+        "ghsaId": "GHSA-h45f-rjvw-2rv2"
+      },
+      "vexData": {
+        "status": "NOT_AFFECTED",
+        "vexJustification": "COMPONENT_NOT_PRESENT",
+        "statement": "",
+        "statusNotes": "",
+        "knownSince": "2022-11-21T17:45:50.52Z",
+        "origin": "Demo ingestion",
+        "collector": "Demo ingestion"
+      }
+    },
+    {
+      "artifact": {
+        "algorithm": "sha256",
+        "digest": "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
+      },
+      "osv": {
+        "osvId": "CVE-2018-15710"
+      },
+      "vexData": {
+        "status": "UNDER_INVESTIGATION",
+        "vexJustification": "NOT_PROVIDED",
+        "statement": "",
+        "statusNotes": "",
+        "knownSince": "2022-11-21T17:45:50.52Z",
+        "origin": "Demo ingestion",
+        "collector": "Demo ingestion"
+      }
+    },
+    {
+      "artifact": {
+        "algorithm": "sha256",
+        "digest": "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
+      },
+      "cve": {
+        "year": 2018,
+        "cveId": "CVE-2018-43610"
+      },
+      "vexData": {
+        "status": "NOT_AFFECTED",
+        "vexJustification": "NOT_PROVIDED",
+        "statement": "this artifact is not vulnerable to this CVE",
+        "statusNotes": "status not affected because code not in execution path",
+        "knownSince": "2022-11-21T17:45:50.52Z",
+        "origin": "Demo ingestion",
+        "collector": "Demo ingestion"
+      }
+    }
+  ]
+}
