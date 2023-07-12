@@ -36,10 +36,10 @@ import (
 )
 
 var (
-	simpleGraph = assembler.IngestPredicates{
-
+	// For isOccurrences, you must input both a Pkg and Src field
+	// One of the two fields should be empty, but we populate them both so errors are not thrown
+	simpleIsDependencyGraph = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
-
 			{
 				Pkg: &model.PkgInputSpec{
 					Type:      "deb",
@@ -104,6 +104,10 @@ var (
 				},
 			},
 		},
+	}
+
+	simpleHasSLSAGraph = assembler.IngestPredicates{
+
 		IsOccurrence: []assembler.IsOccurrenceIngest{
 			{
 				Pkg: &model.PkgInputSpec{
@@ -112,6 +116,7 @@ var (
 					Name:      "pkgName1",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm1",
 					Digest:    "testArtifactDigest1",
@@ -127,6 +132,7 @@ var (
 					Name:      "pkgName2",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm2",
 					Digest:    "testArtifactDigest2",
@@ -142,6 +148,7 @@ var (
 					Name:      "pkgName4",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm1",
 					Digest:    "testArtifactDigest1",
@@ -157,6 +164,7 @@ var (
 					Name:      "pkgName4",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm3",
 					Digest:    "testArtifactDigest3",
@@ -172,6 +180,7 @@ var (
 					Name:      "pkgName5",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm4",
 					Digest:    "testArtifactDigest4",
@@ -260,6 +269,7 @@ var (
 					Name:      "pkgName1",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm1",
 					Digest:    "testArtifactDigest1",
@@ -275,6 +285,7 @@ var (
 					Name:      "pkgName2",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm2",
 					Digest:    "testArtifactDigest2",
@@ -333,6 +344,80 @@ var (
 			},
 		},
 	}
+
+	sourceNameHasSLSAGraph = assembler.IngestPredicates{
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: &model.PkgInputSpec{},
+				Src: &model.SourceInputSpec{
+					Type:      "srcType2",
+					Namespace: "srcNamespace2",
+					Name:      "srcName2",
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm5",
+					Digest:    "testArtifactDigest5",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect src2 and artifact5",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgType6",
+					Namespace: ptrfrom.String("pkgNamespace6"),
+					Name:      "pkgName6",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				Src: &model.SourceInputSpec{},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm6",
+					Digest:    "testArtifactDigest6",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkg6 and artifact6",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{},
+				Src: &model.SourceInputSpec{
+					Type:      "srcType2",
+					Namespace: "srcNamespace2",
+					Name:      "srcName2",
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm7",
+					Digest:    "testArtifactDigest7",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect src2 and artifact7",
+				},
+			},
+		},
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithm5",
+					Digest:    "testArtifactDigest5",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "testUri",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "testArtifactAlgorithm6",
+					Digest:    "testArtifactDigest6",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "testBuildType",
+					SlsaVersion: "testSlsaVersion",
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.testKey", Value: "testValue"},
+					},
+				},
+			},
+		},
+	}
+
 	shouldNotBeExplored = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
 			{
@@ -391,7 +476,6 @@ var (
 )
 
 func ingestIsDependency(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
-
 	for _, ingest := range graph.IsDependency {
 		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
 
@@ -414,25 +498,6 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, graph assemb
 }
 
 func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
-	for _, ingest := range graph.IsOccurrence {
-		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
-
-		if err != nil {
-			return fmt.Errorf("Error in ingesting package for IsOccurrence: %v\n", err)
-		}
-
-		_, err = model.IngestArtifact(context.Background(), client, *ingest.Artifact)
-
-		if err != nil {
-			return fmt.Errorf("Error in ingesting artifact for IsOccurrence: %v\n", err)
-		}
-
-		_, err = model.IsOccurrencePkg(context.Background(), client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
-
-		if err != nil {
-			return fmt.Errorf("Error in ingesting isOccurrence: %v\n", err)
-		}
-	}
 	for _, ingest := range graph.HasSlsa {
 		_, err := model.IngestBuilder(context.Background(), client, *ingest.Builder)
 
@@ -455,6 +520,39 @@ func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.I
 	return nil
 }
 
+func ingestIsOccurrence(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
+	for _, ingest := range graph.IsOccurrence {
+		var err error
+		if ingest.Src.Type != "" {
+			_, err = model.IngestSource(context.Background(), client, *ingest.Src)
+		} else {
+			_, err = model.IngestPackage(context.Background(), client, *ingest.Pkg)
+
+		}
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting pkg/src IsOccurrence: %v\n", err)
+		}
+
+		_, err = model.IngestArtifact(context.Background(), client, *ingest.Artifact)
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting artifact for IsOccurrence: %v\n", err)
+		}
+
+		if ingest.Src.Type != "" {
+			_, err = model.IsOccurrenceSrc(context.Background(), client, *ingest.Src, *ingest.Artifact, *ingest.IsOccurrence)
+		} else {
+			_, err = model.IsOccurrencePkg(context.Background(), client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
+		}
+
+		if err != nil {
+			return fmt.Errorf("Error in ingesting isOccurrence: %v\n", err)
+		}
+	}
+	return nil
+}
+
 func ingestCertifyGood(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
 	for _, ingest := range graph.CertifyGood {
 		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
@@ -472,61 +570,110 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, graph assembl
 	return nil
 }
 
-func ingestTestData(ctx context.Context, client graphql.Client, graphInput string) error {
-	switch graphInput {
-	case "isDependencySimpleGraph":
-		err := ingestIsDependency(ctx, client, simpleGraph)
+func ingestTestData(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
+	if len(graph.IsDependency) > 0 {
+		err := ingestIsDependency(ctx, client, graph)
 		if err != nil {
 			return err
 		}
-		return nil
-	case "isDependencyNotInRangeGraph":
-		err := ingestIsDependency(ctx, client, isDependencyNotInRangeGraph)
-		if err != nil {
-			return err
-		}
-		return nil
-	case "isDependencyAndHasSLSAGraph":
-		err := ingestIsDependency(ctx, client, simpleGraph)
-		if err != nil {
-			return err
-		}
-		err = ingestHasSLSA(ctx, client, simpleGraph)
-		if err != nil {
-			return err
-		}
-		err = ingestIsDependency(ctx, client, isDependencyAndHasSLSARelationship)
-		if err != nil {
-			return err
-		}
-		return nil
-	case "simpleHasSLSAGraph":
-		err := ingestHasSLSA(ctx, client, simpleGraph)
-		if err != nil {
-			return err
-		}
-		return nil
-	case "shouldNotBeExplored":
-		err := ingestIsDependency(ctx, client, shouldNotBeExplored)
-
-		if err != nil {
-			return err
-		}
-
-		err = ingestCertifyGood(ctx, client, shouldNotBeExplored)
-
-		if err != nil {
-			return err
-		}
-		return nil
-	case "hasSLSASimpletonGraph":
-		err := ingestHasSLSA(ctx, client, hasSLSASimpletonGraph)
-		if err != nil {
-			return err
-		}
-		return nil
 	}
-	return fmt.Errorf("Graph input did not match any test graph")
+
+	if len(graph.IsOccurrence) > 0 {
+		err := ingestIsOccurrence(ctx, client, graph)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(graph.HasSlsa) > 0 {
+		err := ingestHasSLSA(ctx, client, graph)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(graph.CertifyGood) > 0 {
+		err := ingestCertifyGood(ctx, client, graph)
+		if err != nil {
+			return err
+		}
+	}
+	// switch graphInput {
+	// case "isDependencySimpleGraph":
+	// 	err := ingestIsDependency(ctx, client, simpleGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// case "isDependencyNotInRangeGraph":
+	// 	err := ingestIsDependency(ctx, client, isDependencyNotInRangeGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// case "isDependencyAndHasSLSAGraph":
+	// 	err := ingestIsDependency(ctx, client, simpleGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	err = ingestIsOccurrencePkg(ctx, client, simpleGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	err = ingestHasSLSA(ctx, client, simpleGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	err = ingestIsDependency(ctx, client, isDependencyAndHasSLSARelationship)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// case "simpleHasSLSAGraph":
+	// 	err := ingestIsOccurrencePkg(ctx, client, simpleGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	err = ingestHasSLSA(ctx, client, simpleGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// case "shouldNotBeExplored":
+	// 	err := ingestIsDependency(ctx, client, shouldNotBeExplored)
+
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// 	err = ingestCertifyGood(ctx, client, shouldNotBeExplored)
+
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// case "hasSLSASimpletonGraph":
+	// 	err := ingestIsOccurrencePkg(ctx, client, hasSLSASimpletonGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	err = ingestHasSLSA(ctx, client, hasSLSASimpletonGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// case "sourceNameHasSLSAGraph":
+	// 	err := ingestIsOccurrenceSrcAndPkg(ctx, client, sourceNameHasSLSAGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	err = ingestHasSLSA(ctx, client, sourceNameHasSLSAGraph)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// }
+	return nil
 }
 
 func Test_SearchSubgraphFromVuln(t *testing.T) {
@@ -556,7 +703,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		expectedLen       int
 		expectedPkgs      []string
 		expectedArtifacts []string
-		graphInput        string
+		expectedSrcs      []string
+		graphInputs       []assembler.IngestPredicates
 	}{
 		{
 			name:           "1: two levels of dependencies, no stopID and no limiting maxDepth",
@@ -567,7 +715,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth:       10,
 			expectedLen:    6,
 			expectedPkgs:   []string{"top", "deb", "conan"},
-			graphInput:     "isDependencySimpleGraph",
+			graphInputs:    []assembler.IngestPredicates{simpleIsDependencyGraph},
 		},
 		{
 			name:           "2:  one level of dependencies, no stopID and no limiting maxDepth",
@@ -578,7 +726,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth:       10,
 			expectedLen:    4,
 			expectedPkgs:   []string{"top", "deb"},
-			graphInput:     "isDependencySimpleGraph",
+			graphInputs:    []assembler.IngestPredicates{simpleIsDependencyGraph},
 		},
 		{
 			name:           "3: two levels of dependencies, a stopID at the first level and no limiting maxDepth",
@@ -593,7 +741,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth:       10,
 			expectedLen:    4,
 			expectedPkgs:   []string{"deb", "conan"},
-			graphInput:     "isDependencySimpleGraph",
+			graphInputs:    []assembler.IngestPredicates{simpleIsDependencyGraph},
 		},
 		{
 			name:           "4: two levels of dependencies, no stopID and a limiting maxDepth at the first level",
@@ -604,7 +752,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth:       1,
 			expectedLen:    4,
 			expectedPkgs:   []string{"deb", "conan"},
-			graphInput:     "isDependencySimpleGraph",
+			graphInputs:    []assembler.IngestPredicates{simpleIsDependencyGraph},
 		},
 		{
 			name:           "5: isDependency indirect dependency",
@@ -615,7 +763,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth:       10,
 			expectedLen:    8,
 			expectedPkgs:   []string{"top", "deb", "conan", "bottom"},
-			graphInput:     "isDependencySimpleGraph",
+			graphInputs:    []assembler.IngestPredicates{simpleIsDependencyGraph},
 		},
 		{
 			name:           "6: isDependency no dependents returns no extra",
@@ -626,7 +774,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth:       10,
 			expectedLen:    2,
 			expectedPkgs:   []string{"top"},
-			graphInput:     "isDependencySimpleGraph",
+			graphInputs:    []assembler.IngestPredicates{simpleIsDependencyGraph},
 		},
 		{
 			name:           "7: direct isDependency not included in range",
@@ -637,7 +785,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth:       10,
 			expectedLen:    2,
 			expectedPkgs:   []string{"extraType"},
-			graphInput:     "isDependencyNotInRangeGraph",
+			graphInputs:    []assembler.IngestPredicates{isDependencyNotInRangeGraph},
 		},
 		{
 			name:              "8: hasSLSA simpleton case",
@@ -649,7 +797,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedLen:       6,
 			expectedPkgs:      []string{"pkgType1", "pkgType2"},
 			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2"},
-			graphInput:        "hasSLSASimpletonGraph",
+			graphInputs:       []assembler.IngestPredicates{hasSLSASimpletonGraph},
 		},
 		{
 			name:              "9: hasSLSA large case",
@@ -661,7 +809,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedLen:       9,
 			expectedPkgs:      []string{"pkgType1", "pkgType2", "pkgType4"},
 			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2", "testArtifactAlgorithm3"},
-			graphInput:        "simpleHasSLSAGraph",
+			graphInputs:       []assembler.IngestPredicates{simpleHasSLSAGraph},
 		},
 		{
 			name:              "10: hasSLSA case with no dependent isOccurrences",
@@ -673,7 +821,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedLen:       3,
 			expectedPkgs:      []string{"pkgType2"},
 			expectedArtifacts: []string{"testArtifactAlgorithm2"},
-			graphInput:        "simpleHasSLSAGraph",
+			graphInputs:       []assembler.IngestPredicates{simpleHasSLSAGraph},
 		},
 		{
 			name:              "11: hasSLSA two levels",
@@ -685,7 +833,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedLen:       12,
 			expectedPkgs:      []string{"pkgType5", "pkgType4", "pkgType2", "pkgType1"},
 			expectedArtifacts: []string{"testArtifactAlgorithm4", "testArtifactAlgorithm3", "testArtifactAlgorithm1", "testArtifactAlgorithm2"},
-			graphInput:        "simpleHasSLSAGraph",
+			graphInputs:       []assembler.IngestPredicates{simpleHasSLSAGraph},
 		},
 		{
 			name:              "12: hasSLSA & isDependency combined case",
@@ -697,7 +845,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedLen:       11,
 			expectedPkgs:      []string{"pkgType3", "pkgType2", "pkgType1", "pkgType4"},
 			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2", "testArtifactAlgorithm3"},
-			graphInput:        "isDependencyAndHasSLSAGraph",
+			graphInputs:       []assembler.IngestPredicates{simpleHasSLSAGraph, simpleIsDependencyGraph, isDependencyAndHasSLSARelationship},
 		},
 		{
 			name:           "13: should not explore certifyGood case",
@@ -708,18 +856,32 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth:       10,
 			expectedLen:    4,
 			expectedPkgs:   []string{"pkgTypeB", "pkgTypeA"},
-			graphInput:     "shouldNotBeExplored",
+			graphInputs:    []assembler.IngestPredicates{shouldNotBeExplored},
 		},
-		// TODO: add test cases for sourceName nodes
+		{
+			name:              "14: test sourceNames with hasSLSA",
+			startType:         "pkgType6",
+			startNamespace:    "pkgNamespace6",
+			startName:         "pkgName6",
+			startVersion:      ptrfrom.String("3.0.3"),
+			maxDepth:          10,
+			expectedLen:       6,
+			expectedPkgs:      []string{"pkgType6"},
+			expectedArtifacts: []string{"testArtifactAlgorithm5", "testArtifactAlgorithm6", "testArtifactAlgorithm7"},
+			expectedSrcs:      []string{"srcType2"},
+			graphInputs:       []assembler.IngestPredicates{sourceNameHasSLSAGraph},
+		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("Test case %s\n", tt.name), func(t *testing.T) {
-			err = ingestTestData(ctx, gqlClient, tt.graphInput)
+			for _, graphInput := range tt.graphInputs {
+				err = ingestTestData(ctx, gqlClient, graphInput)
 
-			if err != nil {
-				t.Errorf("Error ingesting test data: %s", err)
-				return
+				if err != nil {
+					t.Errorf("Error ingesting test data: %s", err)
+					return
+				}
 			}
 
 			var getPackageIDsValues []*string
@@ -735,11 +897,10 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				return
 			}
 
-			if getPackageIDsValues == nil || len(getPackageIDsValues) > 1 {
+			if len(getPackageIDsValues) > 1 {
 				t.Errorf("Cannot locate matching startID input\n")
 				return
 			}
-
 			startID = *getPackageIDsValues[0]
 
 			var stopID *string
@@ -795,6 +956,16 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				expectedArtifactIDs = append(expectedArtifactIDs, artifactID)
 			}
 
+			var expectedSrcIDs []string
+			for _, src := range tt.expectedSrcs {
+				srcID, err := getSrcID(ctx, gqlClient, src)
+				if err != nil {
+					t.Errorf("%s \n", err)
+				}
+
+				expectedSrcIDs = append(expectedSrcIDs, srcID)
+			}
+
 			for gotID, node := range gotMap {
 				if stopID == nil && tt.maxDepth == 10 {
 					if !node.Expanded {
@@ -819,8 +990,16 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 					}
 				}
 
+				inExpectedSrcs := false
+				for _, expectedID := range expectedSrcIDs {
+					if expectedID == gotID {
+						inExpectedSrcs = true
+						break
+					}
+				}
+
 				// if not present in expected packages or in expected artifacts
-				if !(inExpectedPkgs || inExpectedArtifacts) {
+				if !(inExpectedPkgs || inExpectedArtifacts || inExpectedSrcs) {
 					t.Errorf("This ID appears in the returned map but is not expected: %s \n", gotID)
 					return
 				}
@@ -895,6 +1074,7 @@ func getPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *stri
 			Type: nodeType,
 		}
 	}
+
 	pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
 
 	if err != nil {
@@ -937,4 +1117,22 @@ func getArtifactID(ctx context.Context, gqlClient graphql.Client, algorithm stri
 	}
 
 	return artifactResponse.Artifacts[0].Id, nil
+}
+
+func getSrcID(ctx context.Context, gqlClient graphql.Client, srcType string) (string, error) {
+	srcFilter := model.SourceSpec{
+		Type: &srcType,
+	}
+
+	srcResponse, err := model.Sources(ctx, gqlClient, &srcFilter)
+
+	if err != nil {
+		return "", fmt.Errorf("Error filtering for expected source: %s\n", err)
+	}
+
+	if len(srcResponse.Sources) != 1 {
+		return "", fmt.Errorf("Could not find the matching source\n")
+	}
+
+	return srcResponse.Sources[0].Namespaces[0].Names[0].Id, nil
 }
