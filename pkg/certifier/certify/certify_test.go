@@ -27,7 +27,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
-	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
@@ -60,7 +59,7 @@ func newMockUnknownQuery() certifier.QueryComponents {
 
 // GetComponents returns components for test
 func (q *mockUnknownQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
-	compChan <- assembler.AttestationNode{}
+	compChan <- nil
 	return nil
 }
 

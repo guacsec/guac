@@ -19,7 +19,6 @@ import (
 	_ "embed"
 	"encoding/base64"
 	"encoding/json"
-	"reflect"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -1941,117 +1940,6 @@ For the update to take effect, all services linked to the OpenSSL library must b
 		},
 	}
 )
-
-func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
-	if len(slice1) != len(slice2) {
-		return false
-	}
-
-	result := true
-
-	for _, node1 := range slice1 {
-		e := false
-		for _, node2 := range slice2 {
-			if node1.Type() == "Package" && node2.Type() == "Package" {
-				if node1.(assembler.PackageNode).Name == node2.(assembler.PackageNode).Name {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Artifact" && node2.Type() == "Artifact" {
-				if node1.(assembler.ArtifactNode).Name == node2.(assembler.ArtifactNode).Name {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Attestation" && node2.Type() == "Attestation" {
-				if node1.(assembler.AttestationNode).FilePath == node2.(assembler.AttestationNode).FilePath {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Builder" && node2.Type() == "Builder" {
-				if node1.(assembler.BuilderNode).BuilderId == node2.(assembler.BuilderNode).BuilderId {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Identity" && node2.Type() == "Identity" {
-				if node1.(assembler.IdentityNode).ID == node2.(assembler.IdentityNode).ID {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Vulnerability" && node2.Type() == "Vulnerability" {
-				if node1.(assembler.VulnerabilityNode).ID == node2.(assembler.VulnerabilityNode).ID {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			}
-		}
-		if !e {
-			result = false
-			break
-		}
-	}
-	return result
-}
-
-func GuacEdgeSliceEqual(slice1, slice2 []assembler.GuacEdge) bool {
-	if len(slice1) != len(slice2) {
-		return false
-	}
-
-	result := true
-	for _, edge1 := range slice1 {
-		e := false
-		for _, edge2 := range slice2 {
-			if edge1.Type() == "DependsOn" && edge2.Type() == "DependsOn" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "Contains" && edge2.Type() == "Contains" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "Attestation" && edge2.Type() == "Attestation" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "Identity" && edge2.Type() == "Identity" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "BuiltBy" && edge2.Type() == "BuiltBy" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "Vulnerable" && edge2.Type() == "Vulnerable" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			}
-		}
-		if !e {
-			result = false
-			break
-		}
-	}
-	return result
-}
 
 var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.EquateEmpty(),

@@ -24,33 +24,6 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
-// ArtifactNode is a node that represents an artifact
-type artifactNode struct {
-	algorithm string
-	digest    string
-}
-
-func (an *artifactNode) Type() string {
-	return "Artifact"
-}
-
-func (an *artifactNode) Properties() map[string]interface{} {
-	properties := make(map[string]interface{})
-	properties["algorithm"] = an.algorithm
-	properties["digest"] = strings.ToLower(an.digest)
-	return properties
-}
-
-func (an *artifactNode) PropertyNames() []string {
-	fields := []string{"algorithm", "digest"}
-	return fields
-}
-
-func (an *artifactNode) IdentifiablePropertyNames() []string {
-	// An artifact can be uniquely identified by algorithm and digest
-	return []string{"algorithm", "digest"}
-}
-
 func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()

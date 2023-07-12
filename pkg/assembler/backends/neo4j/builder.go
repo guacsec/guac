@@ -23,30 +23,6 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
-// builderNode represents the builder
-type builderNode struct {
-	uri string
-}
-
-func (bn builderNode) Type() string {
-	return "Builder"
-}
-
-func (bn builderNode) Properties() map[string]interface{} {
-	properties := make(map[string]interface{})
-	properties["uri"] = bn.uri
-	return properties
-}
-
-func (bn builderNode) PropertyNames() []string {
-	fields := []string{"uri"}
-	return fields
-}
-
-func (bn builderNode) IdentifiablePropertyNames() []string {
-	return []string{"uri"}
-}
-
 func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
