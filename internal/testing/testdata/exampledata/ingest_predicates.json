@@ -492,7 +492,7 @@
         "subpath": ""
       },
       "pkgMatchFlag": {
-        "pkg": ""
+        "pkg": "SPECIFIC_VERSION"
       },
       "src": {
         "type": "git",
@@ -520,7 +520,7 @@
         "subpath": ""
       },
       "pkgMatchFlag": {
-        "pkg": ""
+        "pkg": "SPECIFIC_VERSION"
       },
       "certifyBad": {
         "justification": "bad package",
@@ -571,7 +571,7 @@
         "subpath": ""
       },
       "pkgMatchFlag": {
-        "pkg": ""
+        "pkg": "SPECIFIC_VERSION"
       },
       "certifyGood": {
         "justification": "good package",

@@ -2239,7 +2239,8 @@ For the update to take effect, all services linked to the OpenSSL library must b
 		},
 		CertifyBad: []assembler.CertifyBadIngest{
 			{
-				Pkg: topLevelPack,
+				Pkg:          topLevelPack,
+				PkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
 				CertifyBad: &generated.CertifyBadInputSpec{
 					Justification: "bad package",
 				},
@@ -2267,7 +2268,8 @@ For the update to take effect, all services linked to the OpenSSL library must b
 		},
 		CertifyGood: []assembler.CertifyGoodIngest{
 			{
-				Pkg: topLevelPack,
+				Pkg:          topLevelPack,
+				PkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
 				CertifyGood: &generated.CertifyGoodInputSpec{
 					Justification: "good package",
 				},
@@ -2295,7 +2297,8 @@ For the update to take effect, all services linked to the OpenSSL library must b
 		},
 		HasSourceAt: []assembler.HasSourceAtIngest{
 			{
-				Pkg: topLevelPack,
+				Pkg:          topLevelPack,
+				PkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
 				Src: &generated.SourceInputSpec{
 					Type:      "git",
 					Namespace: "github.com/kubernetes",
