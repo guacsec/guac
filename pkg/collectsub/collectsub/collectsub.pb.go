@@ -98,6 +98,7 @@ type CollectEntry struct {
 
 	Type  CollectDataType `protobuf:"varint,1,opt,name=type,proto3,enum=guacsec.guac.collect_subscriber.schema.CollectDataType" json:"type,omitempty"`
 	Value string          `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	AsOf  int64           `protobuf:"int64,3,opt,name=as_of,proto3" json:"as_of,omitempty"`
 }
 
 func (x *CollectEntry) Reset() {

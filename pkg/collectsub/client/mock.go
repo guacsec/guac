@@ -45,5 +45,5 @@ func (c *MockClient) AddCollectEntries(ctx context.Context, entries []*pb.Collec
 }
 
 func (c *MockClient) GetCollectEntries(ctx context.Context, filters []*pb.CollectEntryFilter) ([]*pb.CollectEntry, error) {
-	return c.db.GetCollectEntries(ctx, filters)
+	return c.db.GetCollectEntries(ctx, filters, 0)
 }

@@ -23,5 +23,5 @@ import (
 
 type CollectSubscriberDb interface {
 	AddCollectEntries(context.Context, []*pb.CollectEntry) error
-	GetCollectEntries(context.Context, []*pb.CollectEntryFilter) ([]*pb.CollectEntry, error)
+	GetCollectEntries(context.Context, []*pb.CollectEntryFilter, int64) ([]*pb.CollectEntry, error)
 }

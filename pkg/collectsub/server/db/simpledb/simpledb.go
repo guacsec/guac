@@ -18,6 +18,7 @@ package simpledb
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/gobwas/glob"
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
@@ -52,15 +53,18 @@ func (s *simpleDb) containsEntry(e *pb.CollectEntry) bool {
 func (s *simpleDb) AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+	var asOf int64
+	asOf = time.Now().Unix()
 	for _, e := range entries {
 		if e != nil && !s.containsEntry(e) {
+			e.AsOf = asOf
 			s.collectEntries = append(s.collectEntries, e)
 		}
 	}
 	return nil
 }
 
-func (s *simpleDb) GetCollectEntries(ctx context.Context, filters []*pb.CollectEntryFilter) ([]*pb.CollectEntry, error) {
+func (s *simpleDb) GetCollectEntries(ctx context.Context, filters []*pb.CollectEntryFilter, sinceTime int64) ([]*pb.CollectEntry, error) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	var filterMatchers []glob.Glob
@@ -70,11 +74,13 @@ func (s *simpleDb) GetCollectEntries(ctx context.Context, filters []*pb.CollectE
 
 	var retList []*pb.CollectEntry
 	for _, e := range s.collectEntries {
-		for i, f := range filters {
-			matched := filterMatchers[i].Match(e.Value)
-			if e.Type == f.Type && matched {
-				retList = append(retList, e)
-				break
+		if e.AsOf >= sinceTime {
+			for i, f := range filters {
+				matched := filterMatchers[i].Match(e.Value)
+				if e.Type == f.Type && matched {
+					retList = append(retList, e)
+					break
+				}
 			}
 		}
 	}
