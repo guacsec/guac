@@ -53,8 +53,7 @@ func (s *simpleDb) containsEntry(e *pb.CollectEntry) bool {
 func (s *simpleDb) AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	var asOf int64
-	asOf = time.Now().Unix()
+	var asOf = time.Now().Unix()
 	for _, e := range entries {
 		if e != nil && !s.containsEntry(e) {
 			e.AsOf = asOf
