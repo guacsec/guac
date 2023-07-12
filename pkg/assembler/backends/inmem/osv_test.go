@@ -153,3 +153,35 @@ func TestOSV(t *testing.T) {
 		})
 	}
 }
+
+func TestIngestOSVs(t *testing.T) {
+	tests := []struct {
+		name    string
+		ingests []*model.OSVInputSpec
+		exp     []*model.Osv
+	}{{
+		name:    "Multiple",
+		ingests: []*model.OSVInputSpec{o1, o2, o3},
+		exp:     []*model.Osv{o1out, o2out, o3out},
+	}}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	ctx := context.Background()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			b, err := inmem.GetBackend(nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			got, err := b.IngestOSVs(ctx, test.ingests)
+			if err != nil {
+				t.Fatalf("ingest error: %v", err)
+				return
+			}
+			if diff := cmp.Diff(test.exp, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

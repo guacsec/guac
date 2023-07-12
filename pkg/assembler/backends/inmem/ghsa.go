@@ -94,7 +94,15 @@ func (n *ghsaNode) setVexLinks(id uint32) {
 // Ingest GHSA
 
 func (c *demoClient) IngestGHSAs(ctx context.Context, ghsas []*model.GHSAInputSpec) ([]*model.Ghsa, error) {
-	return []*model.Ghsa{}, fmt.Errorf("not implemented: IngestGHSAs")
+	var modelGHSAs []*model.Ghsa
+	for _, ghsa := range ghsas {
+		modelGHSA, err := c.IngestGhsa(ctx, ghsa)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestGhsa failed with err: %v", err)
+		}
+		modelGHSAs = append(modelGHSAs, modelGHSA)
+	}
+	return modelGHSAs, nil
 }
 
 func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec) (*model.Ghsa, error) {

@@ -98,7 +98,15 @@ func (n *osvNode) setVexLinks(id uint32) {
 // Ingest OSV
 
 func (c *demoClient) IngestOSVs(ctx context.Context, osvs []*model.OSVInputSpec) ([]*model.Osv, error) {
-	return []*model.Osv{}, fmt.Errorf("not implemented: IngestOSVs")
+	var modelOSVs []*model.Osv
+	for _, osv := range osvs {
+		modelOSV, err := c.IngestOsv(ctx, osv)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestOsv failed with err: %v", err)
+		}
+		modelOSVs = append(modelOSVs, modelOSV)
+	}
+	return modelOSVs, nil
 }
 
 func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (*model.Osv, error) {

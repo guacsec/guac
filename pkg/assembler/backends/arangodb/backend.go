@@ -61,6 +61,26 @@ const (
 	srcHasNameStr      string = "srcHasName"
 	srcNamesStr        string = "srcNames"
 
+	// builder collections
+
+	buildersStr string = "builders"
+
+	// artifact collection
+
+	artifactsStr string = "artifacts"
+
+	// cve collection
+
+	cvesStr string = "cves"
+
+	// ghsa collection
+
+	ghsasStr string = "ghsas"
+
+	// osv collection
+
+	osvsStr string = "osvs"
+
 	// isDependency collections
 
 	isDependencyEdgesStr string = "isDependencyEdges"
@@ -76,26 +96,20 @@ const (
 	hasSLSAEdgesStr string = "hasSLSAEdges"
 	hasSLSAsStr     string = "hasSLSAs"
 
-	// builder collections
-
-	buildersStr string = "builders"
-
 	// hashEquals collections
 
 	hashEqualsEdgesStr string = "hashEqualsEdges"
-
-	// artifact collection
-
-	artifactsStr string = "artifacts"
+	hashEqualsStr      string = "hashEquals"
 
 	// hasSBOM collection
 
 	hasSBOMEdgesStr string = "hasSBOMEdges"
 	hasSBOMsStr     string = "hasSBOMs"
 
-	// hashEqual collection
+	// certifyVuln collection
 
-	hashEqualsStr string = "hashEquals"
+	certifyVulnEdgesStr string = "certifyVulnEdges"
+	certifyVulnsStr     string = "certifyVulns"
 )
 
 type ArangoConfig struct {
@@ -303,10 +317,18 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// repeat this for the collections where an edge is going into
 		hasSBOMEdges.To = []string{hasSBOMsStr}
 
+		var certifyVulnEdges driver.EdgeDefinition
+		certifyVulnEdges.Collection = certifyVulnEdgesStr
+		// define a set of collections where an edge is going out...
+		certifyVulnEdges.From = []string{pkgVersionsStr, certifyVulnsStr}
+
+		// repeat this for the collections where an edge is going into
+		certifyVulnEdges.To = []string{certifyVulnsStr, cvesStr, ghsasStr, osvsStr}
+
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
 		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName,
-			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges, hasSLSAEdges}
+			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges, hasSLSAEdges, certifyVulnEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -325,6 +347,18 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		if err := createIndexPerCollection(ctx, db, buildersStr, []string{"uri"}, true, "byUri"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for builders: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, cvesStr, []string{"cveID"}, false, "byCveID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for cves: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, ghsasStr, []string{"ghsaID"}, false, "byGhsaID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for ghsas: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, osvsStr, []string{"osvID"}, false, "byOsvID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for osvs: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID"}, true, "byArtIDEqualArtID"); err != nil {

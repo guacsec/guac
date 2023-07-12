@@ -167,3 +167,35 @@ func TestCVE(t *testing.T) {
 		})
 	}
 }
+
+func TestIngestCVEs(t *testing.T) {
+	tests := []struct {
+		name    string
+		ingests []*model.CVEInputSpec
+		exp     []*model.Cve
+	}{{
+		name:    "Multiple",
+		ingests: []*model.CVEInputSpec{c1, c2, c3},
+		exp:     []*model.Cve{c1out, c2out, c3out},
+	}}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	ctx := context.Background()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			b, err := inmem.GetBackend(nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			got, err := b.IngestCVEs(ctx, test.ingests)
+			if err != nil {
+				t.Fatalf("ingest error: %v", err)
+				return
+			}
+			if diff := cmp.Diff(test.exp, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
