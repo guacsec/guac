@@ -150,7 +150,7 @@ type testCall func(ctx context.Context, db types.CollectSubscriberDb) error
 
 func getFn(filters []*pb.CollectEntryFilter, expectErr bool, expect []*pb.CollectEntry) testCall {
 	return func(ctx context.Context, db types.CollectSubscriberDb) error {
-		entries, err := db.GetCollectEntries(ctx, filters)
+		entries, err := db.GetCollectEntries(ctx, filters, 0)
 		if err != nil != expectErr {
 			return fmt.Errorf("expected err status %v, got %v", expectErr, err != nil)
 		}
