@@ -78,9 +78,26 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) < 1 {
 		// TODO: handle case where there are circular dependencies that introduce more versions to the version list on a node that requires revisiting
+		pkgFilter := model.PkgSpec{
+			Type:      &nodePkg.AllPkgTree.Type,
+			Namespace: &nodePkg.AllPkgTree.Namespaces[0].Namespace,
+			Name:      &nodePkg.AllPkgTree.Namespaces[0].Names[0].Name,
+		}
+
+		pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
+
+		if err != nil {
+			return nil, fmt.Errorf("error finding inputted node")
+		}
+
 		var versionsList []string
-		for _, versionEntry := range nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions {
+		for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+			fmt.Printf("%s \n", versionEntry)
 			versionsList = append(versionsList, versionEntry.Version)
+			q.nodeMap[versionEntry.Id] = DfsNode{
+				Type: PackageVersion,
+			}
+			q.queue = append(q.queue, versionEntry.Id)
 		}
 		q.nodeMap[startID] = DfsNode{
 			Type:         PackageName,
@@ -92,8 +109,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		var versionsList []string
 		versionsList = append(versionsList, nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
 		q.nodeMap[startID] = DfsNode{
-			Type:         PackageVersion,
-			nodeVersions: versionsList,
+			Type: PackageVersion,
 		}
 
 		q.nodeMap[nodePkg.AllPkgTree.Namespaces[0].Names[0].Id] = DfsNode{
@@ -150,11 +166,22 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			if err != nil {
 				return err
 			}
+		case *model.NeighborsNeighborsHasSourceAt:
+			exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
 		}
-	case PackageVersion, SourceName:
+	case PackageVersion:
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsIsOccurrence:
 			exploreIsOccurrenceFromSubject(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsHasSourceAt:
+			exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
+		}
+	case SourceName:
+		switch neighbor := neighbor.(type) {
+		case *model.NeighborsNeighborsIsOccurrence:
+			exploreIsOccurrenceFromSubject(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsHasSourceAt:
+			exploreHasSourceAtFromSource(ctx, gqlClient, q, *neighbor)
 		}
 	case Artifact:
 		switch neighbor := neighbor.(type) {
@@ -204,6 +231,21 @@ func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlClient graphql.Clie
 	case *model.AllIsOccurrencesTreeSubjectSource:
 		q.addNodeToQueue(SourceName, nil, subject.Namespaces[0].Names[0].Id)
 	}
+}
+
+// TODO: implement this function
+func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) {
+	// Step 1: Add packageVersion(s) attached to the hasSourceAt to the queue
+	// Step 2: Add the packageName attached to the hasSourceAt to the queue with associated versions
+	// Note: Meaning, if the hasSourceAt was attached to a specific version, that version only will be added to the queue and the packageName
+	// But, if the hasSourceAt was attached to a packageName, all version will be added to the queue and the packageName
+	// This will be handled implicitly
+}
+
+// TODO: implement this function
+func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) {
+	// Step 1: Add sourceName added to the HasSourceAt to the nodeMap but not to the queue
+	// It may be useful for patch planning, but not necessary to explore
 }
 
 func (q *queueValues) addNodeToQueue(nodeType NodeType, versions []string, id string) {
