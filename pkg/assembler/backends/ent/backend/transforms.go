@@ -94,6 +94,10 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 	}
 }
 
+func toModelSourceName(s *ent.SourceName) *model.Source {
+	return toModelSource(backReferenceSourceName(s))
+}
+
 func toModelSource(s *ent.SourceType) *model.Source {
 	if s == nil {
 		return nil

@@ -7,7 +7,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 )
 
-func WithinTX[T any](ctx context.Context, entClient *ent.Client, next func(context.Context) (*T, error)) (*T, error) {
+func WithinTX[T any](ctx context.Context, entClient *ent.Client, exec func(context.Context) (*T, error)) (*T, error) {
 	tx, err := entClient.BeginTx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelDefault,
 	})
@@ -24,7 +24,7 @@ func WithinTX[T any](ctx context.Context, entClient *ent.Client, next func(conte
 		}
 	}()
 
-	result, err := next(ctx)
+	result, err := exec(ctx)
 	if err != nil {
 		_ = tx.Rollback()
 		return nil, err

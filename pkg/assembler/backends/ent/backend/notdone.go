@@ -8,10 +8,6 @@ import (
 
 // Retrieval read-only queries for software trees
 
-func (b *EntBackend) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	return nil, nil
-}
-
 // Retrieval read-only queries for evidence trees
 func (b *EntBackend) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
 	return nil, nil
@@ -23,9 +19,6 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, certifyVEXStatemen
 	return nil, nil
 }
 
-func (b *EntBackend) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
-	return nil, nil
-}
 func (b *EntBackend) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	return nil, nil
 }
@@ -38,10 +31,6 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 	return nil, nil
 }
 func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-	return nil, nil
-}
-
-func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	return nil, nil
 }
 

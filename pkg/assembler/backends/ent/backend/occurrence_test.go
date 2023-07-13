@@ -162,6 +162,7 @@ var s2 = &model.SourceInputSpec{
 	Type:      "git",
 	Namespace: "github.com/bob",
 	Name:      "bobsrepo",
+	Commit:    ptrfrom.String("5e7c41f"),
 }
 var s2out = &model.Source{
 	Type: "git",
@@ -170,7 +171,7 @@ var s2out = &model.Source{
 		Names: []*model.SourceName{{
 			Name:   "bobsrepo",
 			Tag:    ptrfrom.String(""),
-			Commit: ptrfrom.String(""),
+			Commit: ptrfrom.String("5e7c41f"),
 		}},
 	}},
 }

@@ -14,7 +14,7 @@ type Suite struct {
 	testutils.Suite
 }
 
-func TestSoftwareTreeSuite(t *testing.T) {
+func TestEntBackendSuite(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
 
