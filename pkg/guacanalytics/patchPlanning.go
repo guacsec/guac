@@ -59,7 +59,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 	nodePkg, ok := startNode.Node.(*model.NodeNodePackage)
 
 	if !ok {
-		return nil, fmt.Errorf("Not a package")
+		return nil, fmt.Errorf("not a package")
 	}
 
 	q := queueValues{
@@ -69,11 +69,11 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 
 	// TODO: add functionality to start with other nodes?
 	if len(nodePkg.AllPkgTree.Namespaces) < 1 {
-		return nil, fmt.Errorf("Start by inputting a packageName or packageVersion node")
+		return nil, fmt.Errorf("start by inputting a packageName or packageVersion node")
 	}
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names) < 1 {
-		return nil, fmt.Errorf("Start by inputting a packageName or packageVersion node")
+		return nil, fmt.Errorf("start by inputting a packageName or packageVersion node")
 	}
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) < 1 {

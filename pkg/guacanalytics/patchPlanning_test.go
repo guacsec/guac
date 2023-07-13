@@ -468,18 +468,18 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, graph assemb
 		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting package: %s\n", err)
+			return fmt.Errorf("error in ingesting package: %s\n", err)
 		}
 
 		_, err = model.IngestPackage(context.Background(), client, *ingest.DepPkg)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting dependent package: %s\n", err)
+			return fmt.Errorf("error in ingesting dependent package: %s\n", err)
 		}
 		_, err = model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting isDependency: %s\n", err)
+			return fmt.Errorf("error in ingesting isDependency: %s\n", err)
 		}
 	}
 	return nil
@@ -490,19 +490,19 @@ func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.I
 		_, err := model.IngestBuilder(context.Background(), client, *ingest.Builder)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting Builder for HasSlsa: %v\n", err)
+			return fmt.Errorf("error in ingesting Builder for HasSlsa: %v\n", err)
 		}
 
 		_, err = model.IngestMaterials(context.Background(), client, ingest.Materials)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting Material for HasSlsa: %v\n", err)
+			return fmt.Errorf("error in ingesting Material for HasSlsa: %v\n", err)
 		}
 
 		_, err = model.SLSAForArtifact(context.Background(), client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting HasSlsa: %v\n", err)
+			return fmt.Errorf("error in ingesting HasSlsa: %v\n", err)
 		}
 	}
 	return nil
@@ -520,13 +520,13 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, graph assemb
 		}
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting pkg/src IsOccurrence: %v\n", err)
+			return fmt.Errorf("error in ingesting pkg/src IsOccurrence: %v\n", err)
 		}
 
 		_, err = model.IngestArtifact(context.Background(), client, *ingest.Artifact)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting artifact for IsOccurrence: %v\n", err)
+			return fmt.Errorf("error in ingesting artifact for IsOccurrence: %v\n", err)
 		}
 
 		if ingest.Src != nil {
@@ -536,7 +536,7 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, graph assemb
 		}
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting isOccurrence: %v\n", err)
+			return fmt.Errorf("error in ingesting isOccurrence: %v\n", err)
 		}
 	}
 	return nil
@@ -547,13 +547,13 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, graph assembl
 		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting Package for CertifyGood: %v\n", err)
+			return fmt.Errorf("error in ingesting Package for CertifyGood: %v\n", err)
 		}
 
 		_, err = model.CertifyGoodPkg(context.Background(), client, *ingest.Pkg, &ingest.PkgMatchFlag, *ingest.CertifyGood)
 
 		if err != nil {
-			return fmt.Errorf("Error in ingesting CertifyGood: %v\n", err)
+			return fmt.Errorf("error in ingesting CertifyGood: %v\n", err)
 		}
 	}
 	return nil
@@ -594,7 +594,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	server, err := startTestServer()
 
 	if err != nil {
-		t.Errorf("Error starting server: %s \n", err)
+		t.Errorf("error starting server: %s \n", err)
 		os.Exit(1)
 	}
 
@@ -793,7 +793,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				err = ingestTestData(ctx, gqlClient, graphInput)
 
 				if err != nil {
-					t.Errorf("Error ingesting test data: %s", err)
+					t.Errorf("error ingesting test data: %s", err)
 					return
 				}
 			}
@@ -807,12 +807,12 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Errorf("Error finding startNode: %s", err)
+				t.Errorf("error finding startNode: %s", err)
 				return
 			}
 
 			if len(getPackageIDsValues) > 1 {
-				t.Errorf("Cannot locate matching startID input\n")
+				t.Errorf("cannot locate matching startID input\n")
 				return
 			}
 			startID = *getPackageIDsValues[0]
@@ -826,12 +826,12 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				if err != nil {
-					t.Errorf("Error finding stopNode: %s", err)
+					t.Errorf("error finding stopNode: %s", err)
 					return
 				}
 
 				if getPackageIDsValues == nil || len(getPackageIDsValues) > 1 {
-					t.Errorf("Cannot locate matching stopID input\n")
+					t.Errorf("cannot locate matching stopID input\n")
 					return
 				}
 
@@ -845,14 +845,14 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(tt.expectedLen, len(gotMap)); len(diff) > 0 {
-				t.Errorf("Number of map entries (-want +got):\n%s", diff)
+				t.Errorf("number of map entries (-want +got):\n%s", diff)
 			}
 
 			var expectedPkgIDs []string
 			for _, pkg := range tt.expectedPkgs {
 				pkgIDs, err := getPackageIDs(ctx, gqlClient, &pkg, "", "", nil, false, false)
 				if err != nil {
-					t.Errorf("Expected package %s not found: %s\n", pkg, err)
+					t.Errorf("expected package %s not found: %s\n", pkg, err)
 				}
 
 				for _, ID := range pkgIDs {
@@ -883,7 +883,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			for gotID, node := range gotMap {
 				if stopID == nil && tt.maxDepth == 10 {
 					if !node.Expanded {
-						t.Errorf("All nodes should be expanded but this node was not: node %s \n", gotID)
+						t.Errorf("all nodes should be expanded but this node was not: node %s \n", gotID)
 					}
 				}
 
@@ -914,7 +914,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 				// if not present in expected packages or in expected artifacts
 				if !(inExpectedPkgs || inExpectedArtifacts || inExpectedSrcs) {
-					t.Errorf("This ID appears in the returned map but is not expected: %s \n", gotID)
+					t.Errorf("this ID appears in the returned map but is not expected: %s \n", gotID)
 					return
 				}
 			}
@@ -962,7 +962,7 @@ func getGraphqlTestServer() (*handler.Server, error) {
 	args := inmem.DemoCredentials{}
 	backend, err := inmem.GetBackend(&args)
 	if err != nil {
-		return nil, fmt.Errorf("Error creating inmem backend: %w", err)
+		return nil, fmt.Errorf("error creating inmem backend: %w", err)
 	}
 
 	topResolver = resolvers.Resolver{Backend: backend}
@@ -992,7 +992,7 @@ func getPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *stri
 	pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
 
 	if err != nil {
-		return nil, fmt.Errorf("Error getting id for test case: %s\n", err)
+		return nil, fmt.Errorf("error getting id for test case: %s\n", err)
 	}
 	var foundIDs []*string
 
@@ -1009,7 +1009,7 @@ func getPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *stri
 	}
 
 	if len(foundIDs) < 1 {
-		return nil, fmt.Errorf("No matching nodes found\n")
+		return nil, fmt.Errorf("no matching nodes found\n")
 	}
 
 	return foundIDs, nil
@@ -1023,11 +1023,11 @@ func getArtifactID(ctx context.Context, gqlClient graphql.Client, algorithm stri
 	artifactResponse, err := model.Artifacts(ctx, gqlClient, &artifactFilter)
 
 	if err != nil {
-		return "", fmt.Errorf("Error filtering for expected artifact: %s\n", err)
+		return "", fmt.Errorf("error filtering for expected artifact: %s\n", err)
 	}
 
 	if len(artifactResponse.Artifacts) != 1 {
-		return "", fmt.Errorf("Could not find the matching artifact\n")
+		return "", fmt.Errorf("could not find the matching artifact\n")
 	}
 
 	return artifactResponse.Artifacts[0].Id, nil
@@ -1041,11 +1041,11 @@ func getSrcID(ctx context.Context, gqlClient graphql.Client, srcType string) (st
 	srcResponse, err := model.Sources(ctx, gqlClient, &srcFilter)
 
 	if err != nil {
-		return "", fmt.Errorf("Error filtering for expected source: %s\n", err)
+		return "", fmt.Errorf("error filtering for expected source: %s\n", err)
 	}
 
 	if len(srcResponse.Sources) != 1 {
-		return "", fmt.Errorf("Could not find the matching source\n")
+		return "", fmt.Errorf("could not find the matching source\n")
 	}
 
 	return srcResponse.Sources[0].Namespaces[0].Names[0].Id, nil
