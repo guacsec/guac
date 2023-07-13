@@ -179,34 +179,34 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlClient graphql.Client
 		return nil
 	}
 
-	addNodeToQueue(q, PackageVersion, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
-	addNodeToQueue(q, PackageName, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Id)
+	q.addNodeToQueue(PackageVersion, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
+	q.addNodeToQueue(PackageName, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Id)
 
 	return nil
 }
 
 func exploreIsOccurrenceFromSubject(ctx context.Context, gqlClient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {
-	addNodeToQueue(q, Artifact, nil, isOccurrence.Artifact.Id)
+	q.addNodeToQueue(Artifact, nil, isOccurrence.Artifact.Id)
 }
 
 func exploreHasSLSAFromArtifact(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSLSA model.NeighborsNeighborsHasSLSA) {
 	// Check that the subject is not the node inputted itself and being re-added to the queue unnecessarily
 	if q.now != hasSLSA.Subject.Id {
-		addNodeToQueue(q, Artifact, nil, hasSLSA.Subject.Id)
+		q.addNodeToQueue(Artifact, nil, hasSLSA.Subject.Id)
 	}
 }
 
 func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlClient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {
 	switch subject := isOccurrence.Subject.(type) {
 	case *model.AllIsOccurrencesTreeSubjectPackage:
-		addNodeToQueue(q, PackageVersion, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Versions[0].Id)
-		addNodeToQueue(q, PackageName, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Id)
+		q.addNodeToQueue(PackageVersion, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Versions[0].Id)
+		q.addNodeToQueue(PackageName, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Id)
 	case *model.AllIsOccurrencesTreeSubjectSource:
-		addNodeToQueue(q, SourceName, nil, subject.Namespaces[0].Names[0].Id)
+		q.addNodeToQueue(SourceName, nil, subject.Namespaces[0].Names[0].Id)
 	}
 }
 
-func addNodeToQueue(q *queueValues, nodeType NodeType, versions []string, id string) {
+func (q *queueValues) addNodeToQueue(nodeType NodeType, versions []string, id string) {
 	node, seen := q.nodeMap[id]
 
 	if !seen {
