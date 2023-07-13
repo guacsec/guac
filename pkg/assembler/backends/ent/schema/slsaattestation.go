@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -47,8 +48,10 @@ func (SLSAAttestation) Edges() []ent.Edge {
 
 // TODO: (ivanvanderbyl) Add indexes for the SLSAAttestation entity.
 
-// func (SLSAAttestation) Indexes() []ent.Index {
-// 	return []ent.Index{
-// 		index.Fields("origin", "collector").Unique(),
-// 	}
-// }
+func (SLSAAttestation) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("subject_id", "origin", "collector", "build_type", "slsa_version", "built_by_id").Unique(),
+		index.Fields("started_on"),
+		index.Fields("finished_on"),
+	}
+}

@@ -22,9 +22,14 @@ var (
 		PrimaryKey: []*schema.Column{ArtifactsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "artifact_algorithm_digest",
+				Name:    "artifact_algorithm",
+				Unique:  false,
+				Columns: []*schema.Column{ArtifactsColumns[1]},
+			},
+			{
+				Name:    "artifact_digest",
 				Unique:  true,
-				Columns: []*schema.Column{ArtifactsColumns[1], ArtifactsColumns[2]},
+				Columns: []*schema.Column{ArtifactsColumns[2]},
 			},
 		},
 	}
@@ -475,6 +480,23 @@ var (
 				Columns:    []*schema.Column{SlsaAttestationsColumns[9]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "slsaattestation_subject_id_origin_collector_build_type_slsa_version_built_by_id",
+				Unique:  true,
+				Columns: []*schema.Column{SlsaAttestationsColumns[9], SlsaAttestationsColumns[6], SlsaAttestationsColumns[7], SlsaAttestationsColumns[1], SlsaAttestationsColumns[3], SlsaAttestationsColumns[8]},
+			},
+			{
+				Name:    "slsaattestation_started_on",
+				Unique:  false,
+				Columns: []*schema.Column{SlsaAttestationsColumns[4]},
+			},
+			{
+				Name:    "slsaattestation_finished_on",
+				Unique:  false,
+				Columns: []*schema.Column{SlsaAttestationsColumns[5]},
 			},
 		},
 	}

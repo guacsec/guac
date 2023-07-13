@@ -37,3 +37,6 @@ func Float64(v float64) *float64 { return &v }
 
 // String helps get string pointers for test literals
 func String(v string) *string { return &v }
+
+// Any helps get pointers from any type for test literals
+func Any[T any](v T) *T { return &v }

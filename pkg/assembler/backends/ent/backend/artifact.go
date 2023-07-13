@@ -41,8 +41,8 @@ func artifactQueryInputPredicates(spec model.ArtifactInputSpec) predicate.Artifa
 func artifactQueryPredicates(spec *model.ArtifactSpec) predicate.Artifact {
 	return artifact.And(
 		optionalPredicate(spec.ID, IDEQ),
-		optionalPredicate(toLowerPtr(spec.Algorithm), artifact.AlgorithmEQ),
-		optionalPredicate(toLowerPtr(spec.Digest), artifact.DigestEQ),
+		optionalPredicate(spec.Algorithm, artifact.AlgorithmEqualFold),
+		optionalPredicate(spec.Digest, artifact.DigestEqualFold),
 	)
 }
 
@@ -97,7 +97,7 @@ func ingestArtifacts(ctx context.Context, client *ent.Client, artifacts []*model
 
 	err := client.Artifact.CreateBulk(creates...).
 		OnConflict(
-			sql.ConflictColumns(artifact.FieldAlgorithm, artifact.FieldDigest),
+			sql.ConflictColumns(artifact.FieldDigest),
 		).
 		UpdateNewValues().
 		Exec(ctx)
