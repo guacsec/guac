@@ -30,11 +30,6 @@ func (b *EntBackend) Scorecards(ctx context.Context, certifyScorecardSpec *model
 	return nil, nil
 }
 
-// Mutations for software trees (read-write queries)
-func (b *EntBackend) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	return nil, nil
-}
-
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 func (b *EntBackend) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
 	return nil, nil

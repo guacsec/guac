@@ -460,6 +460,7 @@ func (s *Suite) TestIsDependency() {
 			depIDs := make([]string, len(test.Calls))
 			pksIDs := make([]string, 0)
 			for i, o := range test.Calls {
+
 				dep, err := b.IngestDependency(ctx, *o.P1, *o.P2, *o.Input)
 				if (err != nil) != test.ExpectedIngestErr {
 					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpectedIngestErr, err)
@@ -508,6 +509,114 @@ func (s *Suite) TestIsDependency() {
 			if diff := cmp.Diff(test.ExpectedDep, got, ignoreID, ignoreEmptySlices); diff != "" {
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
+		})
+	}
+}
+
+func (s *Suite) TestIngestDependencies() {
+	type call struct {
+		P1s []*model.PkgInputSpec
+		P2s []*model.PkgInputSpec
+		IDs []*model.IsDependencyInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		Calls        []call
+		ExpID        []*model.IsDependency
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{p1, p2, p3, p4},
+			Calls: []call{{
+				P1s: []*model.PkgInputSpec{p1, p2},
+				P2s: []*model.PkgInputSpec{p2, p4},
+				IDs: []*model.IsDependencyInputSpec{
+					{
+						Justification: "test justification",
+					},
+					{
+						Justification: "test justification",
+					},
+				},
+			}},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          p1out,
+					DependentPackage: p2outName,
+					Justification:    "test justification",
+					DependencyType:   model.DependencyTypeUnknown,
+				},
+				{
+					Package:          p2out,
+					DependentPackage: p4outName,
+					Justification:    "test justification",
+					DependencyType:   model.DependencyTypeUnknown,
+				},
+			},
+		},
+		{
+			Name:  "With uneven pkgs input",
+			InPkg: []*model.PkgInputSpec{p1, p2, p3, p4},
+			Calls: []call{{
+				P1s: []*model.PkgInputSpec{p1, p2},
+				P2s: []*model.PkgInputSpec{p2},
+				IDs: []*model.IsDependencyInputSpec{
+					{
+						Justification: "test justification",
+					},
+					{
+						Justification: "test justification",
+					},
+				},
+			}},
+			ExpIngestErr: true,
+		},
+		{
+			Name:  "With uneven deps input",
+			InPkg: []*model.PkgInputSpec{p1, p2, p3, p4},
+			Calls: []call{{
+				P1s: []*model.PkgInputSpec{p1, p2},
+				P2s: []*model.PkgInputSpec{p2, p4},
+				IDs: []*model.IsDependencyInputSpec{
+					{
+						Justification: "test justification",
+					},
+				},
+			}},
+			ExpIngestErr: true,
+		},
+	}
+
+	ctx := s.Ctx
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, a := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				got, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.IDs)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpID, got, ignoreID, ignoreEmptySlices); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+
 		})
 	}
 }

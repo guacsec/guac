@@ -55,6 +55,27 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 	return collect(deps, toModelIsDependencyWithBackrefs), nil
 }
 
+func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+	if len(pkgs) != len(depPkgs) {
+		return nil, Errorf("uneven packages and dependent packages for ingestion")
+	}
+	if len(pkgs) != len(dependencies) {
+		return nil, Errorf("uneven packages and dependencies nodes for ingestion")
+	}
+
+	// TODO: This looks like a good candidate for using BulkCreate()
+
+	var modelIsDependencies []*model.IsDependency
+	for i := range dependencies {
+		isDependency, err := b.IngestDependency(ctx, *pkgs[i], *depPkgs[i], *dependencies[i])
+		if err != nil {
+			return nil, Errorf("IngestDependency failed with err: %v", err)
+		}
+		modelIsDependencies = append(modelIsDependencies, isDependency)
+	}
+	return modelIsDependencies, nil
+}
+
 func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, spec model.IsDependencyInputSpec) (*model.IsDependency, error) {
 	funcName := "IngestDependency"
 
