@@ -36,8 +36,6 @@ import (
 )
 
 var (
-	// For isOccurrences, you must input both a Pkg and Src field
-	// One of the two fields should be empty, but we populate them both so errors are not thrown
 	simpleIsDependencyGraph = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
 			{
@@ -116,7 +114,6 @@ var (
 					Name:      "pkgName1",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm1",
 					Digest:    "testArtifactDigest1",
@@ -132,7 +129,6 @@ var (
 					Name:      "pkgName2",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm2",
 					Digest:    "testArtifactDigest2",
@@ -148,7 +144,6 @@ var (
 					Name:      "pkgName4",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm1",
 					Digest:    "testArtifactDigest1",
@@ -164,7 +159,6 @@ var (
 					Name:      "pkgName4",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm3",
 					Digest:    "testArtifactDigest3",
@@ -180,7 +174,6 @@ var (
 					Name:      "pkgName5",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm4",
 					Digest:    "testArtifactDigest4",
@@ -269,7 +262,6 @@ var (
 					Name:      "pkgName1",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm1",
 					Digest:    "testArtifactDigest1",
@@ -285,7 +277,6 @@ var (
 					Name:      "pkgName2",
 					Version:   ptrfrom.String("1.19.0"),
 				},
-				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm2",
 					Digest:    "testArtifactDigest2",
@@ -348,7 +339,6 @@ var (
 	sourceNameHasSLSAGraph = assembler.IngestPredicates{
 		IsOccurrence: []assembler.IsOccurrenceIngest{
 			{
-				Pkg: &model.PkgInputSpec{},
 				Src: &model.SourceInputSpec{
 					Type:      "srcType2",
 					Namespace: "srcNamespace2",
@@ -369,7 +359,6 @@ var (
 					Name:      "pkgName6",
 					Version:   ptrfrom.String("3.0.3"),
 				},
-				Src: &model.SourceInputSpec{},
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "testArtifactAlgorithm6",
 					Digest:    "testArtifactDigest6",
@@ -379,7 +368,6 @@ var (
 				},
 			},
 			{
-				Pkg: &model.PkgInputSpec{},
 				Src: &model.SourceInputSpec{
 					Type:      "srcType2",
 					Namespace: "srcNamespace2",
@@ -523,7 +511,8 @@ func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.I
 func ingestIsOccurrence(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
 	for _, ingest := range graph.IsOccurrence {
 		var err error
-		if ingest.Src.Type != "" {
+
+		if ingest.Src != nil {
 			_, err = model.IngestSource(context.Background(), client, *ingest.Src)
 		} else {
 			_, err = model.IngestPackage(context.Background(), client, *ingest.Pkg)
@@ -540,7 +529,7 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, graph assemb
 			return fmt.Errorf("Error in ingesting artifact for IsOccurrence: %v\n", err)
 		}
 
-		if ingest.Src.Type != "" {
+		if ingest.Src != nil {
 			_, err = model.IsOccurrenceSrc(context.Background(), client, *ingest.Src, *ingest.Artifact, *ingest.IsOccurrence)
 		} else {
 			_, err = model.IsOccurrencePkg(context.Background(), client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
