@@ -1,12 +1,15 @@
 package backend
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha1"
 	"fmt"
+	"sort"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -24,7 +27,7 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 	}
 
 	if spec.BuiltBy != nil {
-		query = append(query, slsaattestation.HasBuiltByWith(builder.URIEQ(*spec.BuiltBy.URI)))
+		query = append(query, slsaattestation.HasBuiltByWith(builderQueryPredicate(spec.BuiltBy)))
 	}
 
 	if spec.Subject != nil {
@@ -71,7 +74,9 @@ func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInput
 	}
 
 	// artifacts, err := ingestArtifacts(ctx, client.Client(), builtFrom)
-	artifacts, err := client.Artifact.Query().Where(collect(fromPtrSlice(builtFrom), artifactQueryInputPredicates)...).All(ctx)
+	artifacts, err := client.Artifact.Query().Where(
+		artifact.Or(collect(fromPtrSlice(builtFrom), artifactQueryInputPredicates)...),
+	).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +91,7 @@ func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInput
 	}
 
 	id, err := client.SLSAAttestation.Create().
+		SetBuiltFromHash(hashBuiltFromVersion(artifacts)).
 		SetSubject(subjectArtifact).
 		SetBuildType(slsa.BuildType).
 		SetBuiltBy(builder).
@@ -104,6 +110,7 @@ func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInput
 				slsaattestation.FieldBuildType,
 				slsaattestation.FieldSlsaVersion,
 				slsaattestation.FieldBuiltByID,
+				slsaattestation.FieldBuiltFromHash,
 			),
 		).
 		UpdateNewValues().
@@ -148,4 +155,18 @@ func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 			Collector:     att.Collector,
 		},
 	}
+}
+
+func hashBuiltFromVersion(builtFrom []*ent.Artifact) string {
+	hash := sha1.New()
+	content := bytes.NewBuffer(nil)
+
+	sort.Slice(builtFrom, func(i, j int) bool { return builtFrom[i].Digest < builtFrom[j].Digest })
+
+	for _, v := range builtFrom {
+		content.WriteString(v.Digest)
+	}
+
+	hash.Write(content.Bytes())
+	return fmt.Sprintf("%x", hash.Sum(nil))
 }

@@ -39,6 +39,8 @@ type SLSAAttestation struct {
 	Origin string `json:"origin,omitempty"`
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
+	// Hash of the artifacts that was built
+	BuiltFromHash string `json:"built_from_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SLSAAttestationQuery when eager-loading is set.
 	Edges        SLSAAttestationEdges `json:"edges"`
@@ -102,7 +104,7 @@ func (*SLSAAttestation) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case slsaattestation.FieldID, slsaattestation.FieldBuiltByID, slsaattestation.FieldSubjectID:
 			values[i] = new(sql.NullInt64)
-		case slsaattestation.FieldBuildType, slsaattestation.FieldSlsaVersion, slsaattestation.FieldOrigin, slsaattestation.FieldCollector:
+		case slsaattestation.FieldBuildType, slsaattestation.FieldSlsaVersion, slsaattestation.FieldOrigin, slsaattestation.FieldCollector, slsaattestation.FieldBuiltFromHash:
 			values[i] = new(sql.NullString)
 		case slsaattestation.FieldStartedOn, slsaattestation.FieldFinishedOn:
 			values[i] = new(sql.NullTime)
@@ -185,6 +187,12 @@ func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				sa.Collector = value.String
 			}
+		case slsaattestation.FieldBuiltFromHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field built_from_hash", values[i])
+			} else if value.Valid {
+				sa.BuiltFromHash = value.String
+			}
 		default:
 			sa.selectValues.Set(columns[i], values[i])
 		}
@@ -266,6 +274,9 @@ func (sa *SLSAAttestation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(sa.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("built_from_hash=")
+	builder.WriteString(sa.BuiltFromHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

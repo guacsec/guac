@@ -9104,6 +9104,7 @@ type SLSAAttestationMutation struct {
 	finished_on          *time.Time
 	origin               *string
 	collector            *string
+	built_from_hash      *string
 	clearedFields        map[string]struct{}
 	built_from           map[int]struct{}
 	removedbuilt_from    map[int]struct{}
@@ -9594,6 +9595,42 @@ func (m *SLSAAttestationMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetBuiltFromHash sets the "built_from_hash" field.
+func (m *SLSAAttestationMutation) SetBuiltFromHash(s string) {
+	m.built_from_hash = &s
+}
+
+// BuiltFromHash returns the value of the "built_from_hash" field in the mutation.
+func (m *SLSAAttestationMutation) BuiltFromHash() (r string, exists bool) {
+	v := m.built_from_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBuiltFromHash returns the old "built_from_hash" field's value of the SLSAAttestation entity.
+// If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SLSAAttestationMutation) OldBuiltFromHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBuiltFromHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBuiltFromHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBuiltFromHash: %w", err)
+	}
+	return oldValue.BuiltFromHash, nil
+}
+
+// ResetBuiltFromHash resets all changes to the "built_from_hash" field.
+func (m *SLSAAttestationMutation) ResetBuiltFromHash() {
+	m.built_from_hash = nil
+}
+
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by ids.
 func (m *SLSAAttestationMutation) AddBuiltFromIDs(ids ...int) {
 	if m.built_from == nil {
@@ -9734,7 +9771,7 @@ func (m *SLSAAttestationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SLSAAttestationMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.build_type != nil {
 		fields = append(fields, slsaattestation.FieldBuildType)
 	}
@@ -9762,6 +9799,9 @@ func (m *SLSAAttestationMutation) Fields() []string {
 	if m.collector != nil {
 		fields = append(fields, slsaattestation.FieldCollector)
 	}
+	if m.built_from_hash != nil {
+		fields = append(fields, slsaattestation.FieldBuiltFromHash)
+	}
 	return fields
 }
 
@@ -9788,6 +9828,8 @@ func (m *SLSAAttestationMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case slsaattestation.FieldCollector:
 		return m.Collector()
+	case slsaattestation.FieldBuiltFromHash:
+		return m.BuiltFromHash()
 	}
 	return nil, false
 }
@@ -9815,6 +9857,8 @@ func (m *SLSAAttestationMutation) OldField(ctx context.Context, name string) (en
 		return m.OldOrigin(ctx)
 	case slsaattestation.FieldCollector:
 		return m.OldCollector(ctx)
+	case slsaattestation.FieldBuiltFromHash:
+		return m.OldBuiltFromHash(ctx)
 	}
 	return nil, fmt.Errorf("unknown SLSAAttestation field %s", name)
 }
@@ -9886,6 +9930,13 @@ func (m *SLSAAttestationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case slsaattestation.FieldBuiltFromHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBuiltFromHash(v)
 		return nil
 	}
 	return fmt.Errorf("unknown SLSAAttestation field %s", name)
@@ -9986,6 +10037,9 @@ func (m *SLSAAttestationMutation) ResetField(name string) error {
 		return nil
 	case slsaattestation.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case slsaattestation.FieldBuiltFromHash:
+		m.ResetBuiltFromHash()
 		return nil
 	}
 	return fmt.Errorf("unknown SLSAAttestation field %s", name)

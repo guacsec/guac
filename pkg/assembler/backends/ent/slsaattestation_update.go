@@ -126,6 +126,12 @@ func (sau *SLSAAttestationUpdate) SetCollector(s string) *SLSAAttestationUpdate 
 	return sau
 }
 
+// SetBuiltFromHash sets the "built_from_hash" field.
+func (sau *SLSAAttestationUpdate) SetBuiltFromHash(s string) *SLSAAttestationUpdate {
+	sau.mutation.SetBuiltFromHash(s)
+	return sau
+}
+
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by IDs.
 func (sau *SLSAAttestationUpdate) AddBuiltFromIDs(ids ...int) *SLSAAttestationUpdate {
 	sau.mutation.AddBuiltFromIDs(ids...)
@@ -273,6 +279,9 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 	}
 	if value, ok := sau.mutation.Collector(); ok {
 		_spec.SetField(slsaattestation.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := sau.mutation.BuiltFromHash(); ok {
+		_spec.SetField(slsaattestation.FieldBuiltFromHash, field.TypeString, value)
 	}
 	if sau.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -491,6 +500,12 @@ func (sauo *SLSAAttestationUpdateOne) SetCollector(s string) *SLSAAttestationUpd
 	return sauo
 }
 
+// SetBuiltFromHash sets the "built_from_hash" field.
+func (sauo *SLSAAttestationUpdateOne) SetBuiltFromHash(s string) *SLSAAttestationUpdateOne {
+	sauo.mutation.SetBuiltFromHash(s)
+	return sauo
+}
+
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by IDs.
 func (sauo *SLSAAttestationUpdateOne) AddBuiltFromIDs(ids ...int) *SLSAAttestationUpdateOne {
 	sauo.mutation.AddBuiltFromIDs(ids...)
@@ -668,6 +683,9 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 	}
 	if value, ok := sauo.mutation.Collector(); ok {
 		_spec.SetField(slsaattestation.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := sauo.mutation.BuiltFromHash(); ok {
+		_spec.SetField(slsaattestation.FieldBuiltFromHash, field.TypeString, value)
 	}
 	if sauo.mutation.BuiltFromCleared() {
 		edge := &sqlgraph.EdgeSpec{

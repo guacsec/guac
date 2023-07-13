@@ -24,10 +24,10 @@ func (s *Suite) TestHasSLSA() {
 	testTime := time.Unix(1e9+5, 0)
 	testTime2 := time.Unix(1e9, 0)
 	type call struct {
-		Sub  *model.ArtifactInputSpec
-		BF   []*model.ArtifactInputSpec
-		BB   *model.BuilderInputSpec
-		SLSA *model.SLSAInputSpec
+		Sub       *model.ArtifactInputSpec
+		BuiltFrom []*model.ArtifactInputSpec
+		Builder   *model.BuilderInputSpec
+		SLSA      *model.SLSAInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -46,9 +46,9 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Calls: []call{
 				{
-					Sub: a1,
-					BF:  []*model.ArtifactInputSpec{a2},
-					BB:  b1,
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
 					},
@@ -74,17 +74,17 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Calls: []call{
 				{
-					Sub: a1,
-					BF:  []*model.ArtifactInputSpec{a2},
-					BB:  b1,
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
 					},
 				},
 				{
-					Sub: a1,
-					BF:  []*model.ArtifactInputSpec{a2},
-					BB:  b1,
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
 					},
@@ -110,17 +110,17 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Calls: []call{
 				{
-					Sub: a1,
-					BF:  []*model.ArtifactInputSpec{a2},
-					BB:  b1,
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type one",
 					},
 				},
 				{
-					Sub: a1,
-					BF:  []*model.ArtifactInputSpec{a2},
-					BB:  b1,
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type two",
 					},
@@ -146,17 +146,17 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Calls: []call{
 				{
-					Sub: a1,
-					BF:  []*model.ArtifactInputSpec{a2},
-					BB:  b1,
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
 					SLSA: &model.SLSAInputSpec{
 						SlsaVersion: "test type two",
 					},
 				},
 				{
-					Sub: a1,
-					BF:  []*model.ArtifactInputSpec{a2},
-					BB:  b1,
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
 					SLSA: &model.SLSAInputSpec{
 						SlsaVersion: "test type one",
 					},
@@ -182,17 +182,17 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Calls: []call{
 				{
-					Sub: a1,
-					BF:  []*model.ArtifactInputSpec{a2},
-					BB:  b1,
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
 					SLSA: &model.SLSAInputSpec{
 						StartedOn: &testTime2,
 					},
 				},
 				{
-					Sub: a1,
-					BF:  []*model.ArtifactInputSpec{a2},
-					BB:  b1,
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
 					SLSA: &model.SLSAInputSpec{
 						StartedOn: &testTime,
 					},
@@ -218,16 +218,16 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 				{
-					Sub:  a3,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a3,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			Query: &model.HasSLSASpec{
@@ -246,28 +246,27 @@ func (s *Suite) TestHasSLSA() {
 			},
 		},
 		{
-			// FIXME: (ivanvanderbyl) This will require making a unique record for each builtFrom so that we can ensure uniqueness across multiple builtFroms
 			Name:  "Query on Materials",
 			InArt: []*model.ArtifactInputSpec{a1, a2, a3, a4},
 			InBld: []*model.BuilderInputSpec{b1},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2, a3},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2, a3},
+					Builder:   b1,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a4},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a4},
+					Builder:   b1,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			Query: &model.HasSLSASpec{
@@ -298,16 +297,16 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1, b2},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b2,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			Query: &model.HasSLSASpec{
@@ -331,16 +330,16 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1, b2},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b2,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			Query: &model.HasSLSASpec{
@@ -362,16 +361,16 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1, b2},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b2,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			Query: &model.HasSLSASpec{
@@ -387,10 +386,10 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   nil,
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: nil,
+					Builder:   b2,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			ExpIngestErr: true,
@@ -401,10 +400,10 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{},
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{},
+					Builder:   b2,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			ExpIngestErr: true,
@@ -415,10 +414,10 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b2},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b2,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			ExpIngestErr: true,
@@ -429,10 +428,10 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b2},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b2,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			ExpIngestErr: true,
@@ -442,10 +441,10 @@ func (s *Suite) TestHasSLSA() {
 			InArt: []*model.ArtifactInputSpec{a1, a2},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b2,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			ExpIngestErr: true,
@@ -456,16 +455,16 @@ func (s *Suite) TestHasSLSA() {
 			InBld: []*model.BuilderInputSpec{b1, b2},
 			Calls: []call{
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b1,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
+					Sub:       a1,
+					BuiltFrom: []*model.ArtifactInputSpec{a2},
+					Builder:   b2,
+					SLSA:      &model.SLSAInputSpec{},
 				},
 			},
 			Query: &model.HasSLSASpec{
@@ -507,7 +506,7 @@ func (s *Suite) TestHasSLSA() {
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
+				v, err := b.IngestSLSA(ctx, *o.Sub, o.BuiltFrom, *o.Builder, *o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

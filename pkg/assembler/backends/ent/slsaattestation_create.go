@@ -95,6 +95,12 @@ func (sac *SLSAAttestationCreate) SetCollector(s string) *SLSAAttestationCreate 
 	return sac
 }
 
+// SetBuiltFromHash sets the "built_from_hash" field.
+func (sac *SLSAAttestationCreate) SetBuiltFromHash(s string) *SLSAAttestationCreate {
+	sac.mutation.SetBuiltFromHash(s)
+	return sac
+}
+
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by IDs.
 func (sac *SLSAAttestationCreate) AddBuiltFromIDs(ids ...int) *SLSAAttestationCreate {
 	sac.mutation.AddBuiltFromIDs(ids...)
@@ -172,6 +178,9 @@ func (sac *SLSAAttestationCreate) check() error {
 	if _, ok := sac.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "SLSAAttestation.collector"`)}
 	}
+	if _, ok := sac.mutation.BuiltFromHash(); !ok {
+		return &ValidationError{Name: "built_from_hash", err: errors.New(`ent: missing required field "SLSAAttestation.built_from_hash"`)}
+	}
 	if _, ok := sac.mutation.BuiltByID(); !ok {
 		return &ValidationError{Name: "built_by", err: errors.New(`ent: missing required edge "SLSAAttestation.built_by"`)}
 	}
@@ -232,6 +241,10 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 	if value, ok := sac.mutation.Collector(); ok {
 		_spec.SetField(slsaattestation.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := sac.mutation.BuiltFromHash(); ok {
+		_spec.SetField(slsaattestation.FieldBuiltFromHash, field.TypeString, value)
+		_node.BuiltFromHash = value
 	}
 	if nodes := sac.mutation.BuiltFromIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -461,6 +474,18 @@ func (u *SLSAAttestationUpsert) UpdateCollector() *SLSAAttestationUpsert {
 	return u
 }
 
+// SetBuiltFromHash sets the "built_from_hash" field.
+func (u *SLSAAttestationUpsert) SetBuiltFromHash(v string) *SLSAAttestationUpsert {
+	u.Set(slsaattestation.FieldBuiltFromHash, v)
+	return u
+}
+
+// UpdateBuiltFromHash sets the "built_from_hash" field to the value that was provided on create.
+func (u *SLSAAttestationUpsert) UpdateBuiltFromHash() *SLSAAttestationUpsert {
+	u.SetExcluded(slsaattestation.FieldBuiltFromHash)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -645,6 +670,20 @@ func (u *SLSAAttestationUpsertOne) SetCollector(v string) *SLSAAttestationUpsert
 func (u *SLSAAttestationUpsertOne) UpdateCollector() *SLSAAttestationUpsertOne {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetBuiltFromHash sets the "built_from_hash" field.
+func (u *SLSAAttestationUpsertOne) SetBuiltFromHash(v string) *SLSAAttestationUpsertOne {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.SetBuiltFromHash(v)
+	})
+}
+
+// UpdateBuiltFromHash sets the "built_from_hash" field to the value that was provided on create.
+func (u *SLSAAttestationUpsertOne) UpdateBuiltFromHash() *SLSAAttestationUpsertOne {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.UpdateBuiltFromHash()
 	})
 }
 
@@ -991,6 +1030,20 @@ func (u *SLSAAttestationUpsertBulk) SetCollector(v string) *SLSAAttestationUpser
 func (u *SLSAAttestationUpsertBulk) UpdateCollector() *SLSAAttestationUpsertBulk {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetBuiltFromHash sets the "built_from_hash" field.
+func (u *SLSAAttestationUpsertBulk) SetBuiltFromHash(v string) *SLSAAttestationUpsertBulk {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.SetBuiltFromHash(v)
+	})
+}
+
+// UpdateBuiltFromHash sets the "built_from_hash" field to the value that was provided on create.
+func (u *SLSAAttestationUpsertBulk) UpdateBuiltFromHash() *SLSAAttestationUpsertBulk {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.UpdateBuiltFromHash()
 	})
 }
 

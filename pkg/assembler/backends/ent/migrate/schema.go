@@ -460,6 +460,7 @@ var (
 		{Name: "finished_on", Type: field.TypeTime, Nullable: true},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
+		{Name: "built_from_hash", Type: field.TypeString},
 		{Name: "built_by_id", Type: field.TypeInt},
 		{Name: "subject_id", Type: field.TypeInt},
 	}
@@ -471,22 +472,22 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "slsa_attestations_builders_built_by",
-				Columns:    []*schema.Column{SlsaAttestationsColumns[8]},
+				Columns:    []*schema.Column{SlsaAttestationsColumns[9]},
 				RefColumns: []*schema.Column{BuildersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "slsa_attestations_artifacts_subject",
-				Columns:    []*schema.Column{SlsaAttestationsColumns[9]},
+				Columns:    []*schema.Column{SlsaAttestationsColumns[10]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "slsaattestation_subject_id_origin_collector_build_type_slsa_version_built_by_id",
+				Name:    "slsaattestation_subject_id_origin_collector_build_type_slsa_version_built_by_id_built_from_hash",
 				Unique:  true,
-				Columns: []*schema.Column{SlsaAttestationsColumns[9], SlsaAttestationsColumns[6], SlsaAttestationsColumns[7], SlsaAttestationsColumns[1], SlsaAttestationsColumns[3], SlsaAttestationsColumns[8]},
+				Columns: []*schema.Column{SlsaAttestationsColumns[10], SlsaAttestationsColumns[6], SlsaAttestationsColumns[7], SlsaAttestationsColumns[1], SlsaAttestationsColumns[3], SlsaAttestationsColumns[9], SlsaAttestationsColumns[8]},
 			},
 			{
 				Name:    "slsaattestation_started_on",

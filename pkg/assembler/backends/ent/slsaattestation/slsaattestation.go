@@ -30,6 +30,8 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldBuiltFromHash holds the string denoting the built_from_hash field in the database.
+	FieldBuiltFromHash = "built_from_hash"
 	// EdgeBuiltFrom holds the string denoting the built_from edge name in mutations.
 	EdgeBuiltFrom = "built_from"
 	// EdgeBuiltBy holds the string denoting the built_by edge name in mutations.
@@ -71,6 +73,7 @@ var Columns = []string{
 	FieldFinishedOn,
 	FieldOrigin,
 	FieldCollector,
+	FieldBuiltFromHash,
 }
 
 var (
@@ -135,6 +138,11 @@ func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 // ByCollector orders the results by the collector field.
 func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
+}
+
+// ByBuiltFromHash orders the results by the built_from_hash field.
+func ByBuiltFromHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBuiltFromHash, opts...).ToFunc()
 }
 
 // ByBuiltFromCount orders the results by built_from count.

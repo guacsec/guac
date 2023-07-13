@@ -95,6 +95,11 @@ func Collector(v string) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldCollector, v))
 }
 
+// BuiltFromHash applies equality check predicate on the "built_from_hash" field. It's identical to BuiltFromHashEQ.
+func BuiltFromHash(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEQ(FieldBuiltFromHash, v))
+}
+
 // BuildTypeEQ applies the EQ predicate on the "build_type" field.
 func BuildTypeEQ(v string) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldBuildType, v))
@@ -503,6 +508,71 @@ func CollectorEqualFold(v string) predicate.SLSAAttestation {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// BuiltFromHashEQ applies the EQ predicate on the "built_from_hash" field.
+func BuiltFromHashEQ(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEQ(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashNEQ applies the NEQ predicate on the "built_from_hash" field.
+func BuiltFromHashNEQ(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldNEQ(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashIn applies the In predicate on the "built_from_hash" field.
+func BuiltFromHashIn(vs ...string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldIn(FieldBuiltFromHash, vs...))
+}
+
+// BuiltFromHashNotIn applies the NotIn predicate on the "built_from_hash" field.
+func BuiltFromHashNotIn(vs ...string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldNotIn(FieldBuiltFromHash, vs...))
+}
+
+// BuiltFromHashGT applies the GT predicate on the "built_from_hash" field.
+func BuiltFromHashGT(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldGT(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashGTE applies the GTE predicate on the "built_from_hash" field.
+func BuiltFromHashGTE(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldGTE(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashLT applies the LT predicate on the "built_from_hash" field.
+func BuiltFromHashLT(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldLT(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashLTE applies the LTE predicate on the "built_from_hash" field.
+func BuiltFromHashLTE(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldLTE(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashContains applies the Contains predicate on the "built_from_hash" field.
+func BuiltFromHashContains(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldContains(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashHasPrefix applies the HasPrefix predicate on the "built_from_hash" field.
+func BuiltFromHashHasPrefix(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldHasPrefix(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashHasSuffix applies the HasSuffix predicate on the "built_from_hash" field.
+func BuiltFromHashHasSuffix(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldHasSuffix(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashEqualFold applies the EqualFold predicate on the "built_from_hash" field.
+func BuiltFromHashEqualFold(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEqualFold(FieldBuiltFromHash, v))
+}
+
+// BuiltFromHashContainsFold applies the ContainsFold predicate on the "built_from_hash" field.
+func BuiltFromHashContainsFold(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldContainsFold(FieldBuiltFromHash, v))
 }
 
 // HasBuiltFrom applies the HasEdge predicate on the "built_from" edge.
