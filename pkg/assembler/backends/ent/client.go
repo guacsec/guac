@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -65,6 +66,8 @@ type Client struct {
 	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
+	// PkgEqual is the client for interacting with the PkgEqual builders.
+	PkgEqual *PkgEqualClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
 	// SecurityAdvisory is the client for interacting with the SecurityAdvisory builders.
@@ -101,6 +104,7 @@ func (c *Client) init() {
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
 	c.PackageType = NewPackageTypeClient(c.config)
 	c.PackageVersion = NewPackageVersionClient(c.config)
+	c.PkgEqual = NewPkgEqualClient(c.config)
 	c.SLSAAttestation = NewSLSAAttestationClient(c.config)
 	c.SecurityAdvisory = NewSecurityAdvisoryClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
@@ -201,6 +205,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
+		PkgEqual:         NewPkgEqualClient(cfg),
 		SLSAAttestation:  NewSLSAAttestationClient(cfg),
 		SecurityAdvisory: NewSecurityAdvisoryClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
@@ -238,6 +243,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
+		PkgEqual:         NewPkgEqualClient(cfg),
 		SLSAAttestation:  NewSLSAAttestationClient(cfg),
 		SecurityAdvisory: NewSecurityAdvisoryClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
@@ -274,8 +280,9 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
 		c.Dependency, c.HashEqual, c.IsVulnerability, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SLSAAttestation,
-		c.SecurityAdvisory, c.SourceName, c.SourceNamespace, c.SourceType,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
+		c.SLSAAttestation, c.SecurityAdvisory, c.SourceName, c.SourceNamespace,
+		c.SourceType,
 	} {
 		n.Use(hooks...)
 	}
@@ -287,8 +294,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
 		c.Dependency, c.HashEqual, c.IsVulnerability, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SLSAAttestation,
-		c.SecurityAdvisory, c.SourceName, c.SourceNamespace, c.SourceType,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
+		c.SLSAAttestation, c.SecurityAdvisory, c.SourceName, c.SourceNamespace,
+		c.SourceType,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -323,6 +331,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PackageType.mutate(ctx, m)
 	case *PackageVersionMutation:
 		return c.PackageVersion.mutate(ctx, m)
+	case *PkgEqualMutation:
+		return c.PkgEqual.mutate(ctx, m)
 	case *SLSAAttestationMutation:
 		return c.SLSAAttestation.mutate(ctx, m)
 	case *SecurityAdvisoryMutation:
@@ -2247,6 +2257,38 @@ func (c *PackageVersionClient) QuerySbom(pv *PackageVersion) *BillOfMaterialsQue
 	return query
 }
 
+// QuerySimilar queries the similar edge of a PackageVersion.
+func (c *PackageVersionClient) QuerySimilar(pv *PackageVersion) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, packageversion.SimilarTable, packageversion.SimilarPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEqual queries the equal edge of a PackageVersion.
+func (c *PackageVersionClient) QueryEqual(pv *PackageVersion) *PkgEqualQuery {
+	query := (&PkgEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.EqualTable, packageversion.EqualColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PackageVersionClient) Hooks() []Hook {
 	return c.hooks.PackageVersion
@@ -2269,6 +2311,156 @@ func (c *PackageVersionClient) mutate(ctx context.Context, m *PackageVersionMuta
 		return (&PackageVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown PackageVersion mutation op: %q", m.Op())
+	}
+}
+
+// PkgEqualClient is a client for the PkgEqual schema.
+type PkgEqualClient struct {
+	config
+}
+
+// NewPkgEqualClient returns a client for the PkgEqual from the given config.
+func NewPkgEqualClient(c config) *PkgEqualClient {
+	return &PkgEqualClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pkgequal.Hooks(f(g(h())))`.
+func (c *PkgEqualClient) Use(hooks ...Hook) {
+	c.hooks.PkgEqual = append(c.hooks.PkgEqual, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pkgequal.Intercept(f(g(h())))`.
+func (c *PkgEqualClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PkgEqual = append(c.inters.PkgEqual, interceptors...)
+}
+
+// Create returns a builder for creating a PkgEqual entity.
+func (c *PkgEqualClient) Create() *PkgEqualCreate {
+	mutation := newPkgEqualMutation(c.config, OpCreate)
+	return &PkgEqualCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PkgEqual entities.
+func (c *PkgEqualClient) CreateBulk(builders ...*PkgEqualCreate) *PkgEqualCreateBulk {
+	return &PkgEqualCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PkgEqual.
+func (c *PkgEqualClient) Update() *PkgEqualUpdate {
+	mutation := newPkgEqualMutation(c.config, OpUpdate)
+	return &PkgEqualUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PkgEqualClient) UpdateOne(pe *PkgEqual) *PkgEqualUpdateOne {
+	mutation := newPkgEqualMutation(c.config, OpUpdateOne, withPkgEqual(pe))
+	return &PkgEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PkgEqualClient) UpdateOneID(id int) *PkgEqualUpdateOne {
+	mutation := newPkgEqualMutation(c.config, OpUpdateOne, withPkgEqualID(id))
+	return &PkgEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PkgEqual.
+func (c *PkgEqualClient) Delete() *PkgEqualDelete {
+	mutation := newPkgEqualMutation(c.config, OpDelete)
+	return &PkgEqualDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PkgEqualClient) DeleteOne(pe *PkgEqual) *PkgEqualDeleteOne {
+	return c.DeleteOneID(pe.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PkgEqualClient) DeleteOneID(id int) *PkgEqualDeleteOne {
+	builder := c.Delete().Where(pkgequal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PkgEqualDeleteOne{builder}
+}
+
+// Query returns a query builder for PkgEqual.
+func (c *PkgEqualClient) Query() *PkgEqualQuery {
+	return &PkgEqualQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePkgEqual},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PkgEqual entity by its id.
+func (c *PkgEqualClient) Get(ctx context.Context, id int) (*PkgEqual, error) {
+	return c.Query().Where(pkgequal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PkgEqualClient) GetX(ctx context.Context, id int) *PkgEqual {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPackageA queries the package_a edge of a PkgEqual.
+func (c *PkgEqualClient) QueryPackageA(pe *PkgEqual) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageATable, pkgequal.PackageAColumn),
+		)
+		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPackageB queries the package_b edge of a PkgEqual.
+func (c *PkgEqualClient) QueryPackageB(pe *PkgEqual) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageBTable, pkgequal.PackageBColumn),
+		)
+		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PkgEqualClient) Hooks() []Hook {
+	return c.hooks.PkgEqual
+}
+
+// Interceptors returns the client interceptors.
+func (c *PkgEqualClient) Interceptors() []Interceptor {
+	return c.inters.PkgEqual
+}
+
+func (c *PkgEqualClient) mutate(ctx context.Context, m *PkgEqualMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PkgEqualCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PkgEqualUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PkgEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PkgEqualDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PkgEqual mutation op: %q", m.Op())
 	}
 }
 
@@ -2979,13 +3171,13 @@ type (
 	hooks struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
 		HashEqual, IsVulnerability, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, SLSAAttestation, SecurityAdvisory, SourceName,
-		SourceNamespace, SourceType []ent.Hook
+		PackageType, PackageVersion, PkgEqual, SLSAAttestation, SecurityAdvisory,
+		SourceName, SourceNamespace, SourceType []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
 		HashEqual, IsVulnerability, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, SLSAAttestation, SecurityAdvisory, SourceName,
-		SourceNamespace, SourceType []ent.Interceptor
+		PackageType, PackageVersion, PkgEqual, SLSAAttestation, SecurityAdvisory,
+		SourceName, SourceNamespace, SourceType []ent.Interceptor
 	}
 )

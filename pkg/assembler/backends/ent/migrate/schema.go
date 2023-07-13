@@ -413,6 +413,47 @@ var (
 			},
 		},
 	}
+	// PkgEqualsColumns holds the columns for the "pkg_equals" table.
+	PkgEqualsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "package_version_id", Type: field.TypeInt},
+		{Name: "similar_id", Type: field.TypeInt},
+	}
+	// PkgEqualsTable holds the schema information for the "pkg_equals" table.
+	PkgEqualsTable = &schema.Table{
+		Name:       "pkg_equals",
+		Columns:    PkgEqualsColumns,
+		PrimaryKey: []*schema.Column{PkgEqualsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "pkg_equals_package_versions_package_a",
+				Columns:    []*schema.Column{PkgEqualsColumns[4]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "pkg_equals_package_versions_package_b",
+				Columns:    []*schema.Column{PkgEqualsColumns[5]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "pkgequal_package_version_id_similar_id",
+				Unique:  true,
+				Columns: []*schema.Column{PkgEqualsColumns[4], PkgEqualsColumns[5]},
+			},
+			{
+				Name:    "pkgequal_package_version_id_similar_id_origin_justification_collector",
+				Unique:  true,
+				Columns: []*schema.Column{PkgEqualsColumns[4], PkgEqualsColumns[5], PkgEqualsColumns[1], PkgEqualsColumns[3], PkgEqualsColumns[2]},
+			},
+		},
+	}
 	// SlsaAttestationsColumns holds the columns for the "slsa_attestations" table.
 	SlsaAttestationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -605,6 +646,7 @@ var (
 		PackageNamespacesTable,
 		PackageTypesTable,
 		PackageVersionsTable,
+		PkgEqualsTable,
 		SlsaAttestationsTable,
 		SecurityAdvisoriesTable,
 		SourceNamesTable,
@@ -631,6 +673,8 @@ func init() {
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageTypesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
+	PkgEqualsTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	PkgEqualsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	SlsaAttestationsTable.Annotation = &entsql.Annotation{
 		Table: "slsa_attestations",
 	}

@@ -28,6 +28,10 @@ const (
 	EdgeOccurrences = "occurrences"
 	// EdgeSbom holds the string denoting the sbom edge name in mutations.
 	EdgeSbom = "sbom"
+	// EdgeSimilar holds the string denoting the similar edge name in mutations.
+	EdgeSimilar = "similar"
+	// EdgeEqual holds the string denoting the equal edge name in mutations.
+	EdgeEqual = "equal"
 	// Table holds the table name of the packageversion in the database.
 	Table = "package_versions"
 	// NameTable is the table that holds the name relation/edge.
@@ -51,6 +55,15 @@ const (
 	SbomInverseTable = "bill_of_materials"
 	// SbomColumn is the table column denoting the sbom relation/edge.
 	SbomColumn = "package_id"
+	// SimilarTable is the table that holds the similar relation/edge. The primary key declared below.
+	SimilarTable = "pkg_equals"
+	// EqualTable is the table that holds the equal relation/edge.
+	EqualTable = "pkg_equals"
+	// EqualInverseTable is the table name for the PkgEqual entity.
+	// It exists in this package in order to avoid circular dependency with the "pkgequal" package.
+	EqualInverseTable = "pkg_equals"
+	// EqualColumn is the table column denoting the equal relation/edge.
+	EqualColumn = "package_version_id"
 )
 
 // Columns holds all SQL columns for packageversion fields.
@@ -62,6 +75,12 @@ var Columns = []string{
 	FieldQualifiers,
 	FieldHash,
 }
+
+var (
+	// SimilarPrimaryKey and SimilarColumn2 are the table columns denoting the
+	// primary key for the similar relation (M2M).
+	SimilarPrimaryKey = []string{"package_version_id", "similar_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -142,6 +161,34 @@ func BySbom(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSbomStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySimilarCount orders the results by similar count.
+func BySimilarCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSimilarStep(), opts...)
+	}
+}
+
+// BySimilar orders the results by similar terms.
+func BySimilar(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSimilarStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByEqualCount orders the results by equal count.
+func ByEqualCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newEqualStep(), opts...)
+	}
+}
+
+// ByEqual orders the results by equal terms.
+func ByEqual(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newEqualStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newNameStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -161,5 +208,19 @@ func newSbomStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SbomInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, SbomTable, SbomColumn),
+	)
+}
+func newSimilarStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, SimilarTable, SimilarPrimaryKey...),
+	)
+}
+func newEqualStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(EqualInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, EqualTable, EqualColumn),
 	)
 }

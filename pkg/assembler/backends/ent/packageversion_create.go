@@ -14,6 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -104,6 +105,36 @@ func (pvc *PackageVersionCreate) AddSbom(b ...*BillOfMaterials) *PackageVersionC
 		ids[i] = b[i].ID
 	}
 	return pvc.AddSbomIDs(ids...)
+}
+
+// AddSimilarIDs adds the "similar" edge to the PackageVersion entity by IDs.
+func (pvc *PackageVersionCreate) AddSimilarIDs(ids ...int) *PackageVersionCreate {
+	pvc.mutation.AddSimilarIDs(ids...)
+	return pvc
+}
+
+// AddSimilar adds the "similar" edges to the PackageVersion entity.
+func (pvc *PackageVersionCreate) AddSimilar(p ...*PackageVersion) *PackageVersionCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvc.AddSimilarIDs(ids...)
+}
+
+// AddEqualIDs adds the "equal" edge to the PkgEqual entity by IDs.
+func (pvc *PackageVersionCreate) AddEqualIDs(ids ...int) *PackageVersionCreate {
+	pvc.mutation.AddEqualIDs(ids...)
+	return pvc
+}
+
+// AddEqual adds the "equal" edges to the PkgEqual entity.
+func (pvc *PackageVersionCreate) AddEqual(p ...*PkgEqual) *PackageVersionCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvc.AddEqualIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -253,6 +284,38 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.SimilarIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   packageversion.SimilarTable,
+			Columns: packageversion.SimilarPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.EqualIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.EqualTable,
+			Columns: []string{packageversion.EqualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

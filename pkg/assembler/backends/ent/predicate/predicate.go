@@ -45,6 +45,9 @@ type PackageType func(*sql.Selector)
 // PackageVersion is the predicate function for packageversion builders.
 type PackageVersion func(*sql.Selector)
 
+// PkgEqual is the predicate function for pkgequal builders.
+type PkgEqual func(*sql.Selector)
+
 // SLSAAttestation is the predicate function for slsaattestation builders.
 type SLSAAttestation func(*sql.Selector)
 

@@ -165,6 +165,18 @@ func (f PackageVersionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageVersionMutation", m)
 }
 
+// The PkgEqualFunc type is an adapter to allow the use of ordinary
+// function as PkgEqual mutator.
+type PkgEqualFunc func(context.Context, *ent.PkgEqualMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PkgEqualFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PkgEqualMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PkgEqualMutation", m)
+}
+
 // The SLSAAttestationFunc type is an adapter to allow the use of ordinary
 // function as SLSAAttestation mutator.
 type SLSAAttestationFunc func(context.Context, *ent.SLSAAttestationMutation) (ent.Value, error)

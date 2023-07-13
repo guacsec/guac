@@ -367,6 +367,52 @@ func HasSbomWith(preds ...predicate.BillOfMaterials) predicate.PackageVersion {
 	})
 }
 
+// HasSimilar applies the HasEdge predicate on the "similar" edge.
+func HasSimilar() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, SimilarTable, SimilarPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSimilarWith applies the HasEdge predicate on the "similar" edge with a given conditions (other predicates).
+func HasSimilarWith(preds ...predicate.PackageVersion) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newSimilarStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasEqual applies the HasEdge predicate on the "equal" edge.
+func HasEqual() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, EqualTable, EqualColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasEqualWith applies the HasEdge predicate on the "equal" edge with a given conditions (other predicates).
+func HasEqualWith(preds ...predicate.PkgEqual) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newEqualStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.PackageVersion) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.AndPredicates(predicates...))

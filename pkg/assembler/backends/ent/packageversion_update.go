@@ -15,6 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -125,6 +126,36 @@ func (pvu *PackageVersionUpdate) AddSbom(b ...*BillOfMaterials) *PackageVersionU
 	return pvu.AddSbomIDs(ids...)
 }
 
+// AddSimilarIDs adds the "similar" edge to the PackageVersion entity by IDs.
+func (pvu *PackageVersionUpdate) AddSimilarIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.AddSimilarIDs(ids...)
+	return pvu
+}
+
+// AddSimilar adds the "similar" edges to the PackageVersion entity.
+func (pvu *PackageVersionUpdate) AddSimilar(p ...*PackageVersion) *PackageVersionUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.AddSimilarIDs(ids...)
+}
+
+// AddEqualIDs adds the "equal" edge to the PkgEqual entity by IDs.
+func (pvu *PackageVersionUpdate) AddEqualIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.AddEqualIDs(ids...)
+	return pvu
+}
+
+// AddEqual adds the "equal" edges to the PkgEqual entity.
+func (pvu *PackageVersionUpdate) AddEqual(p ...*PkgEqual) *PackageVersionUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.AddEqualIDs(ids...)
+}
+
 // Mutation returns the PackageVersionMutation object of the builder.
 func (pvu *PackageVersionUpdate) Mutation() *PackageVersionMutation {
 	return pvu.mutation
@@ -176,6 +207,48 @@ func (pvu *PackageVersionUpdate) RemoveSbom(b ...*BillOfMaterials) *PackageVersi
 		ids[i] = b[i].ID
 	}
 	return pvu.RemoveSbomIDs(ids...)
+}
+
+// ClearSimilar clears all "similar" edges to the PackageVersion entity.
+func (pvu *PackageVersionUpdate) ClearSimilar() *PackageVersionUpdate {
+	pvu.mutation.ClearSimilar()
+	return pvu
+}
+
+// RemoveSimilarIDs removes the "similar" edge to PackageVersion entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveSimilarIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.RemoveSimilarIDs(ids...)
+	return pvu
+}
+
+// RemoveSimilar removes "similar" edges to PackageVersion entities.
+func (pvu *PackageVersionUpdate) RemoveSimilar(p ...*PackageVersion) *PackageVersionUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.RemoveSimilarIDs(ids...)
+}
+
+// ClearEqual clears all "equal" edges to the PkgEqual entity.
+func (pvu *PackageVersionUpdate) ClearEqual() *PackageVersionUpdate {
+	pvu.mutation.ClearEqual()
+	return pvu
+}
+
+// RemoveEqualIDs removes the "equal" edge to PkgEqual entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveEqualIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.RemoveEqualIDs(ids...)
+	return pvu
+}
+
+// RemoveEqual removes "equal" edges to PkgEqual entities.
+func (pvu *PackageVersionUpdate) RemoveEqual(p ...*PkgEqual) *PackageVersionUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.RemoveEqualIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -364,6 +437,96 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pvu.mutation.SimilarCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   packageversion.SimilarTable,
+			Columns: packageversion.SimilarPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedSimilarIDs(); len(nodes) > 0 && !pvu.mutation.SimilarCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   packageversion.SimilarTable,
+			Columns: packageversion.SimilarPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.SimilarIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   packageversion.SimilarTable,
+			Columns: packageversion.SimilarPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.EqualCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.EqualTable,
+			Columns: []string{packageversion.EqualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedEqualIDs(); len(nodes) > 0 && !pvu.mutation.EqualCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.EqualTable,
+			Columns: []string{packageversion.EqualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.EqualIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.EqualTable,
+			Columns: []string{packageversion.EqualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pvu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{packageversion.Label}
@@ -477,6 +640,36 @@ func (pvuo *PackageVersionUpdateOne) AddSbom(b ...*BillOfMaterials) *PackageVers
 	return pvuo.AddSbomIDs(ids...)
 }
 
+// AddSimilarIDs adds the "similar" edge to the PackageVersion entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddSimilarIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.AddSimilarIDs(ids...)
+	return pvuo
+}
+
+// AddSimilar adds the "similar" edges to the PackageVersion entity.
+func (pvuo *PackageVersionUpdateOne) AddSimilar(p ...*PackageVersion) *PackageVersionUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.AddSimilarIDs(ids...)
+}
+
+// AddEqualIDs adds the "equal" edge to the PkgEqual entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddEqualIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.AddEqualIDs(ids...)
+	return pvuo
+}
+
+// AddEqual adds the "equal" edges to the PkgEqual entity.
+func (pvuo *PackageVersionUpdateOne) AddEqual(p ...*PkgEqual) *PackageVersionUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.AddEqualIDs(ids...)
+}
+
 // Mutation returns the PackageVersionMutation object of the builder.
 func (pvuo *PackageVersionUpdateOne) Mutation() *PackageVersionMutation {
 	return pvuo.mutation
@@ -528,6 +721,48 @@ func (pvuo *PackageVersionUpdateOne) RemoveSbom(b ...*BillOfMaterials) *PackageV
 		ids[i] = b[i].ID
 	}
 	return pvuo.RemoveSbomIDs(ids...)
+}
+
+// ClearSimilar clears all "similar" edges to the PackageVersion entity.
+func (pvuo *PackageVersionUpdateOne) ClearSimilar() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearSimilar()
+	return pvuo
+}
+
+// RemoveSimilarIDs removes the "similar" edge to PackageVersion entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveSimilarIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveSimilarIDs(ids...)
+	return pvuo
+}
+
+// RemoveSimilar removes "similar" edges to PackageVersion entities.
+func (pvuo *PackageVersionUpdateOne) RemoveSimilar(p ...*PackageVersion) *PackageVersionUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.RemoveSimilarIDs(ids...)
+}
+
+// ClearEqual clears all "equal" edges to the PkgEqual entity.
+func (pvuo *PackageVersionUpdateOne) ClearEqual() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearEqual()
+	return pvuo
+}
+
+// RemoveEqualIDs removes the "equal" edge to PkgEqual entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveEqualIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveEqualIDs(ids...)
+	return pvuo
+}
+
+// RemoveEqual removes "equal" edges to PkgEqual entities.
+func (pvuo *PackageVersionUpdateOne) RemoveEqual(p ...*PkgEqual) *PackageVersionUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.RemoveEqualIDs(ids...)
 }
 
 // Where appends a list predicates to the PackageVersionUpdate builder.
@@ -739,6 +974,96 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.SimilarCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   packageversion.SimilarTable,
+			Columns: packageversion.SimilarPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedSimilarIDs(); len(nodes) > 0 && !pvuo.mutation.SimilarCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   packageversion.SimilarTable,
+			Columns: packageversion.SimilarPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.SimilarIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   packageversion.SimilarTable,
+			Columns: packageversion.SimilarPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.EqualCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.EqualTable,
+			Columns: []string{packageversion.EqualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedEqualIDs(); len(nodes) > 0 && !pvuo.mutation.EqualCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.EqualTable,
+			Columns: []string{packageversion.EqualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.EqualIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.EqualTable,
+			Columns: []string{packageversion.EqualColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

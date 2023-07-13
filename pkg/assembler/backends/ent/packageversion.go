@@ -43,9 +43,13 @@ type PackageVersionEdges struct {
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// Sbom holds the value of the sbom edge.
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
+	// Similar holds the value of the similar edge.
+	Similar []*PackageVersion `json:"similar,omitempty"`
+	// Equal holds the value of the equal edge.
+	Equal []*PkgEqual `json:"equal,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 }
 
 // NameOrErr returns the Name value or an error if the edge
@@ -77,6 +81,24 @@ func (e PackageVersionEdges) SbomOrErr() ([]*BillOfMaterials, error) {
 		return e.Sbom, nil
 	}
 	return nil, &NotLoadedError{edge: "sbom"}
+}
+
+// SimilarOrErr returns the Similar value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) SimilarOrErr() ([]*PackageVersion, error) {
+	if e.loadedTypes[3] {
+		return e.Similar, nil
+	}
+	return nil, &NotLoadedError{edge: "similar"}
+}
+
+// EqualOrErr returns the Equal value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) EqualOrErr() ([]*PkgEqual, error) {
+	if e.loadedTypes[4] {
+		return e.Equal, nil
+	}
+	return nil, &NotLoadedError{edge: "equal"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -169,6 +191,16 @@ func (pv *PackageVersion) QueryOccurrences() *OccurrenceQuery {
 // QuerySbom queries the "sbom" edge of the PackageVersion entity.
 func (pv *PackageVersion) QuerySbom() *BillOfMaterialsQuery {
 	return NewPackageVersionClient(pv.config).QuerySbom(pv)
+}
+
+// QuerySimilar queries the "similar" edge of the PackageVersion entity.
+func (pv *PackageVersion) QuerySimilar() *PackageVersionQuery {
+	return NewPackageVersionClient(pv.config).QuerySimilar(pv)
+}
+
+// QueryEqual queries the "equal" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryEqual() *PkgEqualQuery {
+	return NewPackageVersionClient(pv.config).QueryEqual(pv)
 }
 
 // Update returns a builder for updating this PackageVersion.

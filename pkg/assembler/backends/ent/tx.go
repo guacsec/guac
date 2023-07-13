@@ -38,6 +38,8 @@ type Tx struct {
 	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
+	// PkgEqual is the client for interacting with the PkgEqual builders.
+	PkgEqual *PkgEqualClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
 	// SecurityAdvisory is the client for interacting with the SecurityAdvisory builders.
@@ -192,6 +194,7 @@ func (tx *Tx) init() {
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)
 	tx.PackageType = NewPackageTypeClient(tx.config)
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
+	tx.PkgEqual = NewPkgEqualClient(tx.config)
 	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
 	tx.SecurityAdvisory = NewSecurityAdvisoryClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)

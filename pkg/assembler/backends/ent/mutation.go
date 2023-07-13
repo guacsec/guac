@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
@@ -54,6 +55,7 @@ const (
 	TypePackageNamespace = "PackageNamespace"
 	TypePackageType      = "PackageType"
 	TypePackageVersion   = "PackageVersion"
+	TypePkgEqual         = "PkgEqual"
 	TypeSLSAAttestation  = "SLSAAttestation"
 	TypeSecurityAdvisory = "SecurityAdvisory"
 	TypeSourceName       = "SourceName"
@@ -7442,6 +7444,12 @@ type PackageVersionMutation struct {
 	sbom               map[int]struct{}
 	removedsbom        map[int]struct{}
 	clearedsbom        bool
+	similar            map[int]struct{}
+	removedsimilar     map[int]struct{}
+	clearedsimilar     bool
+	equal              map[int]struct{}
+	removedequal       map[int]struct{}
+	clearedequal       bool
 	done               bool
 	oldValue           func(context.Context) (*PackageVersion, error)
 	predicates         []predicate.PackageVersion
@@ -7888,6 +7896,114 @@ func (m *PackageVersionMutation) ResetSbom() {
 	m.removedsbom = nil
 }
 
+// AddSimilarIDs adds the "similar" edge to the PackageVersion entity by ids.
+func (m *PackageVersionMutation) AddSimilarIDs(ids ...int) {
+	if m.similar == nil {
+		m.similar = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.similar[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSimilar clears the "similar" edge to the PackageVersion entity.
+func (m *PackageVersionMutation) ClearSimilar() {
+	m.clearedsimilar = true
+}
+
+// SimilarCleared reports if the "similar" edge to the PackageVersion entity was cleared.
+func (m *PackageVersionMutation) SimilarCleared() bool {
+	return m.clearedsimilar
+}
+
+// RemoveSimilarIDs removes the "similar" edge to the PackageVersion entity by IDs.
+func (m *PackageVersionMutation) RemoveSimilarIDs(ids ...int) {
+	if m.removedsimilar == nil {
+		m.removedsimilar = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.similar, ids[i])
+		m.removedsimilar[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSimilar returns the removed IDs of the "similar" edge to the PackageVersion entity.
+func (m *PackageVersionMutation) RemovedSimilarIDs() (ids []int) {
+	for id := range m.removedsimilar {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SimilarIDs returns the "similar" edge IDs in the mutation.
+func (m *PackageVersionMutation) SimilarIDs() (ids []int) {
+	for id := range m.similar {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSimilar resets all changes to the "similar" edge.
+func (m *PackageVersionMutation) ResetSimilar() {
+	m.similar = nil
+	m.clearedsimilar = false
+	m.removedsimilar = nil
+}
+
+// AddEqualIDs adds the "equal" edge to the PkgEqual entity by ids.
+func (m *PackageVersionMutation) AddEqualIDs(ids ...int) {
+	if m.equal == nil {
+		m.equal = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.equal[ids[i]] = struct{}{}
+	}
+}
+
+// ClearEqual clears the "equal" edge to the PkgEqual entity.
+func (m *PackageVersionMutation) ClearEqual() {
+	m.clearedequal = true
+}
+
+// EqualCleared reports if the "equal" edge to the PkgEqual entity was cleared.
+func (m *PackageVersionMutation) EqualCleared() bool {
+	return m.clearedequal
+}
+
+// RemoveEqualIDs removes the "equal" edge to the PkgEqual entity by IDs.
+func (m *PackageVersionMutation) RemoveEqualIDs(ids ...int) {
+	if m.removedequal == nil {
+		m.removedequal = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.equal, ids[i])
+		m.removedequal[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedEqual returns the removed IDs of the "equal" edge to the PkgEqual entity.
+func (m *PackageVersionMutation) RemovedEqualIDs() (ids []int) {
+	for id := range m.removedequal {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// EqualIDs returns the "equal" edge IDs in the mutation.
+func (m *PackageVersionMutation) EqualIDs() (ids []int) {
+	for id := range m.equal {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetEqual resets all changes to the "equal" edge.
+func (m *PackageVersionMutation) ResetEqual() {
+	m.equal = nil
+	m.clearedequal = false
+	m.removedequal = nil
+}
+
 // Where appends a list predicates to the PackageVersionMutation builder.
 func (m *PackageVersionMutation) Where(ps ...predicate.PackageVersion) {
 	m.predicates = append(m.predicates, ps...)
@@ -8101,7 +8217,7 @@ func (m *PackageVersionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PackageVersionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.name != nil {
 		edges = append(edges, packageversion.EdgeName)
 	}
@@ -8110,6 +8226,12 @@ func (m *PackageVersionMutation) AddedEdges() []string {
 	}
 	if m.sbom != nil {
 		edges = append(edges, packageversion.EdgeSbom)
+	}
+	if m.similar != nil {
+		edges = append(edges, packageversion.EdgeSimilar)
+	}
+	if m.equal != nil {
+		edges = append(edges, packageversion.EdgeEqual)
 	}
 	return edges
 }
@@ -8134,18 +8256,36 @@ func (m *PackageVersionMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case packageversion.EdgeSimilar:
+		ids := make([]ent.Value, 0, len(m.similar))
+		for id := range m.similar {
+			ids = append(ids, id)
+		}
+		return ids
+	case packageversion.EdgeEqual:
+		ids := make([]ent.Value, 0, len(m.equal))
+		for id := range m.equal {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PackageVersionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.removedoccurrences != nil {
 		edges = append(edges, packageversion.EdgeOccurrences)
 	}
 	if m.removedsbom != nil {
 		edges = append(edges, packageversion.EdgeSbom)
+	}
+	if m.removedsimilar != nil {
+		edges = append(edges, packageversion.EdgeSimilar)
+	}
+	if m.removedequal != nil {
+		edges = append(edges, packageversion.EdgeEqual)
 	}
 	return edges
 }
@@ -8166,13 +8306,25 @@ func (m *PackageVersionMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case packageversion.EdgeSimilar:
+		ids := make([]ent.Value, 0, len(m.removedsimilar))
+		for id := range m.removedsimilar {
+			ids = append(ids, id)
+		}
+		return ids
+	case packageversion.EdgeEqual:
+		ids := make([]ent.Value, 0, len(m.removedequal))
+		for id := range m.removedequal {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PackageVersionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.clearedname {
 		edges = append(edges, packageversion.EdgeName)
 	}
@@ -8181,6 +8333,12 @@ func (m *PackageVersionMutation) ClearedEdges() []string {
 	}
 	if m.clearedsbom {
 		edges = append(edges, packageversion.EdgeSbom)
+	}
+	if m.clearedsimilar {
+		edges = append(edges, packageversion.EdgeSimilar)
+	}
+	if m.clearedequal {
+		edges = append(edges, packageversion.EdgeEqual)
 	}
 	return edges
 }
@@ -8195,6 +8353,10 @@ func (m *PackageVersionMutation) EdgeCleared(name string) bool {
 		return m.clearedoccurrences
 	case packageversion.EdgeSbom:
 		return m.clearedsbom
+	case packageversion.EdgeSimilar:
+		return m.clearedsimilar
+	case packageversion.EdgeEqual:
+		return m.clearedequal
 	}
 	return false
 }
@@ -8223,8 +8385,683 @@ func (m *PackageVersionMutation) ResetEdge(name string) error {
 	case packageversion.EdgeSbom:
 		m.ResetSbom()
 		return nil
+	case packageversion.EdgeSimilar:
+		m.ResetSimilar()
+		return nil
+	case packageversion.EdgeEqual:
+		m.ResetEqual()
+		return nil
 	}
 	return fmt.Errorf("unknown PackageVersion edge %s", name)
+}
+
+// PkgEqualMutation represents an operation that mutates the PkgEqual nodes in the graph.
+type PkgEqualMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	origin           *string
+	collector        *string
+	justification    *string
+	clearedFields    map[string]struct{}
+	package_a        *int
+	clearedpackage_a bool
+	package_b        *int
+	clearedpackage_b bool
+	done             bool
+	oldValue         func(context.Context) (*PkgEqual, error)
+	predicates       []predicate.PkgEqual
+}
+
+var _ ent.Mutation = (*PkgEqualMutation)(nil)
+
+// pkgequalOption allows management of the mutation configuration using functional options.
+type pkgequalOption func(*PkgEqualMutation)
+
+// newPkgEqualMutation creates new mutation for the PkgEqual entity.
+func newPkgEqualMutation(c config, op Op, opts ...pkgequalOption) *PkgEqualMutation {
+	m := &PkgEqualMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePkgEqual,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPkgEqualID sets the ID field of the mutation.
+func withPkgEqualID(id int) pkgequalOption {
+	return func(m *PkgEqualMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PkgEqual
+		)
+		m.oldValue = func(ctx context.Context) (*PkgEqual, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PkgEqual.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPkgEqual sets the old PkgEqual of the mutation.
+func withPkgEqual(node *PkgEqual) pkgequalOption {
+	return func(m *PkgEqualMutation) {
+		m.oldValue = func(context.Context) (*PkgEqual, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PkgEqualMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PkgEqualMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PkgEqualMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PkgEqualMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PkgEqual.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPackageVersionID sets the "package_version_id" field.
+func (m *PkgEqualMutation) SetPackageVersionID(i int) {
+	m.package_a = &i
+}
+
+// PackageVersionID returns the value of the "package_version_id" field in the mutation.
+func (m *PkgEqualMutation) PackageVersionID() (r int, exists bool) {
+	v := m.package_a
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageVersionID returns the old "package_version_id" field's value of the PkgEqual entity.
+// If the PkgEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PkgEqualMutation) OldPackageVersionID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageVersionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageVersionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageVersionID: %w", err)
+	}
+	return oldValue.PackageVersionID, nil
+}
+
+// ResetPackageVersionID resets all changes to the "package_version_id" field.
+func (m *PkgEqualMutation) ResetPackageVersionID() {
+	m.package_a = nil
+}
+
+// SetSimilarID sets the "similar_id" field.
+func (m *PkgEqualMutation) SetSimilarID(i int) {
+	m.package_b = &i
+}
+
+// SimilarID returns the value of the "similar_id" field in the mutation.
+func (m *PkgEqualMutation) SimilarID() (r int, exists bool) {
+	v := m.package_b
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSimilarID returns the old "similar_id" field's value of the PkgEqual entity.
+// If the PkgEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PkgEqualMutation) OldSimilarID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSimilarID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSimilarID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSimilarID: %w", err)
+	}
+	return oldValue.SimilarID, nil
+}
+
+// ResetSimilarID resets all changes to the "similar_id" field.
+func (m *PkgEqualMutation) ResetSimilarID() {
+	m.package_b = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *PkgEqualMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *PkgEqualMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the PkgEqual entity.
+// If the PkgEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PkgEqualMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *PkgEqualMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *PkgEqualMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *PkgEqualMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the PkgEqual entity.
+// If the PkgEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PkgEqualMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *PkgEqualMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// SetJustification sets the "justification" field.
+func (m *PkgEqualMutation) SetJustification(s string) {
+	m.justification = &s
+}
+
+// Justification returns the value of the "justification" field in the mutation.
+func (m *PkgEqualMutation) Justification() (r string, exists bool) {
+	v := m.justification
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJustification returns the old "justification" field's value of the PkgEqual entity.
+// If the PkgEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PkgEqualMutation) OldJustification(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJustification is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJustification requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJustification: %w", err)
+	}
+	return oldValue.Justification, nil
+}
+
+// ResetJustification resets all changes to the "justification" field.
+func (m *PkgEqualMutation) ResetJustification() {
+	m.justification = nil
+}
+
+// SetPackageAID sets the "package_a" edge to the PackageVersion entity by id.
+func (m *PkgEqualMutation) SetPackageAID(id int) {
+	m.package_a = &id
+}
+
+// ClearPackageA clears the "package_a" edge to the PackageVersion entity.
+func (m *PkgEqualMutation) ClearPackageA() {
+	m.clearedpackage_a = true
+}
+
+// PackageACleared reports if the "package_a" edge to the PackageVersion entity was cleared.
+func (m *PkgEqualMutation) PackageACleared() bool {
+	return m.clearedpackage_a
+}
+
+// PackageAID returns the "package_a" edge ID in the mutation.
+func (m *PkgEqualMutation) PackageAID() (id int, exists bool) {
+	if m.package_a != nil {
+		return *m.package_a, true
+	}
+	return
+}
+
+// PackageAIDs returns the "package_a" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageAID instead. It exists only for internal usage by the builders.
+func (m *PkgEqualMutation) PackageAIDs() (ids []int) {
+	if id := m.package_a; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackageA resets all changes to the "package_a" edge.
+func (m *PkgEqualMutation) ResetPackageA() {
+	m.package_a = nil
+	m.clearedpackage_a = false
+}
+
+// SetPackageBID sets the "package_b" edge to the PackageVersion entity by id.
+func (m *PkgEqualMutation) SetPackageBID(id int) {
+	m.package_b = &id
+}
+
+// ClearPackageB clears the "package_b" edge to the PackageVersion entity.
+func (m *PkgEqualMutation) ClearPackageB() {
+	m.clearedpackage_b = true
+}
+
+// PackageBCleared reports if the "package_b" edge to the PackageVersion entity was cleared.
+func (m *PkgEqualMutation) PackageBCleared() bool {
+	return m.clearedpackage_b
+}
+
+// PackageBID returns the "package_b" edge ID in the mutation.
+func (m *PkgEqualMutation) PackageBID() (id int, exists bool) {
+	if m.package_b != nil {
+		return *m.package_b, true
+	}
+	return
+}
+
+// PackageBIDs returns the "package_b" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageBID instead. It exists only for internal usage by the builders.
+func (m *PkgEqualMutation) PackageBIDs() (ids []int) {
+	if id := m.package_b; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackageB resets all changes to the "package_b" edge.
+func (m *PkgEqualMutation) ResetPackageB() {
+	m.package_b = nil
+	m.clearedpackage_b = false
+}
+
+// Where appends a list predicates to the PkgEqualMutation builder.
+func (m *PkgEqualMutation) Where(ps ...predicate.PkgEqual) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PkgEqualMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PkgEqualMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PkgEqual, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PkgEqualMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PkgEqualMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PkgEqual).
+func (m *PkgEqualMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PkgEqualMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.package_a != nil {
+		fields = append(fields, pkgequal.FieldPackageVersionID)
+	}
+	if m.package_b != nil {
+		fields = append(fields, pkgequal.FieldSimilarID)
+	}
+	if m.origin != nil {
+		fields = append(fields, pkgequal.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, pkgequal.FieldCollector)
+	}
+	if m.justification != nil {
+		fields = append(fields, pkgequal.FieldJustification)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PkgEqualMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case pkgequal.FieldPackageVersionID:
+		return m.PackageVersionID()
+	case pkgequal.FieldSimilarID:
+		return m.SimilarID()
+	case pkgequal.FieldOrigin:
+		return m.Origin()
+	case pkgequal.FieldCollector:
+		return m.Collector()
+	case pkgequal.FieldJustification:
+		return m.Justification()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PkgEqualMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case pkgequal.FieldPackageVersionID:
+		return m.OldPackageVersionID(ctx)
+	case pkgequal.FieldSimilarID:
+		return m.OldSimilarID(ctx)
+	case pkgequal.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case pkgequal.FieldCollector:
+		return m.OldCollector(ctx)
+	case pkgequal.FieldJustification:
+		return m.OldJustification(ctx)
+	}
+	return nil, fmt.Errorf("unknown PkgEqual field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PkgEqualMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case pkgequal.FieldPackageVersionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageVersionID(v)
+		return nil
+	case pkgequal.FieldSimilarID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSimilarID(v)
+		return nil
+	case pkgequal.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case pkgequal.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	case pkgequal.FieldJustification:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJustification(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PkgEqual field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PkgEqualMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PkgEqualMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PkgEqualMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PkgEqual numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PkgEqualMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PkgEqualMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PkgEqualMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown PkgEqual nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PkgEqualMutation) ResetField(name string) error {
+	switch name {
+	case pkgequal.FieldPackageVersionID:
+		m.ResetPackageVersionID()
+		return nil
+	case pkgequal.FieldSimilarID:
+		m.ResetSimilarID()
+		return nil
+	case pkgequal.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case pkgequal.FieldCollector:
+		m.ResetCollector()
+		return nil
+	case pkgequal.FieldJustification:
+		m.ResetJustification()
+		return nil
+	}
+	return fmt.Errorf("unknown PkgEqual field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PkgEqualMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.package_a != nil {
+		edges = append(edges, pkgequal.EdgePackageA)
+	}
+	if m.package_b != nil {
+		edges = append(edges, pkgequal.EdgePackageB)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PkgEqualMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case pkgequal.EdgePackageA:
+		if id := m.package_a; id != nil {
+			return []ent.Value{*id}
+		}
+	case pkgequal.EdgePackageB:
+		if id := m.package_b; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PkgEqualMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PkgEqualMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PkgEqualMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedpackage_a {
+		edges = append(edges, pkgequal.EdgePackageA)
+	}
+	if m.clearedpackage_b {
+		edges = append(edges, pkgequal.EdgePackageB)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PkgEqualMutation) EdgeCleared(name string) bool {
+	switch name {
+	case pkgequal.EdgePackageA:
+		return m.clearedpackage_a
+	case pkgequal.EdgePackageB:
+		return m.clearedpackage_b
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PkgEqualMutation) ClearEdge(name string) error {
+	switch name {
+	case pkgequal.EdgePackageA:
+		m.ClearPackageA()
+		return nil
+	case pkgequal.EdgePackageB:
+		m.ClearPackageB()
+		return nil
+	}
+	return fmt.Errorf("unknown PkgEqual unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PkgEqualMutation) ResetEdge(name string) error {
+	switch name {
+	case pkgequal.EdgePackageA:
+		m.ResetPackageA()
+		return nil
+	case pkgequal.EdgePackageB:
+		m.ResetPackageB()
+		return nil
+	}
+	return fmt.Errorf("unknown PkgEqual edge %s", name)
 }
 
 // SLSAAttestationMutation represents an operation that mutates the SLSAAttestation nodes in the graph.

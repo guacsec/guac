@@ -492,9 +492,7 @@ func (s *Suite) TestHashEquals() {
 					if idIdx >= len(ids) {
 						s.T().Fatalf("ID index out of range, want: %d, got: %d", len(ids), idIdx)
 					}
-
-					realID := ids[idIdx]
-					test.Query.ID = &realID
+					test.Query.ID = &ids[idIdx]
 				}
 			}
 
