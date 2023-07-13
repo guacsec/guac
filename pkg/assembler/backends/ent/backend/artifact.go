@@ -33,8 +33,8 @@ func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 
 func artifactQueryInputPredicates(spec model.ArtifactInputSpec) predicate.Artifact {
 	return artifact.And(
-		artifact.Algorithm(strings.ToLower(spec.Algorithm)),
-		artifact.Digest(strings.ToLower(spec.Digest)),
+		artifact.AlgorithmEqualFold(strings.ToLower(spec.Algorithm)),
+		artifact.DigestEqualFold(strings.ToLower(spec.Digest)),
 	)
 }
 
