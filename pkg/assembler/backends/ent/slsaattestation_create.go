@@ -31,6 +31,18 @@ func (sac *SLSAAttestationCreate) SetBuildType(s string) *SLSAAttestationCreate 
 	return sac
 }
 
+// SetBuiltByID sets the "built_by_id" field.
+func (sac *SLSAAttestationCreate) SetBuiltByID(i int) *SLSAAttestationCreate {
+	sac.mutation.SetBuiltByID(i)
+	return sac
+}
+
+// SetSubjectID sets the "subject_id" field.
+func (sac *SLSAAttestationCreate) SetSubjectID(i int) *SLSAAttestationCreate {
+	sac.mutation.SetSubjectID(i)
+	return sac
+}
+
 // SetSlsaPredicate sets the "slsa_predicate" field.
 func (sac *SLSAAttestationCreate) SetSlsaPredicate(mp []*model.SLSAPredicate) *SLSAAttestationCreate {
 	sac.mutation.SetSlsaPredicate(mp)
@@ -98,23 +110,14 @@ func (sac *SLSAAttestationCreate) AddBuiltFrom(a ...*Artifact) *SLSAAttestationC
 	return sac.AddBuiltFromIDs(ids...)
 }
 
-// SetBuiltByID sets the "built_by" edge to the Builder entity by ID.
-func (sac *SLSAAttestationCreate) SetBuiltByID(id int) *SLSAAttestationCreate {
-	sac.mutation.SetBuiltByID(id)
-	return sac
-}
-
-// SetNillableBuiltByID sets the "built_by" edge to the Builder entity by ID if the given value is not nil.
-func (sac *SLSAAttestationCreate) SetNillableBuiltByID(id *int) *SLSAAttestationCreate {
-	if id != nil {
-		sac = sac.SetBuiltByID(*id)
-	}
-	return sac
-}
-
 // SetBuiltBy sets the "built_by" edge to the Builder entity.
 func (sac *SLSAAttestationCreate) SetBuiltBy(b *Builder) *SLSAAttestationCreate {
 	return sac.SetBuiltByID(b.ID)
+}
+
+// SetSubject sets the "subject" edge to the Artifact entity.
+func (sac *SLSAAttestationCreate) SetSubject(a *Artifact) *SLSAAttestationCreate {
+	return sac.SetSubjectID(a.ID)
 }
 
 // Mutation returns the SLSAAttestationMutation object of the builder.
@@ -154,6 +157,12 @@ func (sac *SLSAAttestationCreate) check() error {
 	if _, ok := sac.mutation.BuildType(); !ok {
 		return &ValidationError{Name: "build_type", err: errors.New(`ent: missing required field "SLSAAttestation.build_type"`)}
 	}
+	if _, ok := sac.mutation.BuiltByID(); !ok {
+		return &ValidationError{Name: "built_by_id", err: errors.New(`ent: missing required field "SLSAAttestation.built_by_id"`)}
+	}
+	if _, ok := sac.mutation.SubjectID(); !ok {
+		return &ValidationError{Name: "subject_id", err: errors.New(`ent: missing required field "SLSAAttestation.subject_id"`)}
+	}
 	if _, ok := sac.mutation.SlsaVersion(); !ok {
 		return &ValidationError{Name: "slsa_version", err: errors.New(`ent: missing required field "SLSAAttestation.slsa_version"`)}
 	}
@@ -162,6 +171,12 @@ func (sac *SLSAAttestationCreate) check() error {
 	}
 	if _, ok := sac.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "SLSAAttestation.collector"`)}
+	}
+	if _, ok := sac.mutation.BuiltByID(); !ok {
+		return &ValidationError{Name: "built_by", err: errors.New(`ent: missing required edge "SLSAAttestation.built_by"`)}
+	}
+	if _, ok := sac.mutation.SubjectID(); !ok {
+		return &ValidationError{Name: "subject", err: errors.New(`ent: missing required edge "SLSAAttestation.subject"`)}
 	}
 	return nil
 }
@@ -236,7 +251,7 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 	}
 	if nodes := sac.mutation.BuiltByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   slsaattestation.BuiltByTable,
 			Columns: []string{slsaattestation.BuiltByColumn},
@@ -248,6 +263,24 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.BuiltByID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := sac.mutation.SubjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   slsaattestation.SubjectTable,
+			Columns: []string{slsaattestation.SubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.SubjectID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -311,6 +344,30 @@ func (u *SLSAAttestationUpsert) SetBuildType(v string) *SLSAAttestationUpsert {
 // UpdateBuildType sets the "build_type" field to the value that was provided on create.
 func (u *SLSAAttestationUpsert) UpdateBuildType() *SLSAAttestationUpsert {
 	u.SetExcluded(slsaattestation.FieldBuildType)
+	return u
+}
+
+// SetBuiltByID sets the "built_by_id" field.
+func (u *SLSAAttestationUpsert) SetBuiltByID(v int) *SLSAAttestationUpsert {
+	u.Set(slsaattestation.FieldBuiltByID, v)
+	return u
+}
+
+// UpdateBuiltByID sets the "built_by_id" field to the value that was provided on create.
+func (u *SLSAAttestationUpsert) UpdateBuiltByID() *SLSAAttestationUpsert {
+	u.SetExcluded(slsaattestation.FieldBuiltByID)
+	return u
+}
+
+// SetSubjectID sets the "subject_id" field.
+func (u *SLSAAttestationUpsert) SetSubjectID(v int) *SLSAAttestationUpsert {
+	u.Set(slsaattestation.FieldSubjectID, v)
+	return u
+}
+
+// UpdateSubjectID sets the "subject_id" field to the value that was provided on create.
+func (u *SLSAAttestationUpsert) UpdateSubjectID() *SLSAAttestationUpsert {
+	u.SetExcluded(slsaattestation.FieldSubjectID)
 	return u
 }
 
@@ -455,6 +512,34 @@ func (u *SLSAAttestationUpsertOne) SetBuildType(v string) *SLSAAttestationUpsert
 func (u *SLSAAttestationUpsertOne) UpdateBuildType() *SLSAAttestationUpsertOne {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.UpdateBuildType()
+	})
+}
+
+// SetBuiltByID sets the "built_by_id" field.
+func (u *SLSAAttestationUpsertOne) SetBuiltByID(v int) *SLSAAttestationUpsertOne {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.SetBuiltByID(v)
+	})
+}
+
+// UpdateBuiltByID sets the "built_by_id" field to the value that was provided on create.
+func (u *SLSAAttestationUpsertOne) UpdateBuiltByID() *SLSAAttestationUpsertOne {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.UpdateBuiltByID()
+	})
+}
+
+// SetSubjectID sets the "subject_id" field.
+func (u *SLSAAttestationUpsertOne) SetSubjectID(v int) *SLSAAttestationUpsertOne {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.SetSubjectID(v)
+	})
+}
+
+// UpdateSubjectID sets the "subject_id" field to the value that was provided on create.
+func (u *SLSAAttestationUpsertOne) UpdateSubjectID() *SLSAAttestationUpsertOne {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.UpdateSubjectID()
 	})
 }
 
@@ -773,6 +858,34 @@ func (u *SLSAAttestationUpsertBulk) SetBuildType(v string) *SLSAAttestationUpser
 func (u *SLSAAttestationUpsertBulk) UpdateBuildType() *SLSAAttestationUpsertBulk {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.UpdateBuildType()
+	})
+}
+
+// SetBuiltByID sets the "built_by_id" field.
+func (u *SLSAAttestationUpsertBulk) SetBuiltByID(v int) *SLSAAttestationUpsertBulk {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.SetBuiltByID(v)
+	})
+}
+
+// UpdateBuiltByID sets the "built_by_id" field to the value that was provided on create.
+func (u *SLSAAttestationUpsertBulk) UpdateBuiltByID() *SLSAAttestationUpsertBulk {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.UpdateBuiltByID()
+	})
+}
+
+// SetSubjectID sets the "subject_id" field.
+func (u *SLSAAttestationUpsertBulk) SetSubjectID(v int) *SLSAAttestationUpsertBulk {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.SetSubjectID(v)
+	})
+}
+
+// UpdateSubjectID sets the "subject_id" field to the value that was provided on create.
+func (u *SLSAAttestationUpsertBulk) UpdateSubjectID() *SLSAAttestationUpsertBulk {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.UpdateSubjectID()
 	})
 }
 

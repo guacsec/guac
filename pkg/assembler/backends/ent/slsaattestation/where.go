@@ -60,6 +60,16 @@ func BuildType(v string) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldBuildType, v))
 }
 
+// BuiltByID applies equality check predicate on the "built_by_id" field. It's identical to BuiltByIDEQ.
+func BuiltByID(v int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEQ(FieldBuiltByID, v))
+}
+
+// SubjectID applies equality check predicate on the "subject_id" field. It's identical to SubjectIDEQ.
+func SubjectID(v int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEQ(FieldSubjectID, v))
+}
+
 // SlsaVersion applies equality check predicate on the "slsa_version" field. It's identical to SlsaVersionEQ.
 func SlsaVersion(v string) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldSlsaVersion, v))
@@ -148,6 +158,46 @@ func BuildTypeEqualFold(v string) predicate.SLSAAttestation {
 // BuildTypeContainsFold applies the ContainsFold predicate on the "build_type" field.
 func BuildTypeContainsFold(v string) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldContainsFold(FieldBuildType, v))
+}
+
+// BuiltByIDEQ applies the EQ predicate on the "built_by_id" field.
+func BuiltByIDEQ(v int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEQ(FieldBuiltByID, v))
+}
+
+// BuiltByIDNEQ applies the NEQ predicate on the "built_by_id" field.
+func BuiltByIDNEQ(v int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldNEQ(FieldBuiltByID, v))
+}
+
+// BuiltByIDIn applies the In predicate on the "built_by_id" field.
+func BuiltByIDIn(vs ...int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldIn(FieldBuiltByID, vs...))
+}
+
+// BuiltByIDNotIn applies the NotIn predicate on the "built_by_id" field.
+func BuiltByIDNotIn(vs ...int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldNotIn(FieldBuiltByID, vs...))
+}
+
+// SubjectIDEQ applies the EQ predicate on the "subject_id" field.
+func SubjectIDEQ(v int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEQ(FieldSubjectID, v))
+}
+
+// SubjectIDNEQ applies the NEQ predicate on the "subject_id" field.
+func SubjectIDNEQ(v int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldNEQ(FieldSubjectID, v))
+}
+
+// SubjectIDIn applies the In predicate on the "subject_id" field.
+func SubjectIDIn(vs ...int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldIn(FieldSubjectID, vs...))
+}
+
+// SubjectIDNotIn applies the NotIn predicate on the "subject_id" field.
+func SubjectIDNotIn(vs ...int) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldNotIn(FieldSubjectID, vs...))
 }
 
 // SlsaPredicateIsNil applies the IsNil predicate on the "slsa_predicate" field.
@@ -483,7 +533,7 @@ func HasBuiltBy() predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, BuiltByTable, BuiltByColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, BuiltByTable, BuiltByColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -493,6 +543,29 @@ func HasBuiltBy() predicate.SLSAAttestation {
 func HasBuiltByWith(preds ...predicate.Builder) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(func(s *sql.Selector) {
 		step := newBuiltByStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSubject applies the HasEdge predicate on the "subject" edge.
+func HasSubject() predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, SubjectTable, SubjectColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSubjectWith applies the HasEdge predicate on the "subject" edge with a given conditions (other predicates).
+func HasSubjectWith(preds ...predicate.Artifact) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(func(s *sql.Selector) {
+		step := newSubjectStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

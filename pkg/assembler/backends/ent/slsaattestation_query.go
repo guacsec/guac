@@ -26,6 +26,7 @@ type SLSAAttestationQuery struct {
 	predicates    []predicate.SLSAAttestation
 	withBuiltFrom *ArtifactQuery
 	withBuiltBy   *BuilderQuery
+	withSubject   *ArtifactQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -98,7 +99,29 @@ func (saq *SLSAAttestationQuery) QueryBuiltBy() *BuilderQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, selector),
 			sqlgraph.To(builder.Table, builder.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(saq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySubject chains the current query on the "subject" edge.
+func (saq *SLSAAttestationQuery) QuerySubject() *ArtifactQuery {
+	query := (&ArtifactClient{config: saq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := saq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := saq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, selector),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, slsaattestation.SubjectTable, slsaattestation.SubjectColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(saq.driver.Dialect(), step)
 		return fromU, nil
@@ -300,6 +323,7 @@ func (saq *SLSAAttestationQuery) Clone() *SLSAAttestationQuery {
 		predicates:    append([]predicate.SLSAAttestation{}, saq.predicates...),
 		withBuiltFrom: saq.withBuiltFrom.Clone(),
 		withBuiltBy:   saq.withBuiltBy.Clone(),
+		withSubject:   saq.withSubject.Clone(),
 		// clone intermediate query.
 		sql:  saq.sql.Clone(),
 		path: saq.path,
@@ -325,6 +349,17 @@ func (saq *SLSAAttestationQuery) WithBuiltBy(opts ...func(*BuilderQuery)) *SLSAA
 		opt(query)
 	}
 	saq.withBuiltBy = query
+	return saq
+}
+
+// WithSubject tells the query-builder to eager-load the nodes that are connected to
+// the "subject" edge. The optional arguments are used to configure the query builder of the edge.
+func (saq *SLSAAttestationQuery) WithSubject(opts ...func(*ArtifactQuery)) *SLSAAttestationQuery {
+	query := (&ArtifactClient{config: saq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	saq.withSubject = query
 	return saq
 }
 
@@ -406,9 +441,10 @@ func (saq *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	var (
 		nodes       = []*SLSAAttestation{}
 		_spec       = saq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			saq.withBuiltFrom != nil,
 			saq.withBuiltBy != nil,
+			saq.withSubject != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -439,6 +475,12 @@ func (saq *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	if query := saq.withBuiltBy; query != nil {
 		if err := saq.loadBuiltBy(ctx, query, nodes, nil,
 			func(n *SLSAAttestation, e *Builder) { n.Edges.BuiltBy = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := saq.withSubject; query != nil {
+		if err := saq.loadSubject(ctx, query, nodes, nil,
+			func(n *SLSAAttestation, e *Artifact) { n.Edges.Subject = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -507,30 +549,60 @@ func (saq *SLSAAttestationQuery) loadBuiltFrom(ctx context.Context, query *Artif
 	return nil
 }
 func (saq *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *BuilderQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Builder)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*SLSAAttestation)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*SLSAAttestation)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+		fk := nodes[i].BuiltByID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.Builder(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(slsaattestation.BuiltByColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(builder.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.slsa_attestation_built_by
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "slsa_attestation_built_by" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "slsa_attestation_built_by" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "built_by_id" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (saq *SLSAAttestationQuery) loadSubject(ctx context.Context, query *ArtifactQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Artifact)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*SLSAAttestation)
+	for i := range nodes {
+		fk := nodes[i].SubjectID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(artifact.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "subject_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -559,6 +631,12 @@ func (saq *SLSAAttestationQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != slsaattestation.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if saq.withBuiltBy != nil {
+			_spec.Node.AddColumnOnce(slsaattestation.FieldBuiltByID)
+		}
+		if saq.withSubject != nil {
+			_spec.Node.AddColumnOnce(slsaattestation.FieldSubjectID)
 		}
 	}
 	if ps := saq.predicates; len(ps) > 0 {

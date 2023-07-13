@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,12 +19,11 @@ import (
 // BuilderQuery is the builder for querying Builder entities.
 type BuilderQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []builder.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.Builder
-	withSlsaAttestation *SLSAAttestationQuery
-	withFKs             bool
+	ctx                  *QueryContext
+	order                []builder.OrderOption
+	inters               []Interceptor
+	predicates           []predicate.Builder
+	withSlsaAttestations *SLSAAttestationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,8 +60,8 @@ func (bq *BuilderQuery) Order(o ...builder.OrderOption) *BuilderQuery {
 	return bq
 }
 
-// QuerySlsaAttestation chains the current query on the "slsa_attestation" edge.
-func (bq *BuilderQuery) QuerySlsaAttestation() *SLSAAttestationQuery {
+// QuerySlsaAttestations chains the current query on the "slsa_attestations" edge.
+func (bq *BuilderQuery) QuerySlsaAttestations() *SLSAAttestationQuery {
 	query := (&SLSAAttestationClient{config: bq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
@@ -74,7 +74,7 @@ func (bq *BuilderQuery) QuerySlsaAttestation() *SLSAAttestationQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(builder.Table, builder.FieldID, selector),
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, builder.SlsaAttestationTable, builder.SlsaAttestationColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, builder.SlsaAttestationsTable, builder.SlsaAttestationsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,26 +269,26 @@ func (bq *BuilderQuery) Clone() *BuilderQuery {
 		return nil
 	}
 	return &BuilderQuery{
-		config:              bq.config,
-		ctx:                 bq.ctx.Clone(),
-		order:               append([]builder.OrderOption{}, bq.order...),
-		inters:              append([]Interceptor{}, bq.inters...),
-		predicates:          append([]predicate.Builder{}, bq.predicates...),
-		withSlsaAttestation: bq.withSlsaAttestation.Clone(),
+		config:               bq.config,
+		ctx:                  bq.ctx.Clone(),
+		order:                append([]builder.OrderOption{}, bq.order...),
+		inters:               append([]Interceptor{}, bq.inters...),
+		predicates:           append([]predicate.Builder{}, bq.predicates...),
+		withSlsaAttestations: bq.withSlsaAttestations.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,
 	}
 }
 
-// WithSlsaAttestation tells the query-builder to eager-load the nodes that are connected to
-// the "slsa_attestation" edge. The optional arguments are used to configure the query builder of the edge.
-func (bq *BuilderQuery) WithSlsaAttestation(opts ...func(*SLSAAttestationQuery)) *BuilderQuery {
+// WithSlsaAttestations tells the query-builder to eager-load the nodes that are connected to
+// the "slsa_attestations" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BuilderQuery) WithSlsaAttestations(opts ...func(*SLSAAttestationQuery)) *BuilderQuery {
 	query := (&SLSAAttestationClient{config: bq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	bq.withSlsaAttestation = query
+	bq.withSlsaAttestations = query
 	return bq
 }
 
@@ -369,18 +369,11 @@ func (bq *BuilderQuery) prepareQuery(ctx context.Context) error {
 func (bq *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Builder, error) {
 	var (
 		nodes       = []*Builder{}
-		withFKs     = bq.withFKs
 		_spec       = bq.querySpec()
 		loadedTypes = [1]bool{
-			bq.withSlsaAttestation != nil,
+			bq.withSlsaAttestations != nil,
 		}
 	)
-	if bq.withSlsaAttestation != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, builder.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Builder).scanValues(nil, columns)
 	}
@@ -399,44 +392,43 @@ func (bq *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Buil
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := bq.withSlsaAttestation; query != nil {
-		if err := bq.loadSlsaAttestation(ctx, query, nodes, nil,
-			func(n *Builder, e *SLSAAttestation) { n.Edges.SlsaAttestation = e }); err != nil {
+	if query := bq.withSlsaAttestations; query != nil {
+		if err := bq.loadSlsaAttestations(ctx, query, nodes,
+			func(n *Builder) { n.Edges.SlsaAttestations = []*SLSAAttestation{} },
+			func(n *Builder, e *SLSAAttestation) { n.Edges.SlsaAttestations = append(n.Edges.SlsaAttestations, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (bq *BuilderQuery) loadSlsaAttestation(ctx context.Context, query *SLSAAttestationQuery, nodes []*Builder, init func(*Builder), assign func(*Builder, *SLSAAttestation)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Builder)
+func (bq *BuilderQuery) loadSlsaAttestations(ctx context.Context, query *SLSAAttestationQuery, nodes []*Builder, init func(*Builder), assign func(*Builder, *SLSAAttestation)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Builder)
 	for i := range nodes {
-		if nodes[i].slsa_attestation_built_by == nil {
-			continue
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
-		fk := *nodes[i].slsa_attestation_built_by
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(ids) == 0 {
-		return nil
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(slsaattestation.FieldBuiltByID)
 	}
-	query.Where(slsaattestation.IDIn(ids...))
+	query.Where(predicate.SLSAAttestation(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(builder.SlsaAttestationsColumn), fks...))
+	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		fk := n.BuiltByID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "slsa_attestation_built_by" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "built_by_id" returned %v for node %v`, fk, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

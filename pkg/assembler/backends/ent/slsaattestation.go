@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -22,6 +23,10 @@ type SLSAAttestation struct {
 	ID int `json:"id,omitempty"`
 	// Type of the builder
 	BuildType string `json:"build_type,omitempty"`
+	// ID of the builder
+	BuiltByID int `json:"built_by_id,omitempty"`
+	// ID of the subject artifact
+	SubjectID int `json:"subject_id,omitempty"`
 	// Individual predicates found in the attestation
 	SlsaPredicate []*model.SLSAPredicate `json:"slsa_predicate,omitempty"`
 	// Version of the SLSA predicate
@@ -46,9 +51,11 @@ type SLSAAttestationEdges struct {
 	BuiltFrom []*Artifact `json:"built_from,omitempty"`
 	// BuiltBy holds the value of the built_by edge.
 	BuiltBy *Builder `json:"built_by,omitempty"`
+	// Subject holds the value of the subject edge.
+	Subject *Artifact `json:"subject,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // BuiltFromOrErr returns the BuiltFrom value or an error if the edge
@@ -73,6 +80,19 @@ func (e SLSAAttestationEdges) BuiltByOrErr() (*Builder, error) {
 	return nil, &NotLoadedError{edge: "built_by"}
 }
 
+// SubjectOrErr returns the Subject value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e SLSAAttestationEdges) SubjectOrErr() (*Artifact, error) {
+	if e.loadedTypes[2] {
+		if e.Subject == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: artifact.Label}
+		}
+		return e.Subject, nil
+	}
+	return nil, &NotLoadedError{edge: "subject"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*SLSAAttestation) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -80,7 +100,7 @@ func (*SLSAAttestation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case slsaattestation.FieldSlsaPredicate:
 			values[i] = new([]byte)
-		case slsaattestation.FieldID:
+		case slsaattestation.FieldID, slsaattestation.FieldBuiltByID, slsaattestation.FieldSubjectID:
 			values[i] = new(sql.NullInt64)
 		case slsaattestation.FieldBuildType, slsaattestation.FieldSlsaVersion, slsaattestation.FieldOrigin, slsaattestation.FieldCollector:
 			values[i] = new(sql.NullString)
@@ -112,6 +132,18 @@ func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field build_type", values[i])
 			} else if value.Valid {
 				sa.BuildType = value.String
+			}
+		case slsaattestation.FieldBuiltByID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field built_by_id", values[i])
+			} else if value.Valid {
+				sa.BuiltByID = int(value.Int64)
+			}
+		case slsaattestation.FieldSubjectID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field subject_id", values[i])
+			} else if value.Valid {
+				sa.SubjectID = int(value.Int64)
 			}
 		case slsaattestation.FieldSlsaPredicate:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -176,6 +208,11 @@ func (sa *SLSAAttestation) QueryBuiltBy() *BuilderQuery {
 	return NewSLSAAttestationClient(sa.config).QueryBuiltBy(sa)
 }
 
+// QuerySubject queries the "subject" edge of the SLSAAttestation entity.
+func (sa *SLSAAttestation) QuerySubject() *ArtifactQuery {
+	return NewSLSAAttestationClient(sa.config).QuerySubject(sa)
+}
+
 // Update returns a builder for updating this SLSAAttestation.
 // Note that you need to call SLSAAttestation.Unwrap() before calling this method if this SLSAAttestation
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -201,6 +238,12 @@ func (sa *SLSAAttestation) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", sa.ID))
 	builder.WriteString("build_type=")
 	builder.WriteString(sa.BuildType)
+	builder.WriteString(", ")
+	builder.WriteString("built_by_id=")
+	builder.WriteString(fmt.Sprintf("%v", sa.BuiltByID))
+	builder.WriteString(", ")
+	builder.WriteString("subject_id=")
+	builder.WriteString(fmt.Sprintf("%v", sa.SubjectID))
 	builder.WriteString(", ")
 	builder.WriteString("slsa_predicate=")
 	builder.WriteString(fmt.Sprintf("%v", sa.SlsaPredicate))

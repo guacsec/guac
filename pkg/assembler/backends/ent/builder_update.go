@@ -28,23 +28,19 @@ func (bu *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
 	return bu
 }
 
-// SetSlsaAttestationID sets the "slsa_attestation" edge to the SLSAAttestation entity by ID.
-func (bu *BuilderUpdate) SetSlsaAttestationID(id int) *BuilderUpdate {
-	bu.mutation.SetSlsaAttestationID(id)
+// AddSlsaAttestationIDs adds the "slsa_attestations" edge to the SLSAAttestation entity by IDs.
+func (bu *BuilderUpdate) AddSlsaAttestationIDs(ids ...int) *BuilderUpdate {
+	bu.mutation.AddSlsaAttestationIDs(ids...)
 	return bu
 }
 
-// SetNillableSlsaAttestationID sets the "slsa_attestation" edge to the SLSAAttestation entity by ID if the given value is not nil.
-func (bu *BuilderUpdate) SetNillableSlsaAttestationID(id *int) *BuilderUpdate {
-	if id != nil {
-		bu = bu.SetSlsaAttestationID(*id)
+// AddSlsaAttestations adds the "slsa_attestations" edges to the SLSAAttestation entity.
+func (bu *BuilderUpdate) AddSlsaAttestations(s ...*SLSAAttestation) *BuilderUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
 	}
-	return bu
-}
-
-// SetSlsaAttestation sets the "slsa_attestation" edge to the SLSAAttestation entity.
-func (bu *BuilderUpdate) SetSlsaAttestation(s *SLSAAttestation) *BuilderUpdate {
-	return bu.SetSlsaAttestationID(s.ID)
+	return bu.AddSlsaAttestationIDs(ids...)
 }
 
 // Mutation returns the BuilderMutation object of the builder.
@@ -52,10 +48,25 @@ func (bu *BuilderUpdate) Mutation() *BuilderMutation {
 	return bu.mutation
 }
 
-// ClearSlsaAttestation clears the "slsa_attestation" edge to the SLSAAttestation entity.
-func (bu *BuilderUpdate) ClearSlsaAttestation() *BuilderUpdate {
-	bu.mutation.ClearSlsaAttestation()
+// ClearSlsaAttestations clears all "slsa_attestations" edges to the SLSAAttestation entity.
+func (bu *BuilderUpdate) ClearSlsaAttestations() *BuilderUpdate {
+	bu.mutation.ClearSlsaAttestations()
 	return bu
+}
+
+// RemoveSlsaAttestationIDs removes the "slsa_attestations" edge to SLSAAttestation entities by IDs.
+func (bu *BuilderUpdate) RemoveSlsaAttestationIDs(ids ...int) *BuilderUpdate {
+	bu.mutation.RemoveSlsaAttestationIDs(ids...)
+	return bu
+}
+
+// RemoveSlsaAttestations removes "slsa_attestations" edges to SLSAAttestation entities.
+func (bu *BuilderUpdate) RemoveSlsaAttestations(s ...*SLSAAttestation) *BuilderUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return bu.RemoveSlsaAttestationIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -94,12 +105,12 @@ func (bu *BuilderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if bu.mutation.SlsaAttestationCleared() {
+	if bu.mutation.SlsaAttestationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   builder.SlsaAttestationTable,
-			Columns: []string{builder.SlsaAttestationColumn},
+			Table:   builder.SlsaAttestationsTable,
+			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
@@ -107,12 +118,28 @@ func (bu *BuilderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.SlsaAttestationIDs(); len(nodes) > 0 {
+	if nodes := bu.mutation.RemovedSlsaAttestationsIDs(); len(nodes) > 0 && !bu.mutation.SlsaAttestationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   builder.SlsaAttestationTable,
-			Columns: []string{builder.SlsaAttestationColumn},
+			Table:   builder.SlsaAttestationsTable,
+			Columns: []string{builder.SlsaAttestationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.SlsaAttestationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   builder.SlsaAttestationsTable,
+			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
@@ -143,23 +170,19 @@ type BuilderUpdateOne struct {
 	mutation *BuilderMutation
 }
 
-// SetSlsaAttestationID sets the "slsa_attestation" edge to the SLSAAttestation entity by ID.
-func (buo *BuilderUpdateOne) SetSlsaAttestationID(id int) *BuilderUpdateOne {
-	buo.mutation.SetSlsaAttestationID(id)
+// AddSlsaAttestationIDs adds the "slsa_attestations" edge to the SLSAAttestation entity by IDs.
+func (buo *BuilderUpdateOne) AddSlsaAttestationIDs(ids ...int) *BuilderUpdateOne {
+	buo.mutation.AddSlsaAttestationIDs(ids...)
 	return buo
 }
 
-// SetNillableSlsaAttestationID sets the "slsa_attestation" edge to the SLSAAttestation entity by ID if the given value is not nil.
-func (buo *BuilderUpdateOne) SetNillableSlsaAttestationID(id *int) *BuilderUpdateOne {
-	if id != nil {
-		buo = buo.SetSlsaAttestationID(*id)
+// AddSlsaAttestations adds the "slsa_attestations" edges to the SLSAAttestation entity.
+func (buo *BuilderUpdateOne) AddSlsaAttestations(s ...*SLSAAttestation) *BuilderUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
 	}
-	return buo
-}
-
-// SetSlsaAttestation sets the "slsa_attestation" edge to the SLSAAttestation entity.
-func (buo *BuilderUpdateOne) SetSlsaAttestation(s *SLSAAttestation) *BuilderUpdateOne {
-	return buo.SetSlsaAttestationID(s.ID)
+	return buo.AddSlsaAttestationIDs(ids...)
 }
 
 // Mutation returns the BuilderMutation object of the builder.
@@ -167,10 +190,25 @@ func (buo *BuilderUpdateOne) Mutation() *BuilderMutation {
 	return buo.mutation
 }
 
-// ClearSlsaAttestation clears the "slsa_attestation" edge to the SLSAAttestation entity.
-func (buo *BuilderUpdateOne) ClearSlsaAttestation() *BuilderUpdateOne {
-	buo.mutation.ClearSlsaAttestation()
+// ClearSlsaAttestations clears all "slsa_attestations" edges to the SLSAAttestation entity.
+func (buo *BuilderUpdateOne) ClearSlsaAttestations() *BuilderUpdateOne {
+	buo.mutation.ClearSlsaAttestations()
 	return buo
+}
+
+// RemoveSlsaAttestationIDs removes the "slsa_attestations" edge to SLSAAttestation entities by IDs.
+func (buo *BuilderUpdateOne) RemoveSlsaAttestationIDs(ids ...int) *BuilderUpdateOne {
+	buo.mutation.RemoveSlsaAttestationIDs(ids...)
+	return buo
+}
+
+// RemoveSlsaAttestations removes "slsa_attestations" edges to SLSAAttestation entities.
+func (buo *BuilderUpdateOne) RemoveSlsaAttestations(s ...*SLSAAttestation) *BuilderUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return buo.RemoveSlsaAttestationIDs(ids...)
 }
 
 // Where appends a list predicates to the BuilderUpdate builder.
@@ -239,12 +277,12 @@ func (buo *BuilderUpdateOne) sqlSave(ctx context.Context) (_node *Builder, err e
 			}
 		}
 	}
-	if buo.mutation.SlsaAttestationCleared() {
+	if buo.mutation.SlsaAttestationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   builder.SlsaAttestationTable,
-			Columns: []string{builder.SlsaAttestationColumn},
+			Table:   builder.SlsaAttestationsTable,
+			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
@@ -252,12 +290,28 @@ func (buo *BuilderUpdateOne) sqlSave(ctx context.Context) (_node *Builder, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.SlsaAttestationIDs(); len(nodes) > 0 {
+	if nodes := buo.mutation.RemovedSlsaAttestationsIDs(); len(nodes) > 0 && !buo.mutation.SlsaAttestationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   builder.SlsaAttestationTable,
-			Columns: []string{builder.SlsaAttestationColumn},
+			Table:   builder.SlsaAttestationsTable,
+			Columns: []string{builder.SlsaAttestationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.SlsaAttestationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   builder.SlsaAttestationsTable,
+			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),

@@ -9,7 +9,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
 
 // Builder is the model entity for the Builder schema.
@@ -21,31 +20,26 @@ type Builder struct {
 	URI string `json:"uri,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BuilderQuery when eager-loading is set.
-	Edges                     BuilderEdges `json:"edges"`
-	slsa_attestation_built_by *int
-	selectValues              sql.SelectValues
+	Edges        BuilderEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // BuilderEdges holds the relations/edges for other nodes in the graph.
 type BuilderEdges struct {
-	// SlsaAttestation holds the value of the slsa_attestation edge.
-	SlsaAttestation *SLSAAttestation `json:"slsa_attestation,omitempty"`
+	// SlsaAttestations holds the value of the slsa_attestations edge.
+	SlsaAttestations []*SLSAAttestation `json:"slsa_attestations,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// SlsaAttestationOrErr returns the SlsaAttestation value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e BuilderEdges) SlsaAttestationOrErr() (*SLSAAttestation, error) {
+// SlsaAttestationsOrErr returns the SlsaAttestations value or an error if the edge
+// was not loaded in eager-loading.
+func (e BuilderEdges) SlsaAttestationsOrErr() ([]*SLSAAttestation, error) {
 	if e.loadedTypes[0] {
-		if e.SlsaAttestation == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: slsaattestation.Label}
-		}
-		return e.SlsaAttestation, nil
+		return e.SlsaAttestations, nil
 	}
-	return nil, &NotLoadedError{edge: "slsa_attestation"}
+	return nil, &NotLoadedError{edge: "slsa_attestations"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -57,8 +51,6 @@ func (*Builder) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case builder.FieldURI:
 			values[i] = new(sql.NullString)
-		case builder.ForeignKeys[0]: // slsa_attestation_built_by
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -86,13 +78,6 @@ func (b *Builder) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.URI = value.String
 			}
-		case builder.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field slsa_attestation_built_by", value)
-			} else if value.Valid {
-				b.slsa_attestation_built_by = new(int)
-				*b.slsa_attestation_built_by = int(value.Int64)
-			}
 		default:
 			b.selectValues.Set(columns[i], values[i])
 		}
@@ -106,9 +91,9 @@ func (b *Builder) Value(name string) (ent.Value, error) {
 	return b.selectValues.Get(name)
 }
 
-// QuerySlsaAttestation queries the "slsa_attestation" edge of the Builder entity.
-func (b *Builder) QuerySlsaAttestation() *SLSAAttestationQuery {
-	return NewBuilderClient(b.config).QuerySlsaAttestation(b)
+// QuerySlsaAttestations queries the "slsa_attestations" edge of the Builder entity.
+func (b *Builder) QuerySlsaAttestations() *SLSAAttestationQuery {
+	return NewBuilderClient(b.config).QuerySlsaAttestations(b)
 }
 
 // Update returns a builder for updating this Builder.

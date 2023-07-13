@@ -14,17 +14,17 @@ const (
 	FieldID = "id"
 	// FieldURI holds the string denoting the uri field in the database.
 	FieldURI = "uri"
-	// EdgeSlsaAttestation holds the string denoting the slsa_attestation edge name in mutations.
-	EdgeSlsaAttestation = "slsa_attestation"
+	// EdgeSlsaAttestations holds the string denoting the slsa_attestations edge name in mutations.
+	EdgeSlsaAttestations = "slsa_attestations"
 	// Table holds the table name of the builder in the database.
 	Table = "builders"
-	// SlsaAttestationTable is the table that holds the slsa_attestation relation/edge.
-	SlsaAttestationTable = "builders"
-	// SlsaAttestationInverseTable is the table name for the SLSAAttestation entity.
+	// SlsaAttestationsTable is the table that holds the slsa_attestations relation/edge.
+	SlsaAttestationsTable = "slsa_attestations"
+	// SlsaAttestationsInverseTable is the table name for the SLSAAttestation entity.
 	// It exists in this package in order to avoid circular dependency with the "slsaattestation" package.
-	SlsaAttestationInverseTable = "slsa_attestations"
-	// SlsaAttestationColumn is the table column denoting the slsa_attestation relation/edge.
-	SlsaAttestationColumn = "slsa_attestation_built_by"
+	SlsaAttestationsInverseTable = "slsa_attestations"
+	// SlsaAttestationsColumn is the table column denoting the slsa_attestations relation/edge.
+	SlsaAttestationsColumn = "built_by_id"
 )
 
 // Columns holds all SQL columns for builder fields.
@@ -33,21 +33,10 @@ var Columns = []string{
 	FieldURI,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "builders"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"slsa_attestation_built_by",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -67,16 +56,23 @@ func ByURI(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldURI, opts...).ToFunc()
 }
 
-// BySlsaAttestationField orders the results by slsa_attestation field.
-func BySlsaAttestationField(field string, opts ...sql.OrderTermOption) OrderOption {
+// BySlsaAttestationsCount orders the results by slsa_attestations count.
+func BySlsaAttestationsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSlsaAttestationStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newSlsaAttestationsStep(), opts...)
 	}
 }
-func newSlsaAttestationStep() *sqlgraph.Step {
+
+// BySlsaAttestations orders the results by slsa_attestations terms.
+func BySlsaAttestations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSlsaAttestationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newSlsaAttestationsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SlsaAttestationInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, SlsaAttestationTable, SlsaAttestationColumn),
+		sqlgraph.To(SlsaAttestationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, SlsaAttestationsTable, SlsaAttestationsColumn),
 	)
 }

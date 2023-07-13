@@ -25,6 +25,8 @@ func (SLSAAttestation) Annotations() []schema.Annotation {
 func (SLSAAttestation) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("build_type").Comment("Type of the builder"),
+		field.Int("built_by_id").Comment("ID of the builder"),
+		field.Int("subject_id").Comment("ID of the subject artifact"),
 		field.JSON("slsa_predicate", []*model.SLSAPredicate{}).Optional().Comment("Individual predicates found in the attestation"),
 		field.String("slsa_version").Comment("Version of the SLSA predicate"),
 		field.Time("started_on").Optional().Nillable().Comment("Timestamp of build start time"),
@@ -38,8 +40,15 @@ func (SLSAAttestation) Fields() []ent.Field {
 func (SLSAAttestation) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("built_from", Artifact.Type),
-		edge.To("built_by", Builder.Type).Unique(),
+		edge.To("built_by", Builder.Type).Unique().Field("built_by_id").Required(),
+		edge.To("subject", Artifact.Type).Unique().Field("subject_id").Required(),
 	}
 }
 
 // TODO: (ivanvanderbyl) Add indexes for the SLSAAttestation entity.
+
+// func (SLSAAttestation) Indexes() []ent.Index {
+// 	return []ent.Index{
+// 		index.Fields("origin", "collector").Unique(),
+// 	}
+// }

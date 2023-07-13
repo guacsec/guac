@@ -83,21 +83,12 @@ var (
 	BuildersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "uri", Type: field.TypeString, Unique: true},
-		{Name: "slsa_attestation_built_by", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// BuildersTable holds the schema information for the "builders" table.
 	BuildersTable = &schema.Table{
 		Name:       "builders",
 		Columns:    BuildersColumns,
 		PrimaryKey: []*schema.Column{BuildersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "builders_slsa_attestations_built_by",
-				Columns:    []*schema.Column{BuildersColumns[2]},
-				RefColumns: []*schema.Column{SlsaAttestationsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "builder_uri",
@@ -464,12 +455,28 @@ var (
 		{Name: "finished_on", Type: field.TypeTime, Nullable: true},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
+		{Name: "built_by_id", Type: field.TypeInt},
+		{Name: "subject_id", Type: field.TypeInt},
 	}
 	// SlsaAttestationsTable holds the schema information for the "slsa_attestations" table.
 	SlsaAttestationsTable = &schema.Table{
 		Name:       "slsa_attestations",
 		Columns:    SlsaAttestationsColumns,
 		PrimaryKey: []*schema.Column{SlsaAttestationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "slsa_attestations_builders_built_by",
+				Columns:    []*schema.Column{SlsaAttestationsColumns[8]},
+				RefColumns: []*schema.Column{BuildersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "slsa_attestations_artifacts_subject",
+				Columns:    []*schema.Column{SlsaAttestationsColumns[9]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// SecurityAdvisoriesColumns holds the columns for the "security_advisories" table.
 	SecurityAdvisoriesColumns = []*schema.Column{
@@ -660,7 +667,6 @@ var (
 func init() {
 	BillOfMaterialsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	BillOfMaterialsTable.ForeignKeys[1].RefTable = ArtifactsTable
-	BuildersTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	CertifyVulnsTable.ForeignKeys[0].RefTable = SecurityAdvisoriesTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
@@ -675,6 +681,8 @@ func init() {
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
 	PkgEqualsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	PkgEqualsTable.ForeignKeys[1].RefTable = PackageVersionsTable
+	SlsaAttestationsTable.ForeignKeys[0].RefTable = BuildersTable
+	SlsaAttestationsTable.ForeignKeys[1].RefTable = ArtifactsTable
 	SlsaAttestationsTable.Annotation = &entsql.Annotation{
 		Table: "slsa_attestations",
 	}

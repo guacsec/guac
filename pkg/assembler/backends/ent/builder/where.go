@@ -123,21 +123,21 @@ func URIContainsFold(v string) predicate.Builder {
 	return predicate.Builder(sql.FieldContainsFold(FieldURI, v))
 }
 
-// HasSlsaAttestation applies the HasEdge predicate on the "slsa_attestation" edge.
-func HasSlsaAttestation() predicate.Builder {
+// HasSlsaAttestations applies the HasEdge predicate on the "slsa_attestations" edge.
+func HasSlsaAttestations() predicate.Builder {
 	return predicate.Builder(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, SlsaAttestationTable, SlsaAttestationColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, SlsaAttestationsTable, SlsaAttestationsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSlsaAttestationWith applies the HasEdge predicate on the "slsa_attestation" edge with a given conditions (other predicates).
-func HasSlsaAttestationWith(preds ...predicate.SLSAAttestation) predicate.Builder {
+// HasSlsaAttestationsWith applies the HasEdge predicate on the "slsa_attestations" edge with a given conditions (other predicates).
+func HasSlsaAttestationsWith(preds ...predicate.SLSAAttestation) predicate.Builder {
 	return predicate.Builder(func(s *sql.Selector) {
-		step := newSlsaAttestationStep()
+		step := newSlsaAttestationsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

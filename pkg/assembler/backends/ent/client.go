@@ -773,15 +773,15 @@ func (c *BuilderClient) GetX(ctx context.Context, id int) *Builder {
 	return obj
 }
 
-// QuerySlsaAttestation queries the slsa_attestation edge of a Builder.
-func (c *BuilderClient) QuerySlsaAttestation(b *Builder) *SLSAAttestationQuery {
+// QuerySlsaAttestations queries the slsa_attestations edge of a Builder.
+func (c *BuilderClient) QuerySlsaAttestations(b *Builder) *SLSAAttestationQuery {
 	query := (&SLSAAttestationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := b.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(builder.Table, builder.FieldID, id),
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, builder.SlsaAttestationTable, builder.SlsaAttestationColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, builder.SlsaAttestationsTable, builder.SlsaAttestationsColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
@@ -2581,7 +2581,23 @@ func (c *SLSAAttestationClient) QueryBuiltBy(sa *SLSAAttestation) *BuilderQuery 
 		step := sqlgraph.NewStep(
 			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
 			sqlgraph.To(builder.Table, builder.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, slsaattestation.BuiltByTable, slsaattestation.BuiltByColumn),
+		)
+		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySubject queries the subject edge of a SLSAAttestation.
+func (c *SLSAAttestationClient) QuerySubject(sa *SLSAAttestation) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(slsaattestation.Table, slsaattestation.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, slsaattestation.SubjectTable, slsaattestation.SubjectColumn),
 		)
 		fromV = sqlgraph.Neighbors(sa.driver.Dialect(), step)
 		return fromV, nil

@@ -14,6 +14,10 @@ const (
 	FieldID = "id"
 	// FieldBuildType holds the string denoting the build_type field in the database.
 	FieldBuildType = "build_type"
+	// FieldBuiltByID holds the string denoting the built_by_id field in the database.
+	FieldBuiltByID = "built_by_id"
+	// FieldSubjectID holds the string denoting the subject_id field in the database.
+	FieldSubjectID = "subject_id"
 	// FieldSlsaPredicate holds the string denoting the slsa_predicate field in the database.
 	FieldSlsaPredicate = "slsa_predicate"
 	// FieldSlsaVersion holds the string denoting the slsa_version field in the database.
@@ -30,6 +34,8 @@ const (
 	EdgeBuiltFrom = "built_from"
 	// EdgeBuiltBy holds the string denoting the built_by edge name in mutations.
 	EdgeBuiltBy = "built_by"
+	// EdgeSubject holds the string denoting the subject edge name in mutations.
+	EdgeSubject = "subject"
 	// Table holds the table name of the slsaattestation in the database.
 	Table = "slsa_attestations"
 	// BuiltFromTable is the table that holds the built_from relation/edge. The primary key declared below.
@@ -38,18 +44,27 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "artifact" package.
 	BuiltFromInverseTable = "artifacts"
 	// BuiltByTable is the table that holds the built_by relation/edge.
-	BuiltByTable = "builders"
+	BuiltByTable = "slsa_attestations"
 	// BuiltByInverseTable is the table name for the Builder entity.
 	// It exists in this package in order to avoid circular dependency with the "builder" package.
 	BuiltByInverseTable = "builders"
 	// BuiltByColumn is the table column denoting the built_by relation/edge.
-	BuiltByColumn = "slsa_attestation_built_by"
+	BuiltByColumn = "built_by_id"
+	// SubjectTable is the table that holds the subject relation/edge.
+	SubjectTable = "slsa_attestations"
+	// SubjectInverseTable is the table name for the Artifact entity.
+	// It exists in this package in order to avoid circular dependency with the "artifact" package.
+	SubjectInverseTable = "artifacts"
+	// SubjectColumn is the table column denoting the subject relation/edge.
+	SubjectColumn = "subject_id"
 )
 
 // Columns holds all SQL columns for slsaattestation fields.
 var Columns = []string{
 	FieldID,
 	FieldBuildType,
+	FieldBuiltByID,
+	FieldSubjectID,
 	FieldSlsaPredicate,
 	FieldSlsaVersion,
 	FieldStartedOn,
@@ -85,6 +100,16 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByBuildType orders the results by the build_type field.
 func ByBuildType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBuildType, opts...).ToFunc()
+}
+
+// ByBuiltByID orders the results by the built_by_id field.
+func ByBuiltByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBuiltByID, opts...).ToFunc()
+}
+
+// BySubjectID orders the results by the subject_id field.
+func BySubjectID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSubjectID, opts...).ToFunc()
 }
 
 // BySlsaVersion orders the results by the slsa_version field.
@@ -132,6 +157,13 @@ func ByBuiltByField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newBuiltByStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// BySubjectField orders the results by subject field.
+func BySubjectField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubjectStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newBuiltFromStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -143,6 +175,13 @@ func newBuiltByStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(BuiltByInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, BuiltByTable, BuiltByColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, BuiltByTable, BuiltByColumn),
+	)
+}
+func newSubjectStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubjectInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, SubjectTable, SubjectColumn),
 	)
 }

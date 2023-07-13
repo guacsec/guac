@@ -28,23 +28,19 @@ func (bc *BuilderCreate) SetURI(s string) *BuilderCreate {
 	return bc
 }
 
-// SetSlsaAttestationID sets the "slsa_attestation" edge to the SLSAAttestation entity by ID.
-func (bc *BuilderCreate) SetSlsaAttestationID(id int) *BuilderCreate {
-	bc.mutation.SetSlsaAttestationID(id)
+// AddSlsaAttestationIDs adds the "slsa_attestations" edge to the SLSAAttestation entity by IDs.
+func (bc *BuilderCreate) AddSlsaAttestationIDs(ids ...int) *BuilderCreate {
+	bc.mutation.AddSlsaAttestationIDs(ids...)
 	return bc
 }
 
-// SetNillableSlsaAttestationID sets the "slsa_attestation" edge to the SLSAAttestation entity by ID if the given value is not nil.
-func (bc *BuilderCreate) SetNillableSlsaAttestationID(id *int) *BuilderCreate {
-	if id != nil {
-		bc = bc.SetSlsaAttestationID(*id)
+// AddSlsaAttestations adds the "slsa_attestations" edges to the SLSAAttestation entity.
+func (bc *BuilderCreate) AddSlsaAttestations(s ...*SLSAAttestation) *BuilderCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
 	}
-	return bc
-}
-
-// SetSlsaAttestation sets the "slsa_attestation" edge to the SLSAAttestation entity.
-func (bc *BuilderCreate) SetSlsaAttestation(s *SLSAAttestation) *BuilderCreate {
-	return bc.SetSlsaAttestationID(s.ID)
+	return bc.AddSlsaAttestationIDs(ids...)
 }
 
 // Mutation returns the BuilderMutation object of the builder.
@@ -115,12 +111,12 @@ func (bc *BuilderCreate) createSpec() (*Builder, *sqlgraph.CreateSpec) {
 		_spec.SetField(builder.FieldURI, field.TypeString, value)
 		_node.URI = value
 	}
-	if nodes := bc.mutation.SlsaAttestationIDs(); len(nodes) > 0 {
+	if nodes := bc.mutation.SlsaAttestationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   builder.SlsaAttestationTable,
-			Columns: []string{builder.SlsaAttestationColumn},
+			Table:   builder.SlsaAttestationsTable,
+			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
@@ -129,7 +125,6 @@ func (bc *BuilderCreate) createSpec() (*Builder, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.slsa_attestation_built_by = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
