@@ -2306,6 +2306,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Commit:    ptrfrom.String("5835544ca568b757a8ecae5c153f317e5736700e"),
 				},
 				HasSourceAt: &generated.HasSourceAtInputSpec{
+					KnownSince:    parseRfc3339("2022-09-21T17:45:50.52Z"),
 					Justification: "package at this source",
 				},
 			},
