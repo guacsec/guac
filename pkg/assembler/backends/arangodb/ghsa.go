@@ -30,7 +30,7 @@ func (c *arangoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*m
 	arangoQueryBuilder := newForQuery(ghsasStr, "ghsa")
 	if ghsaSpec.GhsaID != nil {
 		arangoQueryBuilder.filter("ghsa", "ghsaId", "==", "@ghsaId")
-		values["ghsaId"] = ghsaSpec.GhsaID
+		values["ghsaId"] = strings.ToLower(*ghsaSpec.GhsaID)
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
@@ -50,7 +50,7 @@ func (c *arangoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*m
 
 func getGHSAQueryValues(ghsa *model.GHSAInputSpec) map[string]any {
 	values := map[string]any{}
-	values["ghsaId"] = ghsa.GhsaID
+	values["ghsaId"] = strings.ToLower(ghsa.GhsaID)
 	return values
 }
 

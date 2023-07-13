@@ -34,7 +34,7 @@ func (c *arangoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*mode
 	}
 	if cveSpec.CveID != nil {
 		arangoQueryBuilder.filter("cve", "cveId", "==", "@cveId")
-		values["cveId"] = cveSpec.CveID
+		values["cveId"] = strings.ToLower(*cveSpec.CveID)
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
@@ -56,7 +56,7 @@ func (c *arangoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*mode
 func getCVEQueryValues(cve *model.CVEInputSpec) map[string]any {
 	values := map[string]any{}
 	values["year"] = cve.Year
-	values["cveId"] = cve.CveID
+	values["cveId"] = strings.ToLower(cve.CveID)
 	return values
 }
 

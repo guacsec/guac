@@ -30,7 +30,7 @@ func (c *arangoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*mode
 	arangoQueryBuilder := newForQuery(osvsStr, "osv")
 	if osvSpec.OsvID != nil {
 		arangoQueryBuilder.filter("osv", "osvId", "==", "@osvId")
-		values["osvId"] = osvSpec.OsvID
+		values["osvId"] = strings.ToLower(*osvSpec.OsvID)
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
@@ -50,7 +50,7 @@ func (c *arangoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*mode
 
 func getOSVQueryValues(osv *model.OSVInputSpec) map[string]any {
 	values := map[string]any{}
-	values["osvId"] = osv.OsvID
+	values["osvId"] = strings.ToLower(osv.OsvID)
 	return values
 }
 
