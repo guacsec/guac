@@ -24,12 +24,21 @@ import (
 	"github.com/guacsec/guac/pkg/misc/depversion"
 )
 
+type NodeType int
+
+const (
+	PackageName NodeType = iota
+	PackageVersion
+	SourceName
+	Artifact
+)
+
 type DfsNode struct {
 	Expanded     bool // true once all node neighbors are added to queue
 	Parent       string
 	Depth        int
-	NodeType     string   // packageName, packageVersion
-	nodeVersions []string // for a packageName, what was the packageVersion associated with this version
+	Type         NodeType
+	nodeVersions []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
 }
 
 type queueValues struct {
@@ -40,17 +49,17 @@ type queueValues struct {
 }
 
 // TODO: make more robust using predicates
-func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID *string, maxDepth int) (map[string]DfsNode, error) {
-	startNode, err := model.Node(ctx, gqlclient, startID)
+func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Client, startID string, stopID *string, maxDepth int) (map[string]DfsNode, error) {
+	startNode, err := model.Node(ctx, gqlClient, startID)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed getting intial node with given ID:%w", err)
+		return nil, fmt.Errorf("failed getting initial node with given ID:%w", err)
 	}
 
 	nodePkg, ok := startNode.Node.(*model.NodeNodePackage)
 
 	if !ok {
-		return nil, fmt.Errorf("Not a package")
+		return nil, fmt.Errorf("not a package")
 	}
 
 	q := queueValues{
@@ -60,35 +69,35 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 
 	// TODO: add functionality to start with other nodes?
 	if len(nodePkg.AllPkgTree.Namespaces) < 1 {
-		return nil, fmt.Errorf("Start by inputting a packageName or packageVerion node")
+		return nil, fmt.Errorf("start by inputting a packageName or packageVersion node")
 	}
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names) < 1 {
-		return nil, fmt.Errorf("Start by inputting a packageName or packageVerion node")
+		return nil, fmt.Errorf("start by inputting a packageName or packageVersion node")
 	}
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) < 1 {
-		// TODO: handle case where there are circular depedencies that introduce more versions to the version list on a node that requires revisiting
+		// TODO: handle case where there are circular dependencies that introduce more versions to the version list on a node that requires revisiting
 		var versionsList []string
 		for _, versionEntry := range nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions {
 			versionsList = append(versionsList, versionEntry.Version)
 		}
 		q.nodeMap[startID] = DfsNode{
-			NodeType:     "packageName",
+			Type:         PackageName,
 			nodeVersions: versionsList,
 		}
 	} else {
-		q.nodeMap[startID] = DfsNode{
-			NodeType: "packageVersion",
-		}
-
-		// Add packageName node to the frontier as well
 		q.queue = append(q.queue, nodePkg.AllPkgTree.Namespaces[0].Names[0].Id)
 
 		var versionsList []string
 		versionsList = append(versionsList, nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
+		q.nodeMap[startID] = DfsNode{
+			Type:         PackageVersion,
+			nodeVersions: versionsList,
+		}
+
 		q.nodeMap[nodePkg.AllPkgTree.Namespaces[0].Names[0].Id] = DfsNode{
-			NodeType:     "packageName",
+			Type:         PackageName,
 			nodeVersions: versionsList,
 		}
 	}
@@ -108,14 +117,14 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 			break
 		}
 
-		neighborsResponse, err := model.Neighbors(ctx, gqlclient, q.now, []model.Edge{})
+		neighborsResponse, err := model.Neighbors(ctx, gqlClient, q.now, []model.Edge{})
 
 		if err != nil {
 			return nil, fmt.Errorf("failed getting neighbors:%w", err)
 		}
 
 		for _, neighbor := range neighborsResponse.Neighbors {
-			err = caseOnPredicates(ctx, gqlclient, &q, neighbor, q.nowNode.NodeType)
+			err = caseOnPredicates(ctx, gqlClient, &q, neighbor, q.nowNode.Type)
 
 			if err != nil {
 				return nil, err
@@ -130,24 +139,36 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 
 }
 
-func caseOnPredicates(ctx context.Context, gqlclient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode, nodeType string) error {
+func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode, nodeType NodeType) error {
 	// case on predicates and nodeType
 	switch nodeType {
-	case "packageName":
+	case PackageName:
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsIsDependency:
-			err := exploreIsDependencyFromDepPkg(ctx, gqlclient, q, *neighbor)
+			err := exploreIsDependencyFromDepPkg(ctx, gqlClient, q, *neighbor)
 
 			if err != nil {
 				return err
 			}
 		}
-	}
+	case PackageVersion, SourceName:
+		switch neighbor := neighbor.(type) {
+		case *model.NeighborsNeighborsIsOccurrence:
+			exploreIsOccurrenceFromSubject(ctx, gqlClient, q, *neighbor)
+		}
+	case Artifact:
+		switch neighbor := neighbor.(type) {
+		case *model.NeighborsNeighborsHasSLSA:
+			exploreHasSLSAFromArtifact(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsIsOccurrence:
+			exploreIsOccurrenceFromArtifact(ctx, gqlClient, q, *neighbor)
+		}
 
+	}
 	return nil
 }
 
-func exploreIsDependencyFromDepPkg(ctx context.Context, gqlclient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) error {
+func exploreIsDependencyFromDepPkg(ctx context.Context, gqlClient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) error {
 	doesRangeInclude, err := depversion.DoesRangeInclude(q.nowNode.nodeVersions, isDependency.VersionRange)
 
 	if err != nil {
@@ -158,35 +179,47 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlclient graphql.Client
 		return nil
 	}
 
-	dfsNVersion, seenVersion := q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id]
-	dfsNName, seenName := q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Id]
-
-	if !seenVersion {
-		dfsNVersion = DfsNode{
-			Parent:   q.now,
-			Depth:    q.nowNode.Depth + 1,
-			NodeType: "packageVersion",
-		}
-		q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id] = dfsNVersion
-	}
-
-	if !seenName {
-		dfsNName = DfsNode{
-			Parent:       q.now,
-			Depth:        q.nowNode.Depth + 1,
-			NodeType:     "packageName",
-			nodeVersions: []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version},
-		}
-		q.nodeMap[isDependency.Package.Namespaces[0].Names[0].Id] = dfsNName
-	}
-
-	if !dfsNVersion.Expanded {
-		q.queue = append(q.queue, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
-	}
-
-	if !dfsNName.Expanded {
-		q.queue = append(q.queue, isDependency.Package.Namespaces[0].Names[0].Id)
-	}
+	q.addNodeToQueue(PackageVersion, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
+	q.addNodeToQueue(PackageName, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Id)
 
 	return nil
+}
+
+func exploreIsOccurrenceFromSubject(ctx context.Context, gqlClient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {
+	q.addNodeToQueue(Artifact, nil, isOccurrence.Artifact.Id)
+}
+
+func exploreHasSLSAFromArtifact(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSLSA model.NeighborsNeighborsHasSLSA) {
+	// Check that the subject is not the node inputted itself and being re-added to the queue unnecessarily
+	if q.now != hasSLSA.Subject.Id {
+		q.addNodeToQueue(Artifact, nil, hasSLSA.Subject.Id)
+	}
+}
+
+func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlClient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {
+	switch subject := isOccurrence.Subject.(type) {
+	case *model.AllIsOccurrencesTreeSubjectPackage:
+		q.addNodeToQueue(PackageVersion, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Versions[0].Id)
+		q.addNodeToQueue(PackageName, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Id)
+	case *model.AllIsOccurrencesTreeSubjectSource:
+		q.addNodeToQueue(SourceName, nil, subject.Namespaces[0].Names[0].Id)
+	}
+}
+
+func (q *queueValues) addNodeToQueue(nodeType NodeType, versions []string, id string) {
+	node, seen := q.nodeMap[id]
+
+	if !seen {
+		node = DfsNode{
+			Parent:       q.now,
+			Depth:        q.nowNode.Depth + 1,
+			Type:         nodeType,
+			nodeVersions: versions,
+		}
+		q.nodeMap[id] = node
+	}
+
+	if !node.Expanded {
+		q.queue = append(q.queue, id)
+	}
 }
