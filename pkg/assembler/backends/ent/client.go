@@ -21,6 +21,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -52,6 +53,8 @@ type Client struct {
 	CertifyVuln *CertifyVulnClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
+	// HasSourceAt is the client for interacting with the HasSourceAt builders.
+	HasSourceAt *HasSourceAtClient
 	// HashEqual is the client for interacting with the HashEqual builders.
 	HashEqual *HashEqualClient
 	// IsVulnerability is the client for interacting with the IsVulnerability builders.
@@ -97,6 +100,7 @@ func (c *Client) init() {
 	c.Certification = NewCertificationClient(c.config)
 	c.CertifyVuln = NewCertifyVulnClient(c.config)
 	c.Dependency = NewDependencyClient(c.config)
+	c.HasSourceAt = NewHasSourceAtClient(c.config)
 	c.HashEqual = NewHashEqualClient(c.config)
 	c.IsVulnerability = NewIsVulnerabilityClient(c.config)
 	c.Occurrence = NewOccurrenceClient(c.config)
@@ -198,6 +202,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Certification:    NewCertificationClient(cfg),
 		CertifyVuln:      NewCertifyVulnClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
+		HasSourceAt:      NewHasSourceAtClient(cfg),
 		HashEqual:        NewHashEqualClient(cfg),
 		IsVulnerability:  NewIsVulnerabilityClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
@@ -236,6 +241,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Certification:    NewCertificationClient(cfg),
 		CertifyVuln:      NewCertifyVulnClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
+		HasSourceAt:      NewHasSourceAtClient(cfg),
 		HashEqual:        NewHashEqualClient(cfg),
 		IsVulnerability:  NewIsVulnerabilityClient(cfg),
 		Occurrence:       NewOccurrenceClient(cfg),
@@ -279,8 +285,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
-		c.Dependency, c.HashEqual, c.IsVulnerability, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
+		c.Dependency, c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.Occurrence,
+		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
 		c.SLSAAttestation, c.SecurityAdvisory, c.SourceName, c.SourceNamespace,
 		c.SourceType,
 	} {
@@ -293,8 +299,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
-		c.Dependency, c.HashEqual, c.IsVulnerability, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
+		c.Dependency, c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.Occurrence,
+		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
 		c.SLSAAttestation, c.SecurityAdvisory, c.SourceName, c.SourceNamespace,
 		c.SourceType,
 	} {
@@ -317,6 +323,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CertifyVuln.mutate(ctx, m)
 	case *DependencyMutation:
 		return c.Dependency.mutate(ctx, m)
+	case *HasSourceAtMutation:
+		return c.HasSourceAt.mutate(ctx, m)
 	case *HashEqualMutation:
 		return c.HashEqual.mutate(ctx, m)
 	case *IsVulnerabilityMutation:
@@ -1229,6 +1237,172 @@ func (c *DependencyClient) mutate(ctx context.Context, m *DependencyMutation) (V
 		return (&DependencyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Dependency mutation op: %q", m.Op())
+	}
+}
+
+// HasSourceAtClient is a client for the HasSourceAt schema.
+type HasSourceAtClient struct {
+	config
+}
+
+// NewHasSourceAtClient returns a client for the HasSourceAt from the given config.
+func NewHasSourceAtClient(c config) *HasSourceAtClient {
+	return &HasSourceAtClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `hassourceat.Hooks(f(g(h())))`.
+func (c *HasSourceAtClient) Use(hooks ...Hook) {
+	c.hooks.HasSourceAt = append(c.hooks.HasSourceAt, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `hassourceat.Intercept(f(g(h())))`.
+func (c *HasSourceAtClient) Intercept(interceptors ...Interceptor) {
+	c.inters.HasSourceAt = append(c.inters.HasSourceAt, interceptors...)
+}
+
+// Create returns a builder for creating a HasSourceAt entity.
+func (c *HasSourceAtClient) Create() *HasSourceAtCreate {
+	mutation := newHasSourceAtMutation(c.config, OpCreate)
+	return &HasSourceAtCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of HasSourceAt entities.
+func (c *HasSourceAtClient) CreateBulk(builders ...*HasSourceAtCreate) *HasSourceAtCreateBulk {
+	return &HasSourceAtCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for HasSourceAt.
+func (c *HasSourceAtClient) Update() *HasSourceAtUpdate {
+	mutation := newHasSourceAtMutation(c.config, OpUpdate)
+	return &HasSourceAtUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *HasSourceAtClient) UpdateOne(hsa *HasSourceAt) *HasSourceAtUpdateOne {
+	mutation := newHasSourceAtMutation(c.config, OpUpdateOne, withHasSourceAt(hsa))
+	return &HasSourceAtUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *HasSourceAtClient) UpdateOneID(id int) *HasSourceAtUpdateOne {
+	mutation := newHasSourceAtMutation(c.config, OpUpdateOne, withHasSourceAtID(id))
+	return &HasSourceAtUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for HasSourceAt.
+func (c *HasSourceAtClient) Delete() *HasSourceAtDelete {
+	mutation := newHasSourceAtMutation(c.config, OpDelete)
+	return &HasSourceAtDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *HasSourceAtClient) DeleteOne(hsa *HasSourceAt) *HasSourceAtDeleteOne {
+	return c.DeleteOneID(hsa.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *HasSourceAtClient) DeleteOneID(id int) *HasSourceAtDeleteOne {
+	builder := c.Delete().Where(hassourceat.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &HasSourceAtDeleteOne{builder}
+}
+
+// Query returns a query builder for HasSourceAt.
+func (c *HasSourceAtClient) Query() *HasSourceAtQuery {
+	return &HasSourceAtQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeHasSourceAt},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a HasSourceAt entity by its id.
+func (c *HasSourceAtClient) Get(ctx context.Context, id int) (*HasSourceAt, error) {
+	return c.Query().Where(hassourceat.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *HasSourceAtClient) GetX(ctx context.Context, id int) *HasSourceAt {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPackageVersion queries the package_version edge of a HasSourceAt.
+func (c *HasSourceAtClient) QueryPackageVersion(hsa *HasSourceAt) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := hsa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(hassourceat.Table, hassourceat.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, hassourceat.PackageVersionTable, hassourceat.PackageVersionColumn),
+		)
+		fromV = sqlgraph.Neighbors(hsa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAllVersions queries the all_versions edge of a HasSourceAt.
+func (c *HasSourceAtClient) QueryAllVersions(hsa *HasSourceAt) *PackageNameQuery {
+	query := (&PackageNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := hsa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(hassourceat.Table, hassourceat.FieldID, id),
+			sqlgraph.To(packagename.Table, packagename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, hassourceat.AllVersionsTable, hassourceat.AllVersionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(hsa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySource queries the source edge of a HasSourceAt.
+func (c *HasSourceAtClient) QuerySource(hsa *HasSourceAt) *SourceNameQuery {
+	query := (&SourceNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := hsa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(hassourceat.Table, hassourceat.FieldID, id),
+			sqlgraph.To(sourcename.Table, sourcename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, hassourceat.SourceTable, hassourceat.SourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(hsa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *HasSourceAtClient) Hooks() []Hook {
+	return c.hooks.HasSourceAt
+}
+
+// Interceptors returns the client interceptors.
+func (c *HasSourceAtClient) Interceptors() []Interceptor {
+	return c.inters.HasSourceAt
+}
+
+func (c *HasSourceAtClient) mutate(ctx context.Context, m *HasSourceAtMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&HasSourceAtCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&HasSourceAtUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&HasSourceAtUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&HasSourceAtDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown HasSourceAt mutation op: %q", m.Op())
 	}
 }
 
@@ -3186,14 +3360,14 @@ func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (V
 type (
 	hooks struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
-		HashEqual, IsVulnerability, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, PkgEqual, SLSAAttestation, SecurityAdvisory,
-		SourceName, SourceNamespace, SourceType []ent.Hook
+		HasSourceAt, HashEqual, IsVulnerability, Occurrence, PackageName,
+		PackageNamespace, PackageType, PackageVersion, PkgEqual, SLSAAttestation,
+		SecurityAdvisory, SourceName, SourceNamespace, SourceType []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
-		HashEqual, IsVulnerability, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, PkgEqual, SLSAAttestation, SecurityAdvisory,
-		SourceName, SourceNamespace, SourceType []ent.Interceptor
+		HasSourceAt, HashEqual, IsVulnerability, Occurrence, PackageName,
+		PackageNamespace, PackageType, PackageVersion, PkgEqual, SLSAAttestation,
+		SecurityAdvisory, SourceName, SourceNamespace, SourceType []ent.Interceptor
 	}
 )

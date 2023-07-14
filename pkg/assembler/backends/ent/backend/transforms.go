@@ -23,44 +23,6 @@ func toModelBuilder(b *ent.Builder) *model.Builder {
 	}
 }
 
-func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageType {
-	if pv != nil && pv.Edges.Name != nil &&
-		pv.Edges.Name.Edges.Namespace != nil &&
-		pv.Edges.Name.Edges.Namespace.Edges.Package != nil {
-		pn := pv.Edges.Name
-		ns := pn.Edges.Namespace
-		pt := ns.Edges.Package
-		pn.Edges.Versions = []*ent.PackageVersion{pv}
-		ns.Edges.Names = []*ent.PackageName{pn}
-		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
-		return pt
-	}
-	return nil
-}
-
-func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
-	if pn.Edges.Namespace != nil &&
-		pn.Edges.Namespace.Edges.Package != nil {
-		ns := pn.Edges.Namespace
-		pt := ns.Edges.Package
-		ns.Edges.Names = []*ent.PackageName{pn}
-		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
-		return pt
-	}
-	return nil
-}
-
-func backReferenceSourceName(sn *ent.SourceName) *ent.SourceType {
-	if sn.Edges.Namespace != nil {
-		sns := sn.Edges.Namespace
-		sns.Edges.Names = []*ent.SourceName{sn}
-		st := sns.Edges.SourceType
-		st.Edges.Namespaces = []*ent.SourceNamespace{sns}
-		return st
-	}
-	return nil
-}
-
 func toModelPackage(p *ent.PackageType) *model.Package {
 	if p == nil {
 		return nil
@@ -91,34 +53,6 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 		ID:       nodeID(n.ID),
 		Name:     n.Name,
 		Versions: collect(n.Edges.Versions, toModelPackageVersion),
-	}
-}
-
-func toModelSourceName(s *ent.SourceName) *model.Source {
-	return toModelSource(backReferenceSourceName(s))
-}
-
-func toModelSource(s *ent.SourceType) *model.Source {
-	if s == nil {
-		return nil
-	}
-	return &model.Source{
-		ID:   nodeID(s.ID),
-		Type: s.Type,
-		Namespaces: collect(s.Edges.Namespaces, func(n *ent.SourceNamespace) *model.SourceNamespace {
-			return &model.SourceNamespace{
-				ID:        nodeID(n.ID),
-				Namespace: n.Namespace,
-				Names: collect(n.Edges.Names, func(n *ent.SourceName) *model.SourceName {
-					return &model.SourceName{
-						ID:     nodeID(n.ID),
-						Name:   n.Name,
-						Tag:    &n.Tag,
-						Commit: &n.Commit,
-					}
-				}),
-			}
-		}),
 	}
 }
 

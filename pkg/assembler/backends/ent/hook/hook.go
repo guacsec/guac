@@ -81,6 +81,18 @@ func (f DependencyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DependencyMutation", m)
 }
 
+// The HasSourceAtFunc type is an adapter to allow the use of ordinary
+// function as HasSourceAt mutator.
+type HasSourceAtFunc func(context.Context, *ent.HasSourceAtMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f HasSourceAtFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.HasSourceAtMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.HasSourceAtMutation", m)
+}
+
 // The HashEqualFunc type is an adapter to allow the use of ordinary
 // function as HashEqual mutator.
 type HashEqualFunc func(context.Context, *ent.HashEqualMutation) (ent.Value, error)

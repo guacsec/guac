@@ -42,12 +42,12 @@ func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInput
 		Where(
 			pkgequal.Or(
 				pkgequal.And(
-					pkgequal.HasPackageAWith(pkgVersionInputPredicates(&pkgA)),
-					pkgequal.HasPackageBWith(pkgVersionInputPredicates(&pkgB)),
+					pkgequal.HasPackageAWith(packageVersionQuery(&pkgA)),
+					pkgequal.HasPackageBWith(packageVersionQuery(&pkgB)),
 				),
 				pkgequal.And(
-					pkgequal.HasPackageAWith(pkgVersionInputPredicates(&pkgB)),
-					pkgequal.HasPackageBWith(pkgVersionInputPredicates(&pkgA)),
+					pkgequal.HasPackageAWith(packageVersionQuery(&pkgB)),
+					pkgequal.HasPackageBWith(packageVersionQuery(&pkgA)),
 				),
 			),
 		).
@@ -59,11 +59,11 @@ func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInput
 		return pkgEql, nil
 	}
 
-	pkgARecord, err := client.PackageVersion.Query().Where(pkgVersionInputPredicates(&pkgA)).Only(ctx)
+	pkgARecord, err := client.PackageVersion.Query().Where(packageVersionQuery(&pkgA)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
-	pkgBRecord, err := client.PackageVersion.Query().Where(pkgVersionInputPredicates(&pkgB)).Only(ctx)
+	pkgBRecord, err := client.PackageVersion.Query().Where(packageVersionQuery(&pkgB)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}

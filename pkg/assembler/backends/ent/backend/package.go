@@ -191,7 +191,7 @@ func normalizeInputQualifiers(inputs []*model.PackageQualifierInputSpec) []model
 	return qualifiers
 }
 
-func pkgVersionInputPredicates(spec *model.PkgInputSpec) predicate.PackageVersion {
+func packageVersionQuery(spec *model.PkgInputSpec) predicate.PackageVersion {
 	if spec == nil {
 		return NoOpSelector()
 	}
@@ -214,23 +214,31 @@ func pkgVersionInputPredicates(spec *model.PkgInputSpec) predicate.PackageVersio
 	return packageversion.And(rv...)
 }
 
-func pkgVersionPredicates(spec *model.PkgSpec) predicate.PackageVersion {
-	if spec == nil {
+func isPackageVersionQuery(filter *model.PkgSpec) bool {
+	if filter == nil {
+		return false
+	}
+
+	return filter.Version != nil || filter.Subpath != nil || filter.Qualifiers != nil
+}
+
+func pkgVersionPredicates(filter *model.PkgSpec) predicate.PackageVersion {
+	if filter == nil {
 		return NoOpSelector()
 	}
 
 	rv := []predicate.PackageVersion{
-		optionalPredicate(spec.ID, IDEQ),
-		optionalPredicate(spec.Version, packageversion.VersionEQ),
-		optionalPredicate(spec.Subpath, packageversion.SubpathEQ),
-		packageversion.QualifiersMatchSpec(spec.Qualifiers),
+		optionalPredicate(filter.ID, IDEQ),
+		packageversion.VersionEQ(stringOrEmpty(filter.Version)),
+		optionalPredicate(filter.Subpath, packageversion.SubpathEQ),
+		packageversion.QualifiersMatchSpec(filter.Qualifiers),
 
 		packageversion.HasNameWith(
-			optionalPredicate(spec.Name, packagename.Name),
+			optionalPredicate(filter.Name, packagename.Name),
 			packagename.HasNamespaceWith(
-				optionalPredicate(spec.Namespace, packagenamespace.Namespace),
+				optionalPredicate(filter.Namespace, packagenamespace.Namespace),
 				packagenamespace.HasPackageWith(
-					optionalPredicate(spec.Type, packagetype.Type),
+					optionalPredicate(filter.Type, packagetype.Type),
 				),
 			),
 		),
@@ -239,13 +247,30 @@ func pkgVersionPredicates(spec *model.PkgSpec) predicate.PackageVersion {
 	return packageversion.And(rv...)
 }
 
-func pkgNamePredicates(spec *model.PkgNameSpec) []predicate.PackageName {
-	if spec == nil {
-		return nil
+func packageNameInputQuery(spec model.PkgInputSpec) predicate.PackageName {
+	rv := []predicate.PackageName{
+		packagename.NameEQ(spec.Name),
+		packagename.HasNamespaceWith(
+			packagenamespace.Namespace(stringOrEmpty(spec.Namespace)),
+			packagenamespace.HasPackageWith(
+				packagetype.TypeEQ(spec.Type),
+			),
+		),
 	}
-	return []predicate.PackageName{
+
+	return packagename.And(rv...)
+}
+
+func packageNameQuery(spec *model.PkgNameSpec) predicate.PackageName {
+	if spec == nil {
+		return NoOpSelector()
+	}
+	query := []predicate.PackageName{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.Name, packagename.Name),
+		packagename.HasVersionsWith(
+			packageversion.VersionEQ(""), // Match all versions
+		),
 		packagename.HasNamespaceWith(
 			optionalPredicate(spec.Namespace, packagenamespace.Namespace),
 			packagenamespace.HasPackageWith(
@@ -253,4 +278,78 @@ func pkgNamePredicates(spec *model.PkgNameSpec) []predicate.PackageName {
 			),
 		),
 	}
+
+	return packagename.And(query...)
+}
+
+func pkgNameQueryFromPkgSpec(filter *model.PkgSpec) *model.PkgNameSpec {
+	if filter == nil {
+		return nil
+	}
+
+	return &model.PkgNameSpec{
+		Name:      filter.Name,
+		Namespace: filter.Namespace,
+		Type:      filter.Type,
+		ID:        filter.ID,
+	}
+}
+
+func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageType {
+	if pv != nil && pv.Edges.Name != nil &&
+		pv.Edges.Name.Edges.Namespace != nil &&
+		pv.Edges.Name.Edges.Namespace.Edges.Package != nil {
+		pn := pv.Edges.Name
+		ns := pn.Edges.Namespace
+		pt := ns.Edges.Package
+		pn.Edges.Versions = []*ent.PackageVersion{pv}
+		ns.Edges.Names = []*ent.PackageName{pn}
+		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
+		return pt
+	}
+	return nil
+}
+
+func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
+	if pn.Edges.Namespace != nil &&
+		pn.Edges.Namespace.Edges.Package != nil {
+		ns := pn.Edges.Namespace
+		pt := ns.Edges.Package
+		ns.Edges.Names = []*ent.PackageName{pn}
+		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
+		return pt
+	}
+	return nil
+}
+
+// Each "noun" node will need a "get" for any time an ingest happens on a
+// "verb" node that points to it. All but Package and Source are simple. For
+// Package, some verbs link to Name and some to Version, or some both. For
+// Source, we will want a SourceName.
+//
+// It is tempting to try to make generic helpers function that are used in both
+// this usecase and also in querying, but I find that gets too complicated to
+// understand easily.
+//
+// These queries need to be fast, all the fields are present in an "InputSpec"
+// and should allow using the db index.
+
+func getPkgName(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
+	return client.PackageType.Query().
+		Where(packagetype.Type(pkgin.Type)).
+		QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
+		QueryNames().Where(packagename.NameEQ(pkgin.Name)).
+		Only(ctx)
+}
+
+func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
+	return client.PackageType.Query().
+		Where(packagetype.Type(pkgin.Type)).
+		QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
+		QueryNames().Where(packagename.NameEQ(pkgin.Name)).
+		QueryVersions().
+		Where(
+			packageVersionQuery(pkgin),
+		).
+		Only(ctx)
 }

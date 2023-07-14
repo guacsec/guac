@@ -17,6 +17,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -48,6 +49,7 @@ const (
 	TypeCertification    = "Certification"
 	TypeCertifyVuln      = "CertifyVuln"
 	TypeDependency       = "Dependency"
+	TypeHasSourceAt      = "HasSourceAt"
 	TypeHashEqual        = "HashEqual"
 	TypeIsVulnerability  = "IsVulnerability"
 	TypeOccurrence       = "Occurrence"
@@ -4034,6 +4036,856 @@ func (m *DependencyMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency edge %s", name)
+}
+
+// HasSourceAtMutation represents an operation that mutates the HasSourceAt nodes in the graph.
+type HasSourceAtMutation struct {
+	config
+	op                     Op
+	typ                    string
+	id                     *int
+	known_since            *time.Time
+	justification          *string
+	origin                 *string
+	collector              *string
+	clearedFields          map[string]struct{}
+	package_version        *int
+	clearedpackage_version bool
+	all_versions           *int
+	clearedall_versions    bool
+	source                 *int
+	clearedsource          bool
+	done                   bool
+	oldValue               func(context.Context) (*HasSourceAt, error)
+	predicates             []predicate.HasSourceAt
+}
+
+var _ ent.Mutation = (*HasSourceAtMutation)(nil)
+
+// hassourceatOption allows management of the mutation configuration using functional options.
+type hassourceatOption func(*HasSourceAtMutation)
+
+// newHasSourceAtMutation creates new mutation for the HasSourceAt entity.
+func newHasSourceAtMutation(c config, op Op, opts ...hassourceatOption) *HasSourceAtMutation {
+	m := &HasSourceAtMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeHasSourceAt,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withHasSourceAtID sets the ID field of the mutation.
+func withHasSourceAtID(id int) hassourceatOption {
+	return func(m *HasSourceAtMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *HasSourceAt
+		)
+		m.oldValue = func(ctx context.Context) (*HasSourceAt, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().HasSourceAt.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withHasSourceAt sets the old HasSourceAt of the mutation.
+func withHasSourceAt(node *HasSourceAt) hassourceatOption {
+	return func(m *HasSourceAtMutation) {
+		m.oldValue = func(context.Context) (*HasSourceAt, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m HasSourceAtMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m HasSourceAtMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *HasSourceAtMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *HasSourceAtMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().HasSourceAt.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPackageVersionID sets the "package_version_id" field.
+func (m *HasSourceAtMutation) SetPackageVersionID(i int) {
+	m.package_version = &i
+}
+
+// PackageVersionID returns the value of the "package_version_id" field in the mutation.
+func (m *HasSourceAtMutation) PackageVersionID() (r int, exists bool) {
+	v := m.package_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageVersionID returns the old "package_version_id" field's value of the HasSourceAt entity.
+// If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HasSourceAtMutation) OldPackageVersionID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageVersionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageVersionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageVersionID: %w", err)
+	}
+	return oldValue.PackageVersionID, nil
+}
+
+// ClearPackageVersionID clears the value of the "package_version_id" field.
+func (m *HasSourceAtMutation) ClearPackageVersionID() {
+	m.package_version = nil
+	m.clearedFields[hassourceat.FieldPackageVersionID] = struct{}{}
+}
+
+// PackageVersionIDCleared returns if the "package_version_id" field was cleared in this mutation.
+func (m *HasSourceAtMutation) PackageVersionIDCleared() bool {
+	_, ok := m.clearedFields[hassourceat.FieldPackageVersionID]
+	return ok
+}
+
+// ResetPackageVersionID resets all changes to the "package_version_id" field.
+func (m *HasSourceAtMutation) ResetPackageVersionID() {
+	m.package_version = nil
+	delete(m.clearedFields, hassourceat.FieldPackageVersionID)
+}
+
+// SetPackageNameID sets the "package_name_id" field.
+func (m *HasSourceAtMutation) SetPackageNameID(i int) {
+	m.all_versions = &i
+}
+
+// PackageNameID returns the value of the "package_name_id" field in the mutation.
+func (m *HasSourceAtMutation) PackageNameID() (r int, exists bool) {
+	v := m.all_versions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageNameID returns the old "package_name_id" field's value of the HasSourceAt entity.
+// If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HasSourceAtMutation) OldPackageNameID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageNameID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageNameID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageNameID: %w", err)
+	}
+	return oldValue.PackageNameID, nil
+}
+
+// ClearPackageNameID clears the value of the "package_name_id" field.
+func (m *HasSourceAtMutation) ClearPackageNameID() {
+	m.all_versions = nil
+	m.clearedFields[hassourceat.FieldPackageNameID] = struct{}{}
+}
+
+// PackageNameIDCleared returns if the "package_name_id" field was cleared in this mutation.
+func (m *HasSourceAtMutation) PackageNameIDCleared() bool {
+	_, ok := m.clearedFields[hassourceat.FieldPackageNameID]
+	return ok
+}
+
+// ResetPackageNameID resets all changes to the "package_name_id" field.
+func (m *HasSourceAtMutation) ResetPackageNameID() {
+	m.all_versions = nil
+	delete(m.clearedFields, hassourceat.FieldPackageNameID)
+}
+
+// SetSourceID sets the "source_id" field.
+func (m *HasSourceAtMutation) SetSourceID(i int) {
+	m.source = &i
+}
+
+// SourceID returns the value of the "source_id" field in the mutation.
+func (m *HasSourceAtMutation) SourceID() (r int, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceID returns the old "source_id" field's value of the HasSourceAt entity.
+// If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HasSourceAtMutation) OldSourceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceID: %w", err)
+	}
+	return oldValue.SourceID, nil
+}
+
+// ResetSourceID resets all changes to the "source_id" field.
+func (m *HasSourceAtMutation) ResetSourceID() {
+	m.source = nil
+}
+
+// SetKnownSince sets the "known_since" field.
+func (m *HasSourceAtMutation) SetKnownSince(t time.Time) {
+	m.known_since = &t
+}
+
+// KnownSince returns the value of the "known_since" field in the mutation.
+func (m *HasSourceAtMutation) KnownSince() (r time.Time, exists bool) {
+	v := m.known_since
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKnownSince returns the old "known_since" field's value of the HasSourceAt entity.
+// If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HasSourceAtMutation) OldKnownSince(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKnownSince is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKnownSince requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKnownSince: %w", err)
+	}
+	return oldValue.KnownSince, nil
+}
+
+// ResetKnownSince resets all changes to the "known_since" field.
+func (m *HasSourceAtMutation) ResetKnownSince() {
+	m.known_since = nil
+}
+
+// SetJustification sets the "justification" field.
+func (m *HasSourceAtMutation) SetJustification(s string) {
+	m.justification = &s
+}
+
+// Justification returns the value of the "justification" field in the mutation.
+func (m *HasSourceAtMutation) Justification() (r string, exists bool) {
+	v := m.justification
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJustification returns the old "justification" field's value of the HasSourceAt entity.
+// If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HasSourceAtMutation) OldJustification(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJustification is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJustification requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJustification: %w", err)
+	}
+	return oldValue.Justification, nil
+}
+
+// ResetJustification resets all changes to the "justification" field.
+func (m *HasSourceAtMutation) ResetJustification() {
+	m.justification = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *HasSourceAtMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *HasSourceAtMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the HasSourceAt entity.
+// If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HasSourceAtMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *HasSourceAtMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *HasSourceAtMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *HasSourceAtMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the HasSourceAt entity.
+// If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HasSourceAtMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *HasSourceAtMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
+func (m *HasSourceAtMutation) ClearPackageVersion() {
+	m.clearedpackage_version = true
+}
+
+// PackageVersionCleared reports if the "package_version" edge to the PackageVersion entity was cleared.
+func (m *HasSourceAtMutation) PackageVersionCleared() bool {
+	return m.PackageVersionIDCleared() || m.clearedpackage_version
+}
+
+// PackageVersionIDs returns the "package_version" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageVersionID instead. It exists only for internal usage by the builders.
+func (m *HasSourceAtMutation) PackageVersionIDs() (ids []int) {
+	if id := m.package_version; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackageVersion resets all changes to the "package_version" edge.
+func (m *HasSourceAtMutation) ResetPackageVersion() {
+	m.package_version = nil
+	m.clearedpackage_version = false
+}
+
+// SetAllVersionsID sets the "all_versions" edge to the PackageName entity by id.
+func (m *HasSourceAtMutation) SetAllVersionsID(id int) {
+	m.all_versions = &id
+}
+
+// ClearAllVersions clears the "all_versions" edge to the PackageName entity.
+func (m *HasSourceAtMutation) ClearAllVersions() {
+	m.clearedall_versions = true
+}
+
+// AllVersionsCleared reports if the "all_versions" edge to the PackageName entity was cleared.
+func (m *HasSourceAtMutation) AllVersionsCleared() bool {
+	return m.PackageNameIDCleared() || m.clearedall_versions
+}
+
+// AllVersionsID returns the "all_versions" edge ID in the mutation.
+func (m *HasSourceAtMutation) AllVersionsID() (id int, exists bool) {
+	if m.all_versions != nil {
+		return *m.all_versions, true
+	}
+	return
+}
+
+// AllVersionsIDs returns the "all_versions" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AllVersionsID instead. It exists only for internal usage by the builders.
+func (m *HasSourceAtMutation) AllVersionsIDs() (ids []int) {
+	if id := m.all_versions; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAllVersions resets all changes to the "all_versions" edge.
+func (m *HasSourceAtMutation) ResetAllVersions() {
+	m.all_versions = nil
+	m.clearedall_versions = false
+}
+
+// ClearSource clears the "source" edge to the SourceName entity.
+func (m *HasSourceAtMutation) ClearSource() {
+	m.clearedsource = true
+}
+
+// SourceCleared reports if the "source" edge to the SourceName entity was cleared.
+func (m *HasSourceAtMutation) SourceCleared() bool {
+	return m.clearedsource
+}
+
+// SourceIDs returns the "source" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SourceID instead. It exists only for internal usage by the builders.
+func (m *HasSourceAtMutation) SourceIDs() (ids []int) {
+	if id := m.source; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSource resets all changes to the "source" edge.
+func (m *HasSourceAtMutation) ResetSource() {
+	m.source = nil
+	m.clearedsource = false
+}
+
+// Where appends a list predicates to the HasSourceAtMutation builder.
+func (m *HasSourceAtMutation) Where(ps ...predicate.HasSourceAt) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the HasSourceAtMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *HasSourceAtMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.HasSourceAt, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *HasSourceAtMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *HasSourceAtMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (HasSourceAt).
+func (m *HasSourceAtMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *HasSourceAtMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.package_version != nil {
+		fields = append(fields, hassourceat.FieldPackageVersionID)
+	}
+	if m.all_versions != nil {
+		fields = append(fields, hassourceat.FieldPackageNameID)
+	}
+	if m.source != nil {
+		fields = append(fields, hassourceat.FieldSourceID)
+	}
+	if m.known_since != nil {
+		fields = append(fields, hassourceat.FieldKnownSince)
+	}
+	if m.justification != nil {
+		fields = append(fields, hassourceat.FieldJustification)
+	}
+	if m.origin != nil {
+		fields = append(fields, hassourceat.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, hassourceat.FieldCollector)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *HasSourceAtMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case hassourceat.FieldPackageVersionID:
+		return m.PackageVersionID()
+	case hassourceat.FieldPackageNameID:
+		return m.PackageNameID()
+	case hassourceat.FieldSourceID:
+		return m.SourceID()
+	case hassourceat.FieldKnownSince:
+		return m.KnownSince()
+	case hassourceat.FieldJustification:
+		return m.Justification()
+	case hassourceat.FieldOrigin:
+		return m.Origin()
+	case hassourceat.FieldCollector:
+		return m.Collector()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *HasSourceAtMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case hassourceat.FieldPackageVersionID:
+		return m.OldPackageVersionID(ctx)
+	case hassourceat.FieldPackageNameID:
+		return m.OldPackageNameID(ctx)
+	case hassourceat.FieldSourceID:
+		return m.OldSourceID(ctx)
+	case hassourceat.FieldKnownSince:
+		return m.OldKnownSince(ctx)
+	case hassourceat.FieldJustification:
+		return m.OldJustification(ctx)
+	case hassourceat.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case hassourceat.FieldCollector:
+		return m.OldCollector(ctx)
+	}
+	return nil, fmt.Errorf("unknown HasSourceAt field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *HasSourceAtMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case hassourceat.FieldPackageVersionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageVersionID(v)
+		return nil
+	case hassourceat.FieldPackageNameID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageNameID(v)
+		return nil
+	case hassourceat.FieldSourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceID(v)
+		return nil
+	case hassourceat.FieldKnownSince:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKnownSince(v)
+		return nil
+	case hassourceat.FieldJustification:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJustification(v)
+		return nil
+	case hassourceat.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case hassourceat.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	}
+	return fmt.Errorf("unknown HasSourceAt field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *HasSourceAtMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *HasSourceAtMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *HasSourceAtMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown HasSourceAt numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *HasSourceAtMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(hassourceat.FieldPackageVersionID) {
+		fields = append(fields, hassourceat.FieldPackageVersionID)
+	}
+	if m.FieldCleared(hassourceat.FieldPackageNameID) {
+		fields = append(fields, hassourceat.FieldPackageNameID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *HasSourceAtMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *HasSourceAtMutation) ClearField(name string) error {
+	switch name {
+	case hassourceat.FieldPackageVersionID:
+		m.ClearPackageVersionID()
+		return nil
+	case hassourceat.FieldPackageNameID:
+		m.ClearPackageNameID()
+		return nil
+	}
+	return fmt.Errorf("unknown HasSourceAt nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *HasSourceAtMutation) ResetField(name string) error {
+	switch name {
+	case hassourceat.FieldPackageVersionID:
+		m.ResetPackageVersionID()
+		return nil
+	case hassourceat.FieldPackageNameID:
+		m.ResetPackageNameID()
+		return nil
+	case hassourceat.FieldSourceID:
+		m.ResetSourceID()
+		return nil
+	case hassourceat.FieldKnownSince:
+		m.ResetKnownSince()
+		return nil
+	case hassourceat.FieldJustification:
+		m.ResetJustification()
+		return nil
+	case hassourceat.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case hassourceat.FieldCollector:
+		m.ResetCollector()
+		return nil
+	}
+	return fmt.Errorf("unknown HasSourceAt field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *HasSourceAtMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.package_version != nil {
+		edges = append(edges, hassourceat.EdgePackageVersion)
+	}
+	if m.all_versions != nil {
+		edges = append(edges, hassourceat.EdgeAllVersions)
+	}
+	if m.source != nil {
+		edges = append(edges, hassourceat.EdgeSource)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *HasSourceAtMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case hassourceat.EdgePackageVersion:
+		if id := m.package_version; id != nil {
+			return []ent.Value{*id}
+		}
+	case hassourceat.EdgeAllVersions:
+		if id := m.all_versions; id != nil {
+			return []ent.Value{*id}
+		}
+	case hassourceat.EdgeSource:
+		if id := m.source; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *HasSourceAtMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *HasSourceAtMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *HasSourceAtMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedpackage_version {
+		edges = append(edges, hassourceat.EdgePackageVersion)
+	}
+	if m.clearedall_versions {
+		edges = append(edges, hassourceat.EdgeAllVersions)
+	}
+	if m.clearedsource {
+		edges = append(edges, hassourceat.EdgeSource)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *HasSourceAtMutation) EdgeCleared(name string) bool {
+	switch name {
+	case hassourceat.EdgePackageVersion:
+		return m.clearedpackage_version
+	case hassourceat.EdgeAllVersions:
+		return m.clearedall_versions
+	case hassourceat.EdgeSource:
+		return m.clearedsource
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *HasSourceAtMutation) ClearEdge(name string) error {
+	switch name {
+	case hassourceat.EdgePackageVersion:
+		m.ClearPackageVersion()
+		return nil
+	case hassourceat.EdgeAllVersions:
+		m.ClearAllVersions()
+		return nil
+	case hassourceat.EdgeSource:
+		m.ClearSource()
+		return nil
+	}
+	return fmt.Errorf("unknown HasSourceAt unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *HasSourceAtMutation) ResetEdge(name string) error {
+	switch name {
+	case hassourceat.EdgePackageVersion:
+		m.ResetPackageVersion()
+		return nil
+	case hassourceat.EdgeAllVersions:
+		m.ResetAllVersions()
+		return nil
+	case hassourceat.EdgeSource:
+		m.ResetSource()
+		return nil
+	}
+	return fmt.Errorf("unknown HasSourceAt edge %s", name)
 }
 
 // HashEqualMutation represents an operation that mutates the HashEqual nodes in the graph.

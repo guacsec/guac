@@ -7,42 +7,9 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
-
-// Each "noun" node will need a "get" for any time an ingest happens on a
-// "verb" node that points to it. All but Package and Source are simple. For
-// Package, some verbs link to Name and some to Version, or some both. For
-// Source, we will want a SourceName.
-//
-// It is tempting to try to make generic helpers function that are used in both
-// this usecase and also in querying, but I find that gets too complicated to
-// understand easily.
-//
-// These queries need to be fast, all the fields are present in an "InputSpec"
-// and should allow using the db index.
-
-func getPkgName(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
-	return client.PackageType.Query().
-		Where(packagetype.Type(pkgin.Type)).
-		QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
-		QueryNames().Where(packagename.NameEQ(pkgin.Name)).
-		Only(ctx)
-}
-
-func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
-	return client.PackageType.Query().
-		Where(packagetype.Type(pkgin.Type)).
-		QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
-		QueryNames().Where(packagename.NameEQ(pkgin.Name)).
-		QueryVersions().
-		Where(
-			pkgVersionInputPredicates(pkgin),
-		).
-		Only(ctx)
-}
 
 func getArtifact(ctx context.Context, client *ent.Client, artin *model.ArtifactInputSpec) (*ent.Artifact, error) {
 	return client.Artifact.Query().

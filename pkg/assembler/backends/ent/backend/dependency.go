@@ -23,7 +23,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 			optionalPredicate(spec.Collector, dependency.Collector),
 		)
 		if spec.DependentPackage != nil {
-			query.Where(dependency.HasDependentPackageWith(pkgNamePredicates(spec.DependentPackage)...))
+			query.Where(dependency.HasDependentPackageWith(packageNameQuery(spec.DependentPackage)))
 		}
 		if spec.Package != nil {
 			query.Where(dependency.HasPackageWith(pkgVersionPredicates(spec.Package)))

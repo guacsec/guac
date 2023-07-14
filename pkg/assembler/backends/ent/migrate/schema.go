@@ -201,6 +201,66 @@ var (
 			},
 		},
 	}
+	// HasSourceAtsColumns holds the columns for the "has_source_ats" table.
+	HasSourceAtsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "known_since", Type: field.TypeTime},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "package_version_id", Type: field.TypeInt, Nullable: true},
+		{Name: "package_name_id", Type: field.TypeInt, Nullable: true},
+		{Name: "source_id", Type: field.TypeInt},
+	}
+	// HasSourceAtsTable holds the schema information for the "has_source_ats" table.
+	HasSourceAtsTable = &schema.Table{
+		Name:       "has_source_ats",
+		Columns:    HasSourceAtsColumns,
+		PrimaryKey: []*schema.Column{HasSourceAtsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "has_source_ats_package_versions_package_version",
+				Columns:    []*schema.Column{HasSourceAtsColumns[5]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "has_source_ats_package_names_all_versions",
+				Columns:    []*schema.Column{HasSourceAtsColumns[6]},
+				RefColumns: []*schema.Column{PackageNamesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "has_source_ats_source_names_source",
+				Columns:    []*schema.Column{HasSourceAtsColumns[7]},
+				RefColumns: []*schema.Column{SourceNamesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "hassourceat_source_id_package_version_id_justification",
+				Unique:  true,
+				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[5], HasSourceAtsColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_version_id IS NOT NULL AND package_name_id IS NULL",
+				},
+			},
+			{
+				Name:    "hassourceat_source_id_package_name_id_justification",
+				Unique:  true,
+				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[6], HasSourceAtsColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_name_id IS NOT NULL AND package_version_id IS NULL",
+				},
+			},
+			{
+				Name:    "hassourceat_known_since",
+				Unique:  false,
+				Columns: []*schema.Column{HasSourceAtsColumns[1]},
+			},
+		},
+	}
 	// HashEqualsColumns holds the columns for the "hash_equals" table.
 	HashEqualsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -669,6 +729,7 @@ var (
 		CertificationsTable,
 		CertifyVulnsTable,
 		DependenciesTable,
+		HasSourceAtsTable,
 		HashEqualsTable,
 		IsVulnerabilitiesTable,
 		OccurrencesTable,
@@ -694,6 +755,9 @@ func init() {
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
+	HasSourceAtsTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	HasSourceAtsTable.ForeignKeys[1].RefTable = PackageNamesTable
+	HasSourceAtsTable.ForeignKeys[2].RefTable = SourceNamesTable
 	IsVulnerabilitiesTable.ForeignKeys[0].RefTable = SecurityAdvisoriesTable
 	IsVulnerabilitiesTable.ForeignKeys[1].RefTable = SecurityAdvisoriesTable
 	OccurrencesTable.ForeignKeys[0].RefTable = ArtifactsTable
