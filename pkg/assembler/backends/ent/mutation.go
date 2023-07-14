@@ -14,6 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -2145,13 +2146,25 @@ func (m *BuilderMutation) ResetEdge(name string) error {
 // CertificationMutation represents an operation that mutates the Certification nodes in the graph.
 type CertificationMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Certification, error)
-	predicates    []predicate.Certification
+	op                     Op
+	typ                    string
+	id                     *int
+	_type                  *certification.Type
+	justification          *string
+	origin                 *string
+	collector              *string
+	clearedFields          map[string]struct{}
+	source                 *int
+	clearedsource          bool
+	package_version        *int
+	clearedpackage_version bool
+	all_versions           *int
+	clearedall_versions    bool
+	artifact               *int
+	clearedartifact        bool
+	done                   bool
+	oldValue               func(context.Context) (*Certification, error)
+	predicates             []predicate.Certification
 }
 
 var _ ent.Mutation = (*CertificationMutation)(nil)
@@ -2252,6 +2265,463 @@ func (m *CertificationMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetSourceID sets the "source_id" field.
+func (m *CertificationMutation) SetSourceID(i int) {
+	m.source = &i
+}
+
+// SourceID returns the value of the "source_id" field in the mutation.
+func (m *CertificationMutation) SourceID() (r int, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceID returns the old "source_id" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldSourceID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceID: %w", err)
+	}
+	return oldValue.SourceID, nil
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (m *CertificationMutation) ClearSourceID() {
+	m.source = nil
+	m.clearedFields[certification.FieldSourceID] = struct{}{}
+}
+
+// SourceIDCleared returns if the "source_id" field was cleared in this mutation.
+func (m *CertificationMutation) SourceIDCleared() bool {
+	_, ok := m.clearedFields[certification.FieldSourceID]
+	return ok
+}
+
+// ResetSourceID resets all changes to the "source_id" field.
+func (m *CertificationMutation) ResetSourceID() {
+	m.source = nil
+	delete(m.clearedFields, certification.FieldSourceID)
+}
+
+// SetPackageVersionID sets the "package_version_id" field.
+func (m *CertificationMutation) SetPackageVersionID(i int) {
+	m.package_version = &i
+}
+
+// PackageVersionID returns the value of the "package_version_id" field in the mutation.
+func (m *CertificationMutation) PackageVersionID() (r int, exists bool) {
+	v := m.package_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageVersionID returns the old "package_version_id" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldPackageVersionID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageVersionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageVersionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageVersionID: %w", err)
+	}
+	return oldValue.PackageVersionID, nil
+}
+
+// ClearPackageVersionID clears the value of the "package_version_id" field.
+func (m *CertificationMutation) ClearPackageVersionID() {
+	m.package_version = nil
+	m.clearedFields[certification.FieldPackageVersionID] = struct{}{}
+}
+
+// PackageVersionIDCleared returns if the "package_version_id" field was cleared in this mutation.
+func (m *CertificationMutation) PackageVersionIDCleared() bool {
+	_, ok := m.clearedFields[certification.FieldPackageVersionID]
+	return ok
+}
+
+// ResetPackageVersionID resets all changes to the "package_version_id" field.
+func (m *CertificationMutation) ResetPackageVersionID() {
+	m.package_version = nil
+	delete(m.clearedFields, certification.FieldPackageVersionID)
+}
+
+// SetPackageNameID sets the "package_name_id" field.
+func (m *CertificationMutation) SetPackageNameID(i int) {
+	m.all_versions = &i
+}
+
+// PackageNameID returns the value of the "package_name_id" field in the mutation.
+func (m *CertificationMutation) PackageNameID() (r int, exists bool) {
+	v := m.all_versions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageNameID returns the old "package_name_id" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldPackageNameID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageNameID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageNameID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageNameID: %w", err)
+	}
+	return oldValue.PackageNameID, nil
+}
+
+// ClearPackageNameID clears the value of the "package_name_id" field.
+func (m *CertificationMutation) ClearPackageNameID() {
+	m.all_versions = nil
+	m.clearedFields[certification.FieldPackageNameID] = struct{}{}
+}
+
+// PackageNameIDCleared returns if the "package_name_id" field was cleared in this mutation.
+func (m *CertificationMutation) PackageNameIDCleared() bool {
+	_, ok := m.clearedFields[certification.FieldPackageNameID]
+	return ok
+}
+
+// ResetPackageNameID resets all changes to the "package_name_id" field.
+func (m *CertificationMutation) ResetPackageNameID() {
+	m.all_versions = nil
+	delete(m.clearedFields, certification.FieldPackageNameID)
+}
+
+// SetArtifactID sets the "artifact_id" field.
+func (m *CertificationMutation) SetArtifactID(i int) {
+	m.artifact = &i
+}
+
+// ArtifactID returns the value of the "artifact_id" field in the mutation.
+func (m *CertificationMutation) ArtifactID() (r int, exists bool) {
+	v := m.artifact
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldArtifactID returns the old "artifact_id" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldArtifactID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldArtifactID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldArtifactID: %w", err)
+	}
+	return oldValue.ArtifactID, nil
+}
+
+// ClearArtifactID clears the value of the "artifact_id" field.
+func (m *CertificationMutation) ClearArtifactID() {
+	m.artifact = nil
+	m.clearedFields[certification.FieldArtifactID] = struct{}{}
+}
+
+// ArtifactIDCleared returns if the "artifact_id" field was cleared in this mutation.
+func (m *CertificationMutation) ArtifactIDCleared() bool {
+	_, ok := m.clearedFields[certification.FieldArtifactID]
+	return ok
+}
+
+// ResetArtifactID resets all changes to the "artifact_id" field.
+func (m *CertificationMutation) ResetArtifactID() {
+	m.artifact = nil
+	delete(m.clearedFields, certification.FieldArtifactID)
+}
+
+// SetType sets the "type" field.
+func (m *CertificationMutation) SetType(c certification.Type) {
+	m._type = &c
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *CertificationMutation) GetType() (r certification.Type, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldType(ctx context.Context) (v certification.Type, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *CertificationMutation) ResetType() {
+	m._type = nil
+}
+
+// SetJustification sets the "justification" field.
+func (m *CertificationMutation) SetJustification(s string) {
+	m.justification = &s
+}
+
+// Justification returns the value of the "justification" field in the mutation.
+func (m *CertificationMutation) Justification() (r string, exists bool) {
+	v := m.justification
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJustification returns the old "justification" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldJustification(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJustification is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJustification requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJustification: %w", err)
+	}
+	return oldValue.Justification, nil
+}
+
+// ResetJustification resets all changes to the "justification" field.
+func (m *CertificationMutation) ResetJustification() {
+	m.justification = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *CertificationMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *CertificationMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *CertificationMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *CertificationMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *CertificationMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *CertificationMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// ClearSource clears the "source" edge to the SourceName entity.
+func (m *CertificationMutation) ClearSource() {
+	m.clearedsource = true
+}
+
+// SourceCleared reports if the "source" edge to the SourceName entity was cleared.
+func (m *CertificationMutation) SourceCleared() bool {
+	return m.SourceIDCleared() || m.clearedsource
+}
+
+// SourceIDs returns the "source" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SourceID instead. It exists only for internal usage by the builders.
+func (m *CertificationMutation) SourceIDs() (ids []int) {
+	if id := m.source; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSource resets all changes to the "source" edge.
+func (m *CertificationMutation) ResetSource() {
+	m.source = nil
+	m.clearedsource = false
+}
+
+// ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
+func (m *CertificationMutation) ClearPackageVersion() {
+	m.clearedpackage_version = true
+}
+
+// PackageVersionCleared reports if the "package_version" edge to the PackageVersion entity was cleared.
+func (m *CertificationMutation) PackageVersionCleared() bool {
+	return m.PackageVersionIDCleared() || m.clearedpackage_version
+}
+
+// PackageVersionIDs returns the "package_version" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageVersionID instead. It exists only for internal usage by the builders.
+func (m *CertificationMutation) PackageVersionIDs() (ids []int) {
+	if id := m.package_version; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackageVersion resets all changes to the "package_version" edge.
+func (m *CertificationMutation) ResetPackageVersion() {
+	m.package_version = nil
+	m.clearedpackage_version = false
+}
+
+// SetAllVersionsID sets the "all_versions" edge to the PackageName entity by id.
+func (m *CertificationMutation) SetAllVersionsID(id int) {
+	m.all_versions = &id
+}
+
+// ClearAllVersions clears the "all_versions" edge to the PackageName entity.
+func (m *CertificationMutation) ClearAllVersions() {
+	m.clearedall_versions = true
+}
+
+// AllVersionsCleared reports if the "all_versions" edge to the PackageName entity was cleared.
+func (m *CertificationMutation) AllVersionsCleared() bool {
+	return m.PackageNameIDCleared() || m.clearedall_versions
+}
+
+// AllVersionsID returns the "all_versions" edge ID in the mutation.
+func (m *CertificationMutation) AllVersionsID() (id int, exists bool) {
+	if m.all_versions != nil {
+		return *m.all_versions, true
+	}
+	return
+}
+
+// AllVersionsIDs returns the "all_versions" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AllVersionsID instead. It exists only for internal usage by the builders.
+func (m *CertificationMutation) AllVersionsIDs() (ids []int) {
+	if id := m.all_versions; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAllVersions resets all changes to the "all_versions" edge.
+func (m *CertificationMutation) ResetAllVersions() {
+	m.all_versions = nil
+	m.clearedall_versions = false
+}
+
+// ClearArtifact clears the "artifact" edge to the Artifact entity.
+func (m *CertificationMutation) ClearArtifact() {
+	m.clearedartifact = true
+}
+
+// ArtifactCleared reports if the "artifact" edge to the Artifact entity was cleared.
+func (m *CertificationMutation) ArtifactCleared() bool {
+	return m.ArtifactIDCleared() || m.clearedartifact
+}
+
+// ArtifactIDs returns the "artifact" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ArtifactID instead. It exists only for internal usage by the builders.
+func (m *CertificationMutation) ArtifactIDs() (ids []int) {
+	if id := m.artifact; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetArtifact resets all changes to the "artifact" edge.
+func (m *CertificationMutation) ResetArtifact() {
+	m.artifact = nil
+	m.clearedartifact = false
+}
+
 // Where appends a list predicates to the CertificationMutation builder.
 func (m *CertificationMutation) Where(ps ...predicate.Certification) {
 	m.predicates = append(m.predicates, ps...)
@@ -2286,7 +2756,31 @@ func (m *CertificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertificationMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 8)
+	if m.source != nil {
+		fields = append(fields, certification.FieldSourceID)
+	}
+	if m.package_version != nil {
+		fields = append(fields, certification.FieldPackageVersionID)
+	}
+	if m.all_versions != nil {
+		fields = append(fields, certification.FieldPackageNameID)
+	}
+	if m.artifact != nil {
+		fields = append(fields, certification.FieldArtifactID)
+	}
+	if m._type != nil {
+		fields = append(fields, certification.FieldType)
+	}
+	if m.justification != nil {
+		fields = append(fields, certification.FieldJustification)
+	}
+	if m.origin != nil {
+		fields = append(fields, certification.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, certification.FieldCollector)
+	}
 	return fields
 }
 
@@ -2294,6 +2788,24 @@ func (m *CertificationMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *CertificationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case certification.FieldSourceID:
+		return m.SourceID()
+	case certification.FieldPackageVersionID:
+		return m.PackageVersionID()
+	case certification.FieldPackageNameID:
+		return m.PackageNameID()
+	case certification.FieldArtifactID:
+		return m.ArtifactID()
+	case certification.FieldType:
+		return m.GetType()
+	case certification.FieldJustification:
+		return m.Justification()
+	case certification.FieldOrigin:
+		return m.Origin()
+	case certification.FieldCollector:
+		return m.Collector()
+	}
 	return nil, false
 }
 
@@ -2301,6 +2813,24 @@ func (m *CertificationMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *CertificationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case certification.FieldSourceID:
+		return m.OldSourceID(ctx)
+	case certification.FieldPackageVersionID:
+		return m.OldPackageVersionID(ctx)
+	case certification.FieldPackageNameID:
+		return m.OldPackageNameID(ctx)
+	case certification.FieldArtifactID:
+		return m.OldArtifactID(ctx)
+	case certification.FieldType:
+		return m.OldType(ctx)
+	case certification.FieldJustification:
+		return m.OldJustification(ctx)
+	case certification.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case certification.FieldCollector:
+		return m.OldCollector(ctx)
+	}
 	return nil, fmt.Errorf("unknown Certification field %s", name)
 }
 
@@ -2309,6 +2839,62 @@ func (m *CertificationMutation) OldField(ctx context.Context, name string) (ent.
 // type.
 func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case certification.FieldSourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceID(v)
+		return nil
+	case certification.FieldPackageVersionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageVersionID(v)
+		return nil
+	case certification.FieldPackageNameID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageNameID(v)
+		return nil
+	case certification.FieldArtifactID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetArtifactID(v)
+		return nil
+	case certification.FieldType:
+		v, ok := value.(certification.Type)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case certification.FieldJustification:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJustification(v)
+		return nil
+	case certification.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case certification.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)
 }
@@ -2316,13 +2902,16 @@ func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CertificationMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CertificationMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -2330,13 +2919,28 @@ func (m *CertificationMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *CertificationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Certification numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CertificationMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(certification.FieldSourceID) {
+		fields = append(fields, certification.FieldSourceID)
+	}
+	if m.FieldCleared(certification.FieldPackageVersionID) {
+		fields = append(fields, certification.FieldPackageVersionID)
+	}
+	if m.FieldCleared(certification.FieldPackageNameID) {
+		fields = append(fields, certification.FieldPackageNameID)
+	}
+	if m.FieldCleared(certification.FieldArtifactID) {
+		fields = append(fields, certification.FieldArtifactID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2349,30 +2953,100 @@ func (m *CertificationMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CertificationMutation) ClearField(name string) error {
+	switch name {
+	case certification.FieldSourceID:
+		m.ClearSourceID()
+		return nil
+	case certification.FieldPackageVersionID:
+		m.ClearPackageVersionID()
+		return nil
+	case certification.FieldPackageNameID:
+		m.ClearPackageNameID()
+		return nil
+	case certification.FieldArtifactID:
+		m.ClearArtifactID()
+		return nil
+	}
 	return fmt.Errorf("unknown Certification nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *CertificationMutation) ResetField(name string) error {
+	switch name {
+	case certification.FieldSourceID:
+		m.ResetSourceID()
+		return nil
+	case certification.FieldPackageVersionID:
+		m.ResetPackageVersionID()
+		return nil
+	case certification.FieldPackageNameID:
+		m.ResetPackageNameID()
+		return nil
+	case certification.FieldArtifactID:
+		m.ResetArtifactID()
+		return nil
+	case certification.FieldType:
+		m.ResetType()
+		return nil
+	case certification.FieldJustification:
+		m.ResetJustification()
+		return nil
+	case certification.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case certification.FieldCollector:
+		m.ResetCollector()
+		return nil
+	}
 	return fmt.Errorf("unknown Certification field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CertificationMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 4)
+	if m.source != nil {
+		edges = append(edges, certification.EdgeSource)
+	}
+	if m.package_version != nil {
+		edges = append(edges, certification.EdgePackageVersion)
+	}
+	if m.all_versions != nil {
+		edges = append(edges, certification.EdgeAllVersions)
+	}
+	if m.artifact != nil {
+		edges = append(edges, certification.EdgeArtifact)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *CertificationMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case certification.EdgeSource:
+		if id := m.source; id != nil {
+			return []ent.Value{*id}
+		}
+	case certification.EdgePackageVersion:
+		if id := m.package_version; id != nil {
+			return []ent.Value{*id}
+		}
+	case certification.EdgeAllVersions:
+		if id := m.all_versions; id != nil {
+			return []ent.Value{*id}
+		}
+	case certification.EdgeArtifact:
+		if id := m.artifact; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CertificationMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 4)
 	return edges
 }
 
@@ -2384,25 +3058,75 @@ func (m *CertificationMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CertificationMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 4)
+	if m.clearedsource {
+		edges = append(edges, certification.EdgeSource)
+	}
+	if m.clearedpackage_version {
+		edges = append(edges, certification.EdgePackageVersion)
+	}
+	if m.clearedall_versions {
+		edges = append(edges, certification.EdgeAllVersions)
+	}
+	if m.clearedartifact {
+		edges = append(edges, certification.EdgeArtifact)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *CertificationMutation) EdgeCleared(name string) bool {
+	switch name {
+	case certification.EdgeSource:
+		return m.clearedsource
+	case certification.EdgePackageVersion:
+		return m.clearedpackage_version
+	case certification.EdgeAllVersions:
+		return m.clearedall_versions
+	case certification.EdgeArtifact:
+		return m.clearedartifact
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *CertificationMutation) ClearEdge(name string) error {
+	switch name {
+	case certification.EdgeSource:
+		m.ClearSource()
+		return nil
+	case certification.EdgePackageVersion:
+		m.ClearPackageVersion()
+		return nil
+	case certification.EdgeAllVersions:
+		m.ClearAllVersions()
+		return nil
+	case certification.EdgeArtifact:
+		m.ClearArtifact()
+		return nil
+	}
 	return fmt.Errorf("unknown Certification unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *CertificationMutation) ResetEdge(name string) error {
+	switch name {
+	case certification.EdgeSource:
+		m.ResetSource()
+		return nil
+	case certification.EdgePackageVersion:
+		m.ResetPackageVersion()
+		return nil
+	case certification.EdgeAllVersions:
+		m.ResetAllVersions()
+		return nil
+	case certification.EdgeArtifact:
+		m.ResetArtifact()
+		return nil
+	}
 	return fmt.Errorf("unknown Certification edge %s", name)
 }
 

@@ -915,6 +915,70 @@ func (c *CertificationClient) GetX(ctx context.Context, id int) *Certification {
 	return obj
 }
 
+// QuerySource queries the source edge of a Certification.
+func (c *CertificationClient) QuerySource(ce *Certification) *SourceNameQuery {
+	query := (&SourceNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ce.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, id),
+			sqlgraph.To(sourcename.Table, sourcename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.SourceTable, certification.SourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPackageVersion queries the package_version edge of a Certification.
+func (c *CertificationClient) QueryPackageVersion(ce *Certification) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ce.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.PackageVersionTable, certification.PackageVersionColumn),
+		)
+		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAllVersions queries the all_versions edge of a Certification.
+func (c *CertificationClient) QueryAllVersions(ce *Certification) *PackageNameQuery {
+	query := (&PackageNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ce.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, id),
+			sqlgraph.To(packagename.Table, packagename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.AllVersionsTable, certification.AllVersionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryArtifact queries the artifact edge of a Certification.
+func (c *CertificationClient) QueryArtifact(ce *Certification) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ce.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.ArtifactTable, certification.ArtifactColumn),
+		)
+		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CertificationClient) Hooks() []Hook {
 	return c.hooks.Certification

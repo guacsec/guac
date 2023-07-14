@@ -105,12 +105,80 @@ var (
 	// CertificationsColumns holds the columns for the "certifications" table.
 	CertificationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"GOOD", "BAD"}, Default: "GOOD"},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "source_id", Type: field.TypeInt, Nullable: true},
+		{Name: "package_version_id", Type: field.TypeInt, Nullable: true},
+		{Name: "package_name_id", Type: field.TypeInt, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
 	}
 	// CertificationsTable holds the schema information for the "certifications" table.
 	CertificationsTable = &schema.Table{
 		Name:       "certifications",
 		Columns:    CertificationsColumns,
 		PrimaryKey: []*schema.Column{CertificationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "certifications_source_names_source",
+				Columns:    []*schema.Column{CertificationsColumns[5]},
+				RefColumns: []*schema.Column{SourceNamesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "certifications_package_versions_package_version",
+				Columns:    []*schema.Column{CertificationsColumns[6]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "certifications_package_names_all_versions",
+				Columns:    []*schema.Column{CertificationsColumns[7]},
+				RefColumns: []*schema.Column{PackageNamesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "certifications_artifacts_artifact",
+				Columns:    []*schema.Column{CertificationsColumns[8]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "certification_type_justification_origin_collector_source_id",
+				Unique:  true,
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[5]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "certification_type_justification_origin_collector_package_version_id",
+				Unique:  true,
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[6]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "certification_type_justification_origin_collector_package_name_id",
+				Unique:  true,
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[7]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "certification_type_justification_origin_collector_artifact_id",
+				Unique:  true,
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL",
+				},
+			},
+		},
 	}
 	// CertifyVulnsColumns holds the columns for the "certify_vulns" table.
 	CertifyVulnsColumns = []*schema.Column{
@@ -751,6 +819,10 @@ var (
 func init() {
 	BillOfMaterialsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	BillOfMaterialsTable.ForeignKeys[1].RefTable = ArtifactsTable
+	CertificationsTable.ForeignKeys[0].RefTable = SourceNamesTable
+	CertificationsTable.ForeignKeys[1].RefTable = PackageVersionsTable
+	CertificationsTable.ForeignKeys[2].RefTable = PackageNamesTable
+	CertificationsTable.ForeignKeys[3].RefTable = ArtifactsTable
 	CertifyVulnsTable.ForeignKeys[0].RefTable = SecurityAdvisoriesTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable

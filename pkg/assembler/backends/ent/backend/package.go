@@ -191,6 +191,17 @@ func normalizeInputQualifiers(inputs []*model.PackageQualifierInputSpec) []model
 	return qualifiers
 }
 
+func qualifiersToSpecQualifiers(q []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
+	results := make([]*model.PackageQualifierSpec, len(q))
+	for i, s := range q {
+		results[i] = &model.PackageQualifierSpec{
+			Key:   s.Key,
+			Value: &s.Value,
+		}
+	}
+	return results
+}
+
 func packageVersionQuery(spec *model.PkgInputSpec) predicate.PackageVersion {
 	if spec == nil {
 		return NoOpSelector()
@@ -292,6 +303,17 @@ func pkgNameQueryFromPkgSpec(filter *model.PkgSpec) *model.PkgNameSpec {
 		Namespace: filter.Namespace,
 		Type:      filter.Type,
 		ID:        filter.ID,
+	}
+}
+
+func pkgSpecToInputSpec(spec *model.PkgInputSpec) *model.PkgSpec {
+	return &model.PkgSpec{
+		Type:       &spec.Type,
+		Namespace:  spec.Namespace,
+		Name:       &spec.Name,
+		Version:    spec.Version,
+		Qualifiers: qualifiersToSpecQualifiers(spec.Qualifiers),
+		Subpath:    spec.Subpath,
 	}
 }
 

@@ -39,7 +39,7 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		Where(query...).
 		WithAllVersions(withPackageNameTree()).
 		WithPackageVersion(withPackageVersionTree()).
-		WithSource(sourceNameTreeQuery()).
+		WithSource(withSourceNameTreeQuery()).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -107,7 +107,7 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSp
 
 	return client.HasSourceAt.Query().
 		Where(hassourceat.ID(id)).
-		WithSource(sourceNameTreeQuery()).
+		WithSource(withSourceNameTreeQuery()).
 		WithAllVersions(withPackageNameTree()).
 		WithPackageVersion(withPackageVersionTree()).
 		Only(ctx)
@@ -214,7 +214,7 @@ func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
 	})
 }
 
-func sourceNameTreeQuery() func(*ent.SourceNameQuery) {
+func withSourceNameTreeQuery() func(*ent.SourceNameQuery) {
 	return func(q *ent.SourceNameQuery) {
 		q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
 			q.WithSourceType()

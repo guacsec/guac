@@ -13,6 +13,8 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	certificationFields := schema.Certification{}.Fields()
+	_ = certificationFields
 	packagenameFields := schema.PackageName{}.Fields()
 	_ = packagenameFields
 	// packagenameDescName is the schema descriptor for name field.

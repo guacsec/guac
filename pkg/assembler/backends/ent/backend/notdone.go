@@ -9,12 +9,6 @@ import (
 // Retrieval read-only queries for software trees
 
 // Retrieval read-only queries for evidence trees
-func (b *EntBackend) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	return nil, nil
-}
-func (b *EntBackend) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
-	return nil, nil
-}
 func (b *EntBackend) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	return nil, nil
 }
@@ -25,12 +19,6 @@ func (b *EntBackend) Scorecards(ctx context.Context, certifyScorecardSpec *model
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 func (b *EntBackend) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
-	return nil, nil
-}
-func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	return nil, nil
-}
-func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
 	return nil, nil
 }
 

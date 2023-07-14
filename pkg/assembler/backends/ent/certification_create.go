@@ -10,7 +10,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // CertificationCreate is the builder for creating a Certification entity.
@@ -21,6 +25,128 @@ type CertificationCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetSourceID sets the "source_id" field.
+func (cc *CertificationCreate) SetSourceID(i int) *CertificationCreate {
+	cc.mutation.SetSourceID(i)
+	return cc
+}
+
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (cc *CertificationCreate) SetNillableSourceID(i *int) *CertificationCreate {
+	if i != nil {
+		cc.SetSourceID(*i)
+	}
+	return cc
+}
+
+// SetPackageVersionID sets the "package_version_id" field.
+func (cc *CertificationCreate) SetPackageVersionID(i int) *CertificationCreate {
+	cc.mutation.SetPackageVersionID(i)
+	return cc
+}
+
+// SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
+func (cc *CertificationCreate) SetNillablePackageVersionID(i *int) *CertificationCreate {
+	if i != nil {
+		cc.SetPackageVersionID(*i)
+	}
+	return cc
+}
+
+// SetPackageNameID sets the "package_name_id" field.
+func (cc *CertificationCreate) SetPackageNameID(i int) *CertificationCreate {
+	cc.mutation.SetPackageNameID(i)
+	return cc
+}
+
+// SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
+func (cc *CertificationCreate) SetNillablePackageNameID(i *int) *CertificationCreate {
+	if i != nil {
+		cc.SetPackageNameID(*i)
+	}
+	return cc
+}
+
+// SetArtifactID sets the "artifact_id" field.
+func (cc *CertificationCreate) SetArtifactID(i int) *CertificationCreate {
+	cc.mutation.SetArtifactID(i)
+	return cc
+}
+
+// SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
+func (cc *CertificationCreate) SetNillableArtifactID(i *int) *CertificationCreate {
+	if i != nil {
+		cc.SetArtifactID(*i)
+	}
+	return cc
+}
+
+// SetType sets the "type" field.
+func (cc *CertificationCreate) SetType(c certification.Type) *CertificationCreate {
+	cc.mutation.SetType(c)
+	return cc
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (cc *CertificationCreate) SetNillableType(c *certification.Type) *CertificationCreate {
+	if c != nil {
+		cc.SetType(*c)
+	}
+	return cc
+}
+
+// SetJustification sets the "justification" field.
+func (cc *CertificationCreate) SetJustification(s string) *CertificationCreate {
+	cc.mutation.SetJustification(s)
+	return cc
+}
+
+// SetOrigin sets the "origin" field.
+func (cc *CertificationCreate) SetOrigin(s string) *CertificationCreate {
+	cc.mutation.SetOrigin(s)
+	return cc
+}
+
+// SetCollector sets the "collector" field.
+func (cc *CertificationCreate) SetCollector(s string) *CertificationCreate {
+	cc.mutation.SetCollector(s)
+	return cc
+}
+
+// SetSource sets the "source" edge to the SourceName entity.
+func (cc *CertificationCreate) SetSource(s *SourceName) *CertificationCreate {
+	return cc.SetSourceID(s.ID)
+}
+
+// SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
+func (cc *CertificationCreate) SetPackageVersion(p *PackageVersion) *CertificationCreate {
+	return cc.SetPackageVersionID(p.ID)
+}
+
+// SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
+func (cc *CertificationCreate) SetAllVersionsID(id int) *CertificationCreate {
+	cc.mutation.SetAllVersionsID(id)
+	return cc
+}
+
+// SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
+func (cc *CertificationCreate) SetNillableAllVersionsID(id *int) *CertificationCreate {
+	if id != nil {
+		cc = cc.SetAllVersionsID(*id)
+	}
+	return cc
+}
+
+// SetAllVersions sets the "all_versions" edge to the PackageName entity.
+func (cc *CertificationCreate) SetAllVersions(p *PackageName) *CertificationCreate {
+	return cc.SetAllVersionsID(p.ID)
+}
+
+// SetArtifact sets the "artifact" edge to the Artifact entity.
+func (cc *CertificationCreate) SetArtifact(a *Artifact) *CertificationCreate {
+	return cc.SetArtifactID(a.ID)
+}
+
 // Mutation returns the CertificationMutation object of the builder.
 func (cc *CertificationCreate) Mutation() *CertificationMutation {
 	return cc.mutation
@@ -28,6 +154,7 @@ func (cc *CertificationCreate) Mutation() *CertificationMutation {
 
 // Save creates the Certification in the database.
 func (cc *CertificationCreate) Save(ctx context.Context) (*Certification, error) {
+	cc.defaults()
 	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
@@ -53,8 +180,33 @@ func (cc *CertificationCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (cc *CertificationCreate) defaults() {
+	if _, ok := cc.mutation.GetType(); !ok {
+		v := certification.DefaultType
+		cc.mutation.SetType(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (cc *CertificationCreate) check() error {
+	if _, ok := cc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Certification.type"`)}
+	}
+	if v, ok := cc.mutation.GetType(); ok {
+		if err := certification.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Certification.type": %w`, err)}
+		}
+	}
+	if _, ok := cc.mutation.Justification(); !ok {
+		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "Certification.justification"`)}
+	}
+	if _, ok := cc.mutation.Origin(); !ok {
+		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "Certification.origin"`)}
+	}
+	if _, ok := cc.mutation.Collector(); !ok {
+		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "Certification.collector"`)}
+	}
 	return nil
 }
 
@@ -82,6 +234,90 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 		_spec = sqlgraph.NewCreateSpec(certification.Table, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = cc.conflict
+	if value, ok := cc.mutation.GetType(); ok {
+		_spec.SetField(certification.FieldType, field.TypeEnum, value)
+		_node.Type = value
+	}
+	if value, ok := cc.mutation.Justification(); ok {
+		_spec.SetField(certification.FieldJustification, field.TypeString, value)
+		_node.Justification = value
+	}
+	if value, ok := cc.mutation.Origin(); ok {
+		_spec.SetField(certification.FieldOrigin, field.TypeString, value)
+		_node.Origin = value
+	}
+	if value, ok := cc.mutation.Collector(); ok {
+		_spec.SetField(certification.FieldCollector, field.TypeString, value)
+		_node.Collector = value
+	}
+	if nodes := cc.mutation.SourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   certification.SourceTable,
+			Columns: []string{certification.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.SourceID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.PackageVersionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   certification.PackageVersionTable,
+			Columns: []string{certification.PackageVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.PackageVersionID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.AllVersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   certification.AllVersionsTable,
+			Columns: []string{certification.AllVersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.PackageNameID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.ArtifactIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   certification.ArtifactTable,
+			Columns: []string{certification.ArtifactColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ArtifactID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -89,11 +325,17 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 // of the `INSERT` statement. For example:
 //
 //	client.Certification.Create().
+//		SetSourceID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.CertificationUpsert) {
+//			SetSourceID(v+v).
+//		}).
 //		Exec(ctx)
 func (cc *CertificationCreate) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertOne {
 	cc.conflict = opts
@@ -127,6 +369,126 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetSourceID sets the "source_id" field.
+func (u *CertificationUpsert) SetSourceID(v int) *CertificationUpsert {
+	u.Set(certification.FieldSourceID, v)
+	return u
+}
+
+// UpdateSourceID sets the "source_id" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateSourceID() *CertificationUpsert {
+	u.SetExcluded(certification.FieldSourceID)
+	return u
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (u *CertificationUpsert) ClearSourceID() *CertificationUpsert {
+	u.SetNull(certification.FieldSourceID)
+	return u
+}
+
+// SetPackageVersionID sets the "package_version_id" field.
+func (u *CertificationUpsert) SetPackageVersionID(v int) *CertificationUpsert {
+	u.Set(certification.FieldPackageVersionID, v)
+	return u
+}
+
+// UpdatePackageVersionID sets the "package_version_id" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdatePackageVersionID() *CertificationUpsert {
+	u.SetExcluded(certification.FieldPackageVersionID)
+	return u
+}
+
+// ClearPackageVersionID clears the value of the "package_version_id" field.
+func (u *CertificationUpsert) ClearPackageVersionID() *CertificationUpsert {
+	u.SetNull(certification.FieldPackageVersionID)
+	return u
+}
+
+// SetPackageNameID sets the "package_name_id" field.
+func (u *CertificationUpsert) SetPackageNameID(v int) *CertificationUpsert {
+	u.Set(certification.FieldPackageNameID, v)
+	return u
+}
+
+// UpdatePackageNameID sets the "package_name_id" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdatePackageNameID() *CertificationUpsert {
+	u.SetExcluded(certification.FieldPackageNameID)
+	return u
+}
+
+// ClearPackageNameID clears the value of the "package_name_id" field.
+func (u *CertificationUpsert) ClearPackageNameID() *CertificationUpsert {
+	u.SetNull(certification.FieldPackageNameID)
+	return u
+}
+
+// SetArtifactID sets the "artifact_id" field.
+func (u *CertificationUpsert) SetArtifactID(v int) *CertificationUpsert {
+	u.Set(certification.FieldArtifactID, v)
+	return u
+}
+
+// UpdateArtifactID sets the "artifact_id" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateArtifactID() *CertificationUpsert {
+	u.SetExcluded(certification.FieldArtifactID)
+	return u
+}
+
+// ClearArtifactID clears the value of the "artifact_id" field.
+func (u *CertificationUpsert) ClearArtifactID() *CertificationUpsert {
+	u.SetNull(certification.FieldArtifactID)
+	return u
+}
+
+// SetType sets the "type" field.
+func (u *CertificationUpsert) SetType(v certification.Type) *CertificationUpsert {
+	u.Set(certification.FieldType, v)
+	return u
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateType() *CertificationUpsert {
+	u.SetExcluded(certification.FieldType)
+	return u
+}
+
+// SetJustification sets the "justification" field.
+func (u *CertificationUpsert) SetJustification(v string) *CertificationUpsert {
+	u.Set(certification.FieldJustification, v)
+	return u
+}
+
+// UpdateJustification sets the "justification" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateJustification() *CertificationUpsert {
+	u.SetExcluded(certification.FieldJustification)
+	return u
+}
+
+// SetOrigin sets the "origin" field.
+func (u *CertificationUpsert) SetOrigin(v string) *CertificationUpsert {
+	u.Set(certification.FieldOrigin, v)
+	return u
+}
+
+// UpdateOrigin sets the "origin" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateOrigin() *CertificationUpsert {
+	u.SetExcluded(certification.FieldOrigin)
+	return u
+}
+
+// SetCollector sets the "collector" field.
+func (u *CertificationUpsert) SetCollector(v string) *CertificationUpsert {
+	u.Set(certification.FieldCollector, v)
+	return u
+}
+
+// UpdateCollector sets the "collector" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateCollector() *CertificationUpsert {
+	u.SetExcluded(certification.FieldCollector)
+	return u
+}
 
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
@@ -166,6 +528,146 @@ func (u *CertificationUpsertOne) Update(set func(*CertificationUpsert)) *Certifi
 		set(&CertificationUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetSourceID sets the "source_id" field.
+func (u *CertificationUpsertOne) SetSourceID(v int) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetSourceID(v)
+	})
+}
+
+// UpdateSourceID sets the "source_id" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateSourceID() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateSourceID()
+	})
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (u *CertificationUpsertOne) ClearSourceID() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.ClearSourceID()
+	})
+}
+
+// SetPackageVersionID sets the "package_version_id" field.
+func (u *CertificationUpsertOne) SetPackageVersionID(v int) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetPackageVersionID(v)
+	})
+}
+
+// UpdatePackageVersionID sets the "package_version_id" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdatePackageVersionID() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdatePackageVersionID()
+	})
+}
+
+// ClearPackageVersionID clears the value of the "package_version_id" field.
+func (u *CertificationUpsertOne) ClearPackageVersionID() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.ClearPackageVersionID()
+	})
+}
+
+// SetPackageNameID sets the "package_name_id" field.
+func (u *CertificationUpsertOne) SetPackageNameID(v int) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetPackageNameID(v)
+	})
+}
+
+// UpdatePackageNameID sets the "package_name_id" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdatePackageNameID() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdatePackageNameID()
+	})
+}
+
+// ClearPackageNameID clears the value of the "package_name_id" field.
+func (u *CertificationUpsertOne) ClearPackageNameID() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.ClearPackageNameID()
+	})
+}
+
+// SetArtifactID sets the "artifact_id" field.
+func (u *CertificationUpsertOne) SetArtifactID(v int) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetArtifactID(v)
+	})
+}
+
+// UpdateArtifactID sets the "artifact_id" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateArtifactID() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateArtifactID()
+	})
+}
+
+// ClearArtifactID clears the value of the "artifact_id" field.
+func (u *CertificationUpsertOne) ClearArtifactID() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.ClearArtifactID()
+	})
+}
+
+// SetType sets the "type" field.
+func (u *CertificationUpsertOne) SetType(v certification.Type) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateType() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateType()
+	})
+}
+
+// SetJustification sets the "justification" field.
+func (u *CertificationUpsertOne) SetJustification(v string) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetJustification(v)
+	})
+}
+
+// UpdateJustification sets the "justification" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateJustification() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateJustification()
+	})
+}
+
+// SetOrigin sets the "origin" field.
+func (u *CertificationUpsertOne) SetOrigin(v string) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetOrigin(v)
+	})
+}
+
+// UpdateOrigin sets the "origin" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateOrigin() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateOrigin()
+	})
+}
+
+// SetCollector sets the "collector" field.
+func (u *CertificationUpsertOne) SetCollector(v string) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetCollector(v)
+	})
+}
+
+// UpdateCollector sets the "collector" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateCollector() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateCollector()
+	})
 }
 
 // Exec executes the query.
@@ -216,6 +718,7 @@ func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification,
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertificationMutation)
 				if !ok {
@@ -295,6 +798,11 @@ func (ccb *CertificationCreateBulk) ExecX(ctx context.Context) {
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.CertificationUpsert) {
+//			SetSourceID(v+v).
+//		}).
 //		Exec(ctx)
 func (ccb *CertificationCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertBulk {
 	ccb.conflict = opts
@@ -360,6 +868,146 @@ func (u *CertificationUpsertBulk) Update(set func(*CertificationUpsert)) *Certif
 		set(&CertificationUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetSourceID sets the "source_id" field.
+func (u *CertificationUpsertBulk) SetSourceID(v int) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetSourceID(v)
+	})
+}
+
+// UpdateSourceID sets the "source_id" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateSourceID() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateSourceID()
+	})
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (u *CertificationUpsertBulk) ClearSourceID() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.ClearSourceID()
+	})
+}
+
+// SetPackageVersionID sets the "package_version_id" field.
+func (u *CertificationUpsertBulk) SetPackageVersionID(v int) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetPackageVersionID(v)
+	})
+}
+
+// UpdatePackageVersionID sets the "package_version_id" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdatePackageVersionID() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdatePackageVersionID()
+	})
+}
+
+// ClearPackageVersionID clears the value of the "package_version_id" field.
+func (u *CertificationUpsertBulk) ClearPackageVersionID() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.ClearPackageVersionID()
+	})
+}
+
+// SetPackageNameID sets the "package_name_id" field.
+func (u *CertificationUpsertBulk) SetPackageNameID(v int) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetPackageNameID(v)
+	})
+}
+
+// UpdatePackageNameID sets the "package_name_id" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdatePackageNameID() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdatePackageNameID()
+	})
+}
+
+// ClearPackageNameID clears the value of the "package_name_id" field.
+func (u *CertificationUpsertBulk) ClearPackageNameID() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.ClearPackageNameID()
+	})
+}
+
+// SetArtifactID sets the "artifact_id" field.
+func (u *CertificationUpsertBulk) SetArtifactID(v int) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetArtifactID(v)
+	})
+}
+
+// UpdateArtifactID sets the "artifact_id" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateArtifactID() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateArtifactID()
+	})
+}
+
+// ClearArtifactID clears the value of the "artifact_id" field.
+func (u *CertificationUpsertBulk) ClearArtifactID() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.ClearArtifactID()
+	})
+}
+
+// SetType sets the "type" field.
+func (u *CertificationUpsertBulk) SetType(v certification.Type) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateType() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateType()
+	})
+}
+
+// SetJustification sets the "justification" field.
+func (u *CertificationUpsertBulk) SetJustification(v string) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetJustification(v)
+	})
+}
+
+// UpdateJustification sets the "justification" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateJustification() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateJustification()
+	})
+}
+
+// SetOrigin sets the "origin" field.
+func (u *CertificationUpsertBulk) SetOrigin(v string) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetOrigin(v)
+	})
+}
+
+// UpdateOrigin sets the "origin" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateOrigin() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateOrigin()
+	})
+}
+
+// SetCollector sets the "collector" field.
+func (u *CertificationUpsertBulk) SetCollector(v string) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetCollector(v)
+	})
+}
+
+// UpdateCollector sets the "collector" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateCollector() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateCollector()
+	})
 }
 
 // Exec executes the query.

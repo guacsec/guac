@@ -10,17 +10,25 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // CertificationQuery is the builder for querying Certification entities.
 type CertificationQuery struct {
 	config
-	ctx        *QueryContext
-	order      []certification.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Certification
+	ctx                *QueryContext
+	order              []certification.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.Certification
+	withSource         *SourceNameQuery
+	withPackageVersion *PackageVersionQuery
+	withAllVersions    *PackageNameQuery
+	withArtifact       *ArtifactQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -55,6 +63,94 @@ func (cq *CertificationQuery) Unique(unique bool) *CertificationQuery {
 func (cq *CertificationQuery) Order(o ...certification.OrderOption) *CertificationQuery {
 	cq.order = append(cq.order, o...)
 	return cq
+}
+
+// QuerySource chains the current query on the "source" edge.
+func (cq *CertificationQuery) QuerySource() *SourceNameQuery {
+	query := (&SourceNameClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, selector),
+			sqlgraph.To(sourcename.Table, sourcename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.SourceTable, certification.SourceColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPackageVersion chains the current query on the "package_version" edge.
+func (cq *CertificationQuery) QueryPackageVersion() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, selector),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.PackageVersionTable, certification.PackageVersionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAllVersions chains the current query on the "all_versions" edge.
+func (cq *CertificationQuery) QueryAllVersions() *PackageNameQuery {
+	query := (&PackageNameClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, selector),
+			sqlgraph.To(packagename.Table, packagename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.AllVersionsTable, certification.AllVersionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryArtifact chains the current query on the "artifact" edge.
+func (cq *CertificationQuery) QueryArtifact() *ArtifactQuery {
+	query := (&ArtifactClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, selector),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.ArtifactTable, certification.ArtifactColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Certification entity from the query.
@@ -244,19 +340,79 @@ func (cq *CertificationQuery) Clone() *CertificationQuery {
 		return nil
 	}
 	return &CertificationQuery{
-		config:     cq.config,
-		ctx:        cq.ctx.Clone(),
-		order:      append([]certification.OrderOption{}, cq.order...),
-		inters:     append([]Interceptor{}, cq.inters...),
-		predicates: append([]predicate.Certification{}, cq.predicates...),
+		config:             cq.config,
+		ctx:                cq.ctx.Clone(),
+		order:              append([]certification.OrderOption{}, cq.order...),
+		inters:             append([]Interceptor{}, cq.inters...),
+		predicates:         append([]predicate.Certification{}, cq.predicates...),
+		withSource:         cq.withSource.Clone(),
+		withPackageVersion: cq.withPackageVersion.Clone(),
+		withAllVersions:    cq.withAllVersions.Clone(),
+		withArtifact:       cq.withArtifact.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
 	}
 }
 
+// WithSource tells the query-builder to eager-load the nodes that are connected to
+// the "source" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CertificationQuery) WithSource(opts ...func(*SourceNameQuery)) *CertificationQuery {
+	query := (&SourceNameClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withSource = query
+	return cq
+}
+
+// WithPackageVersion tells the query-builder to eager-load the nodes that are connected to
+// the "package_version" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CertificationQuery) WithPackageVersion(opts ...func(*PackageVersionQuery)) *CertificationQuery {
+	query := (&PackageVersionClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withPackageVersion = query
+	return cq
+}
+
+// WithAllVersions tells the query-builder to eager-load the nodes that are connected to
+// the "all_versions" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CertificationQuery) WithAllVersions(opts ...func(*PackageNameQuery)) *CertificationQuery {
+	query := (&PackageNameClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withAllVersions = query
+	return cq
+}
+
+// WithArtifact tells the query-builder to eager-load the nodes that are connected to
+// the "artifact" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CertificationQuery) WithArtifact(opts ...func(*ArtifactQuery)) *CertificationQuery {
+	query := (&ArtifactClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withArtifact = query
+	return cq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		SourceID int `json:"source_id,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Certification.Query().
+//		GroupBy(certification.FieldSourceID).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (cq *CertificationQuery) GroupBy(field string, fields ...string) *CertificationGroupBy {
 	cq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &CertificationGroupBy{build: cq}
@@ -268,6 +424,16 @@ func (cq *CertificationQuery) GroupBy(field string, fields ...string) *Certifica
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		SourceID int `json:"source_id,omitempty"`
+//	}
+//
+//	client.Certification.Query().
+//		Select(certification.FieldSourceID).
+//		Scan(ctx, &v)
 func (cq *CertificationQuery) Select(fields ...string) *CertificationSelect {
 	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
 	sbuild := &CertificationSelect{CertificationQuery: cq}
@@ -309,8 +475,14 @@ func (cq *CertificationQuery) prepareQuery(ctx context.Context) error {
 
 func (cq *CertificationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Certification, error) {
 	var (
-		nodes = []*Certification{}
-		_spec = cq.querySpec()
+		nodes       = []*Certification{}
+		_spec       = cq.querySpec()
+		loadedTypes = [4]bool{
+			cq.withSource != nil,
+			cq.withPackageVersion != nil,
+			cq.withAllVersions != nil,
+			cq.withArtifact != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Certification).scanValues(nil, columns)
@@ -318,6 +490,7 @@ func (cq *CertificationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Certification{config: cq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -329,7 +502,160 @@ func (cq *CertificationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := cq.withSource; query != nil {
+		if err := cq.loadSource(ctx, query, nodes, nil,
+			func(n *Certification, e *SourceName) { n.Edges.Source = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withPackageVersion; query != nil {
+		if err := cq.loadPackageVersion(ctx, query, nodes, nil,
+			func(n *Certification, e *PackageVersion) { n.Edges.PackageVersion = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withAllVersions; query != nil {
+		if err := cq.loadAllVersions(ctx, query, nodes, nil,
+			func(n *Certification, e *PackageName) { n.Edges.AllVersions = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withArtifact; query != nil {
+		if err := cq.loadArtifact(ctx, query, nodes, nil,
+			func(n *Certification, e *Artifact) { n.Edges.Artifact = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (cq *CertificationQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*Certification, init func(*Certification), assign func(*Certification, *SourceName)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Certification)
+	for i := range nodes {
+		if nodes[i].SourceID == nil {
+			continue
+		}
+		fk := *nodes[i].SourceID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(sourcename.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "source_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (cq *CertificationQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*Certification, init func(*Certification), assign func(*Certification, *PackageVersion)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Certification)
+	for i := range nodes {
+		if nodes[i].PackageVersionID == nil {
+			continue
+		}
+		fk := *nodes[i].PackageVersionID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(packageversion.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "package_version_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (cq *CertificationQuery) loadAllVersions(ctx context.Context, query *PackageNameQuery, nodes []*Certification, init func(*Certification), assign func(*Certification, *PackageName)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Certification)
+	for i := range nodes {
+		if nodes[i].PackageNameID == nil {
+			continue
+		}
+		fk := *nodes[i].PackageNameID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(packagename.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "package_name_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (cq *CertificationQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*Certification, init func(*Certification), assign func(*Certification, *Artifact)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Certification)
+	for i := range nodes {
+		if nodes[i].ArtifactID == nil {
+			continue
+		}
+		fk := *nodes[i].ArtifactID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(artifact.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "artifact_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (cq *CertificationQuery) sqlCount(ctx context.Context) (int, error) {
@@ -356,6 +682,18 @@ func (cq *CertificationQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != certification.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if cq.withSource != nil {
+			_spec.Node.AddColumnOnce(certification.FieldSourceID)
+		}
+		if cq.withPackageVersion != nil {
+			_spec.Node.AddColumnOnce(certification.FieldPackageVersionID)
+		}
+		if cq.withAllVersions != nil {
+			_spec.Node.AddColumnOnce(certification.FieldPackageNameID)
+		}
+		if cq.withArtifact != nil {
+			_spec.Node.AddColumnOnce(certification.FieldArtifactID)
 		}
 	}
 	if ps := cq.predicates; len(ps) > 0 {
