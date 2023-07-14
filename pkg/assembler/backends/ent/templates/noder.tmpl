@@ -1,0 +1,33 @@
+{{ define "noder" }}
+
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+{{/* loop over all types and add implement the Node interface. */}}
+{{ range $n := $.Nodes }}
+	func (*{{ $n.Name }}) IsNode() {}
+{{ end }}
+
+func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error) {
+	switch table {
+	{{- range $n := $.Nodes }}
+		case {{ $n.Package }}.Table:
+			query := c.{{ $n.Name }}.Query().
+				Where({{ $n.Package }}.ID(id))
+			n, err := query.Only(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return n, nil
+	{{- end }}
+	default:
+		return nil, fmt.Errorf("cannot resolve noder from table %q: %w", table, errNodeInvalidID)
+	}
+}
+{{ end }}
+
+
+{{ define "client/fields/additional" }}
+  // additional fields for node api
+  tables tables
+{{ end }}

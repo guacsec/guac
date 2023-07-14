@@ -630,7 +630,7 @@ func (s *Suite) TestCertifyGood() {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpCG: []*model.CertifyGood{
-				&model.CertifyGood{
+				{
 					Subject:       p1out,
 					Justification: "test justification",
 				},
@@ -656,7 +656,7 @@ func (s *Suite) TestCertifyGood() {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpCG: []*model.CertifyGood{
-				&model.CertifyGood{
+				{
 					Subject:       p1outName,
 					Justification: "test justification",
 				},
@@ -693,7 +693,7 @@ func (s *Suite) TestCertifyGood() {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpCG: []*model.CertifyGood{
-				&model.CertifyGood{
+				{
 					Subject:       p1out,
 					Justification: "test justification",
 				},
@@ -730,7 +730,7 @@ func (s *Suite) TestCertifyGood() {
 				Justification: ptrfrom.String("test justification one"),
 			},
 			ExpCG: []*model.CertifyGood{
-				&model.CertifyGood{
+				{
 					Subject:       p1out,
 					Justification: "test justification one",
 				},

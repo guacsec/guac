@@ -81,6 +81,8 @@ type Client struct {
 	SourceNamespace *SourceNamespaceClient
 	// SourceType is the client for interacting with the SourceType builders.
 	SourceType *SourceTypeClient
+	// additional fields for node api
+	tables tables
 }
 
 // NewClient creates a new client configured with the given options.
