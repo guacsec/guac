@@ -12,7 +12,65 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+type certificationInputSpec interface {
+	model.CertifyGoodInputSpec | model.CertifyBadInputSpec
+}
+
 func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
+	records, err := queryCertifications(ctx, b.client, certification.TypeGOOD, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return collect(records, toModelCertifyBad), nil
+}
+
+func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
+	if filter == nil {
+		return nil, nil
+	}
+
+	records, err := queryCertifications(ctx, b.client, certification.TypeGOOD, (*model.CertifyBadSpec)(filter))
+	if err != nil {
+		return nil, err
+	}
+
+	return collect(records, toModelCertifyGood), nil
+}
+
+func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (*model.CertifyBad, error) {
+	funcName := "IngestCertifyBad"
+	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject"); err != nil {
+		return nil, Errorf("%v ::  %s", funcName, err)
+	}
+
+	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
+		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return toModelCertifyBad(certRecord), nil
+}
+
+func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
+	funcName := "IngestCertifyGood"
+	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject"); err != nil {
+		return nil, Errorf("%v ::  %s", funcName, err)
+	}
+
+	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
+		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return toModelCertifyGood(certRecord), nil
+}
+
+func queryCertifications(ctx context.Context, client *ent.Client, typ certification.Type, filter *model.CertifyBadSpec) ([]*ent.Certification, error) {
 	if filter != nil {
 		if err := helper.ValidatePackageSourceOrArtifactQueryFilter(filter.Subject); err != nil {
 			return nil, err
@@ -20,7 +78,7 @@ func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 	}
 
 	query := []predicate.Certification{
-		certification.TypeEQ(certification.TypeBAD),
+		certification.TypeEQ(typ),
 		optionalPredicate(filter.ID, IDEQ),
 		optionalPredicate(filter.Collector, certification.CollectorEQ),
 		optionalPredicate(filter.Origin, certification.OriginEQ),
@@ -41,7 +99,7 @@ func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 		}
 	}
 
-	records, err := b.client.Certification.Query().
+	return client.Certification.Query().
 		Where(query...).
 		Limit(MaxPageSize).
 		WithSource(withSourceNameTreeQuery()).
@@ -49,49 +107,9 @@ func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 		WithPackageVersion(withPackageVersionTree()).
 		WithAllVersions(withPackageNameTree()).
 		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return collect(records, toModelCertifyBad), nil
 }
 
-func (b *EntBackend) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
-	return nil, nil
-}
-
-func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	funcName := "IngestCertifyBad"
-	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject"); err != nil {
-		return nil, Errorf("%v ::  %s", funcName, err)
-	}
-
-	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
-		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return toModelCertifyBad(certRecord), nil
-}
-
-func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
-		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return toModelCertifyGood(certRecord), nil
-}
-
-type certificationSpec interface {
-	model.CertifyGoodInputSpec | model.CertifyBadInputSpec
-}
-
-func upsertCertification[T certificationSpec](ctx context.Context, client *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*ent.Certification, error) {
+func upsertCertification[T certificationInputSpec](ctx context.Context, client *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*ent.Certification, error) {
 	insert := client.Certification.Create()
 
 	switch v := any(spec).(type) {
