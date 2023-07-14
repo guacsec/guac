@@ -29,8 +29,7 @@ type PackageVersionQuery struct {
 	withName        *PackageNameQuery
 	withOccurrences *OccurrenceQuery
 	withSbom        *BillOfMaterialsQuery
-	withSimilar     *PackageVersionQuery
-	withEqual       *PkgEqualQuery
+	withPkgEquals   *PkgEqualQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -133,30 +132,8 @@ func (pvq *PackageVersionQuery) QuerySbom() *BillOfMaterialsQuery {
 	return query
 }
 
-// QuerySimilar chains the current query on the "similar" edge.
-func (pvq *PackageVersionQuery) QuerySimilar() *PackageVersionQuery {
-	query := (&PackageVersionClient{config: pvq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pvq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pvq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
-			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, packageversion.SimilarTable, packageversion.SimilarPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryEqual chains the current query on the "equal" edge.
-func (pvq *PackageVersionQuery) QueryEqual() *PkgEqualQuery {
+// QueryPkgEquals chains the current query on the "pkg_equals" edge.
+func (pvq *PackageVersionQuery) QueryPkgEquals() *PkgEqualQuery {
 	query := (&PkgEqualClient{config: pvq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pvq.prepareQuery(ctx); err != nil {
@@ -169,7 +146,7 @@ func (pvq *PackageVersionQuery) QueryEqual() *PkgEqualQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
 			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.EqualTable, packageversion.EqualColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.PkgEqualsTable, packageversion.PkgEqualsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
 		return fromU, nil
@@ -372,8 +349,7 @@ func (pvq *PackageVersionQuery) Clone() *PackageVersionQuery {
 		withName:        pvq.withName.Clone(),
 		withOccurrences: pvq.withOccurrences.Clone(),
 		withSbom:        pvq.withSbom.Clone(),
-		withSimilar:     pvq.withSimilar.Clone(),
-		withEqual:       pvq.withEqual.Clone(),
+		withPkgEquals:   pvq.withPkgEquals.Clone(),
 		// clone intermediate query.
 		sql:  pvq.sql.Clone(),
 		path: pvq.path,
@@ -413,25 +389,14 @@ func (pvq *PackageVersionQuery) WithSbom(opts ...func(*BillOfMaterialsQuery)) *P
 	return pvq
 }
 
-// WithSimilar tells the query-builder to eager-load the nodes that are connected to
-// the "similar" edge. The optional arguments are used to configure the query builder of the edge.
-func (pvq *PackageVersionQuery) WithSimilar(opts ...func(*PackageVersionQuery)) *PackageVersionQuery {
-	query := (&PackageVersionClient{config: pvq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	pvq.withSimilar = query
-	return pvq
-}
-
-// WithEqual tells the query-builder to eager-load the nodes that are connected to
-// the "equal" edge. The optional arguments are used to configure the query builder of the edge.
-func (pvq *PackageVersionQuery) WithEqual(opts ...func(*PkgEqualQuery)) *PackageVersionQuery {
+// WithPkgEquals tells the query-builder to eager-load the nodes that are connected to
+// the "pkg_equals" edge. The optional arguments are used to configure the query builder of the edge.
+func (pvq *PackageVersionQuery) WithPkgEquals(opts ...func(*PkgEqualQuery)) *PackageVersionQuery {
 	query := (&PkgEqualClient{config: pvq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pvq.withEqual = query
+	pvq.withPkgEquals = query
 	return pvq
 }
 
@@ -513,12 +478,11 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	var (
 		nodes       = []*PackageVersion{}
 		_spec       = pvq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [4]bool{
 			pvq.withName != nil,
 			pvq.withOccurrences != nil,
 			pvq.withSbom != nil,
-			pvq.withSimilar != nil,
-			pvq.withEqual != nil,
+			pvq.withPkgEquals != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -559,17 +523,10 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 			return nil, err
 		}
 	}
-	if query := pvq.withSimilar; query != nil {
-		if err := pvq.loadSimilar(ctx, query, nodes,
-			func(n *PackageVersion) { n.Edges.Similar = []*PackageVersion{} },
-			func(n *PackageVersion, e *PackageVersion) { n.Edges.Similar = append(n.Edges.Similar, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := pvq.withEqual; query != nil {
-		if err := pvq.loadEqual(ctx, query, nodes,
-			func(n *PackageVersion) { n.Edges.Equal = []*PkgEqual{} },
-			func(n *PackageVersion, e *PkgEqual) { n.Edges.Equal = append(n.Edges.Equal, e) }); err != nil {
+	if query := pvq.withPkgEquals; query != nil {
+		if err := pvq.loadPkgEquals(ctx, query, nodes,
+			func(n *PackageVersion) { n.Edges.PkgEquals = []*PkgEqual{} },
+			func(n *PackageVersion, e *PkgEqual) { n.Edges.PkgEquals = append(n.Edges.PkgEquals, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -671,7 +628,7 @@ func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *BillOfMater
 	}
 	return nil
 }
-func (pvq *PackageVersionQuery) loadSimilar(ctx context.Context, query *PackageVersionQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *PackageVersion)) error {
+func (pvq *PackageVersionQuery) loadPkgEquals(ctx context.Context, query *PkgEqualQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *PkgEqual)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*PackageVersion)
 	nids := make(map[int]map[*PackageVersion]struct{})
@@ -683,11 +640,11 @@ func (pvq *PackageVersionQuery) loadSimilar(ctx context.Context, query *PackageV
 		}
 	}
 	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(packageversion.SimilarTable)
-		s.Join(joinT).On(s.C(packageversion.FieldID), joinT.C(packageversion.SimilarPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(packageversion.SimilarPrimaryKey[0]), edgeIDs...))
+		joinT := sql.Table(packageversion.PkgEqualsTable)
+		s.Join(joinT).On(s.C(pkgequal.FieldID), joinT.C(packageversion.PkgEqualsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(packageversion.PkgEqualsPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()
-		s.Select(joinT.C(packageversion.SimilarPrimaryKey[0]))
+		s.Select(joinT.C(packageversion.PkgEqualsPrimaryKey[1]))
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
@@ -717,48 +674,18 @@ func (pvq *PackageVersionQuery) loadSimilar(ctx context.Context, query *PackageV
 			}
 		})
 	})
-	neighbors, err := withInterceptors[[]*PackageVersion](ctx, query, qr, query.inters)
+	neighbors, err := withInterceptors[[]*PkgEqual](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
 		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "similar" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "pkg_equals" node returned %v`, n.ID)
 		}
 		for kn := range nodes {
 			assign(kn, n)
 		}
-	}
-	return nil
-}
-func (pvq *PackageVersionQuery) loadEqual(ctx context.Context, query *PkgEqualQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *PkgEqual)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*PackageVersion)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(pkgequal.FieldPackageVersionID)
-	}
-	query.Where(predicate.PkgEqual(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(packageversion.EqualColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.PackageVersionID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "package_version_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }

@@ -53,16 +53,6 @@ func IDLTE(id int) predicate.PkgEqual {
 	return predicate.PkgEqual(sql.FieldLTE(FieldID, id))
 }
 
-// PackageVersionID applies equality check predicate on the "package_version_id" field. It's identical to PackageVersionIDEQ.
-func PackageVersionID(v int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldEQ(FieldPackageVersionID, v))
-}
-
-// SimilarID applies equality check predicate on the "similar_id" field. It's identical to SimilarIDEQ.
-func SimilarID(v int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldEQ(FieldSimilarID, v))
-}
-
 // Origin applies equality check predicate on the "origin" field. It's identical to OriginEQ.
 func Origin(v string) predicate.PkgEqual {
 	return predicate.PkgEqual(sql.FieldEQ(FieldOrigin, v))
@@ -78,44 +68,9 @@ func Justification(v string) predicate.PkgEqual {
 	return predicate.PkgEqual(sql.FieldEQ(FieldJustification, v))
 }
 
-// PackageVersionIDEQ applies the EQ predicate on the "package_version_id" field.
-func PackageVersionIDEQ(v int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldEQ(FieldPackageVersionID, v))
-}
-
-// PackageVersionIDNEQ applies the NEQ predicate on the "package_version_id" field.
-func PackageVersionIDNEQ(v int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldNEQ(FieldPackageVersionID, v))
-}
-
-// PackageVersionIDIn applies the In predicate on the "package_version_id" field.
-func PackageVersionIDIn(vs ...int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldIn(FieldPackageVersionID, vs...))
-}
-
-// PackageVersionIDNotIn applies the NotIn predicate on the "package_version_id" field.
-func PackageVersionIDNotIn(vs ...int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldNotIn(FieldPackageVersionID, vs...))
-}
-
-// SimilarIDEQ applies the EQ predicate on the "similar_id" field.
-func SimilarIDEQ(v int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldEQ(FieldSimilarID, v))
-}
-
-// SimilarIDNEQ applies the NEQ predicate on the "similar_id" field.
-func SimilarIDNEQ(v int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldNEQ(FieldSimilarID, v))
-}
-
-// SimilarIDIn applies the In predicate on the "similar_id" field.
-func SimilarIDIn(vs ...int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldIn(FieldSimilarID, vs...))
-}
-
-// SimilarIDNotIn applies the NotIn predicate on the "similar_id" field.
-func SimilarIDNotIn(vs ...int) predicate.PkgEqual {
-	return predicate.PkgEqual(sql.FieldNotIn(FieldSimilarID, vs...))
+// PackagesHash applies equality check predicate on the "packages_hash" field. It's identical to PackagesHashEQ.
+func PackagesHash(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldEQ(FieldPackagesHash, v))
 }
 
 // OriginEQ applies the EQ predicate on the "origin" field.
@@ -313,44 +268,86 @@ func JustificationContainsFold(v string) predicate.PkgEqual {
 	return predicate.PkgEqual(sql.FieldContainsFold(FieldJustification, v))
 }
 
-// HasPackageA applies the HasEdge predicate on the "package_a" edge.
-func HasPackageA() predicate.PkgEqual {
+// PackagesHashEQ applies the EQ predicate on the "packages_hash" field.
+func PackagesHashEQ(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldEQ(FieldPackagesHash, v))
+}
+
+// PackagesHashNEQ applies the NEQ predicate on the "packages_hash" field.
+func PackagesHashNEQ(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldNEQ(FieldPackagesHash, v))
+}
+
+// PackagesHashIn applies the In predicate on the "packages_hash" field.
+func PackagesHashIn(vs ...string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldIn(FieldPackagesHash, vs...))
+}
+
+// PackagesHashNotIn applies the NotIn predicate on the "packages_hash" field.
+func PackagesHashNotIn(vs ...string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldNotIn(FieldPackagesHash, vs...))
+}
+
+// PackagesHashGT applies the GT predicate on the "packages_hash" field.
+func PackagesHashGT(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldGT(FieldPackagesHash, v))
+}
+
+// PackagesHashGTE applies the GTE predicate on the "packages_hash" field.
+func PackagesHashGTE(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldGTE(FieldPackagesHash, v))
+}
+
+// PackagesHashLT applies the LT predicate on the "packages_hash" field.
+func PackagesHashLT(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldLT(FieldPackagesHash, v))
+}
+
+// PackagesHashLTE applies the LTE predicate on the "packages_hash" field.
+func PackagesHashLTE(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldLTE(FieldPackagesHash, v))
+}
+
+// PackagesHashContains applies the Contains predicate on the "packages_hash" field.
+func PackagesHashContains(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldContains(FieldPackagesHash, v))
+}
+
+// PackagesHashHasPrefix applies the HasPrefix predicate on the "packages_hash" field.
+func PackagesHashHasPrefix(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldHasPrefix(FieldPackagesHash, v))
+}
+
+// PackagesHashHasSuffix applies the HasSuffix predicate on the "packages_hash" field.
+func PackagesHashHasSuffix(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldHasSuffix(FieldPackagesHash, v))
+}
+
+// PackagesHashEqualFold applies the EqualFold predicate on the "packages_hash" field.
+func PackagesHashEqualFold(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldEqualFold(FieldPackagesHash, v))
+}
+
+// PackagesHashContainsFold applies the ContainsFold predicate on the "packages_hash" field.
+func PackagesHashContainsFold(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldContainsFold(FieldPackagesHash, v))
+}
+
+// HasPackages applies the HasEdge predicate on the "packages" edge.
+func HasPackages() predicate.PkgEqual {
 	return predicate.PkgEqual(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, PackageATable, PackageAColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, PackagesTable, PackagesPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPackageAWith applies the HasEdge predicate on the "package_a" edge with a given conditions (other predicates).
-func HasPackageAWith(preds ...predicate.PackageVersion) predicate.PkgEqual {
+// HasPackagesWith applies the HasEdge predicate on the "packages" edge with a given conditions (other predicates).
+func HasPackagesWith(preds ...predicate.PackageVersion) predicate.PkgEqual {
 	return predicate.PkgEqual(func(s *sql.Selector) {
-		step := newPackageAStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasPackageB applies the HasEdge predicate on the "package_b" edge.
-func HasPackageB() predicate.PkgEqual {
-	return predicate.PkgEqual(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, PackageBTable, PackageBColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPackageBWith applies the HasEdge predicate on the "package_b" edge with a given conditions (other predicates).
-func HasPackageBWith(preds ...predicate.PackageVersion) predicate.PkgEqual {
-	return predicate.PkgEqual(func(s *sql.Selector) {
-		step := newPackageBStep()
+		step := newPackagesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

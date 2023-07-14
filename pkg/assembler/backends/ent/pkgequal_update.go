@@ -28,18 +28,6 @@ func (peu *PkgEqualUpdate) Where(ps ...predicate.PkgEqual) *PkgEqualUpdate {
 	return peu
 }
 
-// SetPackageVersionID sets the "package_version_id" field.
-func (peu *PkgEqualUpdate) SetPackageVersionID(i int) *PkgEqualUpdate {
-	peu.mutation.SetPackageVersionID(i)
-	return peu
-}
-
-// SetSimilarID sets the "similar_id" field.
-func (peu *PkgEqualUpdate) SetSimilarID(i int) *PkgEqualUpdate {
-	peu.mutation.SetSimilarID(i)
-	return peu
-}
-
 // SetOrigin sets the "origin" field.
 func (peu *PkgEqualUpdate) SetOrigin(s string) *PkgEqualUpdate {
 	peu.mutation.SetOrigin(s)
@@ -58,26 +46,25 @@ func (peu *PkgEqualUpdate) SetJustification(s string) *PkgEqualUpdate {
 	return peu
 }
 
-// SetPackageAID sets the "package_a" edge to the PackageVersion entity by ID.
-func (peu *PkgEqualUpdate) SetPackageAID(id int) *PkgEqualUpdate {
-	peu.mutation.SetPackageAID(id)
+// SetPackagesHash sets the "packages_hash" field.
+func (peu *PkgEqualUpdate) SetPackagesHash(s string) *PkgEqualUpdate {
+	peu.mutation.SetPackagesHash(s)
 	return peu
 }
 
-// SetPackageA sets the "package_a" edge to the PackageVersion entity.
-func (peu *PkgEqualUpdate) SetPackageA(p *PackageVersion) *PkgEqualUpdate {
-	return peu.SetPackageAID(p.ID)
-}
-
-// SetPackageBID sets the "package_b" edge to the PackageVersion entity by ID.
-func (peu *PkgEqualUpdate) SetPackageBID(id int) *PkgEqualUpdate {
-	peu.mutation.SetPackageBID(id)
+// AddPackageIDs adds the "packages" edge to the PackageVersion entity by IDs.
+func (peu *PkgEqualUpdate) AddPackageIDs(ids ...int) *PkgEqualUpdate {
+	peu.mutation.AddPackageIDs(ids...)
 	return peu
 }
 
-// SetPackageB sets the "package_b" edge to the PackageVersion entity.
-func (peu *PkgEqualUpdate) SetPackageB(p *PackageVersion) *PkgEqualUpdate {
-	return peu.SetPackageBID(p.ID)
+// AddPackages adds the "packages" edges to the PackageVersion entity.
+func (peu *PkgEqualUpdate) AddPackages(p ...*PackageVersion) *PkgEqualUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return peu.AddPackageIDs(ids...)
 }
 
 // Mutation returns the PkgEqualMutation object of the builder.
@@ -85,16 +72,25 @@ func (peu *PkgEqualUpdate) Mutation() *PkgEqualMutation {
 	return peu.mutation
 }
 
-// ClearPackageA clears the "package_a" edge to the PackageVersion entity.
-func (peu *PkgEqualUpdate) ClearPackageA() *PkgEqualUpdate {
-	peu.mutation.ClearPackageA()
+// ClearPackages clears all "packages" edges to the PackageVersion entity.
+func (peu *PkgEqualUpdate) ClearPackages() *PkgEqualUpdate {
+	peu.mutation.ClearPackages()
 	return peu
 }
 
-// ClearPackageB clears the "package_b" edge to the PackageVersion entity.
-func (peu *PkgEqualUpdate) ClearPackageB() *PkgEqualUpdate {
-	peu.mutation.ClearPackageB()
+// RemovePackageIDs removes the "packages" edge to PackageVersion entities by IDs.
+func (peu *PkgEqualUpdate) RemovePackageIDs(ids ...int) *PkgEqualUpdate {
+	peu.mutation.RemovePackageIDs(ids...)
 	return peu
+}
+
+// RemovePackages removes "packages" edges to PackageVersion entities.
+func (peu *PkgEqualUpdate) RemovePackages(p ...*PackageVersion) *PkgEqualUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return peu.RemovePackageIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -124,21 +120,7 @@ func (peu *PkgEqualUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (peu *PkgEqualUpdate) check() error {
-	if _, ok := peu.mutation.PackageAID(); peu.mutation.PackageACleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_a"`)
-	}
-	if _, ok := peu.mutation.PackageBID(); peu.mutation.PackageBCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_b"`)
-	}
-	return nil
-}
-
 func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := peu.check(); err != nil {
-		return n, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(pkgequal.Table, pkgequal.Columns, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt))
 	if ps := peu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -156,12 +138,15 @@ func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := peu.mutation.Justification(); ok {
 		_spec.SetField(pkgequal.FieldJustification, field.TypeString, value)
 	}
-	if peu.mutation.PackageACleared() {
+	if value, ok := peu.mutation.PackagesHash(); ok {
+		_spec.SetField(pkgequal.FieldPackagesHash, field.TypeString, value)
+	}
+	if peu.mutation.PackagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   pkgequal.PackageATable,
-			Columns: []string{pkgequal.PackageAColumn},
+			Table:   pkgequal.PackagesTable,
+			Columns: pkgequal.PackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
@@ -169,12 +154,12 @@ func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := peu.mutation.PackageAIDs(); len(nodes) > 0 {
+	if nodes := peu.mutation.RemovedPackagesIDs(); len(nodes) > 0 && !peu.mutation.PackagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   pkgequal.PackageATable,
-			Columns: []string{pkgequal.PackageAColumn},
+			Table:   pkgequal.PackagesTable,
+			Columns: pkgequal.PackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
@@ -183,27 +168,14 @@ func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if peu.mutation.PackageBCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   pkgequal.PackageBTable,
-			Columns: []string{pkgequal.PackageBColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
-			},
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := peu.mutation.PackageBIDs(); len(nodes) > 0 {
+	if nodes := peu.mutation.PackagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   pkgequal.PackageBTable,
-			Columns: []string{pkgequal.PackageBColumn},
+			Table:   pkgequal.PackagesTable,
+			Columns: pkgequal.PackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
@@ -234,18 +206,6 @@ type PkgEqualUpdateOne struct {
 	mutation *PkgEqualMutation
 }
 
-// SetPackageVersionID sets the "package_version_id" field.
-func (peuo *PkgEqualUpdateOne) SetPackageVersionID(i int) *PkgEqualUpdateOne {
-	peuo.mutation.SetPackageVersionID(i)
-	return peuo
-}
-
-// SetSimilarID sets the "similar_id" field.
-func (peuo *PkgEqualUpdateOne) SetSimilarID(i int) *PkgEqualUpdateOne {
-	peuo.mutation.SetSimilarID(i)
-	return peuo
-}
-
 // SetOrigin sets the "origin" field.
 func (peuo *PkgEqualUpdateOne) SetOrigin(s string) *PkgEqualUpdateOne {
 	peuo.mutation.SetOrigin(s)
@@ -264,26 +224,25 @@ func (peuo *PkgEqualUpdateOne) SetJustification(s string) *PkgEqualUpdateOne {
 	return peuo
 }
 
-// SetPackageAID sets the "package_a" edge to the PackageVersion entity by ID.
-func (peuo *PkgEqualUpdateOne) SetPackageAID(id int) *PkgEqualUpdateOne {
-	peuo.mutation.SetPackageAID(id)
+// SetPackagesHash sets the "packages_hash" field.
+func (peuo *PkgEqualUpdateOne) SetPackagesHash(s string) *PkgEqualUpdateOne {
+	peuo.mutation.SetPackagesHash(s)
 	return peuo
 }
 
-// SetPackageA sets the "package_a" edge to the PackageVersion entity.
-func (peuo *PkgEqualUpdateOne) SetPackageA(p *PackageVersion) *PkgEqualUpdateOne {
-	return peuo.SetPackageAID(p.ID)
-}
-
-// SetPackageBID sets the "package_b" edge to the PackageVersion entity by ID.
-func (peuo *PkgEqualUpdateOne) SetPackageBID(id int) *PkgEqualUpdateOne {
-	peuo.mutation.SetPackageBID(id)
+// AddPackageIDs adds the "packages" edge to the PackageVersion entity by IDs.
+func (peuo *PkgEqualUpdateOne) AddPackageIDs(ids ...int) *PkgEqualUpdateOne {
+	peuo.mutation.AddPackageIDs(ids...)
 	return peuo
 }
 
-// SetPackageB sets the "package_b" edge to the PackageVersion entity.
-func (peuo *PkgEqualUpdateOne) SetPackageB(p *PackageVersion) *PkgEqualUpdateOne {
-	return peuo.SetPackageBID(p.ID)
+// AddPackages adds the "packages" edges to the PackageVersion entity.
+func (peuo *PkgEqualUpdateOne) AddPackages(p ...*PackageVersion) *PkgEqualUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return peuo.AddPackageIDs(ids...)
 }
 
 // Mutation returns the PkgEqualMutation object of the builder.
@@ -291,16 +250,25 @@ func (peuo *PkgEqualUpdateOne) Mutation() *PkgEqualMutation {
 	return peuo.mutation
 }
 
-// ClearPackageA clears the "package_a" edge to the PackageVersion entity.
-func (peuo *PkgEqualUpdateOne) ClearPackageA() *PkgEqualUpdateOne {
-	peuo.mutation.ClearPackageA()
+// ClearPackages clears all "packages" edges to the PackageVersion entity.
+func (peuo *PkgEqualUpdateOne) ClearPackages() *PkgEqualUpdateOne {
+	peuo.mutation.ClearPackages()
 	return peuo
 }
 
-// ClearPackageB clears the "package_b" edge to the PackageVersion entity.
-func (peuo *PkgEqualUpdateOne) ClearPackageB() *PkgEqualUpdateOne {
-	peuo.mutation.ClearPackageB()
+// RemovePackageIDs removes the "packages" edge to PackageVersion entities by IDs.
+func (peuo *PkgEqualUpdateOne) RemovePackageIDs(ids ...int) *PkgEqualUpdateOne {
+	peuo.mutation.RemovePackageIDs(ids...)
 	return peuo
+}
+
+// RemovePackages removes "packages" edges to PackageVersion entities.
+func (peuo *PkgEqualUpdateOne) RemovePackages(p ...*PackageVersion) *PkgEqualUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return peuo.RemovePackageIDs(ids...)
 }
 
 // Where appends a list predicates to the PkgEqualUpdate builder.
@@ -343,21 +311,7 @@ func (peuo *PkgEqualUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (peuo *PkgEqualUpdateOne) check() error {
-	if _, ok := peuo.mutation.PackageAID(); peuo.mutation.PackageACleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_a"`)
-	}
-	if _, ok := peuo.mutation.PackageBID(); peuo.mutation.PackageBCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "PkgEqual.package_b"`)
-	}
-	return nil
-}
-
 func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, err error) {
-	if err := peuo.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(pkgequal.Table, pkgequal.Columns, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt))
 	id, ok := peuo.mutation.ID()
 	if !ok {
@@ -392,12 +346,15 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 	if value, ok := peuo.mutation.Justification(); ok {
 		_spec.SetField(pkgequal.FieldJustification, field.TypeString, value)
 	}
-	if peuo.mutation.PackageACleared() {
+	if value, ok := peuo.mutation.PackagesHash(); ok {
+		_spec.SetField(pkgequal.FieldPackagesHash, field.TypeString, value)
+	}
+	if peuo.mutation.PackagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   pkgequal.PackageATable,
-			Columns: []string{pkgequal.PackageAColumn},
+			Table:   pkgequal.PackagesTable,
+			Columns: pkgequal.PackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
@@ -405,12 +362,12 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := peuo.mutation.PackageAIDs(); len(nodes) > 0 {
+	if nodes := peuo.mutation.RemovedPackagesIDs(); len(nodes) > 0 && !peuo.mutation.PackagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   pkgequal.PackageATable,
-			Columns: []string{pkgequal.PackageAColumn},
+			Table:   pkgequal.PackagesTable,
+			Columns: pkgequal.PackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
@@ -419,27 +376,14 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if peuo.mutation.PackageBCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   pkgequal.PackageBTable,
-			Columns: []string{pkgequal.PackageBColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
-			},
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := peuo.mutation.PackageBIDs(); len(nodes) > 0 {
+	if nodes := peuo.mutation.PackagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   pkgequal.PackageBTable,
-			Columns: []string{pkgequal.PackageBColumn},
+			Table:   pkgequal.PackagesTable,
+			Columns: pkgequal.PackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),

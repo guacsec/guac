@@ -543,38 +543,18 @@ var (
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "justification", Type: field.TypeString},
-		{Name: "package_version_id", Type: field.TypeInt},
-		{Name: "similar_id", Type: field.TypeInt},
+		{Name: "packages_hash", Type: field.TypeString},
 	}
 	// PkgEqualsTable holds the schema information for the "pkg_equals" table.
 	PkgEqualsTable = &schema.Table{
 		Name:       "pkg_equals",
 		Columns:    PkgEqualsColumns,
 		PrimaryKey: []*schema.Column{PkgEqualsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "pkg_equals_package_versions_package_a",
-				Columns:    []*schema.Column{PkgEqualsColumns[4]},
-				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "pkg_equals_package_versions_package_b",
-				Columns:    []*schema.Column{PkgEqualsColumns[5]},
-				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "pkgequal_package_version_id_similar_id",
+				Name:    "pkgequal_packages_hash_origin_justification_collector",
 				Unique:  true,
-				Columns: []*schema.Column{PkgEqualsColumns[4], PkgEqualsColumns[5]},
-			},
-			{
-				Name:    "pkgequal_package_version_id_similar_id_origin_justification_collector",
-				Unique:  true,
-				Columns: []*schema.Column{PkgEqualsColumns[4], PkgEqualsColumns[5], PkgEqualsColumns[1], PkgEqualsColumns[3], PkgEqualsColumns[2]},
+				Columns: []*schema.Column{PkgEqualsColumns[4], PkgEqualsColumns[1], PkgEqualsColumns[3], PkgEqualsColumns[2]},
 			},
 		},
 	}
@@ -764,6 +744,31 @@ var (
 			},
 		},
 	}
+	// PkgEqualPackagesColumns holds the columns for the "pkg_equal_packages" table.
+	PkgEqualPackagesColumns = []*schema.Column{
+		{Name: "pkg_equal_id", Type: field.TypeInt},
+		{Name: "package_version_id", Type: field.TypeInt},
+	}
+	// PkgEqualPackagesTable holds the schema information for the "pkg_equal_packages" table.
+	PkgEqualPackagesTable = &schema.Table{
+		Name:       "pkg_equal_packages",
+		Columns:    PkgEqualPackagesColumns,
+		PrimaryKey: []*schema.Column{PkgEqualPackagesColumns[0], PkgEqualPackagesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "pkg_equal_packages_pkg_equal_id",
+				Columns:    []*schema.Column{PkgEqualPackagesColumns[0]},
+				RefColumns: []*schema.Column{PkgEqualsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "pkg_equal_packages_package_version_id",
+				Columns:    []*schema.Column{PkgEqualPackagesColumns[1]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// SlsaAttestationBuiltFromColumns holds the columns for the "slsa_attestation_built_from" table.
 	SlsaAttestationBuiltFromColumns = []*schema.Column{
 		{Name: "slsa_attestation_id", Type: field.TypeInt},
@@ -812,6 +817,7 @@ var (
 		SourceNamespacesTable,
 		SourceTypesTable,
 		HashEqualArtifactsTable,
+		PkgEqualPackagesTable,
 		SlsaAttestationBuiltFromTable,
 	}
 )
@@ -838,8 +844,6 @@ func init() {
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageTypesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
-	PkgEqualsTable.ForeignKeys[0].RefTable = PackageVersionsTable
-	PkgEqualsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	SlsaAttestationsTable.ForeignKeys[0].RefTable = BuildersTable
 	SlsaAttestationsTable.ForeignKeys[1].RefTable = ArtifactsTable
 	SlsaAttestationsTable.Annotation = &entsql.Annotation{
@@ -849,6 +853,8 @@ func init() {
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
 	HashEqualArtifactsTable.ForeignKeys[0].RefTable = HashEqualsTable
 	HashEqualArtifactsTable.ForeignKeys[1].RefTable = ArtifactsTable
+	PkgEqualPackagesTable.ForeignKeys[0].RefTable = PkgEqualsTable
+	PkgEqualPackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
 }

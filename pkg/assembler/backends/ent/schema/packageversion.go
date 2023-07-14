@@ -32,9 +32,7 @@ func (PackageVersion) Edges() []ent.Edge {
 		edge.From("name", PackageName.Type).Required().Field("name_id").Ref("versions").Unique(),
 		edge.From("occurrences", Occurrence.Type).Ref("package"),
 		edge.From("sbom", BillOfMaterials.Type).Ref("package"),
-		edge.To("similar", PackageVersion.Type).Through("equal", PkgEqual.Type),
-
-		// edge.To("dependencies", PackageVersion.Type).Through("package", Dependency.Type),
+		edge.From("pkg_equals", PkgEqual.Type).Ref("packages"),
 	}
 }
 

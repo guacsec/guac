@@ -22,18 +22,6 @@ type PkgEqualCreate struct {
 	conflict []sql.ConflictOption
 }
 
-// SetPackageVersionID sets the "package_version_id" field.
-func (pec *PkgEqualCreate) SetPackageVersionID(i int) *PkgEqualCreate {
-	pec.mutation.SetPackageVersionID(i)
-	return pec
-}
-
-// SetSimilarID sets the "similar_id" field.
-func (pec *PkgEqualCreate) SetSimilarID(i int) *PkgEqualCreate {
-	pec.mutation.SetSimilarID(i)
-	return pec
-}
-
 // SetOrigin sets the "origin" field.
 func (pec *PkgEqualCreate) SetOrigin(s string) *PkgEqualCreate {
 	pec.mutation.SetOrigin(s)
@@ -52,26 +40,25 @@ func (pec *PkgEqualCreate) SetJustification(s string) *PkgEqualCreate {
 	return pec
 }
 
-// SetPackageAID sets the "package_a" edge to the PackageVersion entity by ID.
-func (pec *PkgEqualCreate) SetPackageAID(id int) *PkgEqualCreate {
-	pec.mutation.SetPackageAID(id)
+// SetPackagesHash sets the "packages_hash" field.
+func (pec *PkgEqualCreate) SetPackagesHash(s string) *PkgEqualCreate {
+	pec.mutation.SetPackagesHash(s)
 	return pec
 }
 
-// SetPackageA sets the "package_a" edge to the PackageVersion entity.
-func (pec *PkgEqualCreate) SetPackageA(p *PackageVersion) *PkgEqualCreate {
-	return pec.SetPackageAID(p.ID)
-}
-
-// SetPackageBID sets the "package_b" edge to the PackageVersion entity by ID.
-func (pec *PkgEqualCreate) SetPackageBID(id int) *PkgEqualCreate {
-	pec.mutation.SetPackageBID(id)
+// AddPackageIDs adds the "packages" edge to the PackageVersion entity by IDs.
+func (pec *PkgEqualCreate) AddPackageIDs(ids ...int) *PkgEqualCreate {
+	pec.mutation.AddPackageIDs(ids...)
 	return pec
 }
 
-// SetPackageB sets the "package_b" edge to the PackageVersion entity.
-func (pec *PkgEqualCreate) SetPackageB(p *PackageVersion) *PkgEqualCreate {
-	return pec.SetPackageBID(p.ID)
+// AddPackages adds the "packages" edges to the PackageVersion entity.
+func (pec *PkgEqualCreate) AddPackages(p ...*PackageVersion) *PkgEqualCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pec.AddPackageIDs(ids...)
 }
 
 // Mutation returns the PkgEqualMutation object of the builder.
@@ -108,12 +95,6 @@ func (pec *PkgEqualCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pec *PkgEqualCreate) check() error {
-	if _, ok := pec.mutation.PackageVersionID(); !ok {
-		return &ValidationError{Name: "package_version_id", err: errors.New(`ent: missing required field "PkgEqual.package_version_id"`)}
-	}
-	if _, ok := pec.mutation.SimilarID(); !ok {
-		return &ValidationError{Name: "similar_id", err: errors.New(`ent: missing required field "PkgEqual.similar_id"`)}
-	}
 	if _, ok := pec.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "PkgEqual.origin"`)}
 	}
@@ -123,11 +104,11 @@ func (pec *PkgEqualCreate) check() error {
 	if _, ok := pec.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "PkgEqual.justification"`)}
 	}
-	if _, ok := pec.mutation.PackageAID(); !ok {
-		return &ValidationError{Name: "package_a", err: errors.New(`ent: missing required edge "PkgEqual.package_a"`)}
+	if _, ok := pec.mutation.PackagesHash(); !ok {
+		return &ValidationError{Name: "packages_hash", err: errors.New(`ent: missing required field "PkgEqual.packages_hash"`)}
 	}
-	if _, ok := pec.mutation.PackageBID(); !ok {
-		return &ValidationError{Name: "package_b", err: errors.New(`ent: missing required edge "PkgEqual.package_b"`)}
+	if len(pec.mutation.PackagesIDs()) == 0 {
+		return &ValidationError{Name: "packages", err: errors.New(`ent: missing required edge "PkgEqual.packages"`)}
 	}
 	return nil
 }
@@ -168,29 +149,16 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 		_spec.SetField(pkgequal.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if nodes := pec.mutation.PackageAIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   pkgequal.PackageATable,
-			Columns: []string{pkgequal.PackageAColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.PackageVersionID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
+	if value, ok := pec.mutation.PackagesHash(); ok {
+		_spec.SetField(pkgequal.FieldPackagesHash, field.TypeString, value)
+		_node.PackagesHash = value
 	}
-	if nodes := pec.mutation.PackageBIDs(); len(nodes) > 0 {
+	if nodes := pec.mutation.PackagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   pkgequal.PackageBTable,
-			Columns: []string{pkgequal.PackageBColumn},
+			Table:   pkgequal.PackagesTable,
+			Columns: pkgequal.PackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
@@ -199,7 +167,6 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.SimilarID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -209,7 +176,7 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.PkgEqual.Create().
-//		SetPackageVersionID(v).
+//		SetOrigin(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -218,7 +185,7 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PkgEqualUpsert) {
-//			SetPackageVersionID(v+v).
+//			SetOrigin(v+v).
 //		}).
 //		Exec(ctx)
 func (pec *PkgEqualCreate) OnConflict(opts ...sql.ConflictOption) *PkgEqualUpsertOne {
@@ -254,30 +221,6 @@ type (
 	}
 )
 
-// SetPackageVersionID sets the "package_version_id" field.
-func (u *PkgEqualUpsert) SetPackageVersionID(v int) *PkgEqualUpsert {
-	u.Set(pkgequal.FieldPackageVersionID, v)
-	return u
-}
-
-// UpdatePackageVersionID sets the "package_version_id" field to the value that was provided on create.
-func (u *PkgEqualUpsert) UpdatePackageVersionID() *PkgEqualUpsert {
-	u.SetExcluded(pkgequal.FieldPackageVersionID)
-	return u
-}
-
-// SetSimilarID sets the "similar_id" field.
-func (u *PkgEqualUpsert) SetSimilarID(v int) *PkgEqualUpsert {
-	u.Set(pkgequal.FieldSimilarID, v)
-	return u
-}
-
-// UpdateSimilarID sets the "similar_id" field to the value that was provided on create.
-func (u *PkgEqualUpsert) UpdateSimilarID() *PkgEqualUpsert {
-	u.SetExcluded(pkgequal.FieldSimilarID)
-	return u
-}
-
 // SetOrigin sets the "origin" field.
 func (u *PkgEqualUpsert) SetOrigin(v string) *PkgEqualUpsert {
 	u.Set(pkgequal.FieldOrigin, v)
@@ -311,6 +254,18 @@ func (u *PkgEqualUpsert) SetJustification(v string) *PkgEqualUpsert {
 // UpdateJustification sets the "justification" field to the value that was provided on create.
 func (u *PkgEqualUpsert) UpdateJustification() *PkgEqualUpsert {
 	u.SetExcluded(pkgequal.FieldJustification)
+	return u
+}
+
+// SetPackagesHash sets the "packages_hash" field.
+func (u *PkgEqualUpsert) SetPackagesHash(v string) *PkgEqualUpsert {
+	u.Set(pkgequal.FieldPackagesHash, v)
+	return u
+}
+
+// UpdatePackagesHash sets the "packages_hash" field to the value that was provided on create.
+func (u *PkgEqualUpsert) UpdatePackagesHash() *PkgEqualUpsert {
+	u.SetExcluded(pkgequal.FieldPackagesHash)
 	return u
 }
 
@@ -354,34 +309,6 @@ func (u *PkgEqualUpsertOne) Update(set func(*PkgEqualUpsert)) *PkgEqualUpsertOne
 	return u
 }
 
-// SetPackageVersionID sets the "package_version_id" field.
-func (u *PkgEqualUpsertOne) SetPackageVersionID(v int) *PkgEqualUpsertOne {
-	return u.Update(func(s *PkgEqualUpsert) {
-		s.SetPackageVersionID(v)
-	})
-}
-
-// UpdatePackageVersionID sets the "package_version_id" field to the value that was provided on create.
-func (u *PkgEqualUpsertOne) UpdatePackageVersionID() *PkgEqualUpsertOne {
-	return u.Update(func(s *PkgEqualUpsert) {
-		s.UpdatePackageVersionID()
-	})
-}
-
-// SetSimilarID sets the "similar_id" field.
-func (u *PkgEqualUpsertOne) SetSimilarID(v int) *PkgEqualUpsertOne {
-	return u.Update(func(s *PkgEqualUpsert) {
-		s.SetSimilarID(v)
-	})
-}
-
-// UpdateSimilarID sets the "similar_id" field to the value that was provided on create.
-func (u *PkgEqualUpsertOne) UpdateSimilarID() *PkgEqualUpsertOne {
-	return u.Update(func(s *PkgEqualUpsert) {
-		s.UpdateSimilarID()
-	})
-}
-
 // SetOrigin sets the "origin" field.
 func (u *PkgEqualUpsertOne) SetOrigin(v string) *PkgEqualUpsertOne {
 	return u.Update(func(s *PkgEqualUpsert) {
@@ -421,6 +348,20 @@ func (u *PkgEqualUpsertOne) SetJustification(v string) *PkgEqualUpsertOne {
 func (u *PkgEqualUpsertOne) UpdateJustification() *PkgEqualUpsertOne {
 	return u.Update(func(s *PkgEqualUpsert) {
 		s.UpdateJustification()
+	})
+}
+
+// SetPackagesHash sets the "packages_hash" field.
+func (u *PkgEqualUpsertOne) SetPackagesHash(v string) *PkgEqualUpsertOne {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.SetPackagesHash(v)
+	})
+}
+
+// UpdatePackagesHash sets the "packages_hash" field to the value that was provided on create.
+func (u *PkgEqualUpsertOne) UpdatePackagesHash() *PkgEqualUpsertOne {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.UpdatePackagesHash()
 	})
 }
 
@@ -554,7 +495,7 @@ func (pecb *PkgEqualCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PkgEqualUpsert) {
-//			SetPackageVersionID(v+v).
+//			SetOrigin(v+v).
 //		}).
 //		Exec(ctx)
 func (pecb *PkgEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *PkgEqualUpsertBulk {
@@ -623,34 +564,6 @@ func (u *PkgEqualUpsertBulk) Update(set func(*PkgEqualUpsert)) *PkgEqualUpsertBu
 	return u
 }
 
-// SetPackageVersionID sets the "package_version_id" field.
-func (u *PkgEqualUpsertBulk) SetPackageVersionID(v int) *PkgEqualUpsertBulk {
-	return u.Update(func(s *PkgEqualUpsert) {
-		s.SetPackageVersionID(v)
-	})
-}
-
-// UpdatePackageVersionID sets the "package_version_id" field to the value that was provided on create.
-func (u *PkgEqualUpsertBulk) UpdatePackageVersionID() *PkgEqualUpsertBulk {
-	return u.Update(func(s *PkgEqualUpsert) {
-		s.UpdatePackageVersionID()
-	})
-}
-
-// SetSimilarID sets the "similar_id" field.
-func (u *PkgEqualUpsertBulk) SetSimilarID(v int) *PkgEqualUpsertBulk {
-	return u.Update(func(s *PkgEqualUpsert) {
-		s.SetSimilarID(v)
-	})
-}
-
-// UpdateSimilarID sets the "similar_id" field to the value that was provided on create.
-func (u *PkgEqualUpsertBulk) UpdateSimilarID() *PkgEqualUpsertBulk {
-	return u.Update(func(s *PkgEqualUpsert) {
-		s.UpdateSimilarID()
-	})
-}
-
 // SetOrigin sets the "origin" field.
 func (u *PkgEqualUpsertBulk) SetOrigin(v string) *PkgEqualUpsertBulk {
 	return u.Update(func(s *PkgEqualUpsert) {
@@ -690,6 +603,20 @@ func (u *PkgEqualUpsertBulk) SetJustification(v string) *PkgEqualUpsertBulk {
 func (u *PkgEqualUpsertBulk) UpdateJustification() *PkgEqualUpsertBulk {
 	return u.Update(func(s *PkgEqualUpsert) {
 		s.UpdateJustification()
+	})
+}
+
+// SetPackagesHash sets the "packages_hash" field.
+func (u *PkgEqualUpsertBulk) SetPackagesHash(v string) *PkgEqualUpsertBulk {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.SetPackagesHash(v)
+	})
+}
+
+// UpdatePackagesHash sets the "packages_hash" field to the value that was provided on create.
+func (u *PkgEqualUpsertBulk) UpdatePackagesHash() *PkgEqualUpsertBulk {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.UpdatePackagesHash()
 	})
 }
 

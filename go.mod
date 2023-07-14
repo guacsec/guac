@@ -95,6 +95,7 @@ require (
 	github.com/google/wire v0.5.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
+	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect
@@ -145,6 +146,8 @@ require (
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/urfave/cli/v2 v2.25.5 // indirect
 	github.com/vbatts/tar-split v0.11.3 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xanzy/go-gitlab v0.78.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
@@ -168,6 +171,7 @@ require (
 )
 
 require (
+	entgo.io/contrib v0.4.5
 	entgo.io/ent v0.12.4-0.20230702151415-1ec75238037c
 	github.com/99designs/gqlgen v0.17.34
 	github.com/CycloneDX/cyclonedx-go v0.7.1
@@ -181,6 +185,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v50 v50.2.0
 	github.com/google/osv-scanner v1.3.4
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/lib/pq v1.10.7

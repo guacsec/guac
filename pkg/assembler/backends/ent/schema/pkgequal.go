@@ -15,26 +15,23 @@ type PkgEqual struct {
 // Fields of the PkgEqual.
 func (PkgEqual) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("package_version_id"),
-		field.Int("similar_id"),
 		field.String("origin"),
 		field.String("collector"),
 		field.String("justification"),
+		field.String("packages_hash").Comment("An opaque hash of the packages that are equal"),
 	}
 }
 
 // Edges of the PkgEqual.
 func (PkgEqual) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("package_a", PackageVersion.Type).Required().Unique().Field("package_version_id"),
-		edge.To("package_b", PackageVersion.Type).Required().Unique().Field("similar_id"),
+		edge.To("packages", PackageVersion.Type).Required(),
 	}
 }
 
 // Indexes of the PkgEqual.
 func (PkgEqual) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("package_version_id", "similar_id").Unique(),
-		index.Fields("package_version_id", "similar_id", "origin", "justification", "collector").Unique(),
+		index.Fields("packages_hash", "origin", "justification", "collector").Unique(),
 	}
 }

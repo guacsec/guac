@@ -1,11 +1,13 @@
 package backend
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"golang.org/x/exp/slices"
 )
 
 func (s *Suite) TestPkgEqual() {
@@ -187,8 +189,8 @@ func (s *Suite) TestPkgEqual() {
 			},
 		},
 		{
-			Name:  "Query on pkg algo and pkg",
-			Only:  true,
+			Name: "Query on pkg algo and pkg",
+			// Only:  true,
 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
@@ -510,4 +512,118 @@ func (s *Suite) TestPkgEqual() {
 			}
 		})
 	}
+}
+
+func (s *Suite) TestPkgEqualNeighbors() {
+	type call struct {
+		P1 *model.PkgInputSpec
+		P2 *model.PkgInputSpec
+		HE *model.PkgEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		Calls        []call
+		ExpNeighbors map[string][]string
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{p1, p2},
+			Calls: []call{
+				{
+					P1: p1,
+					P2: p2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpNeighbors: map[string][]string{
+				"5": []string{"2", "7"}, // p1
+				"6": []string{"2", "7"}, // p2
+				"7": []string{"2", "2"}, // pkgequal
+			},
+		},
+		{
+			Name:  "Multiple",
+			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Calls: []call{
+				{
+					P1: p1,
+					P2: p2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					P1: p1,
+					P2: p3,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpNeighbors: map[string][]string{
+				"5": []string{"2", "8", "9"}, // p1
+				"6": []string{"2", "8"},      // p2
+				"7": []string{"2", "9"},      // p3
+				"8": []string{"2", "2"},      // pkgequal 1
+				"9": []string{"2", "2"},      // pkgequal 2
+			},
+		},
+	}
+	ctx := s.Ctx
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, a := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				if _, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE); err != nil {
+					t.Fatalf("Could not ingest PkgEqual: %v", err)
+				}
+			}
+			for q, r := range test.ExpNeighbors {
+				got, err := b.Neighbors(ctx, q, nil)
+				if err != nil {
+					t.Fatalf("Could not query neighbors: %s", err)
+				}
+				gotIDs := convNodes(got)
+				slices.Sort(r)
+				slices.Sort(gotIDs)
+				if diff := cmp.Diff(r, gotIDs); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+		})
+	}
+}
+
+func convNode(n model.Node) hasID {
+	// All nodes have a json "id"
+	// Only getting top-level id however
+	var h hasID
+	b, _ := json.Marshal(n)
+	_ = json.Unmarshal(b, &h)
+	return h
+}
+
+func convNodes(ns []model.Node) []string {
+	var ids []string
+	for _, n := range ns {
+		h := convNode(n)
+		ids = append(ids, h.ID)
+	}
+	return ids
+}
+
+type hasID struct {
+	ID string `json:"id"`
 }

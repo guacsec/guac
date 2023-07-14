@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -57,7 +56,7 @@ func upsertHashEqual(ctx context.Context, client *ent.Tx, artifactA model.Artifa
 		return nil, err
 	}
 
-	record, err := artifactARecord.QuerySame().Where(hashequal.HasArtifactsWith(artifact.DigestEQ(artifactB.Digest))).Only(ctx)
+	record, err := artifactARecord.QuerySame().Where(hashequal.HasArtifactsWith(artifactQueryInputPredicates(artifactB))).Only(ctx)
 	if ent.MaskNotFound(err) != nil {
 		return nil, err
 	}
