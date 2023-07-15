@@ -543,16 +543,6 @@ func CollectorContainsFold(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldContainsFold(FieldCollector, v))
 }
 
-// AnnotationsIsNil applies the IsNil predicate on the "annotations" field.
-func AnnotationsIsNil() predicate.BillOfMaterials {
-	return predicate.BillOfMaterials(sql.FieldIsNull(FieldAnnotations))
-}
-
-// AnnotationsNotNil applies the NotNil predicate on the "annotations" field.
-func AnnotationsNotNil() predicate.BillOfMaterials {
-	return predicate.BillOfMaterials(sql.FieldNotNull(FieldAnnotations))
-}
-
 // HasPackage applies the HasEdge predicate on the "package" edge.
 func HasPackage() predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(func(s *sql.Selector) {

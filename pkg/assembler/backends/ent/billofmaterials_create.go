@@ -13,7 +13,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // BillOfMaterialsCreate is the builder for creating a BillOfMaterials entity.
@@ -85,12 +84,6 @@ func (bomc *BillOfMaterialsCreate) SetOrigin(s string) *BillOfMaterialsCreate {
 // SetCollector sets the "collector" field.
 func (bomc *BillOfMaterialsCreate) SetCollector(s string) *BillOfMaterialsCreate {
 	bomc.mutation.SetCollector(s)
-	return bomc
-}
-
-// SetAnnotations sets the "annotations" field.
-func (bomc *BillOfMaterialsCreate) SetAnnotations(m []model.Annotation) *BillOfMaterialsCreate {
-	bomc.mutation.SetAnnotations(m)
 	return bomc
 }
 
@@ -206,10 +199,6 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 	if value, ok := bomc.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
 		_node.Collector = value
-	}
-	if value, ok := bomc.mutation.Annotations(); ok {
-		_spec.SetField(billofmaterials.FieldAnnotations, field.TypeJSON, value)
-		_node.Annotations = value
 	}
 	if nodes := bomc.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -405,24 +394,6 @@ func (u *BillOfMaterialsUpsert) UpdateCollector() *BillOfMaterialsUpsert {
 	return u
 }
 
-// SetAnnotations sets the "annotations" field.
-func (u *BillOfMaterialsUpsert) SetAnnotations(v []model.Annotation) *BillOfMaterialsUpsert {
-	u.Set(billofmaterials.FieldAnnotations, v)
-	return u
-}
-
-// UpdateAnnotations sets the "annotations" field to the value that was provided on create.
-func (u *BillOfMaterialsUpsert) UpdateAnnotations() *BillOfMaterialsUpsert {
-	u.SetExcluded(billofmaterials.FieldAnnotations)
-	return u
-}
-
-// ClearAnnotations clears the value of the "annotations" field.
-func (u *BillOfMaterialsUpsert) ClearAnnotations() *BillOfMaterialsUpsert {
-	u.SetNull(billofmaterials.FieldAnnotations)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -586,27 +557,6 @@ func (u *BillOfMaterialsUpsertOne) SetCollector(v string) *BillOfMaterialsUpsert
 func (u *BillOfMaterialsUpsertOne) UpdateCollector() *BillOfMaterialsUpsertOne {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateCollector()
-	})
-}
-
-// SetAnnotations sets the "annotations" field.
-func (u *BillOfMaterialsUpsertOne) SetAnnotations(v []model.Annotation) *BillOfMaterialsUpsertOne {
-	return u.Update(func(s *BillOfMaterialsUpsert) {
-		s.SetAnnotations(v)
-	})
-}
-
-// UpdateAnnotations sets the "annotations" field to the value that was provided on create.
-func (u *BillOfMaterialsUpsertOne) UpdateAnnotations() *BillOfMaterialsUpsertOne {
-	return u.Update(func(s *BillOfMaterialsUpsert) {
-		s.UpdateAnnotations()
-	})
-}
-
-// ClearAnnotations clears the value of the "annotations" field.
-func (u *BillOfMaterialsUpsertOne) ClearAnnotations() *BillOfMaterialsUpsertOne {
-	return u.Update(func(s *BillOfMaterialsUpsert) {
-		s.ClearAnnotations()
 	})
 }
 
@@ -932,27 +882,6 @@ func (u *BillOfMaterialsUpsertBulk) SetCollector(v string) *BillOfMaterialsUpser
 func (u *BillOfMaterialsUpsertBulk) UpdateCollector() *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateCollector()
-	})
-}
-
-// SetAnnotations sets the "annotations" field.
-func (u *BillOfMaterialsUpsertBulk) SetAnnotations(v []model.Annotation) *BillOfMaterialsUpsertBulk {
-	return u.Update(func(s *BillOfMaterialsUpsert) {
-		s.SetAnnotations(v)
-	})
-}
-
-// UpdateAnnotations sets the "annotations" field to the value that was provided on create.
-func (u *BillOfMaterialsUpsertBulk) UpdateAnnotations() *BillOfMaterialsUpsertBulk {
-	return u.Update(func(s *BillOfMaterialsUpsert) {
-		s.UpdateAnnotations()
-	})
-}
-
-// ClearAnnotations clears the value of the "annotations" field.
-func (u *BillOfMaterialsUpsertBulk) ClearAnnotations() *BillOfMaterialsUpsertBulk {
-	return u.Update(func(s *BillOfMaterialsUpsert) {
-		s.ClearAnnotations()
 	})
 }
 

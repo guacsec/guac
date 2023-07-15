@@ -28,8 +28,6 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
-	// FieldAnnotations holds the string denoting the annotations field in the database.
-	FieldAnnotations = "annotations"
 	// EdgePackage holds the string denoting the package edge name in mutations.
 	EdgePackage = "package"
 	// EdgeArtifact holds the string denoting the artifact edge name in mutations.
@@ -63,7 +61,6 @@ var Columns = []string{
 	FieldDownloadLocation,
 	FieldOrigin,
 	FieldCollector,
-	FieldAnnotations,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

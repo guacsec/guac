@@ -6,7 +6,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func (s *Suite) Test_HasSBOM() {
@@ -43,9 +42,8 @@ func (s *Suite) Test_HasSBOM() {
 			},
 			Expected: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					URI:         "test uri",
-					Annotations: []*model.Annotation{},
+					Subject: p1out,
+					URI:     "test uri",
 				},
 			},
 		},
@@ -75,9 +73,8 @@ func (s *Suite) Test_HasSBOM() {
 			},
 			Expected: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					URI:         "test uri",
-					Annotations: []*model.Annotation{},
+					Subject: p1out,
+					URI:     "test uri",
 				},
 			},
 		},
@@ -107,9 +104,8 @@ func (s *Suite) Test_HasSBOM() {
 			},
 			Expected: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					URI:         "test uri one",
-					Annotations: []*model.Annotation{},
+					Subject: p1out,
+					URI:     "test uri one",
 				},
 			},
 		},
@@ -152,9 +148,8 @@ func (s *Suite) Test_HasSBOM() {
 			},
 			Expected: []*model.HasSbom{
 				{
-					Subject:     p2out,
-					URI:         "test uri",
-					Annotations: []*model.Annotation{},
+					Subject: p2out,
+					URI:     "test uri",
 				},
 			},
 		},
@@ -197,9 +192,8 @@ func (s *Suite) Test_HasSBOM() {
 			},
 			Expected: []*model.HasSbom{
 				{
-					Subject:     a2out,
-					URI:         "test uri",
-					Annotations: []*model.Annotation{},
+					Subject: a2out,
+					URI:     "test uri",
 				},
 			},
 		},
@@ -229,9 +223,8 @@ func (s *Suite) Test_HasSBOM() {
 			},
 			Expected: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					Algorithm:   "qwerasdf",
-					Annotations: []*model.Annotation{},
+					Subject:   p1out,
+					Algorithm: "qwerasdf",
 				},
 			},
 		},
@@ -261,9 +254,8 @@ func (s *Suite) Test_HasSBOM() {
 			},
 			Expected: []*model.HasSbom{
 				{
-					Subject:     p1out,
-					Digest:      "qwerasdf",
-					Annotations: []*model.Annotation{},
+					Subject: p1out,
+					Digest:  "qwerasdf",
 				},
 			},
 		},
@@ -295,49 +287,6 @@ func (s *Suite) Test_HasSBOM() {
 				{
 					Subject:          p1out,
 					DownloadLocation: "location two",
-					Annotations:      []*model.Annotation{},
-				},
-			},
-		},
-		{
-			Name:  "Query on Annotations",
-			InPkg: []*model.PkgInputSpec{p1},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Spec: &model.HasSBOMInputSpec{
-						Annotations: []*model.AnnotationInputSpec{
-							{Key: "k1", Value: "v1"},
-							{Key: "k2", Value: "v2"},
-						},
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Spec: &model.HasSBOMInputSpec{
-						Annotations: []*model.AnnotationInputSpec{
-							{Key: "k1", Value: "v1"},
-						},
-					},
-				},
-			},
-			Query: &model.HasSBOMSpec{
-				Annotations: []*model.AnnotationSpec{
-					{Key: "k1", Value: "v1"},
-					{Key: "k2", Value: "v2"},
-				},
-			},
-			Expected: []*model.HasSbom{
-				{
-					Subject: p1out,
-					Annotations: []*model.Annotation{
-						{Key: "k1", Value: "v1"},
-						{Key: "k2", Value: "v2"},
-					},
 				},
 			},
 		},
@@ -403,12 +352,10 @@ func (s *Suite) Test_HasSBOM() {
 				{
 					Subject:          p1out,
 					DownloadLocation: "location two",
-					Annotations:      []*model.Annotation{},
 				},
 				{
 					Subject:          p2out,
 					DownloadLocation: "location two",
-					Annotations:      []*model.Annotation{},
 				},
 			},
 		},
@@ -440,7 +387,6 @@ func (s *Suite) Test_HasSBOM() {
 				{
 					Subject:          p1out,
 					DownloadLocation: "location two",
-					Annotations:      []*model.Annotation{},
 				},
 			},
 		},
@@ -563,13 +509,6 @@ func (s *Suite) Test_HasSBOM() {
 			}
 			if err != nil {
 				return
-			}
-			less := func(a, b *model.Annotation) bool { return a.Key < b.Key }
-			for _, hs := range got {
-				slices.SortFunc(hs.Annotations, less)
-			}
-			for _, hs := range test.Expected {
-				slices.SortFunc(hs.Annotations, less)
 			}
 			if diff := cmp.Diff(test.Expected, got, ignoreID, ignoreEmptySlices); diff != "" {
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)

@@ -9,13 +9,11 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // BillOfMaterialsUpdate is the builder for updating BillOfMaterials entities.
@@ -107,24 +105,6 @@ func (bomu *BillOfMaterialsUpdate) SetCollector(s string) *BillOfMaterialsUpdate
 	return bomu
 }
 
-// SetAnnotations sets the "annotations" field.
-func (bomu *BillOfMaterialsUpdate) SetAnnotations(m []model.Annotation) *BillOfMaterialsUpdate {
-	bomu.mutation.SetAnnotations(m)
-	return bomu
-}
-
-// AppendAnnotations appends m to the "annotations" field.
-func (bomu *BillOfMaterialsUpdate) AppendAnnotations(m []model.Annotation) *BillOfMaterialsUpdate {
-	bomu.mutation.AppendAnnotations(m)
-	return bomu
-}
-
-// ClearAnnotations clears the value of the "annotations" field.
-func (bomu *BillOfMaterialsUpdate) ClearAnnotations() *BillOfMaterialsUpdate {
-	bomu.mutation.ClearAnnotations()
-	return bomu
-}
-
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (bomu *BillOfMaterialsUpdate) SetPackage(p *PackageVersion) *BillOfMaterialsUpdate {
 	return bomu.SetPackageID(p.ID)
@@ -205,17 +185,6 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if value, ok := bomu.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
-	}
-	if value, ok := bomu.mutation.Annotations(); ok {
-		_spec.SetField(billofmaterials.FieldAnnotations, field.TypeJSON, value)
-	}
-	if value, ok := bomu.mutation.AppendedAnnotations(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, billofmaterials.FieldAnnotations, value)
-		})
-	}
-	if bomu.mutation.AnnotationsCleared() {
-		_spec.ClearField(billofmaterials.FieldAnnotations, field.TypeJSON)
 	}
 	if bomu.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -371,24 +340,6 @@ func (bomuo *BillOfMaterialsUpdateOne) SetCollector(s string) *BillOfMaterialsUp
 	return bomuo
 }
 
-// SetAnnotations sets the "annotations" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetAnnotations(m []model.Annotation) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetAnnotations(m)
-	return bomuo
-}
-
-// AppendAnnotations appends m to the "annotations" field.
-func (bomuo *BillOfMaterialsUpdateOne) AppendAnnotations(m []model.Annotation) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.AppendAnnotations(m)
-	return bomuo
-}
-
-// ClearAnnotations clears the value of the "annotations" field.
-func (bomuo *BillOfMaterialsUpdateOne) ClearAnnotations() *BillOfMaterialsUpdateOne {
-	bomuo.mutation.ClearAnnotations()
-	return bomuo
-}
-
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (bomuo *BillOfMaterialsUpdateOne) SetPackage(p *PackageVersion) *BillOfMaterialsUpdateOne {
 	return bomuo.SetPackageID(p.ID)
@@ -499,17 +450,6 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 	}
 	if value, ok := bomuo.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
-	}
-	if value, ok := bomuo.mutation.Annotations(); ok {
-		_spec.SetField(billofmaterials.FieldAnnotations, field.TypeJSON, value)
-	}
-	if value, ok := bomuo.mutation.AppendedAnnotations(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, billofmaterials.FieldAnnotations, value)
-		})
-	}
-	if bomuo.mutation.AnnotationsCleared() {
-		_spec.ClearField(billofmaterials.FieldAnnotations, field.TypeJSON)
 	}
 	if bomuo.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{

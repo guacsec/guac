@@ -800,8 +800,6 @@ type BillOfMaterialsMutation struct {
 	download_location *string
 	origin            *string
 	collector         *string
-	annotations       *[]model.Annotation
-	appendannotations []model.Annotation
 	clearedFields     map[string]struct{}
 	_package          *int
 	cleared_package   bool
@@ -1224,71 +1222,6 @@ func (m *BillOfMaterialsMutation) ResetCollector() {
 	m.collector = nil
 }
 
-// SetAnnotations sets the "annotations" field.
-func (m *BillOfMaterialsMutation) SetAnnotations(value []model.Annotation) {
-	m.annotations = &value
-	m.appendannotations = nil
-}
-
-// Annotations returns the value of the "annotations" field in the mutation.
-func (m *BillOfMaterialsMutation) Annotations() (r []model.Annotation, exists bool) {
-	v := m.annotations
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAnnotations returns the old "annotations" field's value of the BillOfMaterials entity.
-// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BillOfMaterialsMutation) OldAnnotations(ctx context.Context) (v []model.Annotation, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAnnotations is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAnnotations requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAnnotations: %w", err)
-	}
-	return oldValue.Annotations, nil
-}
-
-// AppendAnnotations adds value to the "annotations" field.
-func (m *BillOfMaterialsMutation) AppendAnnotations(value []model.Annotation) {
-	m.appendannotations = append(m.appendannotations, value...)
-}
-
-// AppendedAnnotations returns the list of values that were appended to the "annotations" field in this mutation.
-func (m *BillOfMaterialsMutation) AppendedAnnotations() ([]model.Annotation, bool) {
-	if len(m.appendannotations) == 0 {
-		return nil, false
-	}
-	return m.appendannotations, true
-}
-
-// ClearAnnotations clears the value of the "annotations" field.
-func (m *BillOfMaterialsMutation) ClearAnnotations() {
-	m.annotations = nil
-	m.appendannotations = nil
-	m.clearedFields[billofmaterials.FieldAnnotations] = struct{}{}
-}
-
-// AnnotationsCleared returns if the "annotations" field was cleared in this mutation.
-func (m *BillOfMaterialsMutation) AnnotationsCleared() bool {
-	_, ok := m.clearedFields[billofmaterials.FieldAnnotations]
-	return ok
-}
-
-// ResetAnnotations resets all changes to the "annotations" field.
-func (m *BillOfMaterialsMutation) ResetAnnotations() {
-	m.annotations = nil
-	m.appendannotations = nil
-	delete(m.clearedFields, billofmaterials.FieldAnnotations)
-}
-
 // ClearPackage clears the "package" edge to the PackageVersion entity.
 func (m *BillOfMaterialsMutation) ClearPackage() {
 	m.cleared_package = true
@@ -1375,7 +1308,7 @@ func (m *BillOfMaterialsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BillOfMaterialsMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 8)
 	if m._package != nil {
 		fields = append(fields, billofmaterials.FieldPackageID)
 	}
@@ -1399,9 +1332,6 @@ func (m *BillOfMaterialsMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, billofmaterials.FieldCollector)
-	}
-	if m.annotations != nil {
-		fields = append(fields, billofmaterials.FieldAnnotations)
 	}
 	return fields
 }
@@ -1427,8 +1357,6 @@ func (m *BillOfMaterialsMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case billofmaterials.FieldCollector:
 		return m.Collector()
-	case billofmaterials.FieldAnnotations:
-		return m.Annotations()
 	}
 	return nil, false
 }
@@ -1454,8 +1382,6 @@ func (m *BillOfMaterialsMutation) OldField(ctx context.Context, name string) (en
 		return m.OldOrigin(ctx)
 	case billofmaterials.FieldCollector:
 		return m.OldCollector(ctx)
-	case billofmaterials.FieldAnnotations:
-		return m.OldAnnotations(ctx)
 	}
 	return nil, fmt.Errorf("unknown BillOfMaterials field %s", name)
 }
@@ -1521,13 +1447,6 @@ func (m *BillOfMaterialsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCollector(v)
 		return nil
-	case billofmaterials.FieldAnnotations:
-		v, ok := value.([]model.Annotation)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAnnotations(v)
-		return nil
 	}
 	return fmt.Errorf("unknown BillOfMaterials field %s", name)
 }
@@ -1567,9 +1486,6 @@ func (m *BillOfMaterialsMutation) ClearedFields() []string {
 	if m.FieldCleared(billofmaterials.FieldArtifactID) {
 		fields = append(fields, billofmaterials.FieldArtifactID)
 	}
-	if m.FieldCleared(billofmaterials.FieldAnnotations) {
-		fields = append(fields, billofmaterials.FieldAnnotations)
-	}
 	return fields
 }
 
@@ -1589,9 +1505,6 @@ func (m *BillOfMaterialsMutation) ClearField(name string) error {
 		return nil
 	case billofmaterials.FieldArtifactID:
 		m.ClearArtifactID()
-		return nil
-	case billofmaterials.FieldAnnotations:
-		m.ClearAnnotations()
 		return nil
 	}
 	return fmt.Errorf("unknown BillOfMaterials nullable field %s", name)
@@ -1624,9 +1537,6 @@ func (m *BillOfMaterialsMutation) ResetField(name string) error {
 		return nil
 	case billofmaterials.FieldCollector:
 		m.ResetCollector()
-		return nil
-	case billofmaterials.FieldAnnotations:
-		m.ResetAnnotations()
 		return nil
 	}
 	return fmt.Errorf("unknown BillOfMaterials field %s", name)

@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // BillOfMaterials holds the schema definition for the BillOfMaterials (SBOM) entity.
@@ -25,7 +24,6 @@ func (BillOfMaterials) Fields() []ent.Field {
 		field.String("download_location"),
 		field.String("origin"),
 		field.String("collector").Comment("GUAC collector for the document"),
-		field.JSON("annotations", []model.Annotation{}).Optional(),
 	}
 }
 

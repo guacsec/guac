@@ -23,7 +23,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 		optionalPredicate(spec.Collector, billofmaterials.CollectorEQ),
 		optionalPredicate(spec.DownloadLocation, billofmaterials.DownloadLocationEQ),
 		optionalPredicate(spec.Origin, billofmaterials.OriginEQ),
-		billofmaterials.AnnotationsMatchSpec(spec.Annotations),
+		// billofmaterials.AnnotationsMatchSpec(spec.Annotations),
 	}
 
 	if spec.Subject != nil {
@@ -62,22 +62,13 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 	sbomId, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
 
-		annotations := make([]model.Annotation, len(spec.Annotations))
-		for i, a := range spec.Annotations {
-			annotations[i] = model.Annotation{
-				Key:   a.Key,
-				Value: a.Value,
-			}
-		}
-
 		sbomCreate := client.BillOfMaterials.Create().
 			SetURI(spec.URI).
 			SetAlgorithm(strings.ToLower(spec.Algorithm)).
 			SetDigest(strings.ToLower(spec.Digest)).
 			SetDownloadLocation(spec.DownloadLocation).
 			SetOrigin(spec.Origin).
-			SetCollector(spec.Collector).
-			SetAnnotations(annotations)
+			SetCollector(spec.Collector)
 
 		conflictColumns := []string{
 			billofmaterials.FieldURI,
