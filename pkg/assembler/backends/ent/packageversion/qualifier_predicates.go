@@ -44,12 +44,17 @@ func QualifiersContains(key, value string) func(*sql.Selector) {
 	}
 }
 
-// QualifiersMatchSpec constructs a JSON field query for the given qualifiers.
+// QualifiersMatch constructs a JSON field query for the given qualifiers.
 // If the value is nil, it will query for the key only.
 // If the value is not nil, it will query for the key/value pair.
 // Each additional spec will be ANDed together.
-func QualifiersMatchSpec(spec []*model.PackageQualifierSpec) func(*sql.Selector) {
+func QualifiersMatch(spec []*model.PackageQualifierSpec, matchOnlyEmptyQualifiers bool) func(*sql.Selector) {
 	return func(s *sql.Selector) {
+		if matchOnlyEmptyQualifiers {
+			QualifiersIsEmpty()(s)
+			return
+		}
+
 		if len(spec) == 0 {
 			return
 		}
