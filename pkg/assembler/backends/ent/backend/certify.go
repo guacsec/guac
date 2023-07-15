@@ -17,7 +17,7 @@ type certificationInputSpec interface {
 }
 
 func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	records, err := queryCertifications(ctx, b.client, certification.TypeGOOD, filter)
+	records, err := queryCertifications(ctx, b.client, certification.TypeBAD, filter)
 	if err != nil {
 		return nil, err
 	}

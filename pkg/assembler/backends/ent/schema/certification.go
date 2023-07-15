@@ -16,6 +16,7 @@ type Certification struct {
 // Fields of the Certification.
 func (Certification) Fields() []ent.Field {
 	return []ent.Field{
+		// TODO: (ivanvanderbyl) We can reduce the index size by 3/4 if we use a single type field for the source, package_version, package_name, and artifact.
 		field.Int("source_id").Optional().Nillable(),
 		field.Int("package_version_id").Optional().Nillable(),
 		field.Int("package_name_id").Optional().Nillable(),
