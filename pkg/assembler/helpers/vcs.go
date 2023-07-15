@@ -43,7 +43,7 @@ func VcsToSrc(vcsUri string) (*model.SourceInputSpec, error) {
 	m := &model.SourceInputSpec{}
 
 	if u.Scheme == "https" {
-		if u.Host == "github.com" || u.Host == "gitlab.com" || strings.Contains(u.Host, "bitbucket") {
+		if u.Host == "go.googlesource.com" || u.Host == "github.com" || u.Host == "gitlab.com" || strings.Contains(u.Host, "bitbucket") {
 			m.Type = "git"
 		} else {
 			return nil, fmt.Errorf("scheme has unknown source type: %s", u.Host)

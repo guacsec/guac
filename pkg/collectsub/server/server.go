@@ -67,7 +67,7 @@ func (s *server) GetCollectEntries(ctx context.Context, in *pb.GetCollectEntries
 	logger := logging.FromContext(ctx)
 	logger.Infof("GetCollectEntries called with filters: %v", in.Filters)
 
-	ret, err := s.Db.GetCollectEntries(ctx, in.Filters)
+	ret, err := s.Db.GetCollectEntries(ctx, in.Filters, in.SinceTime)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get collect entries from db: %w", err)
 	}

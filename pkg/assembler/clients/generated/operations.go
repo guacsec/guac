@@ -2038,18 +2038,6 @@ func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetTag() *string
 // GetCommit returns AllSourceTreeNamespacesSourceNamespaceNamesSourceName.Commit, and is useful for accessing the field via an interface.
 func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetCommit() *string { return v.Commit }
 
-// AnnotationInputSpec allows ingesting Annotation objects.
-type AnnotationInputSpec struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-// GetKey returns AnnotationInputSpec.Key, and is useful for accessing the field via an interface.
-func (v *AnnotationInputSpec) GetKey() string { return v.Key }
-
-// GetValue returns AnnotationInputSpec.Value, and is useful for accessing the field via an interface.
-func (v *AnnotationInputSpec) GetValue() string { return v.Value }
-
 // ArtifactInputSpec specifies an artifact for mutations.
 //
 // The checksum fields are canonicalized to be lowercase.
@@ -3601,6 +3589,8 @@ const (
 	EdgeArtifactHasSbom             Edge = "ARTIFACT_HAS_SBOM"
 	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
 	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
+	EdgeArtifactHasMetadata         Edge = "ARTIFACT_HAS_METADATA"
+	EdgeArtifactPointOfContact      Edge = "ARTIFACT_POINT_OF_CONTACT"
 	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
 	EdgeCveCertifyVexStatement      Edge = "CVE_CERTIFY_VEX_STATEMENT"
 	EdgeCveCertifyVuln              Edge = "CVE_CERTIFY_VULN"
@@ -3621,11 +3611,15 @@ const (
 	EdgePackageIsDependency         Edge = "PACKAGE_IS_DEPENDENCY"
 	EdgePackageIsOccurrence         Edge = "PACKAGE_IS_OCCURRENCE"
 	EdgePackagePkgEqual             Edge = "PACKAGE_PKG_EQUAL"
+	EdgePackageHasMetadata          Edge = "PACKAGE_HAS_METADATA"
+	EdgePackagePointOfContact       Edge = "PACKAGE_POINT_OF_CONTACT"
 	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
 	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
 	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
+	EdgeSourceHasMetadata           Edge = "SOURCE_HAS_METADATA"
+	EdgeSourcePointOfContact        Edge = "SOURCE_POINT_OF_CONTACT"
 	EdgeCertifyBadArtifact          Edge = "CERTIFY_BAD_ARTIFACT"
 	EdgeCertifyBadPackage           Edge = "CERTIFY_BAD_PACKAGE"
 	EdgeCertifyBadSource            Edge = "CERTIFY_BAD_SOURCE"
@@ -3659,6 +3653,12 @@ const (
 	EdgeIsVulnerabilityGhsa         Edge = "IS_VULNERABILITY_GHSA"
 	EdgeIsVulnerabilityOsv          Edge = "IS_VULNERABILITY_OSV"
 	EdgePkgEqualPackage             Edge = "PKG_EQUAL_PACKAGE"
+	EdgeHasMetadataPackage          Edge = "HAS_METADATA_PACKAGE"
+	EdgeHasMetadataArtifact         Edge = "HAS_METADATA_ARTIFACT"
+	EdgeHasMetadataSource           Edge = "HAS_METADATA_SOURCE"
+	EdgePointOfContactPackage       Edge = "POINT_OF_CONTACT_PACKAGE"
+	EdgePointOfContactArtifact      Edge = "POINT_OF_CONTACT_ARTIFACT"
+	EdgePointOfContactSource        Edge = "POINT_OF_CONTACT_SOURCE"
 )
 
 // FindSoftwareFindSoftwareArtifact includes the requested fields of the GraphQL type Artifact.
@@ -4214,6 +4214,446 @@ type GHSAsResponse struct {
 // GetGhsa returns GHSAsResponse.Ghsa, and is useful for accessing the field via an interface.
 func (v *GHSAsResponse) GetGhsa() []GHSAsGhsaGHSA { return v.Ghsa }
 
+// HasMetadataArtifactIngestHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type HasMetadataArtifactIngestHasMetadata struct {
+	allHasMetadata `json:"-"`
+}
+
+// GetId returns HasMetadataArtifactIngestHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactIngestHasMetadata) GetId() string { return v.allHasMetadata.Id }
+
+// GetSubject returns HasMetadataArtifactIngestHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactIngestHasMetadata) GetSubject() allHasMetadataSubjectPackageSourceOrArtifact {
+	return v.allHasMetadata.Subject
+}
+
+// GetKey returns HasMetadataArtifactIngestHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactIngestHasMetadata) GetKey() string { return v.allHasMetadata.Key }
+
+// GetValue returns HasMetadataArtifactIngestHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactIngestHasMetadata) GetValue() string { return v.allHasMetadata.Value }
+
+// GetTimestamp returns HasMetadataArtifactIngestHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactIngestHasMetadata) GetTimestamp() time.Time {
+	return v.allHasMetadata.Timestamp
+}
+
+// GetJustification returns HasMetadataArtifactIngestHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactIngestHasMetadata) GetJustification() string {
+	return v.allHasMetadata.Justification
+}
+
+// GetOrigin returns HasMetadataArtifactIngestHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactIngestHasMetadata) GetOrigin() string { return v.allHasMetadata.Origin }
+
+// GetCollector returns HasMetadataArtifactIngestHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactIngestHasMetadata) GetCollector() string {
+	return v.allHasMetadata.Collector
+}
+
+func (v *HasMetadataArtifactIngestHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasMetadataArtifactIngestHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasMetadataArtifactIngestHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasMetadataArtifactIngestHasMetadata struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasMetadataArtifactIngestHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasMetadataArtifactIngestHasMetadata) __premarshalJSON() (*__premarshalHasMetadataArtifactIngestHasMetadata, error) {
+	var retval __premarshalHasMetadataArtifactIngestHasMetadata
+
+	retval.Id = v.allHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allHasMetadata.Subject
+		var err error
+		*dst, err = __marshalallHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasMetadataArtifactIngestHasMetadata.allHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.allHasMetadata.Key
+	retval.Value = v.allHasMetadata.Value
+	retval.Timestamp = v.allHasMetadata.Timestamp
+	retval.Justification = v.allHasMetadata.Justification
+	retval.Origin = v.allHasMetadata.Origin
+	retval.Collector = v.allHasMetadata.Collector
+	return &retval, nil
+}
+
+// HasMetadataArtifactResponse is returned by HasMetadataArtifact on success.
+type HasMetadataArtifactResponse struct {
+	// Adds metadata about a package, source or artifact.
+	IngestHasMetadata HasMetadataArtifactIngestHasMetadata `json:"ingestHasMetadata"`
+}
+
+// GetIngestHasMetadata returns HasMetadataArtifactResponse.IngestHasMetadata, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactResponse) GetIngestHasMetadata() HasMetadataArtifactIngestHasMetadata {
+	return v.IngestHasMetadata
+}
+
+// HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
+type HasMetadataInputSpec struct {
+	Key           string    `json:"key"`
+	Value         string    `json:"value"`
+	Timestamp     time.Time `json:"timestamp"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// GetKey returns HasMetadataInputSpec.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataInputSpec) GetKey() string { return v.Key }
+
+// GetValue returns HasMetadataInputSpec.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataInputSpec) GetValue() string { return v.Value }
+
+// GetTimestamp returns HasMetadataInputSpec.Timestamp, and is useful for accessing the field via an interface.
+func (v *HasMetadataInputSpec) GetTimestamp() time.Time { return v.Timestamp }
+
+// GetJustification returns HasMetadataInputSpec.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataInputSpec) GetJustification() string { return v.Justification }
+
+// GetOrigin returns HasMetadataInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns HasMetadataInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataInputSpec) GetCollector() string { return v.Collector }
+
+// HasMetadataPkgIngestHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type HasMetadataPkgIngestHasMetadata struct {
+	allHasMetadata `json:"-"`
+}
+
+// GetId returns HasMetadataPkgIngestHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgIngestHasMetadata) GetId() string { return v.allHasMetadata.Id }
+
+// GetSubject returns HasMetadataPkgIngestHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgIngestHasMetadata) GetSubject() allHasMetadataSubjectPackageSourceOrArtifact {
+	return v.allHasMetadata.Subject
+}
+
+// GetKey returns HasMetadataPkgIngestHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgIngestHasMetadata) GetKey() string { return v.allHasMetadata.Key }
+
+// GetValue returns HasMetadataPkgIngestHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgIngestHasMetadata) GetValue() string { return v.allHasMetadata.Value }
+
+// GetTimestamp returns HasMetadataPkgIngestHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgIngestHasMetadata) GetTimestamp() time.Time { return v.allHasMetadata.Timestamp }
+
+// GetJustification returns HasMetadataPkgIngestHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgIngestHasMetadata) GetJustification() string {
+	return v.allHasMetadata.Justification
+}
+
+// GetOrigin returns HasMetadataPkgIngestHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgIngestHasMetadata) GetOrigin() string { return v.allHasMetadata.Origin }
+
+// GetCollector returns HasMetadataPkgIngestHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgIngestHasMetadata) GetCollector() string { return v.allHasMetadata.Collector }
+
+func (v *HasMetadataPkgIngestHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasMetadataPkgIngestHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasMetadataPkgIngestHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasMetadataPkgIngestHasMetadata struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasMetadataPkgIngestHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasMetadataPkgIngestHasMetadata) __premarshalJSON() (*__premarshalHasMetadataPkgIngestHasMetadata, error) {
+	var retval __premarshalHasMetadataPkgIngestHasMetadata
+
+	retval.Id = v.allHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allHasMetadata.Subject
+		var err error
+		*dst, err = __marshalallHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasMetadataPkgIngestHasMetadata.allHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.allHasMetadata.Key
+	retval.Value = v.allHasMetadata.Value
+	retval.Timestamp = v.allHasMetadata.Timestamp
+	retval.Justification = v.allHasMetadata.Justification
+	retval.Origin = v.allHasMetadata.Origin
+	retval.Collector = v.allHasMetadata.Collector
+	return &retval, nil
+}
+
+// HasMetadataPkgResponse is returned by HasMetadataPkg on success.
+type HasMetadataPkgResponse struct {
+	// Adds metadata about a package, source or artifact.
+	IngestHasMetadata HasMetadataPkgIngestHasMetadata `json:"ingestHasMetadata"`
+}
+
+// GetIngestHasMetadata returns HasMetadataPkgResponse.IngestHasMetadata, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgResponse) GetIngestHasMetadata() HasMetadataPkgIngestHasMetadata {
+	return v.IngestHasMetadata
+}
+
+// HasMetadataSrcIngestHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type HasMetadataSrcIngestHasMetadata struct {
+	allHasMetadata `json:"-"`
+}
+
+// GetId returns HasMetadataSrcIngestHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcIngestHasMetadata) GetId() string { return v.allHasMetadata.Id }
+
+// GetSubject returns HasMetadataSrcIngestHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcIngestHasMetadata) GetSubject() allHasMetadataSubjectPackageSourceOrArtifact {
+	return v.allHasMetadata.Subject
+}
+
+// GetKey returns HasMetadataSrcIngestHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcIngestHasMetadata) GetKey() string { return v.allHasMetadata.Key }
+
+// GetValue returns HasMetadataSrcIngestHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcIngestHasMetadata) GetValue() string { return v.allHasMetadata.Value }
+
+// GetTimestamp returns HasMetadataSrcIngestHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcIngestHasMetadata) GetTimestamp() time.Time { return v.allHasMetadata.Timestamp }
+
+// GetJustification returns HasMetadataSrcIngestHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcIngestHasMetadata) GetJustification() string {
+	return v.allHasMetadata.Justification
+}
+
+// GetOrigin returns HasMetadataSrcIngestHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcIngestHasMetadata) GetOrigin() string { return v.allHasMetadata.Origin }
+
+// GetCollector returns HasMetadataSrcIngestHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcIngestHasMetadata) GetCollector() string { return v.allHasMetadata.Collector }
+
+func (v *HasMetadataSrcIngestHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasMetadataSrcIngestHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasMetadataSrcIngestHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasMetadataSrcIngestHasMetadata struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasMetadataSrcIngestHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasMetadataSrcIngestHasMetadata) __premarshalJSON() (*__premarshalHasMetadataSrcIngestHasMetadata, error) {
+	var retval __premarshalHasMetadataSrcIngestHasMetadata
+
+	retval.Id = v.allHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allHasMetadata.Subject
+		var err error
+		*dst, err = __marshalallHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasMetadataSrcIngestHasMetadata.allHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.allHasMetadata.Key
+	retval.Value = v.allHasMetadata.Value
+	retval.Timestamp = v.allHasMetadata.Timestamp
+	retval.Justification = v.allHasMetadata.Justification
+	retval.Origin = v.allHasMetadata.Origin
+	retval.Collector = v.allHasMetadata.Collector
+	return &retval, nil
+}
+
+// HasMetadataSrcResponse is returned by HasMetadataSrc on success.
+type HasMetadataSrcResponse struct {
+	// Adds metadata about a package, source or artifact.
+	IngestHasMetadata HasMetadataSrcIngestHasMetadata `json:"ingestHasMetadata"`
+}
+
+// GetIngestHasMetadata returns HasMetadataSrcResponse.IngestHasMetadata, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcResponse) GetIngestHasMetadata() HasMetadataSrcIngestHasMetadata {
+	return v.IngestHasMetadata
+}
+
 // HasSBOMArtifactIngestHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type HasSBOMArtifactIngestHasSBOM struct {
 	allHasSBOMTree `json:"-"`
@@ -4239,11 +4679,6 @@ func (v *HasSBOMArtifactIngestHasSBOM) GetDigest() string { return v.allHasSBOMT
 // GetDownloadLocation returns HasSBOMArtifactIngestHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *HasSBOMArtifactIngestHasSBOM) GetDownloadLocation() string {
 	return v.allHasSBOMTree.DownloadLocation
-}
-
-// GetAnnotations returns HasSBOMArtifactIngestHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *HasSBOMArtifactIngestHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
-	return v.allHasSBOMTree.Annotations
 }
 
 // GetOrigin returns HasSBOMArtifactIngestHasSBOM.Origin, and is useful for accessing the field via an interface.
@@ -4290,8 +4725,6 @@ type __premarshalHasSBOMArtifactIngestHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -4325,7 +4758,6 @@ func (v *HasSBOMArtifactIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMA
 	retval.Algorithm = v.allHasSBOMTree.Algorithm
 	retval.Digest = v.allHasSBOMTree.Digest
 	retval.DownloadLocation = v.allHasSBOMTree.DownloadLocation
-	retval.Annotations = v.allHasSBOMTree.Annotations
 	retval.Origin = v.allHasSBOMTree.Origin
 	retval.Collector = v.allHasSBOMTree.Collector
 	return &retval, nil
@@ -4344,13 +4776,12 @@ func (v *HasSBOMArtifactResponse) GetIngestHasSBOM() HasSBOMArtifactIngestHasSBO
 
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
-	Uri              string                `json:"uri"`
-	Algorithm        string                `json:"algorithm"`
-	Digest           string                `json:"digest"`
-	DownloadLocation string                `json:"downloadLocation"`
-	Annotations      []AnnotationInputSpec `json:"annotations"`
-	Origin           string                `json:"origin"`
-	Collector        string                `json:"collector"`
+	Uri              string `json:"uri"`
+	Algorithm        string `json:"algorithm"`
+	Digest           string `json:"digest"`
+	DownloadLocation string `json:"downloadLocation"`
+	Origin           string `json:"origin"`
+	Collector        string `json:"collector"`
 }
 
 // GetUri returns HasSBOMInputSpec.Uri, and is useful for accessing the field via an interface.
@@ -4364,9 +4795,6 @@ func (v *HasSBOMInputSpec) GetDigest() string { return v.Digest }
 
 // GetDownloadLocation returns HasSBOMInputSpec.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetDownloadLocation() string { return v.DownloadLocation }
-
-// GetAnnotations returns HasSBOMInputSpec.Annotations, and is useful for accessing the field via an interface.
-func (v *HasSBOMInputSpec) GetAnnotations() []AnnotationInputSpec { return v.Annotations }
 
 // GetOrigin returns HasSBOMInputSpec.Origin, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetOrigin() string { return v.Origin }
@@ -4399,11 +4827,6 @@ func (v *HasSBOMPkgIngestHasSBOM) GetDigest() string { return v.allHasSBOMTree.D
 // GetDownloadLocation returns HasSBOMPkgIngestHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *HasSBOMPkgIngestHasSBOM) GetDownloadLocation() string {
 	return v.allHasSBOMTree.DownloadLocation
-}
-
-// GetAnnotations returns HasSBOMPkgIngestHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *HasSBOMPkgIngestHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
-	return v.allHasSBOMTree.Annotations
 }
 
 // GetOrigin returns HasSBOMPkgIngestHasSBOM.Origin, and is useful for accessing the field via an interface.
@@ -4450,8 +4873,6 @@ type __premarshalHasSBOMPkgIngestHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -4485,7 +4906,6 @@ func (v *HasSBOMPkgIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMPkgIng
 	retval.Algorithm = v.allHasSBOMTree.Algorithm
 	retval.Digest = v.allHasSBOMTree.Digest
 	retval.DownloadLocation = v.allHasSBOMTree.DownloadLocation
-	retval.Annotations = v.allHasSBOMTree.Annotations
 	retval.Origin = v.allHasSBOMTree.Origin
 	retval.Collector = v.allHasSBOMTree.Collector
 	return &retval, nil
@@ -4925,6 +5345,30 @@ type IngestBuilderResponse struct {
 
 // GetIngestBuilder returns IngestBuilderResponse.IngestBuilder, and is useful for accessing the field via an interface.
 func (v *IngestBuilderResponse) GetIngestBuilder() IngestBuilderIngestBuilder { return v.IngestBuilder }
+
+// IngestBuildersIngestBuildersBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
+//
+// Currently builders are identified by the uri field.
+type IngestBuildersIngestBuildersBuilder struct {
+	Uri string `json:"uri"`
+}
+
+// GetUri returns IngestBuildersIngestBuildersBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *IngestBuildersIngestBuildersBuilder) GetUri() string { return v.Uri }
+
+// IngestBuildersResponse is returned by IngestBuilders on success.
+type IngestBuildersResponse struct {
+	// Bulk ingests new builders and returns a list of them.
+	IngestBuilders []IngestBuildersIngestBuildersBuilder `json:"ingestBuilders"`
+}
+
+// GetIngestBuilders returns IngestBuildersResponse.IngestBuilders, and is useful for accessing the field via an interface.
+func (v *IngestBuildersResponse) GetIngestBuilders() []IngestBuildersIngestBuildersBuilder {
+	return v.IngestBuilders
+}
 
 // IngestCVEIngestCVE includes the requested fields of the GraphQL type CVE.
 // The GraphQL type's documentation follows.
@@ -5519,6 +5963,96 @@ type IngestSourceResponse struct {
 
 // GetIngestSource returns IngestSourceResponse.IngestSource, and is useful for accessing the field via an interface.
 func (v *IngestSourceResponse) GetIngestSource() IngestSourceIngestSource { return v.IngestSource }
+
+// IngestSourcesIngestSourcesSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type IngestSourcesIngestSourcesSource struct {
+	AllSourceTree `json:"-"`
+}
+
+// GetId returns IngestSourcesIngestSourcesSource.Id, and is useful for accessing the field via an interface.
+func (v *IngestSourcesIngestSourcesSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns IngestSourcesIngestSourcesSource.Type, and is useful for accessing the field via an interface.
+func (v *IngestSourcesIngestSourcesSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns IngestSourcesIngestSourcesSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *IngestSourcesIngestSourcesSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *IngestSourcesIngestSourcesSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestSourcesIngestSourcesSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestSourcesIngestSourcesSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestSourcesIngestSourcesSource struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *IngestSourcesIngestSourcesSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestSourcesIngestSourcesSource) __premarshalJSON() (*__premarshalIngestSourcesIngestSourcesSource, error) {
+	var retval __premarshalIngestSourcesIngestSourcesSource
+
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
+// IngestSourcesResponse is returned by IngestSources on success.
+type IngestSourcesResponse struct {
+	// Bulk ingests sources and returns the list of corresponding source trie path.
+	IngestSources []IngestSourcesIngestSourcesSource `json:"ingestSources"`
+}
+
+// GetIngestSources returns IngestSourcesResponse.IngestSources, and is useful for accessing the field via an interface.
+func (v *IngestSourcesResponse) GetIngestSources() []IngestSourcesIngestSourcesSource {
+	return v.IngestSources
+}
 
 // IsDependenciesIngestDependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
 // The GraphQL type's documentation follows.
@@ -7411,6 +7945,30 @@ func (v *NeighborsNeighborsGHSA) __premarshalJSON() (*__premarshalNeighborsNeigh
 	return &retval, nil
 }
 
+// NeighborsNeighborsHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type NeighborsNeighborsHasMetadata struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NeighborsNeighborsHasMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetTypename() *string { return v.Typename }
+
 // NeighborsNeighborsHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type NeighborsNeighborsHasSBOM struct {
 	Typename       *string `json:"__typename"`
@@ -7440,11 +7998,6 @@ func (v *NeighborsNeighborsHasSBOM) GetDigest() string { return v.allHasSBOMTree
 // GetDownloadLocation returns NeighborsNeighborsHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasSBOM) GetDownloadLocation() string {
 	return v.allHasSBOMTree.DownloadLocation
-}
-
-// GetAnnotations returns NeighborsNeighborsHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
-	return v.allHasSBOMTree.Annotations
 }
 
 // GetOrigin returns NeighborsNeighborsHasSBOM.Origin, and is useful for accessing the field via an interface.
@@ -7493,8 +8046,6 @@ type __premarshalNeighborsNeighborsHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -7529,7 +8080,6 @@ func (v *NeighborsNeighborsHasSBOM) __premarshalJSON() (*__premarshalNeighborsNe
 	retval.Algorithm = v.allHasSBOMTree.Algorithm
 	retval.Digest = v.allHasSBOMTree.Digest
 	retval.DownloadLocation = v.allHasSBOMTree.DownloadLocation
-	retval.Annotations = v.allHasSBOMTree.Annotations
 	retval.Origin = v.allHasSBOMTree.Origin
 	retval.Collector = v.allHasSBOMTree.Collector
 	return &retval, nil
@@ -8175,6 +8725,7 @@ func (v *NeighborsNeighborsNoVuln) GetId() string { return v.Id }
 // NeighborsNeighborsCertifyVEXStatement
 // NeighborsNeighborsCertifyVuln
 // NeighborsNeighborsGHSA
+// NeighborsNeighborsHasMetadata
 // NeighborsNeighborsHasSBOM
 // NeighborsNeighborsHasSLSA
 // NeighborsNeighborsHasSourceAt
@@ -8186,6 +8737,7 @@ func (v *NeighborsNeighborsNoVuln) GetId() string { return v.Id }
 // NeighborsNeighborsOSV
 // NeighborsNeighborsPackage
 // NeighborsNeighborsPkgEqual
+// NeighborsNeighborsPointOfContact
 // NeighborsNeighborsSource
 // The GraphQL type's documentation follows.
 //
@@ -8209,6 +8761,7 @@ func (v *NeighborsNeighborsCertifyScorecard) implementsGraphQLInterfaceNeighbors
 func (v *NeighborsNeighborsCertifyVEXStatement) implementsGraphQLInterfaceNeighborsNeighborsNode() {}
 func (v *NeighborsNeighborsCertifyVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
 func (v *NeighborsNeighborsGHSA) implementsGraphQLInterfaceNeighborsNeighborsNode()                {}
+func (v *NeighborsNeighborsHasMetadata) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
 func (v *NeighborsNeighborsHasSBOM) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsHasSLSA) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsHasSourceAt) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
@@ -8220,6 +8773,7 @@ func (v *NeighborsNeighborsNoVuln) implementsGraphQLInterfaceNeighborsNeighborsN
 func (v *NeighborsNeighborsOSV) implementsGraphQLInterfaceNeighborsNeighborsNode()                 {}
 func (v *NeighborsNeighborsPackage) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsPkgEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()            {}
+func (v *NeighborsNeighborsPointOfContact) implementsGraphQLInterfaceNeighborsNeighborsNode()      {}
 func (v *NeighborsNeighborsSource) implementsGraphQLInterfaceNeighborsNeighborsNode()              {}
 
 func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) error {
@@ -8263,6 +8817,9 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 	case "GHSA":
 		*v = new(NeighborsNeighborsGHSA)
 		return json.Unmarshal(b, *v)
+	case "HasMetadata":
+		*v = new(NeighborsNeighborsHasMetadata)
+		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(NeighborsNeighborsHasSBOM)
 		return json.Unmarshal(b, *v)
@@ -8295,6 +8852,9 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 		return json.Unmarshal(b, *v)
 	case "PkgEqual":
 		*v = new(NeighborsNeighborsPkgEqual)
+		return json.Unmarshal(b, *v)
+	case "PointOfContact":
+		*v = new(NeighborsNeighborsPointOfContact)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(NeighborsNeighborsSource)
@@ -8419,6 +8979,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsHasMetadata:
+		typename = "HasMetadata"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NeighborsNeighborsHasMetadata
+		}{typename, v}
 		return json.Marshal(result)
 	case *NeighborsNeighborsHasSBOM:
 		typename = "HasSBOM"
@@ -8547,6 +9115,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsPkgEqual
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsPointOfContact:
+		typename = "PointOfContact"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NeighborsNeighborsPointOfContact
+		}{typename, v}
 		return json.Marshal(result)
 	case *NeighborsNeighborsSource:
 		typename = "Source"
@@ -8820,6 +9396,37 @@ func (v *NeighborsNeighborsPkgEqual) __premarshalJSON() (*__premarshalNeighborsN
 	return &retval, nil
 }
 
+// NeighborsNeighborsPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type NeighborsNeighborsPointOfContact struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NeighborsNeighborsPointOfContact.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetTypename() *string { return v.Typename }
+
 // NeighborsNeighborsSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
 //
@@ -9007,6 +9614,7 @@ func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, 
 // NodeNodeCertifyVEXStatement
 // NodeNodeCertifyVuln
 // NodeNodeGHSA
+// NodeNodeHasMetadata
 // NodeNodeHasSBOM
 // NodeNodeHasSLSA
 // NodeNodeHasSourceAt
@@ -9018,6 +9626,7 @@ func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, 
 // NodeNodeOSV
 // NodeNodePackage
 // NodeNodePkgEqual
+// NodeNodePointOfContact
 // NodeNodeSource
 // The GraphQL type's documentation follows.
 //
@@ -9041,6 +9650,7 @@ func (v *NodeNodeCertifyScorecard) implementsGraphQLInterfaceNodeNode()    {}
 func (v *NodeNodeCertifyVEXStatement) implementsGraphQLInterfaceNodeNode() {}
 func (v *NodeNodeCertifyVuln) implementsGraphQLInterfaceNodeNode()         {}
 func (v *NodeNodeGHSA) implementsGraphQLInterfaceNodeNode()                {}
+func (v *NodeNodeHasMetadata) implementsGraphQLInterfaceNodeNode()         {}
 func (v *NodeNodeHasSBOM) implementsGraphQLInterfaceNodeNode()             {}
 func (v *NodeNodeHasSLSA) implementsGraphQLInterfaceNodeNode()             {}
 func (v *NodeNodeHasSourceAt) implementsGraphQLInterfaceNodeNode()         {}
@@ -9052,6 +9662,7 @@ func (v *NodeNodeNoVuln) implementsGraphQLInterfaceNodeNode()              {}
 func (v *NodeNodeOSV) implementsGraphQLInterfaceNodeNode()                 {}
 func (v *NodeNodePackage) implementsGraphQLInterfaceNodeNode()             {}
 func (v *NodeNodePkgEqual) implementsGraphQLInterfaceNodeNode()            {}
+func (v *NodeNodePointOfContact) implementsGraphQLInterfaceNodeNode()      {}
 func (v *NodeNodeSource) implementsGraphQLInterfaceNodeNode()              {}
 
 func __unmarshalNodeNode(b []byte, v *NodeNode) error {
@@ -9095,6 +9706,9 @@ func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 	case "GHSA":
 		*v = new(NodeNodeGHSA)
 		return json.Unmarshal(b, *v)
+	case "HasMetadata":
+		*v = new(NodeNodeHasMetadata)
+		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(NodeNodeHasSBOM)
 		return json.Unmarshal(b, *v)
@@ -9127,6 +9741,9 @@ func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 		return json.Unmarshal(b, *v)
 	case "PkgEqual":
 		*v = new(NodeNodePkgEqual)
+		return json.Unmarshal(b, *v)
+	case "PointOfContact":
+		*v = new(NodeNodePointOfContact)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(NodeNodeSource)
@@ -9251,6 +9868,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodeGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeHasMetadata:
+		typename = "HasMetadata"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodeNodeHasMetadata
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodeNodeHasSBOM:
 		typename = "HasSBOM"
@@ -9379,6 +10004,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodePkgEqual
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodePointOfContact:
+		typename = "PointOfContact"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodeNodePointOfContact
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodeNodeSource:
 		typename = "Source"
@@ -10253,6 +10886,30 @@ func (v *NodeNodeGHSA) __premarshalJSON() (*__premarshalNodeNodeGHSA, error) {
 	return &retval, nil
 }
 
+// NodeNodeHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type NodeNodeHasMetadata struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodeNodeHasMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetTypename() *string { return v.Typename }
+
 // NodeNodeHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type NodeNodeHasSBOM struct {
 	Typename       *string `json:"__typename"`
@@ -10281,11 +10938,6 @@ func (v *NodeNodeHasSBOM) GetDigest() string { return v.allHasSBOMTree.Digest }
 
 // GetDownloadLocation returns NodeNodeHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetDownloadLocation() string { return v.allHasSBOMTree.DownloadLocation }
-
-// GetAnnotations returns NodeNodeHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *NodeNodeHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
-	return v.allHasSBOMTree.Annotations
-}
 
 // GetOrigin returns NodeNodeHasSBOM.Origin, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetOrigin() string { return v.allHasSBOMTree.Origin }
@@ -10333,8 +10985,6 @@ type __premarshalNodeNodeHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -10369,7 +11019,6 @@ func (v *NodeNodeHasSBOM) __premarshalJSON() (*__premarshalNodeNodeHasSBOM, erro
 	retval.Algorithm = v.allHasSBOMTree.Algorithm
 	retval.Digest = v.allHasSBOMTree.Digest
 	retval.DownloadLocation = v.allHasSBOMTree.DownloadLocation
-	retval.Annotations = v.allHasSBOMTree.Annotations
 	retval.Origin = v.allHasSBOMTree.Origin
 	retval.Collector = v.allHasSBOMTree.Collector
 	return &retval, nil
@@ -11228,6 +11877,37 @@ func (v *NodeNodePkgEqual) __premarshalJSON() (*__premarshalNodeNodePkgEqual, er
 	retval.Collector = v.allPkgEqual.Collector
 	return &retval, nil
 }
+
+// NodeNodePointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type NodeNodePointOfContact struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodeNodePointOfContact.Typename, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetTypename() *string { return v.Typename }
 
 // NodeNodeSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
@@ -12242,6 +12922,30 @@ func (v *NodesNodesGHSA) __premarshalJSON() (*__premarshalNodesNodesGHSA, error)
 	return &retval, nil
 }
 
+// NodesNodesHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type NodesNodesHasMetadata struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodesNodesHasMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetTypename() *string { return v.Typename }
+
 // NodesNodesHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type NodesNodesHasSBOM struct {
 	Typename       *string `json:"__typename"`
@@ -12270,11 +12974,6 @@ func (v *NodesNodesHasSBOM) GetDigest() string { return v.allHasSBOMTree.Digest 
 
 // GetDownloadLocation returns NodesNodesHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *NodesNodesHasSBOM) GetDownloadLocation() string { return v.allHasSBOMTree.DownloadLocation }
-
-// GetAnnotations returns NodesNodesHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *NodesNodesHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
-	return v.allHasSBOMTree.Annotations
-}
 
 // GetOrigin returns NodesNodesHasSBOM.Origin, and is useful for accessing the field via an interface.
 func (v *NodesNodesHasSBOM) GetOrigin() string { return v.allHasSBOMTree.Origin }
@@ -12322,8 +13021,6 @@ type __premarshalNodesNodesHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -12358,7 +13055,6 @@ func (v *NodesNodesHasSBOM) __premarshalJSON() (*__premarshalNodesNodesHasSBOM, 
 	retval.Algorithm = v.allHasSBOMTree.Algorithm
 	retval.Digest = v.allHasSBOMTree.Digest
 	retval.DownloadLocation = v.allHasSBOMTree.DownloadLocation
-	retval.Annotations = v.allHasSBOMTree.Annotations
 	retval.Origin = v.allHasSBOMTree.Origin
 	retval.Collector = v.allHasSBOMTree.Collector
 	return &retval, nil
@@ -12986,6 +13682,7 @@ func (v *NodesNodesNoVuln) GetId() string { return v.Id }
 // NodesNodesCertifyVEXStatement
 // NodesNodesCertifyVuln
 // NodesNodesGHSA
+// NodesNodesHasMetadata
 // NodesNodesHasSBOM
 // NodesNodesHasSLSA
 // NodesNodesHasSourceAt
@@ -12997,6 +13694,7 @@ func (v *NodesNodesNoVuln) GetId() string { return v.Id }
 // NodesNodesOSV
 // NodesNodesPackage
 // NodesNodesPkgEqual
+// NodesNodesPointOfContact
 // NodesNodesSource
 // The GraphQL type's documentation follows.
 //
@@ -13020,6 +13718,7 @@ func (v *NodesNodesCertifyScorecard) implementsGraphQLInterfaceNodesNodesNode() 
 func (v *NodesNodesCertifyVEXStatement) implementsGraphQLInterfaceNodesNodesNode() {}
 func (v *NodesNodesCertifyVuln) implementsGraphQLInterfaceNodesNodesNode()         {}
 func (v *NodesNodesGHSA) implementsGraphQLInterfaceNodesNodesNode()                {}
+func (v *NodesNodesHasMetadata) implementsGraphQLInterfaceNodesNodesNode()         {}
 func (v *NodesNodesHasSBOM) implementsGraphQLInterfaceNodesNodesNode()             {}
 func (v *NodesNodesHasSLSA) implementsGraphQLInterfaceNodesNodesNode()             {}
 func (v *NodesNodesHasSourceAt) implementsGraphQLInterfaceNodesNodesNode()         {}
@@ -13031,6 +13730,7 @@ func (v *NodesNodesNoVuln) implementsGraphQLInterfaceNodesNodesNode()           
 func (v *NodesNodesOSV) implementsGraphQLInterfaceNodesNodesNode()                 {}
 func (v *NodesNodesPackage) implementsGraphQLInterfaceNodesNodesNode()             {}
 func (v *NodesNodesPkgEqual) implementsGraphQLInterfaceNodesNodesNode()            {}
+func (v *NodesNodesPointOfContact) implementsGraphQLInterfaceNodesNodesNode()      {}
 func (v *NodesNodesSource) implementsGraphQLInterfaceNodesNodesNode()              {}
 
 func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
@@ -13074,6 +13774,9 @@ func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 	case "GHSA":
 		*v = new(NodesNodesGHSA)
 		return json.Unmarshal(b, *v)
+	case "HasMetadata":
+		*v = new(NodesNodesHasMetadata)
+		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(NodesNodesHasSBOM)
 		return json.Unmarshal(b, *v)
@@ -13106,6 +13809,9 @@ func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 		return json.Unmarshal(b, *v)
 	case "PkgEqual":
 		*v = new(NodesNodesPkgEqual)
+		return json.Unmarshal(b, *v)
+	case "PointOfContact":
+		*v = new(NodesNodesPointOfContact)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(NodesNodesSource)
@@ -13230,6 +13936,14 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesHasMetadata:
+		typename = "HasMetadata"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodesNodesHasMetadata
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodesNodesHasSBOM:
 		typename = "HasSBOM"
@@ -13358,6 +14072,14 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesPkgEqual
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesPointOfContact:
+		typename = "PointOfContact"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodesNodesPointOfContact
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodesNodesSource:
 		typename = "Source"
@@ -13630,6 +14352,37 @@ func (v *NodesNodesPkgEqual) __premarshalJSON() (*__premarshalNodesNodesPkgEqual
 	retval.Collector = v.allPkgEqual.Collector
 	return &retval, nil
 }
+
+// NodesNodesPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type NodesNodesPointOfContact struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodesNodesPointOfContact.Typename, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetTypename() *string { return v.Typename }
 
 // NodesNodesSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
@@ -14893,6 +15646,30 @@ func (v *PathPathGHSA) __premarshalJSON() (*__premarshalPathPathGHSA, error) {
 	return &retval, nil
 }
 
+// PathPathHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type PathPathHasMetadata struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns PathPathHasMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetTypename() *string { return v.Typename }
+
 // PathPathHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type PathPathHasSBOM struct {
 	Typename       *string `json:"__typename"`
@@ -14921,11 +15698,6 @@ func (v *PathPathHasSBOM) GetDigest() string { return v.allHasSBOMTree.Digest }
 
 // GetDownloadLocation returns PathPathHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetDownloadLocation() string { return v.allHasSBOMTree.DownloadLocation }
-
-// GetAnnotations returns PathPathHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *PathPathHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
-	return v.allHasSBOMTree.Annotations
-}
 
 // GetOrigin returns PathPathHasSBOM.Origin, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetOrigin() string { return v.allHasSBOMTree.Origin }
@@ -14973,8 +15745,6 @@ type __premarshalPathPathHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -15009,7 +15779,6 @@ func (v *PathPathHasSBOM) __premarshalJSON() (*__premarshalPathPathHasSBOM, erro
 	retval.Algorithm = v.allHasSBOMTree.Algorithm
 	retval.Digest = v.allHasSBOMTree.Digest
 	retval.DownloadLocation = v.allHasSBOMTree.DownloadLocation
-	retval.Annotations = v.allHasSBOMTree.Annotations
 	retval.Origin = v.allHasSBOMTree.Origin
 	retval.Collector = v.allHasSBOMTree.Collector
 	return &retval, nil
@@ -15631,6 +16400,7 @@ func (v *PathPathNoVuln) GetId() string { return v.Id }
 // PathPathCertifyVEXStatement
 // PathPathCertifyVuln
 // PathPathGHSA
+// PathPathHasMetadata
 // PathPathHasSBOM
 // PathPathHasSLSA
 // PathPathHasSourceAt
@@ -15642,6 +16412,7 @@ func (v *PathPathNoVuln) GetId() string { return v.Id }
 // PathPathOSV
 // PathPathPackage
 // PathPathPkgEqual
+// PathPathPointOfContact
 // PathPathSource
 // The GraphQL type's documentation follows.
 //
@@ -15665,6 +16436,7 @@ func (v *PathPathCertifyScorecard) implementsGraphQLInterfacePathPathNode()    {
 func (v *PathPathCertifyVEXStatement) implementsGraphQLInterfacePathPathNode() {}
 func (v *PathPathCertifyVuln) implementsGraphQLInterfacePathPathNode()         {}
 func (v *PathPathGHSA) implementsGraphQLInterfacePathPathNode()                {}
+func (v *PathPathHasMetadata) implementsGraphQLInterfacePathPathNode()         {}
 func (v *PathPathHasSBOM) implementsGraphQLInterfacePathPathNode()             {}
 func (v *PathPathHasSLSA) implementsGraphQLInterfacePathPathNode()             {}
 func (v *PathPathHasSourceAt) implementsGraphQLInterfacePathPathNode()         {}
@@ -15676,6 +16448,7 @@ func (v *PathPathNoVuln) implementsGraphQLInterfacePathPathNode()              {
 func (v *PathPathOSV) implementsGraphQLInterfacePathPathNode()                 {}
 func (v *PathPathPackage) implementsGraphQLInterfacePathPathNode()             {}
 func (v *PathPathPkgEqual) implementsGraphQLInterfacePathPathNode()            {}
+func (v *PathPathPointOfContact) implementsGraphQLInterfacePathPathNode()      {}
 func (v *PathPathSource) implementsGraphQLInterfacePathPathNode()              {}
 
 func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
@@ -15719,6 +16492,9 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 	case "GHSA":
 		*v = new(PathPathGHSA)
 		return json.Unmarshal(b, *v)
+	case "HasMetadata":
+		*v = new(PathPathHasMetadata)
+		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(PathPathHasSBOM)
 		return json.Unmarshal(b, *v)
@@ -15751,6 +16527,9 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 		return json.Unmarshal(b, *v)
 	case "PkgEqual":
 		*v = new(PathPathPkgEqual)
+		return json.Unmarshal(b, *v)
+	case "PointOfContact":
+		*v = new(PathPathPointOfContact)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(PathPathSource)
@@ -15875,6 +16654,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathHasMetadata:
+		typename = "HasMetadata"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*PathPathHasMetadata
+		}{typename, v}
 		return json.Marshal(result)
 	case *PathPathHasSBOM:
 		typename = "HasSBOM"
@@ -16003,6 +16790,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathPkgEqual
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathPointOfContact:
+		typename = "PointOfContact"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*PathPathPointOfContact
+		}{typename, v}
 		return json.Marshal(result)
 	case *PathPathSource:
 		typename = "Source"
@@ -16273,6 +17068,37 @@ func (v *PathPathPkgEqual) __premarshalJSON() (*__premarshalPathPathPkgEqual, er
 	retval.Collector = v.allPkgEqual.Collector
 	return &retval, nil
 }
+
+// PathPathPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PathPathPointOfContact struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns PathPathPointOfContact.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetTypename() *string { return v.Typename }
 
 // PathPathSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
@@ -16816,6 +17642,481 @@ func (v *PkgSpec) GetMatchOnlyEmptyQualifiers() *bool { return v.MatchOnlyEmptyQ
 
 // GetSubpath returns PkgSpec.Subpath, and is useful for accessing the field via an interface.
 func (v *PkgSpec) GetSubpath() *string { return v.Subpath }
+
+// PointOfContactArtifactIngestPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactArtifactIngestPointOfContact struct {
+	allPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactArtifactIngestPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetId() string { return v.allPointOfContact.Id }
+
+// GetSubject returns PointOfContactArtifactIngestPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetSubject() allPointOfContactSubjectPackageSourceOrArtifact {
+	return v.allPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactArtifactIngestPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetEmail() string {
+	return v.allPointOfContact.Email
+}
+
+// GetInfo returns PointOfContactArtifactIngestPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetInfo() string {
+	return v.allPointOfContact.Info
+}
+
+// GetSince returns PointOfContactArtifactIngestPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetSince() time.Time {
+	return v.allPointOfContact.Since
+}
+
+// GetJustification returns PointOfContactArtifactIngestPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetJustification() string {
+	return v.allPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactArtifactIngestPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetOrigin() string {
+	return v.allPointOfContact.Origin
+}
+
+// GetCollector returns PointOfContactArtifactIngestPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactIngestPointOfContact) GetCollector() string {
+	return v.allPointOfContact.Collector
+}
+
+func (v *PointOfContactArtifactIngestPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactArtifactIngestPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactArtifactIngestPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactArtifactIngestPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactArtifactIngestPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactArtifactIngestPointOfContact) __premarshalJSON() (*__premarshalPointOfContactArtifactIngestPointOfContact, error) {
+	var retval __premarshalPointOfContactArtifactIngestPointOfContact
+
+	retval.Id = v.allPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allPointOfContact.Subject
+		var err error
+		*dst, err = __marshalallPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactArtifactIngestPointOfContact.allPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.allPointOfContact.Email
+	retval.Info = v.allPointOfContact.Info
+	retval.Since = v.allPointOfContact.Since
+	retval.Justification = v.allPointOfContact.Justification
+	retval.Origin = v.allPointOfContact.Origin
+	retval.Collector = v.allPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactArtifactResponse is returned by PointOfContactArtifact on success.
+type PointOfContactArtifactResponse struct {
+	// Adds a PointOfContact attestation to a package, source or artifact.
+	IngestPointOfContact PointOfContactArtifactIngestPointOfContact `json:"ingestPointOfContact"`
+}
+
+// GetIngestPointOfContact returns PointOfContactArtifactResponse.IngestPointOfContact, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactResponse) GetIngestPointOfContact() PointOfContactArtifactIngestPointOfContact {
+	return v.IngestPointOfContact
+}
+
+// PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
+type PointOfContactInputSpec struct {
+	Email         string    `json:"email"`
+	Info          string    `json:"info"`
+	Since         time.Time `json:"since"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// GetEmail returns PointOfContactInputSpec.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetEmail() string { return v.Email }
+
+// GetInfo returns PointOfContactInputSpec.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetInfo() string { return v.Info }
+
+// GetSince returns PointOfContactInputSpec.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetSince() time.Time { return v.Since }
+
+// GetJustification returns PointOfContactInputSpec.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetJustification() string { return v.Justification }
+
+// GetOrigin returns PointOfContactInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns PointOfContactInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetCollector() string { return v.Collector }
+
+// PointOfContactPkgIngestPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactPkgIngestPointOfContact struct {
+	allPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactPkgIngestPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetId() string { return v.allPointOfContact.Id }
+
+// GetSubject returns PointOfContactPkgIngestPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetSubject() allPointOfContactSubjectPackageSourceOrArtifact {
+	return v.allPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactPkgIngestPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetEmail() string { return v.allPointOfContact.Email }
+
+// GetInfo returns PointOfContactPkgIngestPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetInfo() string { return v.allPointOfContact.Info }
+
+// GetSince returns PointOfContactPkgIngestPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetSince() time.Time {
+	return v.allPointOfContact.Since
+}
+
+// GetJustification returns PointOfContactPkgIngestPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetJustification() string {
+	return v.allPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactPkgIngestPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetOrigin() string { return v.allPointOfContact.Origin }
+
+// GetCollector returns PointOfContactPkgIngestPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgIngestPointOfContact) GetCollector() string {
+	return v.allPointOfContact.Collector
+}
+
+func (v *PointOfContactPkgIngestPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactPkgIngestPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactPkgIngestPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactPkgIngestPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactPkgIngestPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactPkgIngestPointOfContact) __premarshalJSON() (*__premarshalPointOfContactPkgIngestPointOfContact, error) {
+	var retval __premarshalPointOfContactPkgIngestPointOfContact
+
+	retval.Id = v.allPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allPointOfContact.Subject
+		var err error
+		*dst, err = __marshalallPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactPkgIngestPointOfContact.allPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.allPointOfContact.Email
+	retval.Info = v.allPointOfContact.Info
+	retval.Since = v.allPointOfContact.Since
+	retval.Justification = v.allPointOfContact.Justification
+	retval.Origin = v.allPointOfContact.Origin
+	retval.Collector = v.allPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactPkgResponse is returned by PointOfContactPkg on success.
+type PointOfContactPkgResponse struct {
+	// Adds a PointOfContact attestation to a package, source or artifact.
+	IngestPointOfContact PointOfContactPkgIngestPointOfContact `json:"ingestPointOfContact"`
+}
+
+// GetIngestPointOfContact returns PointOfContactPkgResponse.IngestPointOfContact, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgResponse) GetIngestPointOfContact() PointOfContactPkgIngestPointOfContact {
+	return v.IngestPointOfContact
+}
+
+// PointOfContactSrcIngestPointOfContact includes the requested fields of the GraphQL type PointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type PointOfContactSrcIngestPointOfContact struct {
+	allPointOfContact `json:"-"`
+}
+
+// GetId returns PointOfContactSrcIngestPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetId() string { return v.allPointOfContact.Id }
+
+// GetSubject returns PointOfContactSrcIngestPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetSubject() allPointOfContactSubjectPackageSourceOrArtifact {
+	return v.allPointOfContact.Subject
+}
+
+// GetEmail returns PointOfContactSrcIngestPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetEmail() string { return v.allPointOfContact.Email }
+
+// GetInfo returns PointOfContactSrcIngestPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetInfo() string { return v.allPointOfContact.Info }
+
+// GetSince returns PointOfContactSrcIngestPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetSince() time.Time {
+	return v.allPointOfContact.Since
+}
+
+// GetJustification returns PointOfContactSrcIngestPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetJustification() string {
+	return v.allPointOfContact.Justification
+}
+
+// GetOrigin returns PointOfContactSrcIngestPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetOrigin() string { return v.allPointOfContact.Origin }
+
+// GetCollector returns PointOfContactSrcIngestPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcIngestPointOfContact) GetCollector() string {
+	return v.allPointOfContact.Collector
+}
+
+func (v *PointOfContactSrcIngestPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PointOfContactSrcIngestPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PointOfContactSrcIngestPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPointOfContactSrcIngestPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PointOfContactSrcIngestPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PointOfContactSrcIngestPointOfContact) __premarshalJSON() (*__premarshalPointOfContactSrcIngestPointOfContact, error) {
+	var retval __premarshalPointOfContactSrcIngestPointOfContact
+
+	retval.Id = v.allPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allPointOfContact.Subject
+		var err error
+		*dst, err = __marshalallPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PointOfContactSrcIngestPointOfContact.allPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.allPointOfContact.Email
+	retval.Info = v.allPointOfContact.Info
+	retval.Since = v.allPointOfContact.Since
+	retval.Justification = v.allPointOfContact.Justification
+	retval.Origin = v.allPointOfContact.Origin
+	retval.Collector = v.allPointOfContact.Collector
+	return &retval, nil
+}
+
+// PointOfContactSrcResponse is returned by PointOfContactSrc on success.
+type PointOfContactSrcResponse struct {
+	// Adds a PointOfContact attestation to a package, source or artifact.
+	IngestPointOfContact PointOfContactSrcIngestPointOfContact `json:"ingestPointOfContact"`
+}
+
+// GetIngestPointOfContact returns PointOfContactSrcResponse.IngestPointOfContact, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcResponse) GetIngestPointOfContact() PointOfContactSrcIngestPointOfContact {
+	return v.IngestPointOfContact
+}
 
 // SLSAForArtifactIngestSLSAHasSLSA includes the requested fields of the GraphQL type HasSLSA.
 // The GraphQL type's documentation follows.
@@ -18467,6 +19768,46 @@ type __GHSAsInput struct {
 // GetFilter returns __GHSAsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__GHSAsInput) GetFilter() *GHSASpec { return v.Filter }
 
+// __HasMetadataArtifactInput is used internally by genqlient
+type __HasMetadataArtifactInput struct {
+	Artifact    ArtifactInputSpec    `json:"artifact"`
+	HasMetadata HasMetadataInputSpec `json:"hasMetadata"`
+}
+
+// GetArtifact returns __HasMetadataArtifactInput.Artifact, and is useful for accessing the field via an interface.
+func (v *__HasMetadataArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// GetHasMetadata returns __HasMetadataArtifactInput.HasMetadata, and is useful for accessing the field via an interface.
+func (v *__HasMetadataArtifactInput) GetHasMetadata() HasMetadataInputSpec { return v.HasMetadata }
+
+// __HasMetadataPkgInput is used internally by genqlient
+type __HasMetadataPkgInput struct {
+	Pkg          PkgInputSpec         `json:"pkg"`
+	PkgMatchType *MatchFlags          `json:"pkgMatchType"`
+	HasMetadata  HasMetadataInputSpec `json:"hasMetadata"`
+}
+
+// GetPkg returns __HasMetadataPkgInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__HasMetadataPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetPkgMatchType returns __HasMetadataPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__HasMetadataPkgInput) GetPkgMatchType() *MatchFlags { return v.PkgMatchType }
+
+// GetHasMetadata returns __HasMetadataPkgInput.HasMetadata, and is useful for accessing the field via an interface.
+func (v *__HasMetadataPkgInput) GetHasMetadata() HasMetadataInputSpec { return v.HasMetadata }
+
+// __HasMetadataSrcInput is used internally by genqlient
+type __HasMetadataSrcInput struct {
+	Source      SourceInputSpec      `json:"source"`
+	HasMetadata HasMetadataInputSpec `json:"hasMetadata"`
+}
+
+// GetSource returns __HasMetadataSrcInput.Source, and is useful for accessing the field via an interface.
+func (v *__HasMetadataSrcInput) GetSource() SourceInputSpec { return v.Source }
+
+// GetHasMetadata returns __HasMetadataSrcInput.HasMetadata, and is useful for accessing the field via an interface.
+func (v *__HasMetadataSrcInput) GetHasMetadata() HasMetadataInputSpec { return v.HasMetadata }
+
 // __HasSBOMArtifactInput is used internally by genqlient
 type __HasSBOMArtifactInput struct {
 	Artifact ArtifactInputSpec `json:"artifact"`
@@ -18551,6 +19892,14 @@ type __IngestBuilderInput struct {
 // GetBuilder returns __IngestBuilderInput.Builder, and is useful for accessing the field via an interface.
 func (v *__IngestBuilderInput) GetBuilder() BuilderInputSpec { return v.Builder }
 
+// __IngestBuildersInput is used internally by genqlient
+type __IngestBuildersInput struct {
+	Builders []BuilderInputSpec `json:"builders"`
+}
+
+// GetBuilders returns __IngestBuildersInput.Builders, and is useful for accessing the field via an interface.
+func (v *__IngestBuildersInput) GetBuilders() []BuilderInputSpec { return v.Builders }
+
 // __IngestCVEInput is used internally by genqlient
 type __IngestCVEInput struct {
 	Cve CVEInputSpec `json:"cve"`
@@ -18606,6 +19955,14 @@ type __IngestSourceInput struct {
 
 // GetSource returns __IngestSourceInput.Source, and is useful for accessing the field via an interface.
 func (v *__IngestSourceInput) GetSource() SourceInputSpec { return v.Source }
+
+// __IngestSourcesInput is used internally by genqlient
+type __IngestSourcesInput struct {
+	Sources []SourceInputSpec `json:"sources"`
+}
+
+// GetSources returns __IngestSourcesInput.Sources, and is useful for accessing the field via an interface.
+func (v *__IngestSourcesInput) GetSources() []SourceInputSpec { return v.Sources }
 
 // __IsDependenciesInput is used internally by genqlient
 type __IsDependenciesInput struct {
@@ -18818,6 +20175,52 @@ func (v *__PkgEqualInput) GetOtherPackage() PkgInputSpec { return v.OtherPackage
 
 // GetPkgEqual returns __PkgEqualInput.PkgEqual, and is useful for accessing the field via an interface.
 func (v *__PkgEqualInput) GetPkgEqual() PkgEqualInputSpec { return v.PkgEqual }
+
+// __PointOfContactArtifactInput is used internally by genqlient
+type __PointOfContactArtifactInput struct {
+	Artifact       ArtifactInputSpec       `json:"artifact"`
+	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
+}
+
+// GetArtifact returns __PointOfContactArtifactInput.Artifact, and is useful for accessing the field via an interface.
+func (v *__PointOfContactArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// GetPointOfContact returns __PointOfContactArtifactInput.PointOfContact, and is useful for accessing the field via an interface.
+func (v *__PointOfContactArtifactInput) GetPointOfContact() PointOfContactInputSpec {
+	return v.PointOfContact
+}
+
+// __PointOfContactPkgInput is used internally by genqlient
+type __PointOfContactPkgInput struct {
+	Pkg            PkgInputSpec            `json:"pkg"`
+	PkgMatchType   *MatchFlags             `json:"pkgMatchType"`
+	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
+}
+
+// GetPkg returns __PointOfContactPkgInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__PointOfContactPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetPkgMatchType returns __PointOfContactPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__PointOfContactPkgInput) GetPkgMatchType() *MatchFlags { return v.PkgMatchType }
+
+// GetPointOfContact returns __PointOfContactPkgInput.PointOfContact, and is useful for accessing the field via an interface.
+func (v *__PointOfContactPkgInput) GetPointOfContact() PointOfContactInputSpec {
+	return v.PointOfContact
+}
+
+// __PointOfContactSrcInput is used internally by genqlient
+type __PointOfContactSrcInput struct {
+	Source         SourceInputSpec         `json:"source"`
+	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
+}
+
+// GetSource returns __PointOfContactSrcInput.Source, and is useful for accessing the field via an interface.
+func (v *__PointOfContactSrcInput) GetSource() SourceInputSpec { return v.Source }
+
+// GetPointOfContact returns __PointOfContactSrcInput.PointOfContact, and is useful for accessing the field via an interface.
+func (v *__PointOfContactSrcInput) GetPointOfContact() PointOfContactInputSpec {
+	return v.PointOfContact
+}
 
 // __SLSAForArtifactInput is used internally by genqlient
 type __SLSAForArtifactInput struct {
@@ -20232,6 +21635,499 @@ func (v *allCertifyVEXStatementVulnerabilityOSV) __premarshalJSON() (*__premarsh
 	return &retval, nil
 }
 
+// allHasMetadata includes the GraphQL fields of HasMetadata requested by the fragment allHasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type allHasMetadata struct {
+	Id            string                                       `json:"id"`
+	Subject       allHasMetadataSubjectPackageSourceOrArtifact `json:"-"`
+	Key           string                                       `json:"key"`
+	Value         string                                       `json:"value"`
+	Timestamp     time.Time                                    `json:"timestamp"`
+	Justification string                                       `json:"justification"`
+	Origin        string                                       `json:"origin"`
+	Collector     string                                       `json:"collector"`
+}
+
+// GetId returns allHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *allHasMetadata) GetId() string { return v.Id }
+
+// GetSubject returns allHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *allHasMetadata) GetSubject() allHasMetadataSubjectPackageSourceOrArtifact { return v.Subject }
+
+// GetKey returns allHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *allHasMetadata) GetKey() string { return v.Key }
+
+// GetValue returns allHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *allHasMetadata) GetValue() string { return v.Value }
+
+// GetTimestamp returns allHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *allHasMetadata) GetTimestamp() time.Time { return v.Timestamp }
+
+// GetJustification returns allHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *allHasMetadata) GetJustification() string { return v.Justification }
+
+// GetOrigin returns allHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *allHasMetadata) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *allHasMetadata) GetCollector() string { return v.Collector }
+
+func (v *allHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allHasMetadata
+		Subject json.RawMessage `json:"subject"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Subject
+		src := firstPass.Subject
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalallHasMetadataSubjectPackageSourceOrArtifact(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal allHasMetadata.Subject: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalallHasMetadata struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *allHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allHasMetadata) __premarshalJSON() (*__premarshalallHasMetadata, error) {
+	var retval __premarshalallHasMetadata
+
+	retval.Id = v.Id
+	{
+
+		dst := &retval.Subject
+		src := v.Subject
+		var err error
+		*dst, err = __marshalallHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal allHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.Key
+	retval.Value = v.Value
+	retval.Timestamp = v.Timestamp
+	retval.Justification = v.Justification
+	retval.Origin = v.Origin
+	retval.Collector = v.Collector
+	return &retval, nil
+}
+
+// allHasMetadataSubjectArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type allHasMetadataSubjectArtifact struct {
+	Typename        *string `json:"__typename"`
+	AllArtifactTree `json:"-"`
+}
+
+// GetTypename returns allHasMetadataSubjectArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns allHasMetadataSubjectArtifact.Id, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns allHasMetadataSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+
+// GetDigest returns allHasMetadataSubjectArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *allHasMetadataSubjectArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allHasMetadataSubjectArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allHasMetadataSubjectArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallHasMetadataSubjectArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *allHasMetadataSubjectArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allHasMetadataSubjectArtifact) __premarshalJSON() (*__premarshalallHasMetadataSubjectArtifact, error) {
+	var retval __premarshalallHasMetadataSubjectArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// allHasMetadataSubjectPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type allHasMetadataSubjectPackage struct {
+	Typename   *string `json:"__typename"`
+	AllPkgTree `json:"-"`
+}
+
+// GetTypename returns allHasMetadataSubjectPackage.Typename, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectPackage) GetTypename() *string { return v.Typename }
+
+// GetId returns allHasMetadataSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns allHasMetadataSubjectPackage.Type, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns allHasMetadataSubjectPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *allHasMetadataSubjectPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allHasMetadataSubjectPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allHasMetadataSubjectPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallHasMetadataSubjectPackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *allHasMetadataSubjectPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allHasMetadataSubjectPackage) __premarshalJSON() (*__premarshalallHasMetadataSubjectPackage, error) {
+	var retval __premarshalallHasMetadataSubjectPackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// allHasMetadataSubjectPackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
+//
+// allHasMetadataSubjectPackageSourceOrArtifact is implemented by the following types:
+// allHasMetadataSubjectArtifact
+// allHasMetadataSubjectPackage
+// allHasMetadataSubjectSource
+// The GraphQL type's documentation follows.
+//
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
+type allHasMetadataSubjectPackageSourceOrArtifact interface {
+	implementsGraphQLInterfaceallHasMetadataSubjectPackageSourceOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *allHasMetadataSubjectArtifact) implementsGraphQLInterfaceallHasMetadataSubjectPackageSourceOrArtifact() {
+}
+func (v *allHasMetadataSubjectPackage) implementsGraphQLInterfaceallHasMetadataSubjectPackageSourceOrArtifact() {
+}
+func (v *allHasMetadataSubjectSource) implementsGraphQLInterfaceallHasMetadataSubjectPackageSourceOrArtifact() {
+}
+
+func __unmarshalallHasMetadataSubjectPackageSourceOrArtifact(b []byte, v *allHasMetadataSubjectPackageSourceOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Artifact":
+		*v = new(allHasMetadataSubjectArtifact)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(allHasMetadataSubjectPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(allHasMetadataSubjectSource)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageSourceOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for allHasMetadataSubjectPackageSourceOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalallHasMetadataSubjectPackageSourceOrArtifact(v *allHasMetadataSubjectPackageSourceOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *allHasMetadataSubjectArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallHasMetadataSubjectArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allHasMetadataSubjectPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallHasMetadataSubjectPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allHasMetadataSubjectSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallHasMetadataSubjectSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for allHasMetadataSubjectPackageSourceOrArtifact: "%T"`, v)
+	}
+}
+
+// allHasMetadataSubjectSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type allHasMetadataSubjectSource struct {
+	Typename      *string `json:"__typename"`
+	AllSourceTree `json:"-"`
+}
+
+// GetTypename returns allHasMetadataSubjectSource.Typename, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectSource) GetTypename() *string { return v.Typename }
+
+// GetId returns allHasMetadataSubjectSource.Id, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns allHasMetadataSubjectSource.Type, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns allHasMetadataSubjectSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *allHasMetadataSubjectSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *allHasMetadataSubjectSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allHasMetadataSubjectSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allHasMetadataSubjectSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallHasMetadataSubjectSource struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *allHasMetadataSubjectSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allHasMetadataSubjectSource) __premarshalJSON() (*__premarshalallHasMetadataSubjectSource, error) {
+	var retval __premarshalallHasMetadataSubjectSource
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
 // allHasSBOMTree includes the GraphQL fields of HasSBOM requested by the fragment allHasSBOMTree.
 type allHasSBOMTree struct {
 	Id string `json:"id"`
@@ -20245,8 +22141,6 @@ type allHasSBOMTree struct {
 	Digest string `json:"digest"`
 	// Location from which the SBOM can be downloaded
 	DownloadLocation string `json:"downloadLocation"`
-	// SBOM annotations (e.g., SBOM Scorecard information)
-	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
 	// GUAC collector for the document
@@ -20270,9 +22164,6 @@ func (v *allHasSBOMTree) GetDigest() string { return v.Digest }
 
 // GetDownloadLocation returns allHasSBOMTree.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTree) GetDownloadLocation() string { return v.DownloadLocation }
-
-// GetAnnotations returns allHasSBOMTree.Annotations, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTree) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation { return v.Annotations }
 
 // GetOrigin returns allHasSBOMTree.Origin, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTree) GetOrigin() string { return v.Origin }
@@ -20326,8 +22217,6 @@ type __premarshalallHasSBOMTree struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
-
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
@@ -20361,27 +22250,10 @@ func (v *allHasSBOMTree) __premarshalJSON() (*__premarshalallHasSBOMTree, error)
 	retval.Algorithm = v.Algorithm
 	retval.Digest = v.Digest
 	retval.DownloadLocation = v.DownloadLocation
-	retval.Annotations = v.Annotations
 	retval.Origin = v.Origin
 	retval.Collector = v.Collector
 	return &retval, nil
 }
-
-// allHasSBOMTreeAnnotationsAnnotation includes the requested fields of the GraphQL type Annotation.
-// The GraphQL type's documentation follows.
-//
-// Annotation is a key-value pair to provide additional information or metadata
-// about an SBOM.
-type allHasSBOMTreeAnnotationsAnnotation struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-// GetKey returns allHasSBOMTreeAnnotationsAnnotation.Key, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeAnnotationsAnnotation) GetKey() string { return v.Key }
-
-// GetValue returns allHasSBOMTreeAnnotationsAnnotation.Value, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeAnnotationsAnnotation) GetValue() string { return v.Value }
 
 // allHasSBOMTreeSubjectArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
@@ -21690,6 +23562,508 @@ func (v *allPkgEqualPackagesPackage) __premarshalJSON() (*__premarshalallPkgEqua
 	return &retval, nil
 }
 
+// allPointOfContact includes the GraphQL fields of PointOfContact requested by the fragment allPointOfContact.
+// The GraphQL type's documentation follows.
+//
+// PointOfContact is an attestation of how to get in touch with the person(s) responsible
+// for a package, source, or artifact.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The attestation applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+//
+// email is the email address (singular) of the point of contact.
+//
+// info is additional contact information other than email address. This is free
+// form.
+//
+// NOTE: the identifiers for point of contact should be part of software trees.
+// This will benefit from identifier look up and traversal as well as organization
+// hierarchy. However, until the use case arises, PointOfContact will be a flat
+// reference to the contact details.
+type allPointOfContact struct {
+	Id            string                                          `json:"id"`
+	Subject       allPointOfContactSubjectPackageSourceOrArtifact `json:"-"`
+	Email         string                                          `json:"email"`
+	Info          string                                          `json:"info"`
+	Since         time.Time                                       `json:"since"`
+	Justification string                                          `json:"justification"`
+	Origin        string                                          `json:"origin"`
+	Collector     string                                          `json:"collector"`
+}
+
+// GetId returns allPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetId() string { return v.Id }
+
+// GetSubject returns allPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetSubject() allPointOfContactSubjectPackageSourceOrArtifact {
+	return v.Subject
+}
+
+// GetEmail returns allPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetEmail() string { return v.Email }
+
+// GetInfo returns allPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetInfo() string { return v.Info }
+
+// GetSince returns allPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetSince() time.Time { return v.Since }
+
+// GetJustification returns allPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetJustification() string { return v.Justification }
+
+// GetOrigin returns allPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *allPointOfContact) GetCollector() string { return v.Collector }
+
+func (v *allPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allPointOfContact
+		Subject json.RawMessage `json:"subject"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Subject
+		src := firstPass.Subject
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalallPointOfContactSubjectPackageSourceOrArtifact(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal allPointOfContact.Subject: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalallPointOfContact struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *allPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allPointOfContact) __premarshalJSON() (*__premarshalallPointOfContact, error) {
+	var retval __premarshalallPointOfContact
+
+	retval.Id = v.Id
+	{
+
+		dst := &retval.Subject
+		src := v.Subject
+		var err error
+		*dst, err = __marshalallPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal allPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.Email
+	retval.Info = v.Info
+	retval.Since = v.Since
+	retval.Justification = v.Justification
+	retval.Origin = v.Origin
+	retval.Collector = v.Collector
+	return &retval, nil
+}
+
+// allPointOfContactSubjectArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type allPointOfContactSubjectArtifact struct {
+	Typename        *string `json:"__typename"`
+	AllArtifactTree `json:"-"`
+}
+
+// GetTypename returns allPointOfContactSubjectArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns allPointOfContactSubjectArtifact.Id, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns allPointOfContactSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+
+// GetDigest returns allPointOfContactSubjectArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *allPointOfContactSubjectArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allPointOfContactSubjectArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allPointOfContactSubjectArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallPointOfContactSubjectArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *allPointOfContactSubjectArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allPointOfContactSubjectArtifact) __premarshalJSON() (*__premarshalallPointOfContactSubjectArtifact, error) {
+	var retval __premarshalallPointOfContactSubjectArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// allPointOfContactSubjectPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type allPointOfContactSubjectPackage struct {
+	Typename   *string `json:"__typename"`
+	AllPkgTree `json:"-"`
+}
+
+// GetTypename returns allPointOfContactSubjectPackage.Typename, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectPackage) GetTypename() *string { return v.Typename }
+
+// GetId returns allPointOfContactSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns allPointOfContactSubjectPackage.Type, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns allPointOfContactSubjectPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *allPointOfContactSubjectPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allPointOfContactSubjectPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allPointOfContactSubjectPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallPointOfContactSubjectPackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *allPointOfContactSubjectPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allPointOfContactSubjectPackage) __premarshalJSON() (*__premarshalallPointOfContactSubjectPackage, error) {
+	var retval __premarshalallPointOfContactSubjectPackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// allPointOfContactSubjectPackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
+//
+// allPointOfContactSubjectPackageSourceOrArtifact is implemented by the following types:
+// allPointOfContactSubjectArtifact
+// allPointOfContactSubjectPackage
+// allPointOfContactSubjectSource
+// The GraphQL type's documentation follows.
+//
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
+type allPointOfContactSubjectPackageSourceOrArtifact interface {
+	implementsGraphQLInterfaceallPointOfContactSubjectPackageSourceOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *allPointOfContactSubjectArtifact) implementsGraphQLInterfaceallPointOfContactSubjectPackageSourceOrArtifact() {
+}
+func (v *allPointOfContactSubjectPackage) implementsGraphQLInterfaceallPointOfContactSubjectPackageSourceOrArtifact() {
+}
+func (v *allPointOfContactSubjectSource) implementsGraphQLInterfaceallPointOfContactSubjectPackageSourceOrArtifact() {
+}
+
+func __unmarshalallPointOfContactSubjectPackageSourceOrArtifact(b []byte, v *allPointOfContactSubjectPackageSourceOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Artifact":
+		*v = new(allPointOfContactSubjectArtifact)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(allPointOfContactSubjectPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(allPointOfContactSubjectSource)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageSourceOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for allPointOfContactSubjectPackageSourceOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalallPointOfContactSubjectPackageSourceOrArtifact(v *allPointOfContactSubjectPackageSourceOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *allPointOfContactSubjectArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallPointOfContactSubjectArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allPointOfContactSubjectPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallPointOfContactSubjectPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allPointOfContactSubjectSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallPointOfContactSubjectSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for allPointOfContactSubjectPackageSourceOrArtifact: "%T"`, v)
+	}
+}
+
+// allPointOfContactSubjectSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type allPointOfContactSubjectSource struct {
+	Typename      *string `json:"__typename"`
+	AllSourceTree `json:"-"`
+}
+
+// GetTypename returns allPointOfContactSubjectSource.Typename, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectSource) GetTypename() *string { return v.Typename }
+
+// GetId returns allPointOfContactSubjectSource.Id, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns allPointOfContactSubjectSource.Type, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns allPointOfContactSubjectSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *allPointOfContactSubjectSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *allPointOfContactSubjectSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allPointOfContactSubjectSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allPointOfContactSubjectSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallPointOfContactSubjectSource struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *allPointOfContactSubjectSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allPointOfContactSubjectSource) __premarshalJSON() (*__premarshalallPointOfContactSubjectSource, error) {
+	var retval __premarshalallPointOfContactSubjectSource
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
 // allSLSATree includes the GraphQL fields of HasSLSA requested by the fragment allSLSATree.
 // The GraphQL type's documentation follows.
 //
@@ -21980,6 +24354,7 @@ func (v *allSLSATreeSubjectArtifact) __premarshalJSON() (*__premarshalallSLSATre
 
 // The query or mutation executed by Artifacts.
 const Artifacts_Operation = `
+# Exposes GraphQL queries to retrieve GUAC sources
 query Artifacts ($filter: ArtifactSpec) {
 	artifacts(artifactSpec: $filter) {
 		... AllArtifactTree
@@ -22020,6 +24395,7 @@ func Artifacts(
 
 // The query or mutation executed by CVEs.
 const CVEs_Operation = `
+# Exposes GraphQL queries to retrieve GUAC CVEs
 query CVEs ($filter: CVESpec) {
 	cve(cveSpec: $filter) {
 		... AllCveTree
@@ -22083,6 +24459,23 @@ fragment AllCertifyBad on CertifyBad {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -22155,6 +24548,22 @@ func CertifyBadArtifact(
 
 // The query or mutation executed by CertifyBadPkg.
 const CertifyBadPkg_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest a CertifyBad into GUAC
 mutation CertifyBadPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyBad: CertifyBadInputSpec!) {
 	ingestCertifyBad(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyBad: $certifyBad) {
 		... AllCertifyBad
@@ -22178,6 +24587,23 @@ fragment AllCertifyBad on CertifyBad {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -22275,6 +24701,23 @@ fragment AllCertifyBad on CertifyBad {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -22347,6 +24790,7 @@ func CertifyBadSrc(
 
 // The query or mutation executed by CertifyBads.
 const CertifyBads_Operation = `
+# Exposes GraphQL queries to retrieve GUAC CertifyBads
 query CertifyBads ($filter: CertifyBadSpec) {
 	CertifyBad(certifyBadSpec: $filter) {
 		... AllCertifyBad
@@ -22370,6 +24814,23 @@ fragment AllCertifyBad on CertifyBad {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -22475,6 +24936,23 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -22578,6 +25056,23 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -22669,6 +25164,23 @@ fragment allCertifyGood on CertifyGood {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -22741,6 +25253,22 @@ func CertifyGoodArtifact(
 
 // The query or mutation executed by CertifyGoodPkg.
 const CertifyGoodPkg_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest a CertifyGood into GUAC
 mutation CertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyGood: CertifyGoodInputSpec!) {
 	ingestCertifyGood(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyGood: $certifyGood) {
 		... allCertifyGood
@@ -22764,6 +25292,23 @@ fragment allCertifyGood on CertifyGood {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -22861,6 +25406,23 @@ fragment allCertifyGood on CertifyGood {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -22968,6 +25530,23 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -23034,6 +25613,22 @@ func CertifyNoKnownVuln(
 
 // The query or mutation executed by CertifyOSV.
 const CertifyOSV_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest a vulnerability certification into GUAC
 mutation CertifyOSV ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
 	ingestVulnerability(pkg: $pkg, vulnerability: {osv:$osv}, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
@@ -23069,6 +25664,23 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -23137,6 +25749,20 @@ func CertifyOSV(
 
 // The query or mutation executed by FindSoftware.
 const FindSoftware_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 query FindSoftware ($searchText: String!) {
 	findSoftware(searchText: $searchText) {
 		__typename
@@ -23151,6 +25777,23 @@ query FindSoftware ($searchText: String!) {
 		}
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -23221,6 +25864,7 @@ func FindSoftware(
 
 // The query or mutation executed by GHSAs.
 const GHSAs_Operation = `
+# Exposes GraphQL queries to retrieve GUAC GHSAs
 query GHSAs ($filter: GHSASpec) {
 	ghsa(ghsaSpec: $filter) {
 		... AllGHSATree
@@ -23258,6 +25902,369 @@ func GHSAs(
 	return &data, err
 }
 
+// The query or mutation executed by HasMetadataArtifact.
+const HasMetadataArtifact_Operation = `
+mutation HasMetadataArtifact ($artifact: ArtifactInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
+	ingestHasMetadata(subject: {artifact:$artifact}, hasMetadata: $hasMetadata) {
+		... allHasMetadata
+	}
+}
+fragment allHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
+	origin
+	collector
+}
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HasMetadataArtifact(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	hasMetadata HasMetadataInputSpec,
+) (*HasMetadataArtifactResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasMetadataArtifact",
+		Query:  HasMetadataArtifact_Operation,
+		Variables: &__HasMetadataArtifactInput{
+			Artifact:    artifact,
+			HasMetadata: hasMetadata,
+		},
+	}
+	var err error
+
+	var data HasMetadataArtifactResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by HasMetadataPkg.
+const HasMetadataPkg_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest a HasMetadata into GUAC
+mutation HasMetadataPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $hasMetadata: HasMetadataInputSpec!) {
+	ingestHasMetadata(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, hasMetadata: $hasMetadata) {
+		... allHasMetadata
+	}
+}
+fragment allHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
+	origin
+	collector
+}
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HasMetadataPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	pkgMatchType *MatchFlags,
+	hasMetadata HasMetadataInputSpec,
+) (*HasMetadataPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasMetadataPkg",
+		Query:  HasMetadataPkg_Operation,
+		Variables: &__HasMetadataPkgInput{
+			Pkg:          pkg,
+			PkgMatchType: pkgMatchType,
+			HasMetadata:  hasMetadata,
+		},
+	}
+	var err error
+
+	var data HasMetadataPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by HasMetadataSrc.
+const HasMetadataSrc_Operation = `
+mutation HasMetadataSrc ($source: SourceInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
+	ingestHasMetadata(subject: {source:$source}, hasMetadata: $hasMetadata) {
+		... allHasMetadata
+	}
+}
+fragment allHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
+	origin
+	collector
+}
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HasMetadataSrc(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+	hasMetadata HasMetadataInputSpec,
+) (*HasMetadataSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasMetadataSrc",
+		Query:  HasMetadataSrc_Operation,
+		Variables: &__HasMetadataSrcInput{
+			Source:      source,
+			HasMetadata: hasMetadata,
+		},
+	}
+	var err error
+
+	var data HasMetadataSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by HasSBOMArtifact.
 const HasSBOMArtifact_Operation = `
 mutation HasSBOMArtifact ($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
@@ -23280,10 +26287,6 @@ fragment allHasSBOMTree on HasSBOM {
 	algorithm
 	digest
 	downloadLocation
-	annotations {
-		key
-		value
-	}
 	origin
 	collector
 }
@@ -23292,6 +26295,23 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -23345,6 +26365,22 @@ func HasSBOMArtifact(
 
 // The query or mutation executed by HasSBOMPkg.
 const HasSBOMPkg_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest that a package or source has an SBOM (specified by a URI) into GUAC
 mutation HasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
 	ingestHasSBOM(subject: {package:$pkg}, hasSBOM: $hasSBOM) {
 		... allHasSBOMTree
@@ -23365,10 +26401,6 @@ fragment allHasSBOMTree on HasSBOM {
 	algorithm
 	digest
 	downloadLocation
-	annotations {
-		key
-		value
-	}
 	origin
 	collector
 }
@@ -23377,6 +26409,23 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -23430,6 +26479,22 @@ func HasSBOMPkg(
 
 // The query or mutation executed by HasSourceAt.
 const HasSourceAt_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest that a package (either at the package version or package name level) has the specified source into GUAC
 mutation HasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
 	ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt) {
 		... allHasSourceAt
@@ -23448,6 +26513,23 @@ fragment allHasSourceAt on HasSourceAt {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -23519,6 +26601,22 @@ func HasSourceAt(
 
 // The query or mutation executed by HashEqual.
 const HashEqual_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to certify that two artifacts are identical
 mutation HashEqual ($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
 	ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual) {
 		... allHashEqualTree
@@ -23572,6 +26670,22 @@ func HashEqual(
 
 // The query or mutation executed by IngestArtifact.
 const IngestArtifact_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Ingest Artifact
 mutation IngestArtifact ($artifact: ArtifactInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -23612,6 +26726,7 @@ func IngestArtifact(
 
 // The query or mutation executed by IngestArtifacts.
 const IngestArtifacts_Operation = `
+# Bulk Ingest Artifacts
 mutation IngestArtifacts ($artifacts: [ArtifactInputSpec!]!) {
 	ingestArtifacts(artifacts: $artifacts) {
 		... AllArtifactTree
@@ -23652,6 +26767,22 @@ func IngestArtifacts(
 
 // The query or mutation executed by IngestBuilder.
 const IngestBuilder_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Ingest Builder
 mutation IngestBuilder ($builder: BuilderInputSpec!) {
 	ingestBuilder(builder: $builder) {
 		uri
@@ -23685,8 +26816,60 @@ func IngestBuilder(
 	return &data, err
 }
 
+// The query or mutation executed by IngestBuilders.
+const IngestBuilders_Operation = `
+# Bulk Ingest Builder
+mutation IngestBuilders ($builders: [BuilderInputSpec!]!) {
+	ingestBuilders(builders: $builders) {
+		uri
+	}
+}
+`
+
+func IngestBuilders(
+	ctx context.Context,
+	client graphql.Client,
+	builders []BuilderInputSpec,
+) (*IngestBuildersResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestBuilders",
+		Query:  IngestBuilders_Operation,
+		Variables: &__IngestBuildersInput{
+			Builders: builders,
+		},
+	}
+	var err error
+
+	var data IngestBuildersResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by IngestCVE.
 const IngestCVE_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Ingest CVE
 mutation IngestCVE ($cve: CVEInputSpec!) {
 	ingestCVE(cve: $cve) {
 		... AllCveTree
@@ -23727,6 +26910,22 @@ func IngestCVE(
 
 // The query or mutation executed by IngestGHSA.
 const IngestGHSA_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Ingest GHSA
 mutation IngestGHSA ($ghsa: GHSAInputSpec!) {
 	ingestGHSA(ghsa: $ghsa) {
 		... AllGHSATree
@@ -23766,6 +26965,7 @@ func IngestGHSA(
 
 // The query or mutation executed by IngestMaterials.
 const IngestMaterials_Operation = `
+# Ingest Materials (artifacts) used by hasSLSA
 mutation IngestMaterials ($materials: [ArtifactInputSpec!]!) {
 	ingestMaterials(materials: $materials) {
 		... AllArtifactTree
@@ -23806,6 +27006,22 @@ func IngestMaterials(
 
 // The query or mutation executed by IngestOSV.
 const IngestOSV_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Ingest OSV
 mutation IngestOSV ($osv: OSVInputSpec!) {
 	ingestOSV(osv: $osv) {
 		... AllOSVTree
@@ -23845,11 +27061,44 @@ func IngestOSV(
 
 // The query or mutation executed by IngestPackage.
 const IngestPackage_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Ingest Package
 mutation IngestPackage ($pkg: PkgInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -23901,11 +27150,29 @@ func IngestPackage(
 
 // The query or mutation executed by IngestPackages.
 const IngestPackages_Operation = `
+# Bulk Ingest Packages
 mutation IngestPackages ($pkgs: [PkgInputSpec!]!) {
 	ingestPackages(pkgs: $pkgs) {
 		... AllPkgTree
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -23957,6 +27224,22 @@ func IngestPackages(
 
 // The query or mutation executed by IngestSource.
 const IngestSource_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Ingest Source
 mutation IngestSource ($source: SourceInputSpec!) {
 	ingestSource(source: $source) {
 		... AllSourceTree
@@ -24004,8 +27287,59 @@ func IngestSource(
 	return &data, err
 }
 
+// The query or mutation executed by IngestSources.
+const IngestSources_Operation = `
+# Bulk Ingest Sources
+mutation IngestSources ($sources: [SourceInputSpec!]!) {
+	ingestSources(sources: $sources) {
+		... AllSourceTree
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func IngestSources(
+	ctx context.Context,
+	client graphql.Client,
+	sources []SourceInputSpec,
+) (*IngestSourcesResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestSources",
+		Query:  IngestSources_Operation,
+		Variables: &__IngestSourcesInput{
+			Sources: sources,
+		},
+	}
+	var err error
+
+	var data IngestSourcesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by IsDependencies.
 const IsDependencies_Operation = `
+# Defines the GraphQL operations to bulk ingest dependencies information into GUAC
 mutation IsDependencies ($pkgs: [PkgInputSpec!]!, $depPkgs: [PkgInputSpec!]!, $dependencies: [IsDependencyInputSpec!]!) {
 	ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, dependencies: $dependencies) {
 		... allIsDependencyTree
@@ -24025,6 +27359,23 @@ fragment allIsDependencyTree on IsDependency {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24080,6 +27431,22 @@ func IsDependencies(
 
 // The query or mutation executed by IsDependency.
 const IsDependency_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest dependency information into GUAC
 mutation IsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
 	ingestDependency(pkg: $pkg, depPkg: $depPkg, dependency: $dependency) {
 		... allIsDependencyTree
@@ -24099,6 +27466,23 @@ fragment allIsDependencyTree on IsDependency {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24154,6 +27538,22 @@ func IsDependency(
 
 // The query or mutation executed by IsOccurrencePkg.
 const IsOccurrencePkg_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest occurrence information into GUAC
 mutation IsOccurrencePkg ($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
 	ingestOccurrence(subject: {package:$pkg}, artifact: $artifact, occurrence: $occurrence) {
 		... AllIsOccurrencesTree
@@ -24177,6 +27577,23 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24274,6 +27691,23 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24348,6 +27782,7 @@ func IsOccurrenceSrc(
 
 // The query or mutation executed by IsOccurrencesPkg.
 const IsOccurrencesPkg_Operation = `
+# Defines the GraphQL operations to bulk ingest occurrences information into GUAC
 mutation IsOccurrencesPkg ($pkgs: [PkgInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
 	ingestOccurrences(subjects: {packages:$pkgs}, artifacts: $artifacts, occurrences: $occurrences) {
 		... AllIsOccurrencesTree
@@ -24371,6 +27806,23 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24468,6 +27920,23 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24542,6 +28011,22 @@ func IsOccurrencesSrc(
 
 // The query or mutation executed by IsVulnerabilityCVE.
 const IsVulnerabilityCVE_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest a isVulnerability into GUAC
 mutation IsVulnerabilityCVE ($osv: OSVInputSpec!, $cve: CVEInputSpec!, $isVulnerability: IsVulnerabilityInputSpec!) {
 	ingestIsVulnerability(osv: $osv, vulnerability: {cve:$cve}, isVulnerability: $isVulnerability) {
 		... allIsVulnerability
@@ -24753,6 +28238,23 @@ query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
 		}
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24954,10 +28456,6 @@ fragment allHasSBOMTree on HasSBOM {
 	algorithm
 	digest
 	downloadLocation
-	annotations {
-		key
-		value
-	}
 	origin
 	collector
 }
@@ -25156,6 +28654,23 @@ query Node ($node: ID!) {
 		}
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25357,10 +28872,6 @@ fragment allHasSBOMTree on HasSBOM {
 	algorithm
 	digest
 	downloadLocation
-	annotations {
-		key
-		value
-	}
 	origin
 	collector
 }
@@ -25557,6 +29068,23 @@ query Nodes ($nodes: [ID!]!) {
 		}
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25758,10 +29286,6 @@ fragment allHasSBOMTree on HasSBOM {
 	algorithm
 	digest
 	downloadLocation
-	annotations {
-		key
-		value
-	}
 	origin
 	collector
 }
@@ -25887,6 +29411,7 @@ func Nodes(
 
 // The query or mutation executed by OSVs.
 const OSVs_Operation = `
+# Exposes GraphQL queries to retrieve GUAC OSVs
 query OSVs ($filter: OSVSpec) {
 	osv(osvSpec: $filter) {
 		... AllOSVTree
@@ -25926,11 +29451,29 @@ func OSVs(
 
 // The query or mutation executed by Packages.
 const Packages_Operation = `
+# Exposes GraphQL queries to retrieve GUAC packages
 query Packages ($filter: PkgSpec) {
 	packages(pkgSpec: $filter) {
 		... AllPkgTree
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25982,6 +29525,22 @@ func Packages(
 
 // The query or mutation executed by Path.
 const Path_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Exposes GraphQL queries to retrieve GUAC graph connectivity data
 query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!]!) {
 	path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: $usingOnly) {
 		__typename
@@ -26053,6 +29612,23 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge
 		}
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26254,10 +29830,6 @@ fragment allHasSBOMTree on HasSBOM {
 	algorithm
 	digest
 	downloadLocation
-	annotations {
-		key
-		value
-	}
 	origin
 	collector
 }
@@ -26389,6 +29961,22 @@ func Path(
 
 // The query or mutation executed by PkgEqual.
 const PkgEqual_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to certify that two packages are identical
 mutation PkgEqual ($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual: PkgEqualInputSpec!) {
 	pkg: ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -26400,6 +29988,23 @@ mutation PkgEqual ($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual:
 		... allPkgEqual
 	}
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26462,8 +30067,387 @@ func PkgEqual(
 	return &data, err
 }
 
+// The query or mutation executed by PointOfContactArtifact.
+const PointOfContactArtifact_Operation = `
+mutation PointOfContactArtifact ($artifact: ArtifactInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
+	ingestPointOfContact(subject: {artifact:$artifact}, pointOfContact: $pointOfContact) {
+		... allPointOfContact
+	}
+}
+fragment allPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContactArtifact(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	pointOfContact PointOfContactInputSpec,
+) (*PointOfContactArtifactResponse, error) {
+	req := &graphql.Request{
+		OpName: "PointOfContactArtifact",
+		Query:  PointOfContactArtifact_Operation,
+		Variables: &__PointOfContactArtifactInput{
+			Artifact:       artifact,
+			PointOfContact: pointOfContact,
+		},
+	}
+	var err error
+
+	var data PointOfContactArtifactResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PointOfContactPkg.
+const PointOfContactPkg_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest a PointOfContact into GUAC
+mutation PointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $pointOfContact: PointOfContactInputSpec!) {
+	ingestPointOfContact(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, pointOfContact: $pointOfContact) {
+		... allPointOfContact
+	}
+}
+fragment allPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContactPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	pkgMatchType *MatchFlags,
+	pointOfContact PointOfContactInputSpec,
+) (*PointOfContactPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "PointOfContactPkg",
+		Query:  PointOfContactPkg_Operation,
+		Variables: &__PointOfContactPkgInput{
+			Pkg:            pkg,
+			PkgMatchType:   pkgMatchType,
+			PointOfContact: pointOfContact,
+		},
+	}
+	var err error
+
+	var data PointOfContactPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PointOfContactSrc.
+const PointOfContactSrc_Operation = `
+mutation PointOfContactSrc ($source: SourceInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
+	ingestPointOfContact(subject: {source:$source}, pointOfContact: $pointOfContact) {
+		... allPointOfContact
+	}
+}
+fragment allPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
+	origin
+	collector
+}
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func PointOfContactSrc(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+	pointOfContact PointOfContactInputSpec,
+) (*PointOfContactSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "PointOfContactSrc",
+		Query:  PointOfContactSrc_Operation,
+		Variables: &__PointOfContactSrcInput{
+			Source:         source,
+			PointOfContact: pointOfContact,
+		},
+	}
+	var err error
+
+	var data PointOfContactSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by SLSAForArtifact.
 const SLSAForArtifact_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest SLSA attestations into GUAC
 mutation SLSAForArtifact ($artifact: ArtifactInputSpec!, $materials: [ArtifactInputSpec!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
 	ingestSLSA(subject: $artifact, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
 		... allSLSATree
@@ -26535,6 +30519,22 @@ func SLSAForArtifact(
 
 // The query or mutation executed by Scorecard.
 const Scorecard_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest a Scorecard certification into GUAC
 mutation Scorecard ($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
 	certifyScorecard(source: $source, scorecard: $scorecard) {
 		... AllCertifyScorecard
@@ -26604,6 +30604,7 @@ func Scorecard(
 
 // The query or mutation executed by Sources.
 const Sources_Operation = `
+# Exposes GraphQL queries to retrieve GUAC sources
 query Sources ($filter: SourceSpec) {
 	sources(sourceSpec: $filter) {
 		... AllSourceTree
@@ -26689,6 +30690,23 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26798,6 +30816,23 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26907,6 +30942,23 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27016,6 +31068,23 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27089,6 +31158,22 @@ func VexArtifactAndOsv(
 
 // The query or mutation executed by VexPackageAndCve.
 const VexPackageAndCve_Operation = `
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines the GraphQL operations to ingest VEX statements into GUAC
 mutation VexPackageAndCve ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {cve:$cve}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
@@ -27125,6 +31210,23 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27234,6 +31336,23 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# NOTE: This is experimental and might change in the future!
+# Defines GraphQL fragments used in the operations
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type

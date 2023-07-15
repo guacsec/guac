@@ -29,6 +29,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/spf13/cobra"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
 	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
@@ -38,6 +39,7 @@ import (
 )
 
 const (
+	arango = "arango"
 	neo4js = "neo4j"
 	inmems = "inmem"
 	ents   = "ent"
@@ -53,7 +55,7 @@ func startServer(cmd *cobra.Command) {
 		os.Exit(1)
 	}
 
-	srv, err := getGraphqlServer(ctx)
+	srv, err := getGraphqlServer()
 	if err != nil {
 		logger.Errorf("unable to initialize graphql server: %v", err)
 		os.Exit(1)
@@ -101,11 +103,13 @@ func startServer(cmd *cobra.Command) {
 }
 
 func validateFlags() error {
-	if flags.backend != neo4js &&
-		flags.backend != inmems &&
-		flags.backend != ents {
+	switch flags.backend {
+	case neo4js, ents, arango, inmems:
+		// Valid
+	default:
 		return fmt.Errorf("invalid graphql backend specified: %q", flags.backend)
 	}
+
 	return nil
 }
 
@@ -140,7 +144,20 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 
 		backend, err := neo4j.GetBackend(&args)
 		if err != nil {
-			return nil, fmt.Errorf("Error creating neo4j backend: %w", err)
+			return nil, fmt.Errorf("error creating neo4j backend: %w", err)
+		}
+
+		topResolver = resolvers.Resolver{Backend: backend}
+
+	case arango:
+		args := arangodb.ArangoConfig{
+			User:   flags.arangoUser,
+			Pass:   flags.arangoPass,
+			DBAddr: flags.arangoAddr,
+		}
+		backend, err := arangodb.GetBackend(ctx, &args)
+		if err != nil {
+			return nil, fmt.Errorf("error creating arango backend: %w", err)
 		}
 
 		topResolver = resolvers.Resolver{Backend: backend}
@@ -148,7 +165,7 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 		args := inmem.DemoCredentials{}
 		backend, err := inmem.GetBackend(&args)
 		if err != nil {
-			return nil, fmt.Errorf("Error creating inmem backend: %w", err)
+			return nil, fmt.Errorf("error creating inmem backend: %w", err)
 		}
 
 		topResolver = resolvers.Resolver{Backend: backend}

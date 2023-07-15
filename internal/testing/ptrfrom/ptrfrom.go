@@ -23,6 +23,8 @@
 //	}
 package ptrfrom
 
+import "time"
+
 // Bool helps get bool pointers for test literals
 func Bool(v bool) *bool { return &v }
 
@@ -37,6 +39,9 @@ func Float64(v float64) *float64 { return &v }
 
 // String helps get string pointers for test literals
 func String(v string) *string { return &v }
+
+// Time helps get time pointers for test literals
+func Time(v time.Time) *time.Time { return &v }
 
 // Any helps get pointers from any type for test literals
 func Any[T any](v T) *T { return &v }

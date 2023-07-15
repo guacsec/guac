@@ -19,7 +19,6 @@ import (
 	_ "embed"
 	"encoding/base64"
 	"encoding/json"
-	"reflect"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -1891,118 +1890,56 @@ var (
 		},
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
+
+	// CSAF
+	//go:embed exampledata/rhsa-csaf.json
+	CsafExampleRedHat []byte
+
+	CsafVexIngest = []assembler.VexIngest{
+		{
+			Pkg: &model.PkgInputSpec{
+				Type:       "rpm",
+				Namespace:  strP("redhat"),
+				Name:       "openssl",
+				Version:    strP("1.1.1k-7.el8_6"),
+				Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "x86_64"}, {Key: "epoch", Value: "1"}},
+				Subpath:    strP(""),
+			},
+			CVE: &model.CVEInputSpec{Year: 2023, CveId: "CVE-2023-0286"},
+			VexData: &model.VexStatementInputSpec{
+				Status:           "AFFECTED",
+				VexJustification: "NOT_PROVIDED",
+				Statement: `For details on how to apply this update, which includes the changes described in this advisory, refer to:
+
+https://access.redhat.com/articles/11258
+
+For the update to take effect, all services linked to the OpenSSL library must be restarted, or the system rebooted.`,
+
+				KnownSince: parseRfc3339("2023-03-23T11:14:00Z"),
+				Origin:     "RHSA-2023:1441",
+			},
+		},
+	}
+	CsafCertifyVulnIngest = []assembler.CertifyVulnIngest{
+		{
+			Pkg: &model.PkgInputSpec{
+				Type:      "rpm",
+				Namespace: strP("redhat"),
+				Name:      "openssl",
+				Version:   strP("1.1.1k-7.el8_6"),
+				Qualifiers: []model.PackageQualifierInputSpec{
+					{Key: "arch", Value: "x86_64"},
+					{Key: "epoch", Value: "1"},
+				},
+				Subpath: strP(""),
+			},
+			CVE: &model.CVEInputSpec{Year: 2023, CveId: "CVE-2023-0286"},
+			VulnData: &model.VulnerabilityMetaDataInput{
+				TimeScanned: parseRfc3339("2023-03-23T11:14:00Z"),
+			},
+		},
+	}
 )
-
-func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
-	if len(slice1) != len(slice2) {
-		return false
-	}
-
-	result := true
-
-	for _, node1 := range slice1 {
-		e := false
-		for _, node2 := range slice2 {
-			if node1.Type() == "Package" && node2.Type() == "Package" {
-				if node1.(assembler.PackageNode).Name == node2.(assembler.PackageNode).Name {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Artifact" && node2.Type() == "Artifact" {
-				if node1.(assembler.ArtifactNode).Name == node2.(assembler.ArtifactNode).Name {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Attestation" && node2.Type() == "Attestation" {
-				if node1.(assembler.AttestationNode).FilePath == node2.(assembler.AttestationNode).FilePath {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Builder" && node2.Type() == "Builder" {
-				if node1.(assembler.BuilderNode).BuilderId == node2.(assembler.BuilderNode).BuilderId {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Identity" && node2.Type() == "Identity" {
-				if node1.(assembler.IdentityNode).ID == node2.(assembler.IdentityNode).ID {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			} else if node1.Type() == "Vulnerability" && node2.Type() == "Vulnerability" {
-				if node1.(assembler.VulnerabilityNode).ID == node2.(assembler.VulnerabilityNode).ID {
-					if reflect.DeepEqual(node1, node2) {
-						e = true
-						break
-					}
-				}
-			}
-		}
-		if !e {
-			result = false
-			break
-		}
-	}
-	return result
-}
-
-func GuacEdgeSliceEqual(slice1, slice2 []assembler.GuacEdge) bool {
-	if len(slice1) != len(slice2) {
-		return false
-	}
-
-	result := true
-	for _, edge1 := range slice1 {
-		e := false
-		for _, edge2 := range slice2 {
-			if edge1.Type() == "DependsOn" && edge2.Type() == "DependsOn" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "Contains" && edge2.Type() == "Contains" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "Attestation" && edge2.Type() == "Attestation" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "Identity" && edge2.Type() == "Identity" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "BuiltBy" && edge2.Type() == "BuiltBy" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			} else if edge1.Type() == "Vulnerable" && edge2.Type() == "Vulnerable" {
-				if reflect.DeepEqual(edge1, edge2) {
-					e = true
-					break
-				}
-			}
-		}
-		if !e {
-			result = false
-			break
-		}
-	}
-	return result
-}
 
 var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.EquateEmpty(),
@@ -2046,4 +1983,12 @@ func gLess(e1, e2 any) bool {
 
 func strP(s string) *string {
 	return &s
+}
+
+func parseRfc3339(s string) time.Time {
+	time, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		panic(err)
+	}
+	return time
 }

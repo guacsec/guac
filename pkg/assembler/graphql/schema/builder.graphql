@@ -46,4 +46,6 @@ extend type Query {
 extend type Mutation {
   "Ingests a new builder and returns it."
   ingestBuilder(builder: BuilderInputSpec): Builder!
+  "Bulk ingests new builders and returns a list of them."
+  ingestBuilders(builders: [BuilderInputSpec!]!): [Builder!]!
 }

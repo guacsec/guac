@@ -160,7 +160,7 @@ func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDepend
 // Ingest IngestDependencies
 
 func (c *neo4jClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
-	panic("not implemented")
+	return []*model.IsDependency{}, fmt.Errorf("not implemented: IngestDependencies")
 }
 
 // Ingest IsDependency

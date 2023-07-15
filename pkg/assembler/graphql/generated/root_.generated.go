@@ -39,11 +39,6 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Annotation struct {
-		Key   func(childComplexity int) int
-		Value func(childComplexity int) int
-	}
-
 	Artifact struct {
 		Algorithm func(childComplexity int) int
 		Digest    func(childComplexity int) int
@@ -108,9 +103,19 @@ type ComplexityRoot struct {
 		ID     func(childComplexity int) int
 	}
 
+	HasMetadata struct {
+		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Key           func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Subject       func(childComplexity int) int
+		Timestamp     func(childComplexity int) int
+		Value         func(childComplexity int) int
+	}
+
 	HasSBOM struct {
 		Algorithm        func(childComplexity int) int
-		Annotations      func(childComplexity int) int
 		Collector        func(childComplexity int) int
 		Digest           func(childComplexity int) int
 		DownloadLocation func(childComplexity int) int
@@ -178,12 +183,14 @@ type ComplexityRoot struct {
 		IngestArtifact        func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestArtifacts       func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
+		IngestBuilders        func(childComplexity int, builders []*model.BuilderInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
+		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
@@ -195,8 +202,10 @@ type ComplexityRoot struct {
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestPackages        func(childComplexity int, pkgs []*model.PkgInputSpec) int
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
+		IngestPointOfContact  func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
+		IngestSources         func(childComplexity int, sources []*model.SourceInputSpec) int
 		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) int
 		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
@@ -248,6 +257,17 @@ type ComplexityRoot struct {
 		Packages      func(childComplexity int) int
 	}
 
+	PointOfContact struct {
+		Collector     func(childComplexity int) int
+		Email         func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Info          func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Since         func(childComplexity int) int
+		Subject       func(childComplexity int) int
+	}
+
 	Query struct {
 		Artifacts           func(childComplexity int, artifactSpec *model.ArtifactSpec) int
 		Builders            func(childComplexity int, builderSpec *model.BuilderSpec) int
@@ -258,6 +278,7 @@ type ComplexityRoot struct {
 		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
 		FindSoftware        func(childComplexity int, searchText string) int
 		Ghsa                func(childComplexity int, ghsaSpec *model.GHSASpec) int
+		HasMetadata         func(childComplexity int, hasMetadataSpec *model.HasMetadataSpec) int
 		HasSbom             func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
 		HasSlsa             func(childComplexity int, hasSLSASpec *model.HasSLSASpec) int
 		HasSourceAt         func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
@@ -272,6 +293,7 @@ type ComplexityRoot struct {
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
 		Path                func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
 		PkgEqual            func(childComplexity int, pkgEqualSpec *model.PkgEqualSpec) int
+		PointOfContact      func(childComplexity int, pointOfContactSpec *model.PointOfContactSpec) int
 		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
@@ -352,20 +374,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "Annotation.key":
-		if e.complexity.Annotation.Key == nil {
-			break
-		}
-
-		return e.complexity.Annotation.Key(childComplexity), true
-
-	case "Annotation.value":
-		if e.complexity.Annotation.Value == nil {
-			break
-		}
-
-		return e.complexity.Annotation.Value(childComplexity), true
 
 	case "Artifact.algorithm":
 		if e.complexity.Artifact.Algorithm == nil {
@@ -626,19 +634,68 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GHSA.ID(childComplexity), true
 
+	case "HasMetadata.collector":
+		if e.complexity.HasMetadata.Collector == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Collector(childComplexity), true
+
+	case "HasMetadata.id":
+		if e.complexity.HasMetadata.ID == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.ID(childComplexity), true
+
+	case "HasMetadata.justification":
+		if e.complexity.HasMetadata.Justification == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Justification(childComplexity), true
+
+	case "HasMetadata.key":
+		if e.complexity.HasMetadata.Key == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Key(childComplexity), true
+
+	case "HasMetadata.origin":
+		if e.complexity.HasMetadata.Origin == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Origin(childComplexity), true
+
+	case "HasMetadata.subject":
+		if e.complexity.HasMetadata.Subject == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Subject(childComplexity), true
+
+	case "HasMetadata.timestamp":
+		if e.complexity.HasMetadata.Timestamp == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Timestamp(childComplexity), true
+
+	case "HasMetadata.value":
+		if e.complexity.HasMetadata.Value == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.Value(childComplexity), true
+
 	case "HasSBOM.algorithm":
 		if e.complexity.HasSBOM.Algorithm == nil {
 			break
 		}
 
 		return e.complexity.HasSBOM.Algorithm(childComplexity), true
-
-	case "HasSBOM.annotations":
-		if e.complexity.HasSBOM.Annotations == nil {
-			break
-		}
-
-		return e.complexity.HasSBOM.Annotations(childComplexity), true
 
 	case "HasSBOM.collector":
 		if e.complexity.HasSBOM.Collector == nil {
@@ -982,6 +1039,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestBuilder(childComplexity, args["builder"].(*model.BuilderInputSpec)), true
 
+	case "Mutation.ingestBuilders":
+		if e.complexity.Mutation.IngestBuilders == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestBuilders_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestBuilders(childComplexity, args["builders"].([]*model.BuilderInputSpec)), true
+
 	case "Mutation.ingestCertifyBad":
 		if e.complexity.Mutation.IngestCertifyBad == nil {
 			break
@@ -1053,6 +1122,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestGhsa(childComplexity, args["ghsa"].(*model.GHSAInputSpec)), true
+
+	case "Mutation.ingestHasMetadata":
+		if e.complexity.Mutation.IngestHasMetadata == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHasMetadata_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHasMetadata(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["hasMetadata"].(model.HasMetadataInputSpec)), true
 
 	case "Mutation.ingestHasSBOM":
 		if e.complexity.Mutation.IngestHasSbom == nil {
@@ -1186,6 +1267,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestPkgEqual(childComplexity, args["pkg"].(model.PkgInputSpec), args["otherPackage"].(model.PkgInputSpec), args["pkgEqual"].(model.PkgEqualInputSpec)), true
 
+	case "Mutation.ingestPointOfContact":
+		if e.complexity.Mutation.IngestPointOfContact == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestPointOfContact_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
+
 	case "Mutation.ingestSLSA":
 		if e.complexity.Mutation.IngestSlsa == nil {
 			break
@@ -1209,6 +1302,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestSource(childComplexity, args["source"].(model.SourceInputSpec)), true
+
+	case "Mutation.ingestSources":
+		if e.complexity.Mutation.IngestSources == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestSources_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestSources(childComplexity, args["sources"].([]*model.SourceInputSpec)), true
 
 	case "Mutation.ingestVEXStatement":
 		if e.complexity.Mutation.IngestVEXStatement == nil {
@@ -1395,6 +1500,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PkgEqual.Packages(childComplexity), true
 
+	case "PointOfContact.collector":
+		if e.complexity.PointOfContact.Collector == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Collector(childComplexity), true
+
+	case "PointOfContact.email":
+		if e.complexity.PointOfContact.Email == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Email(childComplexity), true
+
+	case "PointOfContact.id":
+		if e.complexity.PointOfContact.ID == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.ID(childComplexity), true
+
+	case "PointOfContact.info":
+		if e.complexity.PointOfContact.Info == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Info(childComplexity), true
+
+	case "PointOfContact.justification":
+		if e.complexity.PointOfContact.Justification == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Justification(childComplexity), true
+
+	case "PointOfContact.origin":
+		if e.complexity.PointOfContact.Origin == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Origin(childComplexity), true
+
+	case "PointOfContact.since":
+		if e.complexity.PointOfContact.Since == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Since(childComplexity), true
+
+	case "PointOfContact.subject":
+		if e.complexity.PointOfContact.Subject == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.Subject(childComplexity), true
+
 	case "Query.artifacts":
 		if e.complexity.Query.Artifacts == nil {
 			break
@@ -1502,6 +1663,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(*model.GHSASpec)), true
+
+	case "Query.HasMetadata":
+		if e.complexity.Query.HasMetadata == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HasMetadata_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HasMetadata(childComplexity, args["hasMetadataSpec"].(*model.HasMetadataSpec)), true
 
 	case "Query.HasSBOM":
 		if e.complexity.Query.HasSbom == nil {
@@ -1670,6 +1843,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.PkgEqual(childComplexity, args["pkgEqualSpec"].(*model.PkgEqualSpec)), true
+
+	case "Query.PointOfContact":
+		if e.complexity.Query.PointOfContact == nil {
+			break
+		}
+
+		args, err := ec.field_Query_PointOfContact_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PointOfContact(childComplexity, args["pointOfContactSpec"].(*model.PointOfContactSpec)), true
 
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
@@ -1962,8 +2147,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputAnnotationInputSpec,
-		ec.unmarshalInputAnnotationSpec,
 		ec.unmarshalInputArtifactInputSpec,
 		ec.unmarshalInputArtifactSpec,
 		ec.unmarshalInputBuilderInputSpec,
@@ -1981,6 +2164,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCveOrGhsaSpec,
 		ec.unmarshalInputGHSAInputSpec,
 		ec.unmarshalInputGHSASpec,
+		ec.unmarshalInputHasMetadataInputSpec,
+		ec.unmarshalInputHasMetadataSpec,
 		ec.unmarshalInputHasSBOMInputSpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSLSASpec,
@@ -2011,6 +2196,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPkgInputSpec,
 		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
+		ec.unmarshalInputPointOfContactInputSpec,
+		ec.unmarshalInputPointOfContactSpec,
 		ec.unmarshalInputSLSAInputSpec,
 		ec.unmarshalInputSLSAPredicateInputSpec,
 		ec.unmarshalInputSLSAPredicateSpec,
@@ -2235,6 +2422,8 @@ extend type Query {
 extend type Mutation {
   "Ingests a new builder and returns it."
   ingestBuilder(builder: BuilderInputSpec): Builder!
+  "Bulk ingests new builders and returns a list of them."
+  ingestBuilders(builders: [BuilderInputSpec!]!): [Builder!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyBad.graphql", Input: `#
@@ -2847,6 +3036,103 @@ extend type Mutation {
   ingestVulnerability(pkg: PkgInputSpec!, vulnerability: VulnerabilityInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }
 `, BuiltIn: false},
+	{Name: "../schema/contact.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+"""
+PointOfContact is an attestation of how to get in touch with the person(s) responsible
+for a package, source, or artifact.
+
+All evidence trees record a justification for the property they represent as
+well as the document that contains the attestation (origin) and the collector
+that collected the document (collector).
+
+The attestation applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
+
+email is the email address (singular) of the point of contact.
+
+info is additional contact information other than email address. This is free
+form.
+
+NOTE: the identifiers for point of contact should be part of software trees.
+This will benefit from identifier look up and traversal as well as organization
+hierarchy. However, until the use case arises, PointOfContact will be a flat
+reference to the contact details.
+"""
+type PointOfContact {
+  id: ID!
+  subject: PackageSourceOrArtifact!
+  email: String!
+  info: String!
+  since: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+PointOfContactSpec allows filtering the list of PointOfContact evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
+
+since filters attestations with a value of since later or equal to the provided filter.
+"""
+input PointOfContactSpec {
+  id: ID
+  subject: PackageSourceOrArtifactSpec
+  email: String
+  info: String
+  since: Time
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
+"""
+input PointOfContactInputSpec {
+  email: String!
+  info: String!
+  since: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all PointOfContact attestations matching a filter."
+  PointOfContact (pointOfContactSpec: PointOfContactSpec): [PointOfContact!]!
+}
+
+extend type Mutation {
+  "Adds a PointOfContact attestation to a package, source or artifact."
+  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, pointOfContact: PointOfContactInputSpec!): PointOfContact!
+}
+`, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
@@ -2988,21 +3274,10 @@ type HasSBOM {
   digest: String!
   "Location from which the SBOM can be downloaded"
   downloadLocation: String!
-  "SBOM annotations (e.g., SBOM Scorecard information)"
-  annotations: [Annotation!]!
   "Document from which this attestation is generated from"
   origin: String!
   "GUAC collector for the document"
   collector: String!
-}
-
-"""
-Annotation is a key-value pair to provide additional information or metadata
-about an SBOM.
-"""
-type Annotation {
-  key: String!
-  value: String!
 }
 
 """
@@ -3017,15 +3292,8 @@ input HasSBOMSpec {
   algorithm: String
   digest: String
   downloadLocation: String
-  annotations: [AnnotationSpec!] = []
   origin: String
   collector: String
-}
-
-"AnnotationSpec allows creating query filters for Annotation objects."
-input AnnotationSpec {
-  key: String!
-  value: String!
 }
 
 "HasSBOMInputSpec is the same as HasSBOM but for mutation input."
@@ -3034,15 +3302,8 @@ input HasSBOMInputSpec {
   algorithm: String!
   digest: String!
   downloadLocation: String!
-  annotations: [AnnotationInputSpec!]!
   origin: String!
   collector: String!
-}
-
-"AnnotationInputSpec allows ingesting Annotation objects."
-input AnnotationInputSpec {
-  key: String!
-  value: String!
 }
 
 extend type Query {
@@ -3621,6 +3882,98 @@ extend type Mutation {
   ingestIsVulnerability(osv: OSVInputSpec!, vulnerability: CveOrGhsaInput!, isVulnerability: IsVulnerabilityInputSpec!): IsVulnerability!
 }
 `, BuiltIn: false},
+	{Name: "../schema/metadata.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the HasMetadata
+
+"""
+HasMetadata is an attestation that a package, source, or artifact has a certain
+attested property (key) with value (value). For example, a source may have
+metadata "SourceRepo2FAEnabled=true".
+
+The intent of this evidence tree predicate is to allow extensibility of metadata
+expressible within the GUAC ontology. Metadata that is commonly used will then
+be promoted to a predicate on its own.
+
+Justification indicates how the metadata was determined.
+
+The metadata applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
+"""
+type HasMetadata {
+  id: ID!
+  subject: PackageSourceOrArtifact!
+  key: String!
+  value: String!
+  timestamp: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+HasMetadataSpec allows filtering the list of HasMetadata evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
+
+since specified indicates filtering timestamps after the specified time
+"""
+input HasMetadataSpec {
+  id: ID
+  subject: PackageSourceOrArtifactSpec
+  since: Time
+  key: String
+  value: String
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
+"""
+input HasMetadataInputSpec {
+  key: String!
+  value: String!
+  timestamp: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all HasMetdata attestations matching a filter."
+  HasMetadata(hasMetadataSpec: HasMetadataSpec): [HasMetadata!]!
+}
+
+extend type Mutation {
+  "Adds metadata about a package, source or artifact."
+  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, hasMetadata: HasMetadataInputSpec!): HasMetadata!
+}
+`, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
@@ -3913,6 +4266,8 @@ union Node
   | HasSourceAt
   | HasSBOM
   | HasSLSA
+  | HasMetadata
+  | PointOfContact
 
 """
 Edge allows filtering path/neighbors output to only contain a subset of all
@@ -3934,6 +4289,8 @@ enum Edge {
   ARTIFACT_HAS_SBOM
   ARTIFACT_HAS_SLSA
   ARTIFACT_IS_OCCURRENCE
+  ARTIFACT_HAS_METADATA
+  ARTIFACT_POINT_OF_CONTACT
   BUILDER_HAS_SLSA
   CVE_CERTIFY_VEX_STATEMENT
   CVE_CERTIFY_VULN
@@ -3954,11 +4311,15 @@ enum Edge {
   PACKAGE_IS_DEPENDENCY
   PACKAGE_IS_OCCURRENCE
   PACKAGE_PKG_EQUAL
+  PACKAGE_HAS_METADATA
+  PACKAGE_POINT_OF_CONTACT
   SOURCE_CERTIFY_BAD
   SOURCE_CERTIFY_GOOD
   SOURCE_CERTIFY_SCORECARD
   SOURCE_HAS_SOURCE_AT
   SOURCE_IS_OCCURRENCE
+  SOURCE_HAS_METADATA
+  SOURCE_POINT_OF_CONTACT
 
   CERTIFY_BAD_ARTIFACT
   CERTIFY_BAD_PACKAGE
@@ -3993,6 +4354,12 @@ enum Edge {
   IS_VULNERABILITY_GHSA
   IS_VULNERABILITY_OSV
   PKG_EQUAL_PACKAGE
+  HAS_METADATA_PACKAGE
+  HAS_METADATA_ARTIFACT
+  HAS_METADATA_SOURCE
+  POINT_OF_CONTACT_PACKAGE
+  POINT_OF_CONTACT_ARTIFACT
+  POINT_OF_CONTACT_SOURCE
 }
 
 extend type Query {
@@ -4245,6 +4612,8 @@ extend type Query {
 extend type Mutation {
   "Ingests a new source and returns the corresponding source trie path."
   ingestSource(source: SourceInputSpec!): Source!
+  "Bulk ingests sources and returns the list of corresponding source trie path."
+  ingestSources(sources: [SourceInputSpec!]!): [Source!]!
 }
 `, BuiltIn: false},
 }

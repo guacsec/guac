@@ -37,7 +37,7 @@ func init() {
 
 	set.Int("csub-listen-port", 2782, "port to listen to on collect-sub service")
 
-	set.String("gql-backend", "inmem", "backend used for graphql api server: [neo4j | inmem]")
+	set.String("gql-backend", "inmem", "backend used for graphql api server: [inmem | arango (experimental) | neo4j (unmaintained)]")
 	set.Int("gql-listen-port", 8080, "port used for graphql api server")
 	set.Bool("gql-debug", false, "debug flag which enables the graphQL playground")
 	set.Bool("gql-trace", false, "flag which enables tracing of graphQL requests and responses on the console")
@@ -52,6 +52,10 @@ func init() {
 	set.String("db-driver", "postgres", "database driver to use, one of [postgres | sqlite3 | mysql] or anything supported by sql.DB")
 	set.Bool("db-debug", false, "enable debug logging for database queries")
 	set.Bool("db-migrate", true, "automatically run database migrations on start")
+
+	set.String("arango-addr", "http://localhost:8529", "address to arango db")
+	set.String("arango-user", "", "arango user to connect to graph db")
+	set.String("arango-pass", "", "arango password to connect to graph db")
 
 	set.String("gql-addr", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
 
