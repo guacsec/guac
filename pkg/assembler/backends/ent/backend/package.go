@@ -23,45 +23,52 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	query := b.client.PackageType.Query().Limit(MaxPageSize)
-	paths, isGQL := getPreloads(ctx)
+	query := b.client.PackageVersion.Query().Limit(MaxPageSize)
 
-	query.Where(
-		optionalPredicate(pkgSpec.Type, packagetype.TypeEQ),
-	)
+	query.Where(packageVersionQuery(pkgSpec))
+	query.WithName(withPackageNameTree())
 
-	if PathContains(paths, "namespaces") || !isGQL {
-		query.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-			q.Order(ent.Asc(packagenamespace.FieldNamespace))
-			q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
+	// query := b.client.PackageType.Query().Limit(MaxPageSize)
+	// paths, isGQL := getPreloads(ctx)
 
-			if PathContains(paths, "namespaces.names") || !isGQL {
-				q.WithNames(func(q *ent.PackageNameQuery) {
-					q.Order(ent.Asc(packagename.FieldName))
-					q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
+	// query.Where(
+	// 	optionalPredicate(pkgSpec.Type, packagetype.TypeEQ),
+	// )
 
-					if PathContains(paths, "namespaces.names.versions") || !isGQL {
-						q.WithVersions(func(q *ent.PackageVersionQuery) {
-							q.Order(ent.Asc(packageversion.FieldVersion))
-							q.Where(
-								optionalPredicate(pkgSpec.ID, IDEQ),
-								optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
-								optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEQ),
-								packageversion.QualifiersMatchSpec(pkgSpec.Qualifiers),
-							)
-						})
-					}
-				})
-			}
-		})
-	}
+	// if PathContains(paths, "namespaces") || !isGQL {
+	// 	query.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
+	// 		q.Order(ent.Asc(packagenamespace.FieldNamespace))
+	// 		q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
+
+	// 		if PathContains(paths, "namespaces.names") || !isGQL {
+	// 			q.WithNames(func(q *ent.PackageNameQuery) {
+	// 				q.Order(ent.Asc(packagename.FieldName))
+	// 				q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
+
+	// 				if PathContains(paths, "namespaces.names.versions") || !isGQL {
+	// 					q.WithVersions(func(q *ent.PackageVersionQuery) {
+	// 						q.Order(ent.Asc(packageversion.FieldVersion))
+	// 						q.Where(
+	// 							optionalPredicate(pkgSpec.ID, IDEQ),
+	// 							optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
+	// 							optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEQ),
+	// 							packageversion.QualifiersMatchSpec(pkgSpec.Qualifiers),
+	// 						)
+	// 					})
+	// 				}
+	// 			})
+	// 		}
+	// 	})
+	// }
 
 	pkgs, err := query.All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return collect(pkgs, toModelPackage), nil
+	return collect(pkgs, func(v *ent.PackageVersion) *model.Package {
+		return toModelPackage(backReferencePackageVersion(v))
+	}), nil
 }
 
 func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
@@ -148,6 +155,7 @@ func withPackageVersionTree() func(*ent.PackageVersionQuery) {
 }
 
 func withPackageNameTree() func(q *ent.PackageNameQuery) {
+	// TODO: (ivanvanderbyl) Filter the depth of this query using preloads
 	return func(q *ent.PackageNameQuery) {
 		q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
 			q.WithPackage()
