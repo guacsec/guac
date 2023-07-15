@@ -92,7 +92,7 @@ func queryCertifications(ctx context.Context, client *ent.Client, typ certificat
 		case filter.Subject.Package != nil:
 			query = append(query, certification.Or(
 				certification.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
-				certification.HasPackageVersionWith(pkgVersionPredicates(filter.Subject.Package)),
+				certification.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
 			))
 		case filter.Subject.Source != nil:
 			query = append(query, certification.HasSourceWith(sourceQuery(filter.Subject.Source)))
@@ -154,7 +154,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 
 	case subject.Package != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			pv, err := getPkgVersion(ctx, client.Client(), subject.Package)
+			pv, err := getPkgVersion(ctx, client.Client(), *subject.Package)
 			if err != nil {
 				return nil, err
 			}
@@ -167,7 +167,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 				sql.IsNull(certification.FieldSourceID),
 			)
 		} else {
-			pn, err := getPkgName(ctx, client.Client(), subject.Package)
+			pn, err := getPkgName(ctx, client.Client(), *subject.Package)
 			if err != nil {
 				return nil, err
 			}

@@ -38,11 +38,11 @@ func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 }
 
 func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInputSpec, pkgB model.PkgInputSpec, spec model.PkgEqualInputSpec) (*ent.PkgEqual, error) {
-	pkgARecord, err := client.PackageVersion.Query().Where(packageVersionQuery(&pkgA)).Only(ctx)
+	pkgARecord, err := client.PackageVersion.Query().Where(packageVersionInputQuery(pkgA)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
-	pkgBRecord, err := client.PackageVersion.Query().Where(packageVersionQuery(&pkgB)).Only(ctx)
+	pkgBRecord, err := client.PackageVersion.Query().Where(packageVersionInputQuery(pkgB)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {
 	}
 
 	for _, pkg := range spec.Packages {
-		predicates = append(predicates, pkgequal.HasPackagesWith(pkgVersionPredicates(pkg)))
+		predicates = append(predicates, pkgequal.HasPackagesWith(packageVersionQuery(pkg)))
 	}
 
 	return pkgequal.And(predicates...)
@@ -112,7 +112,8 @@ func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 	}
 }
 
-func hashPackages(slc []*ent.PackageVersion) string {
+// hashPackages is used to create a unique key for the M2M edge between PkgEquals <-M2M-> PackageVersions
+func hashPackages(slc ent.PackageVersions) string {
 	pkgs := slc
 	hash := sha1.New()
 	content := bytes.NewBuffer(nil)

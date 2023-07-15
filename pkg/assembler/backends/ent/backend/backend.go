@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
@@ -32,6 +33,11 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	}
 
 	if client, ok := args.(*ent.Client); ok {
+		err := client.Ping(context.Background())
+		if err != nil {
+			return nil, fmt.Errorf("failed to ping db: %w", err)
+		}
+
 		be.client = client
 	} else {
 		return nil, fmt.Errorf("invalid args type")

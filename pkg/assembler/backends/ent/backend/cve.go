@@ -32,7 +32,7 @@ func (b *EntBackend) Cve(ctx context.Context, spec *model.CVESpec) ([]*model.Cve
 }
 
 func (b *EntBackend) IngestCve(ctx context.Context, spec *model.CVEInputSpec) (*model.Cve, error) {
-	advisory, err := WithinTX(ctx, b.client, func(context.Context) (*ent.SecurityAdvisory, error) {
+	advisory, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SecurityAdvisory, error) {
 		return upsertAdvisory(ctx, ent.TxFromContext(ctx), advisoryQuerySpec{
 			CveID: &spec.CveID,
 			Year:  &spec.Year,

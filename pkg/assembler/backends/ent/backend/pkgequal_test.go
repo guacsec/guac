@@ -187,10 +187,10 @@ func (s *Suite) TestPkgEqual() {
 					Packages: []*model.Package{p1out, p2out},
 				},
 			},
+			// Only: true,
 		},
 		{
-			Name: "Query on pkg algo and pkg",
-			// Only:  true,
+			Name:  "Query on pkg algo and pkg",
 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{

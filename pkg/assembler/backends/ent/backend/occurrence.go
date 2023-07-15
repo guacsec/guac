@@ -108,8 +108,8 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	}
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		client := ent.FromContext(ctx)
 		tx := ent.TxFromContext(ctx)
+		client := tx.Client()
 		var err error
 
 		artRecord, err := client.Artifact.Query().
@@ -136,7 +136,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
-			pkgVersion, err := getPkgVersion(ctx, client, subject.Package)
+			pkgVersion, err := getPkgVersion(ctx, client, *subject.Package)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get package version")
 			}

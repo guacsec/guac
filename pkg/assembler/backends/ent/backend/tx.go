@@ -7,7 +7,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 )
 
-func WithinTX[T any](ctx context.Context, entClient *ent.Client, exec func(context.Context) (*T, error)) (*T, error) {
+func WithinTX[T any](ctx context.Context, entClient *ent.Client, exec func(ctx context.Context) (*T, error)) (*T, error) {
 	if entClient == nil {
 		return nil, Errorf("%v ::  %s", "WithinTX", "ent client is not initialized")
 	}
@@ -18,8 +18,8 @@ func WithinTX[T any](ctx context.Context, entClient *ent.Client, exec func(conte
 	if err != nil {
 		return nil, err
 	}
+
 	ctx = ent.NewTxContext(ctx, tx)
-	ctx = ent.NewContext(ctx, tx.Client())
 
 	defer func() {
 		if r := recover(); r != nil {

@@ -74,7 +74,7 @@ func (s *Suite) Test_get_package_helpers() {
 	s.Require().NotNil(pkgVersionID)
 
 	s.Run("getPkgName", func() {
-		pkgName, err := getPkgName(s.Ctx, s.Client, &model.PkgInputSpec{
+		pkgName, err := getPkgName(s.Ctx, s.Client, model.PkgInputSpec{
 			Type:      "apk",
 			Namespace: ptr("test"),
 			Name:      "alpine",
@@ -85,13 +85,13 @@ func (s *Suite) Test_get_package_helpers() {
 	})
 
 	s.Run("getPkgVersion", func() {
-		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, &spec)
+		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, spec)
 		s.Require().NoError(err)
 		s.Require().NotNil(pkgVersion)
 	})
 
 	s.Run("pkgTreeFromVersion", func() {
-		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, &spec)
+		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, spec)
 		s.Require().NoError(err)
 		pkgTree, err := pkgTreeFromVersion(s.Ctx, pkgVersion)
 		s.Require().NoError(err)

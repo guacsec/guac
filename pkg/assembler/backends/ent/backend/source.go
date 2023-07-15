@@ -26,7 +26,7 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		query = append(query,
 			hassourceat.Or(
 				hassourceat.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Package))),
-				hassourceat.HasPackageVersionWith(pkgVersionPredicates(filter.Package)),
+				hassourceat.HasPackageVersionWith(packageVersionQuery(filter.Package)),
 			),
 		)
 	}
@@ -86,7 +86,7 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSp
 		conflictColumns = append(conflictColumns, hassourceat.FieldPackageNameID)
 		conflictWhere = sql.And(sql.IsNull(hassourceat.FieldPackageVersionID), sql.NotNull(hassourceat.FieldPackageNameID))
 	} else {
-		pkgVersion, err := client.PackageVersion.Query().Where(packageVersionQuery(&pkg)).Only(ctx)
+		pkgVersion, err := client.PackageVersion.Query().Where(packageVersionInputQuery(pkg)).Only(ctx)
 		if err != nil {
 			return nil, err
 		}

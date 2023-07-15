@@ -28,7 +28,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 
 	if spec.Subject != nil {
 		if spec.Subject.Package != nil {
-			predicates = append(predicates, billofmaterials.HasPackageWith(pkgVersionPredicates(spec.Subject.Package)))
+			predicates = append(predicates, billofmaterials.HasPackageWith(packageVersionQuery(spec.Subject.Package)))
 		} else if spec.Subject.Artifact != nil {
 			predicates = append(predicates, billofmaterials.HasArtifactWith(artifactQueryPredicates(spec.Subject.Artifact)))
 		}
@@ -60,7 +60,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 	}
 
 	sbomId, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		client := ent.FromContext(ctx)
+		client := ent.TxFromContext(ctx)
 
 		annotations := make([]model.Annotation, len(spec.Annotations))
 		for i, a := range spec.Annotations {
@@ -90,7 +90,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 
 		if subject.Package != nil {
 			var err error
-			p, err := getPkgVersion(ctx, client, subject.Package)
+			p, err := getPkgVersion(ctx, client.Client(), *subject.Package)
 			if err != nil {
 				return nil, Errorf("%v ::  %s", funcName, err)
 			}

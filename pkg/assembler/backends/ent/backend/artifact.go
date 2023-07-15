@@ -61,7 +61,7 @@ func (b *EntBackend) IngestMaterials(ctx context.Context, materials []*model.Art
 func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
 	funcName := "IngestArtifacts"
 	records, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Artifacts, error) {
-		client := ent.FromContext(ctx)
+		client := ent.TxFromContext(ctx)
 		slc, err := ingestArtifacts(ctx, client, artifacts)
 		if err != nil {
 			return nil, err
@@ -89,7 +89,7 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.ArtifactInpu
 	return records[0], nil
 }
 
-func ingestArtifacts(ctx context.Context, client *ent.Client, artifacts []*model.ArtifactInputSpec) (ent.Artifacts, error) {
+func ingestArtifacts(ctx context.Context, client *ent.Tx, artifacts []*model.ArtifactInputSpec) (ent.Artifacts, error) {
 	creates := make([]*ent.ArtifactCreate, len(artifacts))
 	// TODO: (ivanvanderbyl) Split into batches to ensure we don't reach the max query size
 

@@ -26,7 +26,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 			query.Where(dependency.HasDependentPackageWith(packageNameQuery(spec.DependentPackage)))
 		}
 		if spec.Package != nil {
-			query.Where(dependency.HasPackageWith(pkgVersionPredicates(spec.Package)))
+			query.Where(dependency.HasPackageWith(packageVersionQuery(spec.Package)))
 		}
 
 		if spec.DependencyType != nil {
@@ -80,12 +80,12 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 	funcName := "IngestDependency"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		client := ent.FromContext(ctx)
-		p, err := getPkgVersion(ctx, client, &pkg)
+		client := ent.TxFromContext(ctx)
+		p, err := getPkgVersion(ctx, client.Client(), pkg)
 		if err != nil {
 			return nil, err
 		}
-		dp, err := getPkgName(ctx, client, &depPkg)
+		dp, err := getPkgName(ctx, client.Client(), depPkg)
 		if err != nil {
 			return nil, err
 		}
