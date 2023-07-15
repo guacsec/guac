@@ -69,8 +69,8 @@ func (t *tables) nodeType(ctx context.Context, drv dialect.Driver, id int) (stri
 	if err != nil {
 		return "", err
 	}
-	idx := int(id / (1<<32 - 1))
-	if idx < 0 || idx >= len(tables) {
+	idx := int64(int64(id) / (1<<32 - 1))
+	if idx < 0 || idx >= int64(len(tables)) {
 		return "", fmt.Errorf("cannot resolve table from id %v: %w", id, errNodeInvalidID)
 	}
 	return tables[idx], nil
