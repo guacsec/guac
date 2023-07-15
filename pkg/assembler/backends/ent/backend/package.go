@@ -283,9 +283,6 @@ func packageNameQuery(spec *model.PkgNameSpec) predicate.PackageName {
 	query := []predicate.PackageName{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.Name, packagename.Name),
-		packagename.HasVersionsWith(
-			packageversion.VersionEQ(""), // Match all versions
-		),
 		packagename.HasNamespaceWith(
 			optionalPredicate(spec.Namespace, packagenamespace.Namespace),
 			packagenamespace.HasPackageWith(

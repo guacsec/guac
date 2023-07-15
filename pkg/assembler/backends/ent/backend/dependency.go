@@ -12,26 +12,27 @@ import (
 
 func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	funcName := "IsDependency"
+	if spec == nil {
+		return nil, nil
+	}
+
 	query := b.client.Dependency.Query().Order(ent.Asc(dependency.FieldID)).Limit(MaxPageSize)
+	query.Where(
+		optionalPredicate(spec.ID, IDEQ),
+		optionalPredicate(spec.VersionRange, dependency.VersionRange),
+		optionalPredicate(spec.Justification, dependency.Justification),
+		optionalPredicate(spec.Origin, dependency.Origin),
+		optionalPredicate(spec.Collector, dependency.Collector),
+	)
+	if spec.DependentPackage != nil {
+		query.Where(dependency.HasDependentPackageWith(packageNameQuery(spec.DependentPackage)))
+	}
+	if spec.Package != nil {
+		query.Where(dependency.HasPackageWith(packageVersionQuery(spec.Package)))
+	}
 
-	if spec != nil {
-		query.Where(
-			optionalPredicate(spec.ID, IDEQ),
-			optionalPredicate(spec.VersionRange, dependency.VersionRange),
-			optionalPredicate(spec.Justification, dependency.Justification),
-			optionalPredicate(spec.Origin, dependency.Origin),
-			optionalPredicate(spec.Collector, dependency.Collector),
-		)
-		if spec.DependentPackage != nil {
-			query.Where(dependency.HasDependentPackageWith(packageNameQuery(spec.DependentPackage)))
-		}
-		if spec.Package != nil {
-			query.Where(dependency.HasPackageWith(packageVersionQuery(spec.Package)))
-		}
-
-		if spec.DependencyType != nil {
-			query.Where(dependency.DependencyTypeEQ(dependencyTypeToEnum(*spec.DependencyType)))
-		}
+	if spec.DependencyType != nil {
+		query.Where(dependency.DependencyTypeEQ(dependencyTypeToEnum(*spec.DependencyType)))
 	}
 
 	deps, err := query.
@@ -122,18 +123,8 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 	// Upsert only gets ID, so need to query the object
 	record, err := b.client.Dependency.Query().
 		Where(dependency.ID(*recordID)).
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
-		}).
-		WithDependentPackage(func(q *ent.PackageNameQuery) {
-			q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-				q.WithPackage()
-			})
-		}).
+		WithPackage(withPackageVersionTree()).
+		WithDependentPackage(withPackageNameTree()).
 		Only(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, funcName)
