@@ -42,7 +42,7 @@ const (
 	arango = "arango"
 	neo4js = "neo4j"
 	inmems = "inmem"
-	ents   = "ent"
+	ent    = "ent"
 )
 
 func startServer(cmd *cobra.Command) {
@@ -104,7 +104,7 @@ func startServer(cmd *cobra.Command) {
 
 func validateFlags() error {
 	switch flags.backend {
-	case neo4js, ents, arango, inmems:
+	case neo4js, ent, arango, inmems:
 		// Valid
 	default:
 		return fmt.Errorf("invalid graphql backend specified: %q", flags.backend)
@@ -117,7 +117,7 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	var topResolver resolvers.Resolver
 
 	switch flags.backend {
-	case ents:
+	case ent:
 		client, err := entbackend.SetupBackend(ctx, entbackend.BackendOptions{
 			DriverName:  flags.dbDriver,
 			Address:     flags.dbAddress,
