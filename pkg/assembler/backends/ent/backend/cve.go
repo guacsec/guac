@@ -32,9 +32,11 @@ func (b *EntBackend) Cve(ctx context.Context, spec *model.CVESpec) ([]*model.Cve
 }
 
 func (b *EntBackend) IngestCve(ctx context.Context, spec *model.CVEInputSpec) (*model.Cve, error) {
-	advisory, err := upsertAdvisory(ctx, b.client, advisoryQuerySpec{
-		CveID: &spec.CveID,
-		Year:  &spec.Year,
+	advisory, err := WithinTX(ctx, b.client, func(context.Context) (*ent.SecurityAdvisory, error) {
+		return upsertAdvisory(ctx, ent.TxFromContext(ctx), advisoryQuerySpec{
+			CveID: &spec.CveID,
+			Year:  &spec.Year,
+		})
 	})
 	if err != nil {
 		return nil, err
@@ -86,35 +88,31 @@ func getAdvisories(ctx context.Context, client *ent.Client, query *advisoryQuery
 	return results, nil
 }
 
-func upsertAdvisory(ctx context.Context, client *ent.Client, spec advisoryQuerySpec) (*ent.SecurityAdvisory, error) {
-	return WithinTX(ctx, client, func(context.Context) (*ent.SecurityAdvisory, error) {
-		client := ent.FromContext(ctx)
+func upsertAdvisory(ctx context.Context, client *ent.Tx, spec advisoryQuerySpec) (*ent.SecurityAdvisory, error) {
+	insert := client.SecurityAdvisory.Create()
 
-		insert := client.SecurityAdvisory.Create()
+	columns := []string{}
+	var uniqueConstraint *sql.Predicate
+	switch {
+	case spec.GhsaID != nil:
+		columns, uniqueConstraint = applyGHSAMutations(insert.Mutation(), spec)
+	case spec.CveID != nil:
+		columns, uniqueConstraint = applyCVEMutations(insert.Mutation(), spec)
+	case spec.OsvID != nil:
+		columns, uniqueConstraint = applyOSVMutations(insert.Mutation(), spec)
+	}
 
-		columns := []string{}
-		var uniqueConstraint *sql.Predicate
-		switch {
-		case spec.GhsaID != nil:
-			columns, uniqueConstraint = applyGHSAMutations(insert.Mutation(), spec)
-		case spec.CveID != nil:
-			columns, uniqueConstraint = applyCVEMutations(insert.Mutation(), spec)
-		case spec.OsvID != nil:
-			columns, uniqueConstraint = applyOSVMutations(insert.Mutation(), spec)
-		}
-
-		id, err := insert.
-			OnConflict(
-				sql.ConflictColumns(columns...),
-				sql.ConflictWhere(uniqueConstraint),
-			).
-			Ignore().
-			ID(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return client.SecurityAdvisory.Get(ctx, id)
-	})
+	id, err := insert.
+		OnConflict(
+			sql.ConflictColumns(columns...),
+			sql.ConflictWhere(uniqueConstraint),
+		).
+		Ignore().
+		ID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return client.SecurityAdvisory.Get(ctx, id)
 }
 
 func applyGHSAMutations(mut *ent.SecurityAdvisoryMutation, spec advisoryQuerySpec) ([]string, *sql.Predicate) {

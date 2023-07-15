@@ -21,8 +21,10 @@ func (b *EntBackend) Osv(ctx context.Context, spec *model.OSVSpec) ([]*model.Osv
 }
 
 func (b *EntBackend) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
-	advisory, err := upsertAdvisory(ctx, b.client, advisoryQuerySpec{
-		OsvID: &osv.OsvID,
+	advisory, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SecurityAdvisory, error) {
+		return upsertAdvisory(ctx, ent.TxFromContext(ctx), advisoryQuerySpec{
+			OsvID: &osv.OsvID,
+		})
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "IngestOsv")

@@ -8,6 +8,10 @@ import (
 )
 
 func WithinTX[T any](ctx context.Context, entClient *ent.Client, exec func(context.Context) (*T, error)) (*T, error) {
+	if entClient == nil {
+		return nil, Errorf("%v ::  %s", "WithinTX", "ent client is not initialized")
+	}
+
 	tx, err := entClient.BeginTx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelDefault,
 	})

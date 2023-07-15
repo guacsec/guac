@@ -20,8 +20,10 @@ func (b *EntBackend) Ghsa(ctx context.Context, spec *model.GHSASpec) ([]*model.G
 }
 
 func (b *EntBackend) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
-	advisory, err := upsertAdvisory(ctx, b.client, advisoryQuerySpec{
-		GhsaID: &ghsa.GhsaID,
+	advisory, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SecurityAdvisory, error) {
+		return upsertAdvisory(ctx, ent.TxFromContext(ctx), advisoryQuerySpec{
+			GhsaID: &ghsa.GhsaID,
+		})
 	})
 	if err != nil {
 		return nil, err
