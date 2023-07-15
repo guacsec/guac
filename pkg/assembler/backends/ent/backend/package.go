@@ -202,11 +202,7 @@ func qualifiersToSpecQualifiers(q []*model.PackageQualifierInputSpec) []*model.P
 	return results
 }
 
-func packageVersionQuery(spec *model.PkgInputSpec) predicate.PackageVersion {
-	if spec == nil {
-		return NoOpSelector()
-	}
-
+func packageVersionInputQuery(spec model.PkgInputSpec) predicate.PackageVersion {
 	rv := []predicate.PackageVersion{
 		packageversion.VersionEQ(stringOrEmpty(spec.Version)),
 		packageversion.SubpathEQ(stringOrEmpty(spec.Subpath)),
@@ -233,7 +229,7 @@ func isPackageVersionQuery(filter *model.PkgSpec) bool {
 	return filter.Version != nil || filter.Subpath != nil || filter.Qualifiers != nil
 }
 
-func pkgVersionPredicates(filter *model.PkgSpec) predicate.PackageVersion {
+func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 	if filter == nil {
 		return NoOpSelector()
 	}
@@ -241,7 +237,7 @@ func pkgVersionPredicates(filter *model.PkgSpec) predicate.PackageVersion {
 	rv := []predicate.PackageVersion{
 		optionalPredicate(filter.ID, IDEQ),
 		packageversion.VersionEQ(stringOrEmpty(filter.Version)),
-		optionalPredicate(filter.Subpath, packageversion.SubpathEQ),
+		packageversion.SubpathEQ(stringOrEmpty(filter.Subpath)),
 		packageversion.QualifiersMatchSpec(filter.Qualifiers),
 
 		packageversion.HasNameWith(
@@ -356,22 +352,10 @@ func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
 // These queries need to be fast, all the fields are present in an "InputSpec"
 // and should allow using the db index.
 
-func getPkgName(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
-	return client.PackageType.Query().
-		Where(packagetype.Type(pkgin.Type)).
-		QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
-		QueryNames().Where(packagename.NameEQ(pkgin.Name)).
-		Only(ctx)
+func getPkgName(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpec) (*ent.PackageName, error) {
+	return client.PackageName.Query().Where(packageNameInputQuery(pkgin)).Only(ctx)
 }
 
-func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
-	return client.PackageType.Query().
-		Where(packagetype.Type(pkgin.Type)).
-		QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
-		QueryNames().Where(packagename.NameEQ(pkgin.Name)).
-		QueryVersions().
-		Where(
-			packageVersionQuery(pkgin),
-		).
-		Only(ctx)
+func getPkgVersion(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpec) (*ent.PackageVersion, error) {
+	return client.PackageVersion.Query().Where(packageVersionInputQuery(pkgin)).Only(ctx)
 }
