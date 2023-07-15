@@ -55,7 +55,7 @@ func startServer(cmd *cobra.Command) {
 		os.Exit(1)
 	}
 
-	srv, err := getGraphqlServer()
+	srv, err := getGraphqlServer(ctx)
 	if err != nil {
 		logger.Errorf("unable to initialize graphql server: %v", err)
 		os.Exit(1)
