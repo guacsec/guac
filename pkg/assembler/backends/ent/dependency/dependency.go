@@ -4,6 +4,8 @@ package dependency
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -165,4 +167,22 @@ func newDependentPackageStep() *sqlgraph.Step {
 		sqlgraph.To(DependentPackageInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, DependentPackageTable, DependentPackageColumn),
 	)
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (e DependencyType) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(e.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (e *DependencyType) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*e = DependencyType(str)
+	if err := DependencyTypeValidator(*e); err != nil {
+		return fmt.Errorf("%s is not a valid DependencyType", str)
+	}
+	return nil
 }

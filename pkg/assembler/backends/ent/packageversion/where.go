@@ -367,21 +367,21 @@ func HasSbomWith(preds ...predicate.BillOfMaterials) predicate.PackageVersion {
 	})
 }
 
-// HasPkgEquals applies the HasEdge predicate on the "pkg_equals" edge.
-func HasPkgEquals() predicate.PackageVersion {
+// HasEqualPackages applies the HasEdge predicate on the "equal_packages" edge.
+func HasEqualPackages() predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, PkgEqualsTable, PkgEqualsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, EqualPackagesTable, EqualPackagesPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPkgEqualsWith applies the HasEdge predicate on the "pkg_equals" edge with a given conditions (other predicates).
-func HasPkgEqualsWith(preds ...predicate.PkgEqual) predicate.PackageVersion {
+// HasEqualPackagesWith applies the HasEdge predicate on the "equal_packages" edge with a given conditions (other predicates).
+func HasEqualPackagesWith(preds ...predicate.PkgEqual) predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {
-		step := newPkgEqualsStep()
+		step := newEqualPackagesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
