@@ -12,9 +12,17 @@ type PkgEqual struct {
 	ent.Schema
 }
 
+// func (PkgEqual) Annotations() []schema.Annotation {
+// 	return []schema.Annotation{
+// 		field.ID("package_version_id", "equal_package_id"),
+// 	}
+// }
+
 // Fields of the PkgEqual.
 func (PkgEqual) Fields() []ent.Field {
 	return []ent.Field{
+		// field.Int("package_version_id"),
+		// field.Int("equal_package_id"),
 		field.String("origin"),
 		field.String("collector"),
 		field.String("justification"),
@@ -26,6 +34,8 @@ func (PkgEqual) Fields() []ent.Field {
 func (PkgEqual) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("packages", PackageVersion.Type).Required(),
+		// edge.To("package", PackageVersion.Type).Required().Field("equal_package_id").Unique(),
+		// edge.To("dependant_package", PackageVersion.Type).Required().Field("package_version_id").Unique(),
 	}
 }
 
