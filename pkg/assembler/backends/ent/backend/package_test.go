@@ -226,56 +226,62 @@ func (s *Suite) Test_Packages() {
 		idInFilter bool
 		want       []*model.Package
 		wantErr    bool
-	}{{
-		name:     "tensorflow empty version",
-		pkgInput: p1,
-		pkgFilter: &model.PkgSpec{
-			Name: ptrfrom.String("tensorflow"),
+	}{
+		{
+			name:     "tensorflow empty version",
+			pkgInput: p1,
+			pkgFilter: &model.PkgSpec{
+				Name: ptrfrom.String("tensorflow"),
+			},
+			want: []*model.Package{p1out},
 		},
-		idInFilter: false,
-		want:       []*model.Package{p1out},
-		wantErr:    false,
-	}, {
-		name:     "tensorflow empty version, ID search",
-		pkgInput: p1,
-		pkgFilter: &model.PkgSpec{
-			Name: ptrfrom.String("tensorflow"),
+		{
+			name:     "tensorflow empty version, ID search",
+			pkgInput: p1,
+			pkgFilter: &model.PkgSpec{
+				Name: ptrfrom.String("tensorflow"),
+			},
+			idInFilter: true,
+			want:       []*model.Package{p1out},
 		},
-		idInFilter: true,
-		want:       []*model.Package{p1out},
-		wantErr:    false,
-	}, {
-		name:     "tensorflow with version",
-		pkgInput: p2,
-		pkgFilter: &model.PkgSpec{
-			Type: ptrfrom.String("pypi"),
-			Name: ptrfrom.String("tensorflow"),
+		{
+			name:     "tensorflow with version",
+			pkgInput: p2,
+			pkgFilter: &model.PkgSpec{
+				Type: ptrfrom.String("pypi"),
+				Name: ptrfrom.String("tensorflow"),
+			},
+			want: []*model.Package{p2out},
 		},
-		idInFilter: false,
-		want:       []*model.Package{p2out},
-		wantErr:    false,
-	}, {
-		name:     "tensorflow with version and subpath",
-		pkgInput: p3,
-		pkgFilter: &model.PkgSpec{
-			Type:    ptrfrom.String("pypi"),
-			Name:    ptrfrom.String("tensorflow"),
-			Subpath: ptrfrom.String("saved_model_cli.py"),
+		{
+			name:     "tensorflow with version and subpath",
+			pkgInput: p3,
+			pkgFilter: &model.PkgSpec{
+				Type:    ptrfrom.String("pypi"),
+				Name:    ptrfrom.String("tensorflow"),
+				Subpath: ptrfrom.String("saved_model_cli.py"),
+			},
+			want: []*model.Package{p3out},
 		},
-		idInFilter: false,
-		want:       []*model.Package{p3out},
-		wantErr:    false,
-	}, {
-		name:     "openssl with version",
-		pkgInput: p4,
-		pkgFilter: &model.PkgSpec{
-			Name:    ptrfrom.String("openssl"),
-			Version: ptrfrom.String("3.0.3"),
+		{
+			name:     "tensorflow without subpath",
+			pkgInput: p2,
+			pkgFilter: &model.PkgSpec{
+				Type:    ptrfrom.String("pypi"),
+				Name:    ptrfrom.String("tensorflow"),
+				Subpath: ptrfrom.String(""),
+			},
+			want: []*model.Package{p2out},
 		},
-		idInFilter: false,
-		want:       []*model.Package{p4out},
-		wantErr:    false,
-	}}
+		{
+			name:     "openssl with version",
+			pkgInput: p4,
+			pkgFilter: &model.PkgSpec{
+				Name:    ptrfrom.String("openssl"),
+				Version: ptrfrom.String("3.0.3"),
+			},
+			want: []*model.Package{p4out},
+		}}
 
 	for _, tt := range tests {
 		s.Run(tt.name, func() {

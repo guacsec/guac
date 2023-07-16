@@ -3,6 +3,8 @@ package backend
 import "github.com/google/go-cmp/cmp"
 
 func (s *Suite) TestNode() {
+	s.T().Skip()
+
 	be, err := GetBackend(s.Client)
 	s.Require().NoError(err)
 

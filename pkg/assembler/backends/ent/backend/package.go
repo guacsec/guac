@@ -49,7 +49,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 							q.Where(
 								optionalPredicate(pkgSpec.ID, IDEQ),
 								optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
-								optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEQ),
+								packageversion.SubpathEQ(ptrWithDefault(pkgSpec.Subpath, "")),
 								packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
 							)
 						})
@@ -123,7 +123,7 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 	pvID, err := client.PackageVersion.Create().
 		SetNameID(nameID).
 		SetNillableVersion(pkg.Version).
-		SetNillableSubpath(pkg.Subpath).
+		SetSubpath(ptrWithDefault(pkg.Subpath, "")).
 		SetQualifiers(normalizeInputQualifiers(pkg.Qualifiers)).
 		SetHash(versionHashFromInputSpec(pkg)).
 		OnConflict(
@@ -251,10 +251,8 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 	rv := []predicate.PackageVersion{
 		optionalPredicate(filter.ID, IDEQ),
 		optionalPredicate(filter.Version, packageversion.VersionEQ),
-		// optionalPredicate(filter.Subpath, packageversion.SubpathEQ),
-		// packageversion.VersionEQ(stringOrEmpty(filter.Version)),
+		optionalPredicate(filter.Subpath, packageversion.SubpathEQ),
 		packageversion.QualifiersMatch(filter.Qualifiers, ptrWithDefault(filter.MatchOnlyEmptyQualifiers, false)),
-
 		packageversion.HasNameWith(
 			optionalPredicate(filter.Name, packagename.Name),
 			packagename.HasNamespaceWith(
@@ -264,12 +262,6 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 				),
 			),
 		),
-	}
-
-	if filter.ID == nil && filter.Subpath == nil {
-		rv = append(rv, packageversion.SubpathEQ(""))
-	} else if filter.Subpath != nil {
-		rv = append(rv, packageversion.SubpathEQ(stringOrEmpty(filter.Subpath)))
 	}
 
 	return packageversion.And(rv...)

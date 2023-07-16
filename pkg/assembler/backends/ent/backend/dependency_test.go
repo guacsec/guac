@@ -160,7 +160,7 @@ func (s *Suite) TestIsDependency() {
 			},
 			Query: &model.IsDependencySpec{
 				Package: &model.PkgSpec{
-					ID: ptrfrom.String("0"), // 0 == p1
+					ID: ptrfrom.String("0"), // index of p1
 				},
 			},
 			ExpectedDep: []*model.IsDependency{

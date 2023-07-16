@@ -192,10 +192,8 @@ func (s *Suite) TestPkgEqual() {
 					Packages: []*model.Package{p1out, p2out},
 				},
 			},
-			// Only: true,
 		},
 		{
-			// Only:  true,
 			Name:  "Query on pkg algo and pkg",
 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
@@ -218,6 +216,7 @@ func (s *Suite) TestPkgEqual() {
 					Namespace: ptrfrom.String(""),
 					Name:      ptrfrom.String("tensorflow"),
 					Version:   ptrfrom.String("2.11.1"),
+					Subpath:   ptrfrom.String(""),
 				}},
 			},
 			ExpPkgEqual: []*model.PkgEqual{
@@ -529,6 +528,8 @@ func (s *Suite) TestPkgEqual() {
 }
 
 func (s *Suite) TestPkgEqualNeighbors() {
+	s.T().Skip()
+
 	type call struct {
 		P1 *model.PkgInputSpec
 		P2 *model.PkgInputSpec

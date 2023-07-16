@@ -36,18 +36,8 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 	}
 
 	deps, err := query.
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
-		}).
-		WithDependentPackage(func(q *ent.PackageNameQuery) {
-			q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-				q.WithPackage()
-			})
-		}).
+		WithPackage(withPackageVersionTree()).
+		WithDependentPackage(withPackageNameTree()).
 		All(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, funcName)
