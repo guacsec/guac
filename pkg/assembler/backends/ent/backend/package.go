@@ -14,6 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 )
@@ -23,52 +24,51 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	query := b.client.PackageVersion.Query().Limit(MaxPageSize)
+	// query := b.client.PackageVersion.Query().Limit(MaxPageSize)
 
-	query.Where(packageVersionQuery(pkgSpec))
-	query.WithName(withPackageNameTree())
+	// query.Where(packageVersionQuery(pkgSpec))
+	// query.WithName(withPackageNameTree())
+	query := b.client.PackageType.Query().Limit(MaxPageSize)
 
-	// query := b.client.PackageType.Query().Limit(MaxPageSize)
-	// paths, isGQL := getPreloads(ctx)
+	paths, isGQL := getPreloads(ctx)
 
-	// query.Where(
-	// 	optionalPredicate(pkgSpec.Type, packagetype.TypeEQ),
-	// )
+	query.Where(
+		optionalPredicate(pkgSpec.Type, packagetype.TypeEQ),
+	)
 
-	// if PathContains(paths, "namespaces") || !isGQL {
-	// 	query.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-	// 		q.Order(ent.Asc(packagenamespace.FieldNamespace))
-	// 		q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
+	if PathContains(paths, "namespaces") || !isGQL {
+		query.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
+			q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
 
-	// 		if PathContains(paths, "namespaces.names") || !isGQL {
-	// 			q.WithNames(func(q *ent.PackageNameQuery) {
-	// 				q.Order(ent.Asc(packagename.FieldName))
-	// 				q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
+			if PathContains(paths, "namespaces.names") || !isGQL {
+				q.WithNames(func(q *ent.PackageNameQuery) {
+					q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
 
-	// 				if PathContains(paths, "namespaces.names.versions") || !isGQL {
-	// 					q.WithVersions(func(q *ent.PackageVersionQuery) {
-	// 						q.Order(ent.Asc(packageversion.FieldVersion))
-	// 						q.Where(
-	// 							optionalPredicate(pkgSpec.ID, IDEQ),
-	// 							optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
-	// 							optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEQ),
-	// 							packageversion.QualifiersMatchSpec(pkgSpec.Qualifiers),
-	// 						)
-	// 					})
-	// 				}
-	// 			})
-	// 		}
-	// 	})
-	// }
+					if PathContains(paths, "namespaces.names.versions") || !isGQL {
+						q.WithVersions(func(q *ent.PackageVersionQuery) {
+							q.Where(
+								optionalPredicate(pkgSpec.ID, IDEQ),
+								optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
+								optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEQ),
+								packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
+							)
+						})
+					}
+				})
+			}
+		})
+	}
 
 	pkgs, err := query.All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return collect(pkgs, func(v *ent.PackageVersion) *model.Package {
-		return toModelPackage(backReferencePackageVersion(v))
-	}), nil
+	// return collect(pkgs, func(v *ent.PackageVersion) *model.Package {
+	// 	return toModelPackage(backReferencePackageVersion(v))
+	// }), nil
+
+	return collect(pkgs, toModelPackage), nil
 }
 
 func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
@@ -122,8 +122,8 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 
 	pvID, err := client.PackageVersion.Create().
 		SetNameID(nameID).
-		SetVersion(valueOrDefault(pkg.Version, "")).
-		SetSubpath(valueOrDefault(pkg.Subpath, "")).
+		SetNillableVersion(pkg.Version).
+		SetNillableSubpath(pkg.Subpath).
 		SetQualifiers(normalizeInputQualifiers(pkg.Qualifiers)).
 		SetHash(versionHashFromInputSpec(pkg)).
 		OnConflict(
@@ -188,6 +188,10 @@ func hashPackageVersion(version, subpath string, qualifiers []model.PackageQuali
 }
 
 func normalizeInputQualifiers(inputs []*model.PackageQualifierInputSpec) []model.PackageQualifier {
+	if len(inputs) == 0 {
+		return nil
+	}
+
 	qualifiers := []model.PackageQualifier{}
 	for _, q := range inputs {
 		qualifiers = append(qualifiers, model.PackageQualifier{
@@ -211,22 +215,24 @@ func qualifiersToSpecQualifiers(q []*model.PackageQualifierInputSpec) []*model.P
 }
 
 func packageVersionInputQuery(spec model.PkgInputSpec) predicate.PackageVersion {
-	rv := []predicate.PackageVersion{
-		packageversion.VersionEQ(stringOrEmpty(spec.Version)),
-		packageversion.SubpathEQ(stringOrEmpty(spec.Subpath)),
-		packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(spec.Qualifiers)),
-		packageversion.HasNameWith(
-			packagename.NameEQ(spec.Name),
-			packagename.HasNamespaceWith(
-				packagenamespace.Namespace(stringOrEmpty(spec.Namespace)),
-				packagenamespace.HasPackageWith(
-					packagetype.TypeEQ(spec.Type),
-				),
-			),
-		),
-	}
+	return packageVersionQuery(helper.ConvertPkgInputSpecToPkgSpec(&spec))
 
-	return packageversion.And(rv...)
+	// rv := []predicate.PackageVersion{
+	// 	packageversion.VersionEQ(stringOrEmpty(spec.Version)),
+	// 	packageversion.SubpathEQ(stringOrEmpty(spec.Subpath)),
+	// 	packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(spec.Qualifiers)),
+	// 	packageversion.HasNameWith(
+	// 		packagename.NameEQ(spec.Name),
+	// 		packagename.HasNamespaceWith(
+	// 			packagenamespace.Namespace(stringOrEmpty(spec.Namespace)),
+	// 			packagenamespace.HasPackageWith(
+	// 				packagetype.TypeEQ(spec.Type),
+	// 			),
+	// 		),
+	// 	),
+	// }
+
+	// return packageversion.And(rv...)
 }
 
 func isPackageVersionQuery(filter *model.PkgSpec) bool {
@@ -314,27 +320,41 @@ func pkgNameQueryFromPkgSpec(filter *model.PkgSpec) *model.PkgNameSpec {
 	}
 }
 
-func pkgSpecToInputSpec(spec *model.PkgInputSpec) *model.PkgSpec {
-	return &model.PkgSpec{
-		Type:       &spec.Type,
-		Namespace:  spec.Namespace,
-		Name:       &spec.Name,
-		Version:    spec.Version,
-		Qualifiers: qualifiersToSpecQualifiers(spec.Qualifiers),
-		Subpath:    spec.Subpath,
-	}
-}
-
 func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageType {
-	if pv != nil && pv.Edges.Name != nil &&
+	if pv != nil &&
+		pv.Edges.Name != nil &&
 		pv.Edges.Name.Edges.Namespace != nil &&
 		pv.Edges.Name.Edges.Namespace.Edges.Package != nil {
 		pn := pv.Edges.Name
 		ns := pn.Edges.Namespace
-		pt := ns.Edges.Package
-		pn.Edges.Versions = []*ent.PackageVersion{pv}
-		ns.Edges.Names = []*ent.PackageName{pn}
-		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
+
+		// Rebuild a fresh package type from the back reference so that
+		// we don't mutate the edges of the original package type.
+		pt := &ent.PackageType{
+			ID:   ns.Edges.Package.ID,
+			Type: ns.Edges.Package.Type,
+			Edges: ent.PackageTypeEdges{
+				Namespaces: []*ent.PackageNamespace{
+					{
+						ID:        ns.ID,
+						PackageID: ns.PackageID,
+						Namespace: ns.Namespace,
+						Edges: ent.PackageNamespaceEdges{
+							Names: []*ent.PackageName{
+								{
+									ID:          pn.ID,
+									NamespaceID: pn.NamespaceID,
+									Name:        pn.Name,
+									Edges: ent.PackageNameEdges{
+										Versions: []*ent.PackageVersion{pv},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
 		return pt
 	}
 	return nil
@@ -370,4 +390,13 @@ func getPkgName(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpe
 
 func getPkgVersion(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpec) (*ent.PackageVersion, error) {
 	return client.PackageVersion.Query().Where(packageVersionInputQuery(pkgin)).Only(ctx)
+	// return client.PackageType.Query().
+	// 	Where(packagetype.Type(pkgin.Type)).
+	// 	QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
+	// 	QueryNames().Where(packagename.NameEQ(pkgin.Name)).
+	// 	QueryVersions().
+	// 	Where(
+	// 		packageVersionInputQuery(pkgin),
+	// 	).
+	// 	Only(ctx)
 }

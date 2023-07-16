@@ -55,7 +55,7 @@ func TestHashPackageVersions(t *testing.T) {
 }
 
 func (s *Suite) Test_get_package_helpers() {
-	spec := model.PkgInputSpec{
+	p1Spec := model.PkgInputSpec{
 		Type:      "apk",
 		Namespace: ptr("test"),
 		Name:      "alpine",
@@ -66,9 +66,20 @@ func (s *Suite) Test_get_package_helpers() {
 			{Key: "a", Value: "b"},
 		},
 	}
+	p2Spec := model.PkgInputSpec{
+		Type:      "apk",
+		Namespace: ptr("test"),
+		Name:      "alpine",
+		Version:   ptr("1.0.0"),
+		Subpath:   ptr("subpath"),
+	}
 
+	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p2Spec)
+	})
+	s.Require().NoError(err)
 	pkgVersionID, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
+		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p1Spec)
 	})
 	s.Require().NoError(err)
 	s.Require().NotNil(pkgVersionID)
@@ -85,13 +96,13 @@ func (s *Suite) Test_get_package_helpers() {
 	})
 
 	s.Run("getPkgVersion", func() {
-		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, spec)
+		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, p1Spec)
 		s.Require().NoError(err)
 		s.Require().NotNil(pkgVersion)
 	})
 
 	s.Run("pkgTreeFromVersion", func() {
-		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, spec)
+		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, p1Spec)
 		s.Require().NoError(err)
 		pkgTree, err := pkgTreeFromVersion(s.Ctx, pkgVersion)
 		s.Require().NoError(err)
@@ -159,17 +170,17 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 
 	s.Run("Using spec - Null value", func() {
 		versions := s.Client.PackageVersion.Query().Where(
-			packageversion.QualifiersMatchSpec([]*model.PackageQualifierSpec{{Key: "arch"}}),
+			packageversion.QualifiersMatch([]*model.PackageQualifierSpec{{Key: "arch"}}, false),
 		).AllX(s.Ctx)
 		s.NotEmpty(versions)
 	})
 
 	s.Run("Using spec - Multiple", func() {
 		versions := s.Client.PackageVersion.Query().Where(
-			packageversion.QualifiersMatchSpec([]*model.PackageQualifierSpec{
+			packageversion.QualifiersMatch([]*model.PackageQualifierSpec{
 				{Key: "arch"},
 				{Key: "a", Value: ptr("b")},
-			}),
+			}, false),
 		).AllX(s.Ctx)
 		s.NotEmpty(versions)
 	})
@@ -206,7 +217,7 @@ func (s *Suite) Test_IngestPackages() {
 	}
 }
 
-func (s *Suite) Test_demoClient_Packages() {
+func (s *Suite) Test_Packages() {
 	ctx := s.Ctx
 	tests := []struct {
 		name       string
