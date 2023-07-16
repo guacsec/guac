@@ -25,6 +25,8 @@ type DependencyQuery struct {
 	predicates           []predicate.Dependency
 	withPackage          *PackageVersionQuery
 	withDependentPackage *PackageNameQuery
+	modifiers            []func(*sql.Selector)
+	loadTotal            []func(context.Context, []*Dependency) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -419,6 +421,9 @@ func (dq *DependencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*D
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(dq.modifiers) > 0 {
+		_spec.Modifiers = dq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -437,6 +442,11 @@ func (dq *DependencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*D
 	if query := dq.withDependentPackage; query != nil {
 		if err := dq.loadDependentPackage(ctx, query, nodes, nil,
 			func(n *Dependency, e *PackageName) { n.Edges.DependentPackage = e }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range dq.loadTotal {
+		if err := dq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -504,6 +514,9 @@ func (dq *DependencyQuery) loadDependentPackage(ctx context.Context, query *Pack
 
 func (dq *DependencyQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := dq.querySpec()
+	if len(dq.modifiers) > 0 {
+		_spec.Modifiers = dq.modifiers
+	}
 	_spec.Node.Columns = dq.ctx.Fields
 	if len(dq.ctx.Fields) > 0 {
 		_spec.Unique = dq.ctx.Unique != nil && *dq.ctx.Unique

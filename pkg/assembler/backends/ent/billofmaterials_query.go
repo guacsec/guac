@@ -25,6 +25,8 @@ type BillOfMaterialsQuery struct {
 	predicates   []predicate.BillOfMaterials
 	withPackage  *PackageVersionQuery
 	withArtifact *ArtifactQuery
+	modifiers    []func(*sql.Selector)
+	loadTotal    []func(context.Context, []*BillOfMaterials) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -419,6 +421,9 @@ func (bomq *BillOfMaterialsQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(bomq.modifiers) > 0 {
+		_spec.Modifiers = bomq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -437,6 +442,11 @@ func (bomq *BillOfMaterialsQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if query := bomq.withArtifact; query != nil {
 		if err := bomq.loadArtifact(ctx, query, nodes, nil,
 			func(n *BillOfMaterials, e *Artifact) { n.Edges.Artifact = e }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range bomq.loadTotal {
+		if err := bomq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -510,6 +520,9 @@ func (bomq *BillOfMaterialsQuery) loadArtifact(ctx context.Context, query *Artif
 
 func (bomq *BillOfMaterialsQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bomq.querySpec()
+	if len(bomq.modifiers) > 0 {
+		_spec.Modifiers = bomq.modifiers
+	}
 	_spec.Node.Columns = bomq.ctx.Fields
 	if len(bomq.ctx.Fields) > 0 {
 		_spec.Unique = bomq.ctx.Unique != nil && *bomq.ctx.Unique

@@ -31,6 +31,10 @@ type PackageTypeEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedNamespaces map[string][]*PackageNamespace
 }
 
 // NamespacesOrErr returns the Namespaces value or an error if the edge
@@ -123,6 +127,30 @@ func (pt *PackageType) String() string {
 	builder.WriteString(pt.Type)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedNamespaces returns the Namespaces named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pt *PackageType) NamedNamespaces(name string) ([]*PackageNamespace, error) {
+	if pt.Edges.namedNamespaces == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pt.Edges.namedNamespaces[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pt *PackageType) appendNamedNamespaces(name string, edges ...*PackageNamespace) {
+	if pt.Edges.namedNamespaces == nil {
+		pt.Edges.namedNamespaces = make(map[string][]*PackageNamespace)
+	}
+	if len(edges) == 0 {
+		pt.Edges.namedNamespaces[name] = []*PackageNamespace{}
+	} else {
+		pt.Edges.namedNamespaces[name] = append(pt.Edges.namedNamespaces[name], edges...)
+	}
 }
 
 // PackageTypes is a parsable slice of PackageType.

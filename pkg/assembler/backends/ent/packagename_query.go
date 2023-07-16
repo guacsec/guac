@@ -20,12 +20,15 @@ import (
 // PackageNameQuery is the builder for querying PackageName entities.
 type PackageNameQuery struct {
 	config
-	ctx           *QueryContext
-	order         []packagename.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.PackageName
-	withNamespace *PackageNamespaceQuery
-	withVersions  *PackageVersionQuery
+	ctx               *QueryContext
+	order             []packagename.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.PackageName
+	withNamespace     *PackageNamespaceQuery
+	withVersions      *PackageVersionQuery
+	modifiers         []func(*sql.Selector)
+	loadTotal         []func(context.Context, []*PackageName) error
+	withNamedVersions map[string]*PackageVersionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -420,6 +423,9 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(pnq.modifiers) > 0 {
+		_spec.Modifiers = pnq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -439,6 +445,18 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		if err := pnq.loadVersions(ctx, query, nodes,
 			func(n *PackageName) { n.Edges.Versions = []*PackageVersion{} },
 			func(n *PackageName, e *PackageVersion) { n.Edges.Versions = append(n.Edges.Versions, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pnq.withNamedVersions {
+		if err := pnq.loadVersions(ctx, query, nodes,
+			func(n *PackageName) { n.appendNamedVersions(name) },
+			func(n *PackageName, e *PackageVersion) { n.appendNamedVersions(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range pnq.loadTotal {
+		if err := pnq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -507,6 +525,9 @@ func (pnq *PackageNameQuery) loadVersions(ctx context.Context, query *PackageVer
 
 func (pnq *PackageNameQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pnq.querySpec()
+	if len(pnq.modifiers) > 0 {
+		_spec.Modifiers = pnq.modifiers
+	}
 	_spec.Node.Columns = pnq.ctx.Fields
 	if len(pnq.ctx.Fields) > 0 {
 		_spec.Unique = pnq.ctx.Unique != nil && *pnq.ctx.Unique
@@ -587,6 +608,20 @@ func (pnq *PackageNameQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedVersions tells the query-builder to eager-load the nodes that are connected to the "versions"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithNamedVersions(name string, opts ...func(*PackageVersionQuery)) *PackageNameQuery {
+	query := (&PackageVersionClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pnq.withNamedVersions == nil {
+		pnq.withNamedVersions = make(map[string]*PackageVersionQuery)
+	}
+	pnq.withNamedVersions[name] = query
+	return pnq
 }
 
 // PackageNameGroupBy is the group-by builder for PackageName entities.

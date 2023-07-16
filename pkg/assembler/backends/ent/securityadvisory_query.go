@@ -21,6 +21,8 @@ type SecurityAdvisoryQuery struct {
 	order      []securityadvisory.OrderOption
 	inters     []Interceptor
 	predicates []predicate.SecurityAdvisory
+	modifiers  []func(*sql.Selector)
+	loadTotal  []func(context.Context, []*SecurityAdvisory) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -342,6 +344,9 @@ func (saq *SecurityAdvisoryQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
+	if len(saq.modifiers) > 0 {
+		_spec.Modifiers = saq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -351,11 +356,19 @@ func (saq *SecurityAdvisoryQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	for i := range saq.loadTotal {
+		if err := saq.loadTotal[i](ctx, nodes); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
 func (saq *SecurityAdvisoryQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := saq.querySpec()
+	if len(saq.modifiers) > 0 {
+		_spec.Modifiers = saq.modifiers
+	}
 	_spec.Node.Columns = saq.ctx.Fields
 	if len(saq.ctx.Fields) > 0 {
 		_spec.Unique = saq.ctx.Unique != nil && *saq.ctx.Unique

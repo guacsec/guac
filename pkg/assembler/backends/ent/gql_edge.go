@@ -308,7 +308,7 @@ func (pv *PackageVersion) Sbom(ctx context.Context) (result []*BillOfMaterials, 
 	return result, err
 }
 
-func (pv *PackageVersion) EqualPackages(ctx context.Context) (result []*PackageVersion, err error) {
+func (pv *PackageVersion) EqualPackages(ctx context.Context) (result []*PkgEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = pv.NamedEqualPackages(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
@@ -316,6 +316,18 @@ func (pv *PackageVersion) EqualPackages(ctx context.Context) (result []*PackageV
 	}
 	if IsNotLoaded(err) {
 		result, err = pv.QueryEqualPackages().All(ctx)
+	}
+	return result, err
+}
+
+func (pe *PkgEqual) Packages(ctx context.Context) (result []*PackageVersion, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pe.NamedPackages(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pe.Edges.PackagesOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pe.QueryPackages().All(ctx)
 	}
 	return result, err
 }

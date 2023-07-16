@@ -19,11 +19,14 @@ import (
 // SourceTypeQuery is the builder for querying SourceType entities.
 type SourceTypeQuery struct {
 	config
-	ctx            *QueryContext
-	order          []sourcetype.OrderOption
-	inters         []Interceptor
-	predicates     []predicate.SourceType
-	withNamespaces *SourceNamespaceQuery
+	ctx                 *QueryContext
+	order               []sourcetype.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.SourceType
+	withNamespaces      *SourceNamespaceQuery
+	modifiers           []func(*sql.Selector)
+	loadTotal           []func(context.Context, []*SourceType) error
+	withNamedNamespaces map[string]*SourceNamespaceQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -383,6 +386,9 @@ func (stq *SourceTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(stq.modifiers) > 0 {
+		_spec.Modifiers = stq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -396,6 +402,18 @@ func (stq *SourceTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		if err := stq.loadNamespaces(ctx, query, nodes,
 			func(n *SourceType) { n.Edges.Namespaces = []*SourceNamespace{} },
 			func(n *SourceType, e *SourceNamespace) { n.Edges.Namespaces = append(n.Edges.Namespaces, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range stq.withNamedNamespaces {
+		if err := stq.loadNamespaces(ctx, query, nodes,
+			func(n *SourceType) { n.appendNamedNamespaces(name) },
+			func(n *SourceType, e *SourceNamespace) { n.appendNamedNamespaces(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range stq.loadTotal {
+		if err := stq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -435,6 +453,9 @@ func (stq *SourceTypeQuery) loadNamespaces(ctx context.Context, query *SourceNam
 
 func (stq *SourceTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := stq.querySpec()
+	if len(stq.modifiers) > 0 {
+		_spec.Modifiers = stq.modifiers
+	}
 	_spec.Node.Columns = stq.ctx.Fields
 	if len(stq.ctx.Fields) > 0 {
 		_spec.Unique = stq.ctx.Unique != nil && *stq.ctx.Unique
@@ -512,6 +533,20 @@ func (stq *SourceTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedNamespaces tells the query-builder to eager-load the nodes that are connected to the "namespaces"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (stq *SourceTypeQuery) WithNamedNamespaces(name string, opts ...func(*SourceNamespaceQuery)) *SourceTypeQuery {
+	query := (&SourceNamespaceClient{config: stq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if stq.withNamedNamespaces == nil {
+		stq.withNamedNamespaces = make(map[string]*SourceNamespaceQuery)
+	}
+	stq.withNamedNamespaces[name] = query
+	return stq
 }
 
 // SourceTypeGroupBy is the group-by builder for SourceType entities.

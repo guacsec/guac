@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -3554,6 +3555,252 @@ func (pv *PackageVersion) ToEdge(order *PackageVersionOrder) *PackageVersionEdge
 	return &PackageVersionEdge{
 		Node:   pv,
 		Cursor: order.Field.toCursor(pv),
+	}
+}
+
+// PkgEqualEdge is the edge representation of PkgEqual.
+type PkgEqualEdge struct {
+	Node   *PkgEqual `json:"node"`
+	Cursor Cursor    `json:"cursor"`
+}
+
+// PkgEqualConnection is the connection containing edges to PkgEqual.
+type PkgEqualConnection struct {
+	Edges      []*PkgEqualEdge `json:"edges"`
+	PageInfo   PageInfo        `json:"pageInfo"`
+	TotalCount int             `json:"totalCount"`
+}
+
+func (c *PkgEqualConnection) build(nodes []*PkgEqual, pager *pkgequalPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *PkgEqual
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *PkgEqual {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *PkgEqual {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*PkgEqualEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &PkgEqualEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// PkgEqualPaginateOption enables pagination customization.
+type PkgEqualPaginateOption func(*pkgequalPager) error
+
+// WithPkgEqualOrder configures pagination ordering.
+func WithPkgEqualOrder(order *PkgEqualOrder) PkgEqualPaginateOption {
+	if order == nil {
+		order = DefaultPkgEqualOrder
+	}
+	o := *order
+	return func(pager *pkgequalPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultPkgEqualOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithPkgEqualFilter configures pagination filter.
+func WithPkgEqualFilter(filter func(*PkgEqualQuery) (*PkgEqualQuery, error)) PkgEqualPaginateOption {
+	return func(pager *pkgequalPager) error {
+		if filter == nil {
+			return errors.New("PkgEqualQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type pkgequalPager struct {
+	reverse bool
+	order   *PkgEqualOrder
+	filter  func(*PkgEqualQuery) (*PkgEqualQuery, error)
+}
+
+func newPkgEqualPager(opts []PkgEqualPaginateOption, reverse bool) (*pkgequalPager, error) {
+	pager := &pkgequalPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultPkgEqualOrder
+	}
+	return pager, nil
+}
+
+func (p *pkgequalPager) applyFilter(query *PkgEqualQuery) (*PkgEqualQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *pkgequalPager) toCursor(pe *PkgEqual) Cursor {
+	return p.order.Field.toCursor(pe)
+}
+
+func (p *pkgequalPager) applyCursors(query *PkgEqualQuery, after, before *Cursor) (*PkgEqualQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultPkgEqualOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *pkgequalPager) applyOrder(query *PkgEqualQuery) *PkgEqualQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultPkgEqualOrder.Field {
+		query = query.Order(DefaultPkgEqualOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *pkgequalPager) orderExpr(query *PkgEqualQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultPkgEqualOrder.Field {
+			b.Comma().Ident(DefaultPkgEqualOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to PkgEqual.
+func (pe *PkgEqualQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...PkgEqualPaginateOption,
+) (*PkgEqualConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newPkgEqualPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if pe, err = pager.applyFilter(pe); err != nil {
+		return nil, err
+	}
+	conn := &PkgEqualConnection{Edges: []*PkgEqualEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = pe.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if pe, err = pager.applyCursors(pe, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		pe.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := pe.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	pe = pager.applyOrder(pe)
+	nodes, err := pe.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// PkgEqualOrderField defines the ordering field of PkgEqual.
+type PkgEqualOrderField struct {
+	// Value extracts the ordering value from the given PkgEqual.
+	Value    func(*PkgEqual) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) pkgequal.OrderOption
+	toCursor func(*PkgEqual) Cursor
+}
+
+// PkgEqualOrder defines the ordering of PkgEqual.
+type PkgEqualOrder struct {
+	Direction OrderDirection      `json:"direction"`
+	Field     *PkgEqualOrderField `json:"field"`
+}
+
+// DefaultPkgEqualOrder is the default ordering of PkgEqual.
+var DefaultPkgEqualOrder = &PkgEqualOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &PkgEqualOrderField{
+		Value: func(pe *PkgEqual) (ent.Value, error) {
+			return pe.ID, nil
+		},
+		column: pkgequal.FieldID,
+		toTerm: pkgequal.ByID,
+		toCursor: func(pe *PkgEqual) Cursor {
+			return Cursor{ID: pe.ID}
+		},
+	},
+}
+
+// ToEdge converts PkgEqual into PkgEqualEdge.
+func (pe *PkgEqual) ToEdge(order *PkgEqualOrder) *PkgEqualEdge {
+	if order == nil {
+		order = DefaultPkgEqualOrder
+	}
+	return &PkgEqualEdge{
+		Node:   pe,
+		Cursor: order.Field.toCursor(pe),
 	}
 }
 

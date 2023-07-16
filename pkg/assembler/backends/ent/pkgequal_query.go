@@ -19,11 +19,14 @@ import (
 // PkgEqualQuery is the builder for querying PkgEqual entities.
 type PkgEqualQuery struct {
 	config
-	ctx          *QueryContext
-	order        []pkgequal.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.PkgEqual
-	withPackages *PackageVersionQuery
+	ctx               *QueryContext
+	order             []pkgequal.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.PkgEqual
+	withPackages      *PackageVersionQuery
+	modifiers         []func(*sql.Selector)
+	loadTotal         []func(context.Context, []*PkgEqual) error
+	withNamedPackages map[string]*PackageVersionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -383,6 +386,9 @@ func (peq *PkgEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pk
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(peq.modifiers) > 0 {
+		_spec.Modifiers = peq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -396,6 +402,18 @@ func (peq *PkgEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pk
 		if err := peq.loadPackages(ctx, query, nodes,
 			func(n *PkgEqual) { n.Edges.Packages = []*PackageVersion{} },
 			func(n *PkgEqual, e *PackageVersion) { n.Edges.Packages = append(n.Edges.Packages, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range peq.withNamedPackages {
+		if err := peq.loadPackages(ctx, query, nodes,
+			func(n *PkgEqual) { n.appendNamedPackages(name) },
+			func(n *PkgEqual, e *PackageVersion) { n.appendNamedPackages(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range peq.loadTotal {
+		if err := peq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -466,6 +484,9 @@ func (peq *PkgEqualQuery) loadPackages(ctx context.Context, query *PackageVersio
 
 func (peq *PkgEqualQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := peq.querySpec()
+	if len(peq.modifiers) > 0 {
+		_spec.Modifiers = peq.modifiers
+	}
 	_spec.Node.Columns = peq.ctx.Fields
 	if len(peq.ctx.Fields) > 0 {
 		_spec.Unique = peq.ctx.Unique != nil && *peq.ctx.Unique
@@ -543,6 +564,20 @@ func (peq *PkgEqualQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedPackages tells the query-builder to eager-load the nodes that are connected to the "packages"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (peq *PkgEqualQuery) WithNamedPackages(name string, opts ...func(*PackageVersionQuery)) *PkgEqualQuery {
+	query := (&PackageVersionClient{config: peq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if peq.withNamedPackages == nil {
+		peq.withNamedPackages = make(map[string]*PackageVersionQuery)
+	}
+	peq.withNamedPackages[name] = query
+	return peq
 }
 
 // PkgEqualGroupBy is the group-by builder for PkgEqual entities.

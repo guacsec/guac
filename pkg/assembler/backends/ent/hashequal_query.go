@@ -19,11 +19,14 @@ import (
 // HashEqualQuery is the builder for querying HashEqual entities.
 type HashEqualQuery struct {
 	config
-	ctx           *QueryContext
-	order         []hashequal.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.HashEqual
-	withArtifacts *ArtifactQuery
+	ctx                *QueryContext
+	order              []hashequal.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.HashEqual
+	withArtifacts      *ArtifactQuery
+	modifiers          []func(*sql.Selector)
+	loadTotal          []func(context.Context, []*HashEqual) error
+	withNamedArtifacts map[string]*ArtifactQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -383,6 +386,9 @@ func (heq *HashEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*H
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(heq.modifiers) > 0 {
+		_spec.Modifiers = heq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -396,6 +402,18 @@ func (heq *HashEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*H
 		if err := heq.loadArtifacts(ctx, query, nodes,
 			func(n *HashEqual) { n.Edges.Artifacts = []*Artifact{} },
 			func(n *HashEqual, e *Artifact) { n.Edges.Artifacts = append(n.Edges.Artifacts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range heq.withNamedArtifacts {
+		if err := heq.loadArtifacts(ctx, query, nodes,
+			func(n *HashEqual) { n.appendNamedArtifacts(name) },
+			func(n *HashEqual, e *Artifact) { n.appendNamedArtifacts(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range heq.loadTotal {
+		if err := heq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -466,6 +484,9 @@ func (heq *HashEqualQuery) loadArtifacts(ctx context.Context, query *ArtifactQue
 
 func (heq *HashEqualQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := heq.querySpec()
+	if len(heq.modifiers) > 0 {
+		_spec.Modifiers = heq.modifiers
+	}
 	_spec.Node.Columns = heq.ctx.Fields
 	if len(heq.ctx.Fields) > 0 {
 		_spec.Unique = heq.ctx.Unique != nil && *heq.ctx.Unique
@@ -543,6 +564,20 @@ func (heq *HashEqualQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedArtifacts tells the query-builder to eager-load the nodes that are connected to the "artifacts"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (heq *HashEqualQuery) WithNamedArtifacts(name string, opts ...func(*ArtifactQuery)) *HashEqualQuery {
+	query := (&ArtifactClient{config: heq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if heq.withNamedArtifacts == nil {
+		heq.withNamedArtifacts = make(map[string]*ArtifactQuery)
+	}
+	heq.withNamedArtifacts[name] = query
+	return heq
 }
 
 // HashEqualGroupBy is the group-by builder for HashEqual entities.

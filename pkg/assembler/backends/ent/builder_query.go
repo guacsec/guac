@@ -19,11 +19,14 @@ import (
 // BuilderQuery is the builder for querying Builder entities.
 type BuilderQuery struct {
 	config
-	ctx                  *QueryContext
-	order                []builder.OrderOption
-	inters               []Interceptor
-	predicates           []predicate.Builder
-	withSlsaAttestations *SLSAAttestationQuery
+	ctx                       *QueryContext
+	order                     []builder.OrderOption
+	inters                    []Interceptor
+	predicates                []predicate.Builder
+	withSlsaAttestations      *SLSAAttestationQuery
+	modifiers                 []func(*sql.Selector)
+	loadTotal                 []func(context.Context, []*Builder) error
+	withNamedSlsaAttestations map[string]*SLSAAttestationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -383,6 +386,9 @@ func (bq *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Buil
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(bq.modifiers) > 0 {
+		_spec.Modifiers = bq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -396,6 +402,18 @@ func (bq *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Buil
 		if err := bq.loadSlsaAttestations(ctx, query, nodes,
 			func(n *Builder) { n.Edges.SlsaAttestations = []*SLSAAttestation{} },
 			func(n *Builder, e *SLSAAttestation) { n.Edges.SlsaAttestations = append(n.Edges.SlsaAttestations, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range bq.withNamedSlsaAttestations {
+		if err := bq.loadSlsaAttestations(ctx, query, nodes,
+			func(n *Builder) { n.appendNamedSlsaAttestations(name) },
+			func(n *Builder, e *SLSAAttestation) { n.appendNamedSlsaAttestations(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range bq.loadTotal {
+		if err := bq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -435,6 +453,9 @@ func (bq *BuilderQuery) loadSlsaAttestations(ctx context.Context, query *SLSAAtt
 
 func (bq *BuilderQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bq.querySpec()
+	if len(bq.modifiers) > 0 {
+		_spec.Modifiers = bq.modifiers
+	}
 	_spec.Node.Columns = bq.ctx.Fields
 	if len(bq.ctx.Fields) > 0 {
 		_spec.Unique = bq.ctx.Unique != nil && *bq.ctx.Unique
@@ -512,6 +533,20 @@ func (bq *BuilderQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedSlsaAttestations tells the query-builder to eager-load the nodes that are connected to the "slsa_attestations"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (bq *BuilderQuery) WithNamedSlsaAttestations(name string, opts ...func(*SLSAAttestationQuery)) *BuilderQuery {
+	query := (&SLSAAttestationClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if bq.withNamedSlsaAttestations == nil {
+		bq.withNamedSlsaAttestations = make(map[string]*SLSAAttestationQuery)
+	}
+	bq.withNamedSlsaAttestations[name] = query
+	return bq
 }
 
 // BuilderGroupBy is the group-by builder for Builder entities.

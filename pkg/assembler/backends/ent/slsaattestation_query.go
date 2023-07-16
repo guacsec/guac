@@ -20,13 +20,16 @@ import (
 // SLSAAttestationQuery is the builder for querying SLSAAttestation entities.
 type SLSAAttestationQuery struct {
 	config
-	ctx           *QueryContext
-	order         []slsaattestation.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.SLSAAttestation
-	withBuiltFrom *ArtifactQuery
-	withBuiltBy   *BuilderQuery
-	withSubject   *ArtifactQuery
+	ctx                *QueryContext
+	order              []slsaattestation.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.SLSAAttestation
+	withBuiltFrom      *ArtifactQuery
+	withBuiltBy        *BuilderQuery
+	withSubject        *ArtifactQuery
+	modifiers          []func(*sql.Selector)
+	loadTotal          []func(context.Context, []*SLSAAttestation) error
+	withNamedBuiltFrom map[string]*ArtifactQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -456,6 +459,9 @@ func (saq *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(saq.modifiers) > 0 {
+		_spec.Modifiers = saq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -481,6 +487,18 @@ func (saq *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	if query := saq.withSubject; query != nil {
 		if err := saq.loadSubject(ctx, query, nodes, nil,
 			func(n *SLSAAttestation, e *Artifact) { n.Edges.Subject = e }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range saq.withNamedBuiltFrom {
+		if err := saq.loadBuiltFrom(ctx, query, nodes,
+			func(n *SLSAAttestation) { n.appendNamedBuiltFrom(name) },
+			func(n *SLSAAttestation, e *Artifact) { n.appendNamedBuiltFrom(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range saq.loadTotal {
+		if err := saq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -609,6 +627,9 @@ func (saq *SLSAAttestationQuery) loadSubject(ctx context.Context, query *Artifac
 
 func (saq *SLSAAttestationQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := saq.querySpec()
+	if len(saq.modifiers) > 0 {
+		_spec.Modifiers = saq.modifiers
+	}
 	_spec.Node.Columns = saq.ctx.Fields
 	if len(saq.ctx.Fields) > 0 {
 		_spec.Unique = saq.ctx.Unique != nil && *saq.ctx.Unique
@@ -692,6 +713,20 @@ func (saq *SLSAAttestationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedBuiltFrom tells the query-builder to eager-load the nodes that are connected to the "built_from"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (saq *SLSAAttestationQuery) WithNamedBuiltFrom(name string, opts ...func(*ArtifactQuery)) *SLSAAttestationQuery {
+	query := (&ArtifactClient{config: saq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if saq.withNamedBuiltFrom == nil {
+		saq.withNamedBuiltFrom = make(map[string]*ArtifactQuery)
+	}
+	saq.withNamedBuiltFrom[name] = query
+	return saq
 }
 
 // SLSAAttestationGroupBy is the group-by builder for SLSAAttestation entities.

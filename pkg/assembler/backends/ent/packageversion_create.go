@@ -107,19 +107,19 @@ func (pvc *PackageVersionCreate) AddSbom(b ...*BillOfMaterials) *PackageVersionC
 	return pvc.AddSbomIDs(ids...)
 }
 
-// AddPkgEqualIDs adds the "pkg_equals" edge to the PkgEqual entity by IDs.
-func (pvc *PackageVersionCreate) AddPkgEqualIDs(ids ...int) *PackageVersionCreate {
-	pvc.mutation.AddPkgEqualIDs(ids...)
+// AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by IDs.
+func (pvc *PackageVersionCreate) AddEqualPackageIDs(ids ...int) *PackageVersionCreate {
+	pvc.mutation.AddEqualPackageIDs(ids...)
 	return pvc
 }
 
-// AddPkgEquals adds the "pkg_equals" edges to the PkgEqual entity.
-func (pvc *PackageVersionCreate) AddPkgEquals(p ...*PkgEqual) *PackageVersionCreate {
+// AddEqualPackages adds the "equal_packages" edges to the PkgEqual entity.
+func (pvc *PackageVersionCreate) AddEqualPackages(p ...*PkgEqual) *PackageVersionCreate {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return pvc.AddPkgEqualIDs(ids...)
+	return pvc.AddEqualPackageIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -276,12 +276,12 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.PkgEqualsIDs(); len(nodes) > 0 {
+	if nodes := pvc.mutation.EqualPackagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   packageversion.PkgEqualsTable,
-			Columns: packageversion.PkgEqualsPrimaryKey,
+			Table:   packageversion.EqualPackagesTable,
+			Columns: packageversion.EqualPackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),

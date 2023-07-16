@@ -43,11 +43,17 @@ type PackageVersionEdges struct {
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// Sbom holds the value of the sbom edge.
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
-	// PkgEquals holds the value of the pkg_equals edge.
-	PkgEquals []*PkgEqual `json:"pkg_equals,omitempty"`
+	// EqualPackages holds the value of the equal_packages edge.
+	EqualPackages []*PkgEqual `json:"equal_packages,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
+	// totalCount holds the count of the edges above.
+	totalCount [4]map[string]int
+
+	namedOccurrences   map[string][]*Occurrence
+	namedSbom          map[string][]*BillOfMaterials
+	namedEqualPackages map[string][]*PkgEqual
 }
 
 // NameOrErr returns the Name value or an error if the edge
@@ -81,13 +87,13 @@ func (e PackageVersionEdges) SbomOrErr() ([]*BillOfMaterials, error) {
 	return nil, &NotLoadedError{edge: "sbom"}
 }
 
-// PkgEqualsOrErr returns the PkgEquals value or an error if the edge
+// EqualPackagesOrErr returns the EqualPackages value or an error if the edge
 // was not loaded in eager-loading.
-func (e PackageVersionEdges) PkgEqualsOrErr() ([]*PkgEqual, error) {
+func (e PackageVersionEdges) EqualPackagesOrErr() ([]*PkgEqual, error) {
 	if e.loadedTypes[3] {
-		return e.PkgEquals, nil
+		return e.EqualPackages, nil
 	}
-	return nil, &NotLoadedError{edge: "pkg_equals"}
+	return nil, &NotLoadedError{edge: "equal_packages"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -182,9 +188,9 @@ func (pv *PackageVersion) QuerySbom() *BillOfMaterialsQuery {
 	return NewPackageVersionClient(pv.config).QuerySbom(pv)
 }
 
-// QueryPkgEquals queries the "pkg_equals" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryPkgEquals() *PkgEqualQuery {
-	return NewPackageVersionClient(pv.config).QueryPkgEquals(pv)
+// QueryEqualPackages queries the "equal_packages" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryEqualPackages() *PkgEqualQuery {
+	return NewPackageVersionClient(pv.config).QueryEqualPackages(pv)
 }
 
 // Update returns a builder for updating this PackageVersion.
@@ -226,6 +232,78 @@ func (pv *PackageVersion) String() string {
 	builder.WriteString(pv.Hash)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedOccurrences returns the Occurrences named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedOccurrences(name string) ([]*Occurrence, error) {
+	if pv.Edges.namedOccurrences == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedOccurrences[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedOccurrences(name string, edges ...*Occurrence) {
+	if pv.Edges.namedOccurrences == nil {
+		pv.Edges.namedOccurrences = make(map[string][]*Occurrence)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedOccurrences[name] = []*Occurrence{}
+	} else {
+		pv.Edges.namedOccurrences[name] = append(pv.Edges.namedOccurrences[name], edges...)
+	}
+}
+
+// NamedSbom returns the Sbom named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedSbom(name string) ([]*BillOfMaterials, error) {
+	if pv.Edges.namedSbom == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedSbom[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedSbom(name string, edges ...*BillOfMaterials) {
+	if pv.Edges.namedSbom == nil {
+		pv.Edges.namedSbom = make(map[string][]*BillOfMaterials)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedSbom[name] = []*BillOfMaterials{}
+	} else {
+		pv.Edges.namedSbom[name] = append(pv.Edges.namedSbom[name], edges...)
+	}
+}
+
+// NamedEqualPackages returns the EqualPackages named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedEqualPackages(name string) ([]*PkgEqual, error) {
+	if pv.Edges.namedEqualPackages == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedEqualPackages[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedEqualPackages(name string, edges ...*PkgEqual) {
+	if pv.Edges.namedEqualPackages == nil {
+		pv.Edges.namedEqualPackages = make(map[string][]*PkgEqual)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedEqualPackages[name] = []*PkgEqual{}
+	} else {
+		pv.Edges.namedEqualPackages[name] = append(pv.Edges.namedEqualPackages[name], edges...)
+	}
 }
 
 // PackageVersions is a parsable slice of PackageVersion.

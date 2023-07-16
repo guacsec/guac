@@ -22,14 +22,20 @@ import (
 // ArtifactQuery is the builder for querying Artifact entities.
 type ArtifactQuery struct {
 	config
-	ctx              *QueryContext
-	order            []artifact.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.Artifact
-	withOccurrences  *OccurrenceQuery
-	withSbom         *BillOfMaterialsQuery
-	withAttestations *SLSAAttestationQuery
-	withSame         *HashEqualQuery
+	ctx                   *QueryContext
+	order                 []artifact.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.Artifact
+	withOccurrences       *OccurrenceQuery
+	withSbom              *BillOfMaterialsQuery
+	withAttestations      *SLSAAttestationQuery
+	withSame              *HashEqualQuery
+	modifiers             []func(*sql.Selector)
+	loadTotal             []func(context.Context, []*Artifact) error
+	withNamedOccurrences  map[string]*OccurrenceQuery
+	withNamedSbom         map[string]*BillOfMaterialsQuery
+	withNamedAttestations map[string]*SLSAAttestationQuery
+	withNamedSame         map[string]*HashEqualQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -494,6 +500,9 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(aq.modifiers) > 0 {
+		_spec.Modifiers = aq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -528,6 +537,39 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 		if err := aq.loadSame(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Same = []*HashEqual{} },
 			func(n *Artifact, e *HashEqual) { n.Edges.Same = append(n.Edges.Same, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedOccurrences {
+		if err := aq.loadOccurrences(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedOccurrences(name) },
+			func(n *Artifact, e *Occurrence) { n.appendNamedOccurrences(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedSbom {
+		if err := aq.loadSbom(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedSbom(name) },
+			func(n *Artifact, e *BillOfMaterials) { n.appendNamedSbom(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedAttestations {
+		if err := aq.loadAttestations(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedAttestations(name) },
+			func(n *Artifact, e *SLSAAttestation) { n.appendNamedAttestations(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedSame {
+		if err := aq.loadSame(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedSame(name) },
+			func(n *Artifact, e *HashEqual) { n.appendNamedSame(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range aq.loadTotal {
+		if err := aq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -722,6 +764,9 @@ func (aq *ArtifactQuery) loadSame(ctx context.Context, query *HashEqualQuery, no
 
 func (aq *ArtifactQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := aq.querySpec()
+	if len(aq.modifiers) > 0 {
+		_spec.Modifiers = aq.modifiers
+	}
 	_spec.Node.Columns = aq.ctx.Fields
 	if len(aq.ctx.Fields) > 0 {
 		_spec.Unique = aq.ctx.Unique != nil && *aq.ctx.Unique
@@ -799,6 +844,62 @@ func (aq *ArtifactQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedOccurrences tells the query-builder to eager-load the nodes that are connected to the "occurrences"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedOccurrences(name string, opts ...func(*OccurrenceQuery)) *ArtifactQuery {
+	query := (&OccurrenceClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedOccurrences == nil {
+		aq.withNamedOccurrences = make(map[string]*OccurrenceQuery)
+	}
+	aq.withNamedOccurrences[name] = query
+	return aq
+}
+
+// WithNamedSbom tells the query-builder to eager-load the nodes that are connected to the "sbom"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedSbom(name string, opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
+	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedSbom == nil {
+		aq.withNamedSbom = make(map[string]*BillOfMaterialsQuery)
+	}
+	aq.withNamedSbom[name] = query
+	return aq
+}
+
+// WithNamedAttestations tells the query-builder to eager-load the nodes that are connected to the "attestations"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedAttestations(name string, opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
+	query := (&SLSAAttestationClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedAttestations == nil {
+		aq.withNamedAttestations = make(map[string]*SLSAAttestationQuery)
+	}
+	aq.withNamedAttestations[name] = query
+	return aq
+}
+
+// WithNamedSame tells the query-builder to eager-load the nodes that are connected to the "same"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedSame(name string, opts ...func(*HashEqualQuery)) *ArtifactQuery {
+	query := (&HashEqualClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedSame == nil {
+		aq.withNamedSame = make(map[string]*HashEqualQuery)
+	}
+	aq.withNamedSame[name] = query
+	return aq
 }
 
 // ArtifactGroupBy is the group-by builder for Artifact entities.

@@ -8939,29 +8939,29 @@ func (m *PackageTypeMutation) ResetEdge(name string) error {
 // PackageVersionMutation represents an operation that mutates the PackageVersion nodes in the graph.
 type PackageVersionMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	version            *string
-	subpath            *string
-	qualifiers         *[]model.PackageQualifier
-	appendqualifiers   []model.PackageQualifier
-	hash               *string
-	clearedFields      map[string]struct{}
-	name               *int
-	clearedname        bool
-	occurrences        map[int]struct{}
-	removedoccurrences map[int]struct{}
-	clearedoccurrences bool
-	sbom               map[int]struct{}
-	removedsbom        map[int]struct{}
-	clearedsbom        bool
-	pkg_equals         map[int]struct{}
-	removedpkg_equals  map[int]struct{}
-	clearedpkg_equals  bool
-	done               bool
-	oldValue           func(context.Context) (*PackageVersion, error)
-	predicates         []predicate.PackageVersion
+	op                    Op
+	typ                   string
+	id                    *int
+	version               *string
+	subpath               *string
+	qualifiers            *[]model.PackageQualifier
+	appendqualifiers      []model.PackageQualifier
+	hash                  *string
+	clearedFields         map[string]struct{}
+	name                  *int
+	clearedname           bool
+	occurrences           map[int]struct{}
+	removedoccurrences    map[int]struct{}
+	clearedoccurrences    bool
+	sbom                  map[int]struct{}
+	removedsbom           map[int]struct{}
+	clearedsbom           bool
+	equal_packages        map[int]struct{}
+	removedequal_packages map[int]struct{}
+	clearedequal_packages bool
+	done                  bool
+	oldValue              func(context.Context) (*PackageVersion, error)
+	predicates            []predicate.PackageVersion
 }
 
 var _ ent.Mutation = (*PackageVersionMutation)(nil)
@@ -9405,58 +9405,58 @@ func (m *PackageVersionMutation) ResetSbom() {
 	m.removedsbom = nil
 }
 
-// AddPkgEqualIDs adds the "pkg_equals" edge to the PkgEqual entity by ids.
-func (m *PackageVersionMutation) AddPkgEqualIDs(ids ...int) {
-	if m.pkg_equals == nil {
-		m.pkg_equals = make(map[int]struct{})
+// AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by ids.
+func (m *PackageVersionMutation) AddEqualPackageIDs(ids ...int) {
+	if m.equal_packages == nil {
+		m.equal_packages = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.pkg_equals[ids[i]] = struct{}{}
+		m.equal_packages[ids[i]] = struct{}{}
 	}
 }
 
-// ClearPkgEquals clears the "pkg_equals" edge to the PkgEqual entity.
-func (m *PackageVersionMutation) ClearPkgEquals() {
-	m.clearedpkg_equals = true
+// ClearEqualPackages clears the "equal_packages" edge to the PkgEqual entity.
+func (m *PackageVersionMutation) ClearEqualPackages() {
+	m.clearedequal_packages = true
 }
 
-// PkgEqualsCleared reports if the "pkg_equals" edge to the PkgEqual entity was cleared.
-func (m *PackageVersionMutation) PkgEqualsCleared() bool {
-	return m.clearedpkg_equals
+// EqualPackagesCleared reports if the "equal_packages" edge to the PkgEqual entity was cleared.
+func (m *PackageVersionMutation) EqualPackagesCleared() bool {
+	return m.clearedequal_packages
 }
 
-// RemovePkgEqualIDs removes the "pkg_equals" edge to the PkgEqual entity by IDs.
-func (m *PackageVersionMutation) RemovePkgEqualIDs(ids ...int) {
-	if m.removedpkg_equals == nil {
-		m.removedpkg_equals = make(map[int]struct{})
+// RemoveEqualPackageIDs removes the "equal_packages" edge to the PkgEqual entity by IDs.
+func (m *PackageVersionMutation) RemoveEqualPackageIDs(ids ...int) {
+	if m.removedequal_packages == nil {
+		m.removedequal_packages = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.pkg_equals, ids[i])
-		m.removedpkg_equals[ids[i]] = struct{}{}
+		delete(m.equal_packages, ids[i])
+		m.removedequal_packages[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedPkgEquals returns the removed IDs of the "pkg_equals" edge to the PkgEqual entity.
-func (m *PackageVersionMutation) RemovedPkgEqualsIDs() (ids []int) {
-	for id := range m.removedpkg_equals {
+// RemovedEqualPackages returns the removed IDs of the "equal_packages" edge to the PkgEqual entity.
+func (m *PackageVersionMutation) RemovedEqualPackagesIDs() (ids []int) {
+	for id := range m.removedequal_packages {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// PkgEqualsIDs returns the "pkg_equals" edge IDs in the mutation.
-func (m *PackageVersionMutation) PkgEqualsIDs() (ids []int) {
-	for id := range m.pkg_equals {
+// EqualPackagesIDs returns the "equal_packages" edge IDs in the mutation.
+func (m *PackageVersionMutation) EqualPackagesIDs() (ids []int) {
+	for id := range m.equal_packages {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPkgEquals resets all changes to the "pkg_equals" edge.
-func (m *PackageVersionMutation) ResetPkgEquals() {
-	m.pkg_equals = nil
-	m.clearedpkg_equals = false
-	m.removedpkg_equals = nil
+// ResetEqualPackages resets all changes to the "equal_packages" edge.
+func (m *PackageVersionMutation) ResetEqualPackages() {
+	m.equal_packages = nil
+	m.clearedequal_packages = false
+	m.removedequal_packages = nil
 }
 
 // Where appends a list predicates to the PackageVersionMutation builder.
@@ -9682,8 +9682,8 @@ func (m *PackageVersionMutation) AddedEdges() []string {
 	if m.sbom != nil {
 		edges = append(edges, packageversion.EdgeSbom)
 	}
-	if m.pkg_equals != nil {
-		edges = append(edges, packageversion.EdgePkgEquals)
+	if m.equal_packages != nil {
+		edges = append(edges, packageversion.EdgeEqualPackages)
 	}
 	return edges
 }
@@ -9708,9 +9708,9 @@ func (m *PackageVersionMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case packageversion.EdgePkgEquals:
-		ids := make([]ent.Value, 0, len(m.pkg_equals))
-		for id := range m.pkg_equals {
+	case packageversion.EdgeEqualPackages:
+		ids := make([]ent.Value, 0, len(m.equal_packages))
+		for id := range m.equal_packages {
 			ids = append(ids, id)
 		}
 		return ids
@@ -9727,8 +9727,8 @@ func (m *PackageVersionMutation) RemovedEdges() []string {
 	if m.removedsbom != nil {
 		edges = append(edges, packageversion.EdgeSbom)
 	}
-	if m.removedpkg_equals != nil {
-		edges = append(edges, packageversion.EdgePkgEquals)
+	if m.removedequal_packages != nil {
+		edges = append(edges, packageversion.EdgeEqualPackages)
 	}
 	return edges
 }
@@ -9749,9 +9749,9 @@ func (m *PackageVersionMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case packageversion.EdgePkgEquals:
-		ids := make([]ent.Value, 0, len(m.removedpkg_equals))
-		for id := range m.removedpkg_equals {
+	case packageversion.EdgeEqualPackages:
+		ids := make([]ent.Value, 0, len(m.removedequal_packages))
+		for id := range m.removedequal_packages {
 			ids = append(ids, id)
 		}
 		return ids
@@ -9771,8 +9771,8 @@ func (m *PackageVersionMutation) ClearedEdges() []string {
 	if m.clearedsbom {
 		edges = append(edges, packageversion.EdgeSbom)
 	}
-	if m.clearedpkg_equals {
-		edges = append(edges, packageversion.EdgePkgEquals)
+	if m.clearedequal_packages {
+		edges = append(edges, packageversion.EdgeEqualPackages)
 	}
 	return edges
 }
@@ -9787,8 +9787,8 @@ func (m *PackageVersionMutation) EdgeCleared(name string) bool {
 		return m.clearedoccurrences
 	case packageversion.EdgeSbom:
 		return m.clearedsbom
-	case packageversion.EdgePkgEquals:
-		return m.clearedpkg_equals
+	case packageversion.EdgeEqualPackages:
+		return m.clearedequal_packages
 	}
 	return false
 }
@@ -9817,8 +9817,8 @@ func (m *PackageVersionMutation) ResetEdge(name string) error {
 	case packageversion.EdgeSbom:
 		m.ResetSbom()
 		return nil
-	case packageversion.EdgePkgEquals:
-		m.ResetPkgEquals()
+	case packageversion.EdgeEqualPackages:
+		m.ResetEqualPackages()
 		return nil
 	}
 	return fmt.Errorf("unknown PackageVersion edge %s", name)

@@ -35,6 +35,10 @@ type HashEqualEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedArtifacts map[string][]*Artifact
 }
 
 // ArtifactsOrErr returns the Artifacts value or an error if the edge
@@ -145,6 +149,30 @@ func (he *HashEqual) String() string {
 	builder.WriteString(he.Justification)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedArtifacts returns the Artifacts named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (he *HashEqual) NamedArtifacts(name string) ([]*Artifact, error) {
+	if he.Edges.namedArtifacts == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := he.Edges.namedArtifacts[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (he *HashEqual) appendNamedArtifacts(name string, edges ...*Artifact) {
+	if he.Edges.namedArtifacts == nil {
+		he.Edges.namedArtifacts = make(map[string][]*Artifact)
+	}
+	if len(edges) == 0 {
+		he.Edges.namedArtifacts[name] = []*Artifact{}
+	} else {
+		he.Edges.namedArtifacts[name] = append(he.Edges.namedArtifacts[name], edges...)
+	}
 }
 
 // HashEquals is a parsable slice of HashEqual.

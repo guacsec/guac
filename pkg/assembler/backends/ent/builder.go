@@ -31,6 +31,10 @@ type BuilderEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedSlsaAttestations map[string][]*SLSAAttestation
 }
 
 // SlsaAttestationsOrErr returns the SlsaAttestations value or an error if the edge
@@ -123,6 +127,30 @@ func (b *Builder) String() string {
 	builder.WriteString(b.URI)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedSlsaAttestations returns the SlsaAttestations named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (b *Builder) NamedSlsaAttestations(name string) ([]*SLSAAttestation, error) {
+	if b.Edges.namedSlsaAttestations == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := b.Edges.namedSlsaAttestations[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (b *Builder) appendNamedSlsaAttestations(name string, edges ...*SLSAAttestation) {
+	if b.Edges.namedSlsaAttestations == nil {
+		b.Edges.namedSlsaAttestations = make(map[string][]*SLSAAttestation)
+	}
+	if len(edges) == 0 {
+		b.Edges.namedSlsaAttestations[name] = []*SLSAAttestation{}
+	} else {
+		b.Edges.namedSlsaAttestations[name] = append(b.Edges.namedSlsaAttestations[name], edges...)
+	}
 }
 
 // Builders is a parsable slice of Builder.

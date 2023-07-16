@@ -27,6 +27,8 @@ type HasSourceAtQuery struct {
 	withPackageVersion *PackageVersionQuery
 	withAllVersions    *PackageNameQuery
 	withSource         *SourceNameQuery
+	modifiers          []func(*sql.Selector)
+	loadTotal          []func(context.Context, []*HasSourceAt) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -456,6 +458,9 @@ func (hsaq *HasSourceAtQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(hsaq.modifiers) > 0 {
+		_spec.Modifiers = hsaq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -480,6 +485,11 @@ func (hsaq *HasSourceAtQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if query := hsaq.withSource; query != nil {
 		if err := hsaq.loadSource(ctx, query, nodes, nil,
 			func(n *HasSourceAt, e *SourceName) { n.Edges.Source = e }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range hsaq.loadTotal {
+		if err := hsaq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -582,6 +592,9 @@ func (hsaq *HasSourceAtQuery) loadSource(ctx context.Context, query *SourceNameQ
 
 func (hsaq *HasSourceAtQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := hsaq.querySpec()
+	if len(hsaq.modifiers) > 0 {
+		_spec.Modifiers = hsaq.modifiers
+	}
 	_spec.Node.Columns = hsaq.ctx.Fields
 	if len(hsaq.ctx.Fields) > 0 {
 		_spec.Unique = hsaq.ctx.Unique != nil && *hsaq.ctx.Unique

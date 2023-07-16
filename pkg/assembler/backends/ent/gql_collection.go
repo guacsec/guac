@@ -21,6 +21,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -1551,12 +1552,12 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = (&PackageVersionClient{config: pv.config}).Query()
+				query = (&PkgEqualClient{config: pv.config}).Query()
 			)
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			pv.WithNamedEqualPackages(alias, func(wq *PackageVersionQuery) {
+			pv.WithNamedEqualPackages(alias, func(wq *PkgEqualQuery) {
 				*wq = *query
 			})
 		case "nameID":
@@ -1604,6 +1605,97 @@ type packageversionPaginateArgs struct {
 
 func newPackageVersionPaginateArgs(rv map[string]any) *packageversionPaginateArgs {
 	args := &packageversionPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (pe *PkgEqualQuery) CollectFields(ctx context.Context, satisfies ...string) (*PkgEqualQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return pe, nil
+	}
+	if err := pe.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return pe, nil
+}
+
+func (pe *PkgEqualQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(pkgequal.Columns))
+		selectedFields = []string{pkgequal.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "packages":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PackageVersionClient{config: pe.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pe.WithNamedPackages(alias, func(wq *PackageVersionQuery) {
+				*wq = *query
+			})
+		case "origin":
+			if _, ok := fieldSeen[pkgequal.FieldOrigin]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldOrigin)
+				fieldSeen[pkgequal.FieldOrigin] = struct{}{}
+			}
+		case "collector":
+			if _, ok := fieldSeen[pkgequal.FieldCollector]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldCollector)
+				fieldSeen[pkgequal.FieldCollector] = struct{}{}
+			}
+		case "justification":
+			if _, ok := fieldSeen[pkgequal.FieldJustification]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldJustification)
+				fieldSeen[pkgequal.FieldJustification] = struct{}{}
+			}
+		case "packagesHash":
+			if _, ok := fieldSeen[pkgequal.FieldPackagesHash]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldPackagesHash)
+				fieldSeen[pkgequal.FieldPackagesHash] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		pe.Select(selectedFields...)
+	}
+	return nil
+}
+
+type pkgequalPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []PkgEqualPaginateOption
+}
+
+func newPkgEqualPaginateArgs(rv map[string]any) *pkgequalPaginateArgs {
+	args := &pkgequalPaginateArgs{}
 	if rv == nil {
 		return args
 	}

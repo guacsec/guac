@@ -2497,15 +2497,15 @@ func (c *PackageVersionClient) QuerySbom(pv *PackageVersion) *BillOfMaterialsQue
 	return query
 }
 
-// QueryPkgEquals queries the pkg_equals edge of a PackageVersion.
-func (c *PackageVersionClient) QueryPkgEquals(pv *PackageVersion) *PkgEqualQuery {
+// QueryEqualPackages queries the equal_packages edge of a PackageVersion.
+func (c *PackageVersionClient) QueryEqualPackages(pv *PackageVersion) *PkgEqualQuery {
 	query := (&PkgEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pv.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.PkgEqualsTable, packageversion.PkgEqualsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.EqualPackagesTable, packageversion.EqualPackagesPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
 		return fromV, nil

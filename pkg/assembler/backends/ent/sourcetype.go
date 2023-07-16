@@ -31,6 +31,10 @@ type SourceTypeEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedNamespaces map[string][]*SourceNamespace
 }
 
 // NamespacesOrErr returns the Namespaces value or an error if the edge
@@ -123,6 +127,30 @@ func (st *SourceType) String() string {
 	builder.WriteString(st.Type)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedNamespaces returns the Namespaces named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (st *SourceType) NamedNamespaces(name string) ([]*SourceNamespace, error) {
+	if st.Edges.namedNamespaces == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := st.Edges.namedNamespaces[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (st *SourceType) appendNamedNamespaces(name string, edges ...*SourceNamespace) {
+	if st.Edges.namedNamespaces == nil {
+		st.Edges.namedNamespaces = make(map[string][]*SourceNamespace)
+	}
+	if len(edges) == 0 {
+		st.Edges.namedNamespaces[name] = []*SourceNamespace{}
+	} else {
+		st.Edges.namedNamespaces[name] = append(st.Edges.namedNamespaces[name], edges...)
+	}
 }
 
 // SourceTypes is a parsable slice of SourceType.

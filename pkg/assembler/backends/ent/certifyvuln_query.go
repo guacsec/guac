@@ -25,6 +25,8 @@ type CertifyVulnQuery struct {
 	predicates        []predicate.CertifyVuln
 	withVulnerability *SecurityAdvisoryQuery
 	withPackage       *PackageVersionQuery
+	modifiers         []func(*sql.Selector)
+	loadTotal         []func(context.Context, []*CertifyVuln) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -419,6 +421,9 @@ func (cvq *CertifyVulnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(cvq.modifiers) > 0 {
+		_spec.Modifiers = cvq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -437,6 +442,11 @@ func (cvq *CertifyVulnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if query := cvq.withPackage; query != nil {
 		if err := cvq.loadPackage(ctx, query, nodes, nil,
 			func(n *CertifyVuln, e *PackageVersion) { n.Edges.Package = e }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range cvq.loadTotal {
+		if err := cvq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -507,6 +517,9 @@ func (cvq *CertifyVulnQuery) loadPackage(ctx context.Context, query *PackageVers
 
 func (cvq *CertifyVulnQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cvq.querySpec()
+	if len(cvq.modifiers) > 0 {
+		_spec.Modifiers = cvq.modifiers
+	}
 	_spec.Node.Columns = cvq.ctx.Fields
 	if len(cvq.ctx.Fields) > 0 {
 		_spec.Unique = cvq.ctx.Unique != nil && *cvq.ctx.Unique

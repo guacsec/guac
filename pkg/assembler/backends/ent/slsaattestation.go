@@ -58,6 +58,10 @@ type SLSAAttestationEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
+	// totalCount holds the count of the edges above.
+	totalCount [3]map[string]int
+
+	namedBuiltFrom map[string][]*Artifact
 }
 
 // BuiltFromOrErr returns the BuiltFrom value or an error if the edge
@@ -279,6 +283,30 @@ func (sa *SLSAAttestation) String() string {
 	builder.WriteString(sa.BuiltFromHash)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedBuiltFrom returns the BuiltFrom named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (sa *SLSAAttestation) NamedBuiltFrom(name string) ([]*Artifact, error) {
+	if sa.Edges.namedBuiltFrom == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := sa.Edges.namedBuiltFrom[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (sa *SLSAAttestation) appendNamedBuiltFrom(name string, edges ...*Artifact) {
+	if sa.Edges.namedBuiltFrom == nil {
+		sa.Edges.namedBuiltFrom = make(map[string][]*Artifact)
+	}
+	if len(edges) == 0 {
+		sa.Edges.namedBuiltFrom[name] = []*Artifact{}
+	} else {
+		sa.Edges.namedBuiltFrom[name] = append(sa.Edges.namedBuiltFrom[name], edges...)
+	}
 }
 
 // SLSAAttestations is a parsable slice of SLSAAttestation.

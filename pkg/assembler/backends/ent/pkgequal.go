@@ -37,6 +37,10 @@ type PkgEqualEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedPackages map[string][]*PackageVersion
 }
 
 // PackagesOrErr returns the Packages value or an error if the edge
@@ -156,6 +160,30 @@ func (pe *PkgEqual) String() string {
 	builder.WriteString(pe.PackagesHash)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedPackages returns the Packages named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pe *PkgEqual) NamedPackages(name string) ([]*PackageVersion, error) {
+	if pe.Edges.namedPackages == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pe.Edges.namedPackages[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pe *PkgEqual) appendNamedPackages(name string, edges ...*PackageVersion) {
+	if pe.Edges.namedPackages == nil {
+		pe.Edges.namedPackages = make(map[string][]*PackageVersion)
+	}
+	if len(edges) == 0 {
+		pe.Edges.namedPackages[name] = []*PackageVersion{}
+	} else {
+		pe.Edges.namedPackages[name] = append(pe.Edges.namedPackages[name], edges...)
+	}
 }
 
 // PkgEquals is a parsable slice of PkgEqual.

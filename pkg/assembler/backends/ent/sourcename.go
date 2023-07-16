@@ -40,6 +40,10 @@ type SourceNameEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+	// totalCount holds the count of the edges above.
+	totalCount [2]map[string]int
+
+	namedOccurrences map[string][]*Occurrence
 }
 
 // NamespaceOrErr returns the Namespace value or an error if the edge
@@ -177,6 +181,30 @@ func (sn *SourceName) String() string {
 	builder.WriteString(fmt.Sprintf("%v", sn.NamespaceID))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedOccurrences returns the Occurrences named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (sn *SourceName) NamedOccurrences(name string) ([]*Occurrence, error) {
+	if sn.Edges.namedOccurrences == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := sn.Edges.namedOccurrences[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (sn *SourceName) appendNamedOccurrences(name string, edges ...*Occurrence) {
+	if sn.Edges.namedOccurrences == nil {
+		sn.Edges.namedOccurrences = make(map[string][]*Occurrence)
+	}
+	if len(edges) == 0 {
+		sn.Edges.namedOccurrences[name] = []*Occurrence{}
+	} else {
+		sn.Edges.namedOccurrences[name] = append(sn.Edges.namedOccurrences[name], edges...)
+	}
 }
 
 // SourceNames is a parsable slice of SourceName.

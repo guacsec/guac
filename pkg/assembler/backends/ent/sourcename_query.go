@@ -20,12 +20,15 @@ import (
 // SourceNameQuery is the builder for querying SourceName entities.
 type SourceNameQuery struct {
 	config
-	ctx             *QueryContext
-	order           []sourcename.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.SourceName
-	withNamespace   *SourceNamespaceQuery
-	withOccurrences *OccurrenceQuery
+	ctx                  *QueryContext
+	order                []sourcename.OrderOption
+	inters               []Interceptor
+	predicates           []predicate.SourceName
+	withNamespace        *SourceNamespaceQuery
+	withOccurrences      *OccurrenceQuery
+	modifiers            []func(*sql.Selector)
+	loadTotal            []func(context.Context, []*SourceName) error
+	withNamedOccurrences map[string]*OccurrenceQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -420,6 +423,9 @@ func (snq *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(snq.modifiers) > 0 {
+		_spec.Modifiers = snq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -439,6 +445,18 @@ func (snq *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		if err := snq.loadOccurrences(ctx, query, nodes,
 			func(n *SourceName) { n.Edges.Occurrences = []*Occurrence{} },
 			func(n *SourceName, e *Occurrence) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range snq.withNamedOccurrences {
+		if err := snq.loadOccurrences(ctx, query, nodes,
+			func(n *SourceName) { n.appendNamedOccurrences(name) },
+			func(n *SourceName, e *Occurrence) { n.appendNamedOccurrences(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range snq.loadTotal {
+		if err := snq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -510,6 +528,9 @@ func (snq *SourceNameQuery) loadOccurrences(ctx context.Context, query *Occurren
 
 func (snq *SourceNameQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := snq.querySpec()
+	if len(snq.modifiers) > 0 {
+		_spec.Modifiers = snq.modifiers
+	}
 	_spec.Node.Columns = snq.ctx.Fields
 	if len(snq.ctx.Fields) > 0 {
 		_spec.Unique = snq.ctx.Unique != nil && *snq.ctx.Unique
@@ -590,6 +611,20 @@ func (snq *SourceNameQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedOccurrences tells the query-builder to eager-load the nodes that are connected to the "occurrences"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithNamedOccurrences(name string, opts ...func(*OccurrenceQuery)) *SourceNameQuery {
+	query := (&OccurrenceClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if snq.withNamedOccurrences == nil {
+		snq.withNamedOccurrences = make(map[string]*OccurrenceQuery)
+	}
+	snq.withNamedOccurrences[name] = query
+	return snq
 }
 
 // SourceNameGroupBy is the group-by builder for SourceName entities.

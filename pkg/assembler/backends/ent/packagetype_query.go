@@ -19,11 +19,14 @@ import (
 // PackageTypeQuery is the builder for querying PackageType entities.
 type PackageTypeQuery struct {
 	config
-	ctx            *QueryContext
-	order          []packagetype.OrderOption
-	inters         []Interceptor
-	predicates     []predicate.PackageType
-	withNamespaces *PackageNamespaceQuery
+	ctx                 *QueryContext
+	order               []packagetype.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.PackageType
+	withNamespaces      *PackageNamespaceQuery
+	modifiers           []func(*sql.Selector)
+	loadTotal           []func(context.Context, []*PackageType) error
+	withNamedNamespaces map[string]*PackageNamespaceQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -383,6 +386,9 @@ func (ptq *PackageTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(ptq.modifiers) > 0 {
+		_spec.Modifiers = ptq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -396,6 +402,18 @@ func (ptq *PackageTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		if err := ptq.loadNamespaces(ctx, query, nodes,
 			func(n *PackageType) { n.Edges.Namespaces = []*PackageNamespace{} },
 			func(n *PackageType, e *PackageNamespace) { n.Edges.Namespaces = append(n.Edges.Namespaces, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range ptq.withNamedNamespaces {
+		if err := ptq.loadNamespaces(ctx, query, nodes,
+			func(n *PackageType) { n.appendNamedNamespaces(name) },
+			func(n *PackageType, e *PackageNamespace) { n.appendNamedNamespaces(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range ptq.loadTotal {
+		if err := ptq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -435,6 +453,9 @@ func (ptq *PackageTypeQuery) loadNamespaces(ctx context.Context, query *PackageN
 
 func (ptq *PackageTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ptq.querySpec()
+	if len(ptq.modifiers) > 0 {
+		_spec.Modifiers = ptq.modifiers
+	}
 	_spec.Node.Columns = ptq.ctx.Fields
 	if len(ptq.ctx.Fields) > 0 {
 		_spec.Unique = ptq.ctx.Unique != nil && *ptq.ctx.Unique
@@ -512,6 +533,20 @@ func (ptq *PackageTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedNamespaces tells the query-builder to eager-load the nodes that are connected to the "namespaces"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (ptq *PackageTypeQuery) WithNamedNamespaces(name string, opts ...func(*PackageNamespaceQuery)) *PackageTypeQuery {
+	query := (&PackageNamespaceClient{config: ptq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if ptq.withNamedNamespaces == nil {
+		ptq.withNamedNamespaces = make(map[string]*PackageNamespaceQuery)
+	}
+	ptq.withNamedNamespaces[name] = query
+	return ptq
 }
 
 // PackageTypeGroupBy is the group-by builder for PackageType entities.

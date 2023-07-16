@@ -39,6 +39,13 @@ type ArtifactEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
+	// totalCount holds the count of the edges above.
+	totalCount [4]map[string]int
+
+	namedOccurrences  map[string][]*Occurrence
+	namedSbom         map[string][]*BillOfMaterials
+	namedAttestations map[string][]*SLSAAttestation
+	namedSame         map[string][]*HashEqual
 }
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
@@ -182,6 +189,102 @@ func (a *Artifact) String() string {
 	builder.WriteString(a.Digest)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedOccurrences returns the Occurrences named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedOccurrences(name string) ([]*Occurrence, error) {
+	if a.Edges.namedOccurrences == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedOccurrences[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedOccurrences(name string, edges ...*Occurrence) {
+	if a.Edges.namedOccurrences == nil {
+		a.Edges.namedOccurrences = make(map[string][]*Occurrence)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedOccurrences[name] = []*Occurrence{}
+	} else {
+		a.Edges.namedOccurrences[name] = append(a.Edges.namedOccurrences[name], edges...)
+	}
+}
+
+// NamedSbom returns the Sbom named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedSbom(name string) ([]*BillOfMaterials, error) {
+	if a.Edges.namedSbom == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedSbom[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedSbom(name string, edges ...*BillOfMaterials) {
+	if a.Edges.namedSbom == nil {
+		a.Edges.namedSbom = make(map[string][]*BillOfMaterials)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedSbom[name] = []*BillOfMaterials{}
+	} else {
+		a.Edges.namedSbom[name] = append(a.Edges.namedSbom[name], edges...)
+	}
+}
+
+// NamedAttestations returns the Attestations named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedAttestations(name string) ([]*SLSAAttestation, error) {
+	if a.Edges.namedAttestations == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedAttestations[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedAttestations(name string, edges ...*SLSAAttestation) {
+	if a.Edges.namedAttestations == nil {
+		a.Edges.namedAttestations = make(map[string][]*SLSAAttestation)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedAttestations[name] = []*SLSAAttestation{}
+	} else {
+		a.Edges.namedAttestations[name] = append(a.Edges.namedAttestations[name], edges...)
+	}
+}
+
+// NamedSame returns the Same named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedSame(name string) ([]*HashEqual, error) {
+	if a.Edges.namedSame == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedSame[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedSame(name string, edges ...*HashEqual) {
+	if a.Edges.namedSame == nil {
+		a.Edges.namedSame = make(map[string][]*HashEqual)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedSame[name] = []*HashEqual{}
+	} else {
+		a.Edges.namedSame[name] = append(a.Edges.namedSame[name], edges...)
+	}
 }
 
 // Artifacts is a parsable slice of Artifact.

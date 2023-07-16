@@ -20,12 +20,15 @@ import (
 // PackageNamespaceQuery is the builder for querying PackageNamespace entities.
 type PackageNamespaceQuery struct {
 	config
-	ctx         *QueryContext
-	order       []packagenamespace.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.PackageNamespace
-	withPackage *PackageTypeQuery
-	withNames   *PackageNameQuery
+	ctx            *QueryContext
+	order          []packagenamespace.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.PackageNamespace
+	withPackage    *PackageTypeQuery
+	withNames      *PackageNameQuery
+	modifiers      []func(*sql.Selector)
+	loadTotal      []func(context.Context, []*PackageNamespace) error
+	withNamedNames map[string]*PackageNameQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -420,6 +423,9 @@ func (pnq *PackageNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(pnq.modifiers) > 0 {
+		_spec.Modifiers = pnq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -439,6 +445,18 @@ func (pnq *PackageNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		if err := pnq.loadNames(ctx, query, nodes,
 			func(n *PackageNamespace) { n.Edges.Names = []*PackageName{} },
 			func(n *PackageNamespace, e *PackageName) { n.Edges.Names = append(n.Edges.Names, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pnq.withNamedNames {
+		if err := pnq.loadNames(ctx, query, nodes,
+			func(n *PackageNamespace) { n.appendNamedNames(name) },
+			func(n *PackageNamespace, e *PackageName) { n.appendNamedNames(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range pnq.loadTotal {
+		if err := pnq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -507,6 +525,9 @@ func (pnq *PackageNamespaceQuery) loadNames(ctx context.Context, query *PackageN
 
 func (pnq *PackageNamespaceQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pnq.querySpec()
+	if len(pnq.modifiers) > 0 {
+		_spec.Modifiers = pnq.modifiers
+	}
 	_spec.Node.Columns = pnq.ctx.Fields
 	if len(pnq.ctx.Fields) > 0 {
 		_spec.Unique = pnq.ctx.Unique != nil && *pnq.ctx.Unique
@@ -587,6 +608,20 @@ func (pnq *PackageNamespaceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedNames tells the query-builder to eager-load the nodes that are connected to the "names"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNamespaceQuery) WithNamedNames(name string, opts ...func(*PackageNameQuery)) *PackageNamespaceQuery {
+	query := (&PackageNameClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pnq.withNamedNames == nil {
+		pnq.withNamedNames = make(map[string]*PackageNameQuery)
+	}
+	pnq.withNamedNames[name] = query
+	return pnq
 }
 
 // PackageNamespaceGroupBy is the group-by builder for PackageNamespace entities.

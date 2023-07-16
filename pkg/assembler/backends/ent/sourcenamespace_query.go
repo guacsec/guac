@@ -26,6 +26,9 @@ type SourceNamespaceQuery struct {
 	predicates     []predicate.SourceNamespace
 	withSourceType *SourceTypeQuery
 	withNames      *SourceNameQuery
+	modifiers      []func(*sql.Selector)
+	loadTotal      []func(context.Context, []*SourceNamespace) error
+	withNamedNames map[string]*SourceNameQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -420,6 +423,9 @@ func (snq *SourceNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(snq.modifiers) > 0 {
+		_spec.Modifiers = snq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -439,6 +445,18 @@ func (snq *SourceNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		if err := snq.loadNames(ctx, query, nodes,
 			func(n *SourceNamespace) { n.Edges.Names = []*SourceName{} },
 			func(n *SourceNamespace, e *SourceName) { n.Edges.Names = append(n.Edges.Names, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range snq.withNamedNames {
+		if err := snq.loadNames(ctx, query, nodes,
+			func(n *SourceNamespace) { n.appendNamedNames(name) },
+			func(n *SourceNamespace, e *SourceName) { n.appendNamedNames(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range snq.loadTotal {
+		if err := snq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -507,6 +525,9 @@ func (snq *SourceNamespaceQuery) loadNames(ctx context.Context, query *SourceNam
 
 func (snq *SourceNamespaceQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := snq.querySpec()
+	if len(snq.modifiers) > 0 {
+		_spec.Modifiers = snq.modifiers
+	}
 	_spec.Node.Columns = snq.ctx.Fields
 	if len(snq.ctx.Fields) > 0 {
 		_spec.Unique = snq.ctx.Unique != nil && *snq.ctx.Unique
@@ -587,6 +608,20 @@ func (snq *SourceNamespaceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedNames tells the query-builder to eager-load the nodes that are connected to the "names"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNamespaceQuery) WithNamedNames(name string, opts ...func(*SourceNameQuery)) *SourceNamespaceQuery {
+	query := (&SourceNameClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if snq.withNamedNames == nil {
+		snq.withNamedNames = make(map[string]*SourceNameQuery)
+	}
+	snq.withNamedNames[name] = query
+	return snq
 }
 
 // SourceNamespaceGroupBy is the group-by builder for SourceNamespace entities.
