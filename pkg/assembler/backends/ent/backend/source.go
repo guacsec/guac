@@ -134,6 +134,26 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 	return collect(records, toModelSourceName), nil
 }
 
+func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
+	results, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]*ent.SourceName, error) {
+		results := make([]*ent.SourceName, len(sources))
+		var err error
+		for i, src := range sources {
+			results[i], err = upsertSource(ctx, ent.TxFromContext(ctx), *src)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return &results, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return collect(*results, toModelSourceName), nil
+}
+
 func (b *EntBackend) IngestSource(ctx context.Context, src model.SourceInputSpec) (*model.Source, error) {
 	sourceName, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SourceName, error) {
 		return upsertSource(ctx, ent.TxFromContext(ctx), src)

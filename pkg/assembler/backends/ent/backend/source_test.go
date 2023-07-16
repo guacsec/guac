@@ -578,11 +578,15 @@ func (s *Suite) TestHasSourceAt() {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
-			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
-					t.Fatalf("Could not ingest source: %v", err)
-				}
-			}
+
+			_, err = b.IngestSources(ctx, test.InSrc)
+			s.NoError(err, "Could not ingest sources")
+
+			// for _, s := range test.InSrc {
+			// if _, err := b.IngestSource(ctx, *s); err != nil {
+			// 	t.Fatalf("Could not ingest source: %v", err)
+			// }
+			// }
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
