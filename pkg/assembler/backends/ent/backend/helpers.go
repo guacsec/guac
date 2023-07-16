@@ -24,6 +24,14 @@ func optionalPredicate[P Predicate, T any](value *T, fn func(s T) P) P {
 	return fn(*value)
 }
 
+func ptrWithDefault[T any](value *T, defaultValue T) T {
+	if value == nil {
+		return defaultValue
+	}
+
+	return *value
+}
+
 func toPtrSlice[T any](slice []T) []*T {
 	ptrs := make([]*T, len(slice))
 	for i := range slice {
