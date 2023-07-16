@@ -22,6 +22,7 @@ func (s *Suite) TestPkgEqual() {
 		Calls        []call
 		Query        *model.PkgEqualSpec
 		ExpPkgEqual  []*model.PkgEqual
+		ExpInserts   int
 		ExpIngestErr bool
 		ExpQueryErr  bool
 		Only         bool
@@ -49,8 +50,10 @@ func (s *Suite) TestPkgEqual() {
 			},
 		},
 		{
-			Name:  "Ingest same, different order",
-			InPkg: []*model.PkgInputSpec{p1, p2},
+			// Only:       true,
+			Name:       "Ingest same, different order",
+			InPkg:      []*model.PkgInputSpec{p1, p2},
+			ExpInserts: 1,
 			Calls: []call{
 				{
 					P1: p1,
@@ -78,8 +81,10 @@ func (s *Suite) TestPkgEqual() {
 			},
 		},
 		{
-			Name:  "Query on Justification",
-			InPkg: []*model.PkgInputSpec{p1, p2},
+			Name: "Query on Justification",
+			// Only:       true,
+			InPkg:      []*model.PkgInputSpec{p1, p2},
+			ExpInserts: 2,
 			Calls: []call{
 				{
 					P1: p1,
@@ -97,12 +102,12 @@ func (s *Suite) TestPkgEqual() {
 				},
 			},
 			Query: &model.PkgEqualSpec{
-				Justification: ptrfrom.String("test justification one"),
+				Justification: ptrfrom.String("test justification two"),
 			},
 			ExpPkgEqual: []*model.PkgEqual{
 				{
 					Packages:      []*model.Package{p1out, p2out},
-					Justification: "test justification one",
+					Justification: "test justification two",
 				},
 			},
 		},
@@ -123,7 +128,7 @@ func (s *Suite) TestPkgEqual() {
 			},
 			Query: &model.PkgEqualSpec{
 				Packages: []*model.PkgSpec{{
-					ID: ptrfrom.String("2"),
+					ID: ptrfrom.String("2"), // index of p3
 				}},
 			},
 			ExpPkgEqual: []*model.PkgEqual{
@@ -149,7 +154,7 @@ func (s *Suite) TestPkgEqual() {
 			},
 			Query: &model.PkgEqualSpec{
 				Packages: []*model.PkgSpec{{
-					ID: ptrfrom.String("5"),
+					ID: ptrfrom.String("0"),
 				}},
 			},
 			ExpPkgEqual: []*model.PkgEqual{
@@ -190,6 +195,7 @@ func (s *Suite) TestPkgEqual() {
 			// Only: true,
 		},
 		{
+			// Only:  true,
 			Name:  "Query on pkg algo and pkg",
 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
@@ -222,6 +228,7 @@ func (s *Suite) TestPkgEqual() {
 			},
 		},
 		{
+			// Only:  true,
 			Name:  "Query on both pkgs",
 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
@@ -487,6 +494,13 @@ func (s *Suite) TestPkgEqual() {
 				}
 
 				ids[i] = v.ID
+			}
+			afterCount := s.Client.PkgEqual.Query().CountX(ctx)
+
+			if test.ExpInserts > 0 {
+				if want, got := test.ExpInserts, afterCount; want != got {
+					t.Errorf("unexpected number of inserts, want: %d, got: %d", want, got)
+				}
 			}
 
 			if test.Query != nil && test.Query.ID != nil {

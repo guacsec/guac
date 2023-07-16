@@ -47,27 +47,48 @@ func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInput
 		return nil, err
 	}
 
+	if pkgARecord.ID == pkgBRecord.ID {
+		return nil, fmt.Errorf("cannot create a PkgEqual between the same package")
+	}
+
+	sortedPackages := []*ent.PackageVersion{pkgARecord, pkgBRecord}
+	sort.Slice(sortedPackages, func(i, j int) bool {
+		return sortedPackages[i].ID < sortedPackages[j].ID
+	})
+
 	id, err := client.PkgEqual.Create().
-		AddPackages(pkgARecord, pkgBRecord).
-		SetPackagesHash(hashPackages([]*ent.PackageVersion{pkgARecord, pkgBRecord})).
+		// SetPackage(sortedPackages[0]).
+		// SetDependantPackage(sortedPackages[1]).
+		AddPackages(sortedPackages...).
+		SetPackagesHash(hashPackages(sortedPackages)).
 		SetCollector(spec.Collector).
 		SetJustification(spec.Justification).
 		SetOrigin(spec.Origin).
 		OnConflict(
 			sql.ConflictColumns(
+				// pkgequal.FieldPackageVersionID,
+				// pkgequal.FieldEqualPackageID,
+
 				pkgequal.FieldPackagesHash,
 				pkgequal.FieldOrigin,
 				pkgequal.FieldCollector,
 				pkgequal.FieldJustification,
 			),
 		).
-		UpdateNewValues().
+		Ignore().
 		ID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	pkgEqual, err := client.PkgEqual.Get(ctx, id)
+	pkgEqual, err := client.PkgEqual.Query().Where(
+		pkgequal.ID(id),
+		// pkgequal.HasPackageWith(packageversion.ID(pkgARecord.ID)),
+		// pkgequal.HasDependantPackageWith(packageversion.ID(pkgBRecord.ID)),
+	).
+		WithPackages(withPackageVersionTree()).
+		// WithDependantPackage(withPackageVersionTree()).WithPackage(withPackageVersionTree()).
+		Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -103,12 +124,21 @@ func pkgEqualInputQueryPredicates(spec model.PkgEqualInputSpec) predicate.PkgEqu
 
 func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 	packages := collect(record.Edges.Packages, backReferencePackageVersion)
+
+	// packages := []*ent.PackageVersion{
+	// 	record.Edges.Package,
+	// 	record.Edges.DependantPackage,
+	// }
+
 	return &model.PkgEqual{
 		ID:            nodeID(record.ID),
 		Origin:        record.Origin,
 		Collector:     record.Collector,
 		Justification: record.Justification,
 		Packages:      collect(packages, toModelPackage),
+		// Packages: collect(packages, func(record *ent.PackageVersion) *model.Package {
+		// 	return toModelPackage(backReferencePackageVersion(record))
+		// }),
 	}
 }
 

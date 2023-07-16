@@ -244,9 +244,10 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 
 	rv := []predicate.PackageVersion{
 		optionalPredicate(filter.ID, IDEQ),
-		packageversion.VersionEQ(stringOrEmpty(filter.Version)),
-		packageversion.SubpathEQ(stringOrEmpty(filter.Subpath)),
-		packageversion.QualifiersMatchSpec(filter.Qualifiers),
+		optionalPredicate(filter.Version, packageversion.VersionEQ),
+		// optionalPredicate(filter.Subpath, packageversion.SubpathEQ),
+		// packageversion.VersionEQ(stringOrEmpty(filter.Version)),
+		packageversion.QualifiersMatch(filter.Qualifiers, ptrWithDefault(filter.MatchOnlyEmptyQualifiers, false)),
 
 		packageversion.HasNameWith(
 			optionalPredicate(filter.Name, packagename.Name),
@@ -257,6 +258,12 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 				),
 			),
 		),
+	}
+
+	if filter.ID == nil && filter.Subpath == nil {
+		rv = append(rv, packageversion.SubpathEQ(""))
+	} else if filter.Subpath != nil {
+		rv = append(rv, packageversion.SubpathEQ(stringOrEmpty(filter.Subpath)))
 	}
 
 	return packageversion.And(rv...)

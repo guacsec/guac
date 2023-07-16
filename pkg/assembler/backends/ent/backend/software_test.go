@@ -92,6 +92,7 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 	})
 	s.NoError(err)
 	s.NotNil(pkg1)
+	s.Equal("", pkg1.Namespaces[0].Names[0].Versions[0].Subpath)
 
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=arm64
 	spec2 := model.PkgInputSpec{
