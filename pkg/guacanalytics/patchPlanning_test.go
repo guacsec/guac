@@ -1272,7 +1272,7 @@ func getPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *stri
 	}
 
 	if len(pkgResponse.Packages[0].Namespaces[0].Names[0].Versions) > 0 && !justFindName {
-		for index, _ := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+		for index := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
 			foundIDs = append(foundIDs, &pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[index].Id)
 		}
 	}
