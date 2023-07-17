@@ -36,9 +36,9 @@ func init() {
 	rootCmd.AddCommand(collectCmd)
 
 	if os.Getenv("GUAC_DANGER") != "" {
-		guesser.RegisterDocumentTypeGuesser(&guesser.IngestPredicatesGuesser{}, "ingest_predicates")
-		process.RegisterDocumentProcessor(&preds_processor.IngestPredicatesProcessor{}, processor.DocumentIngestPredicates)
-		parser.RegisterDocumentParser(preds_parser.NewIngestPredicatesParser, processor.DocumentIngestPredicates)
+		_ = guesser.RegisterDocumentTypeGuesser(&guesser.IngestPredicatesGuesser{}, "ingest_predicates")
+		_ = process.RegisterDocumentProcessor(&preds_processor.IngestPredicatesProcessor{}, processor.DocumentIngestPredicates)
+		_ = parser.RegisterDocumentParser(preds_parser.NewIngestPredicatesParser, processor.DocumentIngestPredicates)
 	}
 
 }
