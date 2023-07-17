@@ -29,7 +29,6 @@ func init() {
 	_ = RegisterDocumentTypeGuesser(&cycloneDXTypeGuesser{}, "cyclonedx")
 	_ = RegisterDocumentTypeGuesser(&depsDevTypeGuesser{}, "deps.dev")
 	_ = RegisterDocumentTypeGuesser(&csafTypeGuesser{}, "csaf")
-	_ = RegisterDocumentTypeGuesser(&ingestPredicatesGuesser{}, "ingest_predicates")
 }
 
 // DocumentTypeGuesser guesses the document type based on the blob and format given

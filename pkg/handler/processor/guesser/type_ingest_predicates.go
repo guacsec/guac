@@ -23,9 +23,9 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
-type ingestPredicatesGuesser struct{}
+type IngestPredicatesGuesser struct{}
 
-func (_ *ingestPredicatesGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+func (_ *IngestPredicatesGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	switch format {
 	case processor.FormatJSON:
 		var preds assembler.IngestPredicates

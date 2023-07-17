@@ -15,7 +15,17 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/guesser"
+	preds_processor "github.com/guacsec/guac/pkg/handler/processor/ingest_predicates"
+	"github.com/guacsec/guac/pkg/handler/processor/process"
+	"github.com/guacsec/guac/pkg/ingestor/parser"
+	preds_parser "github.com/guacsec/guac/pkg/ingestor/parser/ingest_predicates"
+	"github.com/spf13/cobra"
+
+	"os"
+)
 
 var collectCmd = &cobra.Command{
 	Use:   "collect",
@@ -24,4 +34,11 @@ var collectCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(collectCmd)
+
+	if os.Getenv("GUAC_DANGER") != "" {
+		guesser.RegisterDocumentTypeGuesser(&guesser.IngestPredicatesGuesser{}, "ingest_predicates")
+		process.RegisterDocumentProcessor(&preds_processor.IngestPredicatesProcessor{}, processor.DocumentIngestPredicates)
+		parser.RegisterDocumentParser(preds_parser.NewIngestPredicatesParser, processor.DocumentIngestPredicates)
+	}
+
 }
