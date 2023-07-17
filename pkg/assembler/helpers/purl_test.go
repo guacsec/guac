@@ -94,6 +94,12 @@ func TestPurlConvert(t *testing.T) {
 			purlUri:  "pkg:oci/debian@sha256:244fd47e07d10?arch=amd64&tag=latest&repository_url=docker.io%2Flibrary",
 			expected: pkg("oci", "docker.io/library", "debian", "sha256:244fd47e07d10", "", map[string]string{"arch": "amd64", "tag": "latest"}),
 		}, {
+			// test case based on OCI PURLs that may not include repository_url.
+			purlUri:  "pkg:oci/docker.io/library/alpine@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+			expected: pkg("oci", "docker.io/library", "alpine", "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870", "", map[string]string{}),
+		},
+
+		{
 			purlUri:  "pkg:docker/smartentry/debian@dc437cc87d10",
 			expected: pkg("docker", "smartentry", "debian", "dc437cc87d10", "", map[string]string{}),
 		}, {
