@@ -36,6 +36,7 @@ import (
 )
 
 var (
+	tm, _                   = time.Parse(time.RFC3339, "2023-07-17T17:45:50.52Z")
 	simpleIsDependencyGraph = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
 			{
@@ -531,9 +532,10 @@ var (
 				},
 				HasSourceAt: &model.HasSourceAtInputSpec{
 					Justification: "test justification",
+					KnownSince:    tm,
 				},
 				PkgMatchFlag: model.MatchFlags{
-					Pkg: model.PkgMatchTypeAllVersions,
+					Pkg: model.PkgMatchTypeSpecificVersion,
 				},
 			},
 		},
@@ -552,7 +554,7 @@ var (
 					Version:   ptrfrom.String("3.0.3"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=2.0.0",
+					VersionRange:   "=>2.0.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -561,50 +563,51 @@ var (
 			},
 		},
 	}
+
 	hasSourceAtPackageNameGraph = assembler.IngestPredicates{
 		IsOccurrence: []assembler.IsOccurrenceIngest{
 			{
 				Pkg: &model.PkgInputSpec{
-					Type:      "pkgTypeC",
-					Namespace: ptrfrom.String("pkgNamespaceC"),
-					Name:      "pkgNameC",
+					Type:      "pkgTypeG",
+					Namespace: ptrfrom.String("pkgNamespaceG"),
+					Name:      "pkgNameG",
 					Version:   ptrfrom.String("3.0.3"),
 				},
 				Artifact: &model.ArtifactInputSpec{
-					Algorithm: "testArtifactAlgorithmC",
-					Digest:    "testArtifactDigestC",
+					Algorithm: "testArtifactAlgorithmG",
+					Digest:    "testArtifactDigestG",
 				},
 				IsOccurrence: &model.IsOccurrenceInputSpec{
-					Justification: "connect pkgC and artifactC",
+					Justification: "connect pkgG and artifactG",
 				},
 			},
 			{
 				Src: &model.SourceInputSpec{
-					Type:      "srcTypeD",
-					Namespace: "srcNamespaceD",
-					Name:      "srcNameD",
+					Type:      "srcTypeH",
+					Namespace: "srcNamespaceH",
+					Name:      "srcNameH",
 				},
 				Artifact: &model.ArtifactInputSpec{
-					Algorithm: "testArtifactAlgorithmD",
-					Digest:    "testArtifactDigestD",
+					Algorithm: "testArtifactAlgorithmH",
+					Digest:    "testArtifactDigestH",
 				},
 				IsOccurrence: &model.IsOccurrenceInputSpec{
-					Justification: "connect srcD and artifactD",
+					Justification: "connect srcH and artifactH",
 				},
 			},
 		},
 		HasSlsa: []assembler.HasSlsaIngest{
 			{
 				Artifact: &model.ArtifactInputSpec{
-					Algorithm: "testArtifactAlgorithmD",
-					Digest:    "testArtifactDigestD",
+					Algorithm: "testArtifactAlgorithmH",
+					Digest:    "testArtifactDigestH",
 				},
 				Builder: &model.BuilderInputSpec{
 					Uri: "testUri",
 				},
 				Materials: []model.ArtifactInputSpec{{
-					Algorithm: "testArtifactAlgorithmC",
-					Digest:    "testArtifactDigestC",
+					Algorithm: "testArtifactAlgorithmG",
+					Digest:    "testArtifactDigestG",
 				}},
 				HasSlsa: &model.SLSAInputSpec{
 					BuildType:   "testBuildType",
@@ -618,17 +621,18 @@ var (
 		HasSourceAt: []assembler.HasSourceAtIngest{
 			{
 				Src: &model.SourceInputSpec{
-					Type:      "srcTypeD",
-					Namespace: "srcNamespaceD",
-					Name:      "srcNameD",
+					Type:      "srcTypeH",
+					Namespace: "srcNamespaceH",
+					Name:      "srcNameH",
 				},
 				Pkg: &model.PkgInputSpec{
-					Type:      "pkgTypeE",
-					Namespace: ptrfrom.String("pkgNamespaceE"),
-					Name:      "pkgNameE",
+					Type:      "pkgTypeI",
+					Namespace: ptrfrom.String("pkgNamespaceI"),
+					Name:      "pkgNameI",
 				},
 				HasSourceAt: &model.HasSourceAtInputSpec{
 					Justification: "test justification",
+					KnownSince:    tm,
 				},
 				PkgMatchFlag: model.MatchFlags{
 					Pkg: model.PkgMatchTypeAllVersions,
@@ -638,15 +642,15 @@ var (
 		IsDependency: []assembler.IsDependencyIngest{
 			{
 				Pkg: &model.PkgInputSpec{
-					Type:      "pkgTypeF",
-					Namespace: ptrfrom.String("pkgNamespaceF"),
-					Name:      "pkgNameF",
+					Type:      "pkgTypeJ",
+					Namespace: ptrfrom.String("pkgNamespaceJ"),
+					Name:      "pkgNameJ",
 					Version:   ptrfrom.String("2.19.0"),
 				},
 				DepPkg: &model.PkgInputSpec{
-					Type:      "pkgTypeE",
-					Namespace: ptrfrom.String("pkgNamespaceE"),
-					Name:      "pkgNameE",
+					Type:      "pkgTypeI",
+					Namespace: ptrfrom.String("pkgNamespaceI"),
+					Name:      "pkgNameI",
 					Version:   ptrfrom.String("3.0.3"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
@@ -804,6 +808,13 @@ func ingestTestData(ctx context.Context, client graphql.Client, graph assembler.
 
 	if len(graph.CertifyGood) > 0 {
 		err := ingestCertifyGood(ctx, client, graph)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(graph.HasSourceAt) > 0 {
+		err := ingestHasSourceAt(ctx, client, graph)
 		if err != nil {
 			return err
 		}
@@ -1013,33 +1024,34 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:         "pkgNameC",
 			startVersion:      ptrfrom.String("3.0.3"),
 			maxDepth:          9,
-			expectedLen:       5,                    // change to 7 once implemented
-			expectedPkgs:      []string{"pkgTypeC"}, // add pkgTypeE once implemented
+			expectedLen:       7,
+			expectedPkgs:      []string{"pkgTypeC", "pkgTypeE"},
 			expectedArtifacts: []string{"testArtifactAlgorithmC", "testArtifactAlgorithmD"},
 			expectedSrcs:      []string{"srcTypeD"},
 			graphInputs:       []assembler.IngestPredicates{hasSourceAtPackageVersionGraph},
 		},
 		{
 			name:              "16: test hasSourceAt attached to packageName",
-			startType:         "pkgTypeC",
-			startNamespace:    "pkgNamespaceC",
-			startName:         "pkgNameC",
+			startType:         "pkgTypeG",
+			startNamespace:    "pkgNamespaceG",
+			startName:         "pkgNameG",
 			startVersion:      ptrfrom.String("3.0.3"),
 			maxDepth:          9,
-			expectedLen:       5,                    // change to 9 once implemented
-			expectedPkgs:      []string{"pkgTypeC"}, // add pkgTypeE/F once implemented
-			expectedArtifacts: []string{"testArtifactAlgorithmC", "testArtifactAlgorithmD"},
-			expectedSrcs:      []string{"srcTypeD"},
+			expectedLen:       10,
+			expectedPkgs:      []string{"pkgTypeG", "pkgTypeI", "pkgTypeJ"},
+			expectedArtifacts: []string{"testArtifactAlgorithmG", "testArtifactAlgorithmH"},
+			expectedSrcs:      []string{"srcTypeH"},
 			graphInputs:       []assembler.IngestPredicates{hasSourceAtPackageNameGraph},
 		},
 		{
-			name:           "17: test hasSourceAt from Package",
+			name:           "17: test hasSourceAt from packageName",
 			startType:      "pkgTypeE",
 			startNamespace: "pkgNamespaceE",
 			startName:      "pkgNameE",
 			maxDepth:       9,
-			expectedLen:    4,                                // change to 5 once implemented
-			expectedPkgs:   []string{"pkgTypeE", "pkgTypeF"}, // add srcTypeD to expectedSrcs once implemented
+			expectedLen:    6,
+			expectedPkgs:   []string{"pkgTypeE", "pkgTypeF"},
+			expectedSrcs:   []string{"srcTypeD"},
 			graphInputs:    []assembler.IngestPredicates{hasSourceAtPackageVersionGraph},
 		},
 	}
@@ -1260,8 +1272,8 @@ func getPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *stri
 	}
 
 	if len(pkgResponse.Packages[0].Namespaces[0].Names[0].Versions) > 0 && !justFindName {
-		for _, version := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-			foundIDs = append(foundIDs, &version.Id)
+		for index, _ := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+			foundIDs = append(foundIDs, &pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[index].Id)
 		}
 	}
 

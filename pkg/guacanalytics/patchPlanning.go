@@ -34,8 +34,8 @@ const (
 )
 
 type DfsNode struct {
-	Expanded     bool // true once all node neighbors are added to queue
-	Parent       string
+	Expanded     bool   // true once all node neighbors are added to queue
+	Parent       string // TODO: turn parent into a list in cause discovered twice from two different nodes
 	Depth        int
 	Type         NodeType
 	nodeVersions []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
@@ -92,7 +92,6 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 
 		var versionsList []string
 		for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-			fmt.Printf("%s \n", versionEntry)
 			versionsList = append(versionsList, versionEntry.Version)
 			q.nodeMap[versionEntry.Id] = DfsNode{
 				Type: PackageVersion,
@@ -181,7 +180,11 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 		case *model.NeighborsNeighborsIsOccurrence:
 			exploreIsOccurrenceFromSubject(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsHasSourceAt:
-			exploreHasSourceAtFromSource(ctx, gqlClient, q, *neighbor)
+			err := exploreHasSourceAtFromSource(ctx, gqlClient, q, *neighbor)
+
+			if err != nil {
+				return err
+			}
 		}
 	case Artifact:
 		switch neighbor := neighbor.(type) {
@@ -233,19 +236,58 @@ func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlClient graphql.Clie
 	}
 }
 
-// TODO: implement this function
-func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) {
-	// Step 1: Add packageVersion(s) attached to the hasSourceAt to the queue
-	// Step 2: Add the packageName attached to the hasSourceAt to the queue with associated versions
-	// Note: Meaning, if the hasSourceAt was attached to a specific version, that version only will be added to the queue and the packageName
-	// But, if the hasSourceAt was attached to a packageName, all version will be added to the queue and the packageName
-	// This will be handled implicitly
+func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) error {
+	if len(hasSourceAt.Package.Namespaces[0].Names[0].Versions) < 1 {
+		pkgFilter := model.PkgSpec{
+			Type:      &hasSourceAt.Package.Type,
+			Namespace: &hasSourceAt.Package.Namespaces[0].Namespace,
+			Name:      &hasSourceAt.Package.Namespaces[0].Names[0].Name,
+		}
+
+		pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
+
+		if err != nil {
+			return fmt.Errorf("error finding inputted node for hasSourceAt")
+		}
+
+		var versionsList []string
+		for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+			versionsList = append(versionsList, versionEntry.Version)
+			q.nodeMap[versionEntry.Id] = DfsNode{
+				Parent: q.now,
+				Depth:  q.nowNode.Depth + 1,
+				Type:   PackageVersion,
+			}
+
+			q.queue = append(q.queue, versionEntry.Id)
+		}
+
+		q.nodeMap[hasSourceAt.Package.Namespaces[0].Names[0].Id] = DfsNode{
+			Parent:       q.now,
+			Depth:        q.nowNode.Depth + 1,
+			Type:         PackageName,
+			nodeVersions: versionsList,
+		}
+		q.queue = append(q.queue, hasSourceAt.Package.Namespaces[0].Names[0].Id)
+	} else {
+		q.addNodeToQueue(PackageVersion, []string{hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Version}, hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Id)
+		q.addNodeToQueue(PackageName, []string{hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Version}, hasSourceAt.Package.Namespaces[0].Names[0].Id)
+	}
+	return nil
 }
 
-// TODO: implement this function
 func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) {
-	// Step 1: Add sourceName added to the HasSourceAt to the nodeMap but not to the queue
-	// It may be useful for patch planning, but not necessary to explore
+	node, seen := q.nodeMap[hasSourceAt.Source.Namespaces[0].Names[0].Id]
+
+	if !seen {
+		node = DfsNode{
+			Parent: q.now,
+			Depth:  q.nowNode.Depth + 1,
+			Type:   SourceName,
+		}
+	}
+
+	q.nodeMap[hasSourceAt.Source.Namespaces[0].Names[0].Id] = node
 }
 
 func (q *queueValues) addNodeToQueue(nodeType NodeType, versions []string, id string) {
