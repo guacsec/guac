@@ -13,6 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// ingest_predicates is a parser that is generally unsafe due to the fact
+// that it does not validate the facts that it is emiting without a backing
+// attestations. However, this can be used in tightly controlled environments
+// where applicable.
 package ingest_predicates
 
 import (
