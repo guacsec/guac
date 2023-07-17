@@ -24354,7 +24354,6 @@ func (v *allSLSATreeSubjectArtifact) __premarshalJSON() (*__premarshalallSLSATre
 
 // The query or mutation executed by Artifacts.
 const Artifacts_Operation = `
-# Exposes GraphQL queries to retrieve GUAC sources
 query Artifacts ($filter: ArtifactSpec) {
 	artifacts(artifactSpec: $filter) {
 		... AllArtifactTree
@@ -24395,7 +24394,6 @@ func Artifacts(
 
 // The query or mutation executed by CVEs.
 const CVEs_Operation = `
-# Exposes GraphQL queries to retrieve GUAC CVEs
 query CVEs ($filter: CVESpec) {
 	cve(cveSpec: $filter) {
 		... AllCveTree
@@ -24459,23 +24457,6 @@ fragment AllCertifyBad on CertifyBad {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24548,22 +24529,6 @@ func CertifyBadArtifact(
 
 // The query or mutation executed by CertifyBadPkg.
 const CertifyBadPkg_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest a CertifyBad into GUAC
 mutation CertifyBadPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyBad: CertifyBadInputSpec!) {
 	ingestCertifyBad(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyBad: $certifyBad) {
 		... AllCertifyBad
@@ -24587,23 +24552,6 @@ fragment AllCertifyBad on CertifyBad {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24701,23 +24649,6 @@ fragment AllCertifyBad on CertifyBad {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24790,7 +24721,6 @@ func CertifyBadSrc(
 
 // The query or mutation executed by CertifyBads.
 const CertifyBads_Operation = `
-# Exposes GraphQL queries to retrieve GUAC CertifyBads
 query CertifyBads ($filter: CertifyBadSpec) {
 	CertifyBad(certifyBadSpec: $filter) {
 		... AllCertifyBad
@@ -24814,23 +24744,6 @@ fragment AllCertifyBad on CertifyBad {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -24936,23 +24849,6 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25056,23 +24952,6 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25164,23 +25043,6 @@ fragment allCertifyGood on CertifyGood {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25253,22 +25115,6 @@ func CertifyGoodArtifact(
 
 // The query or mutation executed by CertifyGoodPkg.
 const CertifyGoodPkg_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest a CertifyGood into GUAC
 mutation CertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyGood: CertifyGoodInputSpec!) {
 	ingestCertifyGood(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyGood: $certifyGood) {
 		... allCertifyGood
@@ -25292,23 +25138,6 @@ fragment allCertifyGood on CertifyGood {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25406,23 +25235,6 @@ fragment allCertifyGood on CertifyGood {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25530,23 +25342,6 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25613,22 +25408,6 @@ func CertifyNoKnownVuln(
 
 // The query or mutation executed by CertifyOSV.
 const CertifyOSV_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest a vulnerability certification into GUAC
 mutation CertifyOSV ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
 	ingestVulnerability(pkg: $pkg, vulnerability: {osv:$osv}, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
@@ -25664,23 +25443,6 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25749,20 +25511,6 @@ func CertifyOSV(
 
 // The query or mutation executed by FindSoftware.
 const FindSoftware_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 query FindSoftware ($searchText: String!) {
 	findSoftware(searchText: $searchText) {
 		__typename
@@ -25777,23 +25525,6 @@ query FindSoftware ($searchText: String!) {
 		}
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -25864,7 +25595,6 @@ func FindSoftware(
 
 // The query or mutation executed by GHSAs.
 const GHSAs_Operation = `
-# Exposes GraphQL queries to retrieve GUAC GHSAs
 query GHSAs ($filter: GHSASpec) {
 	ghsa(ghsaSpec: $filter) {
 		... AllGHSATree
@@ -25930,23 +25660,6 @@ fragment allHasMetadata on HasMetadata {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26019,22 +25732,6 @@ func HasMetadataArtifact(
 
 // The query or mutation executed by HasMetadataPkg.
 const HasMetadataPkg_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest a HasMetadata into GUAC
 mutation HasMetadataPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $hasMetadata: HasMetadataInputSpec!) {
 	ingestHasMetadata(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, hasMetadata: $hasMetadata) {
 		... allHasMetadata
@@ -26061,23 +25758,6 @@ fragment allHasMetadata on HasMetadata {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26178,23 +25858,6 @@ fragment allHasMetadata on HasMetadata {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26295,23 +25958,6 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26365,22 +26011,6 @@ func HasSBOMArtifact(
 
 // The query or mutation executed by HasSBOMPkg.
 const HasSBOMPkg_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest that a package or source has an SBOM (specified by a URI) into GUAC
 mutation HasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
 	ingestHasSBOM(subject: {package:$pkg}, hasSBOM: $hasSBOM) {
 		... allHasSBOMTree
@@ -26409,23 +26039,6 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26479,22 +26092,6 @@ func HasSBOMPkg(
 
 // The query or mutation executed by HasSourceAt.
 const HasSourceAt_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest that a package (either at the package version or package name level) has the specified source into GUAC
 mutation HasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
 	ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt) {
 		... allHasSourceAt
@@ -26513,23 +26110,6 @@ fragment allHasSourceAt on HasSourceAt {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -26601,22 +26181,6 @@ func HasSourceAt(
 
 // The query or mutation executed by HashEqual.
 const HashEqual_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to certify that two artifacts are identical
 mutation HashEqual ($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
 	ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual) {
 		... allHashEqualTree
@@ -26670,22 +26234,6 @@ func HashEqual(
 
 // The query or mutation executed by IngestArtifact.
 const IngestArtifact_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Ingest Artifact
 mutation IngestArtifact ($artifact: ArtifactInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -26726,7 +26274,6 @@ func IngestArtifact(
 
 // The query or mutation executed by IngestArtifacts.
 const IngestArtifacts_Operation = `
-# Bulk Ingest Artifacts
 mutation IngestArtifacts ($artifacts: [ArtifactInputSpec!]!) {
 	ingestArtifacts(artifacts: $artifacts) {
 		... AllArtifactTree
@@ -26767,22 +26314,6 @@ func IngestArtifacts(
 
 // The query or mutation executed by IngestBuilder.
 const IngestBuilder_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Ingest Builder
 mutation IngestBuilder ($builder: BuilderInputSpec!) {
 	ingestBuilder(builder: $builder) {
 		uri
@@ -26818,7 +26349,6 @@ func IngestBuilder(
 
 // The query or mutation executed by IngestBuilders.
 const IngestBuilders_Operation = `
-# Bulk Ingest Builder
 mutation IngestBuilders ($builders: [BuilderInputSpec!]!) {
 	ingestBuilders(builders: $builders) {
 		uri
@@ -26854,22 +26384,6 @@ func IngestBuilders(
 
 // The query or mutation executed by IngestCVE.
 const IngestCVE_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Ingest CVE
 mutation IngestCVE ($cve: CVEInputSpec!) {
 	ingestCVE(cve: $cve) {
 		... AllCveTree
@@ -26910,22 +26424,6 @@ func IngestCVE(
 
 // The query or mutation executed by IngestGHSA.
 const IngestGHSA_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Ingest GHSA
 mutation IngestGHSA ($ghsa: GHSAInputSpec!) {
 	ingestGHSA(ghsa: $ghsa) {
 		... AllGHSATree
@@ -26965,7 +26463,6 @@ func IngestGHSA(
 
 // The query or mutation executed by IngestMaterials.
 const IngestMaterials_Operation = `
-# Ingest Materials (artifacts) used by hasSLSA
 mutation IngestMaterials ($materials: [ArtifactInputSpec!]!) {
 	ingestMaterials(materials: $materials) {
 		... AllArtifactTree
@@ -27006,22 +26503,6 @@ func IngestMaterials(
 
 // The query or mutation executed by IngestOSV.
 const IngestOSV_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Ingest OSV
 mutation IngestOSV ($osv: OSVInputSpec!) {
 	ingestOSV(osv: $osv) {
 		... AllOSVTree
@@ -27061,44 +26542,11 @@ func IngestOSV(
 
 // The query or mutation executed by IngestPackage.
 const IngestPackage_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Ingest Package
 mutation IngestPackage ($pkg: PkgInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27150,29 +26598,11 @@ func IngestPackage(
 
 // The query or mutation executed by IngestPackages.
 const IngestPackages_Operation = `
-# Bulk Ingest Packages
 mutation IngestPackages ($pkgs: [PkgInputSpec!]!) {
 	ingestPackages(pkgs: $pkgs) {
 		... AllPkgTree
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27224,22 +26654,6 @@ func IngestPackages(
 
 // The query or mutation executed by IngestSource.
 const IngestSource_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Ingest Source
 mutation IngestSource ($source: SourceInputSpec!) {
 	ingestSource(source: $source) {
 		... AllSourceTree
@@ -27289,7 +26703,6 @@ func IngestSource(
 
 // The query or mutation executed by IngestSources.
 const IngestSources_Operation = `
-# Bulk Ingest Sources
 mutation IngestSources ($sources: [SourceInputSpec!]!) {
 	ingestSources(sources: $sources) {
 		... AllSourceTree
@@ -27339,7 +26752,6 @@ func IngestSources(
 
 // The query or mutation executed by IsDependencies.
 const IsDependencies_Operation = `
-# Defines the GraphQL operations to bulk ingest dependencies information into GUAC
 mutation IsDependencies ($pkgs: [PkgInputSpec!]!, $depPkgs: [PkgInputSpec!]!, $dependencies: [IsDependencyInputSpec!]!) {
 	ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, dependencies: $dependencies) {
 		... allIsDependencyTree
@@ -27359,23 +26771,6 @@ fragment allIsDependencyTree on IsDependency {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27431,22 +26826,6 @@ func IsDependencies(
 
 // The query or mutation executed by IsDependency.
 const IsDependency_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest dependency information into GUAC
 mutation IsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
 	ingestDependency(pkg: $pkg, depPkg: $depPkg, dependency: $dependency) {
 		... allIsDependencyTree
@@ -27466,23 +26845,6 @@ fragment allIsDependencyTree on IsDependency {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27538,22 +26900,6 @@ func IsDependency(
 
 // The query or mutation executed by IsOccurrencePkg.
 const IsOccurrencePkg_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest occurrence information into GUAC
 mutation IsOccurrencePkg ($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
 	ingestOccurrence(subject: {package:$pkg}, artifact: $artifact, occurrence: $occurrence) {
 		... AllIsOccurrencesTree
@@ -27577,23 +26923,6 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27691,23 +27020,6 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27782,7 +27094,6 @@ func IsOccurrenceSrc(
 
 // The query or mutation executed by IsOccurrencesPkg.
 const IsOccurrencesPkg_Operation = `
-# Defines the GraphQL operations to bulk ingest occurrences information into GUAC
 mutation IsOccurrencesPkg ($pkgs: [PkgInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
 	ingestOccurrences(subjects: {packages:$pkgs}, artifacts: $artifacts, occurrences: $occurrences) {
 		... AllIsOccurrencesTree
@@ -27806,23 +27117,6 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -27920,23 +27214,6 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -28011,22 +27288,6 @@ func IsOccurrencesSrc(
 
 // The query or mutation executed by IsVulnerabilityCVE.
 const IsVulnerabilityCVE_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest a isVulnerability into GUAC
 mutation IsVulnerabilityCVE ($osv: OSVInputSpec!, $cve: CVEInputSpec!, $isVulnerability: IsVulnerabilityInputSpec!) {
 	ingestIsVulnerability(osv: $osv, vulnerability: {cve:$cve}, isVulnerability: $isVulnerability) {
 		... allIsVulnerability
@@ -28238,23 +27499,6 @@ query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
 		}
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -28654,23 +27898,6 @@ query Node ($node: ID!) {
 		}
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -29068,23 +28295,6 @@ query Nodes ($nodes: [ID!]!) {
 		}
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -29411,7 +28621,6 @@ func Nodes(
 
 // The query or mutation executed by OSVs.
 const OSVs_Operation = `
-# Exposes GraphQL queries to retrieve GUAC OSVs
 query OSVs ($filter: OSVSpec) {
 	osv(osvSpec: $filter) {
 		... AllOSVTree
@@ -29451,29 +28660,11 @@ func OSVs(
 
 // The query or mutation executed by Packages.
 const Packages_Operation = `
-# Exposes GraphQL queries to retrieve GUAC packages
 query Packages ($filter: PkgSpec) {
 	packages(pkgSpec: $filter) {
 		... AllPkgTree
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -29525,22 +28716,6 @@ func Packages(
 
 // The query or mutation executed by Path.
 const Path_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Exposes GraphQL queries to retrieve GUAC graph connectivity data
 query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!]!) {
 	path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: $usingOnly) {
 		__typename
@@ -29612,23 +28787,6 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge
 		}
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -29961,22 +29119,6 @@ func Path(
 
 // The query or mutation executed by PkgEqual.
 const PkgEqual_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to certify that two packages are identical
 mutation PkgEqual ($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual: PkgEqualInputSpec!) {
 	pkg: ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -29988,23 +29130,6 @@ mutation PkgEqual ($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual:
 		... allPkgEqual
 	}
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -30095,23 +29220,6 @@ fragment allPointOfContact on PointOfContact {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -30184,22 +29292,6 @@ func PointOfContactArtifact(
 
 // The query or mutation executed by PointOfContactPkg.
 const PointOfContactPkg_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest a PointOfContact into GUAC
 mutation PointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $pointOfContact: PointOfContactInputSpec!) {
 	ingestPointOfContact(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, pointOfContact: $pointOfContact) {
 		... allPointOfContact
@@ -30226,23 +29318,6 @@ fragment allPointOfContact on PointOfContact {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -30343,23 +29418,6 @@ fragment allPointOfContact on PointOfContact {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -30432,22 +29490,6 @@ func PointOfContactSrc(
 
 // The query or mutation executed by SLSAForArtifact.
 const SLSAForArtifact_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest SLSA attestations into GUAC
 mutation SLSAForArtifact ($artifact: ArtifactInputSpec!, $materials: [ArtifactInputSpec!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
 	ingestSLSA(subject: $artifact, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
 		... allSLSATree
@@ -30519,22 +29561,6 @@ func SLSAForArtifact(
 
 // The query or mutation executed by Scorecard.
 const Scorecard_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest a Scorecard certification into GUAC
 mutation Scorecard ($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
 	certifyScorecard(source: $source, scorecard: $scorecard) {
 		... AllCertifyScorecard
@@ -30604,7 +29630,6 @@ func Scorecard(
 
 // The query or mutation executed by Sources.
 const Sources_Operation = `
-# Exposes GraphQL queries to retrieve GUAC sources
 query Sources ($filter: SourceSpec) {
 	sources(sourceSpec: $filter) {
 		... AllSourceTree
@@ -30690,23 +29715,6 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -30816,23 +29824,6 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -30942,23 +29933,6 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -31068,23 +30042,6 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -31158,22 +30115,6 @@ func VexArtifactAndOsv(
 
 // The query or mutation executed by VexPackageAndCve.
 const VexPackageAndCve_Operation = `
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines the GraphQL operations to ingest VEX statements into GUAC
 mutation VexPackageAndCve ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {cve:$cve}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
@@ -31210,23 +30151,6 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
@@ -31336,23 +30260,6 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# NOTE: This is experimental and might change in the future!
-# Defines GraphQL fragments used in the operations
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 fragment AllPkgTree on Package {
 	id
 	type
