@@ -78,30 +78,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) < 1 {
 		// TODO: handle case where there are circular dependencies that introduce more versions to the version list on a node that requires revisiting
-		pkgFilter := model.PkgSpec{
-			Type:      &nodePkg.AllPkgTree.Type,
-			Namespace: &nodePkg.AllPkgTree.Namespaces[0].Namespace,
-			Name:      &nodePkg.AllPkgTree.Namespaces[0].Names[0].Name,
-		}
-
-		pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
-
-		if err != nil {
-			return nil, fmt.Errorf("error finding inputted node")
-		}
-
-		var versionsList []string
-		for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-			versionsList = append(versionsList, versionEntry.Version)
-			q.nodeMap[versionEntry.Id] = DfsNode{
-				Type: PackageVersion,
-			}
-			q.queue = append(q.queue, versionEntry.Id)
-		}
-		q.nodeMap[startID] = DfsNode{
-			Type:         PackageName,
-			nodeVersions: versionsList,
-		}
+		q.addNodesToQueueFromPackageName(ctx, gqlClient, nodePkg.AllPkgTree.Type, nodePkg.AllPkgTree.Namespaces[0].Namespace, nodePkg.AllPkgTree.Namespaces[0].Names[0].Name, startID)
 	} else {
 		q.queue = append(q.queue, nodePkg.AllPkgTree.Namespaces[0].Names[0].Id)
 
@@ -115,9 +92,8 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 			Type:         PackageName,
 			nodeVersions: versionsList,
 		}
+		q.queue = append(q.queue, startID)
 	}
-
-	q.queue = append(q.queue, startID)
 
 	for len(q.queue) > 0 {
 		q.now = q.queue[0]
@@ -238,37 +214,11 @@ func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlClient graphql.Clie
 
 func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) error {
 	if len(hasSourceAt.Package.Namespaces[0].Names[0].Versions) < 1 {
-		pkgFilter := model.PkgSpec{
-			Type:      &hasSourceAt.Package.Type,
-			Namespace: &hasSourceAt.Package.Namespaces[0].Namespace,
-			Name:      &hasSourceAt.Package.Namespaces[0].Names[0].Name,
-		}
-
-		pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
+		err := q.addNodesToQueueFromPackageName(ctx, gqlClient, hasSourceAt.Package.Type, hasSourceAt.Package.Namespaces[0].Namespace, hasSourceAt.Package.Namespaces[0].Names[0].Name, hasSourceAt.Package.Namespaces[0].Names[0].Id)
 
 		if err != nil {
-			return fmt.Errorf("error finding inputted node for hasSourceAt")
+			return err
 		}
-
-		var versionsList []string
-		for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-			versionsList = append(versionsList, versionEntry.Version)
-			q.nodeMap[versionEntry.Id] = DfsNode{
-				Parent: q.now,
-				Depth:  q.nowNode.Depth + 1,
-				Type:   PackageVersion,
-			}
-
-			q.queue = append(q.queue, versionEntry.Id)
-		}
-
-		q.nodeMap[hasSourceAt.Package.Namespaces[0].Names[0].Id] = DfsNode{
-			Parent:       q.now,
-			Depth:        q.nowNode.Depth + 1,
-			Type:         PackageName,
-			nodeVersions: versionsList,
-		}
-		q.queue = append(q.queue, hasSourceAt.Package.Namespaces[0].Names[0].Id)
 	} else {
 		q.addNodeToQueue(PackageVersion, []string{hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Version}, hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Id)
 		q.addNodeToQueue(PackageName, []string{hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Version}, hasSourceAt.Package.Namespaces[0].Names[0].Id)
@@ -288,6 +238,42 @@ func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client
 	}
 
 	q.nodeMap[hasSourceAt.Source.Namespaces[0].Names[0].Id] = node
+}
+
+func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlClient graphql.Client, pkgType string, pkgNamespace string, pkgName string, id string) error {
+	pkgFilter := model.PkgSpec{
+		Type:      &pkgType,
+		Namespace: &pkgNamespace,
+		Name:      &pkgName,
+	}
+
+	pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
+
+	if err != nil {
+		return fmt.Errorf("error finding inputted node %s", err)
+	}
+
+	var versionsList []string
+	for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+		versionsList = append(versionsList, versionEntry.Version)
+		q.nodeMap[versionEntry.Id] = DfsNode{
+			Parent: q.now,
+			Depth:  q.nowNode.Depth + 1,
+			Type:   PackageVersion,
+		}
+
+		q.queue = append(q.queue, versionEntry.Id)
+	}
+
+	q.nodeMap[id] = DfsNode{
+		Parent:       q.now,
+		Depth:        q.nowNode.Depth + 1,
+		Type:         PackageName,
+		nodeVersions: versionsList,
+	}
+	q.queue = append(q.queue, id)
+
+	return nil
 }
 
 func (q *queueValues) addNodeToQueue(nodeType NodeType, versions []string, id string) {
