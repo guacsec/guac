@@ -52,17 +52,18 @@ type DocumentType string
 
 // Document* is the enumerables of DocumentType
 const (
-	DocumentITE6SLSA    DocumentType = "SLSA"
-	DocumentITE6Generic DocumentType = "ITE6"
-	DocumentITE6Vul     DocumentType = "ITE6VUL"
-	DocumentDSSE        DocumentType = "DSSE"
-	DocumentSPDX        DocumentType = "SPDX"
-	DocumentJsonLines   DocumentType = "JSON_LINES"
-	DocumentScorecard   DocumentType = "SCORECARD"
-	DocumentCycloneDX   DocumentType = "CycloneDX"
-	DocumentDepsDev     DocumentType = "DEPS_DEV"
-	DocumentCsaf        DocumentType = "CSAF"
-	DocumentUnknown     DocumentType = "UNKNOWN"
+	DocumentITE6SLSA         DocumentType = "SLSA"
+	DocumentITE6Generic      DocumentType = "ITE6"
+	DocumentITE6Vul          DocumentType = "ITE6VUL"
+	DocumentDSSE             DocumentType = "DSSE"
+	DocumentSPDX             DocumentType = "SPDX"
+	DocumentJsonLines        DocumentType = "JSON_LINES"
+	DocumentScorecard        DocumentType = "SCORECARD"
+	DocumentCycloneDX        DocumentType = "CycloneDX"
+	DocumentDepsDev          DocumentType = "DEPS_DEV"
+	DocumentCsaf             DocumentType = "CSAF"
+	DocumentIngestPredicates DocumentType = "INGEST_PREDICATES"
+	DocumentUnknown          DocumentType = "UNKNOWN"
 )
 
 // FormatType describes the document format for malform checks

@@ -30,48 +30,48 @@ type assembler struct{} //nolint: unused
 // ingestion of the software trees are implicit and handled by the
 // client library.
 type IngestPredicates struct {
-	CertifyScorecard []CertifyScorecardIngest
-	IsDependency     []IsDependencyIngest
-	IsOccurrence     []IsOccurrenceIngest
-	HasSlsa          []HasSlsaIngest
-	CertifyVuln      []CertifyVulnIngest
-	IsVuln           []IsVulnIngest
-	HasSourceAt      []HasSourceAtIngest
-	CertifyBad       []CertifyBadIngest
-	CertifyGood      []CertifyGoodIngest
-	HasSBOM          []HasSBOMIngest
-	HashEqual        []HashEqualIngest
-	PkgEqual         []PkgEqualIngest
-	Vex              []VexIngest
+	CertifyScorecard []CertifyScorecardIngest `json:"certifyScorecard,omitempty"`
+	IsDependency     []IsDependencyIngest     `json:"isDepedency,omitempty"`
+	IsOccurrence     []IsOccurrenceIngest     `json:"isOccurrence,omitempty"`
+	HasSlsa          []HasSlsaIngest          `json:"hasSlsa,omitempty"`
+	CertifyVuln      []CertifyVulnIngest      `json:"certifyVuln,omitempty"`
+	IsVuln           []IsVulnIngest           `json:"isVuln,omitempty"`
+	HasSourceAt      []HasSourceAtIngest      `json:"hasSourceAt,omitempty"`
+	CertifyBad       []CertifyBadIngest       `json:"certifyBad,omitempty"`
+	CertifyGood      []CertifyGoodIngest      `json:"certifyGood,omitempty"`
+	HasSBOM          []HasSBOMIngest          `json:"hasSBOM,omitempty"`
+	HashEqual        []HashEqualIngest        `json:"hashEqual,omitempty"`
+	PkgEqual         []PkgEqualIngest         `json:"pkgEqual,omitempty"`
+	Vex              []VexIngest              `json:"vex,omitempty"`
 }
 
 type CertifyScorecardIngest struct {
-	Source    *generated.SourceInputSpec
-	Scorecard *generated.ScorecardInputSpec
+	Source    *generated.SourceInputSpec    `json:"source,omitempty"`
+	Scorecard *generated.ScorecardInputSpec `json:"scorecard,omitempty"`
 }
 
 type IsDependencyIngest struct {
-	Pkg          *generated.PkgInputSpec
-	DepPkg       *generated.PkgInputSpec
-	IsDependency *generated.IsDependencyInputSpec
+	Pkg          *generated.PkgInputSpec          `json:"pkg,omitempty"`
+	DepPkg       *generated.PkgInputSpec          `json:"depPkg,omitempty"`
+	IsDependency *generated.IsDependencyInputSpec `json:"isDependency,omitempty"`
 }
 
 type IsOccurrenceIngest struct {
 	// Occurrence describes either pkg or src
-	Pkg *generated.PkgInputSpec
-	Src *generated.SourceInputSpec
+	Pkg *generated.PkgInputSpec    `json:"pkg,omitempty"`
+	Src *generated.SourceInputSpec `json:"src,omitempty"`
 
 	// Artifact is the required object of the occurence
-	Artifact *generated.ArtifactInputSpec
+	Artifact *generated.ArtifactInputSpec `json:"artifact,omitempty"`
 
-	IsOccurrence *generated.IsOccurrenceInputSpec
+	IsOccurrence *generated.IsOccurrenceInputSpec `json:"isOccurrence,omitempty"`
 }
 
 type HasSlsaIngest struct {
-	Artifact  *generated.ArtifactInputSpec
-	HasSlsa   *generated.SLSAInputSpec
-	Materials []generated.ArtifactInputSpec
-	Builder   *generated.BuilderInputSpec
+	Artifact  *generated.ArtifactInputSpec  `json:",omitempty"`
+	HasSlsa   *generated.SLSAInputSpec      `json:",omitempty"`
+	Materials []generated.ArtifactInputSpec `json:",omitempty"`
+	Builder   *generated.BuilderInputSpec   `json:",omitempty"`
 
 	// Upon more investigation, seems like SLSA should
 	// only be applied to an artifact and linkages to pkg
@@ -82,83 +82,83 @@ type HasSlsaIngest struct {
 
 type CertifyVulnIngest struct {
 	// pkg is required
-	Pkg *generated.PkgInputSpec
+	Pkg *generated.PkgInputSpec `json:"pkg,omitempty"`
 
 	// vulnerability should be either OSV, CVE, GHSA, or none if no vulnerability is found
-	OSV  *generated.OSVInputSpec
-	CVE  *generated.CVEInputSpec
-	GHSA *generated.GHSAInputSpec
+	OSV  *generated.OSVInputSpec  `json:"osv,omitempty"`
+	CVE  *generated.CVEInputSpec  `json:"cve,omitempty"`
+	GHSA *generated.GHSAInputSpec `json:"ghsa,omitempty"`
 
-	VulnData *generated.VulnerabilityMetaDataInput
+	VulnData *generated.VulnerabilityMetaDataInput `json:"vulnData,omitempty"`
 }
 
 // Only CVE or GHSA needed, not both
 type IsVulnIngest struct {
-	OSV    *generated.OSVInputSpec
-	CVE    *generated.CVEInputSpec
-	GHSA   *generated.GHSAInputSpec
-	IsVuln *generated.IsVulnerabilityInputSpec
+	OSV    *generated.OSVInputSpec             `json:"osv,omitempty"`
+	CVE    *generated.CVEInputSpec             `json:"cve,omitempty"`
+	GHSA   *generated.GHSAInputSpec            `json:"ghsa,omitempty"`
+	IsVuln *generated.IsVulnerabilityInputSpec `json:"isVuln,omitempty"`
 }
 
 type HasSourceAtIngest struct {
-	Pkg          *generated.PkgInputSpec
-	PkgMatchFlag generated.MatchFlags
-	Src          *generated.SourceInputSpec
-	HasSourceAt  *generated.HasSourceAtInputSpec
+	Pkg          *generated.PkgInputSpec         `json:"pkg,omitempty"`
+	PkgMatchFlag generated.MatchFlags            `json:"pkgMatchFlag,omitempty"`
+	Src          *generated.SourceInputSpec      `json:"src,omitempty"`
+	HasSourceAt  *generated.HasSourceAtInputSpec `json:"hasSourceAt,omitempty"`
 }
 
 type CertifyBadIngest struct {
 	// certifyBad describes either pkg, src or artifact
-	Pkg          *generated.PkgInputSpec
-	PkgMatchFlag generated.MatchFlags
-	Src          *generated.SourceInputSpec
-	Artifact     *generated.ArtifactInputSpec
-	CertifyBad   *generated.CertifyBadInputSpec
+	Pkg          *generated.PkgInputSpec        `json:"pkg,omitempty"`
+	PkgMatchFlag generated.MatchFlags           `json:"pkgMatchFlag,omitempty"`
+	Src          *generated.SourceInputSpec     `json:"src,omitempty"`
+	Artifact     *generated.ArtifactInputSpec   `json:"artifact,omitempty"`
+	CertifyBad   *generated.CertifyBadInputSpec `json:"certifyBad,omitempty"`
 }
 
 type CertifyGoodIngest struct {
 	// certifyGood describes either pkg, src or artifact
-	Pkg          *generated.PkgInputSpec
-	PkgMatchFlag generated.MatchFlags
-	Src          *generated.SourceInputSpec
-	Artifact     *generated.ArtifactInputSpec
-	CertifyGood  *generated.CertifyGoodInputSpec
+	Pkg          *generated.PkgInputSpec         `json:"pkg,omitempty"`
+	PkgMatchFlag generated.MatchFlags            `json:"pkgMatchFlag,omitempty"`
+	Src          *generated.SourceInputSpec      `json:"src,omitempty"`
+	Artifact     *generated.ArtifactInputSpec    `json:"artifact,omitempty"`
+	CertifyGood  *generated.CertifyGoodInputSpec `json:"certifyGood,omitempty"`
 }
 
 type HasSBOMIngest struct {
 	// hasSBOM describes either pkg or artifact
-	Pkg      *generated.PkgInputSpec
-	Artifact *generated.ArtifactInputSpec
+	Pkg      *generated.PkgInputSpec      `json:"pkg,omitempty"`
+	Artifact *generated.ArtifactInputSpec `json:"artifact,omitempty"`
 
-	HasSBOM *generated.HasSBOMInputSpec
+	HasSBOM *generated.HasSBOMInputSpec `json:"hasSbom,omitempty"`
 }
 
 type VexIngest struct {
 	// pkg or artifact is required
-	Pkg      *generated.PkgInputSpec
-	Artifact *generated.ArtifactInputSpec
+	Pkg      *generated.PkgInputSpec      `json:"pkg,omitempty"`
+	Artifact *generated.ArtifactInputSpec `json:"artifact,omitempty"`
 
 	// vulnerability should be either OSV, CVE, GHSA
-	OSV  *generated.OSVInputSpec
-	CVE  *generated.CVEInputSpec
-	GHSA *generated.GHSAInputSpec
+	OSV  *generated.OSVInputSpec  `json:"osv,omitempty"`
+	CVE  *generated.CVEInputSpec  `json:"cve,omitempty"`
+	GHSA *generated.GHSAInputSpec `json:"ghsa,omitempty"`
 
-	VexData *generated.VexStatementInputSpec
+	VexData *generated.VexStatementInputSpec `json:"vexData,omitempty"`
 }
 
 type HashEqualIngest struct {
 	// HashEqualIngest describes two artifacts are the same
-	Artifact      *generated.ArtifactInputSpec
-	EqualArtifact *generated.ArtifactInputSpec
+	Artifact      *generated.ArtifactInputSpec `json:"artifact,omitempty"`
+	EqualArtifact *generated.ArtifactInputSpec `json:"equalArtifact,omitempty"`
 
-	HashEqual *generated.HashEqualInputSpec
+	HashEqual *generated.HashEqualInputSpec `json:"hashEqual,omitempty"`
 }
 
 type PkgEqualIngest struct {
 	// PkgEqualIngest describes two packages are the same
-	Pkg      *generated.PkgInputSpec
-	EqualPkg *generated.PkgInputSpec
-	PkgEqual *generated.PkgEqualInputSpec
+	Pkg      *generated.PkgInputSpec      `json:"pkg,omitempty"`
+	EqualPkg *generated.PkgInputSpec      `json:"equalPkg,omitempty"`
+	PkgEqual *generated.PkgEqualInputSpec `json:"pkgEqual,omitempty"`
 }
 
 func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInputSpec {
