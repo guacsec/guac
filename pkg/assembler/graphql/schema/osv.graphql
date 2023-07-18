@@ -51,4 +51,6 @@ extend type Query {
 extend type Mutation {
   "Ingests a new OSV vulnerability and returns it."
   ingestOSV(osv: OSVInputSpec): OSV!
+  "Bulk ingests new OSVs and returns a list of them."
+  ingestOSVs(osvs: [OSVInputSpec!]!): [OSV!]!
 }

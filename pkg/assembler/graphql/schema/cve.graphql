@@ -56,4 +56,6 @@ extend type Query {
 extend type Mutation {
   "Ingests new CVE and returns it."
   ingestCVE(cve: CVEInputSpec): CVE!
+  "Bulk ingests new CVEs and returns a list of them."
+  ingestCVEs(cves: [CVEInputSpec!]!): [CVE!]!
 }

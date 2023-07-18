@@ -184,11 +184,13 @@ type ComplexityRoot struct {
 		IngestArtifacts       func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestBuilders        func(childComplexity int, builders []*model.BuilderInputSpec) int
+		IngestCVEs            func(childComplexity int, cves []*model.CVEInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
+		IngestGHSAs           func(childComplexity int, ghsas []*model.GHSAInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
@@ -196,6 +198,7 @@ type ComplexityRoot struct {
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
 		IngestMaterials       func(childComplexity int, materials []*model.ArtifactInputSpec) int
+		IngestOSVs            func(childComplexity int, osvs []*model.OSVInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOccurrences     func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
@@ -1051,6 +1054,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestBuilders(childComplexity, args["builders"].([]*model.BuilderInputSpec)), true
 
+	case "Mutation.ingestCVEs":
+		if e.complexity.Mutation.IngestCVEs == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCVEs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCVEs(childComplexity, args["cves"].([]*model.CVEInputSpec)), true
+
 	case "Mutation.ingestCertifyBad":
 		if e.complexity.Mutation.IngestCertifyBad == nil {
 			break
@@ -1110,6 +1125,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["dependency"].(model.IsDependencyInputSpec)), true
+
+	case "Mutation.ingestGHSAs":
+		if e.complexity.Mutation.IngestGHSAs == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestGHSAs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestGHSAs(childComplexity, args["ghsas"].([]*model.GHSAInputSpec)), true
 
 	case "Mutation.ingestGHSA":
 		if e.complexity.Mutation.IngestGhsa == nil {
@@ -1194,6 +1221,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestMaterials(childComplexity, args["materials"].([]*model.ArtifactInputSpec)), true
+
+	case "Mutation.ingestOSVs":
+		if e.complexity.Mutation.IngestOSVs == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestOSVs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestOSVs(childComplexity, args["osvs"].([]*model.OSVInputSpec)), true
 
 	case "Mutation.ingestOccurrence":
 		if e.complexity.Mutation.IngestOccurrence == nil {
@@ -3191,6 +3230,8 @@ extend type Query {
 extend type Mutation {
   "Ingests new CVE and returns it."
   ingestCVE(cve: CVEInputSpec): CVE!
+  "Bulk ingests new CVEs and returns a list of them."
+  ingestCVEs(cves: [CVEInputSpec!]!): [CVE!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/ghsa.graphql", Input: `#
@@ -3241,6 +3282,8 @@ extend type Query {
 extend type Mutation {
   "Ingests a new GitHub Security Advisory and returns it."
   ingestGHSA(ghsa: GHSAInputSpec): GHSA!
+  "Bulk ingests new GHSAs and returns a list of them."
+  ingestGHSAs(ghsas: [GHSAInputSpec!]!): [GHSA!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
@@ -4027,6 +4070,8 @@ extend type Query {
 extend type Mutation {
   "Ingests a new OSV vulnerability and returns it."
   ingestOSV(osv: OSVInputSpec): OSV!
+  "Bulk ingests new OSVs and returns a list of them."
+  ingestOSVs(osvs: [OSVInputSpec!]!): [OSV!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/package.graphql", Input: `#

@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -77,6 +78,10 @@ func setGhsaMatchValues(sb *strings.Builder, ghsa *model.GHSASpec, firstMatch *b
 			*firstMatch = false
 		}
 	}
+}
+
+func (c *neo4jClient) IngestGHSAs(ctx context.Context, ghsas []*model.GHSAInputSpec) ([]*model.Ghsa, error) {
+	return []*model.Ghsa{}, fmt.Errorf("not implemented: IngestGHSAs")
 }
 
 func (c *neo4jClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {

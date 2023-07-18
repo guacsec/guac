@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -147,6 +148,10 @@ func setCveMatchValues(sb *strings.Builder, cve *model.CVESpec, firstMatch *bool
 			*firstMatch = false
 		}
 	}
+}
+
+func (c *neo4jClient) IngestCVEs(ctx context.Context, cves []*model.CVEInputSpec) ([]*model.Cve, error) {
+	return []*model.Cve{}, fmt.Errorf("not implemented: IngestCVEs")
 }
 
 func (c *neo4jClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {

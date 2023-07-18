@@ -103,7 +103,6 @@ RETURN NEW`
 	defer cursor.Close()
 
 	return getArtifacts(ctx, cursor)
-
 }
 
 func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {

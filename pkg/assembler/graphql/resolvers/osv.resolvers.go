@@ -15,6 +15,11 @@ func (r *mutationResolver) IngestOsv(ctx context.Context, osv *model.OSVInputSpe
 	return r.Backend.IngestOsv(ctx, osv)
 }
 
+// IngestOSVs is the resolver for the ingestOSVs field.
+func (r *mutationResolver) IngestOSVs(ctx context.Context, osvs []*model.OSVInputSpec) ([]*model.Osv, error) {
+	return r.Backend.IngestOSVs(ctx, osvs)
+}
+
 // Osv is the resolver for the osv field.
 func (r *queryResolver) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
 	return r.Backend.Osv(ctx, osvSpec)
