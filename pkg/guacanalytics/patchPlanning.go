@@ -68,15 +68,15 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 	}
 
 	// TODO: add functionality to start with other nodes?
-	if len(nodePkg.AllPkgTree.Namespaces) < 1 {
+	if len(nodePkg.AllPkgTree.Namespaces) == 0 {
 		return nil, fmt.Errorf("start by inputting a packageName or packageVersion node")
 	}
 
-	if len(nodePkg.AllPkgTree.Namespaces[0].Names) < 1 {
+	if len(nodePkg.AllPkgTree.Namespaces[0].Names) == 0 {
 		return nil, fmt.Errorf("start by inputting a packageName or packageVersion node")
 	}
 
-	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) < 1 {
+	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) == 0 {
 		// TODO: handle case where there are circular dependencies that introduce more versions to the version list on a node that requires revisiting
 		err := q.addNodesToQueueFromPackageName(ctx, gqlClient, nodePkg.AllPkgTree.Type, nodePkg.AllPkgTree.Namespaces[0].Namespace, nodePkg.AllPkgTree.Namespaces[0].Names[0].Name, startID)
 
@@ -217,7 +217,7 @@ func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlClient graphql.Clie
 }
 
 func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) error {
-	if len(hasSourceAt.Package.Namespaces[0].Names[0].Versions) < 1 {
+	if len(hasSourceAt.Package.Namespaces[0].Names[0].Versions) == 0 {
 		err := q.addNodesToQueueFromPackageName(ctx, gqlClient, hasSourceAt.Package.Type, hasSourceAt.Package.Namespaces[0].Namespace, hasSourceAt.Package.Namespaces[0].Names[0].Name, hasSourceAt.Package.Namespaces[0].Names[0].Id)
 
 		if err != nil {
