@@ -237,7 +237,7 @@ func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client,
 // TODO: Expand to not just deal with packageVersions
 func explorePkgEqual(ctx context.Context, gqlClient graphql.Client, q *queueValues, pkgEqual model.NeighborsNeighborsPkgEqual) {
 	// Step 1: Loop through all the packages listed in the pkgEqual
-	// Step 2: as long as they are not equal to the current node, add them and their packageName to the queue
+	// Step 2: as long as they are not equal to the current node, add them and their packageName / packageVersion to the queue
 }
 
 // TODO: implement this function
