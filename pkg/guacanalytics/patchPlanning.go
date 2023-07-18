@@ -236,14 +236,20 @@ func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client,
 
 // TODO: Expand to not just deal with packageVersions
 func explorePkgEqual(ctx context.Context, gqlClient graphql.Client, q *queueValues, pkgEqual model.NeighborsNeighborsPkgEqual) {
-	// Step 1: Loop through all the packages listed in the pkgEqual
-	// Step 2: as long as they are not equal to the current node, add them and their packageName / packageVersion to the queue
+	for _, pkg := range pkgEqual.Packages {
+		if pkg.Namespaces[0].Names[0].Versions[0].Id != q.now {
+			q.addNodeToQueue(PackageVersion, nil, pkg.Namespaces[0].Names[0].Versions[0].Id)
+			q.addNodeToQueue(PackageName, []string{pkg.Namespaces[0].Names[0].Versions[0].Id}, pkg.Namespaces[0].Names[0].Id)
+		}
+	}
 }
 
-// TODO: implement this function
 func exploreHashEqual(ctx context.Context, gqlClient graphql.Client, q *queueValues, hashEqual model.NeighborsNeighborsHashEqual) {
-	// Step 1: Loop through all the artifacts listed in the pkgEqual
-	// Step 2: as long as they are not equal to the current node, add them and to the queue
+	for _, artifact := range hashEqual.Artifacts {
+		if artifact.Id != q.now {
+			q.addNodeToQueue(Artifact, nil, artifact.Id)
+		}
+	}
 }
 
 func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) {

@@ -708,15 +708,15 @@ var (
 		IsDependency: []assembler.IsDependencyIngest{
 			{
 				DepPkg: &model.PkgInputSpec{
-					Type:      "dType",
-					Namespace: ptrfrom.String("dNamespace"),
-					Name:      "dName",
-					Version:   ptrfrom.String("3.0.3"),
-				},
-				Pkg: &model.PkgInputSpec{
 					Type:      "bType",
 					Namespace: ptrfrom.String("bNamespace"),
 					Name:      "bName",
+					Version:   ptrfrom.String("1.19.1"),
+				},
+				Pkg: &model.PkgInputSpec{
+					Type:      "dType",
+					Namespace: ptrfrom.String("dNamespace"),
+					Name:      "dName",
 					Version:   ptrfrom.String("1.19.1"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
@@ -735,7 +735,7 @@ var (
 			{
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "abcTestArtifactAlgorithm",
-					Digest:    "abcTestArtifactDigest",
+					Digest:    "aTestArtifactDigest",
 				},
 				EqualArtifact: &model.ArtifactInputSpec{
 					Algorithm: "abcTestArtifactAlgorithm",
@@ -750,7 +750,7 @@ var (
 			{
 				Artifact: &model.ArtifactInputSpec{
 					Algorithm: "abcTestArtifactAlgorithm",
-					Digest:    "abcTestArtifactDigest",
+					Digest:    "aTestArtifactDigest",
 				},
 				EqualArtifact: &model.ArtifactInputSpec{
 					Algorithm: "abcTestArtifactAlgorithm",
@@ -1255,8 +1255,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:      "aName",
 			startVersion:   ptrfrom.String("1.19.0"),
 			maxDepth:       10,
-			expectedLen:    2,                 // change to 8 once implemented
-			expectedPkgs:   []string{"aType"}, // add dType once implemented
+			expectedLen:    8,                                            // change to 8 once implemented
+			expectedPkgs:   []string{"aType", "bType", "cType", "dType"}, // add dType once implemented
 			graphInputs:    []assembler.IngestPredicates{pkgEqualGraph},
 		},
 		{
@@ -1266,8 +1266,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:         "abcPkgName1",
 			startVersion:      ptrfrom.String("3.0.3"),
 			maxDepth:          10,
-			expectedLen:       3,                   // change to 8 once implemented
-			expectedPkgs:      []string{"abcPkg1"}, // add abcPkg2 once implemented and expectedArtifacts abcTestArtifactAlgorithm
+			expectedLen:       7,                              // change to 8 once implemented
+			expectedPkgs:      []string{"abcPkg1", "abcPkg2"}, // add abcPkg2 once implemented and expectedArtifacts abcTestArtifactAlgorithm
 			expectedArtifacts: []string{"abcTestArtifactAlgorithm"},
 			graphInputs:       []assembler.IngestPredicates{hashEqualGraph},
 		},
