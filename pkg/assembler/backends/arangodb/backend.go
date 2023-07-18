@@ -110,6 +110,11 @@ const (
 
 	certifyVulnEdgesStr string = "certifyVulnEdges"
 	certifyVulnsStr     string = "certifyVulns"
+
+	// certifyScorecard collection
+
+	scorecardEdgesStr string = "scorecardEdges"
+	scorecardStr      string = "scorecards"
 )
 
 type ArangoConfig struct {
@@ -325,10 +330,19 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// repeat this for the collections where an edge is going into
 		certifyVulnEdges.To = []string{certifyVulnsStr, cvesStr, ghsasStr, osvsStr}
 
+		var certifyScorecardEdges driver.EdgeDefinition
+		certifyScorecardEdges.Collection = scorecardEdgesStr
+		// define a set of collections where an edge is going out...
+		certifyScorecardEdges.From = []string{srcNamesStr}
+
+		// repeat this for the collections where an edge is going into
+		certifyScorecardEdges.To = []string{scorecardStr}
+
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
 		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName,
-			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges, hasSLSAEdges, certifyVulnEdges}
+			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges,
+			hasSLSAEdges, certifyVulnEdges, certifyScorecardEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)

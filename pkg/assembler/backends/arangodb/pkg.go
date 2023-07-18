@@ -115,7 +115,7 @@ func getPackageQueryValues(c *arangoClient, pkg *model.PkgInputSpec) map[string]
 
 	// To ensure consistency, always sort the qualifiers by key
 	qualifiersMap := map[string]string{}
-	keys := []string{}
+	var keys []string
 	for _, kv := range pkg.Qualifiers {
 		qualifiersMap[kv.Key] = kv.Value
 		keys = append(keys, kv.Key)

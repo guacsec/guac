@@ -228,15 +228,15 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		  LET isOccurrence = FIRST(
-			  UPSERT { sourceID:firstSrc.nameDoc._id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				  INSERT { sourceID:firstSrc.nameDoc._id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			  UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN isOccurrences
 				  RETURN NEW
 		  )
 		  
 		  LET edgeCollection = (FOR edgeData IN [
 			{fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
-			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.nameDoc._id, to: isOccurrence._id, label: "subject"}]
+			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.name_id, to: isOccurrence._id, label: "subject"}]
 		
 		  INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
 		  )
@@ -393,15 +393,15 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		  LET isOccurrence = FIRST(
-			  UPSERT { sourceID:firstSrc.nameDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
-				  INSERT { sourceID:firstSrc.nameDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+			  UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+				  INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
 				  UPDATE {} IN isOccurrences
 				  RETURN NEW
 		  )
 		  
 		  LET edgeCollection = (FOR edgeData IN [
 			{fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
-			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.nameDoc._id, to: isOccurrence._id, label: "subject"}]
+			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.name_id, to: isOccurrence._id, label: "subject"}]
 		
 		  INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
 		  )

@@ -140,15 +140,15 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
     )
 		
 	LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-			INSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin }
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin }
 			UPDATE {} IN isDependencies
 			RETURN NEW
 		)
 		
 	LET edgeCollection = (FOR edgeData IN [
-		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: 'dependency'}, 
-		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: 'subject'}]
+		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.name_id, label: 'dependency'}, 
+		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.version_id, to: isDependency._id, label: 'subject'}]
 	  
 		INSERT { _key: CONCAT('isDependencyEdges', edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: 'ignore' }
 		)
@@ -240,15 +240,15 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
     )
 	  
 	  LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
-			  INSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+			  INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
 			  UPDATE {} IN isDependencies
 			  RETURN NEW
 	  )
 	  
 	  LET edgeCollection = (FOR edgeData IN [
-		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: "dependency"}, 
-		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: "subject"}]
+		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.name_id, label: "dependency"}, 
+		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.version_id, to: isDependency._id, label: "subject"}]
 	
 		INSERT { _key: CONCAT("isDependencyEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
 	  )
