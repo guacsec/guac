@@ -122,3 +122,85 @@ jobs:
       with:
         python-version: '3.10'
     - run: ./internal/testing/e2e/e2e
+
+  tilt-ci:
+    name: Run 'tilt ci'
+    runs-on:
+      labels: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Install tools
+        shell: bash
+        run: |
+          sudo apt-get install -y git uuid-runtime
+
+          # tilt -- https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh
+          case $(uname -m) in
+              aarch64) ARCH=arm64;;
+              armv7l)  ARCH=arm;;
+              *)       ARCH=$(uname -m);;
+          esac
+          VERSION=0.32.0
+          curl -fsSL https://github.com/tilt-dev/tilt/releases/download/v$VERSION/tilt.$VERSION.linux.$ARCH.tar.gz | tar -xzvC /usr/local/bin tilt
+
+          # helm
+          case $(uname -m) in
+              aarch64) ARCH=arm64;;
+              armv7l)  ARCH=arm;;
+              x86_64)  ARCH=amd64;;
+              *)       ARCH=$(uname -m);;
+          esac
+          VERSION=3.12.0
+          curl -fsSL https://get.helm.sh/helm-v$VERSION-linux-$ARCH.tar.gz | tar --strip-components=1 -xzvC /usr/local/bin linux-$ARCH/helm
+
+          # ctlptl - https://github.com/tilt-dev/ctlptl/blob/main/INSTALL.md
+          CTLPTL_VERSION="0.8.19"
+          curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v$CTLPTL_VERSION/ctlptl.$CTLPTL_VERSION.linux.x86_64.tar.gz | sudo tar -xzv -C /usr/local/bin ctlptl
+
+          # kind - https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
+          # For AMD64 / x86_64
+          [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.19.0/kind-linux-amd64
+          # For ARM64
+          [ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.19.0/kind-linux-arm64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@336e29918d653399e599bfca99fadc1d7ffbc9f7 # v4.3.0
+        with:
+          install-only: true
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # tag=v3
+      - name: setup-go
+        uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # tag=v3.2.1
+        with:
+          go-version: '1.19'
+      - uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Setup the project
+        run: go mod download
+      - name: Setup kind cluster
+        shell: bash
+        run: |
+          ctlptl create cluster kind --registry=ctlptl-registry
+      - name: Run 'tilt ci'
+        shell: bash
+        run: |
+          tilt ci
+      - name: Diag after failure
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+            echo "K8S CLUSTER STATUS"
+            kubectl get all
+
+            echo ""
+
+            for pod in $(kubectl get pod | awk '$1 != "NAME" { print $1; }')
+            do
+                echo ""
+                echo "=== DIAG POD ${pod} ==="
+                echo ""
+                kubectl describe "pod/${pod#pod/}" | sed 's,^,    ,'
+            done

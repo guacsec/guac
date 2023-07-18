@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/version"
@@ -85,6 +86,10 @@ func init() {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}
+
+	viper.SetEnvPrefix("GUAC")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.AutomaticEnv()
 }
 
 func Execute() {

@@ -1,0 +1,167 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guac-collectsub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guac-collectsub
+  template:
+    metadata:
+      labels:
+        app: guac-collectsub
+    spec:
+      containers:
+        - name: guac-collectsub
+          image: local-organic-guac
+          command: ["/opt/guac/guaccsub"]
+          workingDir: /tmp
+          ports:
+            - containerPort: 2782
+          readinessProbe:
+            exec:
+              command:
+                - wget
+                - --spider
+                - http://localhost:2782
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: guac-collectsub
+spec:
+  selector:
+    app: guac-collectsub
+  ports:
+    - protocol: TCP
+      port: 2782
+      targetPort: 2782
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guac-graphql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guac-graphql
+  template:
+    metadata:
+      labels:
+        app: guac-graphql
+    spec:
+      containers:
+        - name: guac-graphql
+          image: local-organic-guac
+          command: ["/opt/guac/guacgql"]
+          workingDir: /tmp
+          env:
+            - name: GUAC_GQL_DEBUG
+              value: "true"
+          ports:
+            - name: http-port
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http-port
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: guac-graphql
+spec:
+  selector:
+    app: guac-graphql
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guac-ingestor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guac-ingestor
+  template:
+    metadata:
+      labels:
+        app: guac-ingestor
+    spec:
+      containers:
+        - name: guac-ingestor
+          image: local-organic-guac
+          command: ["/opt/guac/guacingest"]
+          workingDir: /tmp
+          env:
+            - name: GUAC_NATS_ADDR
+              value: nats://nats:4222
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oci-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oci-collector
+  template:
+    metadata:
+      labels:
+        app: oci-collector
+    spec:
+      containers:
+        - name: oci-collector
+          image: local-organic-guac
+          command: ["/opt/guac/guaccollect", "image"]
+          workingDir: /tmp
+          env:
+            - name: GUAC_NATS_ADDR
+              value: nats://nats:4222
+            - name: GUAC_CSUB_ADDR
+              value: guac-collectsub:2782
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: depsdev-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: depsdev-collector
+  template:
+    metadata:
+      labels:
+        app: depsdev-collector
+    spec:
+      containers:
+        - name: depsdev-collector
+          image: local-organic-guac
+          command: ["/opt/guac/guaccollect", "deps_dev"]
+          workingDir: /tmp
+          env:
+            - name: GUAC_NATS_ADDR
+              value: nats://nats:4222
+            - name: GUAC_CSUB_ADDR
+              value: guac-collectsub:2782

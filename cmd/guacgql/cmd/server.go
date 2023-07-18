@@ -64,6 +64,8 @@ func startServer(cmd *cobra.Command) {
 		srv.Use(tracer)
 	}
 
+	http.HandleFunc("/healthz", healthHandler)
+
 	http.Handle("/query", srv)
 	if flags.debug {
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
@@ -156,4 +158,9 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
 	return srv, nil
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprint(w, "Server is healthy")
 }
