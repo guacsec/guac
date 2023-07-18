@@ -154,6 +154,8 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			exploreIsOccurrenceFromSubject(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsHasSourceAt:
 			exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsPkgEqual:
+			explorePkgEqual(ctx, gqlClient, q, *neighbor)
 		}
 	case SourceName:
 		switch neighbor := neighbor.(type) {
@@ -172,6 +174,8 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			exploreHasSLSAFromArtifact(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsIsOccurrence:
 			exploreIsOccurrenceFromArtifact(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsHashEqual:
+			exploreHashEqual(ctx, gqlClient, q, *neighbor)
 		}
 
 	}
@@ -228,6 +232,18 @@ func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client,
 		q.addNodeToQueue(PackageName, []string{hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Version}, hasSourceAt.Package.Namespaces[0].Names[0].Id)
 	}
 	return nil
+}
+
+// TODO: Expand to not just deal with packageVersions
+func explorePkgEqual(ctx context.Context, gqlClient graphql.Client, q *queueValues, pkgEqual model.NeighborsNeighborsPkgEqual) {
+	// Step 1: Loop through all the packages listed in the pkgEqual
+	// Step 2: as long as they are not equal to the current node, add them and their packageName to the queue
+}
+
+// TODO: implement this function
+func exploreHashEqual(ctx context.Context, gqlClient graphql.Client, q *queueValues, hashEqual model.NeighborsNeighborsHashEqual) {
+	// Step 1: Loop through all the artifacts listed in the pkgEqual
+	// Step 2: as long as they are not equal to the current node, add them and to the queue
 }
 
 func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) {
