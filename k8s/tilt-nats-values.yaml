@@ -1,8 +1,8 @@
 nats:
   image: nats:alpine
 
-  #limits:
-  #  maxPayload: "64MB"
+  limits:
+    maxPayload: "64MB"
 
   jetstream:
     enabled: true
@@ -10,7 +10,6 @@ nats:
     memStorage:
       enabled: true
       size: "128MB"
-  #    size: "1Gi"
 
     fileStorage:
       enabled: false
