@@ -126,5 +126,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a source repository has a Scorecard."
-  certifyScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
+  ingestScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
+  "Adds bulk certifications that a source repository has a Scorecard."
+  ingestScorecards(sources: [SourceInputSpec!]!, scorecards: [ScorecardInputSpec!]!): [CertifyScorecard!]!
 }

@@ -53,8 +53,25 @@ func (n *scorecardLink) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildScorecard(n, nil, true)
 }
 
+// Ingest Scorecards
+
+func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
+	if len(sources) != len(scorecards) {
+		return nil, gqlerror.Errorf("uneven source and scorecards for ingestion")
+	}
+	var modelCertifyScorecards []*model.CertifyScorecard
+	for i := range scorecards {
+		scorecard, err := c.IngestScorecard(ctx, *sources[i], *scorecards[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestScorecard failed with err: %v", err)
+		}
+		modelCertifyScorecards = append(modelCertifyScorecards, scorecard)
+	}
+	return modelCertifyScorecards, nil
+}
+
 // Ingest CertifyScorecard
-func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
+func (c *demoClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
 	return c.certifyScorecard(ctx, source, scorecard, true)
 }
 

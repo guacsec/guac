@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -189,7 +190,13 @@ func setCertifyScorecardValues(sb *strings.Builder, certifyScorecardSpec *model.
 
 // Ingest Scorecards
 
-func (c *neo4jClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
+func (c *neo4jClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
+	return []*model.CertifyScorecard{}, fmt.Errorf("not implemented: IngestDependencies")
+}
+
+// Ingest Scorecard
+
+func (c *neo4jClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 

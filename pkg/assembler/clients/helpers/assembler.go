@@ -228,7 +228,7 @@ func ingestGHSA(ctx context.Context, client graphql.Client, v *model.GHSAInputSp
 }
 
 func ingestCertifyScorecards(ctx context.Context, client graphql.Client, v assembler.CertifyScorecardIngest) error {
-	_, err := model.Scorecard(ctx, client, *v.Source, *v.Scorecard)
+	_, err := model.CertifyScorecard(ctx, client, *v.Source, *v.Scorecard)
 	return err
 }
 

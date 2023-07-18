@@ -53,7 +53,6 @@ func (n *isDependencyLink) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest IngestDependencies
 
 func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
-
 	if len(pkgs) != len(depPkgs) {
 		return nil, gqlerror.Errorf("uneven packages and dependent packages for ingestion")
 	}

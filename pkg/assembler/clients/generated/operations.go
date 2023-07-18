@@ -3557,6 +3557,176 @@ func (v *CertifyOSVResponse) GetIngestVulnerability() CertifyOSVIngestVulnerabil
 	return v.IngestVulnerability
 }
 
+// CertifyScorecardIngestScorecardCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecard is an attestation to attach a Scorecard analysis to a
+// particular source repository.
+type CertifyScorecardIngestScorecardCertifyScorecard struct {
+	AllCertifyScorecard `json:"-"`
+}
+
+// GetId returns CertifyScorecardIngestScorecardCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardIngestScorecardCertifyScorecard) GetId() string {
+	return v.AllCertifyScorecard.Id
+}
+
+// GetSource returns CertifyScorecardIngestScorecardCertifyScorecard.Source, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardIngestScorecardCertifyScorecard) GetSource() AllCertifyScorecardSource {
+	return v.AllCertifyScorecard.Source
+}
+
+// GetScorecard returns CertifyScorecardIngestScorecardCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardIngestScorecardCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
+	return v.AllCertifyScorecard.Scorecard
+}
+
+func (v *CertifyScorecardIngestScorecardCertifyScorecard) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyScorecardIngestScorecardCertifyScorecard
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyScorecardIngestScorecardCertifyScorecard = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyScorecard)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyScorecardIngestScorecardCertifyScorecard struct {
+	Id string `json:"id"`
+
+	Source AllCertifyScorecardSource `json:"source"`
+
+	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
+}
+
+func (v *CertifyScorecardIngestScorecardCertifyScorecard) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyScorecardIngestScorecardCertifyScorecard) __premarshalJSON() (*__premarshalCertifyScorecardIngestScorecardCertifyScorecard, error) {
+	var retval __premarshalCertifyScorecardIngestScorecardCertifyScorecard
+
+	retval.Id = v.AllCertifyScorecard.Id
+	retval.Source = v.AllCertifyScorecard.Source
+	retval.Scorecard = v.AllCertifyScorecard.Scorecard
+	return &retval, nil
+}
+
+// CertifyScorecardResponse is returned by CertifyScorecard on success.
+type CertifyScorecardResponse struct {
+	// Adds a certification that a source repository has a Scorecard.
+	IngestScorecard CertifyScorecardIngestScorecardCertifyScorecard `json:"ingestScorecard"`
+}
+
+// GetIngestScorecard returns CertifyScorecardResponse.IngestScorecard, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardResponse) GetIngestScorecard() CertifyScorecardIngestScorecardCertifyScorecard {
+	return v.IngestScorecard
+}
+
+// CertifyScorecardsIngestScorecardsCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecard is an attestation to attach a Scorecard analysis to a
+// particular source repository.
+type CertifyScorecardsIngestScorecardsCertifyScorecard struct {
+	AllCertifyScorecard `json:"-"`
+}
+
+// GetId returns CertifyScorecardsIngestScorecardsCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardsIngestScorecardsCertifyScorecard) GetId() string {
+	return v.AllCertifyScorecard.Id
+}
+
+// GetSource returns CertifyScorecardsIngestScorecardsCertifyScorecard.Source, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardsIngestScorecardsCertifyScorecard) GetSource() AllCertifyScorecardSource {
+	return v.AllCertifyScorecard.Source
+}
+
+// GetScorecard returns CertifyScorecardsIngestScorecardsCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardsIngestScorecardsCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
+	return v.AllCertifyScorecard.Scorecard
+}
+
+func (v *CertifyScorecardsIngestScorecardsCertifyScorecard) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyScorecardsIngestScorecardsCertifyScorecard
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyScorecardsIngestScorecardsCertifyScorecard = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyScorecard)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyScorecardsIngestScorecardsCertifyScorecard struct {
+	Id string `json:"id"`
+
+	Source AllCertifyScorecardSource `json:"source"`
+
+	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
+}
+
+func (v *CertifyScorecardsIngestScorecardsCertifyScorecard) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyScorecardsIngestScorecardsCertifyScorecard) __premarshalJSON() (*__premarshalCertifyScorecardsIngestScorecardsCertifyScorecard, error) {
+	var retval __premarshalCertifyScorecardsIngestScorecardsCertifyScorecard
+
+	retval.Id = v.AllCertifyScorecard.Id
+	retval.Source = v.AllCertifyScorecard.Source
+	retval.Scorecard = v.AllCertifyScorecard.Scorecard
+	return &retval, nil
+}
+
+// CertifyScorecardsResponse is returned by CertifyScorecards on success.
+type CertifyScorecardsResponse struct {
+	// Adds bulk certifications that a source repository has a Scorecard.
+	IngestScorecards []CertifyScorecardsIngestScorecardsCertifyScorecard `json:"ingestScorecards"`
+}
+
+// GetIngestScorecards returns CertifyScorecardsResponse.IngestScorecards, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardsResponse) GetIngestScorecards() []CertifyScorecardsIngestScorecardsCertifyScorecard {
+	return v.IngestScorecards
+}
+
 // DependencyType determines the type of the dependency.
 type DependencyType string
 
@@ -18242,78 +18412,6 @@ func (v *SLSAPredicateInputSpec) GetKey() string { return v.Key }
 // GetValue returns SLSAPredicateInputSpec.Value, and is useful for accessing the field via an interface.
 func (v *SLSAPredicateInputSpec) GetValue() string { return v.Value }
 
-// ScorecardCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
-// The GraphQL type's documentation follows.
-//
-// CertifyScorecard is an attestation to attach a Scorecard analysis to a
-// particular source repository.
-type ScorecardCertifyScorecard struct {
-	AllCertifyScorecard `json:"-"`
-}
-
-// GetId returns ScorecardCertifyScorecard.Id, and is useful for accessing the field via an interface.
-func (v *ScorecardCertifyScorecard) GetId() string { return v.AllCertifyScorecard.Id }
-
-// GetSource returns ScorecardCertifyScorecard.Source, and is useful for accessing the field via an interface.
-func (v *ScorecardCertifyScorecard) GetSource() AllCertifyScorecardSource {
-	return v.AllCertifyScorecard.Source
-}
-
-// GetScorecard returns ScorecardCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
-func (v *ScorecardCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
-	return v.AllCertifyScorecard.Scorecard
-}
-
-func (v *ScorecardCertifyScorecard) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*ScorecardCertifyScorecard
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.ScorecardCertifyScorecard = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCertifyScorecard)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalScorecardCertifyScorecard struct {
-	Id string `json:"id"`
-
-	Source AllCertifyScorecardSource `json:"source"`
-
-	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
-}
-
-func (v *ScorecardCertifyScorecard) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *ScorecardCertifyScorecard) __premarshalJSON() (*__premarshalScorecardCertifyScorecard, error) {
-	var retval __premarshalScorecardCertifyScorecard
-
-	retval.Id = v.AllCertifyScorecard.Id
-	retval.Source = v.AllCertifyScorecard.Source
-	retval.Scorecard = v.AllCertifyScorecard.Scorecard
-	return &retval, nil
-}
-
 // ScorecardCheckInputSpec represents the mutation input for a Scorecard check.
 type ScorecardCheckInputSpec struct {
 	Check string `json:"check"`
@@ -18357,17 +18455,6 @@ func (v *ScorecardInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns ScorecardInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *ScorecardInputSpec) GetCollector() string { return v.Collector }
-
-// ScorecardResponse is returned by Scorecard on success.
-type ScorecardResponse struct {
-	// Adds a certification that a source repository has a Scorecard.
-	CertifyScorecard ScorecardCertifyScorecard `json:"certifyScorecard"`
-}
-
-// GetCertifyScorecard returns ScorecardResponse.CertifyScorecard, and is useful for accessing the field via an interface.
-func (v *ScorecardResponse) GetCertifyScorecard() ScorecardCertifyScorecard {
-	return v.CertifyScorecard
-}
 
 // SourceInputSpec specifies a source for mutations.
 //
@@ -19752,6 +19839,30 @@ func (v *__CertifyOSVInput) GetOsv() OSVInputSpec { return v.Osv }
 // GetCertifyVuln returns __CertifyOSVInput.CertifyVuln, and is useful for accessing the field via an interface.
 func (v *__CertifyOSVInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
 
+// __CertifyScorecardInput is used internally by genqlient
+type __CertifyScorecardInput struct {
+	Source    SourceInputSpec    `json:"source"`
+	Scorecard ScorecardInputSpec `json:"scorecard"`
+}
+
+// GetSource returns __CertifyScorecardInput.Source, and is useful for accessing the field via an interface.
+func (v *__CertifyScorecardInput) GetSource() SourceInputSpec { return v.Source }
+
+// GetScorecard returns __CertifyScorecardInput.Scorecard, and is useful for accessing the field via an interface.
+func (v *__CertifyScorecardInput) GetScorecard() ScorecardInputSpec { return v.Scorecard }
+
+// __CertifyScorecardsInput is used internally by genqlient
+type __CertifyScorecardsInput struct {
+	Sources    []SourceInputSpec    `json:"sources"`
+	Scorecards []ScorecardInputSpec `json:"scorecards"`
+}
+
+// GetSources returns __CertifyScorecardsInput.Sources, and is useful for accessing the field via an interface.
+func (v *__CertifyScorecardsInput) GetSources() []SourceInputSpec { return v.Sources }
+
+// GetScorecards returns __CertifyScorecardsInput.Scorecards, and is useful for accessing the field via an interface.
+func (v *__CertifyScorecardsInput) GetScorecards() []ScorecardInputSpec { return v.Scorecards }
+
 // __FindSoftwareInput is used internally by genqlient
 type __FindSoftwareInput struct {
 	SearchText string `json:"searchText"`
@@ -20241,18 +20352,6 @@ func (v *__SLSAForArtifactInput) GetBuilder() BuilderInputSpec { return v.Builde
 
 // GetSlsa returns __SLSAForArtifactInput.Slsa, and is useful for accessing the field via an interface.
 func (v *__SLSAForArtifactInput) GetSlsa() SLSAInputSpec { return v.Slsa }
-
-// __ScorecardInput is used internally by genqlient
-type __ScorecardInput struct {
-	Source    SourceInputSpec    `json:"source"`
-	Scorecard ScorecardInputSpec `json:"scorecard"`
-}
-
-// GetSource returns __ScorecardInput.Source, and is useful for accessing the field via an interface.
-func (v *__ScorecardInput) GetSource() SourceInputSpec { return v.Source }
-
-// GetScorecard returns __ScorecardInput.Scorecard, and is useful for accessing the field via an interface.
-func (v *__ScorecardInput) GetScorecard() ScorecardInputSpec { return v.Scorecard }
 
 // __SourcesInput is used internally by genqlient
 type __SourcesInput struct {
@@ -25509,6 +25608,144 @@ func CertifyOSV(
 	return &data, err
 }
 
+// The query or mutation executed by CertifyScorecard.
+const CertifyScorecard_Operation = `
+mutation CertifyScorecard ($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
+	ingestScorecard(source: $source, scorecard: $scorecard) {
+		... AllCertifyScorecard
+	}
+}
+fragment AllCertifyScorecard on CertifyScorecard {
+	id
+	source {
+		... AllSourceTree
+	}
+	scorecard {
+		timeScanned
+		aggregateScore
+		checks {
+			check
+			score
+		}
+		scorecardVersion
+		scorecardCommit
+		origin
+		collector
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func CertifyScorecard(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+	scorecard ScorecardInputSpec,
+) (*CertifyScorecardResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyScorecard",
+		Query:  CertifyScorecard_Operation,
+		Variables: &__CertifyScorecardInput{
+			Source:    source,
+			Scorecard: scorecard,
+		},
+	}
+	var err error
+
+	var data CertifyScorecardResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyScorecards.
+const CertifyScorecards_Operation = `
+mutation CertifyScorecards ($sources: [SourceInputSpec!]!, $scorecards: [ScorecardInputSpec!]!) {
+	ingestScorecards(sources: $sources, scorecards: $scorecards) {
+		... AllCertifyScorecard
+	}
+}
+fragment AllCertifyScorecard on CertifyScorecard {
+	id
+	source {
+		... AllSourceTree
+	}
+	scorecard {
+		timeScanned
+		aggregateScore
+		checks {
+			check
+			score
+		}
+		scorecardVersion
+		scorecardCommit
+		origin
+		collector
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func CertifyScorecards(
+	ctx context.Context,
+	client graphql.Client,
+	sources []SourceInputSpec,
+	scorecards []ScorecardInputSpec,
+) (*CertifyScorecardsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyScorecards",
+		Query:  CertifyScorecards_Operation,
+		Variables: &__CertifyScorecardsInput{
+			Sources:    sources,
+			Scorecards: scorecards,
+		},
+	}
+	var err error
+
+	var data CertifyScorecardsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by FindSoftware.
 const FindSoftware_Operation = `
 query FindSoftware ($searchText: String!) {
@@ -29548,75 +29785,6 @@ func SLSAForArtifact(
 	var err error
 
 	var data SLSAForArtifactResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-// The query or mutation executed by Scorecard.
-const Scorecard_Operation = `
-mutation Scorecard ($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
-	certifyScorecard(source: $source, scorecard: $scorecard) {
-		... AllCertifyScorecard
-	}
-}
-fragment AllCertifyScorecard on CertifyScorecard {
-	id
-	source {
-		... AllSourceTree
-	}
-	scorecard {
-		timeScanned
-		aggregateScore
-		checks {
-			check
-			score
-		}
-		scorecardVersion
-		scorecardCommit
-		origin
-		collector
-	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
-	}
-}
-`
-
-func Scorecard(
-	ctx context.Context,
-	client graphql.Client,
-	source SourceInputSpec,
-	scorecard ScorecardInputSpec,
-) (*ScorecardResponse, error) {
-	req := &graphql.Request{
-		OpName: "Scorecard",
-		Query:  Scorecard_Operation,
-		Variables: &__ScorecardInput{
-			Source:    source,
-			Scorecard: scorecard,
-		},
-	}
-	var err error
-
-	var data ScorecardResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

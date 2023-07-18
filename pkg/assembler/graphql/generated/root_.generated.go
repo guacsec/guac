@@ -179,7 +179,6 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CertifyScorecard      func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
 		IngestArtifact        func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestArtifacts       func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
@@ -206,6 +205,8 @@ type ComplexityRoot struct {
 		IngestPackages        func(childComplexity int, pkgs []*model.PkgInputSpec) int
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
 		IngestPointOfContact  func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
+		IngestScorecard       func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
+		IngestScorecards      func(childComplexity int, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestSources         func(childComplexity int, sources []*model.SourceInputSpec) int
@@ -994,18 +995,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsVulnerability.Vulnerability(childComplexity), true
 
-	case "Mutation.certifyScorecard":
-		if e.complexity.Mutation.CertifyScorecard == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_certifyScorecard_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CertifyScorecard(childComplexity, args["source"].(model.SourceInputSpec), args["scorecard"].(model.ScorecardInputSpec)), true
-
 	case "Mutation.ingestArtifact":
 		if e.complexity.Mutation.IngestArtifact == nil {
 			break
@@ -1317,6 +1306,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
+
+	case "Mutation.ingestScorecard":
+		if e.complexity.Mutation.IngestScorecard == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestScorecard_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestScorecard(childComplexity, args["source"].(model.SourceInputSpec), args["scorecard"].(model.ScorecardInputSpec)), true
+
+	case "Mutation.ingestScorecards":
+		if e.complexity.Mutation.IngestScorecards == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestScorecards_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestScorecards(childComplexity, args["sources"].([]*model.SourceInputSpec), args["scorecards"].([]*model.ScorecardInputSpec)), true
 
 	case "Mutation.ingestSLSA":
 		if e.complexity.Mutation.IngestSlsa == nil {
@@ -2791,7 +2804,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a source repository has a Scorecard."
-  certifyScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
+  ingestScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
+  "Adds bulk certifications that a source repository has a Scorecard."
+  ingestScorecards(sources: [SourceInputSpec!]!, scorecards: [ScorecardInputSpec!]!): [CertifyScorecard!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVEXStatement.graphql", Input: `#

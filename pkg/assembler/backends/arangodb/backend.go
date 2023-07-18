@@ -756,9 +756,6 @@ func (c *arangoClient) IsVulnerability(ctx context.Context, isVulnerabilitySpec 
 func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
 }
-func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	panic(fmt.Errorf("not implemented: Scorecards - Scorecards"))
-}
 
 // Mutations for software trees (read-write queries)
 
@@ -767,9 +764,6 @@ func (c *arangoClient) IngestMaterials(ctx context.Context, materials []*model.A
 }
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
-func (c *arangoClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
-	return &model.CertifyScorecard{}, nil
-}
 func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
 }
