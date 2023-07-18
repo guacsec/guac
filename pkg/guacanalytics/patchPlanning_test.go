@@ -1353,9 +1353,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 					t.Errorf("%s \n", err)
 				}
 
-				for _, ID := range artifactIDs {
-					expectedArtifactIDs = append(expectedArtifactIDs, ID)
-				}
+				expectedArtifactIDs = append(expectedArtifactIDs, artifactIDs...)
+
 			}
 
 			var expectedSrcIDs []string
