@@ -222,6 +222,39 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 	}
 }
 
+func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *arangoQueryBuilder {
+	if srcSpec != nil {
+		arangoQueryBuilder := newForQuery(srcRootsStr, "sRoot")
+		arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
+		queryValues["src"] = "src"
+		arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
+		if srcSpec.Type != nil {
+			arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
+			queryValues["srcType"] = *srcSpec.Type
+		}
+		arangoQueryBuilder.ForOutBound(srcHasNamespaceStr, "sNs", "sType")
+		if srcSpec.Namespace != nil {
+			arangoQueryBuilder.filter("sNs", "namespace", "==", "@namespace")
+			queryValues["namespace"] = *srcSpec.Namespace
+		}
+		arangoQueryBuilder.ForOutBound(srcHasNameStr, "sName", "sNs")
+		if srcSpec.Name != nil {
+			arangoQueryBuilder.filter("sName", "name", "==", "@name")
+			queryValues["name"] = *srcSpec.Name
+		}
+		if srcSpec.Commit != nil {
+			arangoQueryBuilder.filter("sName", "commit", "==", "@commit")
+			queryValues["commit"] = *srcSpec.Commit
+		}
+		if srcSpec.Tag != nil {
+			arangoQueryBuilder.filter("sName", "tag", "==", "@tag")
+			queryValues["tag"] = *srcSpec.Tag
+		}
+		return arangoQueryBuilder
+	}
+	return nil
+}
+
 func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
@@ -246,32 +279,7 @@ func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery(srcRootsStr, "sRoot")
-	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
-	values["src"] = "src"
-	arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
-	if sourceSpec.Type != nil {
-		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
-		values["srcType"] = *sourceSpec.Type
-	}
-	arangoQueryBuilder.ForOutBound(srcHasNamespaceStr, "sNs", "sType")
-	if sourceSpec.Namespace != nil {
-		arangoQueryBuilder.filter("sNs", "namespace", "==", "@namespace")
-		values["namespace"] = *sourceSpec.Namespace
-	}
-	arangoQueryBuilder.ForOutBound(srcHasNameStr, "sName", "sNs")
-	if sourceSpec.Name != nil {
-		arangoQueryBuilder.filter("sName", "name", "==", "@name")
-		values["name"] = *sourceSpec.Name
-	}
-	if sourceSpec.Commit != nil {
-		arangoQueryBuilder.filter("sName", "commit", "==", "@commit")
-		values["commit"] = *sourceSpec.Commit
-	}
-	if sourceSpec.Tag != nil {
-		arangoQueryBuilder.filter("sName", "tag", "==", "@tag")
-		values["tag"] = *sourceSpec.Tag
-	}
+	arangoQueryBuilder := setSrcMatchValues(sourceSpec, values)
 
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {

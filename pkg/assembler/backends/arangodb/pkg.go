@@ -284,6 +284,53 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	}
 }
 
+func setPkgMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *arangoQueryBuilder {
+	if pkgSpec != nil {
+		arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
+		arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
+		queryValues["pkg"] = "pkg"
+		arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
+		if pkgSpec.Type != nil {
+			arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
+			queryValues["pkgType"] = *pkgSpec.Type
+		}
+		arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		if pkgSpec.Namespace != nil {
+			arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
+			queryValues["namespace"] = *pkgSpec.Namespace
+		}
+		arangoQueryBuilder.ForOutBound(pkgHasNameStr, "pName", "pNs")
+		if pkgSpec.Name != nil {
+			arangoQueryBuilder.filter("pName", "name", "==", "@name")
+			queryValues["name"] = *pkgSpec.Name
+		}
+		arangoQueryBuilder.ForOutBound(pkgHasVersionStr, "pVersion", "pName")
+		if pkgSpec.Version != nil {
+			arangoQueryBuilder.filter("pVersion", "version", "==", "@version")
+			queryValues["version"] = *pkgSpec.Version
+		}
+		if pkgSpec.Subpath != nil {
+			arangoQueryBuilder.filter("pVersion", "subpath", "==", "@subpath")
+			queryValues["subpath"] = *pkgSpec.Subpath
+		}
+		if len(pkgSpec.Qualifiers) > 0 {
+			arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
+			queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
+		}
+
+		if !*pkgSpec.MatchOnlyEmptyQualifiers {
+			if len(pkgSpec.Qualifiers) > 0 {
+				arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
+				queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
+			}
+		} else {
+			arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
+			queryValues["objPkgQualifierList"] = []string{}
+		}
+	}
+	return nil
+}
+
 func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
 	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
@@ -315,37 +362,7 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
-	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
-	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
-	if pkgSpec.Type != nil {
-		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
-		values["pkgType"] = *pkgSpec.Type
-	}
-	arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
-	if pkgSpec.Namespace != nil {
-		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
-		values["namespace"] = *pkgSpec.Namespace
-	}
-	arangoQueryBuilder.ForOutBound(pkgHasNameStr, "pName", "pNs")
-	if pkgSpec.Name != nil {
-		arangoQueryBuilder.filter("pName", "name", "==", "@name")
-		values["name"] = *pkgSpec.Name
-	}
-	arangoQueryBuilder.ForOutBound(pkgHasVersionStr, "pVersion", "pName")
-	if pkgSpec.Version != nil {
-		arangoQueryBuilder.filter("pVersion", "version", "==", "@version")
-		values["version"] = *pkgSpec.Version
-	}
-	if pkgSpec.Subpath != nil {
-		arangoQueryBuilder.filter("pVersion", "subpath", "==", "@subpath")
-		values["subpath"] = *pkgSpec.Subpath
-	}
-	if len(pkgSpec.Qualifiers) > 0 {
-		arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
-		values["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
-	}
+	arangoQueryBuilder := setPkgMatchValues(pkgSpec, values)
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		"type_id": pType._id,
