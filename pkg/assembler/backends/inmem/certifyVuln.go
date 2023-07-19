@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -299,7 +300,6 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	}
 	if !foundOne && filter != nil && filter.Vulnerability != nil &&
 		filter.Vulnerability.NoVuln != nil && *filter.Vulnerability.NoVuln {
-
 		search = append(search, c.noKnownVulnNode.certifyVulnLinks...)
 		foundOne = true
 	}
@@ -358,7 +358,7 @@ func (c *demoClient) addCVIfMatch(out []*model.CertifyVuln,
 	if err != nil {
 		return nil, err
 	}
-	if foundCertifyVuln == nil {
+	if foundCertifyVuln == nil || reflect.ValueOf(foundCertifyVuln.Vulnerability).IsNil() {
 		return out, nil
 	}
 	return append(out, foundCertifyVuln), nil
@@ -383,7 +383,7 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 		}
 	}
 
-	if filter != nil && filter.Vulnerability != nil {
+	if filter != nil && filter.Vulnerability != nil && filter.Vulnerability.NoVuln == nil {
 		if filter.Vulnerability.Osv != nil && link.osvID != 0 {
 			osv, err = c.buildOsvResponse(link.osvID, filter.Vulnerability.Osv)
 			if err != nil {
@@ -409,28 +409,32 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 			}
 		}
 	} else {
-		if link.osvID != 0 {
-			osv, err = c.buildOsvResponse(link.osvID, nil)
-			if err != nil {
-				return nil, err
+		if checkNoVulnFilter(filter, false) {
+			if link.osvID != 0 {
+				osv, err = c.buildOsvResponse(link.osvID, nil)
+				if err != nil {
+					return nil, err
+				}
+			}
+			if link.cveID != 0 {
+				cve, err = c.buildCveResponse(link.cveID, nil)
+				if err != nil {
+					return nil, err
+				}
+			}
+			if link.ghsaID != 0 {
+				ghsa, err = c.buildGhsaResponse(link.ghsaID, nil)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
-		if link.cveID != 0 {
-			cve, err = c.buildCveResponse(link.cveID, nil)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if link.ghsaID != 0 {
-			ghsa, err = c.buildGhsaResponse(link.ghsaID, nil)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if link.noKnownVulnID != 0 {
-			noVuln, err = c.buildNoVulnResponse()
-			if err != nil {
-				return nil, err
+		if checkNoVulnFilter(filter, true) {
+			if link.noKnownVulnID != 0 {
+				noVuln, err = c.buildNoVulnResponse()
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
@@ -487,4 +491,13 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 		Metadata:      metadata,
 	}
 	return &certifyVuln, nil
+}
+
+// Checks if the given filter satisfies the condition for NoVuln in the CertifyVulnSpec.
+// It returns true if any of the following conditions are met:
+// 1. The filter is nil.
+// 2. The filter.Vulnerability is nil.
+// 3. The value of filter.Vulnerability.NoVuln matches the expected value.
+func checkNoVulnFilter(filter *model.CertifyVulnSpec, expected bool) bool {
+	return filter == nil || filter.Vulnerability == nil || *filter.Vulnerability.NoVuln == expected
 }

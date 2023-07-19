@@ -1358,11 +1358,11 @@ type VulnerabilityMetaDataInput struct {
 // VulnerabilitySpec allows using Vulnerability union as input type to be used in
 // read queries.
 //
-// Either noVuln must be set to true or exactly one of osv, cve or ghsa
-// must be set to non-nil. Setting noVuln to true means retrieving nodes where
-// there is no vulnerability attached (thus, the special NoVuln node). Setting one
-// of the other fields means retrieving certifications for the corresponding
-// vulnerability types.
+// Either noVuln must be set or exactly one of osv, cve or ghsa
+// must be set to non-nil. Setting noVuln to true means retrieving only nodes where
+// there is no vulnerability attached. Setting it to false means retrieving only nodes
+// with identified vulnerabilities. Setting one of the other fields means retrieving
+// certifications for the corresponding vulnerability types.
 type VulnerabilitySpec struct {
 	Osv    *OSVSpec  `json:"osv,omitempty"`
 	Cve    *CVESpec  `json:"cve,omitempty"`
