@@ -75,13 +75,6 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestBuilders failed with error: %w", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for materials
-			materials := p.GetMaterials(ctx)
-			logger.Infof("assembling Materials (Artifact): %v", len(materials))
-			if err := ingestMaterials(ctx, gqlclient, materials); err != nil {
-				return fmt.Errorf("ingestMaterials failed with error: %w", err)
-			}
-
 			cves := p.GetCVEs(ctx)
 			logger.Infof("assembling CVE: %v", len(cves))
 			var collectedCVEs []model.CVEInputSpec

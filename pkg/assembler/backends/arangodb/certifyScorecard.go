@@ -44,7 +44,7 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 
 	arangoQueryBuilder := setSrcMatchValues(certifyScorecardSpec.Source, values)
 
-	setCertifyScorecardValues(arangoQueryBuilder, certifyScorecardSpec, values)
+	setCertifyScorecardMatchValues(arangoQueryBuilder, certifyScorecardSpec, values)
 
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
@@ -79,7 +79,7 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 	return getCertifyScorecard(ctx, cursor)
 }
 
-func setCertifyScorecardValues(arangoQueryBuilder *arangoQueryBuilder, certifyScorecardSpec *model.CertifyScorecardSpec, queryValues map[string]any) {
+func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyScorecardSpec *model.CertifyScorecardSpec, queryValues map[string]any) {
 	arangoQueryBuilder.ForOutBound(scorecardEdgesStr, "scorecard", "sName")
 	if certifyScorecardSpec.TimeScanned != nil {
 		arangoQueryBuilder.filter("scorecard", timeScannedStr, "==", "@"+timeScannedStr)

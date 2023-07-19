@@ -135,7 +135,4 @@ extend type Query {
 extend type Mutation {
   "Ingests a SLSA attestation."
   ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
-
-  "Helper mutation to ingest multiple artifacts as materials for SLSA."
-  ingestMaterials(materials: [ArtifactInputSpec!]!): [Artifact!]!
 }

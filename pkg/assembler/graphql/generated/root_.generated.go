@@ -196,7 +196,6 @@ type ComplexityRoot struct {
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
-		IngestMaterials       func(childComplexity int, materials []*model.ArtifactInputSpec) int
 		IngestOSVs            func(childComplexity int, osvs []*model.OSVInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOccurrences     func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
@@ -1198,18 +1197,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestIsVulnerability(childComplexity, args["osv"].(model.OSVInputSpec), args["vulnerability"].(model.CveOrGhsaInput), args["isVulnerability"].(model.IsVulnerabilityInputSpec)), true
-
-	case "Mutation.ingestMaterials":
-		if e.complexity.Mutation.IngestMaterials == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestMaterials_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestMaterials(childComplexity, args["materials"].([]*model.ArtifactInputSpec)), true
 
 	case "Mutation.ingestOSVs":
 		if e.complexity.Mutation.IngestOSVs == nil {
@@ -3511,9 +3498,6 @@ extend type Query {
 extend type Mutation {
   "Ingests a SLSA attestation."
   ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
-
-  "Helper mutation to ingest multiple artifacts as materials for SLSA."
-  ingestMaterials(materials: [ArtifactInputSpec!]!): [Artifact!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSourceAt.graphql", Input: `#

@@ -15,12 +15,17 @@ func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.Artifac
 	return r.Backend.IngestSLSA(ctx, subject, builtFrom, builtBy, slsa)
 }
 
-// IngestMaterials is the resolver for the ingestMaterials field.
-func (r *mutationResolver) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	return r.Backend.IngestMaterials(ctx, materials)
-}
-
 // HasSlsa is the resolver for the HasSLSA field.
 func (r *queryResolver) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	return r.Backend.HasSlsa(ctx, hasSLSASpec)
+}
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+	return r.Backend.IngestMaterials(ctx, materials)
 }

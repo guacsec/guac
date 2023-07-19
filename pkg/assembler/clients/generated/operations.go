@@ -5858,92 +5858,6 @@ type IngestGHSAsResponse struct {
 // GetIngestGHSAs returns IngestGHSAsResponse.IngestGHSAs, and is useful for accessing the field via an interface.
 func (v *IngestGHSAsResponse) GetIngestGHSAs() []IngestGHSAsIngestGHSAsGHSA { return v.IngestGHSAs }
 
-// IngestMaterialsIngestMaterialsArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type IngestMaterialsIngestMaterialsArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns IngestMaterialsIngestMaterialsArtifact.Id, and is useful for accessing the field via an interface.
-func (v *IngestMaterialsIngestMaterialsArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns IngestMaterialsIngestMaterialsArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *IngestMaterialsIngestMaterialsArtifact) GetAlgorithm() string {
-	return v.AllArtifactTree.Algorithm
-}
-
-// GetDigest returns IngestMaterialsIngestMaterialsArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *IngestMaterialsIngestMaterialsArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *IngestMaterialsIngestMaterialsArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IngestMaterialsIngestMaterialsArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IngestMaterialsIngestMaterialsArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIngestMaterialsIngestMaterialsArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *IngestMaterialsIngestMaterialsArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IngestMaterialsIngestMaterialsArtifact) __premarshalJSON() (*__premarshalIngestMaterialsIngestMaterialsArtifact, error) {
-	var retval __premarshalIngestMaterialsIngestMaterialsArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
-
-// IngestMaterialsResponse is returned by IngestMaterials on success.
-type IngestMaterialsResponse struct {
-	// Helper mutation to ingest multiple artifacts as materials for SLSA.
-	IngestMaterials []IngestMaterialsIngestMaterialsArtifact `json:"ingestMaterials"`
-}
-
-// GetIngestMaterials returns IngestMaterialsResponse.IngestMaterials, and is useful for accessing the field via an interface.
-func (v *IngestMaterialsResponse) GetIngestMaterials() []IngestMaterialsIngestMaterialsArtifact {
-	return v.IngestMaterials
-}
-
 // IngestOSVIngestOSV includes the requested fields of the GraphQL type OSV.
 // The GraphQL type's documentation follows.
 //
@@ -20279,14 +20193,6 @@ type __IngestGHSAsInput struct {
 // GetGhsas returns __IngestGHSAsInput.Ghsas, and is useful for accessing the field via an interface.
 func (v *__IngestGHSAsInput) GetGhsas() []GHSAInputSpec { return v.Ghsas }
 
-// __IngestMaterialsInput is used internally by genqlient
-type __IngestMaterialsInput struct {
-	Materials []ArtifactInputSpec `json:"materials"`
-}
-
-// GetMaterials returns __IngestMaterialsInput.Materials, and is useful for accessing the field via an interface.
-func (v *__IngestMaterialsInput) GetMaterials() []ArtifactInputSpec { return v.Materials }
-
 // __IngestOSVInput is used internally by genqlient
 type __IngestOSVInput struct {
 	Osv OSVInputSpec `json:"osv"`
@@ -27026,46 +26932,6 @@ func IngestGHSAs(
 	var err error
 
 	var data IngestGHSAsResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-// The query or mutation executed by IngestMaterials.
-const IngestMaterials_Operation = `
-mutation IngestMaterials ($materials: [ArtifactInputSpec!]!) {
-	ingestMaterials(materials: $materials) {
-		... AllArtifactTree
-	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
-}
-`
-
-func IngestMaterials(
-	ctx context.Context,
-	client graphql.Client,
-	materials []ArtifactInputSpec,
-) (*IngestMaterialsResponse, error) {
-	req := &graphql.Request{
-		OpName: "IngestMaterials",
-		Query:  IngestMaterials_Operation,
-		Variables: &__IngestMaterialsInput{
-			Materials: materials,
-		},
-	}
-	var err error
-
-	var data IngestMaterialsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
