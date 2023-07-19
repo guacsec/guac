@@ -43,6 +43,7 @@ type IngestPredicates struct {
 	HashEqual        []HashEqualIngest        `json:"hashEqual,omitempty"`
 	PkgEqual         []PkgEqualIngest         `json:"pkgEqual,omitempty"`
 	Vex              []VexIngest              `json:"vex,omitempty"`
+	PointOfContact   []PointOfContactIngest   `json:"contact,omitempty"`
 }
 
 type CertifyScorecardIngest struct {
@@ -144,6 +145,15 @@ type VexIngest struct {
 	GHSA *generated.GHSAInputSpec `json:"ghsa,omitempty"`
 
 	VexData *generated.VexStatementInputSpec `json:"vexData,omitempty"`
+}
+
+type PointOfContactIngest struct {
+	// certifyGood describes either pkg, src or artifact
+	Pkg            *generated.PkgInputSpec            `json:"pkg,omitempty"`
+	PkgMatchFlag   generated.MatchFlags               `json:"pkgMatchFlag,omitempty"`
+	Src            *generated.SourceInputSpec         `json:"src,omitempty"`
+	Artifact       *generated.ArtifactInputSpec       `json:"artifact,omitempty"`
+	PointOfContact *generated.PointOfContactInputSpec `json:"pointOfContact,omitempty"`
 }
 
 type HashEqualIngest struct {
