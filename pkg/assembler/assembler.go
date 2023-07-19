@@ -283,7 +283,7 @@ type PkgEqualIngest struct {
 	PkgEqual *generated.PkgEqualInputSpec
 }
 
-type PointOfContact struct {
+type PointOfContactIngest struct {
 	// pointOfContact describes either pkg, src or artifact
 	Pkg            *generated.PkgInputSpec
 	Src            *generated.SourceInputSpec
