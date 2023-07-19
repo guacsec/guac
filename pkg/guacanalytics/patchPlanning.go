@@ -154,6 +154,8 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			exploreIsOccurrenceFromSubject(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsHasSourceAt:
 			exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsPkgEqual:
+			explorePkgEqual(ctx, gqlClient, q, *neighbor)
 		}
 	case SourceName:
 		switch neighbor := neighbor.(type) {
@@ -172,6 +174,8 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			exploreHasSLSAFromArtifact(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsIsOccurrence:
 			exploreIsOccurrenceFromArtifact(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsHashEqual:
+			exploreHashEqual(ctx, gqlClient, q, *neighbor)
 		}
 
 	}
@@ -228,6 +232,24 @@ func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client,
 		q.addNodeToQueue(PackageName, []string{hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Version}, hasSourceAt.Package.Namespaces[0].Names[0].Id)
 	}
 	return nil
+}
+
+// TODO: Expand to not just deal with packageVersions
+func explorePkgEqual(ctx context.Context, gqlClient graphql.Client, q *queueValues, pkgEqual model.NeighborsNeighborsPkgEqual) {
+	for _, pkg := range pkgEqual.Packages {
+		if pkg.Namespaces[0].Names[0].Versions[0].Id != q.now {
+			q.addNodeToQueue(PackageVersion, nil, pkg.Namespaces[0].Names[0].Versions[0].Id)
+			q.addNodeToQueue(PackageName, []string{pkg.Namespaces[0].Names[0].Versions[0].Id}, pkg.Namespaces[0].Names[0].Id)
+		}
+	}
+}
+
+func exploreHashEqual(ctx context.Context, gqlClient graphql.Client, q *queueValues, hashEqual model.NeighborsNeighborsHashEqual) {
+	for _, artifact := range hashEqual.Artifacts {
+		if artifact.Id != q.now {
+			q.addNodeToQueue(Artifact, nil, artifact.Id)
+		}
+	}
 }
 
 func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) {
