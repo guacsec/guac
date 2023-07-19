@@ -223,8 +223,9 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 }
 
 func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *arangoQueryBuilder {
+	var arangoQueryBuilder *arangoQueryBuilder
 	if srcSpec != nil {
-		arangoQueryBuilder := newForQuery(srcRootsStr, "sRoot")
+		arangoQueryBuilder = newForQuery(srcRootsStr, "sRoot")
 		arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
 		queryValues["src"] = "src"
 		arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
@@ -250,9 +251,13 @@ func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *a
 			arangoQueryBuilder.filter("sName", "tag", "==", "@tag")
 			queryValues["tag"] = *srcSpec.Tag
 		}
-		return arangoQueryBuilder
+	} else {
+		arangoQueryBuilder = newForQuery(srcRootsStr, "sRoot")
+		arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
+		arangoQueryBuilder.ForOutBound(srcHasNamespaceStr, "sNs", "sType")
+		arangoQueryBuilder.ForOutBound(srcHasNameStr, "sName", "sNs")
 	}
-	return nil
+	return arangoQueryBuilder
 }
 
 func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
@@ -500,12 +505,12 @@ func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, err
 	return sources, nil
 }
 
-func generateModelSource(srcTypeID, srcType, namespaceID, namespaceStr, nameID, nameStr string, commitValue, tagValue *string) *model.Source {
+func generateModelSource(srcTypeID, srcType, namespaceID, namespaceStr, nameID, nameStr string, commitValue, tagValue string) *model.Source {
 	name := &model.SourceName{
 		ID:     nameID,
 		Name:   nameStr,
-		Tag:    tagValue,
-		Commit: commitValue,
+		Tag:    &tagValue,
+		Commit: &commitValue,
 	}
 
 	namespace := &model.SourceNamespace{

@@ -39,7 +39,92 @@ const (
 // Query Scorecards
 
 func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	panic(fmt.Errorf("not implemented: Scorecards - Scorecards"))
+
+	values := map[string]any{}
+
+	arangoQueryBuilder := setSrcMatchValues(certifyScorecardSpec.Source, values)
+
+	setCertifyScorecardValues(arangoQueryBuilder, certifyScorecardSpec, values)
+
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'srcName': {
+			'type_id': sType._id,
+			'type': sType.type,
+			'namespace_id': sNs._id,
+			'namespace': sNs.namespace,
+			'name_id': sName._id,
+			'name': sName.name,
+			'commit': sName.commit,
+			'tag': sName.tag
+		},
+		'scorecard_id': scorecard._id,
+		'checks': scorecard.checks,
+		'aggregateScore': scorecard.aggregateScore,
+		'timeScanned': scorecard.timeScanned,
+		'scorecardVersion': scorecard.scorecardVersion,
+		'scorecardCommit': scorecard.scorecardCommit,
+		'collector': scorecard.collector,
+		'origin': scorecard.origin
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Scorecards")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for Scorecards: %w", err)
+	}
+	defer cursor.Close()
+
+	return getCertifyScorecard(ctx, cursor)
+}
+
+func setCertifyScorecardValues(arangoQueryBuilder *arangoQueryBuilder, certifyScorecardSpec *model.CertifyScorecardSpec, queryValues map[string]any) {
+	arangoQueryBuilder.ForOutBound(scorecardEdgesStr, "scorecard", "sName")
+	if certifyScorecardSpec.TimeScanned != nil {
+		arangoQueryBuilder.filter("scorecard", timeScannedStr, "==", "@"+timeScannedStr)
+		queryValues[timeScannedStr] = certifyScorecardSpec.TimeScanned.UTC()
+	}
+	if certifyScorecardSpec.AggregateScore != nil {
+		arangoQueryBuilder.filter("scorecard", aggregateScoreStr, "==", "@"+aggregateScoreStr)
+		queryValues[aggregateScoreStr] = certifyScorecardSpec.AggregateScore
+	}
+	if len(certifyScorecardSpec.Checks) > 0 {
+		checks := getChecks(certifyScorecardSpec.Checks)
+		arangoQueryBuilder.filter("scorecard", checksStr, "==", "@"+checksStr)
+		queryValues[checksStr] = checks
+	}
+	if certifyScorecardSpec.ScorecardVersion != nil {
+		arangoQueryBuilder.filter("scorecard", scorecardVersionStr, "==", "@"+scorecardVersionStr)
+		queryValues[scorecardVersionStr] = certifyScorecardSpec.ScorecardVersion
+	}
+	if certifyScorecardSpec.ScorecardCommit != nil {
+		arangoQueryBuilder.filter("scorecard", scorecardCommitStr, "==", "@"+scorecardCommitStr)
+		queryValues[scorecardCommitStr] = certifyScorecardSpec.ScorecardCommit
+	}
+	if certifyScorecardSpec.Origin != nil {
+		arangoQueryBuilder.filter("scorecard", origin, "==", "@"+origin)
+		queryValues["origin"] = certifyScorecardSpec.Origin
+	}
+	if certifyScorecardSpec.Collector != nil {
+		arangoQueryBuilder.filter("scorecard", collector, "==", "@"+collector)
+		queryValues["collector"] = certifyScorecardSpec.Collector
+	}
+}
+
+func getChecks(qualifiersSpec []*model.ScorecardCheckSpec) []string {
+	checksMap := map[string]int{}
+	var keys []string
+	for _, kv := range qualifiersSpec {
+		checksMap[kv.Check] = kv.Score
+		keys = append(keys, kv.Check)
+	}
+	sort.Strings(keys)
+	var checks []string
+	for _, k := range keys {
+		checks = append(checks, k, strconv.Itoa(checksMap[k]))
+	}
+	return checks
 }
 
 func getScorecardValues(src *model.SourceInputSpec, scorecard *model.ScorecardInputSpec) map[string]any {
@@ -136,7 +221,7 @@ func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.So
 	)
 	
 	LET edgeCollection = (
-	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id, label : "certifyScorecard" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id, label : "certifyScorecard" } INTO scorecardEdges OPTIONS { overwriteMode: "ignore" }
 	)
 	  
 	  RETURN {
@@ -209,7 +294,7 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 	)
 	
 	LET edgeCollection = (
-	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id, label : "certifyScorecard" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id, label : "certifyScorecard" } INTO scorecardEdges OPTIONS { overwriteMode: "ignore" }
 	)
 	  
 	  RETURN {
@@ -311,7 +396,7 @@ func getCertifyScorecard(ctx context.Context, cursor driver.Cursor) ([]*model.Ce
 	var certifyScorecardList []*model.CertifyScorecard
 	for _, createdValue := range createdValues {
 		src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
-			createdValue.SrcName.NameID, createdValue.SrcName.Name, &createdValue.SrcName.Commit, &createdValue.SrcName.Tag)
+			createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
 
 		checks, err := getCollectedScorecardChecks(createdValue.Checks)
 		if err != nil {

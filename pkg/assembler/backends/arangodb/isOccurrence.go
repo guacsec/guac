@@ -540,7 +540,7 @@ func getSrcIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 	var isOccurrenceList []*model.IsOccurrence
 	for _, createdValue := range createdValues {
 		src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
-			createdValue.SrcName.NameID, createdValue.SrcName.Name, &createdValue.SrcName.Commit, &createdValue.SrcName.Tag)
+			createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
 
 		isOccurrence := &model.IsOccurrence{
 			ID:        createdValue.IsOccurrenceID,

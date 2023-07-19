@@ -208,7 +208,7 @@ RETURN {
 				if s == nil {
 					return nil, fmt.Errorf("failed to parse result of SrcName, got nil when expected non-nil")
 				}
-				src := generateModelSource(s.TypeID, s.SrcType, s.NamespaceID, s.Namespace, s.NameID, s.Name, &s.Commit, &s.Tag)
+				src := generateModelSource(s.TypeID, s.SrcType, s.NamespaceID, s.Namespace, s.NameID, s.Name, s.Commit, s.Tag)
 
 				results = append(results, src)
 			}

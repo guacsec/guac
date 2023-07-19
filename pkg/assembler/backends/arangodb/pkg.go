@@ -285,8 +285,9 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 }
 
 func setPkgMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *arangoQueryBuilder {
+	var arangoQueryBuilder *arangoQueryBuilder
 	if pkgSpec != nil {
-		arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
+		arangoQueryBuilder = newForQuery(pkgRootsStr, "pRoot")
 		arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
 		queryValues["pkg"] = "pkg"
 		arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
@@ -317,7 +318,6 @@ func setPkgMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *aran
 			arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
 			queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
 		}
-
 		if !*pkgSpec.MatchOnlyEmptyQualifiers {
 			if len(pkgSpec.Qualifiers) > 0 {
 				arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
@@ -327,8 +327,15 @@ func setPkgMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *aran
 			arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
 			queryValues["objPkgQualifierList"] = []string{}
 		}
+
+	} else {
+		arangoQueryBuilder = newForQuery(pkgRootsStr, "pRoot")
+		arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
+		arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		arangoQueryBuilder.ForOutBound(pkgHasNameStr, "pName", "pNs")
+		arangoQueryBuilder.ForOutBound(pkgHasVersionStr, "pVersion", "pName")
 	}
-	return nil
+	return arangoQueryBuilder
 }
 
 func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
