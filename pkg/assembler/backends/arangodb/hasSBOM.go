@@ -122,14 +122,14 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		)
 		  
 		  LET hasSBOM = FIRST(
-			  UPSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
-				  INSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
+			  UPSERT {  packageID:firstPkg.version_id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
+				  INSERT {  packageID:firstPkg.version_id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN NEW
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("hasSBOMEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.versionDoc._id, _to: hasSBOM._id, label : "hasSBOM" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("hasSBOMEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id, label : "hasSBOM" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {
@@ -175,25 +175,14 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 func getPkgHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom, error) {
 	type collectedData struct {
-		PkgVersion struct {
-			TypeID        string        `json:"type_id"`
-			PkgType       string        `json:"type"`
-			NamespaceID   string        `json:"namespace_id"`
-			Namespace     string        `json:"namespace"`
-			NameID        string        `json:"name_id"`
-			Name          string        `json:"name"`
-			VersionID     string        `json:"version_id"`
-			Version       string        `json:"version"`
-			Subpath       string        `json:"subpath"`
-			QualifierList []interface{} `json:"qualifier_list"`
-		} `json:"pkgVersion"`
-		HasSBOMId        string `json:"hasSBOM_id"`
-		Uri              string `json:"uri"`
-		Algorithm        string `json:"algorithm"`
-		Digest           string `json:"digest"`
-		DownloadLocation string `json:"downloadLocation"`
-		Collector        string `json:"collector"`
-		Origin           string `json:"origin"`
+		PkgVersion       dbPkgVersion `json:"pkgVersion"`
+		HasSBOMId        string       `json:"hasSBOM_id"`
+		Uri              string       `json:"uri"`
+		Algorithm        string       `json:"algorithm"`
+		Digest           string       `json:"digest"`
+		DownloadLocation string       `json:"downloadLocation"`
+		Collector        string       `json:"collector"`
+		Origin           string       `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -213,11 +202,8 @@ func getPkgHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom,
 
 	var hasSBOMList []*model.HasSbom
 	for _, createdValue := range createdValues {
-		pkg, err := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
 			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-		}
 
 		hasSBOM := &model.HasSbom{
 			ID:               createdValue.HasSBOMId,

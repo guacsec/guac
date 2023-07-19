@@ -140,15 +140,15 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
     )
 		
 	LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-			INSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin }
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin }
 			UPDATE {} IN isDependencies
 			RETURN NEW
 		)
 		
 	LET edgeCollection = (FOR edgeData IN [
-		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: 'dependency'}, 
-		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: 'subject'}]
+		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.name_id, label: 'dependency'}, 
+		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.version_id, to: isDependency._id, label: 'subject'}]
 	  
 		INSERT { _key: CONCAT('isDependencyEdges', edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: 'ignore' }
 		)
@@ -240,15 +240,15 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
     )
 	  
 	  LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
-			  INSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+			  INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
 			  UPDATE {} IN isDependencies
 			  RETURN NEW
 	  )
 	  
 	  LET edgeCollection = (FOR edgeData IN [
-		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: "dependency"}, 
-		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: "subject"}]
+		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.name_id, label: "dependency"}, 
+		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.version_id, to: isDependency._id, label: "subject"}]
 	
 		INSERT { _key: CONCAT("isDependencyEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
 	  )
@@ -315,32 +315,14 @@ func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
 
 func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDependency, error) {
 	type collectedData struct {
-		PkgVersion struct {
-			TypeID        string        `json:"type_id"`
-			PkgType       string        `json:"type"`
-			NamespaceID   string        `json:"namespace_id"`
-			Namespace     string        `json:"namespace"`
-			NameID        string        `json:"name_id"`
-			Name          string        `json:"name"`
-			VersionID     string        `json:"version_id"`
-			Version       string        `json:"version"`
-			Subpath       string        `json:"subpath"`
-			QualifierList []interface{} `json:"qualifier_list"`
-		} `json:"pkgVersion"`
-		DepPkg struct {
-			TypeID      string `json:"type_id"`
-			PkgType     string `json:"type"`
-			NamespaceID string `json:"namespace_id"`
-			Namespace   string `json:"namespace"`
-			NameID      string `json:"name_id"`
-			Name        string `json:"name"`
-		} `json:"depPkg"`
-		IsDependencyID string `json:"isDependency_id"`
-		VersionRange   string `json:"versionRange"`
-		DependencyType string `json:"dependencyType"`
-		Justification  string `json:"justification"`
-		Collector      string `json:"collector"`
-		Origin         string `json:"origin"`
+		PkgVersion     dbPkgVersion `json:"pkgVersion"`
+		DepPkg         dbPkgName    `json:"depPkg"`
+		IsDependencyID string       `json:"isDependency_id"`
+		VersionRange   string       `json:"versionRange"`
+		DependencyType string       `json:"dependencyType"`
+		Justification  string       `json:"justification"`
+		Collector      string       `json:"collector"`
+		Origin         string       `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -360,16 +342,12 @@ func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDepe
 
 	var isDependencyList []*model.IsDependency
 	for _, createdValue := range createdValues {
-		pkg, err := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
 			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-		}
-		depPkg, err := generateModelPackage(createdValue.DepPkg.TypeID, createdValue.DepPkg.PkgType, createdValue.DepPkg.NamespaceID, createdValue.DepPkg.Namespace, createdValue.DepPkg.NameID,
+
+		depPkg := generateModelPackage(createdValue.DepPkg.TypeID, createdValue.DepPkg.PkgType, createdValue.DepPkg.NamespaceID, createdValue.DepPkg.Namespace, createdValue.DepPkg.NameID,
 			createdValue.DepPkg.Name, nil, nil, nil, nil)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get dependent model.package with err: %w", err)
-		}
+
 		dependencyTypeEnum, err := convertDependencyTypeToEnum(createdValue.DependencyType)
 		if err != nil {
 			return nil, fmt.Errorf("convertDependencyTypeToEnum failed with error: %w", err)

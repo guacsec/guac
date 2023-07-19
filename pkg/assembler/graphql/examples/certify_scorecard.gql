@@ -62,7 +62,7 @@ mutation Scorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
   ingestSource(source: $source) {
     ...allSrcTree
   }
-  certifyScorecard(source: $source, scorecard: $scorecard) {
+  ingestScorecard(source: $source, scorecard: $scorecard) {
     ...allCertifyScorecardTree
   }
 }

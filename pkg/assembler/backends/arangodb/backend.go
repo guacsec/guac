@@ -110,6 +110,11 @@ const (
 
 	certifyVulnEdgesStr string = "certifyVulnEdges"
 	certifyVulnsStr     string = "certifyVulns"
+
+	// certifyScorecard collection
+
+	scorecardEdgesStr string = "scorecardEdges"
+	scorecardStr      string = "scorecards"
 )
 
 type ArangoConfig struct {
@@ -325,10 +330,19 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// repeat this for the collections where an edge is going into
 		certifyVulnEdges.To = []string{certifyVulnsStr, cvesStr, ghsasStr, osvsStr}
 
+		var certifyScorecardEdges driver.EdgeDefinition
+		certifyScorecardEdges.Collection = scorecardEdgesStr
+		// define a set of collections where an edge is going out...
+		certifyScorecardEdges.From = []string{srcNamesStr}
+
+		// repeat this for the collections where an edge is going into
+		certifyScorecardEdges.To = []string{scorecardStr}
+
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
 		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName,
-			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges, hasSLSAEdges, certifyVulnEdges}
+			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges,
+			hasSLSAEdges, certifyVulnEdges, certifyScorecardEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -709,7 +723,7 @@ func getPreloads(ctx context.Context) []string {
 }
 
 func getNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string, visited map[string]bool) []string {
-	preloads := []string{}
+	var preloads []string
 	for _, column := range fields {
 		prefixColumn := getPreloadString(prefix, column.Name)
 		if visited[prefixColumn] {
@@ -756,9 +770,6 @@ func (c *arangoClient) IsVulnerability(ctx context.Context, isVulnerabilitySpec 
 func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
 }
-func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	panic(fmt.Errorf("not implemented: Scorecards - Scorecards"))
-}
 
 // Mutations for software trees (read-write queries)
 
@@ -767,9 +778,6 @@ func (c *arangoClient) IngestMaterials(ctx context.Context, materials []*model.A
 }
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
-func (c *arangoClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
-	return &model.CertifyScorecard{}, nil
-}
 func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
 }

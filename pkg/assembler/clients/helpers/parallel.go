@@ -131,7 +131,7 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 					break
 				}
 				v := v
-				verbs.Go(func() error { return ingestCertifyScorecards(errGroupVerbCtx, gqlclient, v) })
+				verbs.Go(func() error { return ingestCertifyScorecard(errGroupVerbCtx, gqlclient, v) })
 			}
 
 			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))

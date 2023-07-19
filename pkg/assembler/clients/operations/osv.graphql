@@ -23,6 +23,14 @@ mutation IngestOSV($osv: OSVInputSpec!) {
   }
 }
 
+# Bulk Ingest OSV
+
+mutation IngestOSVs($osvs: [OSVInputSpec!]!) {
+  ingestOSVs(osvs: $osvs) {
+    ...AllOSVTree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC OSVs
 
 query OSVs($filter: OSVSpec) {

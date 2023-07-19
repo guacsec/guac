@@ -25,6 +25,29 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+type dbSrcName struct {
+	TypeID      string `json:"type_id"`
+	SrcType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
+	NameID      string `json:"name_id"`
+	Name        string `json:"name"`
+	Commit      string `json:"commit"`
+	Tag         string `json:"tag"`
+}
+
+type dbSrcNamespace struct {
+	TypeID      string `json:"type_id"`
+	SrcType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
+}
+
+type dbSrcType struct {
+	TypeID  string `json:"type_id"`
+	SrcType string `json:"type"`
+}
+
 type SrcIds struct {
 	TypeId      string
 	NamespaceId string
@@ -222,6 +245,44 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 	}
 }
 
+func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *arangoQueryBuilder {
+	var arangoQueryBuilder *arangoQueryBuilder
+	if srcSpec != nil {
+		arangoQueryBuilder = newForQuery(srcRootsStr, "sRoot")
+		arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
+		queryValues["src"] = "src"
+		arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
+		if srcSpec.Type != nil {
+			arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
+			queryValues["srcType"] = *srcSpec.Type
+		}
+		arangoQueryBuilder.ForOutBound(srcHasNamespaceStr, "sNs", "sType")
+		if srcSpec.Namespace != nil {
+			arangoQueryBuilder.filter("sNs", "namespace", "==", "@namespace")
+			queryValues["namespace"] = *srcSpec.Namespace
+		}
+		arangoQueryBuilder.ForOutBound(srcHasNameStr, "sName", "sNs")
+		if srcSpec.Name != nil {
+			arangoQueryBuilder.filter("sName", "name", "==", "@name")
+			queryValues["name"] = *srcSpec.Name
+		}
+		if srcSpec.Commit != nil {
+			arangoQueryBuilder.filter("sName", "commit", "==", "@commit")
+			queryValues["commit"] = *srcSpec.Commit
+		}
+		if srcSpec.Tag != nil {
+			arangoQueryBuilder.filter("sName", "tag", "==", "@tag")
+			queryValues["tag"] = *srcSpec.Tag
+		}
+	} else {
+		arangoQueryBuilder = newForQuery(srcRootsStr, "sRoot")
+		arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
+		arangoQueryBuilder.ForOutBound(srcHasNamespaceStr, "sNs", "sType")
+		arangoQueryBuilder.ForOutBound(srcHasNameStr, "sName", "sNs")
+	}
+	return arangoQueryBuilder
+}
+
 func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
@@ -246,32 +307,7 @@ func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery(srcRootsStr, "sRoot")
-	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
-	values["src"] = "src"
-	arangoQueryBuilder.ForOutBound(srcHasTypeStr, "sType", "sRoot")
-	if sourceSpec.Type != nil {
-		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
-		values["srcType"] = *sourceSpec.Type
-	}
-	arangoQueryBuilder.ForOutBound(srcHasNamespaceStr, "sNs", "sType")
-	if sourceSpec.Namespace != nil {
-		arangoQueryBuilder.filter("sNs", "namespace", "==", "@namespace")
-		values["namespace"] = *sourceSpec.Namespace
-	}
-	arangoQueryBuilder.ForOutBound(srcHasNameStr, "sName", "sNs")
-	if sourceSpec.Name != nil {
-		arangoQueryBuilder.filter("sName", "name", "==", "@name")
-		values["name"] = *sourceSpec.Name
-	}
-	if sourceSpec.Commit != nil {
-		arangoQueryBuilder.filter("sName", "commit", "==", "@commit")
-		values["commit"] = *sourceSpec.Commit
-	}
-	if sourceSpec.Tag != nil {
-		arangoQueryBuilder.filter("sName", "tag", "==", "@tag")
-		values["tag"] = *sourceSpec.Tag
-	}
+	arangoQueryBuilder := setSrcMatchValues(sourceSpec, values)
 
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
@@ -322,14 +358,9 @@ func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.Source
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID  string `json:"type_id"`
-		SrcType string `json:"type"`
-	}
-
 	var sources []*model.Source
 	for {
-		var doc collectedData
+		var doc dbSrcType
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -382,16 +413,9 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID      string `json:"type_id"`
-		SrcType     string `json:"type"`
-		NamespaceID string `json:"namespace_id"`
-		Namespace   string `json:"namespace"`
-	}
-
 	srcTypes := map[string][]*model.SourceNamespace{}
 	for {
-		var doc collectedData
+		var doc dbSrcNamespace
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -411,7 +435,7 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 			srcTypes[typeString] = append(srcTypes[typeString], srcNamespace)
 		}
 	}
-	sources := []*model.Source{}
+	var sources []*model.Source
 	for pkgType, namespaces := range srcTypes {
 		typeValues := strings.Split(pkgType, ",")
 		collectedSource := &model.Source{
@@ -426,19 +450,8 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 }
 
 func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, error) {
-	type ingestedSource struct {
-		TypeID      string `json:"type_id"`
-		SrcType     string `json:"type"`
-		NamespaceID string `json:"namespace_id"`
-		Namespace   string `json:"namespace"`
-		NameID      string `json:"name_id"`
-		Name        string `json:"name"`
-		Commit      string `json:"commit"`
-		Tag         string `json:"tag"`
-	}
-
 	srcTypes := map[string]map[string][]*model.SourceName{}
-	var doc ingestedSource
+	var doc dbSrcName
 	for {
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
@@ -469,9 +482,9 @@ func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, err
 			}
 		}
 	}
-	sources := []*model.Source{}
+	var sources []*model.Source
 	for srcType, namespaces := range srcTypes {
-		sourceNamespaces := []*model.SourceNamespace{}
+		var sourceNamespaces []*model.SourceNamespace
 		for namespace, sourceNames := range namespaces {
 			namespaceValues := strings.Split(namespace, ",")
 			srcNamespace := &model.SourceNamespace{
@@ -492,12 +505,12 @@ func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, err
 	return sources, nil
 }
 
-func generateModelSource(srcTypeID, srcType, namespaceID, namespaceStr, nameID, nameStr string, commitValue, tagValue *string) *model.Source {
+func generateModelSource(srcTypeID, srcType, namespaceID, namespaceStr, nameID, nameStr string, commitValue, tagValue string) *model.Source {
 	name := &model.SourceName{
 		ID:     nameID,
 		Name:   nameStr,
-		Tag:    tagValue,
-		Commit: commitValue,
+		Tag:    &tagValue,
+		Commit: &commitValue,
 	}
 
 	namespace := &model.SourceNamespace{

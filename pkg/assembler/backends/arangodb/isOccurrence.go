@@ -228,15 +228,15 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		  LET isOccurrence = FIRST(
-			  UPSERT { sourceID:firstSrc.nameDoc._id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				  INSERT { sourceID:firstSrc.nameDoc._id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			  UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN isOccurrences
 				  RETURN NEW
 		  )
 		  
 		  LET edgeCollection = (FOR edgeData IN [
 			{fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
-			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.nameDoc._id, to: isOccurrence._id, label: "subject"}]
+			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.name_id, to: isOccurrence._id, label: "subject"}]
 		
 		  INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
 		  )
@@ -393,15 +393,15 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		  LET isOccurrence = FIRST(
-			  UPSERT { sourceID:firstSrc.nameDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
-				  INSERT { sourceID:firstSrc.nameDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+			  UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+				  INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
 				  UPDATE {} IN isOccurrences
 				  RETURN NEW
 		  )
 		  
 		  LET edgeCollection = (FOR edgeData IN [
 			{fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
-			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.nameDoc._id, to: isOccurrence._id, label: "subject"}]
+			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.name_id, to: isOccurrence._id, label: "subject"}]
 		
 		  INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
 		  )
@@ -452,18 +452,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 
 func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
 	type collectedData struct {
-		PkgVersion struct {
-			TypeID        string        `json:"type_id"`
-			PkgType       string        `json:"type"`
-			NamespaceID   string        `json:"namespace_id"`
-			Namespace     string        `json:"namespace"`
-			NameID        string        `json:"name_id"`
-			Name          string        `json:"name"`
-			VersionID     string        `json:"version_id"`
-			Version       string        `json:"version"`
-			Subpath       string        `json:"subpath"`
-			QualifierList []interface{} `json:"qualifier_list"`
-		} `json:"pkgVersion"`
+		PkgVersion     dbPkgVersion   `json:"pkgVersion"`
 		Artifact       model.Artifact `json:"artifact"`
 		IsOccurrenceID string         `json:"isOccurrence_id"`
 		Justification  string         `json:"justification"`
@@ -488,11 +477,8 @@ func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 
 	var isOccurrenceList []*model.IsOccurrence
 	for _, createdValue := range createdValues {
-		pkg, err := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
 			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-		}
 
 		isOccurrence := &model.IsOccurrence{
 			ID:        createdValue.IsOccurrenceID,
@@ -508,16 +494,7 @@ func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 
 func getSrcIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
 	type collectedData struct {
-		SrcName struct {
-			TypeID      string `json:"type_id"`
-			SrcType     string `json:"type"`
-			NamespaceID string `json:"namespace_id"`
-			Namespace   string `json:"namespace"`
-			NameID      string `json:"name_id"`
-			Name        string `json:"name"`
-			Commit      string `json:"commit"`
-			Tag         string `json:"tag"`
-		} `json:"srcName"`
+		SrcName        dbSrcName      `json:"srcName"`
 		Artifact       model.Artifact `json:"artifact"`
 		IsOccurrenceID string         `json:"isOccurrence_id"`
 		Justification  string         `json:"justification"`
@@ -543,7 +520,7 @@ func getSrcIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 	var isOccurrenceList []*model.IsOccurrence
 	for _, createdValue := range createdValues {
 		src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
-			createdValue.SrcName.NameID, createdValue.SrcName.Name, &createdValue.SrcName.Commit, &createdValue.SrcName.Tag)
+			createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
 
 		isOccurrence := &model.IsOccurrence{
 			ID:        createdValue.IsOccurrenceID,

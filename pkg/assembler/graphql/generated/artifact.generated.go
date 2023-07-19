@@ -25,7 +25,8 @@ type MutationResolver interface {
 	IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error)
 	IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error)
 	IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error)
-	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
+	IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
+	IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error)
 	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 	IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error)
@@ -85,30 +86,6 @@ type QueryResolver interface {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) field_Mutation_certifyScorecard_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.SourceInputSpec
-	if tmp, ok := rawArgs["source"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-		arg0, err = ec.unmarshalNSourceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["source"] = arg0
-	var arg1 model.ScorecardInputSpec
-	if tmp, ok := rawArgs["scorecard"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecard"))
-		arg1, err = ec.unmarshalNScorecardInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["scorecard"] = arg1
-	return args, nil
-}
 
 func (ec *executionContext) field_Mutation_ingestArtifact_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -773,6 +750,54 @@ func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, 
 		}
 	}
 	args["slsa"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestScorecard_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SourceInputSpec
+	if tmp, ok := rawArgs["source"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
+		arg0, err = ec.unmarshalNSourceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["source"] = arg0
+	var arg1 model.ScorecardInputSpec
+	if tmp, ok := rawArgs["scorecard"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecard"))
+		arg1, err = ec.unmarshalNScorecardInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["scorecard"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestScorecards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*model.SourceInputSpec
+	if tmp, ok := rawArgs["sources"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
+		arg0, err = ec.unmarshalNSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sources"] = arg0
+	var arg1 []*model.ScorecardInputSpec
+	if tmp, ok := rawArgs["scorecards"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecards"))
+		arg1, err = ec.unmarshalNScorecardInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["scorecards"] = arg1
 	return args, nil
 }
 
@@ -1850,8 +1875,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestCertifyGood(ctx context.
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_certifyScorecard(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_certifyScorecard(ctx, field)
+func (ec *executionContext) _Mutation_ingestScorecard(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestScorecard(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1864,7 +1889,7 @@ func (ec *executionContext) _Mutation_certifyScorecard(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CertifyScorecard(rctx, fc.Args["source"].(model.SourceInputSpec), fc.Args["scorecard"].(model.ScorecardInputSpec))
+		return ec.resolvers.Mutation().IngestScorecard(rctx, fc.Args["source"].(model.SourceInputSpec), fc.Args["scorecard"].(model.ScorecardInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1881,7 +1906,7 @@ func (ec *executionContext) _Mutation_certifyScorecard(ctx context.Context, fiel
 	return ec.marshalNCertifyScorecard2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecard(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_certifyScorecard(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_ingestScorecard(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -1906,7 +1931,70 @@ func (ec *executionContext) fieldContext_Mutation_certifyScorecard(ctx context.C
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_certifyScorecard_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_ingestScorecard_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestScorecards(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestScorecards(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestScorecards(rctx, fc.Args["sources"].([]*model.SourceInputSpec), fc.Args["scorecards"].([]*model.ScorecardInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CertifyScorecard)
+	fc.Result = res
+	return ec.marshalNCertifyScorecard2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestScorecards(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyScorecard_id(ctx, field)
+			case "source":
+				return ec.fieldContext_CertifyScorecard_source(ctx, field)
+			case "scorecard":
+				return ec.fieldContext_CertifyScorecard_scorecard(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyScorecard", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestScorecards_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5663,9 +5751,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "certifyScorecard":
+		case "ingestScorecard":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_certifyScorecard(ctx, field)
+				return ec._Mutation_ingestScorecard(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestScorecards":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestScorecards(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
