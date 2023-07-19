@@ -800,18 +800,18 @@ var (
 
 func ingestIsDependency(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
 	for _, ingest := range graph.IsDependency {
-		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+		_, err := model.IngestPackage(ctx, client, *ingest.Pkg)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting package: %s\n", err)
 		}
 
-		_, err = model.IngestPackage(context.Background(), client, *ingest.DepPkg)
+		_, err = model.IngestPackage(ctx, client, *ingest.DepPkg)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting dependent package: %s\n", err)
 		}
-		_, err = model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
+		_, err = model.IsDependency(ctx, client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting isDependency: %s\n", err)
@@ -822,19 +822,19 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, graph assemb
 
 func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
 	for _, ingest := range graph.HasSlsa {
-		_, err := model.IngestBuilder(context.Background(), client, *ingest.Builder)
+		_, err := model.IngestBuilder(ctx, client, *ingest.Builder)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting Builder for HasSlsa: %v\n", err)
 		}
 
-		_, err = model.IngestMaterials(context.Background(), client, ingest.Materials)
+		_, err = model.IngestMaterials(ctx, client, ingest.Materials)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting Material for HasSlsa: %v\n", err)
 		}
 
-		_, err = model.SLSAForArtifact(context.Background(), client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
+		_, err = model.SLSAForArtifact(ctx, client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting HasSlsa: %v\n", err)
@@ -845,19 +845,19 @@ func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.I
 
 func ingestHasSourceAt(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
 	for _, ingest := range graph.HasSourceAt {
-		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+		_, err := model.IngestPackage(ctx, client, *ingest.Pkg)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting pkg HasSourceAt: %v\n", err)
 		}
 
-		_, err = model.IngestSource(context.Background(), client, *ingest.Src)
+		_, err = model.IngestSource(ctx, client, *ingest.Src)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting src HasSourceAt: %v\n", err)
 		}
 
-		_, err = model.HasSourceAt(context.Background(), client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.Src, *ingest.HasSourceAt)
+		_, err = model.HasSourceAt(ctx, client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.Src, *ingest.HasSourceAt)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting HasSourceAt: %v\n", err)
@@ -871,9 +871,9 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, graph assemb
 		var err error
 
 		if ingest.Src != nil {
-			_, err = model.IngestSource(context.Background(), client, *ingest.Src)
+			_, err = model.IngestSource(ctx, client, *ingest.Src)
 		} else {
-			_, err = model.IngestPackage(context.Background(), client, *ingest.Pkg)
+			_, err = model.IngestPackage(ctx, client, *ingest.Pkg)
 
 		}
 
@@ -881,16 +881,16 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, graph assemb
 			return fmt.Errorf("error in ingesting pkg/src IsOccurrence: %v\n", err)
 		}
 
-		_, err = model.IngestArtifact(context.Background(), client, *ingest.Artifact)
+		_, err = model.IngestArtifact(ctx, client, *ingest.Artifact)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting artifact for IsOccurrence: %v\n", err)
 		}
 
 		if ingest.Src != nil {
-			_, err = model.IsOccurrenceSrc(context.Background(), client, *ingest.Src, *ingest.Artifact, *ingest.IsOccurrence)
+			_, err = model.IsOccurrenceSrc(ctx, client, *ingest.Src, *ingest.Artifact, *ingest.IsOccurrence)
 		} else {
-			_, err = model.IsOccurrencePkg(context.Background(), client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
+			_, err = model.IsOccurrencePkg(ctx, client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
 		}
 
 		if err != nil {
@@ -902,13 +902,13 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, graph assemb
 
 func ingestCertifyGood(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
 	for _, ingest := range graph.CertifyGood {
-		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+		_, err := model.IngestPackage(ctx, client, *ingest.Pkg)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting Package for CertifyGood: %v\n", err)
 		}
 
-		_, err = model.CertifyGoodPkg(context.Background(), client, *ingest.Pkg, &ingest.PkgMatchFlag, *ingest.CertifyGood)
+		_, err = model.CertifyGoodPkg(ctx, client, *ingest.Pkg, &ingest.PkgMatchFlag, *ingest.CertifyGood)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting CertifyGood: %v\n", err)
@@ -919,19 +919,19 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, graph assembl
 
 func ingestPkgEqual(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
 	for _, ingest := range graph.PkgEqual {
-		_, err := model.IngestPackage(context.Background(), client, *ingest.Pkg)
+		_, err := model.IngestPackage(ctx, client, *ingest.Pkg)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting Pkg for PkgEqual: %v\n", err)
 		}
 
-		_, err = model.IngestPackage(context.Background(), client, *ingest.EqualPkg)
+		_, err = model.IngestPackage(ctx, client, *ingest.EqualPkg)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting EqualPkg for PkgEqual: %v\n", err)
 		}
 
-		_, err = model.PkgEqual(context.Background(), client, *ingest.Pkg, *ingest.EqualPkg, *ingest.PkgEqual)
+		_, err = model.PkgEqual(ctx, client, *ingest.Pkg, *ingest.EqualPkg, *ingest.PkgEqual)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting PkgEqual: %v\n", err)
@@ -942,19 +942,19 @@ func ingestPkgEqual(ctx context.Context, client graphql.Client, graph assembler.
 
 func ingestHashEqual(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
 	for _, ingest := range graph.HashEqual {
-		_, err := model.IngestArtifact(context.Background(), client, *ingest.Artifact)
+		_, err := model.IngestArtifact(ctx, client, *ingest.Artifact)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting Artifact for HashEqual: %v\n", err)
 		}
 
-		_, err = model.IngestArtifact(context.Background(), client, *ingest.EqualArtifact)
+		_, err = model.IngestArtifact(ctx, client, *ingest.EqualArtifact)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting EqualArtifact for HashEqual: %v\n", err)
 		}
 
-		_, err = model.HashEqual(context.Background(), client, *ingest.Artifact, *ingest.EqualArtifact, *ingest.HashEqual)
+		_, err = model.HashEqual(ctx, client, *ingest.Artifact, *ingest.EqualArtifact, *ingest.HashEqual)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting HashEqual: %v\n", err)
