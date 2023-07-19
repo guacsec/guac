@@ -31,7 +31,7 @@ type assembler struct{} //nolint: unused
 // client library.
 type IngestPredicates struct {
 	CertifyScorecard []CertifyScorecardIngest `json:"certifyScorecard,omitempty"`
-	IsDependency     []IsDependencyIngest     `json:"isDependency,omitempty"`
+	IsDependency     []IsDependencyIngest     `json:"isDepedency,omitempty"`
 	IsOccurrence     []IsOccurrenceIngest     `json:"isOccurrence,omitempty"`
 	HasSlsa          []HasSlsaIngest          `json:"hasSlsa,omitempty"`
 	CertifyVuln      []CertifyVulnIngest      `json:"certifyVuln,omitempty"`
