@@ -452,18 +452,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 
 func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
 	type collectedData struct {
-		PkgVersion struct {
-			TypeID        string   `json:"type_id"`
-			PkgType       string   `json:"type"`
-			NamespaceID   string   `json:"namespace_id"`
-			Namespace     string   `json:"namespace"`
-			NameID        string   `json:"name_id"`
-			Name          string   `json:"name"`
-			VersionID     string   `json:"version_id"`
-			Version       string   `json:"version"`
-			Subpath       string   `json:"subpath"`
-			QualifierList []string `json:"qualifier_list"`
-		} `json:"pkgVersion"`
+		PkgVersion     dbPkgVersion   `json:"pkgVersion"`
 		Artifact       model.Artifact `json:"artifact"`
 		IsOccurrenceID string         `json:"isOccurrence_id"`
 		Justification  string         `json:"justification"`
@@ -505,16 +494,7 @@ func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 
 func getSrcIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
 	type collectedData struct {
-		SrcName struct {
-			TypeID      string `json:"type_id"`
-			SrcType     string `json:"type"`
-			NamespaceID string `json:"namespace_id"`
-			Namespace   string `json:"namespace"`
-			NameID      string `json:"name_id"`
-			Name        string `json:"name"`
-			Commit      string `json:"commit"`
-			Tag         string `json:"tag"`
-		} `json:"srcName"`
+		SrcName        dbSrcName      `json:"srcName"`
 		Artifact       model.Artifact `json:"artifact"`
 		IsOccurrenceID string         `json:"isOccurrence_id"`
 		Justification  string         `json:"justification"`

@@ -175,25 +175,14 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 func getPkgHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom, error) {
 	type collectedData struct {
-		PkgVersion struct {
-			TypeID        string   `json:"type_id"`
-			PkgType       string   `json:"type"`
-			NamespaceID   string   `json:"namespace_id"`
-			Namespace     string   `json:"namespace"`
-			NameID        string   `json:"name_id"`
-			Name          string   `json:"name"`
-			VersionID     string   `json:"version_id"`
-			Version       string   `json:"version"`
-			Subpath       string   `json:"subpath"`
-			QualifierList []string `json:"qualifier_list"`
-		} `json:"pkgVersion"`
-		HasSBOMId        string `json:"hasSBOM_id"`
-		Uri              string `json:"uri"`
-		Algorithm        string `json:"algorithm"`
-		Digest           string `json:"digest"`
-		DownloadLocation string `json:"downloadLocation"`
-		Collector        string `json:"collector"`
-		Origin           string `json:"origin"`
+		PkgVersion       dbPkgVersion `json:"pkgVersion"`
+		HasSBOMId        string       `json:"hasSBOM_id"`
+		Uri              string       `json:"uri"`
+		Algorithm        string       `json:"algorithm"`
+		Digest           string       `json:"digest"`
+		DownloadLocation string       `json:"downloadLocation"`
+		Collector        string       `json:"collector"`
+		Origin           string       `json:"origin"`
 	}
 
 	var createdValues []collectedData

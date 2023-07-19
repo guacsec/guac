@@ -127,27 +127,9 @@ RETURN {
 	type parsedDoc struct {
 		NodeType string `json:"nodeType"`
 
-		PkgName *struct {
-			TypeID      string `json:"type_id"`
-			PkgType     string `json:"type"`
-			NamespaceID string `json:"namespace_id"`
-			Namespace   string `json:"namespace"`
-			NameID      string `json:"name_id"`
-			Name        string `json:"name"`
-		} `json:"pkgName,omitempty"`
-		PkgVersion *struct {
-			TypeID        string   `json:"type_id"`
-			PkgType       string   `json:"type"`
-			NamespaceID   string   `json:"namespace_id"`
-			Namespace     string   `json:"namespace"`
-			NameID        string   `json:"name_id"`
-			Name          string   `json:"name"`
-			VersionID     string   `json:"version_id"`
-			Version       string   `json:"version"`
-			Subpath       string   `json:"subpath"`
-			QualifierList []string `json:"qualifier_list"`
-		} `json:"pkgVersion,omitempty"`
-		SrcName *struct {
+		PkgName    *dbPkgName    `json:"pkgName,omitempty"`
+		PkgVersion *dbPkgVersion `json:"pkgVersion,omitempty"`
+		SrcName    *struct {
 			TypeID      string `json:"type_id"`
 			SrcType     string `json:"type"`
 			NamespaceID string `json:"namespace_id"`

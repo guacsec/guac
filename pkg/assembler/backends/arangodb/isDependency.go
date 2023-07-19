@@ -315,32 +315,14 @@ func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
 
 func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDependency, error) {
 	type collectedData struct {
-		PkgVersion struct {
-			TypeID        string   `json:"type_id"`
-			PkgType       string   `json:"type"`
-			NamespaceID   string   `json:"namespace_id"`
-			Namespace     string   `json:"namespace"`
-			NameID        string   `json:"name_id"`
-			Name          string   `json:"name"`
-			VersionID     string   `json:"version_id"`
-			Version       string   `json:"version"`
-			Subpath       string   `json:"subpath"`
-			QualifierList []string `json:"qualifier_list"`
-		} `json:"pkgVersion"`
-		DepPkg struct {
-			TypeID      string `json:"type_id"`
-			PkgType     string `json:"type"`
-			NamespaceID string `json:"namespace_id"`
-			Namespace   string `json:"namespace"`
-			NameID      string `json:"name_id"`
-			Name        string `json:"name"`
-		} `json:"depPkg"`
-		IsDependencyID string `json:"isDependency_id"`
-		VersionRange   string `json:"versionRange"`
-		DependencyType string `json:"dependencyType"`
-		Justification  string `json:"justification"`
-		Collector      string `json:"collector"`
-		Origin         string `json:"origin"`
+		PkgVersion     dbPkgVersion `json:"pkgVersion"`
+		DepPkg         dbPkgName    `json:"depPkg"`
+		IsDependencyID string       `json:"isDependency_id"`
+		VersionRange   string       `json:"versionRange"`
+		DependencyType string       `json:"dependencyType"`
+		Justification  string       `json:"justification"`
+		Collector      string       `json:"collector"`
+		Origin         string       `json:"origin"`
 	}
 
 	var createdValues []collectedData

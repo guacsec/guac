@@ -25,6 +25,29 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+type dbSrcName struct {
+	TypeID      string `json:"type_id"`
+	SrcType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
+	NameID      string `json:"name_id"`
+	Name        string `json:"name"`
+	Commit      string `json:"commit"`
+	Tag         string `json:"tag"`
+}
+
+type dbSrcNamespace struct {
+	TypeID      string `json:"type_id"`
+	SrcType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
+}
+
+type dbSrcType struct {
+	TypeID  string `json:"type_id"`
+	SrcType string `json:"type"`
+}
+
 type SrcIds struct {
 	TypeId      string
 	NamespaceId string
@@ -335,14 +358,9 @@ func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.Source
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID  string `json:"type_id"`
-		SrcType string `json:"type"`
-	}
-
 	var sources []*model.Source
 	for {
-		var doc collectedData
+		var doc dbSrcType
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -395,16 +413,9 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID      string `json:"type_id"`
-		SrcType     string `json:"type"`
-		NamespaceID string `json:"namespace_id"`
-		Namespace   string `json:"namespace"`
-	}
-
 	srcTypes := map[string][]*model.SourceNamespace{}
 	for {
-		var doc collectedData
+		var doc dbSrcNamespace
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -439,19 +450,8 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 }
 
 func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, error) {
-	type ingestedSource struct {
-		TypeID      string `json:"type_id"`
-		SrcType     string `json:"type"`
-		NamespaceID string `json:"namespace_id"`
-		Namespace   string `json:"namespace"`
-		NameID      string `json:"name_id"`
-		Name        string `json:"name"`
-		Commit      string `json:"commit"`
-		Tag         string `json:"tag"`
-	}
-
 	srcTypes := map[string]map[string][]*model.SourceName{}
-	var doc ingestedSource
+	var doc dbSrcName
 	for {
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {

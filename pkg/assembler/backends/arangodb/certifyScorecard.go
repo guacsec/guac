@@ -358,16 +358,7 @@ func getCollectedScorecardChecks(checksList []string) ([]*model.ScorecardCheck, 
 
 func getCertifyScorecard(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyScorecard, error) {
 	type collectedData struct {
-		SrcName struct {
-			TypeID      string `json:"type_id"`
-			SrcType     string `json:"type"`
-			NamespaceID string `json:"namespace_id"`
-			Namespace   string `json:"namespace"`
-			NameID      string `json:"name_id"`
-			Name        string `json:"name"`
-			Commit      string `json:"commit"`
-			Tag         string `json:"tag"`
-		} `json:"srcName"`
+		SrcName          dbSrcName `json:"srcName"`
 		ScorecardID      string    `json:"scorecard_id"`
 		Checks           []string  `json:"checks"`
 		AggregateScore   float64   `json:"aggregateScore"`

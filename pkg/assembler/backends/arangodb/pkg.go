@@ -26,6 +26,40 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+type dbPkgVersion struct {
+	TypeID        string   `json:"type_id"`
+	PkgType       string   `json:"type"`
+	NamespaceID   string   `json:"namespace_id"`
+	Namespace     string   `json:"namespace"`
+	NameID        string   `json:"name_id"`
+	Name          string   `json:"name"`
+	VersionID     string   `json:"version_id"`
+	Version       string   `json:"version"`
+	Subpath       string   `json:"subpath"`
+	QualifierList []string `json:"qualifier_list"`
+}
+
+type dbPkgName struct {
+	TypeID      string `json:"type_id"`
+	PkgType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
+	NameID      string `json:"name_id"`
+	Name        string `json:"name"`
+}
+
+type dbPkgNamespace struct {
+	TypeID      string `json:"type_id"`
+	PkgType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
+}
+
+type dbPkgType struct {
+	TypeID  string `json:"type_id"`
+	PkgType string `json:"type"`
+}
+
 type PkgIds struct {
 	TypeId      string
 	NamespaceId string
@@ -421,14 +455,9 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID  string `json:"type_id"`
-		PkgType string `json:"type"`
-	}
-
 	var packages []*model.Package
 	for {
-		var doc collectedData
+		var doc dbPkgType
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -481,16 +510,9 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID      string `json:"type_id"`
-		PkgType     string `json:"type"`
-		NamespaceID string `json:"namespace_id"`
-		Namespace   string `json:"namespace"`
-	}
-
 	pkgTypes := map[string][]*model.PackageNamespace{}
 	for {
-		var doc collectedData
+		var doc dbPkgNamespace
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -563,18 +585,9 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID      string `json:"type_id"`
-		PkgType     string `json:"type"`
-		NamespaceID string `json:"namespace_id"`
-		Namespace   string `json:"namespace"`
-		NameID      string `json:"name_id"`
-		Name        string `json:"name"`
-	}
-
 	pkgTypes := map[string]map[string][]*model.PackageName{}
 	for {
-		var doc collectedData
+		var doc dbPkgName
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -627,21 +640,9 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 }
 
 func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, error) {
-	type collectedData struct {
-		TypeID        string   `json:"type_id"`
-		PkgType       string   `json:"type"`
-		NamespaceID   string   `json:"namespace_id"`
-		Namespace     string   `json:"namespace"`
-		NameID        string   `json:"name_id"`
-		Name          string   `json:"name"`
-		VersionID     string   `json:"version_id"`
-		Version       string   `json:"version"`
-		Subpath       string   `json:"subpath"`
-		QualifierList []string `json:"qualifier_list"`
-	}
 
 	pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
-	var doc collectedData
+	var doc dbPkgVersion
 	for {
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
