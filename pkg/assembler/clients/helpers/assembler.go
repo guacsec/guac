@@ -94,7 +94,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			for _, v := range p.CertifyScorecard {
-				if err := ingestCertifyScorecards(ctx, gqlclient, v); err != nil {
+				if err := ingestCertifyScorecard(ctx, gqlclient, v); err != nil {
 					return err
 				}
 			}
@@ -227,7 +227,7 @@ func ingestGHSA(ctx context.Context, client graphql.Client, v *model.GHSAInputSp
 	return err
 }
 
-func ingestCertifyScorecards(ctx context.Context, client graphql.Client, v assembler.CertifyScorecardIngest) error {
+func ingestCertifyScorecard(ctx context.Context, client graphql.Client, v assembler.CertifyScorecardIngest) error {
 	_, err := model.CertifyScorecard(ctx, client, *v.Source, *v.Scorecard)
 	return err
 }

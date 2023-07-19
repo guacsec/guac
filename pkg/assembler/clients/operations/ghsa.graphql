@@ -23,6 +23,14 @@ mutation IngestGHSA($ghsa: GHSAInputSpec!) {
   }
 }
 
+# Bulk Ingest GHSA
+
+mutation IngestGHSAs($ghsas: [GHSAInputSpec!]!) {
+  ingestGHSAs(ghsas: $ghsas) {
+    ...AllGHSATree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC GHSAs
 
 query GHSAs($filter: GHSASpec) {

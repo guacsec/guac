@@ -191,7 +191,7 @@ func setCertifyScorecardValues(sb *strings.Builder, certifyScorecardSpec *model.
 // Ingest Scorecards
 
 func (c *neo4jClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
-	return []*model.CertifyScorecard{}, fmt.Errorf("not implemented: IngestDependencies")
+	return []*model.CertifyScorecard{}, fmt.Errorf("not implemented: IngestScorecards")
 }
 
 // Ingest Scorecard

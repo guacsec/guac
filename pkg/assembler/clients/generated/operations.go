@@ -5625,6 +5625,91 @@ type IngestCVEResponse struct {
 // GetIngestCVE returns IngestCVEResponse.IngestCVE, and is useful for accessing the field via an interface.
 func (v *IngestCVEResponse) GetIngestCVE() IngestCVEIngestCVE { return v.IngestCVE }
 
+// IngestCVEsIngestCVEsCVE includes the requested fields of the GraphQL type CVE.
+// The GraphQL type's documentation follows.
+//
+// CVE represents a vulnerability in the Common Vulnerabilities and Exposures
+// schema.
+//
+// The vulnerability identifier contains a year field, so we are extracting that
+// to allow matching for vulnerabilities found in a given year.
+//
+// The vulnerability identifier field is mandatory and canonicalized to be
+// lowercase.
+//
+// This node can be referred to by other parts of GUAC.
+type IngestCVEsIngestCVEsCVE struct {
+	AllCveTree `json:"-"`
+}
+
+// GetId returns IngestCVEsIngestCVEsCVE.Id, and is useful for accessing the field via an interface.
+func (v *IngestCVEsIngestCVEsCVE) GetId() string { return v.AllCveTree.Id }
+
+// GetYear returns IngestCVEsIngestCVEsCVE.Year, and is useful for accessing the field via an interface.
+func (v *IngestCVEsIngestCVEsCVE) GetYear() int { return v.AllCveTree.Year }
+
+// GetCveId returns IngestCVEsIngestCVEsCVE.CveId, and is useful for accessing the field via an interface.
+func (v *IngestCVEsIngestCVEsCVE) GetCveId() string { return v.AllCveTree.CveId }
+
+func (v *IngestCVEsIngestCVEsCVE) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestCVEsIngestCVEsCVE
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestCVEsIngestCVEsCVE = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCveTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestCVEsIngestCVEsCVE struct {
+	Id string `json:"id"`
+
+	Year int `json:"year"`
+
+	CveId string `json:"cveId"`
+}
+
+func (v *IngestCVEsIngestCVEsCVE) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestCVEsIngestCVEsCVE) __premarshalJSON() (*__premarshalIngestCVEsIngestCVEsCVE, error) {
+	var retval __premarshalIngestCVEsIngestCVEsCVE
+
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
+	return &retval, nil
+}
+
+// IngestCVEsResponse is returned by IngestCVEs on success.
+type IngestCVEsResponse struct {
+	// Bulk ingests new CVEs and returns a list of them.
+	IngestCVEs []IngestCVEsIngestCVEsCVE `json:"ingestCVEs"`
+}
+
+// GetIngestCVEs returns IngestCVEsResponse.IngestCVEs, and is useful for accessing the field via an interface.
+func (v *IngestCVEsResponse) GetIngestCVEs() []IngestCVEsIngestCVEsCVE { return v.IngestCVEs }
+
 // IngestGHSAIngestGHSA includes the requested fields of the GraphQL type GHSA.
 // The GraphQL type's documentation follows.
 //
@@ -5698,6 +5783,80 @@ type IngestGHSAResponse struct {
 
 // GetIngestGHSA returns IngestGHSAResponse.IngestGHSA, and is useful for accessing the field via an interface.
 func (v *IngestGHSAResponse) GetIngestGHSA() IngestGHSAIngestGHSA { return v.IngestGHSA }
+
+// IngestGHSAsIngestGHSAsGHSA includes the requested fields of the GraphQL type GHSA.
+// The GraphQL type's documentation follows.
+//
+// GHSA represents GitHub security advisories.
+//
+// The advisory id field is mandatory and canonicalized to be lowercase.
+//
+// This node can be referred to by other parts of GUAC.
+type IngestGHSAsIngestGHSAsGHSA struct {
+	AllGHSATree `json:"-"`
+}
+
+// GetId returns IngestGHSAsIngestGHSAsGHSA.Id, and is useful for accessing the field via an interface.
+func (v *IngestGHSAsIngestGHSAsGHSA) GetId() string { return v.AllGHSATree.Id }
+
+// GetGhsaId returns IngestGHSAsIngestGHSAsGHSA.GhsaId, and is useful for accessing the field via an interface.
+func (v *IngestGHSAsIngestGHSAsGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
+
+func (v *IngestGHSAsIngestGHSAsGHSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestGHSAsIngestGHSAsGHSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestGHSAsIngestGHSAsGHSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllGHSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestGHSAsIngestGHSAsGHSA struct {
+	Id string `json:"id"`
+
+	GhsaId string `json:"ghsaId"`
+}
+
+func (v *IngestGHSAsIngestGHSAsGHSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestGHSAsIngestGHSAsGHSA) __premarshalJSON() (*__premarshalIngestGHSAsIngestGHSAsGHSA, error) {
+	var retval __premarshalIngestGHSAsIngestGHSAsGHSA
+
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
+	return &retval, nil
+}
+
+// IngestGHSAsResponse is returned by IngestGHSAs on success.
+type IngestGHSAsResponse struct {
+	// Bulk ingests new GHSAs and returns a list of them.
+	IngestGHSAs []IngestGHSAsIngestGHSAsGHSA `json:"ingestGHSAs"`
+}
+
+// GetIngestGHSAs returns IngestGHSAsResponse.IngestGHSAs, and is useful for accessing the field via an interface.
+func (v *IngestGHSAsResponse) GetIngestGHSAs() []IngestGHSAsIngestGHSAsGHSA { return v.IngestGHSAs }
 
 // IngestMaterialsIngestMaterialsArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
@@ -5861,6 +6020,83 @@ type IngestOSVResponse struct {
 
 // GetIngestOSV returns IngestOSVResponse.IngestOSV, and is useful for accessing the field via an interface.
 func (v *IngestOSVResponse) GetIngestOSV() IngestOSVIngestOSV { return v.IngestOSV }
+
+// IngestOSVsIngestOSVsOSV includes the requested fields of the GraphQL type OSV.
+// The GraphQL type's documentation follows.
+//
+// OSV represents an Open Source Vulnerability.
+//
+// The osvId field is mandatory and canonicalized to be lowercase.
+//
+// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
+// CVE ID).
+//
+// This node can be referred to by other parts of GUAC.
+type IngestOSVsIngestOSVsOSV struct {
+	AllOSVTree `json:"-"`
+}
+
+// GetId returns IngestOSVsIngestOSVsOSV.Id, and is useful for accessing the field via an interface.
+func (v *IngestOSVsIngestOSVsOSV) GetId() string { return v.AllOSVTree.Id }
+
+// GetOsvId returns IngestOSVsIngestOSVsOSV.OsvId, and is useful for accessing the field via an interface.
+func (v *IngestOSVsIngestOSVsOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
+
+func (v *IngestOSVsIngestOSVsOSV) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestOSVsIngestOSVsOSV
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestOSVsIngestOSVsOSV = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllOSVTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestOSVsIngestOSVsOSV struct {
+	Id string `json:"id"`
+
+	OsvId string `json:"osvId"`
+}
+
+func (v *IngestOSVsIngestOSVsOSV) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestOSVsIngestOSVsOSV) __premarshalJSON() (*__premarshalIngestOSVsIngestOSVsOSV, error) {
+	var retval __premarshalIngestOSVsIngestOSVsOSV
+
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
+	return &retval, nil
+}
+
+// IngestOSVsResponse is returned by IngestOSVs on success.
+type IngestOSVsResponse struct {
+	// Bulk ingests new OSVs and returns a list of them.
+	IngestOSVs []IngestOSVsIngestOSVsOSV `json:"ingestOSVs"`
+}
+
+// GetIngestOSVs returns IngestOSVsResponse.IngestOSVs, and is useful for accessing the field via an interface.
+func (v *IngestOSVsResponse) GetIngestOSVs() []IngestOSVsIngestOSVsOSV { return v.IngestOSVs }
 
 // IngestPackageIngestPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
@@ -20019,6 +20255,14 @@ type __IngestCVEInput struct {
 // GetCve returns __IngestCVEInput.Cve, and is useful for accessing the field via an interface.
 func (v *__IngestCVEInput) GetCve() CVEInputSpec { return v.Cve }
 
+// __IngestCVEsInput is used internally by genqlient
+type __IngestCVEsInput struct {
+	Cves []CVEInputSpec `json:"cves"`
+}
+
+// GetCves returns __IngestCVEsInput.Cves, and is useful for accessing the field via an interface.
+func (v *__IngestCVEsInput) GetCves() []CVEInputSpec { return v.Cves }
+
 // __IngestGHSAInput is used internally by genqlient
 type __IngestGHSAInput struct {
 	Ghsa GHSAInputSpec `json:"ghsa"`
@@ -20026,6 +20270,14 @@ type __IngestGHSAInput struct {
 
 // GetGhsa returns __IngestGHSAInput.Ghsa, and is useful for accessing the field via an interface.
 func (v *__IngestGHSAInput) GetGhsa() GHSAInputSpec { return v.Ghsa }
+
+// __IngestGHSAsInput is used internally by genqlient
+type __IngestGHSAsInput struct {
+	Ghsas []GHSAInputSpec `json:"ghsas"`
+}
+
+// GetGhsas returns __IngestGHSAsInput.Ghsas, and is useful for accessing the field via an interface.
+func (v *__IngestGHSAsInput) GetGhsas() []GHSAInputSpec { return v.Ghsas }
 
 // __IngestMaterialsInput is used internally by genqlient
 type __IngestMaterialsInput struct {
@@ -20042,6 +20294,14 @@ type __IngestOSVInput struct {
 
 // GetOsv returns __IngestOSVInput.Osv, and is useful for accessing the field via an interface.
 func (v *__IngestOSVInput) GetOsv() OSVInputSpec { return v.Osv }
+
+// __IngestOSVsInput is used internally by genqlient
+type __IngestOSVsInput struct {
+	Osvs []OSVInputSpec `json:"osvs"`
+}
+
+// GetOsvs returns __IngestOSVsInput.Osvs, and is useful for accessing the field via an interface.
+func (v *__IngestOSVsInput) GetOsvs() []OSVInputSpec { return v.Osvs }
 
 // __IngestPackageInput is used internally by genqlient
 type __IngestPackageInput struct {
@@ -26659,6 +26919,46 @@ func IngestCVE(
 	return &data, err
 }
 
+// The query or mutation executed by IngestCVEs.
+const IngestCVEs_Operation = `
+mutation IngestCVEs ($cves: [CVEInputSpec!]!) {
+	ingestCVEs(cves: $cves) {
+		... AllCveTree
+	}
+}
+fragment AllCveTree on CVE {
+	id
+	year
+	cveId
+}
+`
+
+func IngestCVEs(
+	ctx context.Context,
+	client graphql.Client,
+	cves []CVEInputSpec,
+) (*IngestCVEsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestCVEs",
+		Query:  IngestCVEs_Operation,
+		Variables: &__IngestCVEsInput{
+			Cves: cves,
+		},
+	}
+	var err error
+
+	var data IngestCVEsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by IngestGHSA.
 const IngestGHSA_Operation = `
 mutation IngestGHSA ($ghsa: GHSAInputSpec!) {
@@ -26687,6 +26987,45 @@ func IngestGHSA(
 	var err error
 
 	var data IngestGHSAResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestGHSAs.
+const IngestGHSAs_Operation = `
+mutation IngestGHSAs ($ghsas: [GHSAInputSpec!]!) {
+	ingestGHSAs(ghsas: $ghsas) {
+		... AllGHSATree
+	}
+}
+fragment AllGHSATree on GHSA {
+	id
+	ghsaId
+}
+`
+
+func IngestGHSAs(
+	ctx context.Context,
+	client graphql.Client,
+	ghsas []GHSAInputSpec,
+) (*IngestGHSAsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestGHSAs",
+		Query:  IngestGHSAs_Operation,
+		Variables: &__IngestGHSAsInput{
+			Ghsas: ghsas,
+		},
+	}
+	var err error
+
+	var data IngestGHSAsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -26766,6 +27105,45 @@ func IngestOSV(
 	var err error
 
 	var data IngestOSVResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestOSVs.
+const IngestOSVs_Operation = `
+mutation IngestOSVs ($osvs: [OSVInputSpec!]!) {
+	ingestOSVs(osvs: $osvs) {
+		... AllOSVTree
+	}
+}
+fragment AllOSVTree on OSV {
+	id
+	osvId
+}
+`
+
+func IngestOSVs(
+	ctx context.Context,
+	client graphql.Client,
+	osvs []OSVInputSpec,
+) (*IngestOSVsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestOSVs",
+		Query:  IngestOSVs_Operation,
+		Variables: &__IngestOSVsInput{
+			Osvs: osvs,
+		},
+	}
+	var err error
+
+	var data IngestOSVsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
