@@ -148,7 +148,7 @@ type VexIngest struct {
 }
 
 type PointOfContactIngest struct {
-	// certifyGood describes either pkg, src or artifact
+	// pointOfContact describes either pkg, src or artifact
 	Pkg            *generated.PkgInputSpec            `json:"pkg,omitempty"`
 	PkgMatchFlag   generated.MatchFlags               `json:"pkgMatchFlag,omitempty"`
 	Src            *generated.SourceInputSpec         `json:"src,omitempty"`
@@ -243,6 +243,14 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 			}
 		}
 	}
+	for _, poc := range i.PointOfContact {
+		if poc.Pkg != nil {
+			pkgPurl := helpers.PkgInputSpecToPurl(poc.Pkg)
+			if _, ok := packageMap[pkgPurl]; !ok {
+				packageMap[pkgPurl] = poc.Pkg
+			}
+		}
+	}
 	for _, equal := range i.PkgEqual {
 		if equal.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(equal.Pkg)
@@ -307,6 +315,14 @@ func (i IngestPredicates) GetSources(ctx context.Context) []*generated.SourceInp
 			}
 		}
 	}
+	for _, poc := range i.PointOfContact {
+		if poc.Src != nil {
+			sourceString := concatenateSourceInput(poc.Src)
+			if _, ok := sourceMap[sourceString]; !ok {
+				sourceMap[sourceString] = poc.Src
+			}
+		}
+	}
 	sources := make([]*generated.SourceInputSpec, 0, len(sourceMap))
 
 	for _, source := range sourceMap {
@@ -362,6 +378,14 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) []*generated.Artifac
 			artifactString := v.Artifact.Algorithm + ":" + v.Artifact.Digest
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = v.Artifact
+			}
+		}
+	}
+	for _, poc := range i.PointOfContact {
+		if poc.Artifact != nil {
+			artifactString := poc.Artifact.Algorithm + ":" + poc.Artifact.Digest
+			if _, ok := artifactMap[artifactString]; !ok {
+				artifactMap[artifactString] = poc.Artifact
 			}
 		}
 	}

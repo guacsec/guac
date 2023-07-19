@@ -206,6 +206,15 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 				verbs.Go(func() error { return ingestCertifyGood(errGroupVerbCtx, gqlclient, good) })
 			}
 
+			logger.Infof("assembling PointOfContact: %v", len(p.PointOfContact))
+			for _, poc := range p.PointOfContact {
+				if errGroupVerbCtx.Err() != nil {
+					break
+				}
+				poc := poc
+				verbs.Go(func() error { return ingestPointOfContact(errGroupVerbCtx, gqlclient, poc) })
+			}
+
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			for _, hb := range p.HasSBOM {
 				if errGroupVerbCtx.Err() != nil {

@@ -183,6 +183,15 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				}
 			}
 
+			// TODO: add bulk ingestion for PointOfContact
+			logger.Infof("assembling PointOfContact: %v", len(p.CertifyGood))
+			for _, poc := range p.PointOfContact {
+				if err := ingestPointOfContact(ctx, gqlclient, poc); err != nil {
+					return fmt.Errorf("ingestPointOfContact failed with error: %w", err)
+
+				}
+			}
+
 			// TODO(pxp928): add bulk ingestion for HasSBOM
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			for _, hb := range p.HasSBOM {
