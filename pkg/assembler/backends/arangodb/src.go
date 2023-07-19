@@ -411,7 +411,7 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 			srcTypes[typeString] = append(srcTypes[typeString], srcNamespace)
 		}
 	}
-	sources := []*model.Source{}
+	var sources []*model.Source
 	for pkgType, namespaces := range srcTypes {
 		typeValues := strings.Split(pkgType, ",")
 		collectedSource := &model.Source{
@@ -469,9 +469,9 @@ func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, err
 			}
 		}
 	}
-	sources := []*model.Source{}
+	var sources []*model.Source
 	for srcType, namespaces := range srcTypes {
-		sourceNamespaces := []*model.SourceNamespace{}
+		var sourceNamespaces []*model.SourceNamespace
 		for namespace, sourceNames := range namespaces {
 			namespaceValues := strings.Split(namespace, ",")
 			srcNamespace := &model.SourceNamespace{

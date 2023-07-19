@@ -723,7 +723,7 @@ func getPreloads(ctx context.Context) []string {
 }
 
 func getNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string, visited map[string]bool) []string {
-	preloads := []string{}
+	var preloads []string
 	for _, column := range fields {
 		prefixColumn := getPreloadString(prefix, column.Name)
 		if visited[prefixColumn] {

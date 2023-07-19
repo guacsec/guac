@@ -453,16 +453,16 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
 	type collectedData struct {
 		PkgVersion struct {
-			TypeID        string        `json:"type_id"`
-			PkgType       string        `json:"type"`
-			NamespaceID   string        `json:"namespace_id"`
-			Namespace     string        `json:"namespace"`
-			NameID        string        `json:"name_id"`
-			Name          string        `json:"name"`
-			VersionID     string        `json:"version_id"`
-			Version       string        `json:"version"`
-			Subpath       string        `json:"subpath"`
-			QualifierList []interface{} `json:"qualifier_list"`
+			TypeID        string   `json:"type_id"`
+			PkgType       string   `json:"type"`
+			NamespaceID   string   `json:"namespace_id"`
+			Namespace     string   `json:"namespace"`
+			NameID        string   `json:"name_id"`
+			Name          string   `json:"name"`
+			VersionID     string   `json:"version_id"`
+			Version       string   `json:"version"`
+			Subpath       string   `json:"subpath"`
+			QualifierList []string `json:"qualifier_list"`
 		} `json:"pkgVersion"`
 		Artifact       model.Artifact `json:"artifact"`
 		IsOccurrenceID string         `json:"isOccurrence_id"`
@@ -488,11 +488,8 @@ func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 
 	var isOccurrenceList []*model.IsOccurrence
 	for _, createdValue := range createdValues {
-		pkg, err := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
 			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-		}
 
 		isOccurrence := &model.IsOccurrence{
 			ID:        createdValue.IsOccurrenceID,

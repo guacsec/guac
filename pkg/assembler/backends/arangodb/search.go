@@ -136,16 +136,16 @@ RETURN {
 			Name        string `json:"name"`
 		} `json:"pkgName,omitempty"`
 		PkgVersion *struct {
-			TypeID        string        `json:"type_id"`
-			PkgType       string        `json:"type"`
-			NamespaceID   string        `json:"namespace_id"`
-			Namespace     string        `json:"namespace"`
-			NameID        string        `json:"name_id"`
-			Name          string        `json:"name"`
-			VersionID     string        `json:"version_id"`
-			Version       string        `json:"version"`
-			Subpath       string        `json:"subpath"`
-			QualifierList []interface{} `json:"qualifier_list"`
+			TypeID        string   `json:"type_id"`
+			PkgType       string   `json:"type"`
+			NamespaceID   string   `json:"namespace_id"`
+			Namespace     string   `json:"namespace"`
+			NameID        string   `json:"name_id"`
+			Name          string   `json:"name"`
+			VersionID     string   `json:"version_id"`
+			Version       string   `json:"version"`
+			Subpath       string   `json:"subpath"`
+			QualifierList []string `json:"qualifier_list"`
 		} `json:"pkgVersion,omitempty"`
 		SrcName *struct {
 			TypeID      string `json:"type_id"`
@@ -194,20 +194,14 @@ RETURN {
 				if p == nil {
 					return nil, fmt.Errorf("failed to parse result of pkgVersion, got nil when expected non-nil")
 				}
-				pkg, err := generateModelPackage(p.TypeID, p.PkgType, p.NamespaceID, p.Namespace, p.NameID, p.Name, &p.VersionID, &p.Version, &p.Subpath, p.QualifierList)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-				}
+				pkg := generateModelPackage(p.TypeID, p.PkgType, p.NamespaceID, p.Namespace, p.NameID, p.Name, &p.VersionID, &p.Version, &p.Subpath, p.QualifierList)
 				results = append(results, pkg)
 			case "pkgName":
 				p := d.PkgName
 				if p == nil {
 					return nil, fmt.Errorf("failed to parse result of pkgName, got nil when expected non-nil")
 				}
-				pkg, err := generateModelPackage(p.TypeID, p.PkgType, p.NamespaceID, p.Namespace, p.NameID, p.Name, nil, nil, nil, nil)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-				}
+				pkg := generateModelPackage(p.TypeID, p.PkgType, p.NamespaceID, p.Namespace, p.NameID, p.Name, nil, nil, nil, nil)
 				results = append(results, pkg)
 			case "SrcName":
 				s := d.SrcName

@@ -56,7 +56,7 @@ func getScorecardValues(src *model.SourceInputSpec, scorecard *model.ScorecardIn
 		keys = append(keys, kv.Check)
 	}
 	sort.Strings(keys)
-	checks := []string{}
+	var checks []string
 	for _, k := range keys {
 		checks = append(checks, k, strconv.Itoa(checksMap[k]))
 	}
@@ -156,8 +156,8 @@ func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.So
 		'timeScanned': scorecard.timeScanned,
 		'scorecardVersion': scorecard.scorecardVersion,
 		'scorecardCommit': scorecard.scorecardCommit,
-		'collector': isOccurrence.collector,
-		'origin': isOccurrence.origin
+		'collector': scorecard.collector,
+		'origin': scorecard.origin
 	  }`
 
 	sb.WriteString(query)
@@ -229,8 +229,8 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 		'timeScanned': scorecard.timeScanned,
 		'scorecardVersion': scorecard.scorecardVersion,
 		'scorecardCommit': scorecard.scorecardCommit,
-		'collector': isOccurrence.collector,
-		'origin': isOccurrence.origin
+		'collector': scorecard.collector,
+		'origin': scorecard.origin
 	  }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getScorecardValues(&source, &scorecard), "IngestScorecard")
@@ -250,6 +250,25 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 		return nil, fmt.Errorf("number of scorecard ingested is greater than one")
 	}
 
+}
+
+func getCollectedScorecardChecks(checksList []string) ([]*model.ScorecardCheck, error) {
+	var scorecardChecks []*model.ScorecardCheck
+	for i := range checksList {
+		if i%2 == 0 {
+			check := checksList[i]
+			score, err := strconv.Atoi(checksList[i+1])
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert score into integer with error: %w", err)
+			}
+			scorecardCheck := &model.ScorecardCheck{
+				Check: check,
+				Score: score,
+			}
+			scorecardChecks = append(scorecardChecks, scorecardCheck)
+		}
+	}
+	return scorecardChecks, nil
 }
 
 func getCertifyScorecard(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyScorecard, error) {
@@ -294,7 +313,12 @@ func getCertifyScorecard(ctx context.Context, cursor driver.Cursor) ([]*model.Ce
 		src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
 			createdValue.SrcName.NameID, createdValue.SrcName.Name, &createdValue.SrcName.Commit, &createdValue.SrcName.Tag)
 
+		checks, err := getCollectedScorecardChecks(createdValue.Checks)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get scorecard checks with error: %w", err)
+		}
 		scorecard := &model.Scorecard{
+			Checks:           checks,
 			AggregateScore:   createdValue.AggregateScore,
 			TimeScanned:      createdValue.TimeScanned,
 			ScorecardVersion: createdValue.ScorecardVersion,

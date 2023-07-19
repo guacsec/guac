@@ -316,16 +316,16 @@ func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
 func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDependency, error) {
 	type collectedData struct {
 		PkgVersion struct {
-			TypeID        string        `json:"type_id"`
-			PkgType       string        `json:"type"`
-			NamespaceID   string        `json:"namespace_id"`
-			Namespace     string        `json:"namespace"`
-			NameID        string        `json:"name_id"`
-			Name          string        `json:"name"`
-			VersionID     string        `json:"version_id"`
-			Version       string        `json:"version"`
-			Subpath       string        `json:"subpath"`
-			QualifierList []interface{} `json:"qualifier_list"`
+			TypeID        string   `json:"type_id"`
+			PkgType       string   `json:"type"`
+			NamespaceID   string   `json:"namespace_id"`
+			Namespace     string   `json:"namespace"`
+			NameID        string   `json:"name_id"`
+			Name          string   `json:"name"`
+			VersionID     string   `json:"version_id"`
+			Version       string   `json:"version"`
+			Subpath       string   `json:"subpath"`
+			QualifierList []string `json:"qualifier_list"`
 		} `json:"pkgVersion"`
 		DepPkg struct {
 			TypeID      string `json:"type_id"`
@@ -360,16 +360,12 @@ func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDepe
 
 	var isDependencyList []*model.IsDependency
 	for _, createdValue := range createdValues {
-		pkg, err := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
 			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-		}
-		depPkg, err := generateModelPackage(createdValue.DepPkg.TypeID, createdValue.DepPkg.PkgType, createdValue.DepPkg.NamespaceID, createdValue.DepPkg.Namespace, createdValue.DepPkg.NameID,
+
+		depPkg := generateModelPackage(createdValue.DepPkg.TypeID, createdValue.DepPkg.PkgType, createdValue.DepPkg.NamespaceID, createdValue.DepPkg.Namespace, createdValue.DepPkg.NameID,
 			createdValue.DepPkg.Name, nil, nil, nil, nil)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get dependent model.package with err: %w", err)
-		}
+
 		dependencyTypeEnum, err := convertDependencyTypeToEnum(createdValue.DependencyType)
 		if err != nil {
 			return nil, fmt.Errorf("convertDependencyTypeToEnum failed with error: %w", err)
