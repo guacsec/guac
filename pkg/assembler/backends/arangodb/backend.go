@@ -904,7 +904,7 @@ func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRoot
 		  )
 	
 		  LET pkgHasTypeCollection = (
-			INSERT { _key: CONCAT("pkgHasType", @rootKey, type._key), _from: @rootID, _to: type._id, label : "pkgHasType" } INTO pkgHasType OPTIONS { overwriteMode: "ignore" }
+			INSERT { _key: CONCAT("pkgHasType", @rootKey, type._key), _from: @rootID, _to: type._id} INTO pkgHasType OPTIONS { overwriteMode: "ignore" }
 		  )
 	
 		RETURN {
@@ -995,7 +995,7 @@ func preIngestSrcTypes(ctx context.Context, db driver.Database, srcRoot *srcRoot
 		  )
 	
 		  LET pkgHasTypeCollection = (
-			INSERT { _key: CONCAT("srcHasType", @rootKey, type._key), _from: @rootID, _to: type._id, label : "srcHasType" } INTO srcHasType OPTIONS { overwriteMode: "ignore" }
+			INSERT { _key: CONCAT("srcHasType", @rootKey, type._key), _from: @rootID, _to: type._id } INTO srcHasType OPTIONS { overwriteMode: "ignore" }
 		  )
 	
 		RETURN {

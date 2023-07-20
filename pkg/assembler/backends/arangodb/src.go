@@ -164,11 +164,11 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 	)
   
 	LET srcHasNamespaceCollection = (
-	  INSERT { _key: CONCAT("srcHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "srcHasNamespace"} INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("srcHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id } INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET srcHasNameCollection = (
-	  INSERT { _key: CONCAT("srcHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "srcHasName"} INTO srcHasName OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("srcHasName", ns._key, name._key), _from: ns._id, _to: name._id } INTO srcHasName OPTIONS { overwriteMode: "ignore" }
 	)
 	  
     RETURN {
@@ -211,11 +211,11 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 	)
   
 	LET srcHasNamespaceCollection = (
-	  INSERT { _key: CONCAT("srcHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "srcHasNamespace"} INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("srcHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id } INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET srcHasNameCollection = (
-	  INSERT { _key: CONCAT("srcHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "srcHasName"} INTO srcHasName OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("srcHasName", ns._key, name._key), _from: ns._id, _to: name._id } INTO srcHasName OPTIONS { overwriteMode: "ignore" }
 	)
 	  
     RETURN {

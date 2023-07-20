@@ -217,15 +217,15 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 	)
   
 	LET pkgHasNamespaceCollection = (
-	  INSERT { _key: CONCAT("pkgHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "pkgHasNamespace"} INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("pkgHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id } INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET pkgHasNameCollection = (
-	  INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "pkgHasName"} INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
+ 	  INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id } INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET pkgHasVersionCollection = (
-	  INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "pkgHasVersion"} INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id } INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
 	)
 	  
   RETURN {
@@ -278,15 +278,15 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	  )
 	
 	  LET pkgHasNamespaceCollection = (
-		INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "pkgHasNamespace"} INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id} INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  LET pkgHasNameCollection = (
-		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "pkgHasName"} INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id} INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  LET pkgHasVersionCollection = (
-		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "pkgHasVersion"} INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id } INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
 	  )
 		
 	RETURN {

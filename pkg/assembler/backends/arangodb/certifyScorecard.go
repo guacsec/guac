@@ -221,7 +221,7 @@ func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.So
 	)
 	
 	LET edgeCollection = (
-	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id, label : "certifyScorecard" } INTO scorecardEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id } INTO scorecardEdges OPTIONS { overwriteMode: "ignore" }
 	)
 	  
 	  RETURN {
@@ -294,7 +294,7 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 	)
 	
 	LET edgeCollection = (
-	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id, label : "certifyScorecard" } INTO scorecardEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id } INTO scorecardEdges OPTIONS { overwriteMode: "ignore" }
 	)
 	  
 	  RETURN {
