@@ -32,7 +32,7 @@ type assembler struct{} //nolint: unused
 // TODO: fix typo in isDepedency
 type IngestPredicates struct {
 	CertifyScorecard []CertifyScorecardIngest `json:"certifyScorecard,omitempty"`
-	IsDependency     []IsDependencyIngest     `json:"isDepedency,omitempty"`
+	IsDependency     []IsDependencyIngest     `json:"isDependency,omitempty"`
 	IsOccurrence     []IsOccurrenceIngest     `json:"isOccurrence,omitempty"`
 	HasSlsa          []HasSlsaIngest          `json:"hasSlsa,omitempty"`
 	CertifyVuln      []CertifyVulnIngest      `json:"certifyVuln,omitempty"`

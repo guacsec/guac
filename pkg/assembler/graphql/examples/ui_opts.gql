@@ -69,7 +69,7 @@ query GetCve ($spec: CVESpec) {
     }
 }
 
-query GetIsDepedency($spec: IsDependencySpec) {
+query GetIsDependency($spec: IsDependencySpec) {
   IsDependency(isDependencySpec: $spec){
       ...allIsDependencyTree
   }

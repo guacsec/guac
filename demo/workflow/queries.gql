@@ -1,4 +1,4 @@
-query IsDepedency {
+query isDependency {
   IsDependency(
     isDependencySpec: {dependentPackage: {namespace: "github.com/prometheus", name: "client_golang"}}
   ) {
