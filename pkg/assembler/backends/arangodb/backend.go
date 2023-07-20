@@ -95,8 +95,10 @@ const (
 
 	// hasSLSA collections
 
-	hasSLSAEdgesStr string = "hasSLSAEdges"
-	hasSLSAsStr     string = "hasSLSAs"
+	hasSLSASubjectEdgesStr   string = "hasSLSASubjectEdges"
+	hasSLSABuiltByEdgesStr   string = "hasSLSABuiltByEdges"
+	hasSLSABuiltFromEdgesStr string = "hasSLSABuiltFromEdges"
+	hasSLSAsStr              string = "hasSLSAs"
 
 	// hashEquals collections
 
@@ -317,13 +319,29 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// repeat this for the collections where an edge is going into
 		isOccurrencesSubjectEdges.To = []string{isDependenciesStr}
 
-		var hasSLSAEdges driver.EdgeDefinition
-		hasSLSAEdges.Collection = hasSLSAEdgesStr
+		var hasSLSASubjectEdges driver.EdgeDefinition
+		hasSLSASubjectEdges.Collection = hasSLSASubjectEdgesStr
 		// define a set of collections where an edge is going out...
-		hasSLSAEdges.From = []string{artifactsStr, hasSLSAsStr}
+		hasSLSASubjectEdges.From = []string{artifactsStr}
 
 		// repeat this for the collections where an edge is going into
-		hasSLSAEdges.To = []string{hasSLSAsStr, buildersStr, artifactsStr}
+		hasSLSASubjectEdges.To = []string{hasSLSAsStr}
+
+		var hasSLSABuiltByEdges driver.EdgeDefinition
+		hasSLSABuiltByEdges.Collection = hasSLSABuiltByEdgesStr
+		// define a set of collections where an edge is going out...
+		hasSLSABuiltByEdges.From = []string{hasSLSAsStr}
+
+		// repeat this for the collections where an edge is going into
+		hasSLSABuiltByEdges.To = []string{buildersStr}
+
+		var hasSLSABuiltFromEdges driver.EdgeDefinition
+		hasSLSABuiltFromEdges.Collection = hasSLSABuiltFromEdgesStr
+		// define a set of collections where an edge is going out...
+		hasSLSABuiltFromEdges.From = []string{hasSLSAsStr}
+
+		// repeat this for the collections where an edge is going into
+		hasSLSABuiltFromEdges.To = []string{artifactsStr}
 
 		var hashEqualsEdges driver.EdgeDefinition
 		hashEqualsEdges.Collection = hashEqualsEdgesStr
@@ -370,7 +388,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		options.EdgeDefinitions = []driver.EdgeDefinition{pkgHasType, pkgHasNamespace, pkgHasName,
 			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, hashEqualsSubjectEdges, hashEqualsEdges,
 			isDependencySubjectEdges, isDependencyEdges, isOccurrencesSubjectEdges, isOccurrencesEdges,
-			hasSBOMEdges, hasSLSAEdges, certifyVulnEdges, certifyScorecardEdges}
+			hasSBOMEdges, hasSLSASubjectEdges, hasSLSABuiltByEdges, hasSLSABuiltFromEdges, certifyVulnEdges, certifyScorecardEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)

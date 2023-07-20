@@ -98,15 +98,11 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInp
 		RETURN NEW
 	)
 
+	INSERT { _key: CONCAT("hasSLSASubjectEdges", subject._key, hasSLSA._key), _from: subject._id, _to: hasSLSA._id } INTO hasSLSASubjectEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("hasSLSABuiltByEdges", hasSLSA._key, builtBy._key), _from: hasSLSA._id, _to: builtBy._id } INTO hasSLSABuiltByEdges OPTIONS { overwriteMode: "ignore" }
+
 	LET buildFromCollection = (FOR bfData IN @buildFromKeyList
-		INSERT { _key: CONCAT("hasSLSAEdges", hasSLSA._key, bfData), _from: hasSLSA._id, _to: CONCAT("artifacts/", bfData), label: "builtFrom"} INTO hasSLSAEdges OPTIONS { overwriteMode: "ignore" }
-	)
-	  
-	LET edgeCollection = (FOR edgeData IN [
-		{fromKey: hasSLSA._key, toKey: builtBy._key, from: hasSLSA._id, to: builtBy._id, label: "builtBy"}, 
-		{fromKey: subject._key, toKey: hasSLSA._key, from: subject._id, to: hasSLSA._id, label: "subject"}]
-	  
-		INSERT { _key: CONCAT("hasSLSAEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO hasSLSAEdges OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("hasSLSABuiltFromEdges", hasSLSA._key, bfData), _from: hasSLSA._id, _to: CONCAT("artifacts/", bfData) } INTO hasSLSABuiltFromEdges OPTIONS { overwriteMode: "ignore" }
 	)
 
 	RETURN {
