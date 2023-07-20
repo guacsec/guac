@@ -262,6 +262,10 @@ func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *a
 			queryValues["namespace"] = *srcSpec.Namespace
 		}
 		arangoQueryBuilder.ForOutBound(srcHasNameStr, "sName", "sNs")
+		if srcSpec.ID != nil {
+			arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+			queryValues["id"] = *srcSpec.ID
+		}
 		if srcSpec.Name != nil {
 			arangoQueryBuilder.filter("sName", "name", "==", "@name")
 			queryValues["name"] = *srcSpec.Name

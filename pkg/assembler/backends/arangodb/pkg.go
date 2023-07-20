@@ -340,6 +340,10 @@ func setPkgMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *aran
 			queryValues["name"] = *pkgSpec.Name
 		}
 		arangoQueryBuilder.ForOutBound(pkgHasVersionStr, "pVersion", "pName")
+		if pkgSpec.ID != nil {
+			arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+			queryValues["id"] = *pkgSpec.ID
+		}
 		if pkgSpec.Version != nil {
 			arangoQueryBuilder.filter("pVersion", "version", "==", "@version")
 			queryValues["version"] = *pkgSpec.Version

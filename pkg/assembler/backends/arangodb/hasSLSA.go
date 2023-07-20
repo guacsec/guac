@@ -36,7 +36,97 @@ const (
 )
 
 func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: HasSlsa - HasSlsa"))
+	values := map[string]any{}
+	arangoQueryBuilder := setArtifactMatchValues(hasSLSASpec.Subject, values)
+	setHasSLSAMatchValues(arangoQueryBuilder, hasSLSASpec, values)
+
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'subject': {
+			'id': art._id,
+			'algorithm': art.algorithm,
+			'digest': art.digest
+		},
+		'builtBy': {
+			'id': build._id,
+			'uri': build.uri
+		},
+		'hasSLSA_id': hasSLSA._id,
+		'buildType': hasSLSA.buildType,
+		'builtFrom': hasSLSA.builtFrom,
+		'slsaPredicate': hasSLSA.slsaPredicate,
+		'slsaVersion': hasSLSA.slsaVersion,
+		'startedOn': hasSLSA.startedOn,
+		'finishedOn': hasSLSA.finishedOn,
+		'collector': hasSLSA.collector,
+		'origin': hasSLSA.origin
+	}`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSlsa")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for HasSlsa: %w", err)
+	}
+	defer cursor.Close()
+
+	return getHasSLSA(c, ctx, cursor, map[string][]*model.Artifact{})
+}
+
+func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *model.HasSLSASpec, queryValues map[string]any) {
+
+	// currently not filtering on builtFrom (artifacts). Is that a real usecase?
+	arangoQueryBuilder.ForOutBound(hasSLSASubjectEdgesStr, "hasSLSA", "art")
+	if hasSLSASpec.BuildType != nil {
+		arangoQueryBuilder.filter("hasSLSA", buildTypeStr, "==", "@"+buildTypeStr)
+		queryValues[buildTypeStr] = hasSLSASpec.BuildType
+	}
+	if len(hasSLSASpec.Predicate) > 0 {
+		predicateValues := getPredicateValuesFromFilter(hasSLSASpec.Predicate)
+		arangoQueryBuilder.filter("hasSLSA", slsaPredicateStr, "==", "@"+slsaPredicateStr)
+		queryValues[slsaPredicateStr] = predicateValues
+	}
+	if hasSLSASpec.SlsaVersion != nil {
+		arangoQueryBuilder.filter("hasSLSA", slsaVersionStr, "==", "@"+slsaVersionStr)
+		queryValues[slsaVersionStr] = hasSLSASpec.SlsaVersion
+	}
+	if hasSLSASpec.StartedOn != nil {
+		arangoQueryBuilder.filter("hasSLSA", startedOnStr, "==", "@"+startedOnStr)
+		queryValues[startedOnStr] = hasSLSASpec.StartedOn.UTC()
+	}
+	if hasSLSASpec.FinishedOn != nil {
+		arangoQueryBuilder.filter("hasSLSA", finishedOnStr, "==", "@"+finishedOnStr)
+		queryValues[finishedOnStr] = hasSLSASpec.FinishedOn.UTC()
+	}
+	if hasSLSASpec.Origin != nil {
+		arangoQueryBuilder.filter("hasSLSA", origin, "==", "@"+origin)
+		queryValues[origin] = hasSLSASpec.Origin
+	}
+	if hasSLSASpec.Collector != nil {
+		arangoQueryBuilder.filter("hasSLSA", collector, "==", "@"+collector)
+		queryValues[collector] = hasSLSASpec.Collector
+	}
+	arangoQueryBuilder.ForOutBound(hasSLSABuiltByEdgesStr, "build", "hasSLSA")
+	if hasSLSASpec.BuiltBy != nil {
+		arangoQueryBuilder.filter("build", "uri", "==", "@uri")
+		queryValues["uri"] = hasSLSASpec.BuiltBy.URI
+	}
+}
+
+func getPredicateValuesFromFilter(slsaPredicate []*model.SLSAPredicateSpec) []string {
+	predicateMap := map[string]string{}
+	keys := []string{}
+	for _, kv := range slsaPredicate {
+		key := removeInvalidCharFromProperty(kv.Key)
+		predicateMap[key] = kv.Value
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	predicateValues := []string{}
+	for _, k := range keys {
+		predicateValues = append(predicateValues, k, predicateMap[k])
+	}
+	return predicateValues
 }
 
 func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) map[string]any {
@@ -117,6 +207,7 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInp
 		},
 		'hasSLSA_id': hasSLSA._id,
 		'buildType': hasSLSA.buildType,
+		'builtFrom': hasSLSA.builtFrom,
 		'slsaPredicate': hasSLSA.slsaPredicate,
 		'slsaVersion': hasSLSA.slsaVersion,
 		'startedOn': hasSLSA.startedOn,
@@ -131,7 +222,7 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInp
 	}
 	defer cursor.Close()
 
-	hasSLSAList, err := getHasSLSA(ctx, cursor, artifacts)
+	hasSLSAList, err := getHasSLSA(c, ctx, cursor, map[string][]*model.Artifact{artifactKey(subject.Algorithm, subject.Digest): artifacts})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get hasSLSA from arango cursor: %w", err)
 	}
@@ -143,10 +234,17 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInp
 	}
 }
 
-func getHasSLSA(ctx context.Context, cursor driver.Cursor, builtFrom []*model.Artifact) ([]*model.HasSlsa, error) {
+func artifactKey(alg, dig string) string {
+	algorithm := strings.ToLower(alg)
+	digest := strings.ToLower(dig)
+	return strings.Join([]string{algorithm, digest}, ":")
+}
+
+func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, builtFromMap map[string][]*model.Artifact) ([]*model.HasSlsa, error) {
 	type collectedData struct {
 		Subject       model.Artifact `json:"subject"`
 		BuiltBy       model.Builder  `json:"builtBy"`
+		BuiltFrom     []string       `json:"builtFrom"`
 		HasSLSAId     string         `json:"hasSLSA_id"`
 		BuildType     string         `json:"buildType"`
 		SlsaPredicate []string       `json:"slsaPredicate"`
@@ -174,9 +272,19 @@ func getHasSLSA(ctx context.Context, cursor driver.Cursor, builtFrom []*model.Ar
 
 	var hasSLSAList []*model.HasSlsa
 	for _, createdValue := range createdValues {
+		var builtFromArtifacts []*model.Artifact
+		if val, ok := builtFromMap[artifactKey(createdValue.Subject.Algorithm, createdValue.Subject.Digest)]; ok {
+			builtFromArtifacts = val
+		} else {
+			artifacts, err := c.getMaterialsID(ctx, createdValue.BuiltFrom)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact by ID for hasSLSA builtFrom with error: %w", err)
+			}
+			builtFromArtifacts = artifacts
+		}
 
 		slsa := &model.Slsa{
-			BuiltFrom:     builtFrom,
+			BuiltFrom:     builtFromArtifacts,
 			BuiltBy:       &createdValue.BuiltBy,
 			BuildType:     createdValue.BuildType,
 			SlsaPredicate: getCollectedPredicates(createdValue.SlsaPredicate),

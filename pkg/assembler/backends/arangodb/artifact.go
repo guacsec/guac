@@ -27,15 +27,7 @@ import (
 
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	values := map[string]any{}
-	arangoQueryBuilder := newForQuery(artifactsStr, "art")
-	if artifactSpec.Algorithm != nil {
-		arangoQueryBuilder.filter("art", "algorithm", "==", "@algorithm")
-		values["algorithm"] = strings.ToLower(*artifactSpec.Algorithm)
-	}
-	if artifactSpec.Digest != nil {
-		arangoQueryBuilder.filter("art", "digest", "==", "@digest")
-		values["digest"] = strings.ToLower(*artifactSpec.Digest)
-	}
+	arangoQueryBuilder := setArtifactMatchValues(artifactSpec, values)
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		"id": art._id,
@@ -47,6 +39,77 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Artifacts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for artifacts: %w", err)
+	}
+	defer cursor.Close()
+
+	return getArtifacts(ctx, cursor)
+}
+
+func setArtifactMatchValues(artifactSpec *model.ArtifactSpec, queryValues map[string]any) *arangoQueryBuilder {
+	arangoQueryBuilder := newForQuery(artifactsStr, "art")
+	if artifactSpec != nil {
+		if artifactSpec.ID != nil {
+			arangoQueryBuilder.filter("art", "_id", "==", "@id")
+			queryValues["id"] = *artifactSpec.ID
+		}
+		if artifactSpec.Algorithm != nil {
+			arangoQueryBuilder.filter("art", "algorithm", "==", "@algorithm")
+			queryValues["algorithm"] = strings.ToLower(*artifactSpec.Algorithm)
+		}
+		if artifactSpec.Digest != nil {
+			arangoQueryBuilder.filter("art", "digest", "==", "@digest")
+			queryValues["digest"] = strings.ToLower(*artifactSpec.Digest)
+		}
+	}
+	return arangoQueryBuilder
+}
+
+// getMaterialsID return an slice of artifacts as based on only their IDs
+func (c *arangoClient) getMaterialsID(ctx context.Context, artifactIDs []string) ([]*model.Artifact, error) {
+	var listOfValues []map[string]any
+	for _, id := range artifactIDs {
+		values := map[string]any{}
+		values["id"] = id
+		listOfValues = append(listOfValues, values)
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+	sb.WriteString("\n")
+
+	arangoQueryBuilder := newForQuery(artifactsStr, "art")
+	arangoQueryBuilder.filter("art", "_id", "==", "doc.id")
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"id": art._id,
+		"algorithm": art.algorithm,
+		"digest": art.digest
+	  }`)
+
+	sb.WriteString(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "GetMaterials")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for Materials: %w", err)
 	}
 	defer cursor.Close()
 

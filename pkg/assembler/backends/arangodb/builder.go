@@ -27,11 +27,7 @@ import (
 
 func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	values := map[string]any{}
-	arangoQueryBuilder := newForQuery(buildersStr, "build")
-	if builderSpec.URI != nil {
-		arangoQueryBuilder.filter("build", "uri", "==", "@uri")
-		values["uri"] = builderSpec.URI
-	}
+	arangoQueryBuilder := setBuilderMatchValues(builderSpec, values)
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		"id": build._id,
@@ -46,6 +42,21 @@ func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderS
 	defer cursor.Close()
 
 	return getBuilders(ctx, cursor)
+}
+
+func setBuilderMatchValues(builderSpec *model.BuilderSpec, queryValues map[string]any) *arangoQueryBuilder {
+	arangoQueryBuilder := newForQuery(buildersStr, "build")
+	if builderSpec != nil {
+		if builderSpec.ID != nil {
+			arangoQueryBuilder.filter("build", "_id", "==", "@id")
+			queryValues["id"] = *builderSpec.ID
+		}
+		if builderSpec.URI != nil {
+			arangoQueryBuilder.filter("build", "uri", "==", "@uri")
+			queryValues["uri"] = builderSpec.URI
+		}
+	}
+	return arangoQueryBuilder
 }
 
 func getBuilderQueryValues(builder *model.BuilderInputSpec) map[string]any {
