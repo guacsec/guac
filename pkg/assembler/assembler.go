@@ -29,9 +29,10 @@ type assembler struct{} //nolint: unused
 // ingested based on the GUAC ontology. It only has evidence trees as
 // ingestion of the software trees are implicit and handled by the
 // client library.
+// TODO: fix typo in isDepedency
 type IngestPredicates struct {
 	CertifyScorecard []CertifyScorecardIngest `json:"certifyScorecard,omitempty"`
-	IsDependency     []IsDependencyIngest     `json:"isDependency,omitempty"`
+	IsDependency     []IsDependencyIngest     `json:"isDepedency,omitempty"`
 	IsOccurrence     []IsOccurrenceIngest     `json:"isOccurrence,omitempty"`
 	HasSlsa          []HasSlsaIngest          `json:"hasSlsa,omitempty"`
 	CertifyVuln      []CertifyVulnIngest      `json:"certifyVuln,omitempty"`
