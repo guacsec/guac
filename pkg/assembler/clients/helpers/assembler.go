@@ -62,12 +62,6 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
-			materials := p.GetMaterials(ctx)
-			logger.Infof("assembling Materials (Artifact): %v", len(materials))
-			if err := ingestMaterials(ctx, gqlclient, materials); err != nil {
-				return err
-			}
-
 			cves := p.GetCVEs(ctx)
 			logger.Infof("assembling CVE: %v", len(cves))
 			for _, v := range cves {
@@ -206,11 +200,6 @@ func ingestSource(ctx context.Context, client graphql.Client, v *model.SourceInp
 
 func ingestArtifact(ctx context.Context, client graphql.Client, v *model.ArtifactInputSpec) error {
 	_, err := model.IngestArtifact(ctx, client, *v)
-	return err
-}
-
-func ingestMaterials(ctx context.Context, client graphql.Client, v []model.ArtifactInputSpec) error {
-	_, err := model.IngestMaterials(ctx, client, v)
 	return err
 }
 

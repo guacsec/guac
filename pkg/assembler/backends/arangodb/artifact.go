@@ -92,7 +92,11 @@ func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.A
 UPSERT { algorithm:doc.algorithm, digest:doc.digest } 
 INSERT { algorithm:doc.algorithm, digest:doc.digest } 
 UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"algorithm": NEW.algorithm,
+	"digest": NEW.digest
+  }`
 
 	sb.WriteString(query)
 
@@ -110,7 +114,11 @@ func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.Artif
 UPSERT { algorithm:@algorithm, digest:@digest } 
 INSERT { algorithm:@algorithm, digest:@digest } 
 UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"algorithm": NEW.algorithm,
+	"digest": NEW.digest
+  }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getArtifactQueryValues(artifact), "IngestArtifact")
 	if err != nil {

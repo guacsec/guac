@@ -88,7 +88,10 @@ func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.Bui
 UPSERT { uri:doc.uri } 
 INSERT { uri:doc.uri } 
 UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"uri": NEW.uri,
+  }`
 
 	sb.WriteString(query)
 
@@ -107,7 +110,10 @@ func (c *arangoClient) IngestBuilder(ctx context.Context, builder *model.Builder
 UPSERT { uri:@uri } 
 INSERT { uri:@uri } 
 UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"uri": NEW.uri,
+  }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getBuilderQueryValues(builder), "IngestBuilder")
 	if err != nil {

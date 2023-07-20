@@ -412,25 +412,6 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) []*generated.Artifac
 	return artifacts
 }
 
-func (i IngestPredicates) GetMaterials(ctx context.Context) []generated.ArtifactInputSpec {
-	materialMap := make(map[string]generated.ArtifactInputSpec)
-	for _, slsa := range i.HasSlsa {
-		for _, mat := range slsa.Materials {
-			artifactString := mat.Algorithm + ":" + mat.Digest
-			if _, ok := materialMap[artifactString]; !ok {
-				materialMap[artifactString] = mat
-			}
-		}
-
-	}
-	materials := make([]generated.ArtifactInputSpec, 0, len(materialMap))
-
-	for _, mat := range materialMap {
-		materials = append(materials, mat)
-	}
-	return materials
-}
-
 func (i IngestPredicates) GetBuilders(ctx context.Context) []*generated.BuilderInputSpec {
 	builderMap := make(map[string]*generated.BuilderInputSpec)
 	for _, slsa := range i.HasSlsa {

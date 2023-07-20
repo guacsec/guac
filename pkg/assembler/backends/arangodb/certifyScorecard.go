@@ -334,7 +334,6 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 	} else {
 		return nil, fmt.Errorf("number of scorecard ingested is greater than one")
 	}
-
 }
 
 func getCollectedScorecardChecks(checksList []string) ([]*model.ScorecardCheck, error) {

@@ -828,7 +828,7 @@ func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.I
 			return fmt.Errorf("error in ingesting Builder for HasSlsa: %v\n", err)
 		}
 
-		_, err = model.IngestMaterials(ctx, client, ingest.Materials)
+		_, err = model.IngestArtifacts(context.Background(), client, ingest.Materials)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting Material for HasSlsa: %v\n", err)

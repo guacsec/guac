@@ -76,16 +76,15 @@ func TestIngestPredicates(t *testing.T) {
 		Digest:    "575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
 	}
 	tests := []struct {
-		name          string
-		field         IngestPredicates
-		wantPkg       []*generated.PkgInputSpec
-		wantSource    []*generated.SourceInputSpec
-		wantArtifact  []*generated.ArtifactInputSpec
-		wantMaterials []generated.ArtifactInputSpec
-		wantBuilder   []*generated.BuilderInputSpec
-		wantOSV       []*generated.OSVInputSpec
-		wantCVE       []*generated.CVEInputSpec
-		wantGHSA      []*generated.GHSAInputSpec
+		name         string
+		field        IngestPredicates
+		wantPkg      []*generated.PkgInputSpec
+		wantSource   []*generated.SourceInputSpec
+		wantArtifact []*generated.ArtifactInputSpec
+		wantBuilder  []*generated.BuilderInputSpec
+		wantOSV      []*generated.OSVInputSpec
+		wantCVE      []*generated.CVEInputSpec
+		wantGHSA     []*generated.GHSAInputSpec
 	}{{
 		name: "get nouns",
 		field: IngestPredicates{
@@ -548,12 +547,6 @@ func TestIngestPredicates(t *testing.T) {
 				Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
 			},
 		},
-		wantMaterials: []generated.ArtifactInputSpec{
-			{
-				Algorithm: "gitCommit",
-				Digest:    "c27d339ee6075c1f744c5d4b200f7901aad2c369",
-			},
-		},
 		wantBuilder: []*generated.BuilderInputSpec{
 			{
 				Uri: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1",
@@ -637,12 +630,6 @@ func TestIngestPredicates(t *testing.T) {
 			artSort := func(a, b *generated.ArtifactInputSpec) bool { return a.Digest < b.Digest }
 			if diff := cmp.Diff(tt.wantArtifact, gotArtifacts, cmpopts.SortSlices(artSort)); diff != "" {
 				t.Errorf("Unexpected GetArtifacts results. (-want +got):\n%s", diff)
-			}
-
-			gotMaterials := i.GetMaterials(ctx)
-			matSort := func(a, b *generated.ArtifactInputSpec) bool { return a.Digest < b.Digest }
-			if diff := cmp.Diff(tt.wantMaterials, gotMaterials, cmpopts.SortSlices(matSort)); diff != "" {
-				t.Errorf("Unexpected GetMaterials results. (-want +got):\n%s", diff)
 			}
 
 			gotBuilders := i.GetBuilders(ctx)
