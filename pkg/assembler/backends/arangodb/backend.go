@@ -89,8 +89,9 @@ const (
 
 	//isOccurrences collections
 
-	isOccurrencesEdgesStr string = "isOccurrencesEdges"
-	isOccurrencesStr      string = "isOccurrences"
+	isOccurrencesEdgesStr        string = "isOccurrencesEdges"
+	isOccurrencesSubjectEdgesStr string = "isOccurrencesSubjectEdges"
+	isOccurrencesStr             string = "isOccurrences"
 
 	// hasSLSA collections
 
@@ -99,8 +100,9 @@ const (
 
 	// hashEquals collections
 
-	hashEqualsEdgesStr string = "hashEqualsEdges"
-	hashEqualsStr      string = "hashEquals"
+	hashEqualsEdgesStr        string = "hashEqualsEdges"
+	hashEqualsSubjectEdgesStr string = "hashEqualsSubjectEdges"
+	hashEqualsStr             string = "hashEquals"
 
 	// hasSBOM collection
 
@@ -302,10 +304,18 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var isOccurrencesEdges driver.EdgeDefinition
 		isOccurrencesEdges.Collection = isOccurrencesEdgesStr
 		// define a set of collections where an edge is going out...
-		isOccurrencesEdges.From = []string{isOccurrencesStr, pkgVersionsStr, srcNamesStr}
+		isOccurrencesEdges.From = []string{isOccurrencesStr}
 
 		// repeat this for the collections where an edge is going into
-		isOccurrencesEdges.To = []string{isOccurrencesStr, artifactsStr}
+		isOccurrencesEdges.To = []string{artifactsStr}
+
+		var isOccurrencesSubjectEdges driver.EdgeDefinition
+		isOccurrencesSubjectEdges.Collection = isOccurrencesSubjectEdgesStr
+		// define a set of collections where an edge is going out...
+		isOccurrencesSubjectEdges.From = []string{pkgVersionsStr, srcNamesStr}
+
+		// repeat this for the collections where an edge is going into
+		isOccurrencesSubjectEdges.To = []string{isDependenciesStr}
 
 		var hasSLSAEdges driver.EdgeDefinition
 		hasSLSAEdges.Collection = hasSLSAEdgesStr
@@ -318,10 +328,18 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var hashEqualsEdges driver.EdgeDefinition
 		hashEqualsEdges.Collection = hashEqualsEdgesStr
 		// define a set of collections where an edge is going out...
-		hashEqualsEdges.From = []string{artifactsStr, hashEqualsStr}
+		hashEqualsEdges.From = []string{hashEqualsStr}
 
 		// repeat this for the collections where an edge is going into
-		hashEqualsEdges.To = []string{artifactsStr, hashEqualsStr}
+		hashEqualsEdges.To = []string{artifactsStr}
+
+		var hashEqualsSubjectEdges driver.EdgeDefinition
+		hashEqualsSubjectEdges.Collection = hashEqualsSubjectEdgesStr
+		// define a set of collections where an edge is going out...
+		hashEqualsSubjectEdges.From = []string{artifactsStr}
+
+		// repeat this for the collections where an edge is going into
+		hashEqualsSubjectEdges.To = []string{hashEqualsStr}
 
 		var hasSBOMEdges driver.EdgeDefinition
 		hasSBOMEdges.Collection = hasSBOMEdgesStr
@@ -349,9 +367,10 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
-		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName,
-			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencySubjectEdges, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges,
-			hasSLSAEdges, certifyVulnEdges, certifyScorecardEdges}
+		options.EdgeDefinitions = []driver.EdgeDefinition{pkgHasType, pkgHasNamespace, pkgHasName,
+			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, hashEqualsSubjectEdges, hashEqualsEdges,
+			isDependencySubjectEdges, isDependencyEdges, isOccurrencesSubjectEdges, isOccurrencesEdges,
+			hasSBOMEdges, hasSLSAEdges, certifyVulnEdges, certifyScorecardEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)

@@ -88,12 +88,10 @@ LET hashEqual = FIRST(
 		UPDATE {} IN hashEquals
 		RETURN NEW
 )
-LET edgeCollection = (FOR edgeData IN [
-    {fromKey: hashEqual._key, toKey: equalArtifact._key, from: hashEqual._id, to: equalArtifact._id, label: "is_equal"}, 
-    {fromKey: artifact._key, toKey: hashEqual._key, from: artifact._id, to: hashEqual._id, label: "subject"}]
 
-    INSERT { _key: CONCAT("hashEqualsEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO hashEqualsEdges OPTIONS { overwriteMode: "ignore" }
-)
+INSERT { _key: CONCAT("hashEqualsSubjectEdges", artifact._key, hashEqual._key), _from: artifact._id, _to: hashEqual._id} INTO hashEqualsSubjectEdges OPTIONS { overwriteMode: "ignore" }
+INSERT { _key: CONCAT("hashEqualsEdges", hashEqual._key, equalArtifact._key), _from: hashEqual._id, _to: equalArtifact._id} INTO hashEqualsEdges OPTIONS { overwriteMode: "ignore" }
+
 RETURN {
 	'artifact': {
 		'id': artifact._id,

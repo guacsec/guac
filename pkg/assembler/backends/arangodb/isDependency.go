@@ -246,7 +246,7 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 			  RETURN NEW
 	  )
 	  
-	  INSERT { _key: CONCAT("isDependencyEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("isDependencySubjectEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectEdges OPTIONS { overwriteMode: "ignore" }
 	  INSERT { _key: CONCAT("isDependencyEdges", isDependency._key, secondPkg.nameDoc._key), _from: isDependency._id, _to: secondPkg.name_id} INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
 	  
 	  RETURN {

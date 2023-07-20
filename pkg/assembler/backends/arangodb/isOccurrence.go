@@ -121,13 +121,9 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 				  UPDATE {} IN isOccurrences
 				  RETURN NEW
 		  )
-		  
-		  LET edgeCollection = (FOR edgeData IN [
-			{fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
-			{fromKey: firstPkg.versionDoc._key, toKey: isOccurrence._key, from: firstPkg.versionDoc._id, to: isOccurrence._id, label: "subject"}]
-		
-		  INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
-		  )
+		  			
+		  INSERT { _key: CONCAT("isOccurrencesSubjectEdges", firstPkg.versionDoc._key, isOccurrence._key), _from: firstPkg.versionDoc._id, _to: isOccurrence._id } INTO isOccurrencesSubjectEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("isOccurrencesEdges", isOccurrence._key, artifact._key), _from: isOccurrence._id, _to: artifact._id } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
 		  
 		  RETURN {
 			'pkgVersion': {
@@ -233,13 +229,9 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 				  UPDATE {} IN isOccurrences
 				  RETURN NEW
 		  )
-		  
-		  LET edgeCollection = (FOR edgeData IN [
-			{fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
-			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.name_id, to: isOccurrence._id, label: "subject"}]
-		
-		  INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
-		  )
+	
+		  INSERT { _key: CONCAT("isOccurrencesSubjectEdges", firstSrc.nameDoc._key, isOccurrence._key), _from: firstSrc.name_id, _to: isOccurrence._id } INTO isOccurrencesSubjectEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("isOccurrencesEdges", isOccurrence._key, artifact._key), _from: isOccurrence._id, _to: artifact._id } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
 		  
 		  RETURN {
 			'srcName': {
@@ -318,13 +310,9 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 			  UPDATE {} IN isOccurrences
 			  RETURN NEW
 	)
-	  
-	LET edgeCollection = (FOR edgeData IN [
-		{fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
-		{fromKey: firstPkg.versionDoc._key, toKey: isOccurrence._key, from: firstPkg.versionDoc._id, to: isOccurrence._id, label: "subject"}]
 	
-	  INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
-	)
+	INSERT { _key: CONCAT("isOccurrencesSubjectEdges", firstPkg.versionDoc._key, isOccurrence._key), _from: firstPkg.versionDoc._id, _to: isOccurrence._id } INTO isOccurrencesSubjectEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("isOccurrencesEdges", isOccurrence._key, artifact._key), _from: isOccurrence._id, _to: artifact._id } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
 	  
 	RETURN {
 		'pkgVersion': {
@@ -398,13 +386,9 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 				  UPDATE {} IN isOccurrences
 				  RETURN NEW
 		  )
-		  
-		  LET edgeCollection = (FOR edgeData IN [
-			{fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
-			{fromKey: firstSrc.nameDoc._key, toKey: isOccurrence._key, from: firstSrc.name_id, to: isOccurrence._id, label: "subject"}]
-		
-		  INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
-		  )
+
+		  INSERT { _key: CONCAT("isOccurrencesSubjectEdges", firstSrc.nameDoc._key, isOccurrence._key), _from: firstSrc.name_id, _to: isOccurrence._id } INTO isOccurrencesSubjectEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("isOccurrencesEdges", isOccurrence._key, artifact._key), _from: isOccurrence._id, _to: artifact._id } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
 		  
 		  RETURN {
 			'srcName': {
