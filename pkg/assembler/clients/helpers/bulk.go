@@ -130,12 +130,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestIsOccurrences failed with error: %w", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for HasSLSA
 			logger.Infof("assembling HasSLSA: %v", len(p.HasSlsa))
-			for _, v := range p.HasSlsa {
-				if err := ingestHasSlsa(ctx, gqlclient, v); err != nil {
-					return fmt.Errorf("ingestHasSlsa failed with error: %w", err)
-				}
+			if err := ingestHasSLSAs(ctx, gqlclient, p.HasSlsa); err != nil {
+				return fmt.Errorf("ingestHasSLSAs failed with error: %w", err)
 			}
 
 			// TODO(pxp928): add bulk ingestion for CertifyVuln
@@ -283,6 +280,26 @@ func ingestGHSAs(ctx context.Context, client graphql.Client, v []model.GHSAInput
 	_, err := model.IngestGHSAs(ctx, client, v)
 	if err != nil {
 		return fmt.Errorf("ingestGHSAs failed with error: %w", err)
+	}
+	return nil
+}
+
+func ingestHasSLSAs(ctx context.Context, client graphql.Client, v []assembler.HasSlsaIngest) error {
+	var subjects []model.ArtifactInputSpec
+	var slsaAttestations []model.SLSAInputSpec
+	var materialList [][]model.ArtifactInputSpec
+	var builders []model.BuilderInputSpec
+	for _, ingest := range v {
+		subjects = append(subjects, *ingest.Artifact)
+		slsaAttestations = append(slsaAttestations, *ingest.HasSlsa)
+		builders = append(builders, *ingest.Builder)
+		materialList = append(materialList, ingest.Materials)
+	}
+	if len(v) > 0 {
+		_, err := model.SLSAForArtifacts(ctx, client, subjects, materialList, builders, slsaAttestations)
+		if err != nil {
+			return fmt.Errorf("SLSAForArtifacts failed with error: %w", err)
+		}
 	}
 	return nil
 }

@@ -17,6 +17,7 @@ package arangodb
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -172,7 +173,102 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 }
 
 func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
-	return []*model.HasSlsa{}, fmt.Errorf("not implemented: IngestSLSAs")
+	if len(subjects) != len(slsaList) {
+		return nil, fmt.Errorf("uneven subjects and slsa attestation for ingestion")
+	}
+	if len(subjects) != len(builtFromList) {
+		return nil, fmt.Errorf("uneven subjects and built from artifact list for ingestion")
+	}
+	if len(subjects) != len(builtByList) {
+		return nil, fmt.Errorf("uneven subjects and built by for ingestion")
+	}
+
+	builtFromMap := map[string][]*model.Artifact{}
+	var listOfValues []map[string]any
+
+	for i := range subjects {
+		// get materials (builtFrom artifacts) as they should already be ingested
+		materialList, err := c.getMaterials(ctx, builtFromList[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to get built from artifact with error: %w", err)
+		}
+		builtFromMap[artifactKey(subjects[i].Algorithm, subjects[i].Digest)] = materialList
+		listOfValues = append(listOfValues, getSLSAValues(*subjects[i], materialList, *builtByList[i], *slsaList[i]))
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+
+	query := `
+	LET subject = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.algorithm FILTER art.digest == doc.digest RETURN art)
+	LET builtBy = FIRST(FOR builder IN builders FILTER builder.uri == doc.uri RETURN builder)
+	LET hasSLSA = FIRST(
+		UPSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:doc.builtFrom, buildType:doc.buildType, slsaPredicate:doc.slsaPredicate, slsaVersion:doc.slsaVersion, startedOn:doc.startedOn, finishedOn:doc.finishedOn, collector:doc.collector, origin:doc.origin } 
+		INSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:doc.builtFrom, buildType:doc.buildType, slsaPredicate:doc.slsaPredicate, slsaVersion:doc.slsaVersion, startedOn:doc.startedOn, finishedOn:doc.finishedOn, collector:doc.collector, origin:doc.origin } 
+		UPDATE {} IN hasSLSAs
+		RETURN NEW
+	)
+
+	INSERT { _key: CONCAT("hasSLSASubjectEdges", subject._key, hasSLSA._key), _from: subject._id, _to: hasSLSA._id } INTO hasSLSASubjectEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("hasSLSABuiltByEdges", hasSLSA._key, builtBy._key), _from: hasSLSA._id, _to: builtBy._id } INTO hasSLSABuiltByEdges OPTIONS { overwriteMode: "ignore" }
+
+	LET buildFromCollection = (FOR bfData IN doc.buildFromKeyList
+		INSERT { _key: CONCAT("hasSLSABuiltFromEdges", hasSLSA._key, bfData), _from: hasSLSA._id, _to: CONCAT("artifacts/", bfData) } INTO hasSLSABuiltFromEdges OPTIONS { overwriteMode: "ignore" }
+	)
+
+	RETURN {
+		'subject': {
+			'id': subject._id,
+			'algorithm': subject.algorithm,
+			'digest': subject.digest
+		},
+		'builtBy': {
+			'id': builtBy._id,
+			'uri': builtBy.uri
+		},
+		'hasSLSA_id': hasSLSA._id,
+		'buildType': hasSLSA.buildType,
+		'builtFrom': hasSLSA.builtFrom,
+		'slsaPredicate': hasSLSA.slsaPredicate,
+		'slsaVersion': hasSLSA.slsaVersion,
+		'startedOn': hasSLSA.startedOn,
+		'finishedOn': hasSLSA.finishedOn,
+		'collector': hasSLSA.collector,
+		'origin': hasSLSA.origin
+	}`
+
+	sb.WriteString(query)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestSLSAs")
+	if err != nil {
+		return nil, fmt.Errorf("failed to ingest hasSLSA: %w", err)
+	}
+	defer cursor.Close()
+	hasSLSAList, err := getHasSLSA(c, ctx, cursor, builtFromMap)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hasSLSA from arango cursor: %w", err)
+	}
+
+	return hasSLSAList, nil
 }
 
 func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
@@ -246,17 +342,17 @@ func artifactKey(alg, dig string) string {
 
 func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, builtFromMap map[string][]*model.Artifact) ([]*model.HasSlsa, error) {
 	type collectedData struct {
-		Subject       model.Artifact `json:"subject"`
-		BuiltBy       model.Builder  `json:"builtBy"`
-		BuiltFrom     []string       `json:"builtFrom"`
-		HasSLSAId     string         `json:"hasSLSA_id"`
-		BuildType     string         `json:"buildType"`
-		SlsaPredicate []string       `json:"slsaPredicate"`
-		SlsaVersion   string         `json:"slsaVersion"`
-		StartedOn     time.Time      `json:"startedOn"`
-		FinishedOn    time.Time      `json:"finishedOn"`
-		Collector     string         `json:"collector"`
-		Origin        string         `json:"origin"`
+		Subject       *model.Artifact `json:"subject"`
+		BuiltBy       model.Builder   `json:"builtBy"`
+		BuiltFrom     []string        `json:"builtFrom"`
+		HasSLSAId     string          `json:"hasSLSA_id"`
+		BuildType     string          `json:"buildType"`
+		SlsaPredicate []string        `json:"slsaPredicate"`
+		SlsaVersion   string          `json:"slsaVersion"`
+		StartedOn     *time.Time      `json:"startedOn"`
+		FinishedOn    *time.Time      `json:"finishedOn"`
+		Collector     string          `json:"collector"`
+		Origin        string          `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -293,15 +389,15 @@ func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, buil
 			BuildType:     createdValue.BuildType,
 			SlsaPredicate: getCollectedPredicates(createdValue.SlsaPredicate),
 			SlsaVersion:   createdValue.SlsaVersion,
-			StartedOn:     &createdValue.StartedOn,
-			FinishedOn:    &createdValue.FinishedOn,
+			StartedOn:     createdValue.StartedOn,
+			FinishedOn:    createdValue.FinishedOn,
 			Origin:        createdValue.Origin,
 			Collector:     createdValue.Collector,
 		}
 
 		hasSLSA := &model.HasSlsa{
 			ID:      createdValue.HasSLSAId,
-			Subject: &createdValue.Subject,
+			Subject: createdValue.Subject,
 			Slsa:    slsa,
 		}
 		hasSLSAList = append(hasSLSAList, hasSLSA)

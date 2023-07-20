@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -160,7 +159,24 @@ func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSp
 // Ingest HasSlsa
 
 func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
-	return []*model.HasSlsa{}, fmt.Errorf("not implemented: IngestSLSAs")
+	if len(subjects) != len(slsaList) {
+		return nil, gqlerror.Errorf("uneven subjects and slsa attestation for ingestion")
+	}
+	if len(subjects) != len(builtFromList) {
+		return nil, gqlerror.Errorf("uneven subjects and built from artifact list for ingestion")
+	}
+	if len(subjects) != len(builtByList) {
+		return nil, gqlerror.Errorf("uneven subjects and built by for ingestion")
+	}
+	var modelHasSLSAList []*model.HasSlsa
+	for i := range subjects {
+		hasSLSA, err := c.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsaList[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestSLSA failed with err: %v", err)
+		}
+		modelHasSLSAList = append(modelHasSLSAList, hasSLSA)
+	}
+	return modelHasSLSAList, nil
 }
 
 func (c *demoClient) IngestSLSA(ctx context.Context,
