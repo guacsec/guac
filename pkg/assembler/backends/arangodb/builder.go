@@ -27,11 +27,7 @@ import (
 
 func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	values := map[string]any{}
-	arangoQueryBuilder := newForQuery(buildersStr, "build")
-	if builderSpec.URI != nil {
-		arangoQueryBuilder.filter("build", "uri", "==", "@uri")
-		values["uri"] = builderSpec.URI
-	}
+	arangoQueryBuilder := setBuilderMatchValues(builderSpec, values)
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		"id": build._id,
@@ -48,6 +44,21 @@ func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderS
 	return getBuilders(ctx, cursor)
 }
 
+func setBuilderMatchValues(builderSpec *model.BuilderSpec, queryValues map[string]any) *arangoQueryBuilder {
+	arangoQueryBuilder := newForQuery(buildersStr, "build")
+	if builderSpec != nil {
+		if builderSpec.ID != nil {
+			arangoQueryBuilder.filter("build", "_id", "==", "@id")
+			queryValues["id"] = *builderSpec.ID
+		}
+		if builderSpec.URI != nil {
+			arangoQueryBuilder.filter("build", "uri", "==", "@uri")
+			queryValues["uri"] = builderSpec.URI
+		}
+	}
+	return arangoQueryBuilder
+}
+
 func getBuilderQueryValues(builder *model.BuilderInputSpec) map[string]any {
 	values := map[string]any{}
 	values["uri"] = strings.ToLower(builder.URI)
@@ -56,7 +67,7 @@ func getBuilderQueryValues(builder *model.BuilderInputSpec) map[string]any {
 
 func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
 
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 
 	for i := range builders {
 		listOfValues = append(listOfValues, getBuilderQueryValues(builders[i]))
@@ -88,7 +99,10 @@ func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.Bui
 UPSERT { uri:doc.uri } 
 INSERT { uri:doc.uri } 
 UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"uri": NEW.uri,
+  }`
 
 	sb.WriteString(query)
 
@@ -107,7 +121,10 @@ func (c *arangoClient) IngestBuilder(ctx context.Context, builder *model.Builder
 UPSERT { uri:@uri } 
 INSERT { uri:@uri } 
 UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"uri": NEW.uri,
+  }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getBuilderQueryValues(builder), "IngestBuilder")
 	if err != nil {

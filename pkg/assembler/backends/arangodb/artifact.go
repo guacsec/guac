@@ -27,15 +27,7 @@ import (
 
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	values := map[string]any{}
-	arangoQueryBuilder := newForQuery(artifactsStr, "art")
-	if artifactSpec.Algorithm != nil {
-		arangoQueryBuilder.filter("art", "algorithm", "==", "@algorithm")
-		values["algorithm"] = strings.ToLower(*artifactSpec.Algorithm)
-	}
-	if artifactSpec.Digest != nil {
-		arangoQueryBuilder.filter("art", "digest", "==", "@digest")
-		values["digest"] = strings.ToLower(*artifactSpec.Digest)
-	}
+	arangoQueryBuilder := setArtifactMatchValues(artifactSpec, values)
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		"id": art._id,
@@ -53,6 +45,128 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 	return getArtifacts(ctx, cursor)
 }
 
+func setArtifactMatchValues(artifactSpec *model.ArtifactSpec, queryValues map[string]any) *arangoQueryBuilder {
+	arangoQueryBuilder := newForQuery(artifactsStr, "art")
+	if artifactSpec != nil {
+		if artifactSpec.ID != nil {
+			arangoQueryBuilder.filter("art", "_id", "==", "@id")
+			queryValues["id"] = *artifactSpec.ID
+		}
+		if artifactSpec.Algorithm != nil {
+			arangoQueryBuilder.filter("art", "algorithm", "==", "@algorithm")
+			queryValues["algorithm"] = strings.ToLower(*artifactSpec.Algorithm)
+		}
+		if artifactSpec.Digest != nil {
+			arangoQueryBuilder.filter("art", "digest", "==", "@digest")
+			queryValues["digest"] = strings.ToLower(*artifactSpec.Digest)
+		}
+	}
+	return arangoQueryBuilder
+}
+
+// getMaterialsByID return an slice of artifacts as based on only their IDs
+func (c *arangoClient) getMaterialsByID(ctx context.Context, artifactIDs []string) ([]*model.Artifact, error) {
+	var listOfValues []map[string]any
+	for _, id := range artifactIDs {
+		values := map[string]any{}
+		values["id"] = id
+		listOfValues = append(listOfValues, values)
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+	sb.WriteString("\n")
+
+	arangoQueryBuilder := newForQuery(artifactsStr, "art")
+	arangoQueryBuilder.filter("art", "_id", "==", "doc.id")
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"id": art._id,
+		"algorithm": art.algorithm,
+		"digest": art.digest
+	  }`)
+
+	sb.WriteString(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "getMaterialsByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for Materials: %w", err)
+	}
+	defer cursor.Close()
+
+	return getArtifacts(ctx, cursor)
+}
+
+// getMaterials return an slice of artifacts as they are already ingested to be used for hasSLSA
+func (c *arangoClient) getMaterials(ctx context.Context, artifactSpec []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+	var listOfValues []map[string]any
+	for i := range artifactSpec {
+		listOfValues = append(listOfValues, getArtifactQueryValues(artifactSpec[i]))
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+	sb.WriteString("\n")
+
+	arangoQueryBuilder := newForQuery(artifactsStr, "art")
+	arangoQueryBuilder.filter("art", "algorithm", "==", "doc.algorithm")
+	arangoQueryBuilder.filter("art", "digest", "==", "doc.digest")
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"id": art._id,
+		"algorithm": art.algorithm,
+		"digest": art.digest
+	  }`)
+
+	sb.WriteString(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "getMaterials")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for Materials: %w", err)
+	}
+	defer cursor.Close()
+
+	return getArtifacts(ctx, cursor)
+}
+
 func getArtifactQueryValues(artifact *model.ArtifactInputSpec) map[string]any {
 	values := map[string]any{}
 	values["algorithm"] = strings.ToLower(artifact.Algorithm)
@@ -61,7 +175,7 @@ func getArtifactQueryValues(artifact *model.ArtifactInputSpec) map[string]any {
 }
 
 func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range artifacts {
 		listOfValues = append(listOfValues, getArtifactQueryValues(artifacts[i]))
 	}
@@ -92,7 +206,11 @@ func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.A
 UPSERT { algorithm:doc.algorithm, digest:doc.digest } 
 INSERT { algorithm:doc.algorithm, digest:doc.digest } 
 UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"algorithm": NEW.algorithm,
+	"digest": NEW.digest
+  }`
 
 	sb.WriteString(query)
 
@@ -110,7 +228,11 @@ func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.Artif
 UPSERT { algorithm:@algorithm, digest:@digest } 
 INSERT { algorithm:@algorithm, digest:@digest } 
 UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"algorithm": NEW.algorithm,
+	"digest": NEW.digest
+  }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getArtifactQueryValues(artifact), "IngestArtifact")
 	if err != nil {

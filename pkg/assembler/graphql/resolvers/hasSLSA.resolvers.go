@@ -15,9 +15,9 @@ func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.Artifac
 	return r.Backend.IngestSLSA(ctx, subject, builtFrom, builtBy, slsa)
 }
 
-// IngestMaterials is the resolver for the ingestMaterials field.
-func (r *mutationResolver) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	return r.Backend.IngestMaterials(ctx, materials)
+// IngestSLSAs is the resolver for the ingestSLSAs field.
+func (r *mutationResolver) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
+	return r.Backend.IngestSLSAs(ctx, subjects, builtFromList, builtByList, slsaList)
 }
 
 // HasSlsa is the resolver for the HasSLSA field.

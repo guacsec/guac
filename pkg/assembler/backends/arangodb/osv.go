@@ -55,7 +55,7 @@ func getOSVQueryValues(osv *model.OSVInputSpec) map[string]any {
 }
 
 func (c *arangoClient) IngestOSVs(ctx context.Context, osvs []*model.OSVInputSpec) ([]*model.Osv, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range osvs {
 		listOfValues = append(listOfValues, getOSVQueryValues(osvs[i]))
 	}
@@ -86,7 +86,10 @@ func (c *arangoClient) IngestOSVs(ctx context.Context, osvs []*model.OSVInputSpe
 UPSERT { osvId:doc.osvId } 
 INSERT { osvId:doc.osvId } 
 UPDATE {} IN osvs OPTIONS { indexHint: "byOsvID" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"osvId": NEW.osvId
+  }`
 
 	sb.WriteString(query)
 
@@ -104,7 +107,10 @@ func (c *arangoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (
 UPSERT { osvId:@osvId } 
 INSERT { osvId:@osvId } 
 UPDATE {} IN osvs OPTIONS { indexHint: "byOsvID" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"osvId": NEW.osvId
+  }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getOSVQueryValues(osv), "IngestOsv")
 	if err != nil {

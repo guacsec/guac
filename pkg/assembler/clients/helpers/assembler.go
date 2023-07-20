@@ -54,18 +54,18 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			materials := p.GetMaterials(ctx)
+			logger.Infof("assembling Materials (Artifact): %v", len(materials))
+			if err := ingestArtifacts(ctx, gqlclient, materials); err != nil {
+				return err
+			}
+
 			builders := p.GetBuilders(ctx)
 			logger.Infof("assembling Builder: %v", len(builders))
 			for _, v := range builders {
 				if err := ingestBuilder(ctx, gqlclient, v); err != nil {
 					return err
 				}
-			}
-
-			materials := p.GetMaterials(ctx)
-			logger.Infof("assembling Materials (Artifact): %v", len(materials))
-			if err := ingestMaterials(ctx, gqlclient, materials); err != nil {
-				return err
 			}
 
 			cves := p.GetCVEs(ctx)
@@ -206,11 +206,6 @@ func ingestSource(ctx context.Context, client graphql.Client, v *model.SourceInp
 
 func ingestArtifact(ctx context.Context, client graphql.Client, v *model.ArtifactInputSpec) error {
 	_, err := model.IngestArtifact(ctx, client, *v)
-	return err
-}
-
-func ingestMaterials(ctx context.Context, client graphql.Client, v []model.ArtifactInputSpec) error {
-	_, err := model.IngestMaterials(ctx, client, v)
 	return err
 }
 

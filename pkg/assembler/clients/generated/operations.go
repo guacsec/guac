@@ -5858,92 +5858,6 @@ type IngestGHSAsResponse struct {
 // GetIngestGHSAs returns IngestGHSAsResponse.IngestGHSAs, and is useful for accessing the field via an interface.
 func (v *IngestGHSAsResponse) GetIngestGHSAs() []IngestGHSAsIngestGHSAsGHSA { return v.IngestGHSAs }
 
-// IngestMaterialsIngestMaterialsArtifact includes the requested fields of the GraphQL type Artifact.
-// The GraphQL type's documentation follows.
-//
-// Artifact represents an artifact identified by a checksum hash.
-//
-// The checksum is split into the digest value and the algorithm used to generate
-// it. Both fields are mandatory and canonicalized to be lowercase.
-//
-// If having a checksum Go object, algorithm can be
-// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
-type IngestMaterialsIngestMaterialsArtifact struct {
-	AllArtifactTree `json:"-"`
-}
-
-// GetId returns IngestMaterialsIngestMaterialsArtifact.Id, and is useful for accessing the field via an interface.
-func (v *IngestMaterialsIngestMaterialsArtifact) GetId() string { return v.AllArtifactTree.Id }
-
-// GetAlgorithm returns IngestMaterialsIngestMaterialsArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *IngestMaterialsIngestMaterialsArtifact) GetAlgorithm() string {
-	return v.AllArtifactTree.Algorithm
-}
-
-// GetDigest returns IngestMaterialsIngestMaterialsArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *IngestMaterialsIngestMaterialsArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
-
-func (v *IngestMaterialsIngestMaterialsArtifact) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*IngestMaterialsIngestMaterialsArtifact
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.IngestMaterialsIngestMaterialsArtifact = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalIngestMaterialsIngestMaterialsArtifact struct {
-	Id string `json:"id"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-}
-
-func (v *IngestMaterialsIngestMaterialsArtifact) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *IngestMaterialsIngestMaterialsArtifact) __premarshalJSON() (*__premarshalIngestMaterialsIngestMaterialsArtifact, error) {
-	var retval __premarshalIngestMaterialsIngestMaterialsArtifact
-
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
-	return &retval, nil
-}
-
-// IngestMaterialsResponse is returned by IngestMaterials on success.
-type IngestMaterialsResponse struct {
-	// Helper mutation to ingest multiple artifacts as materials for SLSA.
-	IngestMaterials []IngestMaterialsIngestMaterialsArtifact `json:"ingestMaterials"`
-}
-
-// GetIngestMaterials returns IngestMaterialsResponse.IngestMaterials, and is useful for accessing the field via an interface.
-func (v *IngestMaterialsResponse) GetIngestMaterials() []IngestMaterialsIngestMaterialsArtifact {
-	return v.IngestMaterials
-}
-
 // IngestOSVIngestOSV includes the requested fields of the GraphQL type OSV.
 // The GraphQL type's documentation follows.
 //
@@ -18595,13 +18509,93 @@ func (v *SLSAForArtifactIngestSLSAHasSLSA) __premarshalJSON() (*__premarshalSLSA
 
 // SLSAForArtifactResponse is returned by SLSAForArtifact on success.
 type SLSAForArtifactResponse struct {
-	// Ingests a SLSA attestation.
+	// Ingests a SLSA attestation
 	IngestSLSA SLSAForArtifactIngestSLSAHasSLSA `json:"ingestSLSA"`
 }
 
 // GetIngestSLSA returns SLSAForArtifactResponse.IngestSLSA, and is useful for accessing the field via an interface.
 func (v *SLSAForArtifactResponse) GetIngestSLSA() SLSAForArtifactIngestSLSAHasSLSA {
 	return v.IngestSLSA
+}
+
+// SLSAForArtifactsIngestSLSAsHasSLSA includes the requested fields of the GraphQL type HasSLSA.
+// The GraphQL type's documentation follows.
+//
+// HasSLSA records that a subject node has a SLSA attestation.
+type SLSAForArtifactsIngestSLSAsHasSLSA struct {
+	allSLSATree `json:"-"`
+}
+
+// GetId returns SLSAForArtifactsIngestSLSAsHasSLSA.Id, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactsIngestSLSAsHasSLSA) GetId() string { return v.allSLSATree.Id }
+
+// GetSubject returns SLSAForArtifactsIngestSLSAsHasSLSA.Subject, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactsIngestSLSAsHasSLSA) GetSubject() allSLSATreeSubjectArtifact {
+	return v.allSLSATree.Subject
+}
+
+// GetSlsa returns SLSAForArtifactsIngestSLSAsHasSLSA.Slsa, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactsIngestSLSAsHasSLSA) GetSlsa() allSLSATreeSlsaSLSA { return v.allSLSATree.Slsa }
+
+func (v *SLSAForArtifactsIngestSLSAsHasSLSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForArtifactsIngestSLSAsHasSLSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForArtifactsIngestSLSAsHasSLSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSLSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForArtifactsIngestSLSAsHasSLSA struct {
+	Id string `json:"id"`
+
+	Subject allSLSATreeSubjectArtifact `json:"subject"`
+
+	Slsa allSLSATreeSlsaSLSA `json:"slsa"`
+}
+
+func (v *SLSAForArtifactsIngestSLSAsHasSLSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForArtifactsIngestSLSAsHasSLSA) __premarshalJSON() (*__premarshalSLSAForArtifactsIngestSLSAsHasSLSA, error) {
+	var retval __premarshalSLSAForArtifactsIngestSLSAsHasSLSA
+
+	retval.Id = v.allSLSATree.Id
+	retval.Subject = v.allSLSATree.Subject
+	retval.Slsa = v.allSLSATree.Slsa
+	return &retval, nil
+}
+
+// SLSAForArtifactsResponse is returned by SLSAForArtifacts on success.
+type SLSAForArtifactsResponse struct {
+	// Bulk Ingest SLSA attestations
+	IngestSLSAs []SLSAForArtifactsIngestSLSAsHasSLSA `json:"ingestSLSAs"`
+}
+
+// GetIngestSLSAs returns SLSAForArtifactsResponse.IngestSLSAs, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactsResponse) GetIngestSLSAs() []SLSAForArtifactsIngestSLSAsHasSLSA {
+	return v.IngestSLSAs
 }
 
 // SLSAInputSpec is the same as SLSA but for mutation input.
@@ -20279,14 +20273,6 @@ type __IngestGHSAsInput struct {
 // GetGhsas returns __IngestGHSAsInput.Ghsas, and is useful for accessing the field via an interface.
 func (v *__IngestGHSAsInput) GetGhsas() []GHSAInputSpec { return v.Ghsas }
 
-// __IngestMaterialsInput is used internally by genqlient
-type __IngestMaterialsInput struct {
-	Materials []ArtifactInputSpec `json:"materials"`
-}
-
-// GetMaterials returns __IngestMaterialsInput.Materials, and is useful for accessing the field via an interface.
-func (v *__IngestMaterialsInput) GetMaterials() []ArtifactInputSpec { return v.Materials }
-
 // __IngestOSVInput is used internally by genqlient
 type __IngestOSVInput struct {
 	Osv OSVInputSpec `json:"osv"`
@@ -20612,6 +20598,26 @@ func (v *__SLSAForArtifactInput) GetBuilder() BuilderInputSpec { return v.Builde
 
 // GetSlsa returns __SLSAForArtifactInput.Slsa, and is useful for accessing the field via an interface.
 func (v *__SLSAForArtifactInput) GetSlsa() SLSAInputSpec { return v.Slsa }
+
+// __SLSAForArtifactsInput is used internally by genqlient
+type __SLSAForArtifactsInput struct {
+	Artifacts     []ArtifactInputSpec   `json:"artifacts"`
+	MaterialsList [][]ArtifactInputSpec `json:"materialsList"`
+	Builders      []BuilderInputSpec    `json:"builders"`
+	SlsaList      []SLSAInputSpec       `json:"slsaList"`
+}
+
+// GetArtifacts returns __SLSAForArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__SLSAForArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetMaterialsList returns __SLSAForArtifactsInput.MaterialsList, and is useful for accessing the field via an interface.
+func (v *__SLSAForArtifactsInput) GetMaterialsList() [][]ArtifactInputSpec { return v.MaterialsList }
+
+// GetBuilders returns __SLSAForArtifactsInput.Builders, and is useful for accessing the field via an interface.
+func (v *__SLSAForArtifactsInput) GetBuilders() []BuilderInputSpec { return v.Builders }
+
+// GetSlsaList returns __SLSAForArtifactsInput.SlsaList, and is useful for accessing the field via an interface.
+func (v *__SLSAForArtifactsInput) GetSlsaList() []SLSAInputSpec { return v.SlsaList }
 
 // __SourcesInput is used internally by genqlient
 type __SourcesInput struct {
@@ -27037,46 +27043,6 @@ func IngestGHSAs(
 	return &data, err
 }
 
-// The query or mutation executed by IngestMaterials.
-const IngestMaterials_Operation = `
-mutation IngestMaterials ($materials: [ArtifactInputSpec!]!) {
-	ingestMaterials(materials: $materials) {
-		... AllArtifactTree
-	}
-}
-fragment AllArtifactTree on Artifact {
-	id
-	algorithm
-	digest
-}
-`
-
-func IngestMaterials(
-	ctx context.Context,
-	client graphql.Client,
-	materials []ArtifactInputSpec,
-) (*IngestMaterialsResponse, error) {
-	req := &graphql.Request{
-		OpName: "IngestMaterials",
-		Query:  IngestMaterials_Operation,
-		Variables: &__IngestMaterialsInput{
-			Materials: materials,
-		},
-	}
-	var err error
-
-	var data IngestMaterialsResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
 // The query or mutation executed by IngestOSV.
 const IngestOSV_Operation = `
 mutation IngestOSV ($osv: OSVInputSpec!) {
@@ -30163,6 +30129,77 @@ func SLSAForArtifact(
 	var err error
 
 	var data SLSAForArtifactResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by SLSAForArtifacts.
+const SLSAForArtifacts_Operation = `
+mutation SLSAForArtifacts ($artifacts: [ArtifactInputSpec!]!, $materialsList: [[ArtifactInputSpec!]!]!, $builders: [BuilderInputSpec!]!, $slsaList: [SLSAInputSpec!]!) {
+	ingestSLSAs(subjects: $artifacts, builtFromList: $materialsList, builtByList: $builders, slsaList: $slsaList) {
+		... allSLSATree
+	}
+}
+fragment allSLSATree on HasSLSA {
+	id
+	subject {
+		... AllArtifactTree
+	}
+	slsa {
+		builtFrom {
+			... AllArtifactTree
+		}
+		builtBy {
+			id
+			uri
+		}
+		buildType
+		slsaPredicate {
+			key
+			value
+		}
+		slsaVersion
+		startedOn
+		finishedOn
+		origin
+		collector
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func SLSAForArtifacts(
+	ctx context.Context,
+	client graphql.Client,
+	artifacts []ArtifactInputSpec,
+	materialsList [][]ArtifactInputSpec,
+	builders []BuilderInputSpec,
+	slsaList []SLSAInputSpec,
+) (*SLSAForArtifactsResponse, error) {
+	req := &graphql.Request{
+		OpName: "SLSAForArtifacts",
+		Query:  SLSAForArtifacts_Operation,
+		Variables: &__SLSAForArtifactsInput{
+			Artifacts:     artifacts,
+			MaterialsList: materialsList,
+			Builders:      builders,
+			SlsaList:      slsaList,
+		},
+	}
+	var err error
+
+	var data SLSAForArtifactsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

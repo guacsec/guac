@@ -61,7 +61,7 @@ func getCVEQueryValues(cve *model.CVEInputSpec) map[string]any {
 }
 
 func (c *arangoClient) IngestCVEs(ctx context.Context, cves []*model.CVEInputSpec) ([]*model.Cve, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range cves {
 		listOfValues = append(listOfValues, getCVEQueryValues(cves[i]))
 	}
@@ -92,7 +92,11 @@ func (c *arangoClient) IngestCVEs(ctx context.Context, cves []*model.CVEInputSpe
 UPSERT { year:doc.year, cveId:doc.cveId } 
 INSERT { year:doc.year, cveId:doc.cveId } 
 UPDATE {} IN cves OPTIONS { indexHint: "byCveID" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"year": NEW.year,
+	"cveID": NEW.cveId
+  }`
 
 	sb.WriteString(query)
 
@@ -110,7 +114,11 @@ func (c *arangoClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (
 UPSERT { year:@year, cveId:@cveId } 
 INSERT { year:@year, cveId:@cveId } 
 UPDATE {} IN cves OPTIONS { indexHint: "byCveID" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"year": NEW.year,
+	"cveID": NEW.cveId
+  }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getCVEQueryValues(cve), "IngestCve")
 	if err != nil {
