@@ -65,7 +65,7 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 		return nil, fmt.Errorf("uneven packages and isDependency for ingestion")
 	}
 
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 
 	for i := range pkgs {
 		listOfValues = append(listOfValues, getDependencyQueryValues(pkgs[i], depPkgs[i], dependencies[i]))

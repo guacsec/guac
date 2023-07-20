@@ -56,7 +56,7 @@ func getBuilderQueryValues(builder *model.BuilderInputSpec) map[string]any {
 
 func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
 
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 
 	for i := range builders {
 		listOfValues = append(listOfValues, getBuilderQueryValues(builders[i]))

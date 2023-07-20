@@ -55,7 +55,7 @@ func getOSVQueryValues(osv *model.OSVInputSpec) map[string]any {
 }
 
 func (c *arangoClient) IngestOSVs(ctx context.Context, osvs []*model.OSVInputSpec) ([]*model.Osv, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range osvs {
 		listOfValues = append(listOfValues, getOSVQueryValues(osvs[i]))
 	}

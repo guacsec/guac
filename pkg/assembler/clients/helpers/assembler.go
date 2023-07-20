@@ -54,6 +54,12 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			materials := p.GetMaterials(ctx)
+			logger.Infof("assembling Materials (Artifact): %v", len(materials))
+			if err := ingestArtifacts(ctx, gqlclient, materials); err != nil {
+				return err
+			}
+
 			builders := p.GetBuilders(ctx)
 			logger.Infof("assembling Builder: %v", len(builders))
 			for _, v := range builders {

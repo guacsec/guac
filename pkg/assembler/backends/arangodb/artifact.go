@@ -53,6 +53,57 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 	return getArtifacts(ctx, cursor)
 }
 
+// GetMaterials return an slice of artifacts as they are already ingested to be used for hasSLSA
+func (c *arangoClient) getMaterials(ctx context.Context, artifactSpec []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+	var listOfValues []map[string]any
+	for i := range artifactSpec {
+		listOfValues = append(listOfValues, getArtifactQueryValues(artifactSpec[i]))
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+	sb.WriteString("\n")
+
+	arangoQueryBuilder := newForQuery(artifactsStr, "art")
+	arangoQueryBuilder.filter("art", "algorithm", "==", "doc.algorithm")
+	arangoQueryBuilder.filter("art", "digest", "==", "doc.digest")
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"id": art._id,
+		"algorithm": art.algorithm,
+		"digest": art.digest
+	  }`)
+
+	sb.WriteString(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "GetMaterials")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for Materials: %w", err)
+	}
+	defer cursor.Close()
+
+	return getArtifacts(ctx, cursor)
+}
+
 func getArtifactQueryValues(artifact *model.ArtifactInputSpec) map[string]any {
 	values := map[string]any{}
 	values["algorithm"] = strings.ToLower(artifact.Algorithm)
@@ -61,7 +112,7 @@ func getArtifactQueryValues(artifact *model.ArtifactInputSpec) map[string]any {
 }
 
 func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range artifacts {
 		listOfValues = append(listOfValues, getArtifactQueryValues(artifacts[i]))
 	}

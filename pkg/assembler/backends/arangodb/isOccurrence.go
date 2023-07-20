@@ -59,7 +59,7 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 			return nil, fmt.Errorf("uneven packages and occurrence for ingestion")
 		}
 
-		listOfValues := []map[string]any{}
+		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
 			listOfValues = append(listOfValues, getOccurrenceQueryValues(subjects.Packages[i], nil, artifacts[i], occurrences[i]))
@@ -171,7 +171,7 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 			return nil, fmt.Errorf("uneven sources and occurrence for ingestion")
 		}
 
-		listOfValues := []map[string]any{}
+		var listOfValues []map[string]any
 
 		for i := range subjects.Sources {
 			listOfValues = append(listOfValues, getOccurrenceQueryValues(nil, subjects.Sources[i], artifacts[i], occurrences[i]))

@@ -55,7 +55,7 @@ func getGHSAQueryValues(ghsa *model.GHSAInputSpec) map[string]any {
 }
 
 func (c *arangoClient) IngestGHSAs(ctx context.Context, ghsas []*model.GHSAInputSpec) ([]*model.Ghsa, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range ghsas {
 		listOfValues = append(listOfValues, getGHSAQueryValues(ghsas[i]))
 	}

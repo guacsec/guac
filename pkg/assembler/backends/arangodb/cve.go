@@ -61,7 +61,7 @@ func getCVEQueryValues(cve *model.CVEInputSpec) map[string]any {
 }
 
 func (c *arangoClient) IngestCVEs(ctx context.Context, cves []*model.CVEInputSpec) ([]*model.Cve, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range cves {
 		listOfValues = append(listOfValues, getCVEQueryValues(cves[i]))
 	}

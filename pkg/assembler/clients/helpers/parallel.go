@@ -79,6 +79,10 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 				nouns.Go(func() error { return ingestBuilder(errGroupNounCtx, gqlclient, v) })
 			}
 
+			materials := p.GetMaterials(errGroupNounCtx)
+			logger.Infof("assembling Materials: %v", len(materials))
+			nouns.Go(func() error { return ingestArtifacts(errGroupNounCtx, gqlclient, materials) })
+
 			cves := p.GetCVEs(errGroupNounCtx)
 			logger.Infof("assembling CVE: %v", len(cves))
 			for _, v := range cves {

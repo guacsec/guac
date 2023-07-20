@@ -164,7 +164,7 @@ func getPackageQueryValues(c *arangoClient, pkg *model.PkgInputSpec) map[string]
 }
 
 func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range pkgs {
 		listOfValues = append(listOfValues, getPackageQueryValues(c, pkgs[i]))
 	}

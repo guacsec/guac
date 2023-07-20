@@ -82,10 +82,10 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 }
 
 func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	// ingest materials (builtFrom artifacts)
-	artifacts, err := c.IngestArtifacts(ctx, builtFrom)
+	// get materials (builtFrom artifacts) as they should already be ingested
+	artifacts, err := c.getMaterials(ctx, builtFrom)
 	if err != nil {
-		return nil, fmt.Errorf("failed to ingest built from artifact with error: %w", err)
+		return nil, fmt.Errorf("failed to get built from artifact with error: %w", err)
 	}
 
 	query := `

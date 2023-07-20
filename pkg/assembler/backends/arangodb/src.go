@@ -118,7 +118,7 @@ func getSourceQueryValues(c *arangoClient, source *model.SourceInputSpec) map[st
 }
 
 func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 
 	for i := range sources {
 		listOfValues = append(listOfValues, getSourceQueryValues(c, sources[i]))

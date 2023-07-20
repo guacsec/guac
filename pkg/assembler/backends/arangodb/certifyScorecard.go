@@ -163,7 +163,7 @@ func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.So
 		return nil, fmt.Errorf("uneven source and scorecards for ingestion")
 	}
 
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 
 	for i := range sources {
 		listOfValues = append(listOfValues, getScorecardValues(sources[i], scorecards[i]))

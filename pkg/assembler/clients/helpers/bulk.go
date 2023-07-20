@@ -64,6 +64,12 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
 			}
 
+			materials := p.GetMaterials(ctx)
+			logger.Infof("assembling Materials (Artifact): %v", len(materials))
+			if err := ingestArtifacts(ctx, gqlclient, materials); err != nil {
+				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
+			}
+
 			builders := p.GetBuilders(ctx)
 			logger.Infof("assembling Builder: %v", len(builders))
 			var collectedBuilders []model.BuilderInputSpec
