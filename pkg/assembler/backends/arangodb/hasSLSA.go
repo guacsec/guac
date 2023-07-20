@@ -376,7 +376,7 @@ func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, buil
 		if val, ok := builtFromMap[artifactKey(createdValue.Subject.Algorithm, createdValue.Subject.Digest)]; ok {
 			builtFromArtifacts = val
 		} else {
-			artifacts, err := c.getMaterialsID(ctx, createdValue.BuiltFrom)
+			artifacts, err := c.getMaterialsByID(ctx, createdValue.BuiltFrom)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get artifact by ID for hasSLSA builtFrom with error: %w", err)
 			}

@@ -64,8 +64,8 @@ func setArtifactMatchValues(artifactSpec *model.ArtifactSpec, queryValues map[st
 	return arangoQueryBuilder
 }
 
-// getMaterialsID return an slice of artifacts as based on only their IDs
-func (c *arangoClient) getMaterialsID(ctx context.Context, artifactIDs []string) ([]*model.Artifact, error) {
+// getMaterialsByID return an slice of artifacts as based on only their IDs
+func (c *arangoClient) getMaterialsByID(ctx context.Context, artifactIDs []string) ([]*model.Artifact, error) {
 	var listOfValues []map[string]any
 	for _, id := range artifactIDs {
 		values := map[string]any{}
@@ -107,7 +107,7 @@ func (c *arangoClient) getMaterialsID(ctx context.Context, artifactIDs []string)
 
 	sb.WriteString(arangoQueryBuilder.string())
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "GetMaterials")
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "getMaterialsByID")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Materials: %w", err)
 	}
@@ -116,7 +116,7 @@ func (c *arangoClient) getMaterialsID(ctx context.Context, artifactIDs []string)
 	return getArtifacts(ctx, cursor)
 }
 
-// GetMaterials return an slice of artifacts as they are already ingested to be used for hasSLSA
+// getMaterials return an slice of artifacts as they are already ingested to be used for hasSLSA
 func (c *arangoClient) getMaterials(ctx context.Context, artifactSpec []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
 	var listOfValues []map[string]any
 	for i := range artifactSpec {
@@ -158,7 +158,7 @@ func (c *arangoClient) getMaterials(ctx context.Context, artifactSpec []*model.A
 
 	sb.WriteString(arangoQueryBuilder.string())
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "GetMaterials")
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "getMaterials")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Materials: %w", err)
 	}
