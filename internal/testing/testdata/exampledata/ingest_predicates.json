@@ -56,7 +56,7 @@
       }
     }
   ],
-  "isDepedency": [
+  "isDependency": [
     {
       "pkg": {
         "type": "guac",

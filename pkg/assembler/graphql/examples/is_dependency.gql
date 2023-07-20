@@ -49,37 +49,37 @@ origin
 collector
 }
 
-query IsDepedencyQ1 {
+query IsDependencyQ1 {
   IsDependency(isDependencySpec: {}) {
     ...allIsDependencyTree
   }
 }
 
-query IsDepedencyQ2 {
+query IsDependencyQ2 {
   IsDependency(isDependencySpec: {origin: "testing backend"}) {
     ...allIsDependencyTree
   }
 }
 
-query IsDepedencyQ3 {
+query IsDependencyQ3 {
   IsDependency(isDependencySpec: {package: {name: "debian"}}) {
     ...allIsDependencyTree
   }
 }
 
-query IsDepedencyQ4 {
+query IsDependencyQ4 {
   IsDependency(isDependencySpec: {package: {name: "dpkg"}}) {
     ...allIsDependencyTree
   }
 }
 # returns nothing as there is no package with openSSL. It is a dependent package
-query IsDepedencyQ5 {
+query IsDependencyQ5 {
   IsDependency(isDependencySpec: {package: {name: "openssl", version: "3.0.3"}}) {
     ...allIsDependencyTree
   }
 }
 
-query IsDepedencyQ6 {
+query IsDependencyQ6 {
   IsDependency(isDependencySpec: {dependentPackage: {name: "openssl"}}) {
     ...allIsDependencyTree
   }
