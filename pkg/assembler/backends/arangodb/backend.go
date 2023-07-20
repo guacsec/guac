@@ -814,12 +814,6 @@ func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqua
 	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
 }
 
-// Mutations for software trees (read-write queries)
-
-func (c *arangoClient) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	return nil, nil
-}
-
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))

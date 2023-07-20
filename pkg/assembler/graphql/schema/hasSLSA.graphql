@@ -133,6 +133,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a SLSA attestation."
+  "Ingests a SLSA attestation"
   ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
+  "Bulk Ingest SLSA attestations"
+  ingestSLSAs(subjects: [ArtifactInputSpec!]!, builtFromList: [[ArtifactInputSpec!]!]!, builtByList: [BuilderInputSpec!]!, slsaList: [SLSAInputSpec!]!): [HasSLSA!]!
 }

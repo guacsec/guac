@@ -171,6 +171,10 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 	return values
 }
 
+func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
+	return []*model.HasSlsa{}, fmt.Errorf("not implemented: IngestSLSAs")
+}
+
 func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
 	// get materials (builtFrom artifacts) as they should already be ingested
 	artifacts, err := c.getMaterials(ctx, builtFrom)

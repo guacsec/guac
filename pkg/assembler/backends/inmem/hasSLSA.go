@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -158,21 +159,8 @@ func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSp
 
 // Ingest HasSlsa
 
-func (c *demoClient) IngestMaterials(ctx context.Context,
-	materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	var output []*model.Artifact
-
-	// For this backend, there's no optimization we can do, we need to
-	// ingest everything sequentially
-	for _, material := range materials {
-		artifact, err := c.IngestArtifact(ctx, material)
-		if err != nil {
-			return nil, err
-		}
-		output = append(output, artifact)
-	}
-
-	return output, nil
+func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
+	return []*model.HasSlsa{}, fmt.Errorf("not implemented: IngestSLSAs")
 }
 
 func (c *demoClient) IngestSLSA(ctx context.Context,
