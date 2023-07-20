@@ -796,6 +796,138 @@ var (
 			},
 		},
 	}
+	pointOfContactGraph = assembler.IngestPredicates{
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgTypeL",
+					Namespace: ptrfrom.String("pkgNamespaceL"),
+					Name:      "pkgNameL",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithmK",
+					Digest:    "testArtifactDigestK",
+				},
+				IsOccurrence: &model.IsOccurrenceInputSpec{
+					Justification: "connect pkgL and artifactK",
+				},
+			},
+		},
+		HasSourceAt: []assembler.HasSourceAtIngest{
+			{
+				Src: &model.SourceInputSpec{
+					Type:      "srcTypeK",
+					Namespace: "srcNamespaceK",
+					Name:      "srcNameK",
+				},
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgTypeL",
+					Namespace: ptrfrom.String("pkgNamespaceL"),
+					Name:      "pkgNameL",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				HasSourceAt: &model.HasSourceAtInputSpec{
+					Justification: "test justification",
+					KnownSince:    tm,
+				},
+				PkgMatchFlag: model.MatchFlags{
+					Pkg: model.PkgMatchTypeSpecificVersion,
+				},
+			},
+		},
+		IsDependency: []assembler.IsDependencyIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgTypeL",
+					Namespace: ptrfrom.String("pkgNamespaceL"),
+					Name:      "pkgNameL",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				DepPkg: &model.PkgInputSpec{
+					Type:      "pkgTypeM",
+					Namespace: ptrfrom.String("pkgNamespaceM"),
+					Name:      "pkgNameM",
+					Version:   ptrfrom.String("3.0.3"),
+				},
+				IsDependency: &model.IsDependencyInputSpec{
+					VersionRange:   "=>1.0.0",
+					DependencyType: model.DependencyTypeDirect,
+					Justification:  "test justification one",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+			},
+		},
+		PointOfContact: []assembler.PointOfContactIngest{
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgTypeM",
+					Namespace: ptrfrom.String("pkgNamespaceM"),
+					Name:      "pkgNameM",
+					Version:   ptrfrom.String("1.19.0"),
+				},
+				PkgMatchFlag: model.MatchFlags{
+					Pkg: model.PkgMatchTypeSpecificVersion,
+				},
+				PointOfContact: &model.PointOfContactInputSpec{
+					Email:         "testEmailM",
+					Info:          "testInfo",
+					Since:         tm,
+					Justification: "testJustification",
+					Origin:        "testOrigin",
+					Collector:     "testCollector",
+				},
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "pkgTypeL",
+					Namespace: ptrfrom.String("pkgNamespaceL"),
+					Name:      "pkgNameL",
+				},
+				PkgMatchFlag: model.MatchFlags{
+					Pkg: model.PkgMatchTypeAllVersions,
+				},
+				PointOfContact: &model.PointOfContactInputSpec{
+					Email:         "testEmailL",
+					Info:          "testInfo",
+					Since:         tm,
+					Justification: "testJustification",
+					Origin:        "testOrigin",
+					Collector:     "testCollector",
+				},
+			},
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "testArtifactAlgorithmK",
+					Digest:    "testArtifactDigestK",
+				},
+				PointOfContact: &model.PointOfContactInputSpec{
+					Email:         "testEmailK",
+					Info:          "testInfo",
+					Since:         tm,
+					Justification: "testJustification",
+					Origin:        "testOrigin",
+					Collector:     "testCollector",
+				},
+			},
+			{
+				Src: &model.SourceInputSpec{
+					Type:      "srcTypeK",
+					Namespace: "srcNamespaceK",
+					Name:      "srcNameK",
+				},
+				PointOfContact: &model.PointOfContactInputSpec{
+					Email:         "testEmailK",
+					Info:          "testInfo",
+					Since:         tm,
+					Justification: "testJustification",
+					Origin:        "testOrigin",
+					Collector:     "testCollector",
+				},
+			},
+		},
+	}
 )
 
 func ingestIsDependency(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
@@ -963,6 +1095,38 @@ func ingestHashEqual(ctx context.Context, client graphql.Client, graph assembler
 	return nil
 }
 
+func ingestPointOfContact(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
+	for _, ingest := range graph.PointOfContact {
+		var err error
+
+		if ingest.Src != nil {
+			_, err = model.IngestSource(ctx, client, *ingest.Src)
+		} else if ingest.Pkg != nil {
+			_, err = model.IngestPackage(ctx, client, *ingest.Pkg)
+
+		} else {
+			_, err = model.IngestArtifact(ctx, client, *ingest.Artifact)
+		}
+
+		if err != nil {
+			return fmt.Errorf("error in ingesting pkg/src/artifact PointOfContact: %v\n", err)
+		}
+
+		if ingest.Src != nil {
+			_, err = model.PointOfContactSrc(ctx, client, *ingest.Src, *ingest.PointOfContact)
+		} else if ingest.Pkg != nil {
+			_, err = model.PointOfContactPkg(ctx, client, *ingest.Pkg, &ingest.PkgMatchFlag, *ingest.PointOfContact)
+		} else {
+			_, err = model.PointOfContactArtifact(ctx, client, *ingest.Artifact, *ingest.PointOfContact)
+		}
+
+		if err != nil {
+			return fmt.Errorf("error in ingesting PointOfContact: %v\n", err)
+		}
+	}
+	return nil
+}
+
 func ingestTestData(ctx context.Context, client graphql.Client, graph assembler.IngestPredicates) error {
 	if len(graph.IsDependency) > 0 {
 		err := ingestIsDependency(ctx, client, graph)
@@ -1013,6 +1177,13 @@ func ingestTestData(ctx context.Context, client graphql.Client, graph assembler.
 		}
 	}
 
+	if len(graph.PointOfContact) > 0 {
+		err := ingestPointOfContact(ctx, client, graph)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -1044,6 +1215,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		expectedPkgs      []string
 		expectedArtifacts []string
 		expectedSrcs      []string
+		expectedPOC       []string
+		expectedPOCLen    int
 		graphInputs       []assembler.IngestPredicates
 	}{
 		{
@@ -1255,8 +1428,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:      "aName",
 			startVersion:   ptrfrom.String("1.19.0"),
 			maxDepth:       10,
-			expectedLen:    8,                                            // change to 8 once implemented
-			expectedPkgs:   []string{"aType", "bType", "cType", "dType"}, // add dType once implemented
+			expectedLen:    8,
+			expectedPkgs:   []string{"aType", "bType", "cType", "dType"},
 			graphInputs:    []assembler.IngestPredicates{pkgEqualGraph},
 		},
 		{
@@ -1266,10 +1439,23 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:         "abcPkgName1",
 			startVersion:      ptrfrom.String("3.0.3"),
 			maxDepth:          10,
-			expectedLen:       7,                              // change to 8 once implemented
-			expectedPkgs:      []string{"abcPkg1", "abcPkg2"}, // add abcPkg2 once implemented and expectedArtifacts abcTestArtifactAlgorithm
+			expectedLen:       7,
+			expectedPkgs:      []string{"abcPkg1", "abcPkg2"},
 			expectedArtifacts: []string{"abcTestArtifactAlgorithm"},
 			graphInputs:       []assembler.IngestPredicates{hashEqualGraph},
+		},
+		{
+			name:              "20: test pointOfContact",
+			startType:         "pkgTypeM",
+			startNamespace:    "pkgNamespaceM",
+			startName:         "pkgNameM",
+			startVersion:      ptrfrom.String("3.0.3"),
+			maxDepth:          9,
+			expectedLen:       6,
+			expectedPkgs:      []string{"pkgTypeL", "pkgTypeM"},
+			expectedSrcs:      []string{"srcTypeK"}, // add expectedPOC K, L, M once implemented w/ len 5
+			expectedArtifacts: []string{"testArtifactAlgorithmK"},
+			graphInputs:       []assembler.IngestPredicates{pointOfContactGraph},
 		},
 	}
 
@@ -1404,6 +1590,8 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 					t.Errorf("this ID appears in the returned map but is not expected: %s \n", gotID)
 					return
 				}
+
+				// TODO: add check for POC
 			}
 
 		})

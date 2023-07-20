@@ -34,11 +34,12 @@ const (
 )
 
 type DfsNode struct {
-	Expanded     bool   // true once all node neighbors are added to queue
-	Parent       string // TODO: turn parent into a list in cause discovered twice from two different nodes
-	Depth        int
-	Type         NodeType
-	nodeVersions []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
+	Expanded       bool   // true once all node neighbors are added to queue
+	Parent         string // TODO: turn parent into a list in cause discovered twice from two different nodes
+	Depth          int
+	Type           NodeType
+	nodeVersions   []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
+	PointOfContact model.PointOfContactInputSpec
 }
 
 type queueValues struct {
@@ -48,7 +49,6 @@ type queueValues struct {
 	queue   []string
 }
 
-// TODO: make more robust using predicates
 func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Client, startID string, stopID *string, maxDepth int) (map[string]DfsNode, error) {
 	startNode, err := model.Node(ctx, gqlClient, startID)
 
@@ -147,6 +147,8 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			}
 		case *model.NeighborsNeighborsHasSourceAt:
 			exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsPointOfContact:
+			explorePointOfContact(ctx, gqlClient, q, *neighbor)
 		}
 	case PackageVersion:
 		switch neighbor := neighbor.(type) {
@@ -156,6 +158,8 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsPkgEqual:
 			explorePkgEqual(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsPointOfContact:
+			explorePointOfContact(ctx, gqlClient, q, *neighbor)
 		}
 	case SourceName:
 		switch neighbor := neighbor.(type) {
@@ -167,6 +171,8 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			if err != nil {
 				return err
 			}
+		case *model.NeighborsNeighborsPointOfContact:
+			explorePointOfContact(ctx, gqlClient, q, *neighbor)
 		}
 	case Artifact:
 		switch neighbor := neighbor.(type) {
@@ -176,8 +182,9 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			exploreIsOccurrenceFromArtifact(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsHashEqual:
 			exploreHashEqual(ctx, gqlClient, q, *neighbor)
+		case *model.NeighborsNeighborsPointOfContact:
+			explorePointOfContact(ctx, gqlClient, q, *neighbor)
 		}
-
 	}
 	return nil
 }
@@ -264,6 +271,13 @@ func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client
 	}
 
 	q.nodeMap[hasSourceAt.Source.Namespaces[0].Names[0].Id] = node
+}
+
+// TODO: implement
+func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *queueValues, pointOfContact model.NeighborsNeighborsPointOfContact) {
+	// Step 1: Add field to current node in nodeMap of this POC (may need to copy over old fields)
+	// Step 2: If it is a packageName, add the POC to applicable versions (versions in the nodeVersions) but not the reverse
+	// (i.e. for a version do not add POC to associated name as it may not be applicable)
 }
 
 func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlClient graphql.Client, pkgType string, pkgNamespace string, pkgName string, id string) error {
