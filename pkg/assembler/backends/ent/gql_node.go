@@ -18,6 +18,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -59,6 +60,9 @@ func (n *Certification) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *CertifyScorecard) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *CertifyVex) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *CertifyVuln) IsNode() {}
@@ -224,6 +228,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.CertifyScorecard.Query().
 			Where(certifyscorecard.ID(id))
 		query, err := query.CollectFields(ctx, "CertifyScorecard")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case certifyvex.Table:
+		query := c.CertifyVex.Query().
+			Where(certifyvex.ID(id))
+		query, err := query.CollectFields(ctx, "CertifyVex")
 		if err != nil {
 			return nil, err
 		}
@@ -589,6 +605,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.CertifyScorecard.Query().
 			Where(certifyscorecard.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "CertifyScorecard")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case certifyvex.Table:
+		query := c.CertifyVex.Query().
+			Where(certifyvex.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "CertifyVex")
 		if err != nil {
 			return nil, err
 		}

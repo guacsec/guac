@@ -69,6 +69,18 @@ func (f CertifyScorecardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertifyScorecardMutation", m)
 }
 
+// The CertifyVexFunc type is an adapter to allow the use of ordinary
+// function as CertifyVex mutator.
+type CertifyVexFunc func(context.Context, *ent.CertifyVexMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CertifyVexFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CertifyVexMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertifyVexMutation", m)
+}
+
 // The CertifyVulnFunc type is an adapter to allow the use of ordinary
 // function as CertifyVuln mutator.
 type CertifyVulnFunc func(context.Context, *ent.CertifyVulnMutation) (ent.Value, error)

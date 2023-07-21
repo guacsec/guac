@@ -22,6 +22,8 @@ type Tx struct {
 	Certification *CertificationClient
 	// CertifyScorecard is the client for interacting with the CertifyScorecard builders.
 	CertifyScorecard *CertifyScorecardClient
+	// CertifyVex is the client for interacting with the CertifyVex builders.
+	CertifyVex *CertifyVexClient
 	// CertifyVuln is the client for interacting with the CertifyVuln builders.
 	CertifyVuln *CertifyVulnClient
 	// Dependency is the client for interacting with the Dependency builders.
@@ -194,6 +196,7 @@ func (tx *Tx) init() {
 	tx.Builder = NewBuilderClient(tx.config)
 	tx.Certification = NewCertificationClient(tx.config)
 	tx.CertifyScorecard = NewCertifyScorecardClient(tx.config)
+	tx.CertifyVex = NewCertifyVexClient(tx.config)
 	tx.CertifyVuln = NewCertifyVulnClient(tx.config)
 	tx.Dependency = NewDependencyClient(tx.config)
 	tx.HasSourceAt = NewHasSourceAtClient(tx.config)

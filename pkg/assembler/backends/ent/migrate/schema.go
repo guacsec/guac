@@ -212,6 +212,64 @@ var (
 			},
 		},
 	}
+	// CertifyVexesColumns holds the columns for the "certify_vexes" table.
+	CertifyVexesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "known_since", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeString},
+		{Name: "statement", Type: field.TypeString},
+		{Name: "status_notes", Type: field.TypeString},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "package_id", Type: field.TypeInt, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
+		{Name: "vulnerability_id", Type: field.TypeInt},
+	}
+	// CertifyVexesTable holds the schema information for the "certify_vexes" table.
+	CertifyVexesTable = &schema.Table{
+		Name:       "certify_vexes",
+		Columns:    CertifyVexesColumns,
+		PrimaryKey: []*schema.Column{CertifyVexesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "certify_vexes_package_versions_package",
+				Columns:    []*schema.Column{CertifyVexesColumns[8]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "certify_vexes_artifacts_artifact",
+				Columns:    []*schema.Column{CertifyVexesColumns[9]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "certify_vexes_vulnerability_types_vulnerability",
+				Columns:    []*schema.Column{CertifyVexesColumns[10]},
+				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "certifyvex_known_since_justification_status_statement_status_notes_origin_collector_vulnerability_id_package_id",
+				Unique:  true,
+				Columns: []*schema.Column{CertifyVexesColumns[1], CertifyVexesColumns[5], CertifyVexesColumns[2], CertifyVexesColumns[3], CertifyVexesColumns[4], CertifyVexesColumns[6], CertifyVexesColumns[7], CertifyVexesColumns[10], CertifyVexesColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "certifyvex_known_since_justification_status_statement_status_notes_origin_collector_vulnerability_id_artifact_id",
+				Unique:  true,
+				Columns: []*schema.Column{CertifyVexesColumns[1], CertifyVexesColumns[5], CertifyVexesColumns[2], CertifyVexesColumns[3], CertifyVexesColumns[4], CertifyVexesColumns[6], CertifyVexesColumns[7], CertifyVexesColumns[10], CertifyVexesColumns[9]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NULL",
+				},
+			},
+		},
+	}
 	// CertifyVulnsColumns holds the columns for the "certify_vulns" table.
 	CertifyVulnsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -859,6 +917,7 @@ var (
 		BuildersTable,
 		CertificationsTable,
 		CertifyScorecardsTable,
+		CertifyVexesTable,
 		CertifyVulnsTable,
 		DependenciesTable,
 		HasSourceAtsTable,
@@ -892,6 +951,9 @@ func init() {
 	CertificationsTable.ForeignKeys[3].RefTable = ArtifactsTable
 	CertifyScorecardsTable.ForeignKeys[0].RefTable = SourceNamesTable
 	CertifyScorecardsTable.ForeignKeys[1].RefTable = ScorecardsTable
+	CertifyVexesTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	CertifyVexesTable.ForeignKeys[1].RefTable = ArtifactsTable
+	CertifyVexesTable.ForeignKeys[2].RefTable = VulnerabilityTypesTable
 	CertifyVulnsTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable

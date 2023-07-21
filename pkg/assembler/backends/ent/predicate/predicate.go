@@ -21,6 +21,9 @@ type Certification func(*sql.Selector)
 // CertifyScorecard is the predicate function for certifyscorecard builders.
 type CertifyScorecard func(*sql.Selector)
 
+// CertifyVex is the predicate function for certifyvex builders.
+type CertifyVex func(*sql.Selector)
+
 // CertifyVuln is the predicate function for certifyvuln builders.
 type CertifyVuln func(*sql.Selector)
 

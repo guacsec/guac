@@ -132,6 +132,30 @@ func (cs *CertifyScorecard) Source(ctx context.Context) (*SourceName, error) {
 	return result, err
 }
 
+func (cv *CertifyVex) Package(ctx context.Context) (*PackageVersion, error) {
+	result, err := cv.Edges.PackageOrErr()
+	if IsNotLoaded(err) {
+		result, err = cv.QueryPackage().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (cv *CertifyVex) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := cv.Edges.ArtifactOrErr()
+	if IsNotLoaded(err) {
+		result, err = cv.QueryArtifact().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (cv *CertifyVex) Vulnerability(ctx context.Context) (*VulnerabilityType, error) {
+	result, err := cv.Edges.VulnerabilityOrErr()
+	if IsNotLoaded(err) {
+		result, err = cv.QueryVulnerability().Only(ctx)
+	}
+	return result, err
+}
+
 func (cv *CertifyVuln) Vulnerability(ctx context.Context) (*VulnerabilityType, error) {
 	result, err := cv.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {

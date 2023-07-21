@@ -12,6 +12,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -586,6 +587,157 @@ type certifyscorecardPaginateArgs struct {
 
 func newCertifyScorecardPaginateArgs(rv map[string]any) *certifyscorecardPaginateArgs {
 	args := &certifyscorecardPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (cv *CertifyVexQuery) CollectFields(ctx context.Context, satisfies ...string) (*CertifyVexQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return cv, nil
+	}
+	if err := cv.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return cv, nil
+}
+
+func (cv *CertifyVexQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(certifyvex.Columns))
+		selectedFields = []string{certifyvex.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "package":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PackageVersionClient{config: cv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			cv.withPackage = query
+			if _, ok := fieldSeen[certifyvex.FieldPackageID]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldPackageID)
+				fieldSeen[certifyvex.FieldPackageID] = struct{}{}
+			}
+		case "artifact":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&ArtifactClient{config: cv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			cv.withArtifact = query
+			if _, ok := fieldSeen[certifyvex.FieldArtifactID]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldArtifactID)
+				fieldSeen[certifyvex.FieldArtifactID] = struct{}{}
+			}
+		case "vulnerability":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&VulnerabilityTypeClient{config: cv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			cv.withVulnerability = query
+			if _, ok := fieldSeen[certifyvex.FieldVulnerabilityID]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldVulnerabilityID)
+				fieldSeen[certifyvex.FieldVulnerabilityID] = struct{}{}
+			}
+		case "packageID":
+			if _, ok := fieldSeen[certifyvex.FieldPackageID]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldPackageID)
+				fieldSeen[certifyvex.FieldPackageID] = struct{}{}
+			}
+		case "artifactID":
+			if _, ok := fieldSeen[certifyvex.FieldArtifactID]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldArtifactID)
+				fieldSeen[certifyvex.FieldArtifactID] = struct{}{}
+			}
+		case "vulnerabilityID":
+			if _, ok := fieldSeen[certifyvex.FieldVulnerabilityID]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldVulnerabilityID)
+				fieldSeen[certifyvex.FieldVulnerabilityID] = struct{}{}
+			}
+		case "knownsince":
+			if _, ok := fieldSeen[certifyvex.FieldKnownSince]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldKnownSince)
+				fieldSeen[certifyvex.FieldKnownSince] = struct{}{}
+			}
+		case "status":
+			if _, ok := fieldSeen[certifyvex.FieldStatus]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldStatus)
+				fieldSeen[certifyvex.FieldStatus] = struct{}{}
+			}
+		case "statement":
+			if _, ok := fieldSeen[certifyvex.FieldStatement]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldStatement)
+				fieldSeen[certifyvex.FieldStatement] = struct{}{}
+			}
+		case "statusnotes":
+			if _, ok := fieldSeen[certifyvex.FieldStatusNotes]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldStatusNotes)
+				fieldSeen[certifyvex.FieldStatusNotes] = struct{}{}
+			}
+		case "justification":
+			if _, ok := fieldSeen[certifyvex.FieldJustification]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldJustification)
+				fieldSeen[certifyvex.FieldJustification] = struct{}{}
+			}
+		case "origin":
+			if _, ok := fieldSeen[certifyvex.FieldOrigin]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldOrigin)
+				fieldSeen[certifyvex.FieldOrigin] = struct{}{}
+			}
+		case "collector":
+			if _, ok := fieldSeen[certifyvex.FieldCollector]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldCollector)
+				fieldSeen[certifyvex.FieldCollector] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		cv.Select(selectedFields...)
+	}
+	return nil
+}
+
+type certifyvexPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []CertifyVexPaginateOption
+}
+
+func newCertifyVexPaginateArgs(rv map[string]any) *certifyvexPaginateArgs {
+	args := &certifyvexPaginateArgs{}
 	if rv == nil {
 		return args
 	}
