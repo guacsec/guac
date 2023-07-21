@@ -13,49 +13,68 @@ func (s *Suite) TestSources() {
 	ctx := s.Ctx
 	tests := []struct {
 		name       string
-		srcInput   *model.SourceInputSpec
+		srcInput   []*model.SourceInputSpec
 		srcFilter  *model.SourceSpec
 		idInFilter bool
 		want       []*model.Source
 		wantErr    bool
-	}{{
-		name:     "myrepo with tag",
-		srcInput: s1,
-		srcFilter: &model.SourceSpec{
-			Name: ptrfrom.String("myrepo"),
+		expInserts int
+	}{
+		{
+			name:     "myrepo with tag",
+			srcInput: []*model.SourceInputSpec{s1},
+			srcFilter: &model.SourceSpec{
+				Name: ptrfrom.String("myrepo"),
+			},
+			idInFilter: false,
+			want:       []*model.Source{s1out},
+			wantErr:    false,
+			expInserts: 1,
 		},
-		idInFilter: false,
-		want:       []*model.Source{s1out},
-		wantErr:    false,
-	}, {
-		name:     "myrepo with tag, ID search",
-		srcInput: s1,
-		srcFilter: &model.SourceSpec{
-			Name: ptrfrom.String("myrepo"),
+		{
+			name:     "myrepo with tag, ID search",
+			srcInput: []*model.SourceInputSpec{s1},
+			srcFilter: &model.SourceSpec{
+				Name: ptrfrom.String("myrepo"),
+			},
+			idInFilter: true,
+			want:       []*model.Source{s1out},
+			wantErr:    false,
+			expInserts: 1,
 		},
-		idInFilter: true,
-		want:       []*model.Source{s1out},
-		wantErr:    false,
-	}, {
-		name:     "bobsrepo with commit",
-		srcInput: s2,
-		srcFilter: &model.SourceSpec{
-			Namespace: ptrfrom.String("github.com/bob"),
-			Commit:    ptrfrom.String("5e7c41f"),
+		{
+			name:     "bobsrepo with commit",
+			srcInput: []*model.SourceInputSpec{s2},
+			srcFilter: &model.SourceSpec{
+				Namespace: ptrfrom.String("github.com/bob"),
+				Commit:    ptrfrom.String("5e7c41f"),
+			},
+			want:       []*model.Source{s2out},
+			expInserts: 1,
 		},
-		want: []*model.Source{s2out},
-	}, {
-		name:     "bobsrepo with commit, type search",
-		srcInput: s2,
-		srcFilter: &model.SourceSpec{
-			Type:      ptrfrom.String("git"),
-			Namespace: ptrfrom.String("github.com/bob"),
-			Commit:    ptrfrom.String("5e7c41f"),
+		{
+			name:     "ingest same twice",
+			srcInput: []*model.SourceInputSpec{s1, s1},
+			srcFilter: &model.SourceSpec{
+				Name: ptrfrom.String("myrepo"),
+			},
+			want:       []*model.Source{s1out},
+			expInserts: 1,
 		},
-		idInFilter: false,
-		want:       []*model.Source{s2out},
-		wantErr:    false,
-	}}
+		{
+			name:     "bobsrepo with commit, type search",
+			srcInput: []*model.SourceInputSpec{s2},
+			srcFilter: &model.SourceSpec{
+				Type:      ptrfrom.String("git"),
+				Namespace: ptrfrom.String("github.com/bob"),
+				Commit:    ptrfrom.String("5e7c41f"),
+			},
+			idInFilter: false,
+			want:       []*model.Source{s2out},
+			wantErr:    false,
+			expInserts: 1,
+		},
+	}
 
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
@@ -64,13 +83,18 @@ func (s *Suite) TestSources() {
 			if err != nil {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
-			ingestedPkg, err := be.IngestSource(ctx, *tt.srcInput)
+			ingestedPkg, err := be.IngestSources(ctx, tt.srcInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
+			if count := s.Client.SourceName.Query().CountX(ctx); count != tt.expInserts {
+				t.Errorf("Expected %d inserts, got %d", tt.expInserts, count)
+			}
+
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedPkg.Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = &ingestedPkg[0].Namespaces[0].Names[0].ID
 			}
 			got, err := be.Sources(ctx, tt.srcFilter)
 			if (err != nil) != tt.wantErr {

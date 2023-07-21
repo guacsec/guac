@@ -179,6 +179,39 @@ var (
 			},
 		},
 	}
+	// CertifyScorecardsColumns holds the columns for the "certify_scorecards" table.
+	CertifyScorecardsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "source_id", Type: field.TypeInt},
+		{Name: "scorecard_id", Type: field.TypeInt},
+	}
+	// CertifyScorecardsTable holds the schema information for the "certify_scorecards" table.
+	CertifyScorecardsTable = &schema.Table{
+		Name:       "certify_scorecards",
+		Columns:    CertifyScorecardsColumns,
+		PrimaryKey: []*schema.Column{CertifyScorecardsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "certify_scorecards_source_names_source",
+				Columns:    []*schema.Column{CertifyScorecardsColumns[1]},
+				RefColumns: []*schema.Column{SourceNamesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "certify_scorecards_scorecards_certifications",
+				Columns:    []*schema.Column{CertifyScorecardsColumns[2]},
+				RefColumns: []*schema.Column{ScorecardsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "certifyscorecard_source_id_scorecard_id",
+				Unique:  true,
+				Columns: []*schema.Column{CertifyScorecardsColumns[1], CertifyScorecardsColumns[2]},
+			},
+		},
+	}
 	// CertifyVulnsColumns holds the columns for the "certify_vulns" table.
 	CertifyVulnsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -608,6 +641,30 @@ var (
 			},
 		},
 	}
+	// ScorecardsColumns holds the columns for the "scorecards" table.
+	ScorecardsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "checks", Type: field.TypeJSON},
+		{Name: "aggregate_score", Type: field.TypeFloat64, Default: 0},
+		{Name: "time_scanned", Type: field.TypeTime},
+		{Name: "scorecard_version", Type: field.TypeString},
+		{Name: "scorecard_commit", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+	}
+	// ScorecardsTable holds the schema information for the "scorecards" table.
+	ScorecardsTable = &schema.Table{
+		Name:       "scorecards",
+		Columns:    ScorecardsColumns,
+		PrimaryKey: []*schema.Column{ScorecardsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "scorecard_origin_collector_scorecard_version_scorecard_commit_aggregate_score",
+				Unique:  true,
+				Columns: []*schema.Column{ScorecardsColumns[6], ScorecardsColumns[7], ScorecardsColumns[4], ScorecardsColumns[5], ScorecardsColumns[2]},
+			},
+		},
+	}
 	// SecurityAdvisoriesColumns holds the columns for the "security_advisories" table.
 	SecurityAdvisoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -674,9 +731,6 @@ var (
 				Name:    "sourcename_namespace_id_name_commit_tag",
 				Unique:  true,
 				Columns: []*schema.Column{SourceNamesColumns[4], SourceNamesColumns[1], SourceNamesColumns[2], SourceNamesColumns[3]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "commit IS NOT NULL OR tag IS NOT NULL",
-				},
 			},
 		},
 	}
@@ -799,6 +853,7 @@ var (
 		BillOfMaterialsTable,
 		BuildersTable,
 		CertificationsTable,
+		CertifyScorecardsTable,
 		CertifyVulnsTable,
 		DependenciesTable,
 		HasSourceAtsTable,
@@ -811,6 +866,7 @@ var (
 		PackageVersionsTable,
 		PkgEqualsTable,
 		SlsaAttestationsTable,
+		ScorecardsTable,
 		SecurityAdvisoriesTable,
 		SourceNamesTable,
 		SourceNamespacesTable,
@@ -828,6 +884,8 @@ func init() {
 	CertificationsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	CertificationsTable.ForeignKeys[2].RefTable = PackageNamesTable
 	CertificationsTable.ForeignKeys[3].RefTable = ArtifactsTable
+	CertifyScorecardsTable.ForeignKeys[0].RefTable = SourceNamesTable
+	CertifyScorecardsTable.ForeignKeys[1].RefTable = ScorecardsTable
 	CertifyVulnsTable.ForeignKeys[0].RefTable = SecurityAdvisoriesTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable

@@ -13,16 +13,9 @@ import (
 )
 
 func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-	query := b.client.Artifact.Query().Order(ent.Asc(artifact.FieldID))
-
-	if artifactSpec != nil {
-		query.Where(optionalPredicate(artifactSpec.ID, IDEQ))
-		query.Where(optionalPredicate(artifactSpec.Algorithm, artifact.AlgorithmEQ))
-		query.Where(optionalPredicate(artifactSpec.Digest, artifact.DigestEQ))
-	} else {
-		// FIXME: We limit this to a sane number so as not to blow up the server
-		query.Limit(100)
-	}
+	query := b.client.Artifact.Query().
+		Where(artifactQueryPredicates(artifactSpec)).
+		Limit(MaxPageSize)
 
 	artifacts, err := query.All(ctx)
 	if err != nil {
@@ -90,28 +83,38 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.ArtifactInpu
 }
 
 func ingestArtifacts(ctx context.Context, client *ent.Tx, artifacts []*model.ArtifactInputSpec) (ent.Artifacts, error) {
-	creates := make([]*ent.ArtifactCreate, len(artifacts))
-	// TODO: (ivanvanderbyl) Split into batches to ensure we don't reach the max query size
+	batches := chunk(artifacts, 100)
+	results := make(ent.Artifacts, 0)
 
-	for i, art := range artifacts {
-		creates[i] = client.Artifact.Create().
-			SetAlgorithm(strings.ToLower(art.Algorithm)).
-			SetDigest(strings.ToLower(art.Digest))
-	}
+	for _, artifacts := range batches {
+		creates := make([]*ent.ArtifactCreate, len(artifacts))
+		predicates := make([]predicate.Artifact, len(artifacts))
+		for i, art := range artifacts {
+			creates[i] = client.Artifact.Create().
+				SetAlgorithm(strings.ToLower(art.Algorithm)).
+				SetDigest(strings.ToLower(art.Digest))
+		}
 
-	err := client.Artifact.CreateBulk(creates...).
-		OnConflict(
-			sql.ConflictColumns(artifact.FieldDigest),
-		).
-		UpdateNewValues().
-		Exec(ctx)
-	if err != nil {
-		return nil, err
-	}
+		err := client.Artifact.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(artifact.FieldDigest),
+			).
+			UpdateNewValues().
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
 
-	predicates := make([]predicate.Artifact, len(artifacts))
-	for i, art := range artifacts {
-		predicates[i] = artifactQueryInputPredicates(*art)
+		for i, art := range artifacts {
+			predicates[i] = artifactQueryInputPredicates(*art)
+		}
+
+		newRecords, err := client.Artifact.Query().Where(artifact.Or(predicates...)).All(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, newRecords...)
 	}
-	return client.Artifact.Query().Where(artifact.Or(predicates...)).All(ctx)
+	return results, nil
 }

@@ -20,6 +20,8 @@ type Tx struct {
 	Builder *BuilderClient
 	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
+	// CertifyScorecard is the client for interacting with the CertifyScorecard builders.
+	CertifyScorecard *CertifyScorecardClient
 	// CertifyVuln is the client for interacting with the CertifyVuln builders.
 	CertifyVuln *CertifyVulnClient
 	// Dependency is the client for interacting with the Dependency builders.
@@ -44,6 +46,8 @@ type Tx struct {
 	PkgEqual *PkgEqualClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
+	// Scorecard is the client for interacting with the Scorecard builders.
+	Scorecard *ScorecardClient
 	// SecurityAdvisory is the client for interacting with the SecurityAdvisory builders.
 	SecurityAdvisory *SecurityAdvisoryClient
 	// SourceName is the client for interacting with the SourceName builders.
@@ -187,6 +191,7 @@ func (tx *Tx) init() {
 	tx.BillOfMaterials = NewBillOfMaterialsClient(tx.config)
 	tx.Builder = NewBuilderClient(tx.config)
 	tx.Certification = NewCertificationClient(tx.config)
+	tx.CertifyScorecard = NewCertifyScorecardClient(tx.config)
 	tx.CertifyVuln = NewCertifyVulnClient(tx.config)
 	tx.Dependency = NewDependencyClient(tx.config)
 	tx.HasSourceAt = NewHasSourceAtClient(tx.config)
@@ -199,6 +204,7 @@ func (tx *Tx) init() {
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
 	tx.PkgEqual = NewPkgEqualClient(tx.config)
 	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
+	tx.Scorecard = NewScorecardClient(tx.config)
 	tx.SecurityAdvisory = NewSecurityAdvisoryClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)

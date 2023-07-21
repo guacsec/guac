@@ -2,7 +2,6 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -17,8 +16,6 @@ type SourceName struct {
 func (SourceName) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
-		// Commit and tag are mutually exclusive
-		// Could this simply a single field called `ref`? Then check the length of the string to determine if it's a commit or tag?
 		field.String("commit").Optional(),
 		field.String("tag").Optional(),
 		field.Int("namespace_id"),
@@ -36,6 +33,6 @@ func (SourceName) Edges() []ent.Edge {
 // Indexes of the SourceName.
 func (SourceName) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("namespace_id", "name", "commit", "tag").Unique().Annotations(entsql.IndexWhere("commit IS NOT NULL OR tag IS NOT NULL")),
+		index.Fields("namespace_id", "name", "commit", "tag").Unique(),
 	}
 }

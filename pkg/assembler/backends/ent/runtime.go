@@ -3,10 +3,13 @@
 package ent
 
 import (
+	"time"
+
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/schema"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -37,4 +40,14 @@ func init() {
 	packageversionDescSubpath := packageversionFields[2].Descriptor()
 	// packageversion.DefaultSubpath holds the default value on creation for the subpath field.
 	packageversion.DefaultSubpath = packageversionDescSubpath.Default.(string)
+	scorecardFields := schema.Scorecard{}.Fields()
+	_ = scorecardFields
+	// scorecardDescAggregateScore is the schema descriptor for aggregate_score field.
+	scorecardDescAggregateScore := scorecardFields[1].Descriptor()
+	// scorecard.DefaultAggregateScore holds the default value on creation for the aggregate_score field.
+	scorecard.DefaultAggregateScore = scorecardDescAggregateScore.Default.(float64)
+	// scorecardDescTimeScanned is the schema descriptor for time_scanned field.
+	scorecardDescTimeScanned := scorecardFields[2].Descriptor()
+	// scorecard.DefaultTimeScanned holds the default value on creation for the time_scanned field.
+	scorecard.DefaultTimeScanned = scorecardDescTimeScanned.Default.(func() time.Time)
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -29,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -49,6 +51,8 @@ type Client struct {
 	Builder *BuilderClient
 	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
+	// CertifyScorecard is the client for interacting with the CertifyScorecard builders.
+	CertifyScorecard *CertifyScorecardClient
 	// CertifyVuln is the client for interacting with the CertifyVuln builders.
 	CertifyVuln *CertifyVulnClient
 	// Dependency is the client for interacting with the Dependency builders.
@@ -73,6 +77,8 @@ type Client struct {
 	PkgEqual *PkgEqualClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
+	// Scorecard is the client for interacting with the Scorecard builders.
+	Scorecard *ScorecardClient
 	// SecurityAdvisory is the client for interacting with the SecurityAdvisory builders.
 	SecurityAdvisory *SecurityAdvisoryClient
 	// SourceName is the client for interacting with the SourceName builders.
@@ -100,6 +106,7 @@ func (c *Client) init() {
 	c.BillOfMaterials = NewBillOfMaterialsClient(c.config)
 	c.Builder = NewBuilderClient(c.config)
 	c.Certification = NewCertificationClient(c.config)
+	c.CertifyScorecard = NewCertifyScorecardClient(c.config)
 	c.CertifyVuln = NewCertifyVulnClient(c.config)
 	c.Dependency = NewDependencyClient(c.config)
 	c.HasSourceAt = NewHasSourceAtClient(c.config)
@@ -112,6 +119,7 @@ func (c *Client) init() {
 	c.PackageVersion = NewPackageVersionClient(c.config)
 	c.PkgEqual = NewPkgEqualClient(c.config)
 	c.SLSAAttestation = NewSLSAAttestationClient(c.config)
+	c.Scorecard = NewScorecardClient(c.config)
 	c.SecurityAdvisory = NewSecurityAdvisoryClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
 	c.SourceNamespace = NewSourceNamespaceClient(c.config)
@@ -202,6 +210,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		BillOfMaterials:  NewBillOfMaterialsClient(cfg),
 		Builder:          NewBuilderClient(cfg),
 		Certification:    NewCertificationClient(cfg),
+		CertifyScorecard: NewCertifyScorecardClient(cfg),
 		CertifyVuln:      NewCertifyVulnClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
 		HasSourceAt:      NewHasSourceAtClient(cfg),
@@ -214,6 +223,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PackageVersion:   NewPackageVersionClient(cfg),
 		PkgEqual:         NewPkgEqualClient(cfg),
 		SLSAAttestation:  NewSLSAAttestationClient(cfg),
+		Scorecard:        NewScorecardClient(cfg),
 		SecurityAdvisory: NewSecurityAdvisoryClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
@@ -241,6 +251,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		BillOfMaterials:  NewBillOfMaterialsClient(cfg),
 		Builder:          NewBuilderClient(cfg),
 		Certification:    NewCertificationClient(cfg),
+		CertifyScorecard: NewCertifyScorecardClient(cfg),
 		CertifyVuln:      NewCertifyVulnClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
 		HasSourceAt:      NewHasSourceAtClient(cfg),
@@ -253,6 +264,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PackageVersion:   NewPackageVersionClient(cfg),
 		PkgEqual:         NewPkgEqualClient(cfg),
 		SLSAAttestation:  NewSLSAAttestationClient(cfg),
+		Scorecard:        NewScorecardClient(cfg),
 		SecurityAdvisory: NewSecurityAdvisoryClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
@@ -286,11 +298,11 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
-		c.Dependency, c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.Occurrence,
-		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
-		c.SLSAAttestation, c.SecurityAdvisory, c.SourceName, c.SourceNamespace,
-		c.SourceType,
+		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyScorecard,
+		c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual, c.IsVulnerability,
+		c.Occurrence, c.PackageName, c.PackageNamespace, c.PackageType,
+		c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard,
+		c.SecurityAdvisory, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
 		n.Use(hooks...)
 	}
@@ -300,11 +312,11 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyVuln,
-		c.Dependency, c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.Occurrence,
-		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
-		c.SLSAAttestation, c.SecurityAdvisory, c.SourceName, c.SourceNamespace,
-		c.SourceType,
+		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyScorecard,
+		c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual, c.IsVulnerability,
+		c.Occurrence, c.PackageName, c.PackageNamespace, c.PackageType,
+		c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard,
+		c.SecurityAdvisory, c.SourceName, c.SourceNamespace, c.SourceType,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -321,6 +333,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Builder.mutate(ctx, m)
 	case *CertificationMutation:
 		return c.Certification.mutate(ctx, m)
+	case *CertifyScorecardMutation:
+		return c.CertifyScorecard.mutate(ctx, m)
 	case *CertifyVulnMutation:
 		return c.CertifyVuln.mutate(ctx, m)
 	case *DependencyMutation:
@@ -345,6 +359,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PkgEqual.mutate(ctx, m)
 	case *SLSAAttestationMutation:
 		return c.SLSAAttestation.mutate(ctx, m)
+	case *ScorecardMutation:
+		return c.Scorecard.mutate(ctx, m)
 	case *SecurityAdvisoryMutation:
 		return c.SecurityAdvisory.mutate(ctx, m)
 	case *SourceNameMutation:
@@ -1003,6 +1019,156 @@ func (c *CertificationClient) mutate(ctx context.Context, m *CertificationMutati
 		return (&CertificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Certification mutation op: %q", m.Op())
+	}
+}
+
+// CertifyScorecardClient is a client for the CertifyScorecard schema.
+type CertifyScorecardClient struct {
+	config
+}
+
+// NewCertifyScorecardClient returns a client for the CertifyScorecard from the given config.
+func NewCertifyScorecardClient(c config) *CertifyScorecardClient {
+	return &CertifyScorecardClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `certifyscorecard.Hooks(f(g(h())))`.
+func (c *CertifyScorecardClient) Use(hooks ...Hook) {
+	c.hooks.CertifyScorecard = append(c.hooks.CertifyScorecard, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `certifyscorecard.Intercept(f(g(h())))`.
+func (c *CertifyScorecardClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CertifyScorecard = append(c.inters.CertifyScorecard, interceptors...)
+}
+
+// Create returns a builder for creating a CertifyScorecard entity.
+func (c *CertifyScorecardClient) Create() *CertifyScorecardCreate {
+	mutation := newCertifyScorecardMutation(c.config, OpCreate)
+	return &CertifyScorecardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CertifyScorecard entities.
+func (c *CertifyScorecardClient) CreateBulk(builders ...*CertifyScorecardCreate) *CertifyScorecardCreateBulk {
+	return &CertifyScorecardCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CertifyScorecard.
+func (c *CertifyScorecardClient) Update() *CertifyScorecardUpdate {
+	mutation := newCertifyScorecardMutation(c.config, OpUpdate)
+	return &CertifyScorecardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CertifyScorecardClient) UpdateOne(cs *CertifyScorecard) *CertifyScorecardUpdateOne {
+	mutation := newCertifyScorecardMutation(c.config, OpUpdateOne, withCertifyScorecard(cs))
+	return &CertifyScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CertifyScorecardClient) UpdateOneID(id int) *CertifyScorecardUpdateOne {
+	mutation := newCertifyScorecardMutation(c.config, OpUpdateOne, withCertifyScorecardID(id))
+	return &CertifyScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CertifyScorecard.
+func (c *CertifyScorecardClient) Delete() *CertifyScorecardDelete {
+	mutation := newCertifyScorecardMutation(c.config, OpDelete)
+	return &CertifyScorecardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CertifyScorecardClient) DeleteOne(cs *CertifyScorecard) *CertifyScorecardDeleteOne {
+	return c.DeleteOneID(cs.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CertifyScorecardClient) DeleteOneID(id int) *CertifyScorecardDeleteOne {
+	builder := c.Delete().Where(certifyscorecard.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CertifyScorecardDeleteOne{builder}
+}
+
+// Query returns a query builder for CertifyScorecard.
+func (c *CertifyScorecardClient) Query() *CertifyScorecardQuery {
+	return &CertifyScorecardQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCertifyScorecard},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CertifyScorecard entity by its id.
+func (c *CertifyScorecardClient) Get(ctx context.Context, id int) (*CertifyScorecard, error) {
+	return c.Query().Where(certifyscorecard.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CertifyScorecardClient) GetX(ctx context.Context, id int) *CertifyScorecard {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryScorecard queries the scorecard edge of a CertifyScorecard.
+func (c *CertifyScorecardClient) QueryScorecard(cs *CertifyScorecard) *ScorecardQuery {
+	query := (&ScorecardClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cs.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifyscorecard.Table, certifyscorecard.FieldID, id),
+			sqlgraph.To(scorecard.Table, scorecard.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, certifyscorecard.ScorecardTable, certifyscorecard.ScorecardColumn),
+		)
+		fromV = sqlgraph.Neighbors(cs.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySource queries the source edge of a CertifyScorecard.
+func (c *CertifyScorecardClient) QuerySource(cs *CertifyScorecard) *SourceNameQuery {
+	query := (&SourceNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cs.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifyscorecard.Table, certifyscorecard.FieldID, id),
+			sqlgraph.To(sourcename.Table, sourcename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certifyscorecard.SourceTable, certifyscorecard.SourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(cs.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CertifyScorecardClient) Hooks() []Hook {
+	return c.hooks.CertifyScorecard
+}
+
+// Interceptors returns the client interceptors.
+func (c *CertifyScorecardClient) Interceptors() []Interceptor {
+	return c.inters.CertifyScorecard
+}
+
+func (c *CertifyScorecardClient) mutate(ctx context.Context, m *CertifyScorecardMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CertifyScorecardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CertifyScorecardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CertifyScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CertifyScorecardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CertifyScorecard mutation op: %q", m.Op())
 	}
 }
 
@@ -2838,6 +3004,140 @@ func (c *SLSAAttestationClient) mutate(ctx context.Context, m *SLSAAttestationMu
 	}
 }
 
+// ScorecardClient is a client for the Scorecard schema.
+type ScorecardClient struct {
+	config
+}
+
+// NewScorecardClient returns a client for the Scorecard from the given config.
+func NewScorecardClient(c config) *ScorecardClient {
+	return &ScorecardClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `scorecard.Hooks(f(g(h())))`.
+func (c *ScorecardClient) Use(hooks ...Hook) {
+	c.hooks.Scorecard = append(c.hooks.Scorecard, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `scorecard.Intercept(f(g(h())))`.
+func (c *ScorecardClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Scorecard = append(c.inters.Scorecard, interceptors...)
+}
+
+// Create returns a builder for creating a Scorecard entity.
+func (c *ScorecardClient) Create() *ScorecardCreate {
+	mutation := newScorecardMutation(c.config, OpCreate)
+	return &ScorecardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Scorecard entities.
+func (c *ScorecardClient) CreateBulk(builders ...*ScorecardCreate) *ScorecardCreateBulk {
+	return &ScorecardCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Scorecard.
+func (c *ScorecardClient) Update() *ScorecardUpdate {
+	mutation := newScorecardMutation(c.config, OpUpdate)
+	return &ScorecardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ScorecardClient) UpdateOne(s *Scorecard) *ScorecardUpdateOne {
+	mutation := newScorecardMutation(c.config, OpUpdateOne, withScorecard(s))
+	return &ScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ScorecardClient) UpdateOneID(id int) *ScorecardUpdateOne {
+	mutation := newScorecardMutation(c.config, OpUpdateOne, withScorecardID(id))
+	return &ScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Scorecard.
+func (c *ScorecardClient) Delete() *ScorecardDelete {
+	mutation := newScorecardMutation(c.config, OpDelete)
+	return &ScorecardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ScorecardClient) DeleteOne(s *Scorecard) *ScorecardDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ScorecardClient) DeleteOneID(id int) *ScorecardDeleteOne {
+	builder := c.Delete().Where(scorecard.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ScorecardDeleteOne{builder}
+}
+
+// Query returns a query builder for Scorecard.
+func (c *ScorecardClient) Query() *ScorecardQuery {
+	return &ScorecardQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeScorecard},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Scorecard entity by its id.
+func (c *ScorecardClient) Get(ctx context.Context, id int) (*Scorecard, error) {
+	return c.Query().Where(scorecard.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ScorecardClient) GetX(ctx context.Context, id int) *Scorecard {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCertifications queries the certifications edge of a Scorecard.
+func (c *ScorecardClient) QueryCertifications(s *Scorecard) *CertifyScorecardQuery {
+	query := (&CertifyScorecardClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(scorecard.Table, scorecard.FieldID, id),
+			sqlgraph.To(certifyscorecard.Table, certifyscorecard.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, scorecard.CertificationsTable, scorecard.CertificationsColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ScorecardClient) Hooks() []Hook {
+	return c.hooks.Scorecard
+}
+
+// Interceptors returns the client interceptors.
+func (c *ScorecardClient) Interceptors() []Interceptor {
+	return c.inters.Scorecard
+}
+
+func (c *ScorecardClient) mutate(ctx context.Context, m *ScorecardMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ScorecardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ScorecardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ScorecardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Scorecard mutation op: %q", m.Op())
+	}
+}
+
 // SecurityAdvisoryClient is a client for the SecurityAdvisory schema.
 type SecurityAdvisoryClient struct {
 	config
@@ -3393,15 +3693,17 @@ func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (V
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
-		HasSourceAt, HashEqual, IsVulnerability, Occurrence, PackageName,
-		PackageNamespace, PackageType, PackageVersion, PkgEqual, SLSAAttestation,
-		SecurityAdvisory, SourceName, SourceNamespace, SourceType []ent.Hook
+		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard,
+		CertifyVuln, Dependency, HasSourceAt, HashEqual, IsVulnerability, Occurrence,
+		PackageName, PackageNamespace, PackageType, PackageVersion, PkgEqual,
+		SLSAAttestation, Scorecard, SecurityAdvisory, SourceName, SourceNamespace,
+		SourceType []ent.Hook
 	}
 	inters struct {
-		Artifact, BillOfMaterials, Builder, Certification, CertifyVuln, Dependency,
-		HasSourceAt, HashEqual, IsVulnerability, Occurrence, PackageName,
-		PackageNamespace, PackageType, PackageVersion, PkgEqual, SLSAAttestation,
-		SecurityAdvisory, SourceName, SourceNamespace, SourceType []ent.Interceptor
+		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard,
+		CertifyVuln, Dependency, HasSourceAt, HashEqual, IsVulnerability, Occurrence,
+		PackageName, PackageNamespace, PackageType, PackageVersion, PkgEqual,
+		SLSAAttestation, Scorecard, SecurityAdvisory, SourceName, SourceNamespace,
+		SourceType []ent.Interceptor
 	}
 )

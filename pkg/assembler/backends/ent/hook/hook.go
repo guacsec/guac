@@ -57,6 +57,18 @@ func (f CertificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertificationMutation", m)
 }
 
+// The CertifyScorecardFunc type is an adapter to allow the use of ordinary
+// function as CertifyScorecard mutator.
+type CertifyScorecardFunc func(context.Context, *ent.CertifyScorecardMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CertifyScorecardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CertifyScorecardMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertifyScorecardMutation", m)
+}
+
 // The CertifyVulnFunc type is an adapter to allow the use of ordinary
 // function as CertifyVuln mutator.
 type CertifyVulnFunc func(context.Context, *ent.CertifyVulnMutation) (ent.Value, error)
@@ -199,6 +211,18 @@ func (f SLSAAttestationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SLSAAttestationMutation", m)
+}
+
+// The ScorecardFunc type is an adapter to allow the use of ordinary
+// function as Scorecard mutator.
+type ScorecardFunc func(context.Context, *ent.ScorecardMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ScorecardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ScorecardMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ScorecardMutation", m)
 }
 
 // The SecurityAdvisoryFunc type is an adapter to allow the use of ordinary

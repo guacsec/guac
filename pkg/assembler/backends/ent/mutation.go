@@ -15,6 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -27,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -48,6 +50,7 @@ const (
 	TypeBillOfMaterials  = "BillOfMaterials"
 	TypeBuilder          = "Builder"
 	TypeCertification    = "Certification"
+	TypeCertifyScorecard = "CertifyScorecard"
 	TypeCertifyVuln      = "CertifyVuln"
 	TypeDependency       = "Dependency"
 	TypeHasSourceAt      = "HasSourceAt"
@@ -60,6 +63,7 @@ const (
 	TypePackageVersion   = "PackageVersion"
 	TypePkgEqual         = "PkgEqual"
 	TypeSLSAAttestation  = "SLSAAttestation"
+	TypeScorecard        = "Scorecard"
 	TypeSecurityAdvisory = "SecurityAdvisory"
 	TypeSourceName       = "SourceName"
 	TypeSourceNamespace  = "SourceNamespace"
@@ -3038,6 +3042,487 @@ func (m *CertificationMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Certification edge %s", name)
+}
+
+// CertifyScorecardMutation represents an operation that mutates the CertifyScorecard nodes in the graph.
+type CertifyScorecardMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	clearedFields    map[string]struct{}
+	scorecard        *int
+	clearedscorecard bool
+	source           *int
+	clearedsource    bool
+	done             bool
+	oldValue         func(context.Context) (*CertifyScorecard, error)
+	predicates       []predicate.CertifyScorecard
+}
+
+var _ ent.Mutation = (*CertifyScorecardMutation)(nil)
+
+// certifyscorecardOption allows management of the mutation configuration using functional options.
+type certifyscorecardOption func(*CertifyScorecardMutation)
+
+// newCertifyScorecardMutation creates new mutation for the CertifyScorecard entity.
+func newCertifyScorecardMutation(c config, op Op, opts ...certifyscorecardOption) *CertifyScorecardMutation {
+	m := &CertifyScorecardMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCertifyScorecard,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCertifyScorecardID sets the ID field of the mutation.
+func withCertifyScorecardID(id int) certifyscorecardOption {
+	return func(m *CertifyScorecardMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CertifyScorecard
+		)
+		m.oldValue = func(ctx context.Context) (*CertifyScorecard, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CertifyScorecard.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCertifyScorecard sets the old CertifyScorecard of the mutation.
+func withCertifyScorecard(node *CertifyScorecard) certifyscorecardOption {
+	return func(m *CertifyScorecardMutation) {
+		m.oldValue = func(context.Context) (*CertifyScorecard, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CertifyScorecardMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CertifyScorecardMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CertifyScorecardMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CertifyScorecardMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CertifyScorecard.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetSourceID sets the "source_id" field.
+func (m *CertifyScorecardMutation) SetSourceID(i int) {
+	m.source = &i
+}
+
+// SourceID returns the value of the "source_id" field in the mutation.
+func (m *CertifyScorecardMutation) SourceID() (r int, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceID returns the old "source_id" field's value of the CertifyScorecard entity.
+// If the CertifyScorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyScorecardMutation) OldSourceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceID: %w", err)
+	}
+	return oldValue.SourceID, nil
+}
+
+// ResetSourceID resets all changes to the "source_id" field.
+func (m *CertifyScorecardMutation) ResetSourceID() {
+	m.source = nil
+}
+
+// SetScorecardID sets the "scorecard_id" field.
+func (m *CertifyScorecardMutation) SetScorecardID(i int) {
+	m.scorecard = &i
+}
+
+// ScorecardID returns the value of the "scorecard_id" field in the mutation.
+func (m *CertifyScorecardMutation) ScorecardID() (r int, exists bool) {
+	v := m.scorecard
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScorecardID returns the old "scorecard_id" field's value of the CertifyScorecard entity.
+// If the CertifyScorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyScorecardMutation) OldScorecardID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScorecardID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScorecardID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScorecardID: %w", err)
+	}
+	return oldValue.ScorecardID, nil
+}
+
+// ResetScorecardID resets all changes to the "scorecard_id" field.
+func (m *CertifyScorecardMutation) ResetScorecardID() {
+	m.scorecard = nil
+}
+
+// ClearScorecard clears the "scorecard" edge to the Scorecard entity.
+func (m *CertifyScorecardMutation) ClearScorecard() {
+	m.clearedscorecard = true
+}
+
+// ScorecardCleared reports if the "scorecard" edge to the Scorecard entity was cleared.
+func (m *CertifyScorecardMutation) ScorecardCleared() bool {
+	return m.clearedscorecard
+}
+
+// ScorecardIDs returns the "scorecard" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ScorecardID instead. It exists only for internal usage by the builders.
+func (m *CertifyScorecardMutation) ScorecardIDs() (ids []int) {
+	if id := m.scorecard; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetScorecard resets all changes to the "scorecard" edge.
+func (m *CertifyScorecardMutation) ResetScorecard() {
+	m.scorecard = nil
+	m.clearedscorecard = false
+}
+
+// ClearSource clears the "source" edge to the SourceName entity.
+func (m *CertifyScorecardMutation) ClearSource() {
+	m.clearedsource = true
+}
+
+// SourceCleared reports if the "source" edge to the SourceName entity was cleared.
+func (m *CertifyScorecardMutation) SourceCleared() bool {
+	return m.clearedsource
+}
+
+// SourceIDs returns the "source" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SourceID instead. It exists only for internal usage by the builders.
+func (m *CertifyScorecardMutation) SourceIDs() (ids []int) {
+	if id := m.source; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSource resets all changes to the "source" edge.
+func (m *CertifyScorecardMutation) ResetSource() {
+	m.source = nil
+	m.clearedsource = false
+}
+
+// Where appends a list predicates to the CertifyScorecardMutation builder.
+func (m *CertifyScorecardMutation) Where(ps ...predicate.CertifyScorecard) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CertifyScorecardMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CertifyScorecardMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CertifyScorecard, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CertifyScorecardMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CertifyScorecardMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CertifyScorecard).
+func (m *CertifyScorecardMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CertifyScorecardMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.source != nil {
+		fields = append(fields, certifyscorecard.FieldSourceID)
+	}
+	if m.scorecard != nil {
+		fields = append(fields, certifyscorecard.FieldScorecardID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CertifyScorecardMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case certifyscorecard.FieldSourceID:
+		return m.SourceID()
+	case certifyscorecard.FieldScorecardID:
+		return m.ScorecardID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CertifyScorecardMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case certifyscorecard.FieldSourceID:
+		return m.OldSourceID(ctx)
+	case certifyscorecard.FieldScorecardID:
+		return m.OldScorecardID(ctx)
+	}
+	return nil, fmt.Errorf("unknown CertifyScorecard field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CertifyScorecardMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case certifyscorecard.FieldSourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceID(v)
+		return nil
+	case certifyscorecard.FieldScorecardID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScorecardID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CertifyScorecard field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CertifyScorecardMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CertifyScorecardMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CertifyScorecardMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CertifyScorecard numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CertifyScorecardMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CertifyScorecardMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CertifyScorecardMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown CertifyScorecard nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CertifyScorecardMutation) ResetField(name string) error {
+	switch name {
+	case certifyscorecard.FieldSourceID:
+		m.ResetSourceID()
+		return nil
+	case certifyscorecard.FieldScorecardID:
+		m.ResetScorecardID()
+		return nil
+	}
+	return fmt.Errorf("unknown CertifyScorecard field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CertifyScorecardMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.scorecard != nil {
+		edges = append(edges, certifyscorecard.EdgeScorecard)
+	}
+	if m.source != nil {
+		edges = append(edges, certifyscorecard.EdgeSource)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CertifyScorecardMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case certifyscorecard.EdgeScorecard:
+		if id := m.scorecard; id != nil {
+			return []ent.Value{*id}
+		}
+	case certifyscorecard.EdgeSource:
+		if id := m.source; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CertifyScorecardMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CertifyScorecardMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CertifyScorecardMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedscorecard {
+		edges = append(edges, certifyscorecard.EdgeScorecard)
+	}
+	if m.clearedsource {
+		edges = append(edges, certifyscorecard.EdgeSource)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CertifyScorecardMutation) EdgeCleared(name string) bool {
+	switch name {
+	case certifyscorecard.EdgeScorecard:
+		return m.clearedscorecard
+	case certifyscorecard.EdgeSource:
+		return m.clearedsource
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CertifyScorecardMutation) ClearEdge(name string) error {
+	switch name {
+	case certifyscorecard.EdgeScorecard:
+		m.ClearScorecard()
+		return nil
+	case certifyscorecard.EdgeSource:
+		m.ClearSource()
+		return nil
+	}
+	return fmt.Errorf("unknown CertifyScorecard unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CertifyScorecardMutation) ResetEdge(name string) error {
+	switch name {
+	case certifyscorecard.EdgeScorecard:
+		m.ResetScorecard()
+		return nil
+	case certifyscorecard.EdgeSource:
+		m.ResetSource()
+		return nil
+	}
+	return fmt.Errorf("unknown CertifyScorecard edge %s", name)
 }
 
 // CertifyVulnMutation represents an operation that mutates the CertifyVuln nodes in the graph.
@@ -11478,6 +11963,801 @@ func (m *SLSAAttestationMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown SLSAAttestation edge %s", name)
+}
+
+// ScorecardMutation represents an operation that mutates the Scorecard nodes in the graph.
+type ScorecardMutation struct {
+	config
+	op                    Op
+	typ                   string
+	id                    *int
+	checks                *[]*model.ScorecardCheck
+	appendchecks          []*model.ScorecardCheck
+	aggregate_score       *float64
+	addaggregate_score    *float64
+	time_scanned          *time.Time
+	scorecard_version     *string
+	scorecard_commit      *string
+	origin                *string
+	collector             *string
+	clearedFields         map[string]struct{}
+	certifications        map[int]struct{}
+	removedcertifications map[int]struct{}
+	clearedcertifications bool
+	done                  bool
+	oldValue              func(context.Context) (*Scorecard, error)
+	predicates            []predicate.Scorecard
+}
+
+var _ ent.Mutation = (*ScorecardMutation)(nil)
+
+// scorecardOption allows management of the mutation configuration using functional options.
+type scorecardOption func(*ScorecardMutation)
+
+// newScorecardMutation creates new mutation for the Scorecard entity.
+func newScorecardMutation(c config, op Op, opts ...scorecardOption) *ScorecardMutation {
+	m := &ScorecardMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeScorecard,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withScorecardID sets the ID field of the mutation.
+func withScorecardID(id int) scorecardOption {
+	return func(m *ScorecardMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Scorecard
+		)
+		m.oldValue = func(ctx context.Context) (*Scorecard, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Scorecard.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withScorecard sets the old Scorecard of the mutation.
+func withScorecard(node *Scorecard) scorecardOption {
+	return func(m *ScorecardMutation) {
+		m.oldValue = func(context.Context) (*Scorecard, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ScorecardMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ScorecardMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ScorecardMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ScorecardMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Scorecard.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetChecks sets the "checks" field.
+func (m *ScorecardMutation) SetChecks(mc []*model.ScorecardCheck) {
+	m.checks = &mc
+	m.appendchecks = nil
+}
+
+// Checks returns the value of the "checks" field in the mutation.
+func (m *ScorecardMutation) Checks() (r []*model.ScorecardCheck, exists bool) {
+	v := m.checks
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChecks returns the old "checks" field's value of the Scorecard entity.
+// If the Scorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScorecardMutation) OldChecks(ctx context.Context) (v []*model.ScorecardCheck, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChecks is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChecks requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChecks: %w", err)
+	}
+	return oldValue.Checks, nil
+}
+
+// AppendChecks adds mc to the "checks" field.
+func (m *ScorecardMutation) AppendChecks(mc []*model.ScorecardCheck) {
+	m.appendchecks = append(m.appendchecks, mc...)
+}
+
+// AppendedChecks returns the list of values that were appended to the "checks" field in this mutation.
+func (m *ScorecardMutation) AppendedChecks() ([]*model.ScorecardCheck, bool) {
+	if len(m.appendchecks) == 0 {
+		return nil, false
+	}
+	return m.appendchecks, true
+}
+
+// ResetChecks resets all changes to the "checks" field.
+func (m *ScorecardMutation) ResetChecks() {
+	m.checks = nil
+	m.appendchecks = nil
+}
+
+// SetAggregateScore sets the "aggregate_score" field.
+func (m *ScorecardMutation) SetAggregateScore(f float64) {
+	m.aggregate_score = &f
+	m.addaggregate_score = nil
+}
+
+// AggregateScore returns the value of the "aggregate_score" field in the mutation.
+func (m *ScorecardMutation) AggregateScore() (r float64, exists bool) {
+	v := m.aggregate_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAggregateScore returns the old "aggregate_score" field's value of the Scorecard entity.
+// If the Scorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScorecardMutation) OldAggregateScore(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAggregateScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAggregateScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAggregateScore: %w", err)
+	}
+	return oldValue.AggregateScore, nil
+}
+
+// AddAggregateScore adds f to the "aggregate_score" field.
+func (m *ScorecardMutation) AddAggregateScore(f float64) {
+	if m.addaggregate_score != nil {
+		*m.addaggregate_score += f
+	} else {
+		m.addaggregate_score = &f
+	}
+}
+
+// AddedAggregateScore returns the value that was added to the "aggregate_score" field in this mutation.
+func (m *ScorecardMutation) AddedAggregateScore() (r float64, exists bool) {
+	v := m.addaggregate_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAggregateScore resets all changes to the "aggregate_score" field.
+func (m *ScorecardMutation) ResetAggregateScore() {
+	m.aggregate_score = nil
+	m.addaggregate_score = nil
+}
+
+// SetTimeScanned sets the "time_scanned" field.
+func (m *ScorecardMutation) SetTimeScanned(t time.Time) {
+	m.time_scanned = &t
+}
+
+// TimeScanned returns the value of the "time_scanned" field in the mutation.
+func (m *ScorecardMutation) TimeScanned() (r time.Time, exists bool) {
+	v := m.time_scanned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimeScanned returns the old "time_scanned" field's value of the Scorecard entity.
+// If the Scorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScorecardMutation) OldTimeScanned(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTimeScanned is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTimeScanned requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimeScanned: %w", err)
+	}
+	return oldValue.TimeScanned, nil
+}
+
+// ResetTimeScanned resets all changes to the "time_scanned" field.
+func (m *ScorecardMutation) ResetTimeScanned() {
+	m.time_scanned = nil
+}
+
+// SetScorecardVersion sets the "scorecard_version" field.
+func (m *ScorecardMutation) SetScorecardVersion(s string) {
+	m.scorecard_version = &s
+}
+
+// ScorecardVersion returns the value of the "scorecard_version" field in the mutation.
+func (m *ScorecardMutation) ScorecardVersion() (r string, exists bool) {
+	v := m.scorecard_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScorecardVersion returns the old "scorecard_version" field's value of the Scorecard entity.
+// If the Scorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScorecardMutation) OldScorecardVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScorecardVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScorecardVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScorecardVersion: %w", err)
+	}
+	return oldValue.ScorecardVersion, nil
+}
+
+// ResetScorecardVersion resets all changes to the "scorecard_version" field.
+func (m *ScorecardMutation) ResetScorecardVersion() {
+	m.scorecard_version = nil
+}
+
+// SetScorecardCommit sets the "scorecard_commit" field.
+func (m *ScorecardMutation) SetScorecardCommit(s string) {
+	m.scorecard_commit = &s
+}
+
+// ScorecardCommit returns the value of the "scorecard_commit" field in the mutation.
+func (m *ScorecardMutation) ScorecardCommit() (r string, exists bool) {
+	v := m.scorecard_commit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScorecardCommit returns the old "scorecard_commit" field's value of the Scorecard entity.
+// If the Scorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScorecardMutation) OldScorecardCommit(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScorecardCommit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScorecardCommit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScorecardCommit: %w", err)
+	}
+	return oldValue.ScorecardCommit, nil
+}
+
+// ResetScorecardCommit resets all changes to the "scorecard_commit" field.
+func (m *ScorecardMutation) ResetScorecardCommit() {
+	m.scorecard_commit = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *ScorecardMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *ScorecardMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the Scorecard entity.
+// If the Scorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScorecardMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *ScorecardMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *ScorecardMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *ScorecardMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the Scorecard entity.
+// If the Scorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScorecardMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *ScorecardMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// AddCertificationIDs adds the "certifications" edge to the CertifyScorecard entity by ids.
+func (m *ScorecardMutation) AddCertificationIDs(ids ...int) {
+	if m.certifications == nil {
+		m.certifications = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.certifications[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCertifications clears the "certifications" edge to the CertifyScorecard entity.
+func (m *ScorecardMutation) ClearCertifications() {
+	m.clearedcertifications = true
+}
+
+// CertificationsCleared reports if the "certifications" edge to the CertifyScorecard entity was cleared.
+func (m *ScorecardMutation) CertificationsCleared() bool {
+	return m.clearedcertifications
+}
+
+// RemoveCertificationIDs removes the "certifications" edge to the CertifyScorecard entity by IDs.
+func (m *ScorecardMutation) RemoveCertificationIDs(ids ...int) {
+	if m.removedcertifications == nil {
+		m.removedcertifications = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.certifications, ids[i])
+		m.removedcertifications[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCertifications returns the removed IDs of the "certifications" edge to the CertifyScorecard entity.
+func (m *ScorecardMutation) RemovedCertificationsIDs() (ids []int) {
+	for id := range m.removedcertifications {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CertificationsIDs returns the "certifications" edge IDs in the mutation.
+func (m *ScorecardMutation) CertificationsIDs() (ids []int) {
+	for id := range m.certifications {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCertifications resets all changes to the "certifications" edge.
+func (m *ScorecardMutation) ResetCertifications() {
+	m.certifications = nil
+	m.clearedcertifications = false
+	m.removedcertifications = nil
+}
+
+// Where appends a list predicates to the ScorecardMutation builder.
+func (m *ScorecardMutation) Where(ps ...predicate.Scorecard) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ScorecardMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ScorecardMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Scorecard, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ScorecardMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ScorecardMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Scorecard).
+func (m *ScorecardMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ScorecardMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.checks != nil {
+		fields = append(fields, scorecard.FieldChecks)
+	}
+	if m.aggregate_score != nil {
+		fields = append(fields, scorecard.FieldAggregateScore)
+	}
+	if m.time_scanned != nil {
+		fields = append(fields, scorecard.FieldTimeScanned)
+	}
+	if m.scorecard_version != nil {
+		fields = append(fields, scorecard.FieldScorecardVersion)
+	}
+	if m.scorecard_commit != nil {
+		fields = append(fields, scorecard.FieldScorecardCommit)
+	}
+	if m.origin != nil {
+		fields = append(fields, scorecard.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, scorecard.FieldCollector)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ScorecardMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case scorecard.FieldChecks:
+		return m.Checks()
+	case scorecard.FieldAggregateScore:
+		return m.AggregateScore()
+	case scorecard.FieldTimeScanned:
+		return m.TimeScanned()
+	case scorecard.FieldScorecardVersion:
+		return m.ScorecardVersion()
+	case scorecard.FieldScorecardCommit:
+		return m.ScorecardCommit()
+	case scorecard.FieldOrigin:
+		return m.Origin()
+	case scorecard.FieldCollector:
+		return m.Collector()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ScorecardMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case scorecard.FieldChecks:
+		return m.OldChecks(ctx)
+	case scorecard.FieldAggregateScore:
+		return m.OldAggregateScore(ctx)
+	case scorecard.FieldTimeScanned:
+		return m.OldTimeScanned(ctx)
+	case scorecard.FieldScorecardVersion:
+		return m.OldScorecardVersion(ctx)
+	case scorecard.FieldScorecardCommit:
+		return m.OldScorecardCommit(ctx)
+	case scorecard.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case scorecard.FieldCollector:
+		return m.OldCollector(ctx)
+	}
+	return nil, fmt.Errorf("unknown Scorecard field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ScorecardMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case scorecard.FieldChecks:
+		v, ok := value.([]*model.ScorecardCheck)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChecks(v)
+		return nil
+	case scorecard.FieldAggregateScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAggregateScore(v)
+		return nil
+	case scorecard.FieldTimeScanned:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimeScanned(v)
+		return nil
+	case scorecard.FieldScorecardVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScorecardVersion(v)
+		return nil
+	case scorecard.FieldScorecardCommit:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScorecardCommit(v)
+		return nil
+	case scorecard.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case scorecard.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Scorecard field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ScorecardMutation) AddedFields() []string {
+	var fields []string
+	if m.addaggregate_score != nil {
+		fields = append(fields, scorecard.FieldAggregateScore)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ScorecardMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case scorecard.FieldAggregateScore:
+		return m.AddedAggregateScore()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ScorecardMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case scorecard.FieldAggregateScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAggregateScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Scorecard numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ScorecardMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ScorecardMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ScorecardMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Scorecard nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ScorecardMutation) ResetField(name string) error {
+	switch name {
+	case scorecard.FieldChecks:
+		m.ResetChecks()
+		return nil
+	case scorecard.FieldAggregateScore:
+		m.ResetAggregateScore()
+		return nil
+	case scorecard.FieldTimeScanned:
+		m.ResetTimeScanned()
+		return nil
+	case scorecard.FieldScorecardVersion:
+		m.ResetScorecardVersion()
+		return nil
+	case scorecard.FieldScorecardCommit:
+		m.ResetScorecardCommit()
+		return nil
+	case scorecard.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case scorecard.FieldCollector:
+		m.ResetCollector()
+		return nil
+	}
+	return fmt.Errorf("unknown Scorecard field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ScorecardMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.certifications != nil {
+		edges = append(edges, scorecard.EdgeCertifications)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ScorecardMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case scorecard.EdgeCertifications:
+		ids := make([]ent.Value, 0, len(m.certifications))
+		for id := range m.certifications {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ScorecardMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedcertifications != nil {
+		edges = append(edges, scorecard.EdgeCertifications)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ScorecardMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case scorecard.EdgeCertifications:
+		ids := make([]ent.Value, 0, len(m.removedcertifications))
+		for id := range m.removedcertifications {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ScorecardMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedcertifications {
+		edges = append(edges, scorecard.EdgeCertifications)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ScorecardMutation) EdgeCleared(name string) bool {
+	switch name {
+	case scorecard.EdgeCertifications:
+		return m.clearedcertifications
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ScorecardMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Scorecard unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ScorecardMutation) ResetEdge(name string) error {
+	switch name {
+	case scorecard.EdgeCertifications:
+		m.ResetCertifications()
+		return nil
+	}
+	return fmt.Errorf("unknown Scorecard edge %s", name)
 }
 
 // SecurityAdvisoryMutation represents an operation that mutates the SecurityAdvisory nodes in the graph.

@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"log"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -192,8 +193,8 @@ func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec
 	create := client.SourceName.Create().
 		SetNamespaceID(sourceNamespaceID).
 		SetName(src.Name).
-		SetNillableTag(src.Tag).
-		SetNillableCommit(toLowerPtr(src.Commit))
+		SetTag(stringOrEmpty(src.Tag)).
+		SetCommit(stringOrEmpty(src.Commit))
 
 	sourceNameID, err := create.
 		OnConflict(
@@ -203,18 +204,13 @@ func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec
 				sourcename.FieldTag,
 				sourcename.FieldCommit,
 			),
-			sql.ConflictWhere(
-				sql.Or(
-					sql.NotNull(sourcename.FieldTag),
-					sql.NotNull(sourcename.FieldCommit),
-				),
-			),
 		).
-		UpdateNewValues().
+		Ignore().
 		ID(ctx)
 	if err != nil {
 		return nil, err
 	}
+	log.Println(sourceNameID, src)
 
 	return client.SourceName.Query().
 		Where(sourcename.ID(sourceNameID)).

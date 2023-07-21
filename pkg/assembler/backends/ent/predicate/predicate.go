@@ -18,6 +18,9 @@ type Builder func(*sql.Selector)
 // Certification is the predicate function for certification builders.
 type Certification func(*sql.Selector)
 
+// CertifyScorecard is the predicate function for certifyscorecard builders.
+type CertifyScorecard func(*sql.Selector)
+
 // CertifyVuln is the predicate function for certifyvuln builders.
 type CertifyVuln func(*sql.Selector)
 
@@ -53,6 +56,9 @@ type PkgEqual func(*sql.Selector)
 
 // SLSAAttestation is the predicate function for slsaattestation builders.
 type SLSAAttestation func(*sql.Selector)
+
+// Scorecard is the predicate function for scorecard builders.
+type Scorecard func(*sql.Selector)
 
 // SecurityAdvisory is the predicate function for securityadvisory builders.
 type SecurityAdvisory func(*sql.Selector)

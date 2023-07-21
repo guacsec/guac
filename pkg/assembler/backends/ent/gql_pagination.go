@@ -15,6 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -26,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -1095,6 +1097,252 @@ func (c *Certification) ToEdge(order *CertificationOrder) *CertificationEdge {
 	return &CertificationEdge{
 		Node:   c,
 		Cursor: order.Field.toCursor(c),
+	}
+}
+
+// CertifyScorecardEdge is the edge representation of CertifyScorecard.
+type CertifyScorecardEdge struct {
+	Node   *CertifyScorecard `json:"node"`
+	Cursor Cursor            `json:"cursor"`
+}
+
+// CertifyScorecardConnection is the connection containing edges to CertifyScorecard.
+type CertifyScorecardConnection struct {
+	Edges      []*CertifyScorecardEdge `json:"edges"`
+	PageInfo   PageInfo                `json:"pageInfo"`
+	TotalCount int                     `json:"totalCount"`
+}
+
+func (c *CertifyScorecardConnection) build(nodes []*CertifyScorecard, pager *certifyscorecardPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *CertifyScorecard
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *CertifyScorecard {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *CertifyScorecard {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*CertifyScorecardEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &CertifyScorecardEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// CertifyScorecardPaginateOption enables pagination customization.
+type CertifyScorecardPaginateOption func(*certifyscorecardPager) error
+
+// WithCertifyScorecardOrder configures pagination ordering.
+func WithCertifyScorecardOrder(order *CertifyScorecardOrder) CertifyScorecardPaginateOption {
+	if order == nil {
+		order = DefaultCertifyScorecardOrder
+	}
+	o := *order
+	return func(pager *certifyscorecardPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultCertifyScorecardOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithCertifyScorecardFilter configures pagination filter.
+func WithCertifyScorecardFilter(filter func(*CertifyScorecardQuery) (*CertifyScorecardQuery, error)) CertifyScorecardPaginateOption {
+	return func(pager *certifyscorecardPager) error {
+		if filter == nil {
+			return errors.New("CertifyScorecardQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type certifyscorecardPager struct {
+	reverse bool
+	order   *CertifyScorecardOrder
+	filter  func(*CertifyScorecardQuery) (*CertifyScorecardQuery, error)
+}
+
+func newCertifyScorecardPager(opts []CertifyScorecardPaginateOption, reverse bool) (*certifyscorecardPager, error) {
+	pager := &certifyscorecardPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultCertifyScorecardOrder
+	}
+	return pager, nil
+}
+
+func (p *certifyscorecardPager) applyFilter(query *CertifyScorecardQuery) (*CertifyScorecardQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *certifyscorecardPager) toCursor(cs *CertifyScorecard) Cursor {
+	return p.order.Field.toCursor(cs)
+}
+
+func (p *certifyscorecardPager) applyCursors(query *CertifyScorecardQuery, after, before *Cursor) (*CertifyScorecardQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultCertifyScorecardOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *certifyscorecardPager) applyOrder(query *CertifyScorecardQuery) *CertifyScorecardQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultCertifyScorecardOrder.Field {
+		query = query.Order(DefaultCertifyScorecardOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *certifyscorecardPager) orderExpr(query *CertifyScorecardQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultCertifyScorecardOrder.Field {
+			b.Comma().Ident(DefaultCertifyScorecardOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to CertifyScorecard.
+func (cs *CertifyScorecardQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...CertifyScorecardPaginateOption,
+) (*CertifyScorecardConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newCertifyScorecardPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if cs, err = pager.applyFilter(cs); err != nil {
+		return nil, err
+	}
+	conn := &CertifyScorecardConnection{Edges: []*CertifyScorecardEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = cs.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if cs, err = pager.applyCursors(cs, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		cs.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := cs.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	cs = pager.applyOrder(cs)
+	nodes, err := cs.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// CertifyScorecardOrderField defines the ordering field of CertifyScorecard.
+type CertifyScorecardOrderField struct {
+	// Value extracts the ordering value from the given CertifyScorecard.
+	Value    func(*CertifyScorecard) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) certifyscorecard.OrderOption
+	toCursor func(*CertifyScorecard) Cursor
+}
+
+// CertifyScorecardOrder defines the ordering of CertifyScorecard.
+type CertifyScorecardOrder struct {
+	Direction OrderDirection              `json:"direction"`
+	Field     *CertifyScorecardOrderField `json:"field"`
+}
+
+// DefaultCertifyScorecardOrder is the default ordering of CertifyScorecard.
+var DefaultCertifyScorecardOrder = &CertifyScorecardOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &CertifyScorecardOrderField{
+		Value: func(cs *CertifyScorecard) (ent.Value, error) {
+			return cs.ID, nil
+		},
+		column: certifyscorecard.FieldID,
+		toTerm: certifyscorecard.ByID,
+		toCursor: func(cs *CertifyScorecard) Cursor {
+			return Cursor{ID: cs.ID}
+		},
+	},
+}
+
+// ToEdge converts CertifyScorecard into CertifyScorecardEdge.
+func (cs *CertifyScorecard) ToEdge(order *CertifyScorecardOrder) *CertifyScorecardEdge {
+	if order == nil {
+		order = DefaultCertifyScorecardOrder
+	}
+	return &CertifyScorecardEdge{
+		Node:   cs,
+		Cursor: order.Field.toCursor(cs),
 	}
 }
 
@@ -4047,6 +4295,252 @@ func (sa *SLSAAttestation) ToEdge(order *SLSAAttestationOrder) *SLSAAttestationE
 	return &SLSAAttestationEdge{
 		Node:   sa,
 		Cursor: order.Field.toCursor(sa),
+	}
+}
+
+// ScorecardEdge is the edge representation of Scorecard.
+type ScorecardEdge struct {
+	Node   *Scorecard `json:"node"`
+	Cursor Cursor     `json:"cursor"`
+}
+
+// ScorecardConnection is the connection containing edges to Scorecard.
+type ScorecardConnection struct {
+	Edges      []*ScorecardEdge `json:"edges"`
+	PageInfo   PageInfo         `json:"pageInfo"`
+	TotalCount int              `json:"totalCount"`
+}
+
+func (c *ScorecardConnection) build(nodes []*Scorecard, pager *scorecardPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *Scorecard
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *Scorecard {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *Scorecard {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*ScorecardEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &ScorecardEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// ScorecardPaginateOption enables pagination customization.
+type ScorecardPaginateOption func(*scorecardPager) error
+
+// WithScorecardOrder configures pagination ordering.
+func WithScorecardOrder(order *ScorecardOrder) ScorecardPaginateOption {
+	if order == nil {
+		order = DefaultScorecardOrder
+	}
+	o := *order
+	return func(pager *scorecardPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultScorecardOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithScorecardFilter configures pagination filter.
+func WithScorecardFilter(filter func(*ScorecardQuery) (*ScorecardQuery, error)) ScorecardPaginateOption {
+	return func(pager *scorecardPager) error {
+		if filter == nil {
+			return errors.New("ScorecardQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type scorecardPager struct {
+	reverse bool
+	order   *ScorecardOrder
+	filter  func(*ScorecardQuery) (*ScorecardQuery, error)
+}
+
+func newScorecardPager(opts []ScorecardPaginateOption, reverse bool) (*scorecardPager, error) {
+	pager := &scorecardPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultScorecardOrder
+	}
+	return pager, nil
+}
+
+func (p *scorecardPager) applyFilter(query *ScorecardQuery) (*ScorecardQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *scorecardPager) toCursor(s *Scorecard) Cursor {
+	return p.order.Field.toCursor(s)
+}
+
+func (p *scorecardPager) applyCursors(query *ScorecardQuery, after, before *Cursor) (*ScorecardQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultScorecardOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *scorecardPager) applyOrder(query *ScorecardQuery) *ScorecardQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultScorecardOrder.Field {
+		query = query.Order(DefaultScorecardOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *scorecardPager) orderExpr(query *ScorecardQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultScorecardOrder.Field {
+			b.Comma().Ident(DefaultScorecardOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to Scorecard.
+func (s *ScorecardQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...ScorecardPaginateOption,
+) (*ScorecardConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newScorecardPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if s, err = pager.applyFilter(s); err != nil {
+		return nil, err
+	}
+	conn := &ScorecardConnection{Edges: []*ScorecardEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = s.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if s, err = pager.applyCursors(s, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		s.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := s.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	s = pager.applyOrder(s)
+	nodes, err := s.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// ScorecardOrderField defines the ordering field of Scorecard.
+type ScorecardOrderField struct {
+	// Value extracts the ordering value from the given Scorecard.
+	Value    func(*Scorecard) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) scorecard.OrderOption
+	toCursor func(*Scorecard) Cursor
+}
+
+// ScorecardOrder defines the ordering of Scorecard.
+type ScorecardOrder struct {
+	Direction OrderDirection       `json:"direction"`
+	Field     *ScorecardOrderField `json:"field"`
+}
+
+// DefaultScorecardOrder is the default ordering of Scorecard.
+var DefaultScorecardOrder = &ScorecardOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &ScorecardOrderField{
+		Value: func(s *Scorecard) (ent.Value, error) {
+			return s.ID, nil
+		},
+		column: scorecard.FieldID,
+		toTerm: scorecard.ByID,
+		toCursor: func(s *Scorecard) Cursor {
+			return Cursor{ID: s.ID}
+		},
+	},
+}
+
+// ToEdge converts Scorecard into ScorecardEdge.
+func (s *Scorecard) ToEdge(order *ScorecardOrder) *ScorecardEdge {
+	if order == nil {
+		order = DefaultScorecardOrder
+	}
+	return &ScorecardEdge{
+		Node:   s,
+		Cursor: order.Field.toCursor(s),
 	}
 }
 

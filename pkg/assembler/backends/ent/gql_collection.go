@@ -11,6 +11,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -22,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -486,6 +488,103 @@ type certificationPaginateArgs struct {
 
 func newCertificationPaginateArgs(rv map[string]any) *certificationPaginateArgs {
 	args := &certificationPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (cs *CertifyScorecardQuery) CollectFields(ctx context.Context, satisfies ...string) (*CertifyScorecardQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return cs, nil
+	}
+	if err := cs.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return cs, nil
+}
+
+func (cs *CertifyScorecardQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(certifyscorecard.Columns))
+		selectedFields = []string{certifyscorecard.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "scorecard":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&ScorecardClient{config: cs.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			cs.withScorecard = query
+			if _, ok := fieldSeen[certifyscorecard.FieldScorecardID]; !ok {
+				selectedFields = append(selectedFields, certifyscorecard.FieldScorecardID)
+				fieldSeen[certifyscorecard.FieldScorecardID] = struct{}{}
+			}
+		case "source":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&SourceNameClient{config: cs.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			cs.withSource = query
+			if _, ok := fieldSeen[certifyscorecard.FieldSourceID]; !ok {
+				selectedFields = append(selectedFields, certifyscorecard.FieldSourceID)
+				fieldSeen[certifyscorecard.FieldSourceID] = struct{}{}
+			}
+		case "sourceID":
+			if _, ok := fieldSeen[certifyscorecard.FieldSourceID]; !ok {
+				selectedFields = append(selectedFields, certifyscorecard.FieldSourceID)
+				fieldSeen[certifyscorecard.FieldSourceID] = struct{}{}
+			}
+		case "scorecardID":
+			if _, ok := fieldSeen[certifyscorecard.FieldScorecardID]; !ok {
+				selectedFields = append(selectedFields, certifyscorecard.FieldScorecardID)
+				fieldSeen[certifyscorecard.FieldScorecardID] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		cs.Select(selectedFields...)
+	}
+	return nil
+}
+
+type certifyscorecardPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []CertifyScorecardPaginateOption
+}
+
+func newCertifyScorecardPaginateArgs(rv map[string]any) *certifyscorecardPaginateArgs {
+	args := &certifyscorecardPaginateArgs{}
 	if rv == nil {
 		return args
 	}
@@ -1845,6 +1944,112 @@ type slsaattestationPaginateArgs struct {
 
 func newSLSAAttestationPaginateArgs(rv map[string]any) *slsaattestationPaginateArgs {
 	args := &slsaattestationPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (s *ScorecardQuery) CollectFields(ctx context.Context, satisfies ...string) (*ScorecardQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return s, nil
+	}
+	if err := s.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+func (s *ScorecardQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(scorecard.Columns))
+		selectedFields = []string{scorecard.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "certifications":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyScorecardClient{config: s.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			s.WithNamedCertifications(alias, func(wq *CertifyScorecardQuery) {
+				*wq = *query
+			})
+		case "checks":
+			if _, ok := fieldSeen[scorecard.FieldChecks]; !ok {
+				selectedFields = append(selectedFields, scorecard.FieldChecks)
+				fieldSeen[scorecard.FieldChecks] = struct{}{}
+			}
+		case "aggregateScore":
+			if _, ok := fieldSeen[scorecard.FieldAggregateScore]; !ok {
+				selectedFields = append(selectedFields, scorecard.FieldAggregateScore)
+				fieldSeen[scorecard.FieldAggregateScore] = struct{}{}
+			}
+		case "timeScanned":
+			if _, ok := fieldSeen[scorecard.FieldTimeScanned]; !ok {
+				selectedFields = append(selectedFields, scorecard.FieldTimeScanned)
+				fieldSeen[scorecard.FieldTimeScanned] = struct{}{}
+			}
+		case "scorecardVersion":
+			if _, ok := fieldSeen[scorecard.FieldScorecardVersion]; !ok {
+				selectedFields = append(selectedFields, scorecard.FieldScorecardVersion)
+				fieldSeen[scorecard.FieldScorecardVersion] = struct{}{}
+			}
+		case "scorecardCommit":
+			if _, ok := fieldSeen[scorecard.FieldScorecardCommit]; !ok {
+				selectedFields = append(selectedFields, scorecard.FieldScorecardCommit)
+				fieldSeen[scorecard.FieldScorecardCommit] = struct{}{}
+			}
+		case "origin":
+			if _, ok := fieldSeen[scorecard.FieldOrigin]; !ok {
+				selectedFields = append(selectedFields, scorecard.FieldOrigin)
+				fieldSeen[scorecard.FieldOrigin] = struct{}{}
+			}
+		case "collector":
+			if _, ok := fieldSeen[scorecard.FieldCollector]; !ok {
+				selectedFields = append(selectedFields, scorecard.FieldCollector)
+				fieldSeen[scorecard.FieldCollector] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		s.Select(selectedFields...)
+	}
+	return nil
+}
+
+type scorecardPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []ScorecardPaginateOption
+}
+
+func newScorecardPaginateArgs(rv map[string]any) *scorecardPaginateArgs {
+	args := &scorecardPaginateArgs{}
 	if rv == nil {
 		return args
 	}

@@ -17,6 +17,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -28,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -53,6 +55,9 @@ func (n *Builder) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *Certification) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *CertifyScorecard) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *CertifyVuln) IsNode() {}
@@ -89,6 +94,9 @@ func (n *PkgEqual) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *SLSAAttestation) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Scorecard) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *SecurityAdvisory) IsNode() {}
@@ -200,6 +208,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.Certification.Query().
 			Where(certification.ID(id))
 		query, err := query.CollectFields(ctx, "Certification")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case certifyscorecard.Table:
+		query := c.CertifyScorecard.Query().
+			Where(certifyscorecard.ID(id))
+		query, err := query.CollectFields(ctx, "CertifyScorecard")
 		if err != nil {
 			return nil, err
 		}
@@ -344,6 +364,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.SLSAAttestation.Query().
 			Where(slsaattestation.ID(id))
 		query, err := query.CollectFields(ctx, "SLSAAttestation")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case scorecard.Table:
+		query := c.Scorecard.Query().
+			Where(scorecard.ID(id))
+		query, err := query.CollectFields(ctx, "Scorecard")
 		if err != nil {
 			return nil, err
 		}
@@ -537,6 +569,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
+	case certifyscorecard.Table:
+		query := c.CertifyScorecard.Query().
+			Where(certifyscorecard.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "CertifyScorecard")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case certifyvuln.Table:
 		query := c.CertifyVuln.Query().
 			Where(certifyvuln.IDIn(ids...))
@@ -717,6 +765,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.SLSAAttestation.Query().
 			Where(slsaattestation.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "SLSAAttestation")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case scorecard.Table:
+		query := c.Scorecard.Query().
+			Where(scorecard.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Scorecard")
 		if err != nil {
 			return nil, err
 		}

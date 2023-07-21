@@ -13,17 +13,6 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, certifyVEXStatemen
 	return nil, nil
 }
 
-func (b *EntBackend) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	log.Println("Scorecards not implemented")
-	return nil, nil
-}
-
-// Mutations for evidence trees (read-write queries, assume software trees ingested)
-func (b *EntBackend) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
-	log.Println("CertifyScorecard not implemented")
-	return nil, nil
-}
-
 func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	log.Println("IngestVEXStatement not implemented")
 	return nil, nil

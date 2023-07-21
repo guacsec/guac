@@ -2,7 +2,6 @@ package backend
 
 import (
 	"strconv"
-	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -103,9 +102,6 @@ func (s *Suite) TestOSV() {
 			ExpQueryErr: true,
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	ctx := s.Ctx
 	for _, test := range tests {
 		s.Run(test.Name, func() {
