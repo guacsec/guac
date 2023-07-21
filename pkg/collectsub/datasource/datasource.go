@@ -30,7 +30,7 @@ type CollectSource interface {
 
 	// DataSourcesUpdate will return a channel which will get an element
 	// if the CollectSource has new data. This is heuristical and the
-	// channel may get an eleemnt even if there is no new data.
+	// channel may get an element even if there is no new data.
 	DataSourcesUpdate(ctx context.Context) (<-chan error, error)
 }
 
