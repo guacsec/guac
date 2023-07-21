@@ -22517,19 +22517,19 @@ func (v *SLSAForArtifactResponse) GetIngestSLSA() SLSAForArtifactIngestSLSAHasSL
 //
 // HasSLSA records that a subject node has a SLSA attestation.
 type SLSAForArtifactsIngestSLSAsHasSLSA struct {
-	allSLSATree `json:"-"`
+	AllSLSATree `json:"-"`
 }
 
 // GetId returns SLSAForArtifactsIngestSLSAsHasSLSA.Id, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactsIngestSLSAsHasSLSA) GetId() string { return v.allSLSATree.Id }
+func (v *SLSAForArtifactsIngestSLSAsHasSLSA) GetId() string { return v.AllSLSATree.Id }
 
 // GetSubject returns SLSAForArtifactsIngestSLSAsHasSLSA.Subject, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactsIngestSLSAsHasSLSA) GetSubject() allSLSATreeSubjectArtifact {
-	return v.allSLSATree.Subject
+func (v *SLSAForArtifactsIngestSLSAsHasSLSA) GetSubject() AllSLSATreeSubjectArtifact {
+	return v.AllSLSATree.Subject
 }
 
 // GetSlsa returns SLSAForArtifactsIngestSLSAsHasSLSA.Slsa, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactsIngestSLSAsHasSLSA) GetSlsa() allSLSATreeSlsaSLSA { return v.allSLSATree.Slsa }
+func (v *SLSAForArtifactsIngestSLSAsHasSLSA) GetSlsa() AllSLSATreeSlsaSLSA { return v.AllSLSATree.Slsa }
 
 func (v *SLSAForArtifactsIngestSLSAsHasSLSA) UnmarshalJSON(b []byte) error {
 
@@ -22549,7 +22549,7 @@ func (v *SLSAForArtifactsIngestSLSAsHasSLSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSLSATree)
+		b, &v.AllSLSATree)
 	if err != nil {
 		return err
 	}
@@ -22559,9 +22559,9 @@ func (v *SLSAForArtifactsIngestSLSAsHasSLSA) UnmarshalJSON(b []byte) error {
 type __premarshalSLSAForArtifactsIngestSLSAsHasSLSA struct {
 	Id string `json:"id"`
 
-	Subject allSLSATreeSubjectArtifact `json:"subject"`
+	Subject AllSLSATreeSubjectArtifact `json:"subject"`
 
-	Slsa allSLSATreeSlsaSLSA `json:"slsa"`
+	Slsa AllSLSATreeSlsaSLSA `json:"slsa"`
 }
 
 func (v *SLSAForArtifactsIngestSLSAsHasSLSA) MarshalJSON() ([]byte, error) {
@@ -22575,9 +22575,9 @@ func (v *SLSAForArtifactsIngestSLSAsHasSLSA) MarshalJSON() ([]byte, error) {
 func (v *SLSAForArtifactsIngestSLSAsHasSLSA) __premarshalJSON() (*__premarshalSLSAForArtifactsIngestSLSAsHasSLSA, error) {
 	var retval __premarshalSLSAForArtifactsIngestSLSAsHasSLSA
 
-	retval.Id = v.allSLSATree.Id
-	retval.Subject = v.allSLSATree.Subject
-	retval.Slsa = v.allSLSATree.Slsa
+	retval.Id = v.AllSLSATree.Id
+	retval.Subject = v.AllSLSATree.Subject
+	retval.Slsa = v.AllSLSATree.Slsa
 	return &retval, nil
 }
 
@@ -30144,10 +30144,10 @@ func SLSAForArtifact(
 const SLSAForArtifacts_Operation = `
 mutation SLSAForArtifacts ($artifacts: [ArtifactInputSpec!]!, $materialsList: [[ArtifactInputSpec!]!]!, $builders: [BuilderInputSpec!]!, $slsaList: [SLSAInputSpec!]!) {
 	ingestSLSAs(subjects: $artifacts, builtFromList: $materialsList, builtByList: $builders, slsaList: $slsaList) {
-		... allSLSATree
+		... AllSLSATree
 	}
 }
-fragment allSLSATree on HasSLSA {
+fragment AllSLSATree on HasSLSA {
 	id
 	subject {
 		... AllArtifactTree
