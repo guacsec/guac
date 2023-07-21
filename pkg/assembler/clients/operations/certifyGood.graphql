@@ -19,18 +19,18 @@
 
 mutation CertifyGoodPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyGood: CertifyGoodInputSpec!) {
   ingestCertifyGood(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, certifyGood: $certifyGood) {
-    ...allCertifyGood
+    ...AllCertifyGood
   }
 }
 
 mutation CertifyGoodSrc($source: SourceInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
   ingestCertifyGood(subject: {source: $source}, certifyGood: $certifyGood) {
-    ...allCertifyGood
+    ...AllCertifyGood
   }
 }
 
 mutation CertifyGoodArtifact($artifact: ArtifactInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
   ingestCertifyGood(subject: {artifact: $artifact}, certifyGood: $certifyGood) {
-    ...allCertifyGood
+    ...AllCertifyGood
   }
 }

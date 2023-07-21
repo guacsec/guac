@@ -19,7 +19,7 @@
 
 mutation SLSAForArtifact($artifact: ArtifactInputSpec!, $materials: [ArtifactInputSpec!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
   ingestSLSA(subject: $artifact, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
-    ...allSLSATree
+    ...AllSLSATree
   }
 }
 

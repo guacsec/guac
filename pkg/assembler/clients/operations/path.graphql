@@ -30,7 +30,7 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
       ...AllArtifactTree
     }
     ... on Builder {
-      ...allBuilderTree
+      ...AllBuilderTree
     }
     ... on OSV {
       ...AllOSVTree
@@ -48,43 +48,43 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
       ...AllCertifyScorecard
     }
     ... on PkgEqual {
-      ...allPkgEqual
+      ...AllPkgEqual
     }
     ... on IsOccurrence {
       ...AllIsOccurrencesTree
     }
     ... on IsDependency {
-      ...allIsDependencyTree
+      ...AllIsDependencyTree
     }
     ... on HasSLSA {
-      ...allSLSATree
+      ...AllSLSATree
     }
     ... on CertifyBad {
       ...AllCertifyBad
     }
     ... on CertifyGood {
-      ...allCertifyGood
+      ...AllCertifyGood
     }
     ... on HashEqual {
-      ...allHashEqualTree
+      ...AllHashEqualTree
     }
     ... on HasSBOM {
-      ...allHasSBOMTree
+      ...AllHasSBOMTree
     }
     ... on HasSourceAt {
-      ...allHasSourceAt
+      ...AllHasSourceAt
     }
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
     ... on IsVulnerability {
-      ...allIsVulnerability
+      ...AllIsVulnerability
     }
     ... on CertifyVEXStatement {
-      ...allCertifyVEXStatement
+      ...AllCertifyVEXStatement
     }
     ... on Builder {
-      ...allBuilderTree
+      ...AllBuilderTree
     }
   }
 }
@@ -102,7 +102,7 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
       ...AllArtifactTree
     }
     ... on Builder {
-      ...allBuilderTree
+      ...AllBuilderTree
     }
     ... on OSV {
       ...AllOSVTree
@@ -120,43 +120,43 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
       ...AllCertifyScorecard
     }
     ... on PkgEqual {
-      ...allPkgEqual
+      ...AllPkgEqual
     }
     ... on IsOccurrence {
       ...AllIsOccurrencesTree
     }
     ... on IsDependency {
-      ...allIsDependencyTree
+      ...AllIsDependencyTree
     }
     ... on HasSLSA {
-      ...allSLSATree
+      ...AllSLSATree
     }
     ... on CertifyBad {
       ...AllCertifyBad
     }
     ... on CertifyGood {
-      ...allCertifyGood
+      ...AllCertifyGood
     }
     ... on HashEqual {
-      ...allHashEqualTree
+      ...AllHashEqualTree
     }
     ... on HasSBOM {
-      ...allHasSBOMTree
+      ...AllHasSBOMTree
     }
     ... on HasSourceAt {
-      ...allHasSourceAt
+      ...AllHasSourceAt
     }
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
     ... on IsVulnerability {
-      ...allIsVulnerability
+      ...AllIsVulnerability
     }
     ... on CertifyVEXStatement {
-      ...allCertifyVEXStatement
+      ...AllCertifyVEXStatement
     }
     ... on Builder {
-      ...allBuilderTree
+      ...AllBuilderTree
     }
   }
 }
@@ -174,7 +174,7 @@ query Node($node: ID!) {
       ...AllArtifactTree
     }
     ... on Builder {
-      ...allBuilderTree
+      ...AllBuilderTree
     }
     ... on OSV {
       ...AllOSVTree
@@ -192,43 +192,43 @@ query Node($node: ID!) {
       ...AllCertifyScorecard
     }
     ... on PkgEqual {
-      ...allPkgEqual
+      ...AllPkgEqual
     }
     ... on IsOccurrence {
       ...AllIsOccurrencesTree
     }
     ... on IsDependency {
-      ...allIsDependencyTree
+      ...AllIsDependencyTree
     }
     ... on HasSLSA {
-      ...allSLSATree
+      ...AllSLSATree
     }
     ... on CertifyBad {
       ...AllCertifyBad
     }
     ... on CertifyGood {
-      ...allCertifyGood
+      ...AllCertifyGood
     }
     ... on HashEqual {
-      ...allHashEqualTree
+      ...AllHashEqualTree
     }
     ... on HasSBOM {
-      ...allHasSBOMTree
+      ...AllHasSBOMTree
     }
     ... on HasSourceAt {
-      ...allHasSourceAt
+      ...AllHasSourceAt
     }
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
     ... on IsVulnerability {
-      ...allIsVulnerability
+      ...AllIsVulnerability
     }
     ... on CertifyVEXStatement {
-      ...allCertifyVEXStatement
+      ...AllCertifyVEXStatement
     }
     ... on Builder {
-      ...allBuilderTree
+      ...AllBuilderTree
     }
   }
 }
@@ -246,7 +246,7 @@ query Nodes($nodes: [ID!]!) {
       ...AllArtifactTree
     }
     ... on Builder {
-      ...allBuilderTree
+      ...AllBuilderTree
     }
     ... on OSV {
       ...AllOSVTree
@@ -264,43 +264,43 @@ query Nodes($nodes: [ID!]!) {
       ...AllCertifyScorecard
     }
     ... on PkgEqual {
-      ...allPkgEqual
+      ...AllPkgEqual
     }
     ... on IsOccurrence {
       ...AllIsOccurrencesTree
     }
     ... on IsDependency {
-      ...allIsDependencyTree
+      ...AllIsDependencyTree
     }
     ... on HasSLSA {
-      ...allSLSATree
+      ...AllSLSATree
     }
     ... on CertifyBad {
       ...AllCertifyBad
     }
     ... on CertifyGood {
-      ...allCertifyGood
+      ...AllCertifyGood
     }
     ... on HashEqual {
-      ...allHashEqualTree
+      ...AllHashEqualTree
     }
     ... on HasSBOM {
-      ...allHasSBOMTree
+      ...AllHasSBOMTree
     }
     ... on HasSourceAt {
-      ...allHasSourceAt
+      ...AllHasSourceAt
     }
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
     ... on IsVulnerability {
-      ...allIsVulnerability
+      ...AllIsVulnerability
     }
     ... on CertifyVEXStatement {
-      ...allCertifyVEXStatement
+      ...AllCertifyVEXStatement
     }
     ... on Builder {
-      ...allBuilderTree
+      ...AllBuilderTree
     }
   }
 }

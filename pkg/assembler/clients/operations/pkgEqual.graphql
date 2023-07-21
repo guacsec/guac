@@ -25,6 +25,6 @@ mutation PkgEqual($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual: 
     ...AllPkgTree
   }
   ingestPkgEqual(pkg: $pkg, otherPackage: $otherPackage, pkgEqual: $pkgEqual) {
-    ...allPkgEqual
+    ...AllPkgEqual
   }
 }

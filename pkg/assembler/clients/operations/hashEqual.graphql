@@ -19,6 +19,6 @@
 
 mutation HashEqual($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
   ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual) {
-    ...allHashEqualTree
+    ...AllHashEqualTree
   }
 }
