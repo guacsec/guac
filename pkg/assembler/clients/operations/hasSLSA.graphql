@@ -19,7 +19,7 @@
 
 mutation SLSAForArtifact($artifact: ArtifactInputSpec!, $materials: [ArtifactInputSpec!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
   ingestSLSA(subject: $artifact, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
-    ...allSLSATree
+    ...AllSLSATree
   }
 }
 
@@ -27,6 +27,6 @@ mutation SLSAForArtifact($artifact: ArtifactInputSpec!, $materials: [ArtifactInp
 
 mutation SLSAForArtifacts($artifacts: [ArtifactInputSpec!]!, $materialsList: [[ArtifactInputSpec!]!]!, $builders: [BuilderInputSpec!]!, $slsaList: [SLSAInputSpec!]!) {
   ingestSLSAs(subjects: $artifacts, builtFromList: $materialsList, builtByList: $builders, slsaList: $slsaList) {
-    ...allSLSATree
+    ...AllSLSATree
   }
 }

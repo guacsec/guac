@@ -19,12 +19,12 @@
 
 mutation HasSBOMPkg($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
   ingestHasSBOM(subject: {package: $pkg}, hasSBOM: $hasSBOM) {
-    ...allHasSBOMTree
+    ...AllHasSBOMTree
   }
 }
 
 mutation HasSBOMArtifact($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
   ingestHasSBOM(subject: {artifact: $artifact}, hasSBOM: $hasSBOM) {
-    ...allHasSBOMTree
+    ...AllHasSBOMTree
   }
 }

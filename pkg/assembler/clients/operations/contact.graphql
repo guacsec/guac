@@ -19,18 +19,18 @@
 
 mutation PointOfContactPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $pointOfContact: PointOfContactInputSpec!) {
   ingestPointOfContact(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, pointOfContact: $pointOfContact) {
-    ...allPointOfContact
+    ...AllPointOfContact
   }
 }
 
 mutation PointOfContactSrc($source: SourceInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
   ingestPointOfContact(subject: {source: $source}, pointOfContact: $pointOfContact) {
-    ...allPointOfContact
+    ...AllPointOfContact
   }
 }
 
 mutation PointOfContactArtifact($artifact: ArtifactInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
   ingestPointOfContact(subject: {artifact: $artifact}, pointOfContact: $pointOfContact) {
-    ...allPointOfContact
+    ...AllPointOfContact
   }
 }
