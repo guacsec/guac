@@ -277,14 +277,11 @@ func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client
 // TODO: implement
 func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *queueValues, pointOfContact model.NeighborsNeighborsPointOfContact) {
 	// Step 1: Add field to current node in nodeMap of this POC (may need to copy over old fields)
-	q.nodeMap[q.now] = {
-	Parent: q.nowNode.Parent
-	Depth: q.nowNode.Depth
-	Type: q.nowNode.Type
-	nodeVersions: q.nowNode.nodeVersions
-	PointOfContact   pointOfContact.
-	NotInBlastRadius q.nowNode.NotInBlastRadius
+	q.nodeMap[q.now] = BfsNode{
+		Parent: q.nowNode.Parent,
+		Depth:  q.nowNode.Depth,
 	}
+	pointOfContact.Subject
 	// Step 2: If it is a packageName, add the POC to applicable versions (versions in the nodeVersions) but not the reverse
 	// (i.e. for a version do not add POC to associated name as it may not be applicable)
 }
