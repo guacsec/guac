@@ -26,14 +26,98 @@ import (
 )
 
 const (
-	versionRange   string = "versionRange"
-	dependencyType string = "dependencyType"
+	versionRangeStr   string = "versionRange"
+	dependencyTypeStr string = "dependencyType"
 )
 
 // Query IsDependency
 
 func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	return []*model.IsDependency{}, fmt.Errorf("not implemented: IsDependency")
+	values := map[string]any{}
+	arangoQueryBuilder := setPkgMatchValues(isDependencySpec.Package, values)
+	setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
+
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'pkgVersion': {
+			'type_id': pType._id,
+			'type': pType.type,
+			'namespace_id': pNs._id,
+			'namespace': pNs.namespace,
+			'name_id': pName._id,
+			'name': pName.name,
+			'version_id': pVersion._id,
+			'version': pVersion.version,
+			'subpath': pVersion.subpath,
+			'qualifier_list': pVersion.qualifier_list
+		},
+		'depPkg': {
+			'type_id': depType._id,
+			'type': depType.type,
+			'namespace_id': depNamespace._id,
+			'namespace': depNamespace.namespace,
+			'name_id': depName._id,
+			'name': depName.name
+		},
+		'isDependency_id': isDependency._id,
+		'versionRange': isDependency.versionRange,
+		'dependencyType': isDependency.dependencyType,
+		'justification': isDependency.justification,
+		'collector': isDependency.collector,
+		'origin': isDependency.origin
+	}`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsDependency")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for IsDependency: %w", err)
+	}
+	defer cursor.Close()
+
+	return getIsDependency(ctx, cursor)
+}
+
+func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any) {
+
+	arangoQueryBuilder.ForOutBound(isDependencySubjectEdgesStr, "isDependency", "pVersion")
+	if isDependencySpec.VersionRange != nil {
+		arangoQueryBuilder.filter("isDependency", versionRangeStr, "==", "@"+versionRangeStr)
+		queryValues[versionRangeStr] = isDependencySpec.VersionRange
+	}
+	if isDependencySpec.DependencyType != nil {
+		arangoQueryBuilder.filter("isDependency", dependencyTypeStr, "==", "@"+dependencyTypeStr)
+		queryValues[dependencyTypeStr] = isDependencySpec.DependencyType.String()
+	}
+	if isDependencySpec.Origin != nil {
+		arangoQueryBuilder.filter("isDependency", origin, "==", "@"+origin)
+		queryValues[origin] = isDependencySpec.Origin
+	}
+	if isDependencySpec.Collector != nil {
+		arangoQueryBuilder.filter("isDependency", collector, "==", "@"+collector)
+		queryValues[collector] = isDependencySpec.Collector
+	}
+	if isDependencySpec.DependentPackage != nil {
+		arangoQueryBuilder.ForOutBound(isDependencyEdgesStr, "depName", "isDependency")
+		if isDependencySpec.DependentPackage.Name != nil {
+			arangoQueryBuilder.filter("depName", "name", "==", "@name")
+			queryValues["name"] = *isDependencySpec.DependentPackage.Name
+		}
+		arangoQueryBuilder.ForInBound(pkgHasNameStr, "depNamespace", "depName")
+		if isDependencySpec.DependentPackage.Namespace != nil {
+			arangoQueryBuilder.filter("depNamespace", "namespace", "==", "@namespace")
+			queryValues["namespace"] = *isDependencySpec.DependentPackage.Namespace
+		}
+		arangoQueryBuilder.ForInBound(pkgHasNamespaceStr, "depType", "depNamespace")
+		if isDependencySpec.DependentPackage.Namespace != nil {
+			arangoQueryBuilder.filter("depType", "type", "==", "@type")
+			queryValues["type"] = *isDependencySpec.DependentPackage.Type
+		}
+	} else {
+		arangoQueryBuilder.ForOutBound(isDependencyEdgesStr, "depName", "isDependency")
+		arangoQueryBuilder.ForInBound(pkgHasNameStr, "depNamespace", "depName")
+		arangoQueryBuilder.ForInBound(pkgHasNamespaceStr, "depType", "depNamespace")
+	}
 }
 
 // Ingest IsDependency
@@ -49,8 +133,8 @@ func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpe
 
 	// isDependency
 
-	values[versionRange] = dependency.VersionRange
-	values[dependencyType] = dependency.DependencyType.String()
+	values[versionRangeStr] = dependency.VersionRange
+	values[dependencyTypeStr] = dependency.DependencyType.String()
 	values[justification] = dependency.Justification
 	values[origin] = dependency.Origin
 	values[collector] = dependency.Collector

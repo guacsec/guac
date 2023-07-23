@@ -372,6 +372,7 @@ func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, buil
 
 	var hasSLSAList []*model.HasSlsa
 	for _, createdValue := range createdValues {
+
 		var builtFromArtifacts []*model.Artifact
 		if val, ok := builtFromMap[artifactKey(createdValue.Subject.Algorithm, createdValue.Subject.Digest)]; ok {
 			builtFromArtifacts = val

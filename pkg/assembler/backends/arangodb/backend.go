@@ -706,6 +706,12 @@ func (aqb *arangoQueryBuilder) ForOutBound(edgeCollectionName string, counterNam
 	return aqb
 }
 
+func (aqb *arangoQueryBuilder) ForInBound(edgeCollectionName string, counterName string, inBoundValueName string) *arangoQueryBuilder {
+	aqb.query.WriteString("\n")
+	aqb.query.WriteString(fmt.Sprintf("FOR %s IN INBOUND %s %s", counterName, inBoundValueName, edgeCollectionName))
+	return aqb
+}
+
 func (aqb *arangoQueryBuilder) filter(counterName string, fieldName string, condition string, value string) *arangoQueryFilter {
 	aqb.query.WriteString(" ")
 
