@@ -39,7 +39,7 @@ type BfsNode struct {
 	Depth            int
 	Type             NodeType
 	nodeVersions     []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
-	PointOfContactId string
+	PointOfContact   model.AllPointOfContact
 	NotInBlastRadius bool // true if it is solely an informational node, not to be included in the blast radius subgraph
 }
 
@@ -90,7 +90,8 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		var versionsList []string
 		versionsList = append(versionsList, nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
 		q.nodeMap[startID] = BfsNode{
-			Type: PackageVersion,
+			Type:         PackageVersion,
+			nodeVersions: versionsList,
 		}
 
 		q.nodeMap[nodePkg.AllPkgTree.Namespaces[0].Names[0].Id] = BfsNode{
@@ -201,7 +202,7 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlClient graphql.Client
 		return nil
 	}
 
-	q.addNodeToQueue(PackageVersion, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
+	q.addNodeToQueue(PackageVersion, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
 	q.addNodeToQueue(PackageName, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Id)
 
 	return nil
@@ -246,7 +247,7 @@ func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client,
 func explorePkgEqual(ctx context.Context, gqlClient graphql.Client, q *queueValues, pkgEqual model.NeighborsNeighborsPkgEqual) {
 	for _, pkg := range pkgEqual.Packages {
 		if pkg.Namespaces[0].Names[0].Versions[0].Id != q.now {
-			q.addNodeToQueue(PackageVersion, nil, pkg.Namespaces[0].Names[0].Versions[0].Id)
+			q.addNodeToQueue(PackageVersion, []string{pkg.Namespaces[0].Names[0].Versions[0].Id}, pkg.Namespaces[0].Names[0].Versions[0].Id)
 			q.addNodeToQueue(PackageName, []string{pkg.Namespaces[0].Names[0].Versions[0].Id}, pkg.Namespaces[0].Names[0].Id)
 		}
 	}
@@ -262,35 +263,75 @@ func exploreHashEqual(ctx context.Context, gqlClient graphql.Client, q *queueVal
 
 func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) {
 	node, seen := q.nodeMap[hasSourceAt.Source.Namespaces[0].Names[0].Id]
-
 	if !seen {
 		node = BfsNode{
 			Parent: q.now,
 			Depth:  q.nowNode.Depth + 1,
 			Type:   SourceName,
 		}
+
+		// check if the Src has any POCs
+		neighborsResponse, _ := model.Neighbors(ctx, gqlClient, hasSourceAt.Source.Namespaces[0].Names[0].Id, []model.Edge{})
+		for _, neighbor := range neighborsResponse.Neighbors {
+			switch neighbor := neighbor.(type) {
+			case *model.NeighborsNeighborsPointOfContact:
+				node = BfsNode{
+					Parent:         q.now,
+					Depth:          q.nowNode.Depth + 1,
+					Type:           SourceName,
+					PointOfContact: neighbor.AllPointOfContact,
+				}
+			}
+		}
 	}
 
 	q.nodeMap[hasSourceAt.Source.Namespaces[0].Names[0].Id] = node
 }
 
-// TODO: implement
 func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *queueValues, pointOfContact model.NeighborsNeighborsPointOfContact) {
-	// Step 1: Add field to current node in nodeMap of this POC (may need to copy over old fields)
-	q.nodeMap[q.now] = BfsNode{
+	node := BfsNode{
 		Parent:           q.nowNode.Parent,
 		Depth:            q.nowNode.Depth,
 		Type:             q.nowNode.Type,
 		nodeVersions:     q.nowNode.nodeVersions,
-		PointOfContactId: pointOfContact.AllPointOfContact.Id,
+		PointOfContact:   pointOfContact.AllPointOfContact,
 		NotInBlastRadius: q.nowNode.NotInBlastRadius,
+		Expanded:         q.nowNode.Expanded,
+	}
+	q.nodeMap[q.now] = node
+	q.nowNode = node
+
+	// If it is a packageName, add the POC to applicable versions (versions in the nodeVersions) but not the reverse
+	if q.nowNode.Type != PackageName {
+		return
 	}
 
-	// Step 2: If it is a packageName, add the POC to applicable versions (versions in the nodeVersions) but not the reverse
-	// (i.e. for a version do not add POC to associated name as it may not be applicable)
+	for _, version := range q.nowNode.nodeVersions {
+		for id, node := range q.nodeMap {
+			if node.Type == PackageVersion && node.nodeVersions[0] == version {
+				node = BfsNode{
+					Parent:           node.Parent,
+					Depth:            node.Depth,
+					Type:             node.Type,
+					nodeVersions:     node.nodeVersions,
+					PointOfContact:   pointOfContact.AllPointOfContact,
+					NotInBlastRadius: node.NotInBlastRadius,
+					Expanded:         node.Expanded,
+				}
+				q.nodeMap[id] = node
+			}
+		}
+	}
 }
 
 func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlClient graphql.Client, pkgType string, pkgNamespace string, pkgName string, id string) error {
+	if _, seen := q.nodeMap[id]; seen {
+		if !q.nodeMap[id].Expanded {
+			q.queue = append(q.queue, id)
+		}
+		return nil
+	}
+
 	pkgFilter := model.PkgSpec{
 		Type:      &pkgType,
 		Namespace: &pkgNamespace,
@@ -306,12 +347,18 @@ func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlCli
 	var versionsList []string
 	for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
 		versionsList = append(versionsList, versionEntry.Version)
-		q.nodeMap[versionEntry.Id] = BfsNode{
-			Parent: q.now,
-			Depth:  q.nowNode.Depth + 1,
-			Type:   PackageVersion,
+		if _, seen := q.nodeMap[versionEntry.Id]; seen {
+			if !q.nodeMap[versionEntry.Id].Expanded {
+				q.queue = append(q.queue, versionEntry.Id)
+			}
+			break
 		}
-
+		q.nodeMap[versionEntry.Id] = BfsNode{
+			Parent:       q.now,
+			Depth:        q.nowNode.Depth + 1,
+			Type:         PackageVersion,
+			nodeVersions: []string{versionEntry.Id},
+		}
 		q.queue = append(q.queue, versionEntry.Id)
 	}
 
@@ -321,6 +368,7 @@ func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlCli
 		Type:         PackageName,
 		nodeVersions: versionsList,
 	}
+
 	q.queue = append(q.queue, id)
 
 	return nil

@@ -865,7 +865,7 @@ var (
 					Type:      "pkgTypeM",
 					Namespace: ptrfrom.String("pkgNamespaceM"),
 					Name:      "pkgNameM",
-					Version:   ptrfrom.String("1.19.0"),
+					Version:   ptrfrom.String("3.0.3"),
 				},
 				PkgMatchFlag: model.MatchFlags{
 					Pkg: model.PkgMatchTypeSpecificVersion,
@@ -959,13 +959,6 @@ func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.I
 		if err != nil {
 			return fmt.Errorf("error in ingesting Builder for HasSlsa: %v\n", err)
 		}
-
-		_, err = model.IngestMaterials(ctx, client, ingest.Materials)
-
-		if err != nil {
-			return fmt.Errorf("error in ingesting Material for HasSlsa: %v\n", err)
-		}
-
 		_, err = model.SLSAForArtifact(ctx, client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
 
 		if err != nil {
@@ -1453,8 +1446,10 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth:          9,
 			expectedLen:       6,
 			expectedPkgs:      []string{"pkgTypeL", "pkgTypeM"},
-			expectedSrcs:      []string{"srcTypeK"}, // add expectedPOC K, L, M once implemented w/ len 5
+			expectedSrcs:      []string{"srcTypeK"},
 			expectedArtifacts: []string{"testArtifactAlgorithmK"},
+			expectedPOC:       []string{"testEmailK", "testEmailL", "testEmailM"},
+			expectedPOCLen:    5,
 			graphInputs:       []assembler.IngestPredicates{pointOfContactGraph},
 		},
 	}
@@ -1551,6 +1546,10 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				expectedSrcIDs = append(expectedSrcIDs, srcID)
+			}
+
+			if len(getReturnedPOCs(ctx, gqlClient, gotMap)) != tt.expectedPOCLen {
+				t.Errorf("Found %d POCs recorded but expected %d \n", len(getReturnedPOCs(ctx, gqlClient, gotMap)), tt.expectedPOCLen)
 			}
 
 			for gotID, node := range gotMap {
@@ -1729,4 +1728,15 @@ func getSrcID(ctx context.Context, gqlClient graphql.Client, srcType string) (st
 	}
 
 	return srcResponse.Sources[0].Namespaces[0].Names[0].Id, nil
+}
+
+func getReturnedPOCs(ctx context.Context, gqlClient graphql.Client, nodeMap map[string]BfsNode) []string {
+	var found []string
+	for _, node := range nodeMap {
+		if node.PointOfContact.Email != "" {
+			found = append(found, node.PointOfContact.Email)
+		}
+	}
+
+	return found
 }
