@@ -1,10 +1,10 @@
 package backend
 
-import "github.com/google/go-cmp/cmp"
+import (
+	"github.com/google/go-cmp/cmp"
+)
 
 func (s *Suite) TestNode() {
-	s.T().Skip()
-
 	be, err := GetBackend(s.Client)
 	s.Require().NoError(err)
 
@@ -25,6 +25,39 @@ func (s *Suite) TestNode() {
 	s.Require().NoError(err)
 
 	if diff := cmp.Diff(p1out, n, ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
+
+	n, err = be.Node(s.Ctx, p.Namespaces[0].ID)
+	s.Require().NoError(err)
+
+	if diff := cmp.Diff(p1out, n, ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
+
+	n, err = be.Node(s.Ctx, p.Namespaces[0].Names[0].ID)
+	s.Require().NoError(err)
+
+	if diff := cmp.Diff(p1out, n, ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
+
+	n, err = be.Node(s.Ctx, p.Namespaces[0].Names[0].Versions[0].ID)
+	s.Require().NoError(err)
+
+	if diff := cmp.Diff(p1out, n, ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
+
+	nodes, err := be.Nodes(s.Ctx, []string{v.ID, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
+	s.Require().NoError(err)
+	if diff := cmp.Diff(a1out, nodes[0], ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(p1out, nodes[1], ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(p1out, nodes[2], ignoreID, ignoreEmptySlices); diff != "" {
 		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 	}
 }

@@ -391,6 +391,15 @@ func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
 	return nil
 }
 
+func backReferencePackageNamespace(pns *ent.PackageNamespace) *ent.PackageType {
+	if pns.Edges.Package != nil {
+		pt := pns.Edges.Package
+		pt.Edges.Namespaces = []*ent.PackageNamespace{pns}
+		return pt
+	}
+	return nil
+}
+
 // Each "noun" node will need a "get" for any time an ingest happens on a
 // "verb" node that points to it. All but Package and Source are simple. For
 // Package, some verbs link to Name and some to Version, or some both. For
