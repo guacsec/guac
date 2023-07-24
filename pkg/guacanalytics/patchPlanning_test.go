@@ -1208,7 +1208,6 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		expectedPkgs      []string
 		expectedArtifacts []string
 		expectedSrcs      []string
-		expectedPOC       []string
 		expectedPOCLen    int
 		graphInputs       []assembler.IngestPredicates
 	}{
@@ -1448,7 +1447,6 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedPkgs:      []string{"pkgTypeL", "pkgTypeM"},
 			expectedSrcs:      []string{"srcTypeK"},
 			expectedArtifacts: []string{"testArtifactAlgorithmK"},
-			expectedPOC:       []string{"testEmailK", "testEmailL", "testEmailM"},
 			expectedPOCLen:    5,
 			graphInputs:       []assembler.IngestPredicates{pointOfContactGraph},
 		},
