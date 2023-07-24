@@ -39,7 +39,7 @@ type BfsNode struct {
 	Depth            int
 	Type             NodeType
 	nodeVersions     []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
-	PointOfContact   model.PointOfContactInputSpec
+	PointOfContactId string
 	NotInBlastRadius bool // true if it is solely an informational node, not to be included in the blast radius subgraph
 }
 
@@ -276,16 +276,14 @@ func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client
 
 // TODO: implement
 func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *queueValues, pointOfContact model.NeighborsNeighborsPointOfContact) {
-	pocFilter := model.PointOfContactSpec{
-		Subject: now,
-	}
-
-	pointOfContact.AllPointOfContact
-
 	// Step 1: Add field to current node in nodeMap of this POC (may need to copy over old fields)
 	q.nodeMap[q.now] = BfsNode{
-		Parent: q.nowNode.Parent,
-		Depth:  q.nowNode.Depth,
+		Parent:           q.nowNode.Parent,
+		Depth:            q.nowNode.Depth,
+		Type:             q.nowNode.Type,
+		nodeVersions:     q.nowNode.nodeVersions,
+		PointOfContactId: pointOfContact.AllPointOfContact.Id,
+		NotInBlastRadius: q.nowNode.NotInBlastRadius,
 	}
 
 	// Step 2: If it is a packageName, add the POC to applicable versions (versions in the nodeVersions) but not the reverse
