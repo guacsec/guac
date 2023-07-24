@@ -168,7 +168,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/arangodb/go-driver v1.6.0
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/go-git/go-git/v5 v5.7.0
+	github.com/go-git/go-git/v5 v5.8.0
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/golang/mock v1.6.0
