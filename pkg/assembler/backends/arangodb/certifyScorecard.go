@@ -39,10 +39,15 @@ const (
 // Query Scorecards
 
 func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-
 	values := map[string]any{}
+	var arangoQueryBuilder *arangoQueryBuilder
 
-	arangoQueryBuilder := setSrcMatchValues(certifyScorecardSpec.Source, values)
+	if certifyScorecardSpec.Source != nil {
+		arangoQueryBuilder = setSrcMatchValues(certifyScorecardSpec.Source, values)
+		arangoQueryBuilder.forOutBound(scorecardEdgesStr, "scorecard", "sName")
+	} else {
+		arangoQueryBuilder = newForQuery(scorecardStr, "scorecard")
+	}
 
 	setCertifyScorecardMatchValues(arangoQueryBuilder, certifyScorecardSpec, values)
 
@@ -80,7 +85,6 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 }
 
 func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyScorecardSpec *model.CertifyScorecardSpec, queryValues map[string]any) {
-	arangoQueryBuilder.ForOutBound(scorecardEdgesStr, "scorecard", "sName")
 	if certifyScorecardSpec.TimeScanned != nil {
 		arangoQueryBuilder.filter("scorecard", timeScannedStr, "==", "@"+timeScannedStr)
 		queryValues[timeScannedStr] = certifyScorecardSpec.TimeScanned.UTC()
@@ -109,6 +113,12 @@ func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, cert
 	if certifyScorecardSpec.Collector != nil {
 		arangoQueryBuilder.filter("scorecard", collector, "==", "@"+collector)
 		queryValues["collector"] = certifyScorecardSpec.Collector
+	}
+	if certifyScorecardSpec.Source == nil {
+		// get sources
+		arangoQueryBuilder.forInBound(scorecardEdgesStr, "sName", "scorecard")
+		arangoQueryBuilder.forInBound(srcHasNameStr, "sNs", "sName")
+		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sType", "sNs")
 	}
 }
 

@@ -33,6 +33,8 @@ const (
 // Query IsDependency
 
 func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
+
+	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
 	values := map[string]any{}
 	arangoQueryBuilder := setPkgMatchValues(isDependencySpec.Package, values)
 	setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
@@ -80,7 +82,7 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 
 func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any) {
 
-	arangoQueryBuilder.ForOutBound(isDependencySubjectEdgesStr, "isDependency", "pVersion")
+	arangoQueryBuilder.forOutBound(isDependencySubjectEdgesStr, "isDependency", "pVersion")
 	if isDependencySpec.VersionRange != nil {
 		arangoQueryBuilder.filter("isDependency", versionRangeStr, "==", "@"+versionRangeStr)
 		queryValues[versionRangeStr] = isDependencySpec.VersionRange
@@ -98,25 +100,25 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 		queryValues[collector] = isDependencySpec.Collector
 	}
 	if isDependencySpec.DependentPackage != nil {
-		arangoQueryBuilder.ForOutBound(isDependencyEdgesStr, "depName", "isDependency")
+		arangoQueryBuilder.forOutBound(isDependencyEdgesStr, "depName", "isDependency")
 		if isDependencySpec.DependentPackage.Name != nil {
 			arangoQueryBuilder.filter("depName", "name", "==", "@name")
 			queryValues["name"] = *isDependencySpec.DependentPackage.Name
 		}
-		arangoQueryBuilder.ForInBound(pkgHasNameStr, "depNamespace", "depName")
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
 		if isDependencySpec.DependentPackage.Namespace != nil {
 			arangoQueryBuilder.filter("depNamespace", "namespace", "==", "@namespace")
 			queryValues["namespace"] = *isDependencySpec.DependentPackage.Namespace
 		}
-		arangoQueryBuilder.ForInBound(pkgHasNamespaceStr, "depType", "depNamespace")
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
 		if isDependencySpec.DependentPackage.Namespace != nil {
 			arangoQueryBuilder.filter("depType", "type", "==", "@type")
 			queryValues["type"] = *isDependencySpec.DependentPackage.Type
 		}
 	} else {
-		arangoQueryBuilder.ForOutBound(isDependencyEdgesStr, "depName", "isDependency")
-		arangoQueryBuilder.ForInBound(pkgHasNameStr, "depNamespace", "depName")
-		arangoQueryBuilder.ForInBound(pkgHasNamespaceStr, "depType", "depNamespace")
+		arangoQueryBuilder.forOutBound(isDependencyEdgesStr, "depName", "isDependency")
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
 	}
 }
 

@@ -324,22 +324,22 @@ func setPkgMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *aran
 		arangoQueryBuilder = newForQuery(pkgRootsStr, "pRoot")
 		arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
 		queryValues["pkg"] = "pkg"
-		arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
+		arangoQueryBuilder.forOutBound(pkgHasTypeStr, "pType", "pRoot")
 		if pkgSpec.Type != nil {
 			arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 			queryValues["pkgType"] = *pkgSpec.Type
 		}
-		arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
 		if pkgSpec.Namespace != nil {
 			arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
 			queryValues["namespace"] = *pkgSpec.Namespace
 		}
-		arangoQueryBuilder.ForOutBound(pkgHasNameStr, "pName", "pNs")
+		arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
 		if pkgSpec.Name != nil {
 			arangoQueryBuilder.filter("pName", "name", "==", "@name")
 			queryValues["name"] = *pkgSpec.Name
 		}
-		arangoQueryBuilder.ForOutBound(pkgHasVersionStr, "pVersion", "pName")
+		arangoQueryBuilder.forOutBound(pkgHasVersionStr, "pVersion", "pName")
 		if pkgSpec.ID != nil {
 			arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
 			queryValues["id"] = *pkgSpec.ID
@@ -368,10 +368,10 @@ func setPkgMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *aran
 
 	} else {
 		arangoQueryBuilder = newForQuery(pkgRootsStr, "pRoot")
-		arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
-		arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
-		arangoQueryBuilder.ForOutBound(pkgHasNameStr, "pName", "pNs")
-		arangoQueryBuilder.ForOutBound(pkgHasVersionStr, "pVersion", "pName")
+		arangoQueryBuilder.forOutBound(pkgHasTypeStr, "pType", "pRoot")
+		arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
+		arangoQueryBuilder.forOutBound(pkgHasVersionStr, "pVersion", "pName")
 	}
 	return arangoQueryBuilder
 }
@@ -440,7 +440,7 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 	arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
 	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
 	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
+	arangoQueryBuilder.forOutBound(pkgHasTypeStr, "pType", "pRoot")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
@@ -488,12 +488,12 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 	arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
 	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
 	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
+	arangoQueryBuilder.forOutBound(pkgHasTypeStr, "pType", "pRoot")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
 	}
-	arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
+	arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
 	if pkgSpec.Namespace != nil {
 		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
@@ -556,17 +556,17 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 	arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
 	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
 	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
+	arangoQueryBuilder.forOutBound(pkgHasTypeStr, "pType", "pRoot")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
 	}
-	arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
+	arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
 	if pkgSpec.Namespace != nil {
 		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
 	}
-	arangoQueryBuilder.ForOutBound(pkgHasNameStr, "pName", "pNs")
+	arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
 	if pkgSpec.Name != nil {
 		arangoQueryBuilder.filter("pName", "name", "==", "@name")
 		values["name"] = *pkgSpec.Name

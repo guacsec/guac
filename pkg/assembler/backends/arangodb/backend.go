@@ -700,16 +700,43 @@ func newForQuery(repositoryName string, counterName string) *arangoQueryBuilder 
 	return aqb
 }
 
-func (aqb *arangoQueryBuilder) ForOutBound(edgeCollectionName string, counterName string, outBoundValueName string) *arangoQueryBuilder {
+func (aqb *arangoQueryBuilder) forOutBound(edgeCollectionName string, counterVertexName string, outBoundStartVertexName string) *arangoQueryBuilder {
 	aqb.query.WriteString("\n")
-	aqb.query.WriteString(fmt.Sprintf("FOR %s IN OUTBOUND %s %s", counterName, outBoundValueName, edgeCollectionName))
+
+	aqb.query.WriteString(fmt.Sprintf("FOR %s IN OUTBOUND %s %s", counterVertexName, outBoundStartVertexName, edgeCollectionName))
+
 	return aqb
 }
 
-func (aqb *arangoQueryBuilder) ForInBound(edgeCollectionName string, counterName string, inBoundValueName string) *arangoQueryBuilder {
+func (aqb *arangoQueryBuilder) forOutBoundWithEdgeCounter(edgeCollectionName string, counterVertexName string, counterEdgeName string, outBoundStartVertexName string) *arangoQueryBuilder {
 	aqb.query.WriteString("\n")
-	aqb.query.WriteString(fmt.Sprintf("FOR %s IN INBOUND %s %s", counterName, inBoundValueName, edgeCollectionName))
+
+	aqb.query.WriteString(fmt.Sprintf("FOR %s, %s IN OUTBOUND %s %s", counterVertexName, counterEdgeName, outBoundStartVertexName, edgeCollectionName))
+
 	return aqb
+}
+
+func (aqb *arangoQueryBuilder) forInBound(edgeCollectionName string, counterVertexName string, inBoundStartVertexName string) *arangoQueryBuilder {
+	aqb.query.WriteString("\n")
+
+	aqb.query.WriteString(fmt.Sprintf("FOR %s IN INBOUND %s %s", counterVertexName, inBoundStartVertexName, edgeCollectionName))
+
+	return aqb
+}
+
+func (aqb *arangoQueryBuilder) forInBoundWithEdgeCounter(edgeCollectionName string, counterVertexName string, counterEdgeName string, inBoundStartVertexName string) *arangoQueryBuilder {
+	aqb.query.WriteString("\n")
+
+	aqb.query.WriteString(fmt.Sprintf("FOR %s, %s IN INBOUND %s %s", counterVertexName, counterEdgeName, inBoundStartVertexName, edgeCollectionName))
+
+	return aqb
+}
+
+func (aqb *arangoQueryBuilder) prune(counterName string, fieldName string, condition string, value string) *arangoQueryFilter {
+	aqb.query.WriteString(" ")
+	aqb.query.WriteString(fmt.Sprintf("PRUNE %s.%s %s %s", counterName, fieldName, condition, value))
+
+	return newArangoQueryFilter(aqb)
 }
 
 func (aqb *arangoQueryBuilder) filter(counterName string, fieldName string, condition string, value string) *arangoQueryFilter {
