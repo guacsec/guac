@@ -362,9 +362,6 @@ func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *que
 		}
 
 		for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-			if versionEntry.Version == "" {
-				break // this version entry is unpopulated, do not add to map
-			}
 			if node, seen := q.nodeMap[versionEntry.Id]; seen {
 				node = BfsNode{
 					Parent:           append(node.Parent, q.now),
