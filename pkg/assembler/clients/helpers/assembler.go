@@ -54,18 +54,18 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			materials := p.GetMaterials(ctx)
+			logger.Infof("assembling Materials (Artifact): %v", len(materials))
+			if err := ingestArtifacts(ctx, gqlclient, materials); err != nil {
+				return err
+			}
+
 			builders := p.GetBuilders(ctx)
 			logger.Infof("assembling Builder: %v", len(builders))
 			for _, v := range builders {
 				if err := ingestBuilder(ctx, gqlclient, v); err != nil {
 					return err
 				}
-			}
-
-			materials := p.GetMaterials(ctx)
-			logger.Infof("assembling Materials (Artifact): %v", len(materials))
-			if err := ingestMaterials(ctx, gqlclient, materials); err != nil {
-				return err
 			}
 
 			cves := p.GetCVEs(ctx)
@@ -155,6 +155,13 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			logger.Infof("assembling PointOfContact: %v", len(p.PointOfContact))
+			for _, poc := range p.PointOfContact {
+				if err := ingestPointOfContact(ctx, gqlclient, poc); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			for _, hb := range p.HasSBOM {
 				if err := ingestHasSBOM(ctx, gqlclient, hb); err != nil {
@@ -199,11 +206,6 @@ func ingestSource(ctx context.Context, client graphql.Client, v *model.SourceInp
 
 func ingestArtifact(ctx context.Context, client graphql.Client, v *model.ArtifactInputSpec) error {
 	_, err := model.IngestArtifact(ctx, client, *v)
-	return err
-}
-
-func ingestMaterials(ctx context.Context, client graphql.Client, v []model.ArtifactInputSpec) error {
-	_, err := model.IngestMaterials(ctx, client, v)
 	return err
 }
 
@@ -319,7 +321,7 @@ func ingestCertifyBad(ctx context.Context, client graphql.Client, bad assembler.
 
 func ingestCertifyGood(ctx context.Context, client graphql.Client, good assembler.CertifyGoodIngest) error {
 	if err := validatePackageSourceOrArtifactInput(good.Pkg, good.Src, good.Artifact, "certifyGood"); err != nil {
-		return fmt.Errorf("input validation failed for certifyBad: %w", err)
+		return fmt.Errorf("input validation failed for certifyGood: %w", err)
 	}
 
 	if good.Pkg != nil {
@@ -331,6 +333,23 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, good assemble
 		return err
 	}
 	_, err := model.CertifyGoodArtifact(ctx, client, *good.Artifact, *good.CertifyGood)
+	return err
+}
+
+func ingestPointOfContact(ctx context.Context, client graphql.Client, poc assembler.PointOfContactIngest) error {
+	if err := validatePackageSourceOrArtifactInput(poc.Pkg, poc.Src, poc.Artifact, "pointOfContact"); err != nil {
+		return fmt.Errorf("input validation failed for pointOfContact: %w", err)
+	}
+
+	if poc.Pkg != nil {
+		_, err := model.PointOfContactPkg(ctx, client, *poc.Pkg, &poc.PkgMatchFlag, *poc.PointOfContact)
+		return err
+	}
+	if poc.Src != nil {
+		_, err := model.PointOfContactSrc(ctx, client, *poc.Src, *poc.PointOfContact)
+		return err
+	}
+	_, err := model.PointOfContactArtifact(ctx, client, *poc.Artifact, *poc.PointOfContact)
 	return err
 }
 

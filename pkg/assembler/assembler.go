@@ -29,9 +29,10 @@ type assembler struct{} //nolint: unused
 // ingested based on the GUAC ontology. It only has evidence trees as
 // ingestion of the software trees are implicit and handled by the
 // client library.
+// TODO: fix typo in isDepedency
 type IngestPredicates struct {
 	CertifyScorecard []CertifyScorecardIngest `json:"certifyScorecard,omitempty"`
-	IsDependency     []IsDependencyIngest     `json:"isDepedency,omitempty"`
+	IsDependency     []IsDependencyIngest     `json:"isDependency,omitempty"`
 	IsOccurrence     []IsOccurrenceIngest     `json:"isOccurrence,omitempty"`
 	HasSlsa          []HasSlsaIngest          `json:"hasSlsa,omitempty"`
 	CertifyVuln      []CertifyVulnIngest      `json:"certifyVuln,omitempty"`
@@ -43,6 +44,7 @@ type IngestPredicates struct {
 	HashEqual        []HashEqualIngest        `json:"hashEqual,omitempty"`
 	PkgEqual         []PkgEqualIngest         `json:"pkgEqual,omitempty"`
 	Vex              []VexIngest              `json:"vex,omitempty"`
+	PointOfContact   []PointOfContactIngest   `json:"contact,omitempty"`
 }
 
 type CertifyScorecardIngest struct {
@@ -146,6 +148,15 @@ type VexIngest struct {
 	VexData *generated.VexStatementInputSpec `json:"vexData,omitempty"`
 }
 
+type PointOfContactIngest struct {
+	// pointOfContact describes either pkg, src or artifact
+	Pkg            *generated.PkgInputSpec            `json:"pkg,omitempty"`
+	PkgMatchFlag   generated.MatchFlags               `json:"pkgMatchFlag,omitempty"`
+	Src            *generated.SourceInputSpec         `json:"src,omitempty"`
+	Artifact       *generated.ArtifactInputSpec       `json:"artifact,omitempty"`
+	PointOfContact *generated.PointOfContactInputSpec `json:"pointOfContact,omitempty"`
+}
+
 type HashEqualIngest struct {
 	// HashEqualIngest describes two artifacts are the same
 	Artifact      *generated.ArtifactInputSpec `json:"artifact,omitempty"`
@@ -233,6 +244,14 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 			}
 		}
 	}
+	for _, poc := range i.PointOfContact {
+		if poc.Pkg != nil {
+			pkgPurl := helpers.PkgInputSpecToPurl(poc.Pkg)
+			if _, ok := packageMap[pkgPurl]; !ok {
+				packageMap[pkgPurl] = poc.Pkg
+			}
+		}
+	}
 	for _, equal := range i.PkgEqual {
 		if equal.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(equal.Pkg)
@@ -297,6 +316,14 @@ func (i IngestPredicates) GetSources(ctx context.Context) []*generated.SourceInp
 			}
 		}
 	}
+	for _, poc := range i.PointOfContact {
+		if poc.Src != nil {
+			sourceString := concatenateSourceInput(poc.Src)
+			if _, ok := sourceMap[sourceString]; !ok {
+				sourceMap[sourceString] = poc.Src
+			}
+		}
+	}
 	sources := make([]*generated.SourceInputSpec, 0, len(sourceMap))
 
 	for _, source := range sourceMap {
@@ -352,6 +379,14 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) []*generated.Artifac
 			artifactString := v.Artifact.Algorithm + ":" + v.Artifact.Digest
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = v.Artifact
+			}
+		}
+	}
+	for _, poc := range i.PointOfContact {
+		if poc.Artifact != nil {
+			artifactString := poc.Artifact.Algorithm + ":" + poc.Artifact.Digest
+			if _, ok := artifactMap[artifactString]; !ok {
+				artifactMap[artifactString] = poc.Artifact
 			}
 		}
 	}

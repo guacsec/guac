@@ -17,7 +17,7 @@
 
 # Defines GraphQL fragments used in the operations
 
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+# TODO(mihaimaruseac): Clean this up: do we want All of these to be returned?
 
 fragment AllPkgTree on Package {
   id
@@ -62,7 +62,7 @@ fragment AllArtifactTree on Artifact {
   digest
 }
 
-fragment allBuilderTree on Builder {
+fragment AllBuilderTree on Builder {
   id
   uri
 }
@@ -121,7 +121,7 @@ fragment AllIsOccurrencesTree on IsOccurrence {
   collector
 }
 
-fragment allIsDependencyTree on IsDependency {
+fragment AllIsDependencyTree on IsDependency {
   id
   justification
   package {
@@ -136,7 +136,7 @@ fragment allIsDependencyTree on IsDependency {
   collector
 }
 
-fragment allSLSATree on HasSLSA {
+fragment AllSLSATree on HasSLSA {
   id
   subject {
     ...AllArtifactTree
@@ -181,7 +181,7 @@ fragment AllCertifyBad on CertifyBad {
   collector
 }
 
-fragment allCertifyGood on CertifyGood {
+fragment AllCertifyGood on CertifyGood {
   id
   justification
   subject {
@@ -200,7 +200,7 @@ fragment allCertifyGood on CertifyGood {
   collector
 }
 
-fragment allHashEqualTree on HashEqual {
+fragment AllHashEqualTree on HashEqual {
   id
   justification
   artifacts {
@@ -210,7 +210,7 @@ fragment allHashEqualTree on HashEqual {
   collector
 }
 
-fragment allHasSBOMTree on HasSBOM {
+fragment AllHasSBOMTree on HasSBOM {
   id
   subject {
     __typename
@@ -229,7 +229,7 @@ fragment allHasSBOMTree on HasSBOM {
   collector
 }
 
-fragment allHasSourceAt on HasSourceAt {
+fragment AllHasSourceAt on HasSourceAt {
   id
   justification
   knownSince
@@ -274,7 +274,7 @@ fragment AllCertifyVuln on CertifyVuln {
   }
 }
 
-fragment allPkgEqual on PkgEqual {
+fragment AllPkgEqual on PkgEqual {
   id
   justification
   packages {
@@ -284,7 +284,7 @@ fragment allPkgEqual on PkgEqual {
   collector
 }
 
-fragment allIsVulnerability on IsVulnerability {
+fragment AllIsVulnerability on IsVulnerability {
   id
   osv {
     ...AllOSVTree
@@ -303,7 +303,7 @@ fragment allIsVulnerability on IsVulnerability {
   collector
 }
 
-fragment allCertifyVEXStatement on CertifyVEXStatement {
+fragment AllCertifyVEXStatement on CertifyVEXStatement {
   id
   subject {
     __typename
@@ -335,7 +335,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
   collector
 }
 
-fragment allHasMetadata on HasMetadata {
+fragment AllHasMetadata on HasMetadata {
     id
     subject {
       __typename
@@ -358,7 +358,7 @@ fragment allHasMetadata on HasMetadata {
     collector
 }
 
-fragment allPointOfContact on PointOfContact {
+fragment AllPointOfContact on PointOfContact {
     id
     subject {
       __typename

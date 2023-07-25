@@ -164,7 +164,7 @@ func getPackageQueryValues(c *arangoClient, pkg *model.PkgInputSpec) map[string]
 }
 
 func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range pkgs {
 		listOfValues = append(listOfValues, getPackageQueryValues(c, pkgs[i]))
 	}
@@ -340,6 +340,10 @@ func setPkgMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *aran
 			queryValues["name"] = *pkgSpec.Name
 		}
 		arangoQueryBuilder.ForOutBound(pkgHasVersionStr, "pVersion", "pName")
+		if pkgSpec.ID != nil {
+			arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+			queryValues["id"] = *pkgSpec.ID
+		}
 		if pkgSpec.Version != nil {
 			arangoQueryBuilder.filter("pVersion", "version", "==", "@version")
 			queryValues["version"] = *pkgSpec.Version

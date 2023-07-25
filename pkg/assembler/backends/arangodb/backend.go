@@ -83,23 +83,28 @@ const (
 
 	// isDependency collections
 
-	isDependencyEdgesStr string = "isDependencyEdges"
-	isDependenciesStr    string = "isDependencies"
+	isDependencyEdgesStr        string = "isDependencyEdges"
+	isDependencySubjectEdgesStr string = "isDependencySubjectEdges"
+	isDependenciesStr           string = "isDependencies"
 
 	//isOccurrences collections
 
-	isOccurrencesEdgesStr string = "isOccurrencesEdges"
-	isOccurrencesStr      string = "isOccurrences"
+	isOccurrencesEdgesStr        string = "isOccurrencesEdges"
+	isOccurrencesSubjectEdgesStr string = "isOccurrencesSubjectEdges"
+	isOccurrencesStr             string = "isOccurrences"
 
 	// hasSLSA collections
 
-	hasSLSAEdgesStr string = "hasSLSAEdges"
-	hasSLSAsStr     string = "hasSLSAs"
+	hasSLSASubjectEdgesStr   string = "hasSLSASubjectEdges"
+	hasSLSABuiltByEdgesStr   string = "hasSLSABuiltByEdges"
+	hasSLSABuiltFromEdgesStr string = "hasSLSABuiltFromEdges"
+	hasSLSAsStr              string = "hasSLSAs"
 
 	// hashEquals collections
 
-	hashEqualsEdgesStr string = "hashEqualsEdges"
-	hashEqualsStr      string = "hashEquals"
+	hashEqualsEdgesStr        string = "hashEqualsEdges"
+	hashEqualsSubjectEdgesStr string = "hashEqualsSubjectEdges"
+	hashEqualsStr             string = "hashEquals"
 
 	// hasSBOM collection
 
@@ -285,34 +290,74 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var isDependencyEdges driver.EdgeDefinition
 		isDependencyEdges.Collection = isDependencyEdgesStr
 		// define a set of collections where an edge is going out...
-		isDependencyEdges.From = []string{isDependenciesStr, pkgVersionsStr}
+		isDependencyEdges.From = []string{isDependenciesStr}
 
 		// repeat this for the collections where an edge is going into
-		isDependencyEdges.To = []string{isDependenciesStr, pkgNamesStr}
+		isDependencyEdges.To = []string{pkgNamesStr}
+
+		var isDependencySubjectEdges driver.EdgeDefinition
+		isDependencySubjectEdges.Collection = isDependencySubjectEdgesStr
+		// define a set of collections where an edge is going out...
+		isDependencySubjectEdges.From = []string{pkgVersionsStr}
+
+		// repeat this for the collections where an edge is going into
+		isDependencySubjectEdges.To = []string{isDependenciesStr}
 
 		var isOccurrencesEdges driver.EdgeDefinition
 		isOccurrencesEdges.Collection = isOccurrencesEdgesStr
 		// define a set of collections where an edge is going out...
-		isOccurrencesEdges.From = []string{isOccurrencesStr, pkgVersionsStr, srcNamesStr}
+		isOccurrencesEdges.From = []string{isOccurrencesStr}
 
 		// repeat this for the collections where an edge is going into
-		isOccurrencesEdges.To = []string{isOccurrencesStr, artifactsStr}
+		isOccurrencesEdges.To = []string{artifactsStr}
 
-		var hasSLSAEdges driver.EdgeDefinition
-		hasSLSAEdges.Collection = hasSLSAEdgesStr
+		var isOccurrencesSubjectEdges driver.EdgeDefinition
+		isOccurrencesSubjectEdges.Collection = isOccurrencesSubjectEdgesStr
 		// define a set of collections where an edge is going out...
-		hasSLSAEdges.From = []string{hasSLSAsStr}
+		isOccurrencesSubjectEdges.From = []string{pkgVersionsStr, srcNamesStr}
 
 		// repeat this for the collections where an edge is going into
-		hasSLSAEdges.To = []string{buildersStr}
+		isOccurrencesSubjectEdges.To = []string{isDependenciesStr}
+
+		var hasSLSASubjectEdges driver.EdgeDefinition
+		hasSLSASubjectEdges.Collection = hasSLSASubjectEdgesStr
+		// define a set of collections where an edge is going out...
+		hasSLSASubjectEdges.From = []string{artifactsStr}
+
+		// repeat this for the collections where an edge is going into
+		hasSLSASubjectEdges.To = []string{hasSLSAsStr}
+
+		var hasSLSABuiltByEdges driver.EdgeDefinition
+		hasSLSABuiltByEdges.Collection = hasSLSABuiltByEdgesStr
+		// define a set of collections where an edge is going out...
+		hasSLSABuiltByEdges.From = []string{hasSLSAsStr}
+
+		// repeat this for the collections where an edge is going into
+		hasSLSABuiltByEdges.To = []string{buildersStr}
+
+		var hasSLSABuiltFromEdges driver.EdgeDefinition
+		hasSLSABuiltFromEdges.Collection = hasSLSABuiltFromEdgesStr
+		// define a set of collections where an edge is going out...
+		hasSLSABuiltFromEdges.From = []string{hasSLSAsStr}
+
+		// repeat this for the collections where an edge is going into
+		hasSLSABuiltFromEdges.To = []string{artifactsStr}
 
 		var hashEqualsEdges driver.EdgeDefinition
 		hashEqualsEdges.Collection = hashEqualsEdgesStr
 		// define a set of collections where an edge is going out...
-		hashEqualsEdges.From = []string{artifactsStr, hashEqualsStr}
+		hashEqualsEdges.From = []string{hashEqualsStr}
 
 		// repeat this for the collections where an edge is going into
-		hashEqualsEdges.To = []string{artifactsStr, hashEqualsStr}
+		hashEqualsEdges.To = []string{artifactsStr}
+
+		var hashEqualsSubjectEdges driver.EdgeDefinition
+		hashEqualsSubjectEdges.Collection = hashEqualsSubjectEdgesStr
+		// define a set of collections where an edge is going out...
+		hashEqualsSubjectEdges.From = []string{artifactsStr}
+
+		// repeat this for the collections where an edge is going into
+		hashEqualsSubjectEdges.To = []string{hashEqualsStr}
 
 		var hasSBOMEdges driver.EdgeDefinition
 		hasSBOMEdges.Collection = hasSBOMEdgesStr
@@ -340,9 +385,10 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
-		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName,
-			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges,
-			hasSLSAEdges, certifyVulnEdges, certifyScorecardEdges}
+		options.EdgeDefinitions = []driver.EdgeDefinition{pkgHasType, pkgHasNamespace, pkgHasName,
+			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, hashEqualsSubjectEdges, hashEqualsEdges,
+			isDependencySubjectEdges, isDependencyEdges, isOccurrencesSubjectEdges, isOccurrencesEdges,
+			hasSBOMEdges, hasSLSASubjectEdges, hasSLSABuiltByEdges, hasSLSABuiltFromEdges, certifyVulnEdges, certifyScorecardEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -757,9 +803,6 @@ func (c *arangoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.C
 	panic(fmt.Errorf("not implemented: CertifyVuln - CertifyVuln"))
 }
 
-func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: HasSlsa - HasSlsa"))
-}
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
@@ -771,12 +814,6 @@ func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqua
 	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
 }
 
-// Mutations for software trees (read-write queries)
-
-func (c *arangoClient) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	return nil, nil
-}
-
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
@@ -784,7 +821,6 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
 	panic(fmt.Errorf("not implemented: IngestCertifyGood - IngestCertifyGood"))
 }
-
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
 }
@@ -793,9 +829,6 @@ func (c *arangoClient) IngestIsVulnerability(ctx context.Context, osv model.OSVI
 }
 func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
-}
-func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: IngestSLSA - IngestSLSA"))
 }
 func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))

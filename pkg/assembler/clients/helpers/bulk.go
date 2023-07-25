@@ -64,6 +64,12 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
 			}
 
+			materials := p.GetMaterials(ctx)
+			logger.Infof("assembling Materials (Artifact): %v", len(materials))
+			if err := ingestArtifacts(ctx, gqlclient, materials); err != nil {
+				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
+			}
+
 			builders := p.GetBuilders(ctx)
 			logger.Infof("assembling Builder: %v", len(builders))
 			var collectedBuilders []model.BuilderInputSpec
@@ -73,13 +79,6 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 			if err := ingestBuilders(ctx, gqlclient, collectedBuilders); err != nil {
 				return fmt.Errorf("ingestBuilders failed with error: %w", err)
-			}
-
-			// TODO(pxp928): add bulk ingestion for materials
-			materials := p.GetMaterials(ctx)
-			logger.Infof("assembling Materials (Artifact): %v", len(materials))
-			if err := ingestMaterials(ctx, gqlclient, materials); err != nil {
-				return fmt.Errorf("ingestMaterials failed with error: %w", err)
 			}
 
 			cves := p.GetCVEs(ctx)
@@ -131,12 +130,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestIsOccurrences failed with error: %w", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for HasSLSA
 			logger.Infof("assembling HasSLSA: %v", len(p.HasSlsa))
-			for _, v := range p.HasSlsa {
-				if err := ingestHasSlsa(ctx, gqlclient, v); err != nil {
-					return fmt.Errorf("ingestHasSlsa failed with error: %w", err)
-				}
+			if err := ingestHasSLSAs(ctx, gqlclient, p.HasSlsa); err != nil {
+				return fmt.Errorf("ingestHasSLSAs failed with error: %w", err)
 			}
 
 			// TODO(pxp928): add bulk ingestion for CertifyVuln
@@ -179,6 +175,15 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			for _, good := range p.CertifyGood {
 				if err := ingestCertifyGood(ctx, gqlclient, good); err != nil {
 					return fmt.Errorf("ingestCertifyGood failed with error: %w", err)
+
+				}
+			}
+
+			// TODO: add bulk ingestion for PointOfContact
+			logger.Infof("assembling PointOfContact: %v", len(p.CertifyGood))
+			for _, poc := range p.PointOfContact {
+				if err := ingestPointOfContact(ctx, gqlclient, poc); err != nil {
+					return fmt.Errorf("ingestPointOfContact failed with error: %w", err)
 
 				}
 			}
@@ -275,6 +280,26 @@ func ingestGHSAs(ctx context.Context, client graphql.Client, v []model.GHSAInput
 	_, err := model.IngestGHSAs(ctx, client, v)
 	if err != nil {
 		return fmt.Errorf("ingestGHSAs failed with error: %w", err)
+	}
+	return nil
+}
+
+func ingestHasSLSAs(ctx context.Context, client graphql.Client, v []assembler.HasSlsaIngest) error {
+	var subjects []model.ArtifactInputSpec
+	var slsaAttestations []model.SLSAInputSpec
+	var materialList [][]model.ArtifactInputSpec
+	var builders []model.BuilderInputSpec
+	for _, ingest := range v {
+		subjects = append(subjects, *ingest.Artifact)
+		slsaAttestations = append(slsaAttestations, *ingest.HasSlsa)
+		builders = append(builders, *ingest.Builder)
+		materialList = append(materialList, ingest.Materials)
+	}
+	if len(v) > 0 {
+		_, err := model.SLSAForArtifacts(ctx, client, subjects, materialList, builders, slsaAttestations)
+		if err != nil {
+			return fmt.Errorf("SLSAForArtifacts failed with error: %w", err)
+		}
 	}
 	return nil
 }

@@ -150,3 +150,28 @@ jobs:
       registry-username: ${{ github.actor }}
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+  compose-tarball:
+    runs-on: ubuntu-latest
+    name: generate compose tarball
+    needs: [goreleaser]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # tag=v3
+      - name: Create and publish compose tarball
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          mkdir guac-compose
+          cp .env guac-compose/
+          cp docker-compose.yml guac-compose/
+          cp -r container_files guac-compose/
+          sed -i s/local-organic-guac/ghcr.io\\/${{ github.repository_owner }}\\/guac:${{ github.ref_name }}/ guac-compose/.env
+          tar -zcvf guac-compose-${{ github.ref_name }}.tar.gz guac-compose/
+          rm -rf guac-compose/
+          gh release upload ${{ github.ref_name }} guac-compose-${{ github.ref_name }}.tar.gz
+          rm guac-compose-${{ github.ref_name }}.tar.gz
+        shell: bash

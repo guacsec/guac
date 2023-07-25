@@ -55,7 +55,7 @@ func getGHSAQueryValues(ghsa *model.GHSAInputSpec) map[string]any {
 }
 
 func (c *arangoClient) IngestGHSAs(ctx context.Context, ghsas []*model.GHSAInputSpec) ([]*model.Ghsa, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range ghsas {
 		listOfValues = append(listOfValues, getGHSAQueryValues(ghsas[i]))
 	}
@@ -86,7 +86,10 @@ func (c *arangoClient) IngestGHSAs(ctx context.Context, ghsas []*model.GHSAInput
 UPSERT { ghsaId:doc.ghsaId } 
 INSERT { ghsaId:doc.ghsaId } 
 UPDATE {} IN ghsas OPTIONS { indexHint: "byGhsaID" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"ghsaId": NEW.ghsaId
+  }`
 
 	sb.WriteString(query)
 
@@ -104,7 +107,10 @@ func (c *arangoClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec
 UPSERT { ghsaId:@ghsaId } 
 INSERT { ghsaId:@ghsaId } 
 UPDATE {} IN ghsas OPTIONS { indexHint: "byGhsaID" }
-RETURN NEW`
+RETURN {
+	"id": NEW._id,
+	"ghsaId": NEW.ghsaId
+  }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getGHSAQueryValues(ghsa), "IngestGhsa")
 	if err != nil {

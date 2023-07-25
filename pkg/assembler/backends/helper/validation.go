@@ -57,7 +57,7 @@ func ValidateVulnerabilityQueryFilter(vulnerability *model.VulnerabilitySpec, no
 		if vulnerability.Cve != nil {
 			vulnDefined = vulnDefined + 1
 		}
-		if noVulnAllowed && vulnerability.NoVuln != nil && *vulnerability.NoVuln {
+		if noVulnAllowed && vulnerability.NoVuln != nil {
 			if vulnDefined != 0 {
 				return gqlerror.Errorf("Since NoVuln is set, no other vulnerability type is allowed")
 			}

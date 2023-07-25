@@ -118,7 +118,7 @@ func getSourceQueryValues(c *arangoClient, source *model.SourceInputSpec) map[st
 }
 
 func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 
 	for i := range sources {
 		listOfValues = append(listOfValues, getSourceQueryValues(c, sources[i]))
@@ -262,6 +262,10 @@ func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *a
 			queryValues["namespace"] = *srcSpec.Namespace
 		}
 		arangoQueryBuilder.ForOutBound(srcHasNameStr, "sName", "sNs")
+		if srcSpec.ID != nil {
+			arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+			queryValues["id"] = *srcSpec.ID
+		}
 		if srcSpec.Name != nil {
 			arangoQueryBuilder.filter("sName", "name", "==", "@name")
 			queryValues["name"] = *srcSpec.Name
