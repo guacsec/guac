@@ -91,7 +91,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		versionsList = append(versionsList, nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
 		q.nodeMap[startID] = BfsNode{
 			Type:   PackageVersion,
-			Parent: []string{""},
+			Parent: []string{""}, // empty string signifies starting node
 		}
 
 		q.nodeMap[nodePkg.AllPkgTree.Namespaces[0].Names[0].Id] = BfsNode{
@@ -315,13 +315,13 @@ func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client
 		}
 	} else {
 		node = BfsNode{
-			Expanded:         node.Expanded,
 			Parent:           append(node.Parent, q.now),
 			Depth:            node.Depth,
 			Type:             node.Type,
 			nodeVersions:     node.nodeVersions,
 			PointOfContact:   node.PointOfContact,
 			NotInBlastRadius: node.NotInBlastRadius,
+			Expanded:         node.Expanded,
 		}
 	}
 
