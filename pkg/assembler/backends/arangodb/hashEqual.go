@@ -25,6 +25,9 @@ import (
 )
 
 func (c *arangoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+
+	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
+
 	if hashEqualSpec.Artifacts != nil && len(hashEqualSpec.Artifacts) > 2 {
 		return nil, fmt.Errorf("cannot specify more than 2 artifacts in HashEquals")
 	}

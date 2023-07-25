@@ -700,10 +700,35 @@ func newForQuery(repositoryName string, counterName string) *arangoQueryBuilder 
 	return aqb
 }
 
-func (aqb *arangoQueryBuilder) ForOutBound(edgeCollectionName string, counterName string, outBoundValueName string) *arangoQueryBuilder {
+func (aqb *arangoQueryBuilder) forOutBound(edgeCollectionName string, counterVertexName string, outBoundStartVertexName string) *arangoQueryBuilder {
 	aqb.query.WriteString("\n")
-	aqb.query.WriteString(fmt.Sprintf("FOR %s IN OUTBOUND %s %s", counterName, outBoundValueName, edgeCollectionName))
+
+	aqb.query.WriteString(fmt.Sprintf("FOR %s IN OUTBOUND %s %s", counterVertexName, outBoundStartVertexName, edgeCollectionName))
+
 	return aqb
+}
+
+func (aqb *arangoQueryBuilder) forInBound(edgeCollectionName string, counterVertexName string, inBoundStartVertexName string) *arangoQueryBuilder {
+	aqb.query.WriteString("\n")
+
+	aqb.query.WriteString(fmt.Sprintf("FOR %s IN INBOUND %s %s", counterVertexName, inBoundStartVertexName, edgeCollectionName))
+
+	return aqb
+}
+
+func (aqb *arangoQueryBuilder) forInBoundWithEdgeCounter(edgeCollectionName string, counterVertexName string, counterEdgeName string, inBoundStartVertexName string) *arangoQueryBuilder {
+	aqb.query.WriteString("\n")
+
+	aqb.query.WriteString(fmt.Sprintf("FOR %s, %s IN INBOUND %s %s", counterVertexName, counterEdgeName, inBoundStartVertexName, edgeCollectionName))
+
+	return aqb
+}
+
+func (aqb *arangoQueryBuilder) prune(counterName string, fieldName string, condition string, value string) *arangoQueryFilter {
+	aqb.query.WriteString(" ")
+	aqb.query.WriteString(fmt.Sprintf("PRUNE %s.%s %s %s", counterName, fieldName, condition, value))
+
+	return newArangoQueryFilter(aqb)
 }
 
 func (aqb *arangoQueryBuilder) filter(counterName string, fieldName string, condition string, value string) *arangoQueryFilter {
@@ -904,7 +929,7 @@ func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRoot
 		  )
 	
 		  LET pkgHasTypeCollection = (
-			INSERT { _key: CONCAT("pkgHasType", @rootKey, type._key), _from: @rootID, _to: type._id, label : "pkgHasType" } INTO pkgHasType OPTIONS { overwriteMode: "ignore" }
+			INSERT { _key: CONCAT("pkgHasType", @rootKey, type._key), _from: @rootID, _to: type._id} INTO pkgHasType OPTIONS { overwriteMode: "ignore" }
 		  )
 	
 		RETURN {
@@ -995,7 +1020,7 @@ func preIngestSrcTypes(ctx context.Context, db driver.Database, srcRoot *srcRoot
 		  )
 	
 		  LET pkgHasTypeCollection = (
-			INSERT { _key: CONCAT("srcHasType", @rootKey, type._key), _from: @rootID, _to: type._id, label : "srcHasType" } INTO srcHasType OPTIONS { overwriteMode: "ignore" }
+			INSERT { _key: CONCAT("srcHasType", @rootKey, type._key), _from: @rootID, _to: type._id } INTO srcHasType OPTIONS { overwriteMode: "ignore" }
 		  )
 	
 		RETURN {

@@ -25,7 +25,149 @@ import (
 )
 
 func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
-	return []*model.HasSbom{}, fmt.Errorf("not implemented: HasSBOM")
+
+	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
+	values := map[string]any{}
+	var arangoQueryBuilder *arangoQueryBuilder
+	if hasSBOMSpec.Subject != nil {
+		if hasSBOMSpec.Subject.Package != nil {
+			arangoQueryBuilder = setPkgMatchValues(hasSBOMSpec.Subject.Package, values)
+			arangoQueryBuilder.forOutBound(hasSBOMEdgesStr, "hasSBOM", "pVersion")
+			setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
+
+			return getPkgHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
+		} else {
+			arangoQueryBuilder = setArtifactMatchValues(nil, hasSBOMSpec.Subject.Artifact, values)
+			arangoQueryBuilder.forOutBound(hasSBOMEdgesStr, "hasSBOM", "art")
+			setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
+
+			return getArtifactHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
+		}
+	} else {
+		var combinedHasSBOM []*model.HasSbom
+
+		// get packages
+		arangoQueryBuilder = newForQuery(hasSBOMsStr, "hasSBOM")
+		setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
+		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMEdgesStr, "pVersion", "hasSBOMEdge", "hasSBOM")
+		arangoQueryBuilder.prune("hasSBOMEdge", "label", "==", "@label")
+		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
+
+		values["label"] = "package"
+
+		pkgHasSBOMs, err := getPkgHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve package SBOMs with error: %w", err)
+		}
+		combinedHasSBOM = append(combinedHasSBOM, pkgHasSBOMs...)
+
+		// get artifacts
+		arangoQueryBuilder = newForQuery(hasSBOMsStr, "hasSBOM")
+		setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
+		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMEdgesStr, "art", "hasSBOMEdge", "hasSBOM")
+		arangoQueryBuilder.prune("hasSBOMEdge", "label", "==", "@label")
+		values["label"] = "artifact"
+
+		artifactHasSBOMs, err := getArtifactHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve artifact SBOMs with error: %w", err)
+		}
+		combinedHasSBOM = append(combinedHasSBOM, artifactHasSBOMs...)
+
+		return combinedHasSBOM, nil
+	}
+}
+
+func getPkgHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.HasSbom, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'pkgVersion': {
+			"type_id": pType._id,
+			"type": pType.type,
+			"namespace_id": pNs._id,
+			"namespace": pNs.namespace,
+			"name_id": pName._id,
+			"name": pName.name,
+			"version_id": pVersion._id,
+			"version": pVersion.version,
+			"subpath": pVersion.subpath,
+			"qualifier_list": pVersion.qualifier_list
+		},
+		'hasSBOM_id': hasSBOM._id,
+		'uri': hasSBOM.uri,
+		'algorithm': hasSBOM.algorithm,
+		'digest': hasSBOM.digest,
+		'downloadLocation': hasSBOM.downloadLocation,
+		'collector': hasSBOM.collector,
+		'origin': hasSBOM.origin  
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSBOM")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for HasSBOM: %w", err)
+	}
+	defer cursor.Close()
+
+	return getPkgHasSBOM(ctx, cursor)
+}
+
+func getArtifactHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.HasSbom, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'artifact': {
+			'id': art._id,
+			'algorithm': art.algorithm,
+			'digest': art.digest
+		},
+		'hasSBOM_id': hasSBOM._id,
+		'uri': hasSBOM.uri,
+		'algorithm': hasSBOM.algorithm,
+		'digest': hasSBOM.digest,
+		'downloadLocation': hasSBOM.downloadLocation,
+		'collector': hasSBOM.collector,
+		'origin': hasSBOM.origin  
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSBOM")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for HasSBOM: %w", err)
+	}
+	defer cursor.Close()
+
+	return getArtifactHasSBOM(ctx, cursor)
+}
+
+func setHasSBOMMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSBOMSpec *model.HasSBOMSpec, queryValues map[string]any) {
+	if hasSBOMSpec.URI != nil {
+		arangoQueryBuilder.filter("hasSBOM", "uri", "==", "@uri")
+		queryValues["uri"] = hasSBOMSpec.URI
+	}
+	if hasSBOMSpec.Algorithm != nil {
+		arangoQueryBuilder.filter("hasSBOM", "algorithm", "==", "@algorithm")
+		queryValues["algorithm"] = hasSBOMSpec.Algorithm
+	}
+	if hasSBOMSpec.Digest != nil {
+		arangoQueryBuilder.filter("hasSBOM", "digest", "==", "@digest")
+		queryValues["digest"] = hasSBOMSpec.Digest
+	}
+	if hasSBOMSpec.DownloadLocation != nil {
+		arangoQueryBuilder.filter("hasSBOM", "downloadLocation", "==", "@downloadLocation")
+		queryValues["downloadLocation"] = hasSBOMSpec.DownloadLocation
+	}
+	if hasSBOMSpec.Origin != nil {
+		arangoQueryBuilder.filter("hasSBOM", buildTypeStr, "==", "@"+buildTypeStr)
+		queryValues[origin] = hasSBOMSpec.Origin
+	}
+	if hasSBOMSpec.Collector != nil {
+		arangoQueryBuilder.filter("hasSBOM", buildTypeStr, "==", "@"+buildTypeStr)
+		queryValues[collector] = hasSBOMSpec.Collector
+	}
 }
 
 func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInputSpec, hasSbom *model.HasSBOMInputSpec) map[string]any {
@@ -61,7 +203,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("hasSBOMEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id, label : "hasSBOM" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("hasSBOMEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id, label: "artifact" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {
@@ -84,7 +226,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			return nil, fmt.Errorf("failed to ingest hasSBOM: %w", err)
 		}
 		defer cursor.Close()
-		hasSBOMList, err := getPkgHasSBOM(ctx, cursor)
+		hasSBOMList, err := getArtifactHasSBOM(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
 		}
@@ -129,7 +271,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("hasSBOMEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id, label : "hasSBOM" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("hasSBOMEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id, label: "package" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {
@@ -160,7 +302,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		}
 		defer cursor.Close()
 
-		hasSBOMList, err := getArtifactHasSBOM(ctx, cursor)
+		hasSBOMList, err := getPkgHasSBOM(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
 		}
