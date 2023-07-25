@@ -10,21 +10,21 @@ require (
 	github.com/secure-systems-lab/go-securesystemslib v0.7.0
 	github.com/spf13/cobra v1.7.0
 	go.uber.org/zap v1.24.0
-	google.golang.org/api v0.130.0
+	google.golang.org/api v0.133.0
 )
 
 require (
-	cloud.google.com/go v0.110.2 // indirect
+	cloud.google.com/go v0.110.4 // indirect
 	cloud.google.com/go/compute v1.20.1 // indirect
 	cloud.google.com/go/iam v1.1.0 // indirect
-	cloud.google.com/go/pubsub v1.31.0 // indirect
+	cloud.google.com/go/pubsub v1.32.0 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.5 // indirect
-	github.com/googleapis/gax-go/v2 v2.11.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -42,7 +42,7 @@ require (
 	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc // indirect
+	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130 // indirect
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
 )
@@ -145,13 +145,13 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	gocloud.dev v0.30.0 // indirect
-	golang.org/x/mod v0.11.0 // indirect
+	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/term v0.10.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.10.0 // indirect
-	golang.org/x/vuln v0.0.0-20230303230808-d3042fecc4e3 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230629202037-9506855d4529 // indirect
+	golang.org/x/tools v0.11.0 // indirect
+	golang.org/x/vuln v1.0.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20230706204954-ccb25ca9f130 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230720185612-659f7aaaa771 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
@@ -168,18 +168,19 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/arangodb/go-driver v1.6.0
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/go-git/go-git/v5 v5.7.0
+	github.com/go-git/go-git/v5 v5.8.0
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v50 v50.2.0
-	github.com/google/osv-scanner v1.3.5
+	github.com/google/osv-scanner v1.3.6
+	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.20
-	github.com/nats-io/nats.go v1.27.1
+	github.com/nats-io/nats.go v1.28.0
 	github.com/openvex/go-vex v0.2.0
 	github.com/ossf/scorecard/v4 v4.11.0
 	github.com/package-url/packageurl-go v0.1.1
@@ -190,7 +191,7 @@ require (
 	github.com/spdx/tools-golang v0.5.2
 	github.com/spf13/viper v1.16.0
 	github.com/vektah/gqlparser/v2 v2.5.8
-	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
+	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 	gopkg.in/yaml.v3 v3.0.1
 )
 
