@@ -1209,6 +1209,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		expectedArtifacts []string
 		expectedSrcs      []string
 		expectedPOCLen    int
+		expectedPOCs      []string
 		graphInputs       []assembler.IngestPredicates
 	}{
 		{
@@ -1447,6 +1448,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedPkgs:      []string{"pkgTypeL", "pkgTypeM"},
 			expectedSrcs:      []string{"srcTypeK"},
 			expectedArtifacts: []string{"testArtifactAlgorithmK"},
+			expectedPOCs:      []string{"testEmailK", "testEmailL", "testEmailM"},
 			expectedPOCLen:    5,
 			graphInputs:       []assembler.IngestPredicates{pointOfContactGraph},
 		},
@@ -1546,8 +1548,22 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				expectedSrcIDs = append(expectedSrcIDs, srcID)
 			}
 
-			if len(getReturnedPOCs(ctx, gqlClient, gotMap)) != tt.expectedPOCLen {
+			returnedPOCs := getReturnedPOCs(ctx, gqlClient, gotMap)
+			if len(returnedPOCs) != tt.expectedPOCLen {
 				t.Errorf("Found %d POCs recorded but expected %d \n", len(getReturnedPOCs(ctx, gqlClient, gotMap)), tt.expectedPOCLen)
+			}
+
+			inExpectedPOCs := false
+			for _, gotPOC := range returnedPOCs {
+				for _, expectedPOC := range tt.expectedPOCs {
+					if gotPOC == expectedPOC {
+						inExpectedPOCs = true
+						break
+					}
+				}
+				if !inExpectedPOCs {
+					t.Errorf("this ID appears in the returned POCs but is not expected: %s \n", gotPOC)
+				}
 			}
 
 			for gotID, node := range gotMap {
@@ -1573,7 +1589,6 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 						break
 					}
 				}
-
 				inExpectedSrcs := false
 				for _, expectedID := range expectedSrcIDs {
 					if expectedID == gotID {

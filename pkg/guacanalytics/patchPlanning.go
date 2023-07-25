@@ -90,8 +90,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		var versionsList []string
 		versionsList = append(versionsList, nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
 		q.nodeMap[startID] = BfsNode{
-			Type:         PackageVersion,
-			nodeVersions: versionsList,
+			Type: PackageVersion,
 		}
 
 		q.nodeMap[nodePkg.AllPkgTree.Namespaces[0].Names[0].Id] = BfsNode{
@@ -148,20 +147,36 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 				return err
 			}
 		case *model.NeighborsNeighborsHasSourceAt:
-			exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
+			err := exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
+
+			if err != nil {
+				return err
+			}
 		case *model.NeighborsNeighborsPointOfContact:
-			explorePointOfContact(ctx, gqlClient, q, *neighbor)
+			err := explorePointOfContact(ctx, gqlClient, q, *neighbor)
+
+			if err != nil {
+				return err
+			}
 		}
 	case PackageVersion:
 		switch neighbor := neighbor.(type) {
 		case *model.NeighborsNeighborsIsOccurrence:
 			exploreIsOccurrenceFromSubject(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsHasSourceAt:
-			exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
+			err := exploreHasSourceAtFromPackage(ctx, gqlClient, q, *neighbor)
+
+			if err != nil {
+				return err
+			}
 		case *model.NeighborsNeighborsPkgEqual:
 			explorePkgEqual(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsPointOfContact:
-			explorePointOfContact(ctx, gqlClient, q, *neighbor)
+			err := explorePointOfContact(ctx, gqlClient, q, *neighbor)
+
+			if err != nil {
+				return err
+			}
 		}
 	case SourceName:
 		switch neighbor := neighbor.(type) {
@@ -174,7 +189,11 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 				return err
 			}
 		case *model.NeighborsNeighborsPointOfContact:
-			explorePointOfContact(ctx, gqlClient, q, *neighbor)
+			err := explorePointOfContact(ctx, gqlClient, q, *neighbor)
+
+			if err != nil {
+				return err
+			}
 		}
 	case Artifact:
 		switch neighbor := neighbor.(type) {
@@ -185,7 +204,11 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 		case *model.NeighborsNeighborsHashEqual:
 			exploreHashEqual(ctx, gqlClient, q, *neighbor)
 		case *model.NeighborsNeighborsPointOfContact:
-			explorePointOfContact(ctx, gqlClient, q, *neighbor)
+			err := explorePointOfContact(ctx, gqlClient, q, *neighbor)
+
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -202,7 +225,7 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlClient graphql.Client
 		return nil
 	}
 
-	q.addNodeToQueue(PackageVersion, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
+	q.addNodeToQueue(PackageVersion, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
 	q.addNodeToQueue(PackageName, []string{isDependency.Package.Namespaces[0].Names[0].Versions[0].Version}, isDependency.Package.Namespaces[0].Names[0].Id)
 
 	return nil
@@ -222,7 +245,7 @@ func exploreHasSLSAFromArtifact(ctx context.Context, gqlClient graphql.Client, q
 func exploreIsOccurrenceFromArtifact(ctx context.Context, gqlClient graphql.Client, q *queueValues, isOccurrence model.NeighborsNeighborsIsOccurrence) {
 	switch subject := isOccurrence.Subject.(type) {
 	case *model.AllIsOccurrencesTreeSubjectPackage:
-		q.addNodeToQueue(PackageVersion, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Versions[0].Id)
+		q.addNodeToQueue(PackageVersion, nil, subject.Namespaces[0].Names[0].Versions[0].Id)
 		q.addNodeToQueue(PackageName, []string{subject.Namespaces[0].Names[0].Versions[0].Version}, subject.Namespaces[0].Names[0].Id)
 	case *model.AllIsOccurrencesTreeSubjectSource:
 		q.addNodeToQueue(SourceName, nil, subject.Namespaces[0].Names[0].Id)
@@ -237,7 +260,7 @@ func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client,
 			return err
 		}
 	} else {
-		q.addNodeToQueue(PackageVersion, []string{hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Version}, hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Id)
+		q.addNodeToQueue(PackageVersion, nil, hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Id)
 		q.addNodeToQueue(PackageName, []string{hasSourceAt.Package.Namespaces[0].Names[0].Versions[0].Version}, hasSourceAt.Package.Namespaces[0].Names[0].Id)
 	}
 	return nil
@@ -247,8 +270,8 @@ func exploreHasSourceAtFromSource(ctx context.Context, gqlClient graphql.Client,
 func explorePkgEqual(ctx context.Context, gqlClient graphql.Client, q *queueValues, pkgEqual model.NeighborsNeighborsPkgEqual) {
 	for _, pkg := range pkgEqual.Packages {
 		if pkg.Namespaces[0].Names[0].Versions[0].Id != q.now {
-			q.addNodeToQueue(PackageVersion, []string{pkg.Namespaces[0].Names[0].Versions[0].Id}, pkg.Namespaces[0].Names[0].Versions[0].Id)
-			q.addNodeToQueue(PackageName, []string{pkg.Namespaces[0].Names[0].Versions[0].Id}, pkg.Namespaces[0].Names[0].Id)
+			q.addNodeToQueue(PackageVersion, nil, pkg.Namespaces[0].Names[0].Versions[0].Id)
+			q.addNodeToQueue(PackageName, []string{pkg.Namespaces[0].Names[0].Versions[0].Version}, pkg.Namespaces[0].Names[0].Id)
 		}
 	}
 }
@@ -261,7 +284,7 @@ func exploreHashEqual(ctx context.Context, gqlClient graphql.Client, q *queueVal
 	}
 }
 
-func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) {
+func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client, q *queueValues, hasSourceAt model.NeighborsNeighborsHasSourceAt) error {
 	node, seen := q.nodeMap[hasSourceAt.Source.Namespaces[0].Names[0].Id]
 	if !seen {
 		node = BfsNode{
@@ -271,7 +294,12 @@ func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client
 		}
 
 		// check if the Src has any POCs
-		neighborsResponse, _ := model.Neighbors(ctx, gqlClient, hasSourceAt.Source.Namespaces[0].Names[0].Id, []model.Edge{})
+		neighborsResponse, err := model.Neighbors(ctx, gqlClient, hasSourceAt.Source.Namespaces[0].Names[0].Id, []model.Edge{})
+
+		if err != nil {
+			return err
+		}
+
 		for _, neighbor := range neighborsResponse.Neighbors {
 			switch neighbor := neighbor.(type) {
 			case *model.NeighborsNeighborsPointOfContact:
@@ -286,9 +314,10 @@ func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client
 	}
 
 	q.nodeMap[hasSourceAt.Source.Namespaces[0].Names[0].Id] = node
+	return nil
 }
 
-func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *queueValues, pointOfContact model.NeighborsNeighborsPointOfContact) {
+func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *queueValues, pointOfContact model.NeighborsNeighborsPointOfContact) error {
 	node := BfsNode{
 		Parent:           q.nowNode.Parent,
 		Depth:            q.nowNode.Depth,
@@ -303,25 +332,50 @@ func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *que
 
 	// If it is a packageName, add the POC to applicable versions (versions in the nodeVersions) but not the reverse
 	if q.nowNode.Type != PackageName {
-		return
+		return nil
 	}
 
-	for _, version := range q.nowNode.nodeVersions {
-		for id, node := range q.nodeMap {
-			if node.Type == PackageVersion && node.nodeVersions[0] == version {
+	switch poc := pointOfContact.Subject.(type) {
+	case *model.AllPointOfContactSubjectPackage:
+		pkgFilter := model.PkgSpec{
+			Type:      &poc.Type,
+			Namespace: &poc.Namespaces[0].Namespace,
+			Name:      &poc.Namespaces[0].Names[0].Name,
+		}
+
+		pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
+
+		if err != nil {
+			return fmt.Errorf("error finding inputted node %s", err)
+		}
+
+		for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+			if versionEntry.Version == "" {
+				break // this version entry is unpopulated, do not add to map
+			}
+			if node, seen := q.nodeMap[versionEntry.Id]; seen {
 				node = BfsNode{
 					Parent:           node.Parent,
 					Depth:            node.Depth,
 					Type:             node.Type,
-					nodeVersions:     node.nodeVersions,
 					PointOfContact:   pointOfContact.AllPointOfContact,
 					NotInBlastRadius: node.NotInBlastRadius,
 					Expanded:         node.Expanded,
 				}
-				q.nodeMap[id] = node
+			} else {
+				node = BfsNode{
+					Parent:           q.now,
+					Depth:            q.nowNode.Depth + 1,
+					Type:             PackageVersion,
+					PointOfContact:   pointOfContact.AllPointOfContact,
+					NotInBlastRadius: true,
+				}
 			}
+			q.nodeMap[versionEntry.Id] = node
 		}
 	}
+
+	return nil
 }
 
 func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlClient graphql.Client, pkgType string, pkgNamespace string, pkgName string, id string) error {
@@ -354,19 +408,21 @@ func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlCli
 			break
 		}
 		q.nodeMap[versionEntry.Id] = BfsNode{
-			Parent:       q.now,
-			Depth:        q.nowNode.Depth + 1,
-			Type:         PackageVersion,
-			nodeVersions: []string{versionEntry.Id},
+			Parent:           q.now,
+			Depth:            q.nowNode.Depth + 1,
+			Type:             PackageVersion,
+			PointOfContact:   q.nowNode.PointOfContact,
+			NotInBlastRadius: false,
 		}
 		q.queue = append(q.queue, versionEntry.Id)
 	}
 
 	q.nodeMap[id] = BfsNode{
-		Parent:       q.now,
-		Depth:        q.nowNode.Depth + 1,
-		Type:         PackageName,
-		nodeVersions: versionsList,
+		Parent:         q.now,
+		Depth:          q.nowNode.Depth + 1,
+		Type:           PackageName,
+		nodeVersions:   versionsList,
+		PointOfContact: q.nowNode.PointOfContact,
 	}
 
 	q.queue = append(q.queue, id)
@@ -384,10 +440,20 @@ func (q *queueValues) addNodeToQueue(nodeType NodeType, versions []string, id st
 			Type:         nodeType,
 			nodeVersions: versions,
 		}
-		q.nodeMap[id] = node
+	} else if nodeType == PackageVersion {
+		node = BfsNode{
+			Parent:           q.now,
+			Depth:            q.nowNode.Depth + 1,
+			Type:             nodeType,
+			Expanded:         node.Expanded,
+			PointOfContact:   node.PointOfContact,
+			NotInBlastRadius: false,
+		}
 	}
 
-	if !node.Expanded {
+	q.nodeMap[id] = node
+
+	if !node.Expanded && !node.NotInBlastRadius {
 		q.queue = append(q.queue, id)
 	}
 }
