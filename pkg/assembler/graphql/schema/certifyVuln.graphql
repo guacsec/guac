@@ -99,6 +99,14 @@ type VulnerabilityMetaData {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "cvss 2.0 score, defaults to empty string"
+  cvss2Score: Float!
+  "cvss 3.0 score, defaults to empty string"
+  cvss3Score: Float!
+  "additional information, defaults to empty string"
+  additionalInformation: String!
+  "links pointing to other resources, defaults to empty list"
+  links: [String!]!
 }
 
 """
@@ -129,7 +137,16 @@ VulnerabilityMetaDataInput represents the input for certifying vulnerability
 scans in mutations.
 """
 input VulnerabilityMetaDataInput {
-  timeScanned: Time!
+  "cvss 2.0 score, defaults to empty string"
+  cvss2Score: Float!
+  "cvss 3.0 score, defaults to empty string"
+  cvss3Score: Float!
+  "additional information, defaults to empty string"
+  additionalInformation: String!
+  "links pointing to other resources, defaults to empty list"
+  links: [String!]!
+  ollector: String!
+  timeStamp: Time!
   dbUri: String!
   dbVersion: String!
   scannerUri: String!

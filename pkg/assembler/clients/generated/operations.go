@@ -23869,7 +23869,16 @@ const (
 // VulnerabilityMetaDataInput represents the input for certifying vulnerability
 // scans in mutations.
 type VulnerabilityMetaDataInput struct {
-	TimeScanned    time.Time `json:"timeScanned"`
+	// cvss 2.0 score, defaults to empty string
+	Cvss2Score float64 `json:"cvss2Score"`
+	// cvss 3.0 score, defaults to empty string
+	Cvss3Score float64 `json:"cvss3Score"`
+	// additional information, defaults to empty string
+	AdditionalInformation string `json:"additionalInformation"`
+	// links pointing to other resources, defaults to empty list
+	Links          []string  `json:"links"`
+	Ollector       string    `json:"ollector"`
+	TimeStamp      time.Time `json:"timeStamp"`
 	DbUri          string    `json:"dbUri"`
 	DbVersion      string    `json:"dbVersion"`
 	ScannerUri     string    `json:"scannerUri"`
@@ -23878,8 +23887,25 @@ type VulnerabilityMetaDataInput struct {
 	Collector      string    `json:"collector"`
 }
 
-// GetTimeScanned returns VulnerabilityMetaDataInput.TimeScanned, and is useful for accessing the field via an interface.
-func (v *VulnerabilityMetaDataInput) GetTimeScanned() time.Time { return v.TimeScanned }
+// GetCvss2Score returns VulnerabilityMetaDataInput.Cvss2Score, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetCvss2Score() float64 { return v.Cvss2Score }
+
+// GetCvss3Score returns VulnerabilityMetaDataInput.Cvss3Score, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetCvss3Score() float64 { return v.Cvss3Score }
+
+// GetAdditionalInformation returns VulnerabilityMetaDataInput.AdditionalInformation, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetAdditionalInformation() string {
+	return v.AdditionalInformation
+}
+
+// GetLinks returns VulnerabilityMetaDataInput.Links, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetLinks() []string { return v.Links }
+
+// GetOllector returns VulnerabilityMetaDataInput.Ollector, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetOllector() string { return v.Ollector }
+
+// GetTimeStamp returns VulnerabilityMetaDataInput.TimeStamp, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetTimeStamp() time.Time { return v.TimeStamp }
 
 // GetDbUri returns VulnerabilityMetaDataInput.DbUri, and is useful for accessing the field via an interface.
 func (v *VulnerabilityMetaDataInput) GetDbUri() string { return v.DbUri }

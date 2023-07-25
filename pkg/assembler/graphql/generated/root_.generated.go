@@ -354,13 +354,17 @@ type ComplexityRoot struct {
 	}
 
 	VulnerabilityMetaData struct {
-		Collector      func(childComplexity int) int
-		DbURI          func(childComplexity int) int
-		DbVersion      func(childComplexity int) int
-		Origin         func(childComplexity int) int
-		ScannerURI     func(childComplexity int) int
-		ScannerVersion func(childComplexity int) int
-		TimeScanned    func(childComplexity int) int
+		AdditionalInformation func(childComplexity int) int
+		Collector             func(childComplexity int) int
+		Cvss2Score            func(childComplexity int) int
+		Cvss3Score            func(childComplexity int) int
+		DbURI                 func(childComplexity int) int
+		DbVersion             func(childComplexity int) int
+		Links                 func(childComplexity int) int
+		Origin                func(childComplexity int) int
+		ScannerURI            func(childComplexity int) int
+		ScannerVersion        func(childComplexity int) int
+		TimeScanned           func(childComplexity int) int
 	}
 }
 
@@ -2142,12 +2146,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SourceNamespace.Namespace(childComplexity), true
 
+	case "VulnerabilityMetaData.additionalInformation":
+		if e.complexity.VulnerabilityMetaData.AdditionalInformation == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.AdditionalInformation(childComplexity), true
+
 	case "VulnerabilityMetaData.collector":
 		if e.complexity.VulnerabilityMetaData.Collector == nil {
 			break
 		}
 
 		return e.complexity.VulnerabilityMetaData.Collector(childComplexity), true
+
+	case "VulnerabilityMetaData.cvss2Score":
+		if e.complexity.VulnerabilityMetaData.Cvss2Score == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.Cvss2Score(childComplexity), true
+
+	case "VulnerabilityMetaData.cvss3Score":
+		if e.complexity.VulnerabilityMetaData.Cvss3Score == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.Cvss3Score(childComplexity), true
 
 	case "VulnerabilityMetaData.dbUri":
 		if e.complexity.VulnerabilityMetaData.DbURI == nil {
@@ -2162,6 +2187,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.VulnerabilityMetaData.DbVersion(childComplexity), true
+
+	case "VulnerabilityMetaData.links":
+		if e.complexity.VulnerabilityMetaData.Links == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.Links(childComplexity), true
 
 	case "VulnerabilityMetaData.origin":
 		if e.complexity.VulnerabilityMetaData.Origin == nil {
@@ -3041,6 +3073,14 @@ type VulnerabilityMetaData {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "cvss 2.0 score, defaults to empty string"
+  cvss2Score: Float!
+  "cvss 3.0 score, defaults to empty string"
+  cvss3Score: Float!
+  "additional information, defaults to empty string"
+  additionalInformation: String!
+  "links pointing to other resources, defaults to empty list"
+  links: [String!]!
 }
 
 """
@@ -3071,7 +3111,16 @@ VulnerabilityMetaDataInput represents the input for certifying vulnerability
 scans in mutations.
 """
 input VulnerabilityMetaDataInput {
-  timeScanned: Time!
+  "cvss 2.0 score, defaults to empty string"
+  cvss2Score: Float!
+  "cvss 3.0 score, defaults to empty string"
+  cvss3Score: Float!
+  "additional information, defaults to empty string"
+  additionalInformation: String!
+  "links pointing to other resources, defaults to empty list"
+  links: [String!]!
+  ollector: String!
+  timeStamp: Time!
   dbUri: String!
   dbVersion: String!
   scannerUri: String!

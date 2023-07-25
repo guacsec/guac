@@ -1341,12 +1341,29 @@ type VulnerabilityMetaData struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// cvss 2.0 score, defaults to empty string
+	Cvss2Score float64 `json:"cvss2Score"`
+	// cvss 3.0 score, defaults to empty string
+	Cvss3Score float64 `json:"cvss3Score"`
+	// additional information, defaults to empty string
+	AdditionalInformation string `json:"additionalInformation"`
+	// links pointing to other resources, defaults to empty list
+	Links []string `json:"links"`
 }
 
 // VulnerabilityMetaDataInput represents the input for certifying vulnerability
 // scans in mutations.
 type VulnerabilityMetaDataInput struct {
-	TimeScanned    time.Time `json:"timeScanned"`
+	// cvss 2.0 score, defaults to empty string
+	Cvss2Score float64 `json:"cvss2Score"`
+	// cvss 3.0 score, defaults to empty string
+	Cvss3Score float64 `json:"cvss3Score"`
+	// additional information, defaults to empty string
+	AdditionalInformation string `json:"additionalInformation"`
+	// links pointing to other resources, defaults to empty list
+	Links          []string  `json:"links"`
+	Ollector       string    `json:"ollector"`
+	TimeStamp      time.Time `json:"timeStamp"`
 	DbURI          string    `json:"dbUri"`
 	DbVersion      string    `json:"dbVersion"`
 	ScannerURI     string    `json:"scannerUri"`

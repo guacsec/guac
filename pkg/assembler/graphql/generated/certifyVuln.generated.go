@@ -223,6 +223,14 @@ func (ec *executionContext) fieldContext_CertifyVuln_metadata(ctx context.Contex
 				return ec.fieldContext_VulnerabilityMetaData_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_VulnerabilityMetaData_collector(ctx, field)
+			case "cvss2Score":
+				return ec.fieldContext_VulnerabilityMetaData_cvss2Score(ctx, field)
+			case "cvss3Score":
+				return ec.fieldContext_VulnerabilityMetaData_cvss3Score(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_VulnerabilityMetaData_additionalInformation(ctx, field)
+			case "links":
+				return ec.fieldContext_VulnerabilityMetaData_links(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetaData", field.Name)
 		},
@@ -582,6 +590,182 @@ func (ec *executionContext) fieldContext_VulnerabilityMetaData_collector(ctx con
 	return fc, nil
 }
 
+func (ec *executionContext) _VulnerabilityMetaData_cvss2Score(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_cvss2Score(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cvss2Score, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_cvss2Score(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VulnerabilityMetaData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VulnerabilityMetaData_cvss3Score(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_cvss3Score(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cvss3Score, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_cvss3Score(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VulnerabilityMetaData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VulnerabilityMetaData_additionalInformation(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_additionalInformation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AdditionalInformation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_additionalInformation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VulnerabilityMetaData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VulnerabilityMetaData_links(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_links(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Links, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_links(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VulnerabilityMetaData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -759,22 +943,67 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetaDataInput(ctx context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
+	fieldsInOrder := [...]string{"cvss2Score", "cvss3Score", "additionalInformation", "links", "ollector", "timeStamp", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "timeScanned":
+		case "cvss2Score":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeScanned"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cvss2Score"))
+			data, err := ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Cvss2Score = data
+		case "cvss3Score":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cvss3Score"))
+			data, err := ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Cvss3Score = data
+		case "additionalInformation":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("additionalInformation"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AdditionalInformation = data
+		case "links":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("links"))
+			data, err := ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Links = data
+		case "ollector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ollector"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Ollector = data
+		case "timeStamp":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeStamp"))
 			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.TimeScanned = data
+			it.TimeStamp = data
 		case "dbUri":
 			var err error
 
@@ -1072,6 +1301,26 @@ func (ec *executionContext) _VulnerabilityMetaData(ctx context.Context, sel ast.
 			}
 		case "collector":
 			out.Values[i] = ec._VulnerabilityMetaData_collector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "cvss2Score":
+			out.Values[i] = ec._VulnerabilityMetaData_cvss2Score(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "cvss3Score":
+			out.Values[i] = ec._VulnerabilityMetaData_cvss3Score(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "additionalInformation":
+			out.Values[i] = ec._VulnerabilityMetaData_additionalInformation(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "links":
+			out.Values[i] = ec._VulnerabilityMetaData_links(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
