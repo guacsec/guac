@@ -317,14 +317,14 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 func getPkgHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom, error) {
 	type collectedData struct {
-		PkgVersion       dbPkgVersion `json:"pkgVersion"`
-		HasSBOMId        string       `json:"hasSBOM_id"`
-		Uri              string       `json:"uri"`
-		Algorithm        string       `json:"algorithm"`
-		Digest           string       `json:"digest"`
-		DownloadLocation string       `json:"downloadLocation"`
-		Collector        string       `json:"collector"`
-		Origin           string       `json:"origin"`
+		PkgVersion       *dbPkgVersion `json:"pkgVersion"`
+		HasSBOMId        string        `json:"hasSBOM_id"`
+		Uri              string        `json:"uri"`
+		Algorithm        string        `json:"algorithm"`
+		Digest           string        `json:"digest"`
+		DownloadLocation string        `json:"downloadLocation"`
+		Collector        string        `json:"collector"`
+		Origin           string        `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -364,14 +364,14 @@ func getPkgHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom,
 
 func getArtifactHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom, error) {
 	type collectedData struct {
-		Artifact         model.Artifact `json:"artifact"`
-		HasSBOMId        string         `json:"hasSBOM_id"`
-		Uri              string         `json:"uri"`
-		Algorithm        string         `json:"algorithm"`
-		Digest           string         `json:"digest"`
-		DownloadLocation string         `json:"downloadLocation"`
-		Collector        string         `json:"collector"`
-		Origin           string         `json:"origin"`
+		Artifact         *model.Artifact `json:"artifact"`
+		HasSBOMId        string          `json:"hasSBOM_id"`
+		Uri              string          `json:"uri"`
+		Algorithm        string          `json:"algorithm"`
+		Digest           string          `json:"digest"`
+		DownloadLocation string          `json:"downloadLocation"`
+		Collector        string          `json:"collector"`
+		Origin           string          `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -393,7 +393,7 @@ func getArtifactHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.Has
 	for _, createdValue := range createdValues {
 		hasSBOM := &model.HasSbom{
 			ID:               createdValue.HasSBOMId,
-			Subject:          &createdValue.Artifact,
+			Subject:          createdValue.Artifact,
 			URI:              createdValue.Uri,
 			Algorithm:        createdValue.Algorithm,
 			Digest:           createdValue.Digest,

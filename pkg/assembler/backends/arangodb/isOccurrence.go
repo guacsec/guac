@@ -35,13 +35,13 @@ func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model
 		if isOccurrenceSpec.Subject.Package != nil {
 			arangoQueryBuilder = setPkgMatchValues(isOccurrenceSpec.Subject.Package, values)
 			arangoQueryBuilder.forOutBound(isOccurrencesSubjectEdgesStr, "isOccurrence", "pVersion")
-			setIsOccurrenceValues(arangoQueryBuilder, isOccurrenceSpec, values)
+			setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
 
 			return getPkgOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
 		} else {
 			arangoQueryBuilder = setSrcMatchValues(isOccurrenceSpec.Subject.Source, values)
 			arangoQueryBuilder.forOutBound(isOccurrencesSubjectEdgesStr, "isOccurrence", "sName")
-			setIsOccurrenceValues(arangoQueryBuilder, isOccurrenceSpec, values)
+			setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
 
 			return getSrcOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
 		}
@@ -49,7 +49,7 @@ func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model
 		var combinedOccurrence []*model.IsOccurrence
 		// get packages
 		arangoQueryBuilder = newForQuery(isOccurrencesStr, "isOccurrence")
-		setIsOccurrenceValues(arangoQueryBuilder, isOccurrenceSpec, values)
+		setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
 		arangoQueryBuilder.forInBoundWithEdgeCounter(isOccurrencesSubjectEdgesStr, "pVersion", "isOccurEdgePkg", "isOccurrence")
 		arangoQueryBuilder.prune("isOccurEdgePkg", "label", "==", "@label")
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
@@ -66,7 +66,7 @@ func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model
 
 		// get sources
 		arangoQueryBuilder = newForQuery(isOccurrencesStr, "isOccurrence")
-		setIsOccurrenceValues(arangoQueryBuilder, isOccurrenceSpec, values)
+		setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
 		arangoQueryBuilder.forInBoundWithEdgeCounter(isOccurrencesSubjectEdgesStr, "sName", "isOccurEdgeSrc", "isOccurrence")
 		arangoQueryBuilder.prune("isOccurEdgeSrc", "label", "==", "@label")
 		arangoQueryBuilder.forInBound(srcHasNameStr, "sNs", "sName")
@@ -156,7 +156,7 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	return getPkgIsOccurrence(ctx, cursor)
 }
 
-func setIsOccurrenceValues(arangoQueryBuilder *arangoQueryBuilder, isOccurrenceSpec *model.IsOccurrenceSpec, queryValues map[string]any) {
+func setIsOccurrenceMatchValues(arangoQueryBuilder *arangoQueryBuilder, isOccurrenceSpec *model.IsOccurrenceSpec, queryValues map[string]any) {
 	if isOccurrenceSpec.Justification != nil {
 		arangoQueryBuilder.filter("isOccurrence", justification, "==", "@"+justification)
 		queryValues[justification] = isOccurrenceSpec.Justification
@@ -582,12 +582,12 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 
 func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
 	type collectedData struct {
-		PkgVersion     dbPkgVersion   `json:"pkgVersion"`
-		Artifact       model.Artifact `json:"artifact"`
-		IsOccurrenceID string         `json:"isOccurrence_id"`
-		Justification  string         `json:"justification"`
-		Collector      string         `json:"collector"`
-		Origin         string         `json:"origin"`
+		PkgVersion     *dbPkgVersion   `json:"pkgVersion"`
+		Artifact       *model.Artifact `json:"artifact"`
+		IsOccurrenceID string          `json:"isOccurrence_id"`
+		Justification  string          `json:"justification"`
+		Collector      string          `json:"collector"`
+		Origin         string          `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -613,7 +613,7 @@ func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 		isOccurrence := &model.IsOccurrence{
 			ID:        createdValue.IsOccurrenceID,
 			Subject:   pkg,
-			Artifact:  &createdValue.Artifact,
+			Artifact:  createdValue.Artifact,
 			Origin:    createdValue.Collector,
 			Collector: createdValue.Origin,
 		}
@@ -624,12 +624,12 @@ func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 
 func getSrcIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
 	type collectedData struct {
-		SrcName        dbSrcName      `json:"srcName"`
-		Artifact       model.Artifact `json:"artifact"`
-		IsOccurrenceID string         `json:"isOccurrence_id"`
-		Justification  string         `json:"justification"`
-		Collector      string         `json:"collector"`
-		Origin         string         `json:"origin"`
+		SrcName        *dbSrcName      `json:"srcName"`
+		Artifact       *model.Artifact `json:"artifact"`
+		IsOccurrenceID string          `json:"isOccurrence_id"`
+		Justification  string          `json:"justification"`
+		Collector      string          `json:"collector"`
+		Origin         string          `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -655,7 +655,7 @@ func getSrcIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 		isOccurrence := &model.IsOccurrence{
 			ID:        createdValue.IsOccurrenceID,
 			Subject:   src,
-			Artifact:  &createdValue.Artifact,
+			Artifact:  createdValue.Artifact,
 			Origin:    createdValue.Collector,
 			Collector: createdValue.Origin,
 		}

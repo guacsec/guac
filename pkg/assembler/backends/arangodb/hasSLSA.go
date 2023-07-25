@@ -345,7 +345,7 @@ func artifactKey(alg, dig string) string {
 func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, builtFromMap map[string][]*model.Artifact) ([]*model.HasSlsa, error) {
 	type collectedData struct {
 		Subject       *model.Artifact `json:"subject"`
-		BuiltBy       model.Builder   `json:"builtBy"`
+		BuiltBy       *model.Builder  `json:"builtBy"`
 		BuiltFrom     []string        `json:"builtFrom"`
 		HasSLSAId     string          `json:"hasSLSA_id"`
 		BuildType     string          `json:"buildType"`
@@ -388,7 +388,7 @@ func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, buil
 
 		slsa := &model.Slsa{
 			BuiltFrom:     builtFromArtifacts,
-			BuiltBy:       &createdValue.BuiltBy,
+			BuiltBy:       createdValue.BuiltBy,
 			BuildType:     createdValue.BuildType,
 			SlsaPredicate: getCollectedPredicates(createdValue.SlsaPredicate),
 			SlsaVersion:   createdValue.SlsaVersion,
