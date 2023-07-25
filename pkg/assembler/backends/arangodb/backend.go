@@ -708,14 +708,6 @@ func (aqb *arangoQueryBuilder) forOutBound(edgeCollectionName string, counterVer
 	return aqb
 }
 
-func (aqb *arangoQueryBuilder) forOutBoundWithEdgeCounter(edgeCollectionName string, counterVertexName string, counterEdgeName string, outBoundStartVertexName string) *arangoQueryBuilder {
-	aqb.query.WriteString("\n")
-
-	aqb.query.WriteString(fmt.Sprintf("FOR %s, %s IN OUTBOUND %s %s", counterVertexName, counterEdgeName, outBoundStartVertexName, edgeCollectionName))
-
-	return aqb
-}
-
 func (aqb *arangoQueryBuilder) forInBound(edgeCollectionName string, counterVertexName string, inBoundStartVertexName string) *arangoQueryBuilder {
 	aqb.query.WriteString("\n")
 
