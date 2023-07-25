@@ -74,6 +74,9 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
     ... on HasSourceAt {
       ...AllHasSourceAt
     }
+    ... on PointOfContact{
+      ...AllPointOfContact
+    }
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
@@ -145,6 +148,9 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
     }
     ... on HasSourceAt {
       ...AllHasSourceAt
+    }
+    ... on PointOfContact {
+      ...AllPointOfContact
     }
     ... on CertifyVuln {
       ...AllCertifyVuln
@@ -218,6 +224,9 @@ query Node($node: ID!) {
     ... on HasSourceAt {
       ...AllHasSourceAt
     }
+    ... on PointOfContact {
+      ...AllPointOfContact
+    }
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
@@ -289,6 +298,9 @@ query Nodes($nodes: [ID!]!) {
     }
     ... on HasSourceAt {
       ...AllHasSourceAt
+    }
+    ... on PointOfContact{
+      ...AllPointOfContact
     }
     ... on CertifyVuln {
       ...AllCertifyVuln

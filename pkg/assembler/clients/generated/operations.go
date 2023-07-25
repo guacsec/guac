@@ -13433,10 +13433,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 	case *NeighborsNeighborsPointOfContact:
 		typename = "PointOfContact"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NeighborsNeighborsPointOfContact
-		}{typename, v}
+			*__premarshalNeighborsNeighborsPointOfContact
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NeighborsNeighborsSource:
 		typename = "Source"
@@ -13735,11 +13739,121 @@ func (v *NeighborsNeighborsPkgEqual) __premarshalJSON() (*__premarshalNeighborsN
 // hierarchy. However, until the use case arises, PointOfContact will be a flat
 // reference to the contact details.
 type NeighborsNeighborsPointOfContact struct {
-	Typename *string `json:"__typename"`
+	Typename          *string `json:"__typename"`
+	AllPointOfContact `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsPointOfContact.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsPointOfContact) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetId() string { return v.AllPointOfContact.Id }
+
+// GetSubject returns NeighborsNeighborsPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetSubject() AllPointOfContactSubjectPackageSourceOrArtifact {
+	return v.AllPointOfContact.Subject
+}
+
+// GetEmail returns NeighborsNeighborsPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetEmail() string { return v.AllPointOfContact.Email }
+
+// GetInfo returns NeighborsNeighborsPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetInfo() string { return v.AllPointOfContact.Info }
+
+// GetSince returns NeighborsNeighborsPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetSince() time.Time { return v.AllPointOfContact.Since }
+
+// GetJustification returns NeighborsNeighborsPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetJustification() string {
+	return v.AllPointOfContact.Justification
+}
+
+// GetOrigin returns NeighborsNeighborsPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetOrigin() string { return v.AllPointOfContact.Origin }
+
+// GetCollector returns NeighborsNeighborsPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPointOfContact) GetCollector() string {
+	return v.AllPointOfContact.Collector
+}
+
+func (v *NeighborsNeighborsPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsPointOfContact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsPointOfContact) __premarshalJSON() (*__premarshalNeighborsNeighborsPointOfContact, error) {
+	var retval __premarshalNeighborsNeighborsPointOfContact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllPointOfContact.Subject
+		var err error
+		*dst, err = __marshalAllPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal NeighborsNeighborsPointOfContact.AllPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.AllPointOfContact.Email
+	retval.Info = v.AllPointOfContact.Info
+	retval.Since = v.AllPointOfContact.Since
+	retval.Justification = v.AllPointOfContact.Justification
+	retval.Origin = v.AllPointOfContact.Origin
+	retval.Collector = v.AllPointOfContact.Collector
+	return &retval, nil
+}
 
 // NeighborsNeighborsSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
@@ -14322,10 +14436,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 	case *NodeNodePointOfContact:
 		typename = "PointOfContact"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NodeNodePointOfContact
-		}{typename, v}
+			*__premarshalNodeNodePointOfContact
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodeNodeSource:
 		typename = "Source"
@@ -16217,11 +16335,117 @@ func (v *NodeNodePkgEqual) __premarshalJSON() (*__premarshalNodeNodePkgEqual, er
 // hierarchy. However, until the use case arises, PointOfContact will be a flat
 // reference to the contact details.
 type NodeNodePointOfContact struct {
-	Typename *string `json:"__typename"`
+	Typename          *string `json:"__typename"`
+	AllPointOfContact `json:"-"`
 }
 
 // GetTypename returns NodeNodePointOfContact.Typename, and is useful for accessing the field via an interface.
 func (v *NodeNodePointOfContact) GetTypename() *string { return v.Typename }
+
+// GetId returns NodeNodePointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetId() string { return v.AllPointOfContact.Id }
+
+// GetSubject returns NodeNodePointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetSubject() AllPointOfContactSubjectPackageSourceOrArtifact {
+	return v.AllPointOfContact.Subject
+}
+
+// GetEmail returns NodeNodePointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetEmail() string { return v.AllPointOfContact.Email }
+
+// GetInfo returns NodeNodePointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetInfo() string { return v.AllPointOfContact.Info }
+
+// GetSince returns NodeNodePointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetSince() time.Time { return v.AllPointOfContact.Since }
+
+// GetJustification returns NodeNodePointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetJustification() string { return v.AllPointOfContact.Justification }
+
+// GetOrigin returns NodeNodePointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetOrigin() string { return v.AllPointOfContact.Origin }
+
+// GetCollector returns NodeNodePointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *NodeNodePointOfContact) GetCollector() string { return v.AllPointOfContact.Collector }
+
+func (v *NodeNodePointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NodeNodePointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NodeNodePointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNodeNodePointOfContact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NodeNodePointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NodeNodePointOfContact) __premarshalJSON() (*__premarshalNodeNodePointOfContact, error) {
+	var retval __premarshalNodeNodePointOfContact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllPointOfContact.Subject
+		var err error
+		*dst, err = __marshalAllPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal NodeNodePointOfContact.AllPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.AllPointOfContact.Email
+	retval.Info = v.AllPointOfContact.Info
+	retval.Since = v.AllPointOfContact.Since
+	retval.Justification = v.AllPointOfContact.Justification
+	retval.Origin = v.AllPointOfContact.Origin
+	retval.Collector = v.AllPointOfContact.Collector
+	return &retval, nil
+}
 
 // NodeNodeSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
@@ -18390,10 +18614,14 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 	case *NodesNodesPointOfContact:
 		typename = "PointOfContact"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NodesNodesPointOfContact
-		}{typename, v}
+			*__premarshalNodesNodesPointOfContact
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodesNodesSource:
 		typename = "Source"
@@ -18692,11 +18920,119 @@ func (v *NodesNodesPkgEqual) __premarshalJSON() (*__premarshalNodesNodesPkgEqual
 // hierarchy. However, until the use case arises, PointOfContact will be a flat
 // reference to the contact details.
 type NodesNodesPointOfContact struct {
-	Typename *string `json:"__typename"`
+	Typename          *string `json:"__typename"`
+	AllPointOfContact `json:"-"`
 }
 
 // GetTypename returns NodesNodesPointOfContact.Typename, and is useful for accessing the field via an interface.
 func (v *NodesNodesPointOfContact) GetTypename() *string { return v.Typename }
+
+// GetId returns NodesNodesPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetId() string { return v.AllPointOfContact.Id }
+
+// GetSubject returns NodesNodesPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetSubject() AllPointOfContactSubjectPackageSourceOrArtifact {
+	return v.AllPointOfContact.Subject
+}
+
+// GetEmail returns NodesNodesPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetEmail() string { return v.AllPointOfContact.Email }
+
+// GetInfo returns NodesNodesPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetInfo() string { return v.AllPointOfContact.Info }
+
+// GetSince returns NodesNodesPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetSince() time.Time { return v.AllPointOfContact.Since }
+
+// GetJustification returns NodesNodesPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetJustification() string {
+	return v.AllPointOfContact.Justification
+}
+
+// GetOrigin returns NodesNodesPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetOrigin() string { return v.AllPointOfContact.Origin }
+
+// GetCollector returns NodesNodesPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *NodesNodesPointOfContact) GetCollector() string { return v.AllPointOfContact.Collector }
+
+func (v *NodesNodesPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NodesNodesPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NodesNodesPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNodesNodesPointOfContact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NodesNodesPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NodesNodesPointOfContact) __premarshalJSON() (*__premarshalNodesNodesPointOfContact, error) {
+	var retval __premarshalNodesNodesPointOfContact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllPointOfContact.Subject
+		var err error
+		*dst, err = __marshalAllPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal NodesNodesPointOfContact.AllPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.AllPointOfContact.Email
+	retval.Info = v.AllPointOfContact.Info
+	retval.Since = v.AllPointOfContact.Since
+	retval.Justification = v.AllPointOfContact.Justification
+	retval.Origin = v.AllPointOfContact.Origin
+	retval.Collector = v.AllPointOfContact.Collector
+	return &retval, nil
+}
 
 // NodesNodesSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
@@ -21108,10 +21444,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 	case *PathPathPointOfContact:
 		typename = "PointOfContact"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*PathPathPointOfContact
-		}{typename, v}
+			*__premarshalPathPathPointOfContact
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *PathPathSource:
 		typename = "Source"
@@ -21408,11 +21748,117 @@ func (v *PathPathPkgEqual) __premarshalJSON() (*__premarshalPathPathPkgEqual, er
 // hierarchy. However, until the use case arises, PointOfContact will be a flat
 // reference to the contact details.
 type PathPathPointOfContact struct {
-	Typename *string `json:"__typename"`
+	Typename          *string `json:"__typename"`
+	AllPointOfContact `json:"-"`
 }
 
 // GetTypename returns PathPathPointOfContact.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathPointOfContact) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathPointOfContact.Id, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetId() string { return v.AllPointOfContact.Id }
+
+// GetSubject returns PathPathPointOfContact.Subject, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetSubject() AllPointOfContactSubjectPackageSourceOrArtifact {
+	return v.AllPointOfContact.Subject
+}
+
+// GetEmail returns PathPathPointOfContact.Email, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetEmail() string { return v.AllPointOfContact.Email }
+
+// GetInfo returns PathPathPointOfContact.Info, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetInfo() string { return v.AllPointOfContact.Info }
+
+// GetSince returns PathPathPointOfContact.Since, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetSince() time.Time { return v.AllPointOfContact.Since }
+
+// GetJustification returns PathPathPointOfContact.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetJustification() string { return v.AllPointOfContact.Justification }
+
+// GetOrigin returns PathPathPointOfContact.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetOrigin() string { return v.AllPointOfContact.Origin }
+
+// GetCollector returns PathPathPointOfContact.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathPointOfContact) GetCollector() string { return v.AllPointOfContact.Collector }
+
+func (v *PathPathPointOfContact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathPointOfContact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathPointOfContact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPointOfContact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathPointOfContact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Email string `json:"email"`
+
+	Info string `json:"info"`
+
+	Since time.Time `json:"since"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathPointOfContact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathPointOfContact) __premarshalJSON() (*__premarshalPathPathPointOfContact, error) {
+	var retval __premarshalPathPathPointOfContact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPointOfContact.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllPointOfContact.Subject
+		var err error
+		*dst, err = __marshalAllPointOfContactSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PathPathPointOfContact.AllPointOfContact.Subject: %w", err)
+		}
+	}
+	retval.Email = v.AllPointOfContact.Email
+	retval.Info = v.AllPointOfContact.Info
+	retval.Since = v.AllPointOfContact.Since
+	retval.Justification = v.AllPointOfContact.Justification
+	retval.Origin = v.AllPointOfContact.Origin
+	retval.Collector = v.AllPointOfContact.Collector
+	return &retval, nil
+}
 
 // PathPathSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
@@ -28066,6 +28512,9 @@ query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
 		... on HasSourceAt {
 			... AllHasSourceAt
 		}
+		... on PointOfContact {
+			... AllPointOfContact
+		}
 		... on CertifyVuln {
 			... AllCertifyVuln
 		}
@@ -28294,6 +28743,27 @@ fragment AllHasSourceAt on HasSourceAt {
 	source {
 		... AllSourceTree
 	}
+	origin
+	collector
+}
+fragment AllPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
 	origin
 	collector
 }
@@ -28465,6 +28935,9 @@ query Node ($node: ID!) {
 		... on HasSourceAt {
 			... AllHasSourceAt
 		}
+		... on PointOfContact {
+			... AllPointOfContact
+		}
 		... on CertifyVuln {
 			... AllCertifyVuln
 		}
@@ -28693,6 +29166,27 @@ fragment AllHasSourceAt on HasSourceAt {
 	source {
 		... AllSourceTree
 	}
+	origin
+	collector
+}
+fragment AllPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
 	origin
 	collector
 }
@@ -28862,6 +29356,9 @@ query Nodes ($nodes: [ID!]!) {
 		... on HasSourceAt {
 			... AllHasSourceAt
 		}
+		... on PointOfContact {
+			... AllPointOfContact
+		}
 		... on CertifyVuln {
 			... AllCertifyVuln
 		}
@@ -29090,6 +29587,27 @@ fragment AllHasSourceAt on HasSourceAt {
 	source {
 		... AllSourceTree
 	}
+	origin
+	collector
+}
+fragment AllPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
 	origin
 	collector
 }
@@ -29354,6 +29872,9 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge
 		... on HasSourceAt {
 			... AllHasSourceAt
 		}
+		... on PointOfContact {
+			... AllPointOfContact
+		}
 		... on CertifyVuln {
 			... AllCertifyVuln
 		}
@@ -29582,6 +30103,27 @@ fragment AllHasSourceAt on HasSourceAt {
 	source {
 		... AllSourceTree
 	}
+	origin
+	collector
+}
+fragment AllPointOfContact on PointOfContact {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	email
+	info
+	since
+	justification
 	origin
 	collector
 }
