@@ -421,22 +421,26 @@ func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlCli
 	var versionsList []string
 	for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
 		versionsList = append(versionsList, versionEntry.Version)
-		var parent []string
 		if versionNode, seen := q.nodeMap[versionEntry.Id]; seen {
 			if !q.nodeMap[versionEntry.Id].Expanded {
 				q.queue = append(q.queue, versionEntry.Id)
 			}
-			parent = append(versionNode.Parent, q.now)
+			q.nodeMap[versionEntry.Id] = BfsNode{
+				Parent:           append(versionNode.Parent, q.now),
+				Depth:            q.nowNode.Depth + 1,
+				Type:             PackageVersion,
+				PointOfContact:   q.nowNode.PointOfContact,
+				NotInBlastRadius: false,
+			}
 			break
 		} else {
-			parent = []string{q.now}
-		}
-		q.nodeMap[versionEntry.Id] = BfsNode{
-			Parent:           parent,
-			Depth:            q.nowNode.Depth + 1,
-			Type:             PackageVersion,
-			PointOfContact:   q.nowNode.PointOfContact,
-			NotInBlastRadius: false,
+			q.nodeMap[versionEntry.Id] = BfsNode{
+				Parent:           []string{q.now},
+				Depth:            q.nowNode.Depth + 1,
+				Type:             PackageVersion,
+				PointOfContact:   q.nowNode.PointOfContact,
+				NotInBlastRadius: false,
+			}
 		}
 		q.queue = append(q.queue, versionEntry.Id)
 	}
