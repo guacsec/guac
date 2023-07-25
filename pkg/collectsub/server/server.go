@@ -22,11 +22,16 @@ import (
 	"sync"
 	"time"
 
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/server/db/simpledb"
 	db "github.com/guacsec/guac/pkg/collectsub/server/db/types"
 	"github.com/guacsec/guac/pkg/logging"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type server struct {
@@ -50,7 +55,7 @@ func NewServer(port int) (*server, error) {
 }
 
 func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntriesRequest) (*pb.AddCollectEntriesResponse, error) {
-	logger := logging.FromContext(ctx)
+	logger := ctxzap.Extract(ctx).Sugar()
 	logger.Infof("AddCollectEntries called with entries: %v", in.Entries)
 
 	err := s.Db.AddCollectEntries(ctx, in.Entries)
@@ -64,7 +69,7 @@ func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntries
 }
 
 func (s *server) GetCollectEntries(ctx context.Context, in *pb.GetCollectEntriesRequest) (*pb.GetCollectEntriesResponse, error) {
-	logger := logging.FromContext(ctx)
+	logger := ctxzap.Extract(ctx).Sugar()
 	logger.Infof("GetCollectEntries called with filters: %v", in.Filters)
 
 	ret, err := s.Db.GetCollectEntries(ctx, in.Filters, in.SinceTime)
@@ -78,13 +83,52 @@ func (s *server) GetCollectEntries(ctx context.Context, in *pb.GetCollectEntries
 	}, nil
 }
 
+func ContextPropagationUnaryServerInterceptor() grpc.UnaryServerInterceptor {
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (interface{}, error) {
+		if md, ok := metadata.FromIncomingContext(ctx); ok {
+			ctx = metadata.NewOutgoingContext(ctx, md)
+		}
+		return handler(ctx, req)
+	}
+}
+
+func ContextToZapFieldsUnaryServerInterceptor() grpc.UnaryServerInterceptor {
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (interface{}, error) {
+		if md, ok := metadata.FromIncomingContext(ctx); ok {
+			for k, v := range md {
+				ctxzap.AddFields(ctx, zap.Strings(k, v))
+			}
+		}
+		return handler(ctx, req)
+	}
+}
+
 func (s *server) Serve(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
 	if err != nil {
 		return fmt.Errorf("error opening port %d when starting csub server: %w", s.port, err)
 	}
-	gs := grpc.NewServer()
+	opts := []grpc.ServerOption{
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				ContextPropagationUnaryServerInterceptor(),
+				grpc_zap.UnaryServerInterceptor(logger.Desugar()),
+				ContextToZapFieldsUnaryServerInterceptor(),
+			)),
+	}
+	gs := grpc.NewServer(opts...)
+
 	pb.RegisterColectSubscriberServiceServer(gs, s)
 
 	var wg sync.WaitGroup
