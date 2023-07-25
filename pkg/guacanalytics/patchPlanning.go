@@ -91,13 +91,13 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		versionsList = append(versionsList, nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
 		q.nodeMap[startID] = BfsNode{
 			Type:   PackageVersion,
-			Parent: []string{""}, // empty string signifies starting node
+			Parent: []string{},
 		}
 
 		q.nodeMap[nodePkg.AllPkgTree.Namespaces[0].Names[0].Id] = BfsNode{
 			Type:         PackageName,
 			nodeVersions: versionsList,
-			Parent:       []string{""},
+			Parent:       []string{},
 		}
 		q.queue = append(q.queue, startID)
 	}
@@ -373,7 +373,7 @@ func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *que
 				}
 			} else {
 				node = BfsNode{
-					Parent:           []string{q.now},
+					Parent:           append(node.Parent, q.now),
 					Depth:            q.nowNode.Depth + 1,
 					Type:             PackageVersion,
 					PointOfContact:   pointOfContact.AllPointOfContact,
@@ -432,7 +432,7 @@ func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlCli
 			break
 		} else {
 			q.nodeMap[versionEntry.Id] = BfsNode{
-				Parent:           []string{q.now},
+				Parent:           append(versionNode.Parent, q.now),
 				Depth:            q.nowNode.Depth + 1,
 				Type:             PackageVersion,
 				PointOfContact:   q.nowNode.PointOfContact,
@@ -458,21 +458,15 @@ func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlCli
 func (q *queueValues) addNodeToQueue(nodeType NodeType, versions []string, id string) {
 	node, seen := q.nodeMap[id]
 
-	var parent []string
 	var notInBlastRadius bool
-	if !seen {
-		parent = []string{q.now}
-		notInBlastRadius = false
-	} else if nodeType == PackageVersion {
-		parent = append(node.Parent, q.now)
+	if !seen || nodeType == PackageVersion {
 		notInBlastRadius = false
 	} else {
-		parent = append(node.Parent, q.now)
 		notInBlastRadius = node.NotInBlastRadius
 	}
 
 	q.nodeMap[id] = BfsNode{
-		Parent:           parent,
+		Parent:           append(node.Parent, q.now),
 		Depth:            q.nowNode.Depth + 1,
 		Type:             nodeType,
 		PointOfContact:   node.PointOfContact,
