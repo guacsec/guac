@@ -83,7 +83,7 @@ func (s *server) GetCollectEntries(ctx context.Context, in *pb.GetCollectEntries
 	}, nil
 }
 
-func ContextPropagationUnaryServerInterceptor() grpc.UnaryServerInterceptor {
+func contextPropagationUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
@@ -97,7 +97,7 @@ func ContextPropagationUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	}
 }
 
-func ContextToZapFieldsUnaryServerInterceptor() grpc.UnaryServerInterceptor {
+func contextToZapFieldsUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
@@ -122,9 +122,9 @@ func (s *server) Serve(ctx context.Context) error {
 	opts := []grpc.ServerOption{
 		grpc.UnaryInterceptor(
 			grpc_middleware.ChainUnaryServer(
-				ContextPropagationUnaryServerInterceptor(),
+				contextPropagationUnaryServerInterceptor(),
 				grpc_zap.UnaryServerInterceptor(logger.Desugar()),
-				ContextToZapFieldsUnaryServerInterceptor(),
+				contextToZapFieldsUnaryServerInterceptor(),
 			)),
 	}
 	gs := grpc.NewServer(opts...)
