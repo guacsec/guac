@@ -9555,7 +9555,7 @@ func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 
 // HashEqualResponse is returned by HashEqual on success.
 type HashEqualResponse struct {
-	// Adds a certification that two artifacts are the equal.
+	// Adds a certification that two artifacts are equal.
 	IngestHashEqual HashEqualIngestHashEqual `json:"ingestHashEqual"`
 }
 
@@ -9649,7 +9649,7 @@ func (v *HashEqualsIngestHashEqualsHashEqual) __premarshalJSON() (*__premarshalH
 
 // HashEqualsResponse is returned by HashEquals on success.
 type HashEqualsResponse struct {
-	// Bulk ingest certifications that two artifacts are the equal.
+	// Bulk ingest certifications that two artifacts are equal.
 	IngestHashEquals []HashEqualsIngestHashEqualsHashEqual `json:"ingestHashEquals"`
 }
 
