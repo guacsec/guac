@@ -6,6 +6,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"log"
 	"strconv"
 
@@ -81,6 +82,27 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 			return nil, err
 		}
 		return toModelPackage(pt), nil
+	case *ent.SourceType:
+		s, err := b.client.SourceType.Query().
+			Where(sourcetype.ID(v.ID)).
+			WithNamespaces(func(q *ent.SourceNamespaceQuery) {
+				q.WithNames()
+			}).
+			Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return toModelSource(s), nil
+	case *ent.Builder:
+		return toModelBuilder(v), nil
+	case *ent.SecurityAdvisory:
+		if v.OsvID != nil {
+			return toModelOSV(v), nil
+		} else if v.CveID != nil {
+			return toModelCVE(v), nil
+		} else if v.GhsaID != nil {
+			return toModelGHSA(v), nil
+		}
 	default:
 		log.Printf("Unknown node type: %T", v)
 	}
