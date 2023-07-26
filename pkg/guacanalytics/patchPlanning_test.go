@@ -1444,12 +1444,12 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			startName:         "pkgNameM",
 			startVersion:      ptrfrom.String("3.0.3"),
 			maxDepth:          9,
-			expectedLen:       6,
+			expectedLen:       7,
 			expectedPkgs:      []string{"pkgTypeL", "pkgTypeM"},
 			expectedSrcs:      []string{"srcTypeK"},
 			expectedArtifacts: []string{"testArtifactAlgorithmK"},
 			expectedPOCs:      []string{"testEmailK", "testEmailL", "testEmailM"},
-			expectedPOCLen:    5,
+			expectedPOCLen:    6,
 			graphInputs:       []assembler.IngestPredicates{pointOfContactGraph},
 		},
 	}
@@ -1602,8 +1602,6 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 					t.Errorf("this ID appears in the returned map but is not expected: %s \n", gotID)
 					return
 				}
-
-				// TODO: add check for POC
 			}
 
 		})

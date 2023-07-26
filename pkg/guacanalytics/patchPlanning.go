@@ -34,8 +34,8 @@ const (
 )
 
 type BfsNode struct {
-	Expanded         bool   // true once all node neighbors are added to queue
-	Parent           string // TODO: turn parent into a list in cause discovered twice from two different nodes
+	Expanded         bool // true once all node neighbors are added to queue
+	Parent           []string
 	Depth            int
 	Type             NodeType
 	nodeVersions     []string // for a packageName, what was the packageVersion associated with this version.  For a packageVersion, what is the version.
@@ -90,12 +90,14 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		var versionsList []string
 		versionsList = append(versionsList, nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions[0].Version)
 		q.nodeMap[startID] = BfsNode{
-			Type: PackageVersion,
+			Type:   PackageVersion,
+			Parent: []string{},
 		}
 
 		q.nodeMap[nodePkg.AllPkgTree.Namespaces[0].Names[0].Id] = BfsNode{
 			Type:         PackageName,
 			nodeVersions: versionsList,
+			Parent:       []string{},
 		}
 		q.queue = append(q.queue, startID)
 	}
@@ -288,7 +290,7 @@ func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client
 	node, seen := q.nodeMap[hasSourceAt.Source.Namespaces[0].Names[0].Id]
 	if !seen {
 		node = BfsNode{
-			Parent: q.now,
+			Parent: []string{q.now},
 			Depth:  q.nowNode.Depth + 1,
 			Type:   SourceName,
 		}
@@ -304,12 +306,22 @@ func exploreHasSourceAtFromPackage(ctx context.Context, gqlClient graphql.Client
 			switch neighbor := neighbor.(type) {
 			case *model.NeighborsNeighborsPointOfContact:
 				node = BfsNode{
-					Parent:         q.now,
+					Parent:         []string{q.now},
 					Depth:          q.nowNode.Depth + 1,
 					Type:           SourceName,
 					PointOfContact: neighbor.AllPointOfContact,
 				}
 			}
+		}
+	} else {
+		node = BfsNode{
+			Parent:           append(node.Parent, q.now),
+			Depth:            node.Depth,
+			Type:             node.Type,
+			nodeVersions:     node.nodeVersions,
+			PointOfContact:   node.PointOfContact,
+			NotInBlastRadius: node.NotInBlastRadius,
+			Expanded:         node.Expanded,
 		}
 	}
 
@@ -350,12 +362,9 @@ func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *que
 		}
 
 		for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-			if versionEntry.Version == "" {
-				break // this version entry is unpopulated, do not add to map
-			}
 			if node, seen := q.nodeMap[versionEntry.Id]; seen {
 				node = BfsNode{
-					Parent:           node.Parent,
+					Parent:           append(node.Parent, q.now),
 					Depth:            node.Depth,
 					Type:             node.Type,
 					PointOfContact:   pointOfContact.AllPointOfContact,
@@ -364,7 +373,7 @@ func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *que
 				}
 			} else {
 				node = BfsNode{
-					Parent:           q.now,
+					Parent:           append(node.Parent, q.now),
 					Depth:            q.nowNode.Depth + 1,
 					Type:             PackageVersion,
 					PointOfContact:   pointOfContact.AllPointOfContact,
@@ -379,9 +388,17 @@ func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *que
 }
 
 func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlClient graphql.Client, pkgType string, pkgNamespace string, pkgName string, id string) error {
-	if _, seen := q.nodeMap[id]; seen {
+	if node, seen := q.nodeMap[id]; seen {
 		if !q.nodeMap[id].Expanded {
 			q.queue = append(q.queue, id)
+		}
+		q.nodeMap[id] = BfsNode{
+			Parent:           append(node.Parent, q.now),
+			Depth:            node.Depth,
+			Type:             node.Type,
+			PointOfContact:   node.PointOfContact,
+			NotInBlastRadius: node.NotInBlastRadius,
+			Expanded:         node.Expanded,
 		}
 		return nil
 	}
@@ -401,24 +418,32 @@ func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlCli
 	var versionsList []string
 	for _, versionEntry := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
 		versionsList = append(versionsList, versionEntry.Version)
-		if _, seen := q.nodeMap[versionEntry.Id]; seen {
+		if versionNode, seen := q.nodeMap[versionEntry.Id]; seen {
 			if !q.nodeMap[versionEntry.Id].Expanded {
 				q.queue = append(q.queue, versionEntry.Id)
 			}
+			q.nodeMap[versionEntry.Id] = BfsNode{
+				Parent:           append(versionNode.Parent, q.now),
+				Depth:            q.nowNode.Depth + 1,
+				Type:             PackageVersion,
+				PointOfContact:   q.nowNode.PointOfContact,
+				NotInBlastRadius: false,
+			}
 			break
-		}
-		q.nodeMap[versionEntry.Id] = BfsNode{
-			Parent:           q.now,
-			Depth:            q.nowNode.Depth + 1,
-			Type:             PackageVersion,
-			PointOfContact:   q.nowNode.PointOfContact,
-			NotInBlastRadius: false,
+		} else {
+			q.nodeMap[versionEntry.Id] = BfsNode{
+				Parent:           append(versionNode.Parent, q.now),
+				Depth:            q.nowNode.Depth + 1,
+				Type:             PackageVersion,
+				PointOfContact:   q.nowNode.PointOfContact,
+				NotInBlastRadius: false,
+			}
 		}
 		q.queue = append(q.queue, versionEntry.Id)
 	}
 
 	q.nodeMap[id] = BfsNode{
-		Parent:         q.now,
+		Parent:         []string{q.now},
 		Depth:          q.nowNode.Depth + 1,
 		Type:           PackageName,
 		nodeVersions:   versionsList,
@@ -433,25 +458,22 @@ func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlCli
 func (q *queueValues) addNodeToQueue(nodeType NodeType, versions []string, id string) {
 	node, seen := q.nodeMap[id]
 
-	if !seen {
-		node = BfsNode{
-			Parent:       q.now,
-			Depth:        q.nowNode.Depth + 1,
-			Type:         nodeType,
-			nodeVersions: versions,
-		}
-	} else if nodeType == PackageVersion {
-		node = BfsNode{
-			Parent:           q.now,
-			Depth:            q.nowNode.Depth + 1,
-			Type:             nodeType,
-			Expanded:         node.Expanded,
-			PointOfContact:   node.PointOfContact,
-			NotInBlastRadius: false,
-		}
+	var notInBlastRadius bool
+	if !seen || nodeType == PackageVersion {
+		notInBlastRadius = false
+	} else {
+		notInBlastRadius = node.NotInBlastRadius
 	}
 
-	q.nodeMap[id] = node
+	q.nodeMap[id] = BfsNode{
+		Parent:           append(node.Parent, q.now),
+		Depth:            q.nowNode.Depth + 1,
+		Type:             nodeType,
+		PointOfContact:   node.PointOfContact,
+		nodeVersions:     versions,
+		NotInBlastRadius: notInBlastRadius,
+		Expanded:         node.Expanded,
+	}
 
 	if !node.Expanded && !node.NotInBlastRadius {
 		q.queue = append(q.queue, id)
