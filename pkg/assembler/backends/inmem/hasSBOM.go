@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -59,7 +58,44 @@ func (n *hasSBOMStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest HasSBOM
 
 func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
-	return []*model.HasSbom{}, fmt.Errorf("not implemented: IngestHasSBOMs")
+	valuesDefined := 0
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(hasSBOMs) {
+			return nil, gqlerror.Errorf("uneven packages and hasSBOMs for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Artifacts) > 0 {
+		if len(subjects.Artifacts) != len(hasSBOMs) {
+			return nil, gqlerror.Errorf("uneven Sources and hasSBOMs for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return nil, gqlerror.Errorf("must specify at most packages or artifacts for %v", "IngestHasSBOMs")
+	}
+
+	var modelHasSboms []*model.HasSbom
+
+	for i := range hasSBOMs {
+		var hasSBOM *model.HasSbom
+		var err error
+		if len(subjects.Packages) > 0 {
+			subject := model.PackageOrArtifactInput{Package: subjects.Packages[i]}
+			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
+			}
+		} else {
+			subject := model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
+			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
+			}
+		}
+		modelHasSboms = append(modelHasSboms, hasSBOM)
+	}
+	return modelHasSboms, nil
 }
 
 func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec) (*model.HasSbom, error) {
