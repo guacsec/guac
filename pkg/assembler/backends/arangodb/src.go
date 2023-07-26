@@ -244,8 +244,8 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 	)
 	  
     RETURN {
-	  "type_id": @typeID,
-	  "type": @typeValue,
+	  "type_id": type._id,
+	  "type": type.type,
 	  "namespace_id": ns._id,
 	  "namespace": ns.namespace,
 	  "name_id": name._id,
