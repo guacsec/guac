@@ -1064,51 +1064,54 @@ func ingestHashEqual(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 	ingestHashEqual := []struct {
 		name          string
-		artifact      model.ArtifactInputSpec
-		equalArtifact model.ArtifactInputSpec
-		hashEqual     model.HashEqualInputSpec
+		artifacts     []model.ArtifactInputSpec
+		equalArtifact []model.ArtifactInputSpec
+		hashEqual     []model.HashEqualInputSpec
 	}{
 		{
 			name: "these sha1 and sha256 artifacts are the same",
-			artifact: model.ArtifactInputSpec{
-				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-				Algorithm: "sha256",
+			artifacts: []model.ArtifactInputSpec{
+				{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+				{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
 			},
-			equalArtifact: model.ArtifactInputSpec{
-				Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
-				Algorithm: "sha1",
+			equalArtifact: []model.ArtifactInputSpec{
+				{
+					Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+					Algorithm: "sha1",
+				},
+				{
+					Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
+					Algorithm: "sha512",
+				},
 			},
-			hashEqual: model.HashEqualInputSpec{
-				Justification: "these sha1 and sha256 artifacts are the same",
-				Origin:        "Demo ingestion",
-				Collector:     "Demo ingestion",
-			},
-		},
-		{
-			name: "these sha256 and sha512 artifacts are the same",
-			artifact: model.ArtifactInputSpec{
-				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-				Algorithm: "sha256",
-			},
-			equalArtifact: model.ArtifactInputSpec{
-				Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
-				Algorithm: "sha512",
-			},
-			hashEqual: model.HashEqualInputSpec{
-				Justification: "these sha256 and sha512 artifacts are the same",
-				Origin:        "Demo ingestion",
-				Collector:     "Demo ingestion",
+			hashEqual: []model.HashEqualInputSpec{
+				{
+					Justification: "these sha1 and sha256 artifacts are the same",
+					Origin:        "Demo ingestion",
+					Collector:     "Demo ingestion",
+				},
+				{
+					Justification: "these sha256 and sha512 artifacts are the same",
+					Origin:        "Demo ingestion",
+					Collector:     "Demo ingestion",
+				},
 			},
 		},
 	}
 	for _, ingest := range ingestHashEqual {
-		if _, err := model.IngestArtifact(ctx, client, ingest.artifact); err != nil {
+		if _, err := model.IngestArtifacts(ctx, client, ingest.artifacts); err != nil {
 			logger.Errorf("Error in ingesting artifact: %v\n", err)
 		}
-		if _, err := model.IngestArtifact(ctx, client, ingest.equalArtifact); err != nil {
+		if _, err := model.IngestArtifacts(ctx, client, ingest.equalArtifact); err != nil {
 			logger.Errorf("Error in ingesting equal artifact: %v\n", err)
 		}
-		if _, err := model.HashEqual(ctx, client, ingest.artifact, ingest.equalArtifact, ingest.hashEqual); err != nil {
+		if _, err := model.HashEquals(ctx, client, ingest.artifacts, ingest.equalArtifact, ingest.hashEqual); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}

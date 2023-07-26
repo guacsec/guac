@@ -188,13 +188,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				}
 			}
 
-			// TODO(pxp928): add bulk ingestion for HasSBOM
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
-			for _, hb := range p.HasSBOM {
-				if err := ingestHasSBOM(ctx, gqlclient, hb); err != nil {
-					return fmt.Errorf("ingestHasSBOM failed with error: %w", err)
-
-				}
+			if err := ingestHasSBOMs(ctx, gqlclient, p.HasSBOM); err != nil {
+				return fmt.Errorf("ingestHasSBOMs failed with error: %w", err)
 			}
 
 			// TODO(pxp928): add bulk ingestion for VEX
@@ -206,13 +202,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				}
 			}
 
-			// TODO(pxp928): add bulk ingestion for HashEqual
 			logger.Infof("assembling HashEqual : %v", len(p.HashEqual))
-			for _, equal := range p.HashEqual {
-				if err := ingestHashEqual(ctx, gqlclient, equal); err != nil {
-					return fmt.Errorf("ingestHashEqual failed with error: %w", err)
-
-				}
+			if err := ingestHashEquals(ctx, gqlclient, p.HashEqual); err != nil {
+				return fmt.Errorf("ingestHashEquals failed with error: %w", err)
 			}
 
 			// TODO(pxp928): add bulk ingestion for PkgEqual
@@ -333,6 +325,60 @@ func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assemb
 		_, err := model.IsDependencies(ctx, client, pkgs, depPkgs, dependencies)
 		if err != nil {
 			return fmt.Errorf("isDependencies failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestHashEquals(ctx context.Context, client graphql.Client, v []assembler.HashEqualIngest) error {
+	var artifacts []model.ArtifactInputSpec
+	var equalArtifacts []model.ArtifactInputSpec
+	var hashEquals []model.HashEqualInputSpec
+	for _, ingest := range v {
+		artifacts = append(artifacts, *ingest.Artifact)
+		equalArtifacts = append(equalArtifacts, *ingest.EqualArtifact)
+		hashEquals = append(hashEquals, *ingest.HashEqual)
+	}
+	if len(v) > 0 {
+		_, err := model.HashEquals(ctx, client, artifacts, equalArtifacts, hashEquals)
+		if err != nil {
+			return fmt.Errorf("HashEquals failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestHasSBOMs(ctx context.Context, client graphql.Client, v []assembler.HasSBOMIngest) error {
+	var pkgs []model.PkgInputSpec
+	var artifacts []model.ArtifactInputSpec
+	var pkgSBOMs []model.HasSBOMInputSpec
+	var artSBOMs []model.HasSBOMInputSpec
+	for _, ingest := range v {
+		if ingest.Pkg != nil && ingest.Artifact != nil {
+			return fmt.Errorf("unable to create hasSBOM with both artifact and Pkg subject specified")
+		}
+		if ingest.Pkg == nil && ingest.Artifact == nil {
+			return fmt.Errorf("unable to create hasSBOM without either artifact and Pkg subject specified")
+		}
+
+		if ingest.Pkg != nil {
+			pkgs = append(pkgs, *ingest.Pkg)
+			pkgSBOMs = append(pkgSBOMs, *ingest.HasSBOM)
+		} else {
+			artifacts = append(artifacts, *ingest.Artifact)
+			artSBOMs = append(artSBOMs, *ingest.HasSBOM)
+		}
+	}
+	if len(artifacts) > 0 {
+		_, err := model.HasSBOMArtifacts(ctx, client, artifacts, artSBOMs)
+		if err != nil {
+			return fmt.Errorf("hasSBOMArtifacts failed with error: %w", err)
+		}
+	}
+	if len(pkgs) > 0 {
+		_, err := model.HasSBOMPkgs(ctx, client, pkgs, pkgSBOMs)
+		if err != nil {
+			return fmt.Errorf("hasSBOMPkgs failed with error: %w", err)
 		}
 	}
 	return nil
