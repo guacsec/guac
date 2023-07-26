@@ -17,6 +17,7 @@ package arangodb
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -148,7 +149,7 @@ func setHashEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, hashEqualSp
 	}
 }
 
-func getHashEqualQueryValues(artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) map[string]any {
+func getHashEqualQueryValues(artifact *model.ArtifactInputSpec, equalArtifact *model.ArtifactInputSpec, hashEqual *model.HashEqualInputSpec) map[string]any {
 	values := map[string]any{}
 	values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
 	values["art_digest"] = strings.ToLower(artifact.Digest)
@@ -162,7 +163,79 @@ func getHashEqualQueryValues(artifact model.ArtifactInputSpec, equalArtifact mod
 }
 
 func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
-	return []*model.HashEqual{}, fmt.Errorf("not implemented: IngestHashEquals")
+	if len(artifacts) != len(otherArtifacts) {
+		return nil, fmt.Errorf("uneven artifacts and other artifacts for ingestion")
+	} else if len(artifacts) != len(hashEquals) {
+		return nil, fmt.Errorf("uneven artifacts and hashEquals for ingestion")
+	}
+
+	var listOfValues []map[string]any
+
+	for i := range artifacts {
+		listOfValues = append(listOfValues, getHashEqualQueryValues(artifacts[i], otherArtifacts[i], hashEquals[i]))
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+
+	query := `
+	LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
+	LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.equal_algorithm FILTER art.digest == doc.equal_digest RETURN art)
+	LET hashEqual = FIRST(
+		UPSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			INSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			UPDATE {} IN hashEquals
+			RETURN NEW
+	)
+	
+	INSERT { _key: CONCAT("hashEqualsSubjectEdges", artifact._key, hashEqual._key), _from: artifact._id, _to: hashEqual._id} INTO hashEqualsSubjectEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("hashEqualsEdges", hashEqual._key, equalArtifact._key), _from: hashEqual._id, _to: equalArtifact._id} INTO hashEqualsEdges OPTIONS { overwriteMode: "ignore" }
+	
+	RETURN {
+		'artifact': {
+			'id': artifact._id,
+			'algorithm': artifact.algorithm,
+			'digest': artifact.digest
+		},
+		'equalArtifact': {
+			'id': equalArtifact._id,
+			'algorithm': equalArtifact.algorithm,
+			'digest': equalArtifact.digest
+		},
+		'hashEqual_id': hashEqual._id,
+		'justification': hashEqual.justification,
+		'collector': hashEqual.collector,
+		'origin': hashEqual.origin
+	}`
+
+	sb.WriteString(query)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHashEquals")
+	if err != nil {
+		return nil, fmt.Errorf("failed to ingest hashEquals: %w", err)
+	}
+	defer cursor.Close()
+
+	return getHashEqual(ctx, cursor)
 }
 
 func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
@@ -196,7 +269,7 @@ RETURN {
     'origin': hashEqual.origin
 }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getHashEqualQueryValues(artifact, equalArtifact, hashEqual), "IngestHashEqual")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getHashEqualQueryValues(&artifact, &equalArtifact, &hashEqual), "IngestHashEqual")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest hashEqual: %w", err)
 	}
