@@ -92,9 +92,8 @@ func guacSrcId(src model.SourceInputSpec) SrcIds {
 func getSourceQueryValues(c *arangoClient, source *model.SourceInputSpec) map[string]any {
 	values := map[string]any{}
 	// add guac keys
-	values["typeID"] = c.srcTypeMap[source.Type].Id
-	values["typeKey"] = c.srcTypeMap[source.Type].Key
-	values["typeValue"] = c.srcTypeMap[source.Type].SrcType
+	values["rootID"] = c.srcRoot.Id
+	values["rootKey"] = c.srcRoot.Key
 
 	guacIds := guacSrcId(*source)
 	values["guacNsKey"] = guacIds.NamespaceId
@@ -103,6 +102,8 @@ func getSourceQueryValues(c *arangoClient, source *model.SourceInputSpec) map[st
 	values["name"] = source.Name
 
 	values["namespace"] = source.Namespace
+
+	values["srcType"] = source.Type
 
 	if source.Tag != nil {
 		values["tag"] = *source.Tag
@@ -146,10 +147,18 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 	}
 	sb.WriteString("]")
 
-	query := `	  
+	query := `
+	LET type = FIRST(
+		UPSERT { type: doc.srcType, _parent: doc.rootID }
+		INSERT { type: doc.srcType, _parent: doc.rootID }
+		UPDATE {}
+		IN srcTypes OPTIONS { indexHint: "byType" }
+		RETURN NEW
+    )
+
 	LET ns = FIRST(
-	  UPSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
-	  INSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
+	  UPSERT { namespace: doc.namespace, _parent: type._id , guacKey: doc.guacNsKey}
+	  INSERT { namespace: doc.namespace, _parent: type._id , guacKey: doc.guacNsKey}
 	  UPDATE {}
 	  IN srcNamespaces OPTIONS { indexHint: "byNsGuacKey" }
 	  RETURN NEW
@@ -162,9 +171,13 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 	  IN srcNames OPTIONS { indexHint: "byNameGuacKey" }
 	  RETURN NEW
 	)
+
+	LET pkgHasTypeCollection = (
+		INSERT { _key: CONCAT("srcHasType", doc.rootKey, type._key), _from: doc.rootID, _to: type._id } INTO srcHasType OPTIONS { overwriteMode: "ignore" }
+	)
   
 	LET srcHasNamespaceCollection = (
-	  INSERT { _key: CONCAT("srcHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id } INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("srcHasNamespace", type._key, ns._key), _from: type._id, _to: ns._id } INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET srcHasNameCollection = (
@@ -172,8 +185,8 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 	)
 	  
     RETURN {
-	  "type_id": doc.typeID,
-	  "type": doc.typeValue,
+	  "type_id": type._id,
+	  "type": type.type,
 	  "namespace_id": ns._id,
 	  "namespace": ns.namespace,
 	  "name_id": name._id,
@@ -193,10 +206,18 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 }
 
 func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
-	query := `	  
+	query := `
+	LET type = FIRST(
+		UPSERT { type: @srcType, _parent: @rootID }
+		INSERT { type: @srcType, _parent: @rootID }
+		UPDATE {}
+		IN srcTypes OPTIONS { indexHint: "byType" }
+		RETURN NEW
+    )
+
 	LET ns = FIRST(
-	  UPSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
-	  INSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
+	  UPSERT { namespace: @namespace, _parent: type._id , guacKey: @guacNsKey}
+	  INSERT { namespace: @namespace, _parent: type._id , guacKey: @guacNsKey}
 	  UPDATE {}
 	  IN srcNamespaces OPTIONS { indexHint: "byNsGuacKey" }
 	  RETURN NEW
@@ -209,9 +230,13 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 	  IN srcNames OPTIONS { indexHint: "byNameGuacKey" }
 	  RETURN NEW
 	)
+
+	LET pkgHasTypeCollection = (
+		INSERT { _key: CONCAT("srcHasType", @rootKey, type._key), _from: @rootID, _to: type._id } INTO srcHasType OPTIONS { overwriteMode: "ignore" }
+	)	  
   
 	LET srcHasNamespaceCollection = (
-	  INSERT { _key: CONCAT("srcHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id } INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("srcHasNamespace", type._key, ns._key), _from: type._id, _to: ns._id } INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET srcHasNameCollection = (

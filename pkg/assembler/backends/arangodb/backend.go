@@ -139,32 +139,18 @@ type pkgRootData struct {
 	PkgRoot string `json:"root"`
 }
 
-type pkgTypeData struct {
-	Key     string `json:"_key"`
-	Id      string `json:"_id"`
-	PkgType string `json:"type"`
-}
-
 type srcRootData struct {
 	Key     string `json:"_key"`
 	Id      string `json:"_id"`
 	SrcRoot string `json:"root"`
 }
 
-type srcTypeData struct {
-	Key     string `json:"_key"`
-	Id      string `json:"_id"`
-	SrcType string `json:"type"`
-}
-
 type arangoClient struct {
-	client     driver.Client
-	db         driver.Database
-	graph      driver.Graph
-	pkgRoot    *pkgRootData
-	pkgTypeMap map[string]*pkgTypeData
-	srcRoot    *srcRootData
-	srcTypeMap map[string]*srcTypeData
+	client  driver.Client
+	db      driver.Database
+	graph   driver.Graph
+	pkgRoot *pkgRootData
+	srcRoot *srcRootData
 }
 
 func arangoDBConnect(address, user, password string) (driver.Client, error) {
@@ -621,23 +607,13 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 	if err != nil {
 		return nil, fmt.Errorf("failed to create package root: %w", err)
 	}
-	ingestPkgTypes := []string{"pypi", "conan", "guac", "deb", "maven", "alpine", "golang"}
-	collectedPkgTypes, err := preIngestPkgTypes(ctx, db, collectedPkgRootData, ingestPkgTypes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create package types: %w", err)
-	}
 
 	collectedSrcRootData, err := preIngestSrcRoot(ctx, db)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create source root: %w", err)
 	}
-	ingestSrcTypes := []string{"git"}
-	collectedSrcTypes, err := preIngestSrcTypes(ctx, db, collectedSrcRootData, ingestSrcTypes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create source types: %w", err)
-	}
 
-	arangoClient := &arangoClient{client: arangodbClient, db: db, graph: graph, pkgRoot: collectedPkgRootData, pkgTypeMap: collectedPkgTypes, srcRoot: collectedSrcRootData, srcTypeMap: collectedSrcTypes}
+	arangoClient := &arangoClient{client: arangodbClient, db: db, graph: graph, pkgRoot: collectedPkgRootData, srcRoot: collectedSrcRootData}
 
 	return arangoClient, nil
 }
@@ -912,61 +888,6 @@ func preIngestPkgRoot(ctx context.Context, db driver.Database) (*pkgRootData, er
 	}
 }
 
-func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRootData, pkgTypes []string) (map[string]*pkgTypeData, error) {
-	collectedPkgTypes := map[string]*pkgTypeData{}
-	for _, pkgType := range pkgTypes {
-		values := map[string]any{}
-		values["pkgType"] = pkgType
-		values["rootID"] = pkgRoot.Id
-		values["rootKey"] = pkgRoot.Key
-		query := `
-		  LET type = FIRST(
-			UPSERT { type: @pkgType, _parent: @rootID }
-			INSERT { type: @pkgType, _parent: @rootID }
-			UPDATE {}
-			IN pkgTypes OPTIONS { indexHint: "byPkgTypeParent" }
-			RETURN NEW
-		  )
-	
-		  LET pkgHasTypeCollection = (
-			INSERT { _key: CONCAT("pkgHasType", @rootKey, type._key), _from: @rootID, _to: type._id} INTO pkgHasType OPTIONS { overwriteMode: "ignore" }
-		  )
-	
-		RETURN {
-		"type": type.type,
-		"_id": type._id,
-		"_key": type._key
-		}`
-
-		cursor, err := executeQueryWithRetry(ctx, db, query, values, "preIngestPkgTypes")
-		if err != nil {
-			return nil, fmt.Errorf("failed to ingest package type: %w", err)
-		}
-
-		var createdValues []pkgTypeData
-		for {
-			var doc pkgTypeData
-			_, err := cursor.ReadDocument(ctx, &doc)
-			if err != nil {
-				if driver.IsNoMoreDocuments(err) {
-					cursor.Close()
-					break
-				} else {
-					return nil, fmt.Errorf("failed to ingest package type: %w", err)
-				}
-			} else {
-				createdValues = append(createdValues, doc)
-			}
-		}
-		if len(createdValues) == 1 {
-			collectedPkgTypes[createdValues[0].PkgType] = &createdValues[0]
-		} else {
-			return nil, fmt.Errorf("number of package types is greater than one")
-		}
-	}
-	return collectedPkgTypes, nil
-}
-
 func preIngestSrcRoot(ctx context.Context, db driver.Database) (*srcRootData, error) {
 	query := `
 		UPSERT { root: "src" }
@@ -1001,61 +922,6 @@ func preIngestSrcRoot(ctx context.Context, db driver.Database) (*srcRootData, er
 	} else {
 		return nil, fmt.Errorf("number of src root ingested is greater than one")
 	}
-}
-
-func preIngestSrcTypes(ctx context.Context, db driver.Database, srcRoot *srcRootData, srcTypes []string) (map[string]*srcTypeData, error) {
-	collectedSrcTypes := map[string]*srcTypeData{}
-	for _, srcType := range srcTypes {
-		values := map[string]any{}
-		values["srcType"] = srcType
-		values["rootID"] = srcRoot.Id
-		values["rootKey"] = srcRoot.Key
-		query := `
-		  LET type = FIRST(
-			UPSERT { type: @srcType, _parent: @rootID }
-			INSERT { type: @srcType, _parent: @rootID }
-			UPDATE {}
-			IN srcTypes OPTIONS { indexHint: "byType" }
-			RETURN NEW
-		  )
-	
-		  LET pkgHasTypeCollection = (
-			INSERT { _key: CONCAT("srcHasType", @rootKey, type._key), _from: @rootID, _to: type._id } INTO srcHasType OPTIONS { overwriteMode: "ignore" }
-		  )
-	
-		RETURN {
-		"type": type.type,
-		"_id": type._id,
-		"_key": type._key
-		}`
-
-		cursor, err := executeQueryWithRetry(ctx, db, query, values, "preIngestPkgTypes")
-		if err != nil {
-			return nil, fmt.Errorf("failed to ingest source type: %w", err)
-		}
-
-		var createdValues []srcTypeData
-		for {
-			var doc srcTypeData
-			_, err := cursor.ReadDocument(ctx, &doc)
-			if err != nil {
-				if driver.IsNoMoreDocuments(err) {
-					cursor.Close()
-					break
-				} else {
-					return nil, fmt.Errorf("failed to ingest source type: %w", err)
-				}
-			} else {
-				createdValues = append(createdValues, doc)
-			}
-		}
-		if len(createdValues) == 1 {
-			collectedSrcTypes[createdValues[0].SrcType] = &createdValues[0]
-		} else {
-			return nil, fmt.Errorf("number of source type ingested is greater than one")
-		}
-	}
-	return collectedSrcTypes, nil
 }
 
 func ptrfromArangoSearchNGramStreamType(s driver.ArangoSearchNGramStreamType) *driver.ArangoSearchNGramStreamType {
