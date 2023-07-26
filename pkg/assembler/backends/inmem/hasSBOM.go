@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -55,44 +56,11 @@ func (n *hasSBOMStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convHasSBOM(n)
 }
 
-// TODO convert to unit tests
-// func registerAllhasSBOM(client *demoClient) error {
-// 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-// 	// "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable"
-// 	selectedType := "conan"
-// 	selectedNameSpace := "openssl.org"
-// 	selectedName := "openssl"
-// 	selectedVersion := "3.0.3"
-// 	qualifierA := "bincrafters"
-// 	qualifierB := "stable"
-// 	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
-// 	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Qualifiers: selectedQualifiers}
-// 	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	_, err = client.registerHasSBOM(selectedPackage[0], nil, "uri:location of SBOM", "inmem backend", "inmem backend")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	// "git", "github", "github.com/guacsec/guac", "tag=v0.0.1"
-// 	selectedSourceType := "git"
-// 	selectedSourceNameSpace := "github"
-// 	selectedSourceName := "github.com/guacsec/guac"
-// 	selectedTag := "v0.0.1"
-// 	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
-// 	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	_, err = client.registerHasSBOM(nil, selectedSource[0], "uri:location of SBOM", "inmem backend", "inmem backend")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
 // Ingest HasSBOM
+
+func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
+	return []*model.HasSbom{}, fmt.Errorf("not implemented: IngestHasSBOMs")
+}
 
 func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec) (*model.HasSbom, error) {
 	return c.ingestHasSbom(ctx, subject, input, true)

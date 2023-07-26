@@ -192,9 +192,11 @@ type ComplexityRoot struct {
 		IngestGHSAs           func(childComplexity int, ghsas []*model.GHSAInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
+		IngestHasSBOMs        func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
+		IngestHashEquals      func(childComplexity int, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) int
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
 		IngestOSVs            func(childComplexity int, osvs []*model.OSVInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
@@ -1151,6 +1153,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestHasMetadata(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["hasMetadata"].(model.HasMetadataInputSpec)), true
 
+	case "Mutation.ingestHasSBOMs":
+		if e.complexity.Mutation.IngestHasSBOMs == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHasSBOMs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHasSBOMs(childComplexity, args["subjects"].(model.PackageOrArtifactInputs), args["hasSBOMs"].([]*model.HasSBOMInputSpec)), true
+
 	case "Mutation.ingestHasSBOM":
 		if e.complexity.Mutation.IngestHasSbom == nil {
 			break
@@ -1186,6 +1200,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestHashEqual(childComplexity, args["artifact"].(model.ArtifactInputSpec), args["otherArtifact"].(model.ArtifactInputSpec), args["hashEqual"].(model.HashEqualInputSpec)), true
+
+	case "Mutation.ingestHashEquals":
+		if e.complexity.Mutation.IngestHashEquals == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHashEquals_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHashEquals(childComplexity, args["artifacts"].([]*model.ArtifactInputSpec), args["otherArtifacts"].([]*model.ArtifactInputSpec), args["hashEquals"].([]*model.HashEqualInputSpec)), true
 
 	case "Mutation.ingestIsVulnerability":
 		if e.complexity.Mutation.IngestIsVulnerability == nil {
@@ -2235,6 +2261,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputOSVInputSpec,
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageOrArtifactInput,
+		ec.unmarshalInputPackageOrArtifactInputs,
 		ec.unmarshalInputPackageOrArtifactSpec,
 		ec.unmarshalInputPackageOrSourceInput,
 		ec.unmarshalInputPackageOrSourceInputs,
@@ -2853,6 +2880,15 @@ input PackageOrArtifactInput {
   artifact: ArtifactInputSpec
 }
 
+"""
+PackageOrArtifactInputs allows using packages and artifacts as input for batch mutations.
+Exactly one list must be specified.
+"""
+input PackageOrArtifactInputs {
+  packages: [PkgInputSpec!]
+  artifacts: [ArtifactInputSpec!]
+}
+
 "Records the status of a VEX statement subject."
 enum VexStatus {
   NOT_AFFECTED
@@ -3372,6 +3408,8 @@ extend type Query {
 extend type Mutation {
   "Certifies that a package or artifact has an SBOM."
   ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
+  "Bulk ingest that package or artifact has an SBOM."
+  ingestHasSBOMs(subjects: PackageOrArtifactInputs!, hasSBOMs: [HasSBOMInputSpec!]!): [HasSBOM!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSLSA.graphql", Input: `#
@@ -3642,8 +3680,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that two artifacts are similar."
+ "Adds a certification that two artifacts are the equal."
   ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
+  "Bulk ingest certifications that two artifacts are the equal."
+  ingestHashEquals(artifacts: [ArtifactInputSpec!]!, otherArtifacts: [ArtifactInputSpec!]!, hashEquals: [HashEqualInputSpec!]!): [HashEqual!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isDependency.graphql", Input: `#

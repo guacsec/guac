@@ -15,6 +15,11 @@ func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.Pack
 	return r.Backend.IngestHasSbom(ctx, subject, hasSbom)
 }
 
+// IngestHasSBOMs is the resolver for the ingestHasSBOMs field.
+func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
+	return r.Backend.IngestHasSBOMs(ctx, subjects, hasSBOMs)
+}
+
 // HasSbom is the resolver for the HasSBOM field.
 func (r *queryResolver) HasSbom(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 	return r.Backend.HasSBOM(ctx, hasSBOMSpec)

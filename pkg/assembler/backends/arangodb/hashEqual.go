@@ -161,6 +161,10 @@ func getHashEqualQueryValues(artifact model.ArtifactInputSpec, equalArtifact mod
 	return values
 }
 
+func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
+	return []*model.HashEqual{}, fmt.Errorf("not implemented: IngestHashEquals")
+}
+
 func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 	query := `
 LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
