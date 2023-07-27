@@ -17,14 +17,50 @@ import (
 	"fmt"
 )
 
+// TODO: add tests
 func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]BfsNode, error) {
-	// Step 1: make a copy of the inputted nodeMap to modify the old parents values without losing the info, and remove info nodes
-	// Step 2: Loop until the numNodes discovered is >= the numNodes in the new nodeMap
-	// Step 3: Loop through each node in the new nodeMap and find nodes with len(parents) == 0
-	// Step 4: Add these nodes with len(parents) == 0 to the return map
-	// Step 5: Loop through each node in the new nodeMap (not nested in prev loop) and remove the latest parents found from their parents list
-	// Step 6: If no nodes have len(parents) == 0 then cycle is detected (ERROR)
-	// Step 7: Increment outermost loop by num of nodes found
+	var frontiers map[int][]BfsNode
+	parentsMap := copyParents(nodeMap)
+	frontierLevel := 0
+
+	for numNodes := 0; numNodes <= len(parentsMap); numNodes++ {
+		var foundIDs []string
+		for id, parentsList := range parentsMap {
+			if len(parentsList) == 0 {
+				frontiers[frontierLevel] = append(frontiers[frontierLevel], nodeMap[id])
+				foundIDs = append(foundIDs)
+				numNodes++
+			}
+		}
+
+		if len(foundIDs) == 0 {
+			return frontiers, fmt.Errorf("Error: cycle detected")
+		}
+
+		for id, parentsList := range parentsMap {
+			for index, parentID := range parentsList {
+				for _, foundID := range foundIDs {
+					if parentID == foundID {
+						parentsMap[id] = append(parentsList[:index], parentsList[index+1:]...)
+					}
+				}
+			}
+		}
+		frontierLevel++
+	}
 
 	return nil, fmt.Errorf("Unimplemented")
+}
+
+func copyParents(inputMap map[string]BfsNode) map[string][]string {
+	retMap := map[string][]string{}
+	for key, value := range inputMap {
+		if !value.NotInBlastRadius {
+			retMap[key] = []string{}
+			for _, parent := range value.Parents {
+				retMap[key] = append(retMap[key], parent)
+			}
+		}
+	}
+	return retMap
 }
