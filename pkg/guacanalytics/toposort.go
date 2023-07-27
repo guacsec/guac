@@ -19,7 +19,7 @@ import (
 
 // TODO: add tests
 func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]BfsNode, error) {
-	var frontiers map[int][]BfsNode
+	frontiers := make(map[int][]BfsNode)
 	parentsMap := copyParents(nodeMap)
 	frontierLevel := 0
 
@@ -28,7 +28,7 @@ func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]BfsNode, erro
 		for id, parentsList := range parentsMap {
 			if len(parentsList) == 0 {
 				frontiers[frontierLevel] = append(frontiers[frontierLevel], nodeMap[id])
-				foundIDs = append(foundIDs)
+				foundIDs = append(foundIDs, id)
 				numNodes++
 			}
 		}
@@ -49,17 +49,14 @@ func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]BfsNode, erro
 		frontierLevel++
 	}
 
-	return nil, fmt.Errorf("Unimplemented")
+	return frontiers, nil
 }
 
 func copyParents(inputMap map[string]BfsNode) map[string][]string {
 	retMap := map[string][]string{}
 	for key, value := range inputMap {
 		if !value.NotInBlastRadius {
-			retMap[key] = []string{}
-			for _, parent := range value.Parents {
-				retMap[key] = append(retMap[key], parent)
-			}
+			retMap[key] = append(retMap[key], value.Parents...)
 		}
 	}
 	return retMap
