@@ -43,11 +43,14 @@ func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]string, error
 		}
 
 		for id, parentsList := range parentsMap {
-			for index, parentID := range parentsList {
-				if foundIDs[parentID] {
-					parentsMap[id] = append(parentsList[:index], parentsList[index+1:]...)
+			newParentsList := []string{}
+			for _, parentID := range parentsList {
+				if !foundIDs[parentID] {
+					newParentsList = append(newParentsList, parentID)
 				}
 			}
+
+			parentsMap[id] = newParentsList
 		}
 		frontierLevel++
 	}
