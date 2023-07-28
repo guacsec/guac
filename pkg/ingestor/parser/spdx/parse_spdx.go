@@ -123,9 +123,8 @@ func (s *spdxParser) getPackages() error {
 
 		if slices.Contains(topLevelSpdxIds, string(pac.PackageSPDXIdentifier)) {
 			s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)], pkg)
-		} else {
-			s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
 		}
+		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range pac.PackageChecksums {
