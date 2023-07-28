@@ -25,8 +25,9 @@ func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]string, error
 	parentsMap := copyParents(nodeMap)
 	frontierLevel := 0
 	numNodes := 0
+	totalNodes := len(parentsMap)
 
-	for numNodes <= len(parentsMap) {
+	for numNodes <= totalNodes {
 		foundIDs := make(map[string]bool)
 		for id, parentsList := range parentsMap {
 			if len(parentsList) == 0 {
@@ -41,7 +42,6 @@ func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]string, error
 			return frontiers, fmt.Errorf("Error: cycle detected")
 		}
 
-		//refactor this
 		for id, parentsList := range parentsMap {
 			for index, parentID := range parentsList {
 				if foundIDs[parentID] {
