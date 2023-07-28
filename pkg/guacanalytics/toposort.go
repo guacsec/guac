@@ -20,18 +20,20 @@ import (
 )
 
 // TODO: add tests
-func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]BfsNode, error) {
-	frontiers := make(map[int][]BfsNode)
+func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]string, error) {
+	frontiers := make(map[int][]string)
 	parentsMap := copyParents(nodeMap)
 	frontierLevel := 0
+	numNodes := 0
 
-	for numNodes := 0; numNodes <= len(parentsMap); numNodes++ {
-		var foundIDs []string
+	for numNodes <= len(parentsMap) {
+		foundIDs := make(map[string]bool)
 		for id, parentsList := range parentsMap {
 			if len(parentsList) == 0 {
-				frontiers[frontierLevel] = append(frontiers[frontierLevel], nodeMap[id])
-				foundIDs = append(foundIDs, id)
+				frontiers[frontierLevel] = append(frontiers[frontierLevel], id)
+				foundIDs[id] = true
 				numNodes++
+				delete(parentsMap, id)
 			}
 		}
 
@@ -39,12 +41,11 @@ func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]BfsNode, erro
 			return frontiers, fmt.Errorf("Error: cycle detected")
 		}
 
+		//refactor this
 		for id, parentsList := range parentsMap {
 			for index, parentID := range parentsList {
-				for _, foundID := range foundIDs {
-					if parentID == foundID {
-						parentsMap[id] = append(parentsList[:index], parentsList[index+1:]...)
-					}
+				if foundIDs[parentID] {
+					parentsMap[id] = append(parentsList[:index], parentsList[index+1:]...)
 				}
 			}
 		}
