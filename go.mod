@@ -188,7 +188,7 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/regclient/regclient v0.5.0
 	github.com/sigstore/sigstore v1.7.1
-	github.com/spdx/tools-golang v0.5.2
+	github.com/spdx/tools-golang v0.5.3
 	github.com/spf13/viper v1.16.0
 	github.com/vektah/gqlparser/v2 v2.5.8
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
