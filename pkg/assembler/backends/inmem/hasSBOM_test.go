@@ -465,6 +465,27 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpQueryErr: true,
 		},
+		{
+			Name:  "Query without hasSBOMSpec",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: p1,
+					},
+					HS: &model.HasSBOMInputSpec{
+						DownloadLocation: "location one",
+					},
+				},
+			},
+			Query: nil,
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:          p1out,
+					DownloadLocation: "location one",
+				},
+			},
+		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
