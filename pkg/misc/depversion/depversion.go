@@ -103,7 +103,10 @@ func ParseVersionValue(s string) VersionValue {
 		vv.SemVer = &semver
 		return vv
 	} else if almostSemVer(s) {
-		fixedS := fixAlmostSemVer(s)
+		fixedS, err := fixAlmostSemVer(s)
+		if err != nil {
+			return vv
+		}
 		semver, _, _, _, _, _, err := parseSemver(fixedS)
 		if err != nil {
 			return vv
@@ -172,9 +175,12 @@ func almostSemVer(s string) bool {
 	return !exactSvR.Match([]byte(s)) && almostExactSvR.Match([]byte(s))
 }
 
-func fixAlmostSemVer(s string) string {
+func fixAlmostSemVer(s string) (string, error) {
 	matches := almostExactSvR.FindStringSubmatch(s)
-	return fmt.Sprintf("%s-%s", matches[almostExactSvR.SubexpIndex("beforerel")], matches[almostExactSvR.SubexpIndex("afterrel")])
+	if len(matches) == 0 {
+		return "", fmt.Errorf("Did not match AlmostSemVer: %q", s)
+	}
+	return fmt.Sprintf("%s-%s", matches[almostExactSvR.SubexpIndex("beforerel")], matches[almostExactSvR.SubexpIndex("afterrel")]), nil
 }
 
 func isSemver(s string) bool {
@@ -248,6 +254,10 @@ func parseSemver(s string) (semver, major, minor, patch, prerelease, metadata st
 func parseSemverHelper(re *regexp.Regexp, s string) (semver, major, minor, patch, prerelease, metadata string, err error) {
 	matches := re.FindStringSubmatch(s)
 
+	if len(matches) == 0 {
+		err = fmt.Errorf("Did not match regex: %q %s", s, re)
+		return
+	}
 	semverIdx := re.SubexpIndex("semver")
 	majorIdx := re.SubexpIndex("major")
 	minorIdx := re.SubexpIndex("minor")
@@ -314,7 +324,10 @@ func getConstraint(s string) (string, error) {
 		}
 		return "=" + semver, nil
 	} else if almostSemVer(s) {
-		s = fixAlmostSemVer(s)
+		s, err := fixAlmostSemVer(s)
+		if err != nil {
+			return "", err
+		}
 		return "=" + s, nil
 	}
 	// check for 1.x minor and patch versions
@@ -416,7 +429,10 @@ func getConstraint(s string) (string, error) {
 		}
 
 		op1 := matches[op1Idx]
-		semver1 := fixAlmostSemVer(matches[semver1Idx])
+		semver1, err := fixAlmostSemVer(matches[semver1Idx])
+		if err != nil {
+			return "", err
+		}
 		constraint := op1 + semver1
 
 		if op2Idx >= 0 {
