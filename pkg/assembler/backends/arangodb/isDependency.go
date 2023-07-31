@@ -393,14 +393,14 @@ func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
 
 func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDependency, error) {
 	type collectedData struct {
-		PkgVersion     dbPkgVersion `json:"pkgVersion"`
-		DepPkg         dbPkgName    `json:"depPkg"`
-		IsDependencyID string       `json:"isDependency_id"`
-		VersionRange   string       `json:"versionRange"`
-		DependencyType string       `json:"dependencyType"`
-		Justification  string       `json:"justification"`
-		Collector      string       `json:"collector"`
-		Origin         string       `json:"origin"`
+		PkgVersion     *dbPkgVersion `json:"pkgVersion"`
+		DepPkg         *dbPkgName    `json:"depPkg"`
+		IsDependencyID string        `json:"isDependency_id"`
+		VersionRange   string        `json:"versionRange"`
+		DependencyType string        `json:"dependencyType"`
+		Justification  string        `json:"justification"`
+		Collector      string        `json:"collector"`
+		Origin         string        `json:"origin"`
 	}
 
 	var createdValues []collectedData

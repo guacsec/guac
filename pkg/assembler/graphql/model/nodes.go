@@ -808,6 +808,13 @@ type PackageOrArtifactInput struct {
 	Artifact *ArtifactInputSpec `json:"artifact,omitempty"`
 }
 
+// PackageOrArtifactInputs allows using packages and artifacts as input for batch mutations.
+// Exactly one list must be specified.
+type PackageOrArtifactInputs struct {
+	Packages  []*PkgInputSpec      `json:"packages,omitempty"`
+	Artifacts []*ArtifactInputSpec `json:"artifacts,omitempty"`
+}
+
 // PackageOrArtifactSpec allows using PackageOrArtifact union as
 // input type to be used in read queries.
 //

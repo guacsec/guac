@@ -42,6 +42,15 @@ input PackageOrArtifactInput {
   artifact: ArtifactInputSpec
 }
 
+"""
+PackageOrArtifactInputs allows using packages and artifacts as input for batch mutations.
+Exactly one list must be specified.
+"""
+input PackageOrArtifactInputs {
+  packages: [PkgInputSpec!]
+  artifacts: [ArtifactInputSpec!]
+}
+
 "Records the status of a VEX statement subject."
 enum VexStatus {
   NOT_AFFECTED

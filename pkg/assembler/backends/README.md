@@ -16,6 +16,7 @@ project.
 
 ## Backends
 
+- `arangodb/`: Backend based on the Arango database
 - `neo4j/`: Backend based on the Neo4j database
 - `testing/`: simple backend with no resolvers implemented. Useful for
   prototyping. Also known as the in-memory backend.

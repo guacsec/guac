@@ -73,7 +73,7 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 	}
 	defer cursor.Close()
 
-	return getHasSLSA(c, ctx, cursor, map[string][]*model.Artifact{})
+	return getHasSLSA(c, ctx, cursor, map[string][]*model.Artifact{}, hasSLSASpec.BuiltFrom)
 }
 
 func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *model.HasSLSASpec, queryValues map[string]any) {
@@ -265,7 +265,7 @@ func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifa
 		return nil, fmt.Errorf("failed to ingest hasSLSA: %w", err)
 	}
 	defer cursor.Close()
-	hasSLSAList, err := getHasSLSA(c, ctx, cursor, builtFromMap)
+	hasSLSAList, err := getHasSLSA(c, ctx, cursor, builtFromMap, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get hasSLSA from arango cursor: %w", err)
 	}
@@ -324,7 +324,7 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInp
 	}
 	defer cursor.Close()
 
-	hasSLSAList, err := getHasSLSA(c, ctx, cursor, map[string][]*model.Artifact{artifactKey(subject.Algorithm, subject.Digest): artifacts})
+	hasSLSAList, err := getHasSLSA(c, ctx, cursor, map[string][]*model.Artifact{artifactKey(subject.Algorithm, subject.Digest): artifacts}, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get hasSLSA from arango cursor: %w", err)
 	}
@@ -342,10 +342,10 @@ func artifactKey(alg, dig string) string {
 	return strings.Join([]string{algorithm, digest}, ":")
 }
 
-func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, builtFromMap map[string][]*model.Artifact) ([]*model.HasSlsa, error) {
+func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, builtFromMap map[string][]*model.Artifact, filterBuiltFrom []*model.ArtifactSpec) ([]*model.HasSlsa, error) {
 	type collectedData struct {
 		Subject       *model.Artifact `json:"subject"`
-		BuiltBy       model.Builder   `json:"builtBy"`
+		BuiltBy       *model.Builder  `json:"builtBy"`
 		BuiltFrom     []string        `json:"builtFrom"`
 		HasSLSAId     string          `json:"hasSLSA_id"`
 		BuildType     string          `json:"buildType"`
@@ -383,29 +383,79 @@ func getHasSLSA(c *arangoClient, ctx context.Context, cursor driver.Cursor, buil
 			if err != nil {
 				return nil, fmt.Errorf("failed to get artifact by ID for hasSLSA builtFrom with error: %w", err)
 			}
-			builtFromArtifacts = artifacts
+			matchingArtifacts := true
+			if filterBuiltFrom != nil {
+				matchingArtifacts = false
+				for _, bfArtifact := range filterBuiltFrom {
+					if containsMatchingArtifact(artifacts, bfArtifact.ID, bfArtifact.Algorithm, bfArtifact.Digest) {
+						matchingArtifacts = true
+						break
+					}
+				}
+			}
+			if matchingArtifacts {
+				builtFromArtifacts = artifacts
+			}
 		}
 
-		slsa := &model.Slsa{
-			BuiltFrom:     builtFromArtifacts,
-			BuiltBy:       &createdValue.BuiltBy,
-			BuildType:     createdValue.BuildType,
-			SlsaPredicate: getCollectedPredicates(createdValue.SlsaPredicate),
-			SlsaVersion:   createdValue.SlsaVersion,
-			StartedOn:     createdValue.StartedOn,
-			FinishedOn:    createdValue.FinishedOn,
-			Origin:        createdValue.Origin,
-			Collector:     createdValue.Collector,
-		}
+		if len(builtFromArtifacts) > 0 {
+			slsa := &model.Slsa{
+				BuiltFrom:     builtFromArtifacts,
+				BuiltBy:       createdValue.BuiltBy,
+				BuildType:     createdValue.BuildType,
+				SlsaPredicate: getCollectedPredicates(createdValue.SlsaPredicate),
+				SlsaVersion:   createdValue.SlsaVersion,
+				StartedOn:     createdValue.StartedOn,
+				FinishedOn:    createdValue.FinishedOn,
+				Origin:        createdValue.Origin,
+				Collector:     createdValue.Collector,
+			}
 
-		hasSLSA := &model.HasSlsa{
-			ID:      createdValue.HasSLSAId,
-			Subject: createdValue.Subject,
-			Slsa:    slsa,
+			hasSLSA := &model.HasSlsa{
+				ID:      createdValue.HasSLSAId,
+				Subject: createdValue.Subject,
+				Slsa:    slsa,
+			}
+			hasSLSAList = append(hasSLSAList, hasSLSA)
 		}
-		hasSLSAList = append(hasSLSAList, hasSLSA)
 	}
 	return hasSLSAList, nil
+}
+
+func containsMatchingArtifact(artifacts []*model.Artifact, filterID *string, filterAlgo *string, filterDigest *string) bool {
+	var id string = ""
+	var algorithm string = ""
+	var digest string = ""
+	if filterID != nil {
+		id = *filterID
+	}
+	if filterAlgo != nil {
+		algorithm = strings.ToLower(*filterAlgo)
+	}
+	if filterDigest != nil {
+		digest = strings.ToLower(*filterDigest)
+	}
+
+	for _, a := range artifacts {
+		matchID := false
+		if id == "" || id == a.ID {
+			matchID = true
+		}
+		matchAlgorithm := false
+		if algorithm == "" || algorithm == a.Algorithm {
+			matchAlgorithm = true
+		}
+
+		matchDigest := false
+		if digest == "" || digest == a.Digest {
+			matchDigest = true
+		}
+
+		if matchID && matchDigest && matchAlgorithm {
+			return true
+		}
+	}
+	return false
 }
 
 func getCollectedPredicates(slsaPredicateList []string) []*model.SLSAPredicate {

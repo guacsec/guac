@@ -41,8 +41,6 @@ func ingestData(port int) {
 
 	start := time.Now()
 
-	// TODO: these ingestion tests need to be updated to ingest the nouns first before the verbs
-	// See issue https://github.com/guacsec/guac/issues/1000
 	logger.Infof("Ingesting test data into backend server")
 	ingestScorecards(ctx, gqlclient)
 	ingestSLSA(ctx, gqlclient)

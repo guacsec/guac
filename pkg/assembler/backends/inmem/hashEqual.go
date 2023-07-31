@@ -73,6 +73,26 @@ func (n *hashEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // }
 
 // Ingest HashEqual
+
+func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
+	if len(artifacts) != len(otherArtifacts) {
+		return nil, gqlerror.Errorf("uneven artifacts and other artifacts for ingestion")
+	}
+	if len(artifacts) != len(hashEquals) {
+		return nil, gqlerror.Errorf("uneven artifacts and hashEquals nodes for ingestion")
+	}
+
+	var modelHashEquals []*model.HashEqual
+	for i := range hashEquals {
+		hashEqual, err := c.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestDependency failed with err: %v", err)
+		}
+		modelHashEquals = append(modelHashEquals, hashEqual)
+	}
+	return modelHashEquals, nil
+}
+
 func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 	return c.ingestHashEqual(ctx, artifact, equalArtifact, hashEqual, true)
 }

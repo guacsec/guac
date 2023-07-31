@@ -69,4 +69,6 @@ extend type Query {
 extend type Mutation {
   "Certifies that a package or artifact has an SBOM."
   ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
+  "Bulk ingest that package or artifact has an SBOM."
+  ingestHasSBOMs(subjects: PackageOrArtifactInputs!, hasSBOMs: [HasSBOMInputSpec!]!): [HasSBOM!]!
 }
