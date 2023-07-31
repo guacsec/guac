@@ -224,7 +224,7 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	c.m.RLock()
 	defer c.m.RUnlock()
 
-	if filter.ID != nil {
+	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: invalid ID %v", funcName, err)
@@ -294,32 +294,34 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 	filter *model.HasSBOMSpec, link *hasSBOMStruct) (
 	[]*model.HasSbom, error) {
 
-	if noMatch(filter.URI, link.uri) ||
-		noMatch(toLower(filter.Algorithm), link.algorithm) ||
-		noMatch(toLower(filter.Digest), link.digest) ||
-		noMatch(filter.DownloadLocation, link.downloadLocation) ||
-		noMatch(filter.Origin, link.origin) ||
-		noMatch(filter.Collector, link.collector) {
-		return out, nil
-	}
-	if filter.Subject != nil {
-		if filter.Subject.Package != nil {
-			if link.pkg == 0 {
-				return out, nil
-			}
-			p, err := c.buildPackageResponse(link.pkg, filter.Subject.Package)
-			if err != nil {
-				return nil, err
-			}
-			if p == nil {
-				return out, nil
-			}
-		} else if filter.Subject.Artifact != nil {
-			if link.artifact == 0 {
-				return out, nil
-			}
-			if !c.artifactMatch(link.artifact, filter.Subject.Artifact) {
-				return out, nil
+	if filter != nil {
+		if noMatch(filter.URI, link.uri) ||
+			noMatch(toLower(filter.Algorithm), link.algorithm) ||
+			noMatch(toLower(filter.Digest), link.digest) ||
+			noMatch(filter.DownloadLocation, link.downloadLocation) ||
+			noMatch(filter.Origin, link.origin) ||
+			noMatch(filter.Collector, link.collector) {
+			return out, nil
+		}
+		if filter.Subject != nil {
+			if filter.Subject.Package != nil {
+				if link.pkg == 0 {
+					return out, nil
+				}
+				p, err := c.buildPackageResponse(link.pkg, filter.Subject.Package)
+				if err != nil {
+					return nil, err
+				}
+				if p == nil {
+					return out, nil
+				}
+			} else if filter.Subject.Artifact != nil {
+				if link.artifact == 0 {
+					return out, nil
+				}
+				if !c.artifactMatch(link.artifact, filter.Subject.Artifact) {
+					return out, nil
+				}
 			}
 		}
 	}
