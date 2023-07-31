@@ -15,6 +15,11 @@ func (r *mutationResolver) IngestCertifyBad(ctx context.Context, subject model.P
 	return r.Backend.IngestCertifyBad(ctx, subject, pkgMatchType, certifyBad)
 }
 
+// IngestCertifyBads is the resolver for the ingestCertifyBads field.
+func (r *mutationResolver) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
+	return r.Backend.IngestCertifyBads(ctx, subjects, pkgMatchTypes, certifyBads)
+}
+
 // CertifyBad is the resolver for the CertifyBad field.
 func (r *queryResolver) CertifyBad(ctx context.Context, certifyBadSpec model.CertifyBadSpec) ([]*model.CertifyBad, error) {
 	return r.Backend.CertifyBad(ctx, &certifyBadSpec)

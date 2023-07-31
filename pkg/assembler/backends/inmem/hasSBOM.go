@@ -67,7 +67,7 @@ func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 	}
 	if len(subjects.Artifacts) > 0 {
 		if len(subjects.Artifacts) != len(hasSBOMs) {
-			return nil, gqlerror.Errorf("uneven Sources and hasSBOMs for ingestion")
+			return nil, gqlerror.Errorf("uneven artifact and hasSBOMs for ingestion")
 		}
 		valuesDefined = valuesDefined + 1
 	}

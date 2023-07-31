@@ -58,6 +58,60 @@ func (n *goodLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest CertifyGood
+
+func (c *demoClient) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
+	valuesDefined := 0
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(certifyGoods) {
+			return nil, gqlerror.Errorf("uneven packages and certifyGoods for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Artifacts) > 0 {
+		if len(subjects.Artifacts) != len(certifyGoods) {
+			return nil, gqlerror.Errorf("uneven artifacts and certifyGoods for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Sources) > 0 {
+		if len(subjects.Sources) != len(certifyGoods) {
+			return nil, gqlerror.Errorf("uneven sources and certifyGoods for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return nil, gqlerror.Errorf("must specify at most packages, artifacts or sources for %v", "IngestCertifyGoods")
+	}
+
+	var modelCertifyGoods []*model.CertifyGood
+
+	for i := range certifyGoods {
+		var certifyGood *model.CertifyGood
+		var err error
+		if len(subjects.Packages) > 0 {
+			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
+			certifyGood, err = c.IngestCertifyGood(ctx, subject, pkgMatchTypes[i], *certifyGoods[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestCertifyGood failed with err: %v", err)
+			}
+		} else if len(subjects.Sources) > 0 {
+			subject := model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
+			certifyGood, err = c.IngestCertifyGood(ctx, subject, pkgMatchTypes[i], *certifyGoods[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestCertifyGood failed with err: %v", err)
+			}
+		} else {
+			subject := model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
+			certifyGood, err = c.IngestCertifyGood(ctx, subject, pkgMatchTypes[i], *certifyGoods[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestCertifyGood failed with err: %v", err)
+			}
+		}
+		modelCertifyGoods = append(modelCertifyGoods, certifyGood)
+	}
+	return modelCertifyGoods, nil
+}
+
 func (c *demoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
 	return c.ingestCertifyGood(ctx, subject, pkgMatchType, certifyGood, true)
 }

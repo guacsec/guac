@@ -791,12 +791,7 @@ func getPreloadString(prefix, name string) string {
 }
 
 // Retrieval read-only queries for evidence trees
-func (c *arangoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	panic(fmt.Errorf("not implemented: CertifyBad - CertifyBad"))
-}
-func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
-	panic(fmt.Errorf("not implemented: CertifyGood - CertifyGood"))
-}
+
 func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	panic(fmt.Errorf("not implemented: CertifyVEXStatement - CertifyVEXStatement"))
 }
@@ -816,12 +811,7 @@ func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqua
 }
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
-func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
-}
-func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyGood - IngestCertifyGood"))
-}
+
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
 }

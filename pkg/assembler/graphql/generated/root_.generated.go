@@ -185,7 +185,9 @@ type ComplexityRoot struct {
 		IngestBuilders        func(childComplexity int, builders []*model.BuilderInputSpec) int
 		IngestCVEs            func(childComplexity int, cves []*model.CVEInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
+		IngestCertifyBads     func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
+		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
@@ -1069,6 +1071,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
 
+	case "Mutation.ingestCertifyBads":
+		if e.complexity.Mutation.IngestCertifyBads == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyBads_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyBads(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchTypes"].([]*model.MatchFlags), args["certifyBads"].([]*model.CertifyBadInputSpec)), true
+
 	case "Mutation.ingestCertifyGood":
 		if e.complexity.Mutation.IngestCertifyGood == nil {
 			break
@@ -1080,6 +1094,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestCertifyGood(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyGood"].(model.CertifyGoodInputSpec)), true
+
+	case "Mutation.ingestCertifyGoods":
+		if e.complexity.Mutation.IngestCertifyGoods == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyGoods_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyGoods(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchTypes"].([]*model.MatchFlags), args["certifyGoods"].([]*model.CertifyGoodInputSpec)), true
 
 	case "Mutation.ingestCVE":
 		if e.complexity.Mutation.IngestCve == nil {
@@ -2269,6 +2295,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
+		ec.unmarshalInputPackageSourceOrArtifactInputs,
 		ec.unmarshalInputPackageSourceOrArtifactSpec,
 		ec.unmarshalInputPkgEqualInputSpec,
 		ec.unmarshalInputPkgEqualSpec,
@@ -2552,6 +2579,18 @@ input PackageSourceOrArtifactInput {
 }
 
 """
+PackageSourceOrArtifactInputs allows using PackageSourceOrArtifact union as
+input type to be used in bulk mutations.
+
+Exactly one list must be specified.
+"""
+input PackageSourceOrArtifactInputs {
+  packages: [PkgInputSpec!]
+  sources: [SourceInputSpec!]
+  artifacts: [ArtifactInputSpec!]
+}
+
+"""
 CertifyBad is an attestation that a package, source, or artifact is considered
 bad.
 
@@ -2623,6 +2662,8 @@ extend type Query {
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered bad."
   ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
+  "Adds bulk certifications that a package, source or artifact is considered bad."
+  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchTypes: [MatchFlags!], certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyGood.graphql", Input: `#
@@ -2701,6 +2742,8 @@ extend type Query {
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered good."
   ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyGood: CertifyGoodInputSpec!): CertifyGood!
+  "Adds bulk certifications that a package, source or artifact is considered good."
+  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchTypes: [MatchFlags!], certifyGoods: [CertifyGoodInputSpec!]!): [CertifyGood!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#

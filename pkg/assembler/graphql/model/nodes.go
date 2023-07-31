@@ -889,6 +889,16 @@ type PackageSourceOrArtifactInput struct {
 	Artifact *ArtifactInputSpec `json:"artifact,omitempty"`
 }
 
+// PackageSourceOrArtifactInputs allows using PackageSourceOrArtifact union as
+// input type to be used in bulk mutations.
+//
+// Exactly one list must be specified.
+type PackageSourceOrArtifactInputs struct {
+	Packages  []*PkgInputSpec      `json:"packages,omitempty"`
+	Sources   []*SourceInputSpec   `json:"sources,omitempty"`
+	Artifacts []*ArtifactInputSpec `json:"artifacts,omitempty"`
+}
+
 // PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
 // input type to be used in read queries.
 //

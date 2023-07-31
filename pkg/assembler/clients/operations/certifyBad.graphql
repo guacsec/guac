@@ -35,6 +35,26 @@ mutation CertifyBadArtifact($artifact: ArtifactInputSpec!, $certifyBad: CertifyB
   }
 }
 
+# Defines the GraphQL operations to bulk ingest a CertifyBad into GUAC
+
+mutation CertifyBadPkgBulk($pkgs: [PkgInputSpec!]!, $pkgMatchTypes: [MatchFlags!], $certifyBads: [CertifyBadInputSpec!]!) {
+  ingestCertifyBads(subjects: {packages: $pkgs}, pkgMatchTypes: $pkgMatchTypes, certifyBads: $certifyBads) {
+    ...AllCertifyBad
+  }
+}
+
+mutation CertifyBadSrcBulk($sources: [SourceInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
+  ingestCertifyBads(subjects: {sources: $sources}, certifyBads: $certifyBads) {
+    ...AllCertifyBad
+  }
+}
+
+mutation CertifyBadArtifactBulk($artifacts: [ArtifactInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
+  ingestCertifyBads(subjects: {artifacts: $artifacts}, certifyBads: $certifyBads) {
+    ...AllCertifyBad
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC CertifyBads
 
 query CertifyBads($filter: CertifyBadSpec!) {
