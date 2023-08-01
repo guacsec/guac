@@ -33,7 +33,7 @@ mutation IngestPackages($pkgs: [PkgInputSpec!]!) {
 
 # Exposes GraphQL queries to retrieve GUAC packages
 
-query Packages($filter: PkgSpec) {
+query Packages($filter: PkgSpec!) {
   packages(pkgSpec: $filter) {
     ...AllPkgTree
   }

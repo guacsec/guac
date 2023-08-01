@@ -33,7 +33,7 @@ mutation IngestGHSAs($ghsas: [GHSAInputSpec!]!) {
 
 # Exposes GraphQL queries to retrieve GUAC GHSAs
 
-query GHSAs($filter: GHSASpec) {
+query GHSAs($filter: GHSASpec!) {
   ghsa(ghsaSpec: $filter) {
     ...AllGHSATree
   }

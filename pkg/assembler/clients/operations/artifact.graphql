@@ -33,7 +33,7 @@ mutation IngestArtifacts($artifacts: [ArtifactInputSpec!]!) {
 
 # Exposes GraphQL queries to retrieve GUAC sources
 
-query Artifacts($filter: ArtifactSpec) {
+query Artifacts($filter: ArtifactSpec!) {
   artifacts(artifactSpec: $filter) {
     ...AllArtifactTree
   }
