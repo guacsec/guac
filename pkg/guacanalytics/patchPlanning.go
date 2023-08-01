@@ -355,7 +355,7 @@ func explorePointOfContact(ctx context.Context, gqlClient graphql.Client, q *que
 			Name:      &poc.Namespaces[0].Names[0].Name,
 		}
 
-		pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
+		pkgResponse, err := model.Packages(ctx, gqlClient, pkgFilter)
 
 		if err != nil {
 			return fmt.Errorf("error finding inputted node %s", err)
@@ -409,7 +409,7 @@ func (q *queueValues) addNodesToQueueFromPackageName(ctx context.Context, gqlCli
 		Name:      &pkgName,
 	}
 
-	pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
+	pkgResponse, err := model.Packages(ctx, gqlClient, pkgFilter)
 
 	if err != nil {
 		return fmt.Errorf("error finding inputted node %s", err)

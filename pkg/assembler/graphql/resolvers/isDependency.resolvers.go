@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model
 }
 
 // IsDependency is the resolver for the IsDependency field.
-func (r *queryResolver) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	return r.Backend.IsDependency(ctx, isDependencySpec)
+func (r *queryResolver) IsDependency(ctx context.Context, isDependencySpec model.IsDependencySpec) ([]*model.IsDependency, error) {
+	return r.Backend.IsDependency(ctx, &isDependencySpec)
 }

@@ -87,7 +87,7 @@ input PointOfContactInputSpec {
 
 extend type Query {
   "Returns all PointOfContact attestations matching a filter."
-  PointOfContact (pointOfContactSpec: PointOfContactSpec): [PointOfContact!]!
+  PointOfContact (pointOfContactSpec: PointOfContactSpec!): [PointOfContact!]!
 }
 
 extend type Mutation {

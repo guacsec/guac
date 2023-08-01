@@ -16,6 +16,6 @@ func (r *mutationResolver) IngestPkgEqual(ctx context.Context, pkg model.PkgInpu
 }
 
 // PkgEqual is the resolver for the PkgEqual field.
-func (r *queryResolver) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
-	return r.Backend.PkgEqual(ctx, pkgEqualSpec)
+func (r *queryResolver) PkgEqual(ctx context.Context, pkgEqualSpec model.PkgEqualSpec) ([]*model.PkgEqual, error) {
+	return r.Backend.PkgEqual(ctx, &pkgEqualSpec)
 }

@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestSources(ctx context.Context, sources []*model.S
 }
 
 // Sources is the resolver for the sources field.
-func (r *queryResolver) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	return r.Backend.Sources(ctx, sourceSpec)
+func (r *queryResolver) Sources(ctx context.Context, sourceSpec model.SourceSpec) ([]*model.Source, error) {
+	return r.Backend.Sources(ctx, &sourceSpec)
 }

@@ -55,7 +55,7 @@ input ArtifactInputSpec {
 
 extend type Query {
   "Returns all artifacts matching a filter."
-  artifacts(artifactSpec: ArtifactSpec): [Artifact!]!
+  artifacts(artifactSpec: ArtifactSpec!): [Artifact!]!
 }
 
 extend type Mutation {

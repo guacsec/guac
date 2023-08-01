@@ -16,6 +16,6 @@ func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model
 }
 
 // CertifyVEXStatement is the resolver for the CertifyVEXStatement field.
-func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
-	return r.Backend.CertifyVEXStatement(ctx, certifyVEXStatementSpec)
+func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
+	return r.Backend.CertifyVEXStatement(ctx, &certifyVEXStatementSpec)
 }

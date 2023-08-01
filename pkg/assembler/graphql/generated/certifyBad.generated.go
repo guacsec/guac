@@ -652,6 +652,11 @@ func (ec *executionContext) unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsec
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx context.Context, v interface{}) (model.CertifyBadSpec, error) {
+	res, err := ec.unmarshalInputCertifyBadSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx context.Context, v interface{}) (model.MatchFlags, error) {
 	res, err := ec.unmarshalInputMatchFlags(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -724,14 +729,6 @@ func (ec *executionContext) unmarshalNPkgMatchType2githubᚗcomᚋguacsecᚋguac
 
 func (ec *executionContext) marshalNPkgMatchType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgMatchType(ctx context.Context, sel ast.SelectionSet, v model.PkgMatchType) graphql.Marshaler {
 	return v
-}
-
-func (ec *executionContext) unmarshalOCertifyBadSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx context.Context, v interface{}) (*model.CertifyBadSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputCertifyBadSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx context.Context, v interface{}) (*model.MatchFlags, error) {

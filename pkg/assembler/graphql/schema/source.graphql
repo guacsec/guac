@@ -103,7 +103,7 @@ input SourceInputSpec {
 
 extend type Query {
   "Returns all sources matching a filter."
-  sources(sourceSpec: SourceSpec): [Source!]!
+  sources(sourceSpec: SourceSpec!): [Source!]!
 }
 
 extend type Mutation {

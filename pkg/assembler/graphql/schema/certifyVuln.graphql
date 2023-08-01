@@ -140,7 +140,7 @@ input VulnerabilityMetaDataInput {
 
 extend type Query {
   "Returns all vulnerability certifications matching the input filter."
-  CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
+  CertifyVuln(certifyVulnSpec: CertifyVulnSpec!): [CertifyVuln!]!
 }
 
 extend type Mutation {

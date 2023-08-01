@@ -91,7 +91,7 @@ input IsDependencyInputSpec {
 
 extend type Query {
   "Returns all package dependencies that match the filter."
-  IsDependency(isDependencySpec: IsDependencySpec): [IsDependency!]!
+  IsDependency(isDependencySpec: IsDependencySpec!): [IsDependency!]!
 }
 
 extend type Mutation {

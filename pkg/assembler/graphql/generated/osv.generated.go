@@ -328,6 +328,11 @@ func (ec *executionContext) unmarshalNOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋg
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNOSVSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx context.Context, v interface{}) (model.OSVSpec, error) {
+	res, err := ec.unmarshalInputOSVSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx context.Context, v interface{}) (*model.OSVInputSpec, error) {
 	if v == nil {
 		return nil, nil

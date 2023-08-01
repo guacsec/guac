@@ -56,7 +56,7 @@ input HashEqualInputSpec {
 
 extend type Query {
   "Returns all artifact equality statements matching a filter."
-  HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
+  HashEqual(hashEqualSpec: HashEqualSpec!): [HashEqual!]!
 }
 
 extend type Mutation {

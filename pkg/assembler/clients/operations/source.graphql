@@ -33,7 +33,7 @@ mutation IngestSources($sources: [SourceInputSpec!]!) {
 
 # Exposes GraphQL queries to retrieve GUAC sources
 
-query Sources($filter: SourceSpec) {
+query Sources($filter: SourceSpec!) {
   sources(sourceSpec: $filter) {
     ...AllSourceTree
   }

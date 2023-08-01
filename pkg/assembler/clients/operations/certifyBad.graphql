@@ -37,7 +37,7 @@ mutation CertifyBadArtifact($artifact: ArtifactInputSpec!, $certifyBad: CertifyB
 
 # Exposes GraphQL queries to retrieve GUAC CertifyBads
 
-query CertifyBads($filter: CertifyBadSpec) {
+query CertifyBads($filter: CertifyBadSpec!) {
   CertifyBad(certifyBadSpec: $filter) {
     ...AllCertifyBad
   }

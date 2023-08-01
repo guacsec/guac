@@ -110,7 +110,7 @@ input MatchFlags {
 
 extend type Query {
   "Returns all CertifyBad attestations matching a filter."
-  CertifyBad(certifyBadSpec: CertifyBadSpec): [CertifyBad!]!
+  CertifyBad(certifyBadSpec: CertifyBadSpec!): [CertifyBad!]!
 }
 
 extend type Mutation {

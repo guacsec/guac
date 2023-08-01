@@ -721,12 +721,9 @@ func (ec *executionContext) unmarshalNHasSBOMInputSpec2ᚖgithubᚗcomᚋguacsec
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOHasSBOMSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx context.Context, v interface{}) (*model.HasSBOMSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
+func (ec *executionContext) unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx context.Context, v interface{}) (model.HasSBOMSpec, error) {
 	res, err := ec.unmarshalInputHasSBOMSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 // endregion ***************************** type.gotpl *****************************

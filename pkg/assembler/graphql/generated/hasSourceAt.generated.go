@@ -641,12 +641,9 @@ func (ec *executionContext) unmarshalNHasSourceAtInputSpec2githubᚗcomᚋguacse
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOHasSourceAtSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx context.Context, v interface{}) (*model.HasSourceAtSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
+func (ec *executionContext) unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx context.Context, v interface{}) (model.HasSourceAtSpec, error) {
 	res, err := ec.unmarshalInputHasSourceAtSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 // endregion ***************************** type.gotpl *****************************

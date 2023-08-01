@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestBuilders(ctx context.Context, builders []*model
 }
 
 // Builders is the resolver for the builders field.
-func (r *queryResolver) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
-	return r.Backend.Builders(ctx, builderSpec)
+func (r *queryResolver) Builders(ctx context.Context, builderSpec model.BuilderSpec) ([]*model.Builder, error) {
+	return r.Backend.Builders(ctx, &builderSpec)
 }

@@ -529,12 +529,9 @@ func (ec *executionContext) unmarshalNHashEqualInputSpec2ᚖgithubᚗcomᚋguacs
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOHashEqualSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx context.Context, v interface{}) (*model.HashEqualSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
+func (ec *executionContext) unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx context.Context, v interface{}) (model.HashEqualSpec, error) {
 	res, err := ec.unmarshalInputHashEqualSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 // endregion ***************************** type.gotpl *****************************

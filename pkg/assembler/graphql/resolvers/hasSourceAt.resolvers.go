@@ -16,6 +16,6 @@ func (r *mutationResolver) IngestHasSourceAt(ctx context.Context, pkg model.PkgI
 }
 
 // HasSourceAt is the resolver for the HasSourceAt field.
-func (r *queryResolver) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
-	return r.Backend.HasSourceAt(ctx, hasSourceAtSpec)
+func (r *queryResolver) HasSourceAt(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
+	return r.Backend.HasSourceAt(ctx, &hasSourceAtSpec)
 }

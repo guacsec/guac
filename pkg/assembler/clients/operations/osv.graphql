@@ -33,7 +33,7 @@ mutation IngestOSVs($osvs: [OSVInputSpec!]!) {
 
 # Exposes GraphQL queries to retrieve GUAC OSVs
 
-query OSVs($filter: OSVSpec) {
+query OSVs($filter: OSVSpec!) {
   osv(osvSpec: $filter) {
     ...AllOSVTree
   }

@@ -700,12 +700,9 @@ func (ec *executionContext) unmarshalNPointOfContactInputSpec2githubᚗcomᚋgua
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOPointOfContactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx context.Context, v interface{}) (*model.PointOfContactSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
+func (ec *executionContext) unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx context.Context, v interface{}) (model.PointOfContactSpec, error) {
 	res, err := ec.unmarshalInputPointOfContactSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 // endregion ***************************** type.gotpl *****************************

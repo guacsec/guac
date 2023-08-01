@@ -1674,7 +1674,7 @@ func getPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *stri
 		}
 	}
 
-	pkgResponse, err := model.Packages(ctx, gqlClient, &pkgFilter)
+	pkgResponse, err := model.Packages(ctx, gqlClient, pkgFilter)
 
 	if err != nil {
 		return nil, fmt.Errorf("error getting id for test case: %s\n", err)
@@ -1705,7 +1705,7 @@ func getArtifactIDs(ctx context.Context, gqlClient graphql.Client, algorithm str
 		Algorithm: &algorithm,
 	}
 
-	artifactResponse, err := model.Artifacts(ctx, gqlClient, &artifactFilter)
+	artifactResponse, err := model.Artifacts(ctx, gqlClient, artifactFilter)
 
 	if err != nil {
 		return nil, fmt.Errorf("error filtering for expected artifact: %s\n", err)
@@ -1728,7 +1728,7 @@ func getSrcID(ctx context.Context, gqlClient graphql.Client, srcType string) (st
 		Type: &srcType,
 	}
 
-	srcResponse, err := model.Sources(ctx, gqlClient, &srcFilter)
+	srcResponse, err := model.Sources(ctx, gqlClient, srcFilter)
 
 	if err != nil {
 		return "", fmt.Errorf("error filtering for expected source: %s\n", err)

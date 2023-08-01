@@ -1555,6 +1555,11 @@ func (ec *executionContext) unmarshalNPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋg
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx context.Context, v interface{}) (model.PkgSpec, error) {
+	res, err := ec.unmarshalInputPkgSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOPackageQualifierInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.PackageQualifierInputSpec, error) {
 	if v == nil {
 		return nil, nil

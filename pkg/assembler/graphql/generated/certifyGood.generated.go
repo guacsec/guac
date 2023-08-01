@@ -498,12 +498,9 @@ func (ec *executionContext) unmarshalNCertifyGoodInputSpec2githubᚗcomᚋguacse
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOCertifyGoodSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx context.Context, v interface{}) (*model.CertifyGoodSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
+func (ec *executionContext) unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx context.Context, v interface{}) (model.CertifyGoodSpec, error) {
 	res, err := ec.unmarshalInputCertifyGoodSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 // endregion ***************************** type.gotpl *****************************

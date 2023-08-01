@@ -63,7 +63,7 @@ input HasSBOMInputSpec {
 
 extend type Query {
   "Returns all SBOM certifications."
-  HasSBOM(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
+  HasSBOM(hasSBOMSpec: HasSBOMSpec!): [HasSBOM!]!
 }
 
 extend type Mutation {

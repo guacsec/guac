@@ -132,7 +132,7 @@ var queryKnownCmd = &cobra.Command{
 				Subpath:    pkgInput.Subpath,
 				Qualifiers: pkgQualifierFilter,
 			}
-			pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
+			pkgResponse, err := model.Packages(ctx, gqlclient, *pkgFilter)
 			if err != nil {
 				logger.Fatalf("error querying for package: %v", err)
 			}
@@ -208,7 +208,7 @@ var queryKnownCmd = &cobra.Command{
 				Tag:       srcInput.Tag,
 				Commit:    srcInput.Commit,
 			}
-			srcResponse, err := model.Sources(ctx, gqlclient, srcFilter)
+			srcResponse, err := model.Sources(ctx, gqlclient, *srcFilter)
 			if err != nil {
 				logger.Fatalf("error querying for sources: %v", err)
 			}
@@ -243,7 +243,7 @@ var queryKnownCmd = &cobra.Command{
 				Digest:    ptrfrom.String(strings.ToLower(string(split[1]))),
 			}
 
-			artifactResponse, err := model.Artifacts(ctx, gqlclient, artifactFilter)
+			artifactResponse, err := model.Artifacts(ctx, gqlclient, *artifactFilter)
 			if err != nil {
 				logger.Fatalf("error querying for artifacts: %v", err)
 			}
@@ -374,7 +374,7 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 					Algorithm: &occurrence.Artifact.Algorithm,
 					Digest:    &occurrence.Artifact.Digest,
 				}
-				artifactResponse, err := model.Artifacts(ctx, gqlclient, artifactFilter)
+				artifactResponse, err := model.Artifacts(ctx, gqlclient, *artifactFilter)
 				if err != nil {
 					logger.Debugf("error querying for artifacts: %v", err)
 				}

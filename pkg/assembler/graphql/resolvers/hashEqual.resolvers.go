@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestHashEquals(ctx context.Context, artifacts []*mo
 }
 
 // HashEqual is the resolver for the HashEqual field.
-func (r *queryResolver) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
-	return r.Backend.HashEqual(ctx, hashEqualSpec)
+func (r *queryResolver) HashEqual(ctx context.Context, hashEqualSpec model.HashEqualSpec) ([]*model.HashEqual, error) {
+	return r.Backend.HashEqual(ctx, &hashEqualSpec)
 }
