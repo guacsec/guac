@@ -162,11 +162,11 @@ func setHasSBOMMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSBOMSpec *
 		queryValues["downloadLocation"] = hasSBOMSpec.DownloadLocation
 	}
 	if hasSBOMSpec.Origin != nil {
-		arangoQueryBuilder.filter("hasSBOM", buildTypeStr, "==", "@"+buildTypeStr)
+		arangoQueryBuilder.filter("hasSBOM", origin, "==", "@"+origin)
 		queryValues[origin] = hasSBOMSpec.Origin
 	}
 	if hasSBOMSpec.Collector != nil {
-		arangoQueryBuilder.filter("hasSBOM", buildTypeStr, "==", "@"+buildTypeStr)
+		arangoQueryBuilder.filter("hasSBOM", collector, "==", "@"+collector)
 		queryValues[collector] = hasSBOMSpec.Collector
 	}
 }

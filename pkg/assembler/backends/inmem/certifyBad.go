@@ -58,7 +58,7 @@ func (n *badLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest CertifyBad
-func (c *demoClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
+func (c *demoClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
 	valuesDefined := 0
 	if len(subjects.Packages) > 0 {
 		if len(subjects.Packages) != len(certifyBads) {
@@ -89,19 +89,19 @@ func (c *demoClient) IngestCertifyBads(ctx context.Context, subjects model.Packa
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
-			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchTypes[i], *certifyBads[i])
+			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyBad failed with err: %v", err)
 			}
 		} else if len(subjects.Sources) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
-			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchTypes[i], *certifyBads[i])
+			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyBad failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchTypes[i], *certifyBads[i])
+			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyBad failed with err: %v", err)
 			}

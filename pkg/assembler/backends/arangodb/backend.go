@@ -120,6 +120,16 @@ const (
 
 	scorecardEdgesStr string = "scorecardEdges"
 	scorecardStr      string = "scorecards"
+
+	// certifyBad collection
+
+	certifyBadEdgesStr string = "certifyBadEdges"
+	certifyBadsStr     string = "certifyBads"
+
+	// certifyGood collection
+
+	certifyGoodEdgesStr string = "certifyGoodEdges"
+	certifyGoodsStr     string = "certifyGoods"
 )
 
 type ArangoConfig struct {
@@ -369,18 +379,37 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// repeat this for the collections where an edge is going into
 		certifyScorecardEdges.To = []string{scorecardStr}
 
+		var certifyBadEdges driver.EdgeDefinition
+		certifyBadEdges.Collection = certifyBadEdgesStr
+		// define a set of collections where an edge is going out...
+		certifyBadEdges.From = []string{pkgNamesStr, pkgVersionsStr, artifactsStr, srcNamesStr}
+
+		// repeat this for the collections where an edge is going into
+		certifyBadEdges.To = []string{certifyBadsStr}
+
+		var certifyGoodEdges driver.EdgeDefinition
+		certifyGoodEdges.Collection = certifyGoodsStr
+		// define a set of collections where an edge is going out...
+		certifyGoodEdges.From = []string{pkgNamesStr, pkgVersionsStr, artifactsStr, srcNamesStr}
+
+		// repeat this for the collections where an edge is going into
+		certifyGoodEdges.To = []string{certifyGoodsStr}
+
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
 		options.EdgeDefinitions = []driver.EdgeDefinition{pkgHasType, pkgHasNamespace, pkgHasName,
 			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, hashEqualsSubjectEdges, hashEqualsEdges,
 			isDependencySubjectEdges, isDependencyEdges, isOccurrencesSubjectEdges, isOccurrencesEdges,
-			hasSBOMEdges, hasSLSASubjectEdges, hasSLSABuiltByEdges, hasSLSABuiltFromEdges, certifyVulnEdges, certifyScorecardEdges}
+			hasSBOMEdges, hasSLSASubjectEdges, hasSLSABuiltByEdges, hasSLSABuiltFromEdges, certifyVulnEdges, certifyScorecardEdges,
+			certifyBadEdges, certifyGoodEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create graph: %w", err)
 		}
+
+		// TODO (pxp928): Add missing indexes for verbs as needed
 
 		// add indexes to artifact and edge collections
 		if err := createIndexPerCollection(ctx, db, artifactsStr, []string{"digest"}, true, "byDigest"); err != nil {

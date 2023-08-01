@@ -30,7 +30,6 @@ func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.Pack
 	panic(fmt.Errorf("not implemented: IngestCertifyGood - IngestCertifyGood"))
 }
 
-func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
+func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
 	panic(fmt.Errorf("not implemented: IngestCertifyGood - IngestCertifyGood"))
-
 }

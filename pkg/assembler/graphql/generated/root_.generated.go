@@ -185,9 +185,9 @@ type ComplexityRoot struct {
 		IngestBuilders        func(childComplexity int, builders []*model.BuilderInputSpec) int
 		IngestCVEs            func(childComplexity int, cves []*model.CVEInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
-		IngestCertifyBads     func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
+		IngestCertifyBads     func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
-		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
+		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
@@ -1081,7 +1081,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyBads(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchTypes"].([]*model.MatchFlags), args["certifyBads"].([]*model.CertifyBadInputSpec)), true
+		return e.complexity.Mutation.IngestCertifyBads(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(*model.MatchFlags), args["certifyBads"].([]*model.CertifyBadInputSpec)), true
 
 	case "Mutation.ingestCertifyGood":
 		if e.complexity.Mutation.IngestCertifyGood == nil {
@@ -1105,7 +1105,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyGoods(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchTypes"].([]*model.MatchFlags), args["certifyGoods"].([]*model.CertifyGoodInputSpec)), true
+		return e.complexity.Mutation.IngestCertifyGoods(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(*model.MatchFlags), args["certifyGoods"].([]*model.CertifyGoodInputSpec)), true
 
 	case "Mutation.ingestCVE":
 		if e.complexity.Mutation.IngestCve == nil {
@@ -2663,7 +2663,7 @@ extend type Mutation {
   "Adds a certification that a package, source or artifact is considered bad."
   ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
   "Adds bulk certifications that a package, source or artifact is considered bad."
-  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchTypes: [MatchFlags!], certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
+  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags, certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyGood.graphql", Input: `#
@@ -2743,7 +2743,7 @@ extend type Mutation {
   "Adds a certification that a package, source or artifact is considered good."
   ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyGood: CertifyGoodInputSpec!): CertifyGood!
   "Adds bulk certifications that a package, source or artifact is considered good."
-  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchTypes: [MatchFlags!], certifyGoods: [CertifyGoodInputSpec!]!): [CertifyGood!]!
+  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags, certifyGoods: [CertifyGoodInputSpec!]!): [CertifyGood!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#

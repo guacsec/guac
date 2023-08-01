@@ -273,6 +273,6 @@ func (c *neo4jClient) IngestCertifyBad(ctx context.Context, subject model.Packag
 	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
 }
 
-func (c *neo4jClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
+func (c *neo4jClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
 	return []*model.CertifyBad{}, fmt.Errorf("not implemented: IngestCertifyBads")
 }

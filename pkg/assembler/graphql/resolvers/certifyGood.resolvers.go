@@ -16,8 +16,8 @@ func (r *mutationResolver) IngestCertifyGood(ctx context.Context, subject model.
 }
 
 // IngestCertifyGoods is the resolver for the ingestCertifyGoods field.
-func (r *mutationResolver) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
-	return r.Backend.IngestCertifyGoods(ctx, subjects, pkgMatchTypes, certifyGoods)
+func (r *mutationResolver) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
+	return r.Backend.IngestCertifyGoods(ctx, subjects, pkgMatchType, certifyGoods)
 }
 
 // CertifyGood is the resolver for the CertifyGood field.

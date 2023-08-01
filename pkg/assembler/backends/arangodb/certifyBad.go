@@ -17,19 +17,814 @@ package arangodb
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func (c *arangoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	panic(fmt.Errorf("not implemented: CertifyBad - CertifyBad"))
+	return []*model.CertifyBad{}, fmt.Errorf("not implemented - CertifyBad")
+}
+
+// func setCertifyBadMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyBadSpec *model.CertifyBadSpec, queryValues map[string]any) {
+// 	if certifyBadSpec.Justification != nil {
+// 		arangoQueryBuilder.filter("bad", justification, "==", "@"+justification)
+// 		queryValues[justification] = certifyBadSpec.Justification
+// 	}
+// 	if certifyBadSpec.Origin != nil {
+// 		arangoQueryBuilder.filter("bad", origin, "==", "@"+origin)
+// 		queryValues[origin] = certifyBadSpec.Origin
+// 	}
+// 	if certifyBadSpec.Collector != nil {
+// 		arangoQueryBuilder.filter("bad", collector, "==", "@"+collector)
+// 		queryValues[collector] = certifyBadSpec.Collector
+// 	}
+// }
+
+func getCertifyBadQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.MatchFlags, artifact *model.ArtifactInputSpec, source *model.SourceInputSpec, certifyBad *model.CertifyBadInputSpec) map[string]any {
+	values := map[string]any{}
+	// add guac keys
+	if pkg != nil {
+		pkgId := guacPkgId(*pkg)
+		if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+			values["pkgNameGuacKey"] = pkgId.NameId
+		} else {
+			values["pkgVersionGuacKey"] = pkgId.VersionId
+		}
+	} else if artifact != nil {
+		values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
+		values["art_digest"] = strings.ToLower(artifact.Digest)
+	} else {
+		source := guacSrcId(*source)
+		values["srcNameGuacKey"] = source.NameId
+	}
+
+	values["justification"] = certifyBad.Justification
+	values["origin"] = certifyBad.Origin
+	values["collector"] = certifyBad.Collector
+
+	return values
 }
 
 func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
+	if subject.Package != nil {
+		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+			query := `
+		LET firstPkg = FIRST(
+			FOR pVersion in pkgVersions
+			  FILTER pVersion.guacKey == @pkgVersionGuacKey
+			FOR pName in pkgNames
+			  FILTER pName._id == pVersion._parent
+			FOR pNs in pkgNamespaces
+			  FILTER pNs._id == pName._parent
+			FOR pType in pkgTypes
+			  FILTER pType._id == pNs._parent
+	
+			RETURN {
+			  'typeID': pType._id,
+			  'type': pType.type,
+			  'namespace_id': pNs._id,
+			  'namespace': pNs.namespace,
+			  'name_id': pName._id,
+			  'name': pName.name,
+			  'version_id': pVersion._id,
+			  'version': pVersion.version,
+			  'subpath': pVersion.subpath,
+			  'qualifier_list': pVersion.qualifier_list,
+			  'versionDoc': pVersion
+			}
+		)
+		  
+		  LET certifyBad = FIRST(
+			  UPSERT {  packageID:firstPkg.version_id, justification:@justification, collector:@collector, origin:@origin } 
+				  INSERT {  packageID:firstPkg.version_id, justification:@justification, collector:@collector, origin:@origin } 
+				  UPDATE {} IN certifyBads
+				  RETURN NEW
+		  )
+		  
+		  LET edgeCollection = (
+			INSERT {  _key: CONCAT("certifyBadEdges", firstPkg.versionDoc._key, certifyBad._key), _from: firstPkg.version_id, _to: certifyBad._id, label: "pkgVersion" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		  )
+		  
+		  RETURN {
+			'pkgVersion': {
+				'type_id': firstPkg.typeID,
+				'type': firstPkg.type,
+				'namespace_id': firstPkg.namespace_id,
+				'namespace': firstPkg.namespace,
+				'name_id': firstPkg.name_id,
+				'name': firstPkg.name,
+				'version_id': firstPkg.version_id,
+				'version': firstPkg.version,
+				'subpath': firstPkg.subpath,
+				'qualifier_list': firstPkg.qualifier_list
+			},
+			'certifyBad_id': certifyBad._id,
+			'justification': certifyBad.justification,
+			'collector': certifyBad.collector,
+			'origin': certifyBad.origin  
+		  }`
+
+			cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(subject.Package, pkgMatchType, nil, nil, &certifyBad), "IngestCertifyBad - PkgVersion")
+			if err != nil {
+				return nil, fmt.Errorf("failed to ingest package certifyBad: %w", err)
+			}
+			defer cursor.Close()
+
+			certifyBadList, err := getPkgVersionCertifyBad(ctx, cursor)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
+			}
+
+			if len(certifyBadList) == 1 {
+				return certifyBadList[0], nil
+			} else {
+				return nil, fmt.Errorf("number of certifyBad ingested is greater than one")
+			}
+		} else {
+			query := `
+			LET firstPkg = FIRST(
+				FOR pName in pkgNames
+				  FILTER pName.guacKey == @pkgNameGuacKey
+				FOR pNs in pkgNamespaces
+				  FILTER pNs._id == pName._parent
+				FOR pType in pkgTypes
+				  FILTER pType._id == pNs._parent
+		
+				RETURN {
+				  'typeID': pType._id,
+				  'type': pType.type,
+				  'namespace_id': pNs._id,
+				  'namespace': pNs.namespace,
+				  'name_id': pName._id,
+				  'name': pName.name,
+				  'nameDoc': pName
+				}
+			)
+			  
+			  LET certifyBad = FIRST(
+				  UPSERT {  packageID:firstPkg.name_id, justification:@justification, collector:@collector, origin:@origin } 
+					  INSERT {  packageID:firstPkg.name_id, justification:@justification, collector:@collector, origin:@origin } 
+					  UPDATE {} IN certifyBads
+					  RETURN NEW
+			  )
+			  
+			  LET edgeCollection = (
+				INSERT {  _key: CONCAT("certifyBadEdges", firstPkg.nameDoc._key, certifyBad._key), _from: firstPkg.name_id, _to: certifyBad._id, label: "pkgName" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+			  )
+			  
+			  RETURN {
+				'pkgName': {
+					'type_id': firstPkg.typeID,
+					'type': firstPkg.type,
+					'namespace_id': firstPkg.namespace_id,
+					'namespace': firstPkg.namespace,
+					'name_id': firstPkg.name_id,
+					'name': firstPkg.name
+				},
+				'certifyBad_id': certifyBad._id,
+				'justification': certifyBad.justification,
+				'collector': certifyBad.collector,
+				'origin': certifyBad.origin  
+			  }`
+
+			cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(subject.Package, pkgMatchType, nil, nil, &certifyBad), "IngestCertifyBad - PkgName")
+			if err != nil {
+				return nil, fmt.Errorf("failed to ingest package certifyBad: %w", err)
+			}
+			defer cursor.Close()
+
+			certifyBadList, err := getPkgNameCertifyBad(ctx, cursor)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
+			}
+
+			if len(certifyBadList) == 1 {
+				return certifyBadList[0], nil
+			} else {
+				return nil, fmt.Errorf("number of certifyBad ingested is greater than one")
+			}
+		}
+
+	} else if subject.Artifact != nil {
+		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
+		  
+		LET certifyBad = FIRST(
+			UPSERT { artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+				INSERT { artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+				UPDATE {} IN certifyBads
+				RETURN NEW
+		)
+		
+		LET edgeCollection = (
+		  INSERT {  _key: CONCAT("certifyBadEdges", artifact._key, certifyBad._key), _from: artifact._id, _to: certifyBad._id, label: "artifact" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		)
+		
+		RETURN {
+		  'artifact': {
+			  'id': artifact._id,
+			  'algorithm': artifact.algorithm,
+			  'digest': artifact.digest
+		  },
+		  'certifyBad_id': certifyBad._id,
+		  'justification': certifyBad.justification,
+		  'collector': certifyBad.collector,
+		  'origin': certifyBad.origin
+		}`
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(nil, nil, subject.Artifact, nil, &certifyBad), "IngestCertifyBad - artifact")
+		if err != nil {
+			return nil, fmt.Errorf("failed to ingest artifact certifyBad: %w", err)
+		}
+		defer cursor.Close()
+		certifyBadList, err := getArtifactCertifyBad(ctx, cursor)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
+		}
+
+		if len(certifyBadList) == 1 {
+			return certifyBadList[0], nil
+		} else {
+			return nil, fmt.Errorf("number of certifyBad ingested is greater than one")
+		}
+
+	} else if subject.Source != nil {
+		query := `
+		LET firstSrc = FIRST(
+			FOR sName in srcNames
+			  FILTER sName.guacKey == @srcNameGuacKey
+			FOR sNs in srcNamespaces
+			  FILTER sNs._id == sName._parent
+			FOR sType in srcTypes
+			  FILTER sType._id == sNs._parent
+	
+			RETURN {
+			  'typeID': sType._id,
+			  'type': sType.type,
+			  'namespace_id': sNs._id,
+			  'namespace': sNs.namespace,
+			  'name_id': sName._id,
+			  'name': sName.name,
+			  'commit': sName.commit,
+			  'tag': sName.tag,
+			  'nameDoc': sName
+			}
+		)
+		  
+		LET certifyBad = FIRST(
+			UPSERT { sourceID:firstSrc.name_id, justification:@justification, collector:@collector, origin:@origin } 
+				INSERT { sourceID:firstSrc.name_id, justification:@justification, collector:@collector, origin:@origin } 
+				UPDATE {} IN certifyBads
+				RETURN NEW
+		)
+		
+		LET edgeCollection = (
+		  INSERT {  _key: CONCAT("certifyBadEdges", firstSrc.nameDoc._key, certifyBad._key), _from: firstSrc.name_id, _to: certifyBad._id, label: "source" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		)
+		
+		RETURN {
+		  'srcName': {
+			  'type_id': firstSrc.typeID,
+			  'type': firstSrc.type,
+			  'namespace_id': firstSrc.namespace_id,
+			  'namespace': firstSrc.namespace,
+			  'name_id': firstSrc.name_id,
+			  'name': firstSrc.name,
+			  'commit': firstSrc.commit,
+			  'tag': firstSrc.tag
+		  },
+		  'certifyBad_id': certifyBad._id,
+		  'justification': certifyBad.justification,
+		  'collector': certifyBad.collector,
+		  'origin': certifyBad.origin
+		}`
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(nil, nil, nil, subject.Source, &certifyBad), "IngestCertifyBad - source")
+		if err != nil {
+			return nil, fmt.Errorf("failed to ingest source certifyBad: %w", err)
+		}
+		defer cursor.Close()
+		certifyBadList, err := getSourceCertifyBad(ctx, cursor)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
+		}
+
+		if len(certifyBadList) == 1 {
+			return certifyBadList[0], nil
+		} else {
+			return nil, fmt.Errorf("number of certifyBad ingested is greater than one")
+		}
+
+	} else {
+		return nil, fmt.Errorf("package, artifact, or source is specified for IngestCertifyBad")
+	}
 }
 
-func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
+func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(certifyBads) {
+			return nil, fmt.Errorf("uneven packages and certifyBads for ingestion")
+		}
+
+		var listOfValues []map[string]any
+
+		for i := range subjects.Packages {
+			listOfValues = append(listOfValues, getCertifyBadQueryValues(subjects.Packages[i], pkgMatchType, nil, nil, certifyBads[i]))
+		}
+
+		var documents []string
+		for _, val := range listOfValues {
+			bs, _ := json.Marshal(val)
+			documents = append(documents, string(bs))
+		}
+
+		queryValues := map[string]any{}
+		queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+		var sb strings.Builder
+
+		sb.WriteString("for doc in [")
+		for i, val := range listOfValues {
+			bs, _ := json.Marshal(val)
+			if i == len(listOfValues)-1 {
+				sb.WriteString(string(bs))
+			} else {
+				sb.WriteString(string(bs) + ",")
+			}
+		}
+		sb.WriteString("]")
+
+		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+			query := `
+		LET firstPkg = FIRST(
+			FOR pVersion in pkgVersions
+			  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
+			FOR pName in pkgNames
+			  FILTER pName._id == pVersion._parent
+			FOR pNs in pkgNamespaces
+			  FILTER pNs._id == pName._parent
+			FOR pType in pkgTypes
+			  FILTER pType._id == pNs._parent
+	
+			RETURN {
+			  'typeID': pType._id,
+			  'type': pType.type,
+			  'namespace_id': pNs._id,
+			  'namespace': pNs.namespace,
+			  'name_id': pName._id,
+			  'name': pName.name,
+			  'version_id': pVersion._id,
+			  'version': pVersion.version,
+			  'subpath': pVersion.subpath,
+			  'qualifier_list': pVersion.qualifier_list,
+			  'versionDoc': pVersion
+			}
+		)
+		  
+		  LET certifyBad = FIRST(
+			  UPSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  INSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  UPDATE {} IN certifyBads
+				  RETURN NEW
+		  )
+		  
+		  LET edgeCollection = (
+			INSERT {  _key: CONCAT("certifyBadEdges", firstPkg.versionDoc._key, certifyBad._key), _from: firstPkg.version_id, _to: certifyBad._id, label: "pkgVersion" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		  )
+		  
+		  RETURN {
+			'pkgVersion': {
+				'type_id': firstPkg.typeID,
+				'type': firstPkg.type,
+				'namespace_id': firstPkg.namespace_id,
+				'namespace': firstPkg.namespace,
+				'name_id': firstPkg.name_id,
+				'name': firstPkg.name,
+				'version_id': firstPkg.version_id,
+				'version': firstPkg.version,
+				'subpath': firstPkg.subpath,
+				'qualifier_list': firstPkg.qualifier_list
+			},
+			'certifyBad_id': certifyBad._id,
+			'justification': certifyBad.justification,
+			'collector': certifyBad.collector,
+			'origin': certifyBad.origin  
+		  }`
+
+			sb.WriteString(query)
+
+			cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestCertifyBads - PkgVersion")
+			if err != nil {
+				return nil, fmt.Errorf("failed to ingest package certifyBads: %w", err)
+			}
+			defer cursor.Close()
+
+			certifyBadList, err := getPkgVersionCertifyBad(ctx, cursor)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
+			}
+
+			return certifyBadList, nil
+		} else {
+			query := `
+			LET firstPkg = FIRST(
+				FOR pName in pkgNames
+				  FILTER pName.guacKey == doc.pkgNameGuacKey
+				FOR pNs in pkgNamespaces
+				  FILTER pNs._id == pName._parent
+				FOR pType in pkgTypes
+				  FILTER pType._id == pNs._parent
+		
+				RETURN {
+				  'typeID': pType._id,
+				  'type': pType.type,
+				  'namespace_id': pNs._id,
+				  'namespace': pNs.namespace,
+				  'name_id': pName._id,
+				  'name': pName.name,
+				  'nameDoc': pName
+				}
+			)
+			  
+			  LET certifyBad = FIRST(
+				  UPSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+					  INSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+					  UPDATE {} IN certifyBads
+					  RETURN NEW
+			  )
+			  
+			  LET edgeCollection = (
+				INSERT {  _key: CONCAT("certifyBadEdges", firstPkg.nameDoc._key, certifyBad._key), _from: firstPkg.name_id, _to: certifyBad._id, label: "pkgName" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+			  )
+			  
+			  RETURN {
+				'pkgName': {
+					'type_id': firstPkg.typeID,
+					'type': firstPkg.type,
+					'namespace_id': firstPkg.namespace_id,
+					'namespace': firstPkg.namespace,
+					'name_id': firstPkg.name_id,
+					'name': firstPkg.name
+				},
+				'certifyBad_id': certifyBad._id,
+				'justification': certifyBad.justification,
+				'collector': certifyBad.collector,
+				'origin': certifyBad.origin  
+			  }`
+
+			sb.WriteString(query)
+
+			cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestCertifyBads - PkgName")
+			if err != nil {
+				return nil, fmt.Errorf("failed to ingest package certifyBads: %w", err)
+			}
+			defer cursor.Close()
+
+			certifyBadList, err := getPkgNameCertifyBad(ctx, cursor)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
+			}
+
+			return certifyBadList, nil
+		}
+
+	} else if len(subjects.Artifacts) > 0 {
+
+		if len(subjects.Artifacts) != len(certifyBads) {
+			return nil, fmt.Errorf("uneven artifacts and certifyBads for ingestion")
+		}
+
+		var listOfValues []map[string]any
+
+		for i := range subjects.Artifacts {
+			listOfValues = append(listOfValues, getCertifyBadQueryValues(nil, nil, subjects.Artifacts[i], nil, certifyBads[i]))
+		}
+
+		var documents []string
+		for _, val := range listOfValues {
+			bs, _ := json.Marshal(val)
+			documents = append(documents, string(bs))
+		}
+
+		queryValues := map[string]any{}
+		queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+		var sb strings.Builder
+
+		sb.WriteString("for doc in [")
+		for i, val := range listOfValues {
+			bs, _ := json.Marshal(val)
+			if i == len(listOfValues)-1 {
+				sb.WriteString(string(bs))
+			} else {
+				sb.WriteString(string(bs) + ",")
+			}
+		}
+		sb.WriteString("]")
+
+		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
+		  
+		LET certifyBad = FIRST(
+			UPSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				INSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				UPDATE {} IN certifyBads
+				RETURN NEW
+		)
+		
+		LET edgeCollection = (
+		  INSERT {  _key: CONCAT("certifyBadEdges", artifact._key, certifyBad._key), _from: artifact._id, _to: certifyBad._id, label: "artifact" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		)
+		
+		RETURN {
+		  'artifact': {
+			  'id': artifact._id,
+			  'algorithm': artifact.algorithm,
+			  'digest': artifact.digest
+		  },
+		  'certifyBad_id': certifyBad._id,
+		  'justification': certifyBad.justification,
+		  'collector': certifyBad.collector,
+		  'origin': certifyBad.origin
+		}`
+
+		sb.WriteString(query)
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestCertifyBads - artifact")
+		if err != nil {
+			return nil, fmt.Errorf("failed to ingest artifact certifyBad: %w", err)
+		}
+		defer cursor.Close()
+		certifyBadList, err := getArtifactCertifyBad(ctx, cursor)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
+		}
+
+		return certifyBadList, nil
+
+	} else if len(subjects.Sources) > 0 {
+
+		if len(subjects.Sources) != len(certifyBads) {
+			return nil, fmt.Errorf("uneven sources and certifyBads for ingestion")
+		}
+
+		var listOfValues []map[string]any
+
+		for i := range subjects.Sources {
+			listOfValues = append(listOfValues, getCertifyBadQueryValues(nil, nil, nil, subjects.Sources[i], certifyBads[i]))
+		}
+
+		var documents []string
+		for _, val := range listOfValues {
+			bs, _ := json.Marshal(val)
+			documents = append(documents, string(bs))
+		}
+
+		queryValues := map[string]any{}
+		queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+		var sb strings.Builder
+
+		sb.WriteString("for doc in [")
+		for i, val := range listOfValues {
+			bs, _ := json.Marshal(val)
+			if i == len(listOfValues)-1 {
+				sb.WriteString(string(bs))
+			} else {
+				sb.WriteString(string(bs) + ",")
+			}
+		}
+		sb.WriteString("]")
+
+		query := `
+		LET firstSrc = FIRST(
+			FOR sName in srcNames
+			  FILTER sName.guacKey == doc.srcNameGuacKey
+			FOR sNs in srcNamespaces
+			  FILTER sNs._id == sName._parent
+			FOR sType in srcTypes
+			  FILTER sType._id == sNs._parent
+	
+			RETURN {
+			  'typeID': sType._id,
+			  'type': sType.type,
+			  'namespace_id': sNs._id,
+			  'namespace': sNs.namespace,
+			  'name_id': sName._id,
+			  'name': sName.name,
+			  'commit': sName.commit,
+			  'tag': sName.tag,
+			  'nameDoc': sName
+			}
+		)
+		  
+		LET certifyBad = FIRST(
+			UPSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				INSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				UPDATE {} IN certifyBads
+				RETURN NEW
+		)
+		
+		LET edgeCollection = (
+		  INSERT {  _key: CONCAT("certifyBadEdges", firstSrc.nameDoc._key, certifyBad._key), _from: firstSrc.name_id, _to: certifyBad._id, label: "source" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		)
+		
+		RETURN {
+		  'srcName': {
+			  'type_id': firstSrc.typeID,
+			  'type': firstSrc.type,
+			  'namespace_id': firstSrc.namespace_id,
+			  'namespace': firstSrc.namespace,
+			  'name_id': firstSrc.name_id,
+			  'name': firstSrc.name,
+			  'commit': firstSrc.commit,
+			  'tag': firstSrc.tag
+		  },
+		  'certifyBad_id': certifyBad._id,
+		  'justification': certifyBad.justification,
+		  'collector': certifyBad.collector,
+		  'origin': certifyBad.origin
+		}`
+
+		sb.WriteString(query)
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestCertifyBads - source")
+		if err != nil {
+			return nil, fmt.Errorf("failed to ingest source certifyBad: %w", err)
+		}
+		defer cursor.Close()
+		certifyBadList, err := getSourceCertifyBad(ctx, cursor)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
+		}
+
+		return certifyBadList, nil
+
+	} else {
+		return nil, fmt.Errorf("packages, artifacts, or sources not specified for IngestCertifyBads")
+	}
+}
+
+func getPkgNameCertifyBad(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyBad, error) {
+	type collectedData struct {
+		PkgName       *dbPkgName `json:"pkgName"`
+		CertifyBadID  string     `json:"certifyBad_id"`
+		Justification string     `json:"justification"`
+		Collector     string     `json:"collector"`
+		Origin        string     `json:"origin"`
+	}
+
+	var createdValues []collectedData
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to package name certifyBad from cursor: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	var certifyBadList []*model.CertifyBad
+	for _, createdValue := range createdValues {
+		pkg := generateModelPackage(createdValue.PkgName.TypeID, createdValue.PkgName.PkgType, createdValue.PkgName.NamespaceID, createdValue.PkgName.Namespace, createdValue.PkgName.NameID,
+			createdValue.PkgName.Name, nil, nil, nil, nil)
+
+		certifyBad := &model.CertifyBad{
+			ID:            createdValue.CertifyBadID,
+			Subject:       pkg,
+			Justification: createdValue.Justification,
+			Origin:        createdValue.Collector,
+			Collector:     createdValue.Origin,
+		}
+		certifyBadList = append(certifyBadList, certifyBad)
+	}
+	return certifyBadList, nil
+}
+
+func getPkgVersionCertifyBad(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyBad, error) {
+	type collectedData struct {
+		PkgVersion    *dbPkgVersion `json:"pkgVersion"`
+		CertifyBadID  string        `json:"certifyBad_id"`
+		Justification string        `json:"justification"`
+		Collector     string        `json:"collector"`
+		Origin        string        `json:"origin"`
+	}
+
+	var createdValues []collectedData
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to package version certifyBad from cursor: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	var certifyBadList []*model.CertifyBad
+	for _, createdValue := range createdValues {
+		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+
+		certifyBad := &model.CertifyBad{
+			ID:            createdValue.CertifyBadID,
+			Subject:       pkg,
+			Justification: createdValue.Justification,
+			Origin:        createdValue.Collector,
+			Collector:     createdValue.Origin,
+		}
+		certifyBadList = append(certifyBadList, certifyBad)
+	}
+	return certifyBadList, nil
+}
+
+func getArtifactCertifyBad(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyBad, error) {
+	type collectedData struct {
+		Artifact      *model.Artifact `json:"artifact"`
+		CertifyBadID  string          `json:"certifyBad_id"`
+		Justification string          `json:"justification"`
+		Collector     string          `json:"collector"`
+		Origin        string          `json:"origin"`
+	}
+
+	var createdValues []collectedData
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to artifact certifyBad from cursor: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	var certifyBadList []*model.CertifyBad
+	for _, createdValue := range createdValues {
+		certifyBad := &model.CertifyBad{
+			ID:            createdValue.CertifyBadID,
+			Subject:       createdValue.Artifact,
+			Justification: createdValue.Justification,
+			Origin:        createdValue.Collector,
+			Collector:     createdValue.Origin,
+		}
+		certifyBadList = append(certifyBadList, certifyBad)
+	}
+	return certifyBadList, nil
+}
+
+func getSourceCertifyBad(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyBad, error) {
+	type collectedData struct {
+		SrcName       *dbSrcName `json:"srcName"`
+		CertifyBadID  string     `json:"certifyBad_id"`
+		Justification string     `json:"justification"`
+		Collector     string     `json:"collector"`
+		Origin        string     `json:"origin"`
+	}
+
+	var createdValues []collectedData
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to source certifyBad from cursor: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	var certifyBadList []*model.CertifyBad
+	for _, createdValue := range createdValues {
+
+		src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
+			createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
+
+		certifyBad := &model.CertifyBad{
+			ID:            createdValue.CertifyBadID,
+			Subject:       src,
+			Justification: createdValue.Justification,
+			Origin:        createdValue.Collector,
+			Collector:     createdValue.Origin,
+		}
+		certifyBadList = append(certifyBadList, certifyBad)
+	}
+	return certifyBadList, nil
 }

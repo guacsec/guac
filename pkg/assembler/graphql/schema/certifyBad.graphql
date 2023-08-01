@@ -129,5 +129,5 @@ extend type Mutation {
   "Adds a certification that a package, source or artifact is considered bad."
   ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
   "Adds bulk certifications that a package, source or artifact is considered bad."
-  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchTypes: [MatchFlags!], certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
+  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags, certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
 }

@@ -308,7 +308,7 @@ func ingestCertifyBad(ctx context.Context, client graphql.Client, bad assembler.
 	}
 
 	if bad.Pkg != nil {
-		_, err := model.CertifyBadPkg(ctx, client, *bad.Pkg, &bad.PkgMatchFlag, *bad.CertifyBad)
+		_, err := model.CertifyBadPkg(ctx, client, *bad.Pkg, bad.PkgMatchFlag, *bad.CertifyBad)
 		return err
 	}
 	if bad.Src != nil {

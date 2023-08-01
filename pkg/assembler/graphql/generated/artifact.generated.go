@@ -24,9 +24,9 @@ type MutationResolver interface {
 	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error)
 	IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error)
 	IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error)
-	IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error)
+	IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error)
 	IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error)
-	IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchTypes []*model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error)
+	IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error)
 	IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
 	IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error)
 	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
@@ -226,15 +226,15 @@ func (ec *executionContext) field_Mutation_ingestCertifyBads_args(ctx context.Co
 		}
 	}
 	args["subjects"] = arg0
-	var arg1 []*model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchTypes"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchTypes"))
-		arg1, err = ec.unmarshalOMatchFlags2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlagsᚄ(ctx, tmp)
+	var arg1 *model.MatchFlags
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+		arg1, err = ec.unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["pkgMatchTypes"] = arg1
+	args["pkgMatchType"] = arg1
 	var arg2 []*model.CertifyBadInputSpec
 	if tmp, ok := rawArgs["certifyBads"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBads"))
@@ -292,15 +292,15 @@ func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.C
 		}
 	}
 	args["subjects"] = arg0
-	var arg1 []*model.MatchFlags
-	if tmp, ok := rawArgs["pkgMatchTypes"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchTypes"))
-		arg1, err = ec.unmarshalOMatchFlags2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlagsᚄ(ctx, tmp)
+	var arg1 *model.MatchFlags
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+		arg1, err = ec.unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["pkgMatchTypes"] = arg1
+	args["pkgMatchType"] = arg1
 	var arg2 []*model.CertifyGoodInputSpec
 	if tmp, ok := rawArgs["certifyGoods"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoods"))
@@ -1976,7 +1976,7 @@ func (ec *executionContext) _Mutation_ingestCertifyBads(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyBads(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchTypes"].([]*model.MatchFlags), fc.Args["certifyBads"].([]*model.CertifyBadInputSpec))
+		return ec.resolvers.Mutation().IngestCertifyBads(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(*model.MatchFlags), fc.Args["certifyBads"].([]*model.CertifyBadInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2110,7 +2110,7 @@ func (ec *executionContext) _Mutation_ingestCertifyGoods(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyGoods(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchTypes"].([]*model.MatchFlags), fc.Args["certifyGoods"].([]*model.CertifyGoodInputSpec))
+		return ec.resolvers.Mutation().IngestCertifyGoods(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(*model.MatchFlags), fc.Args["certifyGoods"].([]*model.CertifyGoodInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
