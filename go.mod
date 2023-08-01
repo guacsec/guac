@@ -162,7 +162,7 @@ require (
 )
 
 require (
-	github.com/99designs/gqlgen v0.17.35
+	github.com/99designs/gqlgen v0.17.36
 	github.com/CycloneDX/cyclonedx-go v0.7.1
 	github.com/Khan/genqlient v0.6.0
 	github.com/Masterminds/semver v1.5.0
