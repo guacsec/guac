@@ -16,6 +16,6 @@ func (r *mutationResolver) IngestPointOfContact(ctx context.Context, subject mod
 }
 
 // PointOfContact is the resolver for the PointOfContact field.
-func (r *queryResolver) PointOfContact(ctx context.Context, pointOfContactSpec *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
-	return r.Backend.PointOfContact(ctx, pointOfContactSpec)
+func (r *queryResolver) PointOfContact(ctx context.Context, pointOfContactSpec model.PointOfContactSpec) ([]*model.PointOfContact, error) {
+	return r.Backend.PointOfContact(ctx, &pointOfContactSpec)
 }

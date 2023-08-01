@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.Pa
 }
 
 // HasSbom is the resolver for the HasSBOM field.
-func (r *queryResolver) HasSbom(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
-	return r.Backend.HasSBOM(ctx, hasSBOMSpec)
+func (r *queryResolver) HasSbom(ctx context.Context, hasSBOMSpec model.HasSBOMSpec) ([]*model.HasSbom, error) {
+	return r.Backend.HasSBOM(ctx, &hasSBOMSpec)
 }

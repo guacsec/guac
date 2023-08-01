@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestOccurrences(ctx context.Context, subjects model
 }
 
 // IsOccurrence is the resolver for the IsOccurrence field.
-func (r *queryResolver) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	return r.Backend.IsOccurrence(ctx, isOccurrenceSpec)
+func (r *queryResolver) IsOccurrence(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+	return r.Backend.IsOccurrence(ctx, &isOccurrenceSpec)
 }

@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestPackages(ctx context.Context, pkgs []*model.Pkg
 }
 
 // Packages is the resolver for the packages field.
-func (r *queryResolver) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	return r.Backend.Packages(ctx, pkgSpec)
+func (r *queryResolver) Packages(ctx context.Context, pkgSpec model.PkgSpec) ([]*model.Package, error) {
+	return r.Backend.Packages(ctx, &pkgSpec)
 }

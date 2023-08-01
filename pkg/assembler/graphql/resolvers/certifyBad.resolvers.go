@@ -16,6 +16,6 @@ func (r *mutationResolver) IngestCertifyBad(ctx context.Context, subject model.P
 }
 
 // CertifyBad is the resolver for the CertifyBad field.
-func (r *queryResolver) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	return r.Backend.CertifyBad(ctx, certifyBadSpec)
+func (r *queryResolver) CertifyBad(ctx context.Context, certifyBadSpec model.CertifyBadSpec) ([]*model.CertifyBad, error) {
+	return r.Backend.CertifyBad(ctx, &certifyBadSpec)
 }

@@ -16,6 +16,6 @@ func (r *mutationResolver) IngestHasMetadata(ctx context.Context, subject model.
 }
 
 // HasMetadata is the resolver for the HasMetadata field.
-func (r *queryResolver) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
-	return r.Backend.HasMetadata(ctx, hasMetadataSpec)
+func (r *queryResolver) HasMetadata(ctx context.Context, hasMetadataSpec model.HasMetadataSpec) ([]*model.HasMetadata, error) {
+	return r.Backend.HasMetadata(ctx, &hasMetadataSpec)
 }

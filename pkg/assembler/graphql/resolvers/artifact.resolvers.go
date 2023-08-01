@@ -22,8 +22,8 @@ func (r *mutationResolver) IngestArtifacts(ctx context.Context, artifacts []*mod
 }
 
 // Artifacts is the resolver for the artifacts field.
-func (r *queryResolver) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-	return r.Backend.Artifacts(ctx, artifactSpec)
+func (r *queryResolver) Artifacts(ctx context.Context, artifactSpec model.ArtifactSpec) ([]*model.Artifact, error) {
+	return r.Backend.Artifacts(ctx, &artifactSpec)
 }
 
 // Mutation returns generated.MutationResolver implementation.

@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestSLSAs(ctx context.Context, subjects []*model.Ar
 }
 
 // HasSlsa is the resolver for the HasSLSA field.
-func (r *queryResolver) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-	return r.Backend.HasSlsa(ctx, hasSLSASpec)
+func (r *queryResolver) HasSlsa(ctx context.Context, hasSLSASpec model.HasSLSASpec) ([]*model.HasSlsa, error) {
+	return r.Backend.HasSlsa(ctx, &hasSLSASpec)
 }

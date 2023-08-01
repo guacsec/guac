@@ -16,6 +16,6 @@ func (r *mutationResolver) IngestVulnerability(ctx context.Context, pkg model.Pk
 }
 
 // CertifyVuln is the resolver for the CertifyVuln field.
-func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	return r.Backend.CertifyVuln(ctx, certifyVulnSpec)
+func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
+	return r.Backend.CertifyVuln(ctx, &certifyVulnSpec)
 }

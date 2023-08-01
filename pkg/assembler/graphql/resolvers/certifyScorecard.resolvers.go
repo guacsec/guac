@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestScorecards(ctx context.Context, sources []*mode
 }
 
 // Scorecards is the resolver for the scorecards field.
-func (r *queryResolver) Scorecards(ctx context.Context, scorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	return r.Backend.Scorecards(ctx, scorecardSpec)
+func (r *queryResolver) Scorecards(ctx context.Context, scorecardSpec model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
+	return r.Backend.Scorecards(ctx, &scorecardSpec)
 }

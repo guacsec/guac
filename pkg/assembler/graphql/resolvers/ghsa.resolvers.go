@@ -21,6 +21,6 @@ func (r *mutationResolver) IngestGHSAs(ctx context.Context, ghsas []*model.GHSAI
 }
 
 // Ghsa is the resolver for the ghsa field.
-func (r *queryResolver) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
-	return r.Backend.Ghsa(ctx, ghsaSpec)
+func (r *queryResolver) Ghsa(ctx context.Context, ghsaSpec model.GHSASpec) ([]*model.Ghsa, error) {
+	return r.Backend.Ghsa(ctx, &ghsaSpec)
 }

@@ -16,6 +16,6 @@ func (r *mutationResolver) IngestCertifyGood(ctx context.Context, subject model.
 }
 
 // CertifyGood is the resolver for the CertifyGood field.
-func (r *queryResolver) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
-	return r.Backend.CertifyGood(ctx, certifyGoodSpec)
+func (r *queryResolver) CertifyGood(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
+	return r.Backend.CertifyGood(ctx, &certifyGoodSpec)
 }
