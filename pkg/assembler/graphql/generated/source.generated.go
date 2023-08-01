@@ -982,6 +982,11 @@ func (ec *executionContext) marshalNSourceNamespace2ᚖgithubᚗcomᚋguacsecᚋ
 	return ec._SourceNamespace(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx context.Context, v interface{}) (model.SourceSpec, error) {
+	res, err := ec.unmarshalInputSourceSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.SourceInputSpec, error) {
 	if v == nil {
 		return nil, nil

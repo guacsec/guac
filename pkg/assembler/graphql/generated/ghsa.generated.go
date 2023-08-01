@@ -323,6 +323,11 @@ func (ec *executionContext) unmarshalNGHSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋ
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNGHSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx context.Context, v interface{}) (model.GHSASpec, error) {
+	res, err := ec.unmarshalInputGHSASpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOGHSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAInputSpec(ctx context.Context, v interface{}) (*model.GHSAInputSpec, error) {
 	if v == nil {
 		return nil, nil

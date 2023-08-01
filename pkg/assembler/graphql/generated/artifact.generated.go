@@ -56,33 +56,33 @@ type MutationResolver interface {
 	IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error)
 }
 type QueryResolver interface {
-	Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error)
-	Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error)
-	CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error)
-	CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error)
-	Scorecards(ctx context.Context, scorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error)
-	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
-	CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
-	PointOfContact(ctx context.Context, pointOfContactSpec *model.PointOfContactSpec) ([]*model.PointOfContact, error)
-	Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error)
-	Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error)
-	HasSbom(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error)
-	HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error)
-	HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error)
-	HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error)
-	IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error)
-	IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
-	IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error)
-	HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error)
-	Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error)
-	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
+	Artifacts(ctx context.Context, artifactSpec model.ArtifactSpec) ([]*model.Artifact, error)
+	Builders(ctx context.Context, builderSpec model.BuilderSpec) ([]*model.Builder, error)
+	CertifyBad(ctx context.Context, certifyBadSpec model.CertifyBadSpec) ([]*model.CertifyBad, error)
+	CertifyGood(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec) ([]*model.CertifyGood, error)
+	Scorecards(ctx context.Context, scorecardSpec model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error)
+	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
+	CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
+	PointOfContact(ctx context.Context, pointOfContactSpec model.PointOfContactSpec) ([]*model.PointOfContact, error)
+	Cve(ctx context.Context, cveSpec model.CVESpec) ([]*model.Cve, error)
+	Ghsa(ctx context.Context, ghsaSpec model.GHSASpec) ([]*model.Ghsa, error)
+	HasSbom(ctx context.Context, hasSBOMSpec model.HasSBOMSpec) ([]*model.HasSbom, error)
+	HasSlsa(ctx context.Context, hasSLSASpec model.HasSLSASpec) ([]*model.HasSlsa, error)
+	HasSourceAt(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec) ([]*model.HasSourceAt, error)
+	HashEqual(ctx context.Context, hashEqualSpec model.HashEqualSpec) ([]*model.HashEqual, error)
+	IsDependency(ctx context.Context, isDependencySpec model.IsDependencySpec) ([]*model.IsDependency, error)
+	IsOccurrence(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
+	IsVulnerability(ctx context.Context, isVulnerabilitySpec model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error)
+	HasMetadata(ctx context.Context, hasMetadataSpec model.HasMetadataSpec) ([]*model.HasMetadata, error)
+	Osv(ctx context.Context, osvSpec model.OSVSpec) ([]*model.Osv, error)
+	Packages(ctx context.Context, pkgSpec model.PkgSpec) ([]*model.Package, error)
 	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
 	Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error)
 	Node(ctx context.Context, node string) (model.Node, error)
 	Nodes(ctx context.Context, nodes []string) ([]model.Node, error)
-	PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error)
+	PkgEqual(ctx context.Context, pkgEqualSpec model.PkgEqualSpec) ([]*model.PkgEqual, error)
 	FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error)
-	Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
+	Sources(ctx context.Context, sourceSpec model.SourceSpec) ([]*model.Source, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -986,10 +986,10 @@ func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.
 func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.CertifyBadSpec
+	var arg0 model.CertifyBadSpec
 	if tmp, ok := rawArgs["certifyBadSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBadSpec"))
-		arg0, err = ec.unmarshalOCertifyBadSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1001,10 +1001,10 @@ func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, raw
 func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.CertifyGoodSpec
+	var arg0 model.CertifyGoodSpec
 	if tmp, ok := rawArgs["certifyGoodSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoodSpec"))
-		arg0, err = ec.unmarshalOCertifyGoodSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1016,10 +1016,10 @@ func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.CertifyVEXStatementSpec
+	var arg0 model.CertifyVEXStatementSpec
 	if tmp, ok := rawArgs["certifyVEXStatementSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVEXStatementSpec"))
-		arg0, err = ec.unmarshalOCertifyVEXStatementSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1031,10 +1031,10 @@ func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Con
 func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.CertifyVulnSpec
+	var arg0 model.CertifyVulnSpec
 	if tmp, ok := rawArgs["certifyVulnSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVulnSpec"))
-		arg0, err = ec.unmarshalOCertifyVulnSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1046,10 +1046,10 @@ func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.HasMetadataSpec
+	var arg0 model.HasMetadataSpec
 	if tmp, ok := rawArgs["hasMetadataSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadataSpec"))
-		arg0, err = ec.unmarshalOHasMetadataSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1061,10 +1061,10 @@ func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.HasSBOMSpec
+	var arg0 model.HasSBOMSpec
 	if tmp, ok := rawArgs["hasSBOMSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOMSpec"))
-		arg0, err = ec.unmarshalOHasSBOMSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1076,10 +1076,10 @@ func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_HasSLSA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.HasSLSASpec
+	var arg0 model.HasSLSASpec
 	if tmp, ok := rawArgs["hasSLSASpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSLSASpec"))
-		arg0, err = ec.unmarshalOHasSLSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx, tmp)
+		arg0, err = ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1091,10 +1091,10 @@ func (ec *executionContext) field_Query_HasSLSA_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.HasSourceAtSpec
+	var arg0 model.HasSourceAtSpec
 	if tmp, ok := rawArgs["hasSourceAtSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAtSpec"))
-		arg0, err = ec.unmarshalOHasSourceAtSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1106,10 +1106,10 @@ func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.HashEqualSpec
+	var arg0 model.HashEqualSpec
 	if tmp, ok := rawArgs["hashEqualSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqualSpec"))
-		arg0, err = ec.unmarshalOHashEqualSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1121,10 +1121,10 @@ func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.IsDependencySpec
+	var arg0 model.IsDependencySpec
 	if tmp, ok := rawArgs["isDependencySpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isDependencySpec"))
-		arg0, err = ec.unmarshalOIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1136,10 +1136,10 @@ func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, r
 func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.IsOccurrenceSpec
+	var arg0 model.IsOccurrenceSpec
 	if tmp, ok := rawArgs["isOccurrenceSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isOccurrenceSpec"))
-		arg0, err = ec.unmarshalOIsOccurrenceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1151,10 +1151,10 @@ func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, r
 func (ec *executionContext) field_Query_IsVulnerability_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.IsVulnerabilitySpec
+	var arg0 model.IsVulnerabilitySpec
 	if tmp, ok := rawArgs["isVulnerabilitySpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isVulnerabilitySpec"))
-		arg0, err = ec.unmarshalOIsVulnerabilitySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsVulnerabilitySpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIsVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsVulnerabilitySpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1166,10 +1166,10 @@ func (ec *executionContext) field_Query_IsVulnerability_args(ctx context.Context
 func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.PkgEqualSpec
+	var arg0 model.PkgEqualSpec
 	if tmp, ok := rawArgs["pkgEqualSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqualSpec"))
-		arg0, err = ec.unmarshalOPkgEqualSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1181,10 +1181,10 @@ func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_PointOfContact_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.PointOfContactSpec
+	var arg0 model.PointOfContactSpec
 	if tmp, ok := rawArgs["pointOfContactSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContactSpec"))
-		arg0, err = ec.unmarshalOPointOfContactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1211,10 +1211,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.ArtifactSpec
+	var arg0 model.ArtifactSpec
 	if tmp, ok := rawArgs["artifactSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifactSpec"))
-		arg0, err = ec.unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1226,10 +1226,10 @@ func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.BuilderSpec
+	var arg0 model.BuilderSpec
 	if tmp, ok := rawArgs["builderSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builderSpec"))
-		arg0, err = ec.unmarshalOBuilderSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1241,10 +1241,10 @@ func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_cve_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.CVESpec
+	var arg0 model.CVESpec
 	if tmp, ok := rawArgs["cveSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cveSpec"))
-		arg0, err = ec.unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, tmp)
+		arg0, err = ec.unmarshalNCVESpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1271,10 +1271,10 @@ func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, r
 func (ec *executionContext) field_Query_ghsa_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.GHSASpec
+	var arg0 model.GHSASpec
 	if tmp, ok := rawArgs["ghsaSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsaSpec"))
-		arg0, err = ec.unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, tmp)
+		arg0, err = ec.unmarshalNGHSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1340,10 +1340,10 @@ func (ec *executionContext) field_Query_nodes_args(ctx context.Context, rawArgs 
 func (ec *executionContext) field_Query_osv_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.OSVSpec
+	var arg0 model.OSVSpec
 	if tmp, ok := rawArgs["osvSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osvSpec"))
-		arg0, err = ec.unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNOSVSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1355,10 +1355,10 @@ func (ec *executionContext) field_Query_osv_args(ctx context.Context, rawArgs ma
 func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.PkgSpec
+	var arg0 model.PkgSpec
 	if tmp, ok := rawArgs["pkgSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgSpec"))
-		arg0, err = ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1412,10 +1412,10 @@ func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.CertifyScorecardSpec
+	var arg0 model.CertifyScorecardSpec
 	if tmp, ok := rawArgs["scorecardSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardSpec"))
-		arg0, err = ec.unmarshalOCertifyScorecardSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1427,10 +1427,10 @@ func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, raw
 func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.SourceSpec
+	var arg0 model.SourceSpec
 	if tmp, ok := rawArgs["sourceSpec"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceSpec"))
-		arg0, err = ec.unmarshalOSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3908,7 +3908,7 @@ func (ec *executionContext) _Query_artifacts(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Artifacts(rctx, fc.Args["artifactSpec"].(*model.ArtifactSpec))
+		return ec.resolvers.Query().Artifacts(rctx, fc.Args["artifactSpec"].(model.ArtifactSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3971,7 +3971,7 @@ func (ec *executionContext) _Query_builders(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Builders(rctx, fc.Args["builderSpec"].(*model.BuilderSpec))
+		return ec.resolvers.Query().Builders(rctx, fc.Args["builderSpec"].(model.BuilderSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4032,7 +4032,7 @@ func (ec *executionContext) _Query_CertifyBad(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CertifyBad(rctx, fc.Args["certifyBadSpec"].(*model.CertifyBadSpec))
+		return ec.resolvers.Query().CertifyBad(rctx, fc.Args["certifyBadSpec"].(model.CertifyBadSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4099,7 +4099,7 @@ func (ec *executionContext) _Query_CertifyGood(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CertifyGood(rctx, fc.Args["certifyGoodSpec"].(*model.CertifyGoodSpec))
+		return ec.resolvers.Query().CertifyGood(rctx, fc.Args["certifyGoodSpec"].(model.CertifyGoodSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4166,7 +4166,7 @@ func (ec *executionContext) _Query_scorecards(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Scorecards(rctx, fc.Args["scorecardSpec"].(*model.CertifyScorecardSpec))
+		return ec.resolvers.Query().Scorecards(rctx, fc.Args["scorecardSpec"].(model.CertifyScorecardSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4229,7 +4229,7 @@ func (ec *executionContext) _Query_CertifyVEXStatement(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CertifyVEXStatement(rctx, fc.Args["certifyVEXStatementSpec"].(*model.CertifyVEXStatementSpec))
+		return ec.resolvers.Query().CertifyVEXStatement(rctx, fc.Args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4306,7 +4306,7 @@ func (ec *executionContext) _Query_CertifyVuln(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CertifyVuln(rctx, fc.Args["certifyVulnSpec"].(*model.CertifyVulnSpec))
+		return ec.resolvers.Query().CertifyVuln(rctx, fc.Args["certifyVulnSpec"].(model.CertifyVulnSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4371,7 +4371,7 @@ func (ec *executionContext) _Query_PointOfContact(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().PointOfContact(rctx, fc.Args["pointOfContactSpec"].(*model.PointOfContactSpec))
+		return ec.resolvers.Query().PointOfContact(rctx, fc.Args["pointOfContactSpec"].(model.PointOfContactSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4444,7 +4444,7 @@ func (ec *executionContext) _Query_cve(ctx context.Context, field graphql.Collec
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Cve(rctx, fc.Args["cveSpec"].(*model.CVESpec))
+		return ec.resolvers.Query().Cve(rctx, fc.Args["cveSpec"].(model.CVESpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4507,7 +4507,7 @@ func (ec *executionContext) _Query_ghsa(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Ghsa(rctx, fc.Args["ghsaSpec"].(*model.GHSASpec))
+		return ec.resolvers.Query().Ghsa(rctx, fc.Args["ghsaSpec"].(model.GHSASpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4568,7 +4568,7 @@ func (ec *executionContext) _Query_HasSBOM(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().HasSbom(rctx, fc.Args["hasSBOMSpec"].(*model.HasSBOMSpec))
+		return ec.resolvers.Query().HasSbom(rctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4641,7 +4641,7 @@ func (ec *executionContext) _Query_HasSLSA(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().HasSlsa(rctx, fc.Args["hasSLSASpec"].(*model.HasSLSASpec))
+		return ec.resolvers.Query().HasSlsa(rctx, fc.Args["hasSLSASpec"].(model.HasSLSASpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4704,7 +4704,7 @@ func (ec *executionContext) _Query_HasSourceAt(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().HasSourceAt(rctx, fc.Args["hasSourceAtSpec"].(*model.HasSourceAtSpec))
+		return ec.resolvers.Query().HasSourceAt(rctx, fc.Args["hasSourceAtSpec"].(model.HasSourceAtSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4775,7 +4775,7 @@ func (ec *executionContext) _Query_HashEqual(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().HashEqual(rctx, fc.Args["hashEqualSpec"].(*model.HashEqualSpec))
+		return ec.resolvers.Query().HashEqual(rctx, fc.Args["hashEqualSpec"].(model.HashEqualSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4842,7 +4842,7 @@ func (ec *executionContext) _Query_IsDependency(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().IsDependency(rctx, fc.Args["isDependencySpec"].(*model.IsDependencySpec))
+		return ec.resolvers.Query().IsDependency(rctx, fc.Args["isDependencySpec"].(model.IsDependencySpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4915,7 +4915,7 @@ func (ec *executionContext) _Query_IsOccurrence(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().IsOccurrence(rctx, fc.Args["isOccurrenceSpec"].(*model.IsOccurrenceSpec))
+		return ec.resolvers.Query().IsOccurrence(rctx, fc.Args["isOccurrenceSpec"].(model.IsOccurrenceSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4984,7 +4984,7 @@ func (ec *executionContext) _Query_IsVulnerability(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().IsVulnerability(rctx, fc.Args["isVulnerabilitySpec"].(*model.IsVulnerabilitySpec))
+		return ec.resolvers.Query().IsVulnerability(rctx, fc.Args["isVulnerabilitySpec"].(model.IsVulnerabilitySpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5053,7 +5053,7 @@ func (ec *executionContext) _Query_HasMetadata(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().HasMetadata(rctx, fc.Args["hasMetadataSpec"].(*model.HasMetadataSpec))
+		return ec.resolvers.Query().HasMetadata(rctx, fc.Args["hasMetadataSpec"].(model.HasMetadataSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5126,7 +5126,7 @@ func (ec *executionContext) _Query_osv(ctx context.Context, field graphql.Collec
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Osv(rctx, fc.Args["osvSpec"].(*model.OSVSpec))
+		return ec.resolvers.Query().Osv(rctx, fc.Args["osvSpec"].(model.OSVSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5187,7 +5187,7 @@ func (ec *executionContext) _Query_packages(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Packages(rctx, fc.Args["pkgSpec"].(*model.PkgSpec))
+		return ec.resolvers.Query().Packages(rctx, fc.Args["pkgSpec"].(model.PkgSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5470,7 +5470,7 @@ func (ec *executionContext) _Query_PkgEqual(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().PkgEqual(rctx, fc.Args["pkgEqualSpec"].(*model.PkgEqualSpec))
+		return ec.resolvers.Query().PkgEqual(rctx, fc.Args["pkgEqualSpec"].(model.PkgEqualSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5592,7 +5592,7 @@ func (ec *executionContext) _Query_sources(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Sources(rctx, fc.Args["sourceSpec"].(*model.SourceSpec))
+		return ec.resolvers.Query().Sources(rctx, fc.Args["sourceSpec"].(model.SourceSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6951,6 +6951,11 @@ func (ec *executionContext) unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋgua
 func (ec *executionContext) unmarshalNArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v interface{}) (*model.ArtifactInputSpec, error) {
 	res, err := ec.unmarshalInputArtifactInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (model.ArtifactSpec, error) {
+	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (*model.ArtifactSpec, error) {

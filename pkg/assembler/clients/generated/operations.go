@@ -24687,19 +24687,19 @@ func (v *VulnerabilityMetaDataInput) GetCollector() string { return v.Collector 
 
 // __ArtifactsInput is used internally by genqlient
 type __ArtifactsInput struct {
-	Filter *ArtifactSpec `json:"filter"`
+	Filter ArtifactSpec `json:"filter"`
 }
 
 // GetFilter returns __ArtifactsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__ArtifactsInput) GetFilter() *ArtifactSpec { return v.Filter }
+func (v *__ArtifactsInput) GetFilter() ArtifactSpec { return v.Filter }
 
 // __CVEsInput is used internally by genqlient
 type __CVEsInput struct {
-	Filter *CVESpec `json:"filter"`
+	Filter CVESpec `json:"filter"`
 }
 
 // GetFilter returns __CVEsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__CVEsInput) GetFilter() *CVESpec { return v.Filter }
+func (v *__CVEsInput) GetFilter() CVESpec { return v.Filter }
 
 // __CertifyBadArtifactInput is used internally by genqlient
 type __CertifyBadArtifactInput struct {
@@ -24743,11 +24743,11 @@ func (v *__CertifyBadSrcInput) GetCertifyBad() CertifyBadInputSpec { return v.Ce
 
 // __CertifyBadsInput is used internally by genqlient
 type __CertifyBadsInput struct {
-	Filter *CertifyBadSpec `json:"filter"`
+	Filter CertifyBadSpec `json:"filter"`
 }
 
 // GetFilter returns __CertifyBadsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__CertifyBadsInput) GetFilter() *CertifyBadSpec { return v.Filter }
+func (v *__CertifyBadsInput) GetFilter() CertifyBadSpec { return v.Filter }
 
 // __CertifyCVEInput is used internally by genqlient
 type __CertifyCVEInput struct {
@@ -24883,11 +24883,11 @@ func (v *__FindSoftwareInput) GetSearchText() string { return v.SearchText }
 
 // __GHSAsInput is used internally by genqlient
 type __GHSAsInput struct {
-	Filter *GHSASpec `json:"filter"`
+	Filter GHSASpec `json:"filter"`
 }
 
 // GetFilter returns __GHSAsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__GHSAsInput) GetFilter() *GHSASpec { return v.Filter }
+func (v *__GHSAsInput) GetFilter() GHSASpec { return v.Filter }
 
 // __HasMetadataArtifactInput is used internally by genqlient
 type __HasMetadataArtifactInput struct {
@@ -25303,19 +25303,19 @@ func (v *__NodesInput) GetNodes() []string { return v.Nodes }
 
 // __OSVsInput is used internally by genqlient
 type __OSVsInput struct {
-	Filter *OSVSpec `json:"filter"`
+	Filter OSVSpec `json:"filter"`
 }
 
 // GetFilter returns __OSVsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__OSVsInput) GetFilter() *OSVSpec { return v.Filter }
+func (v *__OSVsInput) GetFilter() OSVSpec { return v.Filter }
 
 // __PackagesInput is used internally by genqlient
 type __PackagesInput struct {
-	Filter *PkgSpec `json:"filter"`
+	Filter PkgSpec `json:"filter"`
 }
 
 // GetFilter returns __PackagesInput.Filter, and is useful for accessing the field via an interface.
-func (v *__PackagesInput) GetFilter() *PkgSpec { return v.Filter }
+func (v *__PackagesInput) GetFilter() PkgSpec { return v.Filter }
 
 // __PathInput is used internally by genqlient
 type __PathInput struct {
@@ -25441,11 +25441,11 @@ func (v *__SLSAForArtifactsInput) GetSlsaList() []SLSAInputSpec { return v.SlsaL
 
 // __SourcesInput is used internally by genqlient
 type __SourcesInput struct {
-	Filter *SourceSpec `json:"filter"`
+	Filter SourceSpec `json:"filter"`
 }
 
 // GetFilter returns __SourcesInput.Filter, and is useful for accessing the field via an interface.
-func (v *__SourcesInput) GetFilter() *SourceSpec { return v.Filter }
+func (v *__SourcesInput) GetFilter() SourceSpec { return v.Filter }
 
 // __VEXPackageAndGhsaInput is used internally by genqlient
 type __VEXPackageAndGhsaInput struct {
@@ -25545,7 +25545,7 @@ func (v *__VexPackageAndOsvInput) GetVexStatement() VexStatementInputSpec { retu
 
 // The query or mutation executed by Artifacts.
 const Artifacts_Operation = `
-query Artifacts ($filter: ArtifactSpec) {
+query Artifacts ($filter: ArtifactSpec!) {
 	artifacts(artifactSpec: $filter) {
 		... AllArtifactTree
 	}
@@ -25560,7 +25560,7 @@ fragment AllArtifactTree on Artifact {
 func Artifacts(
 	ctx context.Context,
 	client graphql.Client,
-	filter *ArtifactSpec,
+	filter ArtifactSpec,
 ) (*ArtifactsResponse, error) {
 	req := &graphql.Request{
 		OpName: "Artifacts",
@@ -25585,7 +25585,7 @@ func Artifacts(
 
 // The query or mutation executed by CVEs.
 const CVEs_Operation = `
-query CVEs ($filter: CVESpec) {
+query CVEs ($filter: CVESpec!) {
 	cve(cveSpec: $filter) {
 		... AllCveTree
 	}
@@ -25600,7 +25600,7 @@ fragment AllCveTree on CVE {
 func CVEs(
 	ctx context.Context,
 	client graphql.Client,
-	filter *CVESpec,
+	filter CVESpec,
 ) (*CVEsResponse, error) {
 	req := &graphql.Request{
 		OpName: "CVEs",
@@ -25912,7 +25912,7 @@ func CertifyBadSrc(
 
 // The query or mutation executed by CertifyBads.
 const CertifyBads_Operation = `
-query CertifyBads ($filter: CertifyBadSpec) {
+query CertifyBads ($filter: CertifyBadSpec!) {
 	CertifyBad(certifyBadSpec: $filter) {
 		... AllCertifyBad
 	}
@@ -25980,7 +25980,7 @@ fragment AllArtifactTree on Artifact {
 func CertifyBads(
 	ctx context.Context,
 	client graphql.Client,
-	filter *CertifyBadSpec,
+	filter CertifyBadSpec,
 ) (*CertifyBadsResponse, error) {
 	req := &graphql.Request{
 		OpName: "CertifyBads",
@@ -26924,7 +26924,7 @@ func FindSoftware(
 
 // The query or mutation executed by GHSAs.
 const GHSAs_Operation = `
-query GHSAs ($filter: GHSASpec) {
+query GHSAs ($filter: GHSASpec!) {
 	ghsa(ghsaSpec: $filter) {
 		... AllGHSATree
 	}
@@ -26938,7 +26938,7 @@ fragment AllGHSATree on GHSA {
 func GHSAs(
 	ctx context.Context,
 	client graphql.Client,
-	filter *GHSASpec,
+	filter GHSASpec,
 ) (*GHSAsResponse, error) {
 	req := &graphql.Request{
 		OpName: "GHSAs",
@@ -30315,7 +30315,7 @@ func Nodes(
 
 // The query or mutation executed by OSVs.
 const OSVs_Operation = `
-query OSVs ($filter: OSVSpec) {
+query OSVs ($filter: OSVSpec!) {
 	osv(osvSpec: $filter) {
 		... AllOSVTree
 	}
@@ -30329,7 +30329,7 @@ fragment AllOSVTree on OSV {
 func OSVs(
 	ctx context.Context,
 	client graphql.Client,
-	filter *OSVSpec,
+	filter OSVSpec,
 ) (*OSVsResponse, error) {
 	req := &graphql.Request{
 		OpName: "OSVs",
@@ -30354,7 +30354,7 @@ func OSVs(
 
 // The query or mutation executed by Packages.
 const Packages_Operation = `
-query Packages ($filter: PkgSpec) {
+query Packages ($filter: PkgSpec!) {
 	packages(pkgSpec: $filter) {
 		... AllPkgTree
 	}
@@ -30385,7 +30385,7 @@ fragment AllPkgTree on Package {
 func Packages(
 	ctx context.Context,
 	client graphql.Client,
-	filter *PkgSpec,
+	filter PkgSpec,
 ) (*PackagesResponse, error) {
 	req := &graphql.Request{
 		OpName: "Packages",
@@ -31350,7 +31350,7 @@ func SLSAForArtifacts(
 
 // The query or mutation executed by Sources.
 const Sources_Operation = `
-query Sources ($filter: SourceSpec) {
+query Sources ($filter: SourceSpec!) {
 	sources(sourceSpec: $filter) {
 		... AllSourceTree
 	}
@@ -31374,7 +31374,7 @@ fragment AllSourceTree on Source {
 func Sources(
 	ctx context.Context,
 	client graphql.Client,
-	filter *SourceSpec,
+	filter SourceSpec,
 ) (*SourcesResponse, error) {
 	req := &graphql.Request{
 		OpName: "Sources",

@@ -795,6 +795,11 @@ func (ec *executionContext) unmarshalNIsDependencyInputSpec2ᚖgithubᚗcomᚋgu
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v interface{}) (model.IsDependencySpec, error) {
+	res, err := ec.unmarshalInputIsDependencySpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalODependencyType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx context.Context, v interface{}) (*model.DependencyType, error) {
 	if v == nil {
 		return nil, nil
@@ -809,14 +814,6 @@ func (ec *executionContext) marshalODependencyType2ᚖgithubᚗcomᚋguacsecᚋg
 		return graphql.Null
 	}
 	return v
-}
-
-func (ec *executionContext) unmarshalOIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v interface{}) (*model.IsDependencySpec, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputIsDependencySpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOPkgNameSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgNameSpec(ctx context.Context, v interface{}) (*model.PkgNameSpec, error) {

@@ -390,6 +390,11 @@ func (ec *executionContext) unmarshalNCVEInputSpec2ᚖgithubᚗcomᚋguacsecᚋg
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCVESpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx context.Context, v interface{}) (model.CVESpec, error) {
+	res, err := ec.unmarshalInputCVESpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOCVEInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEInputSpec(ctx context.Context, v interface{}) (*model.CVEInputSpec, error) {
 	if v == nil {
 		return nil, nil
