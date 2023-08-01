@@ -33,13 +33,13 @@ func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSp
 	if hasSBOMSpec.Subject != nil {
 		if hasSBOMSpec.Subject.Package != nil {
 			arangoQueryBuilder = setPkgMatchValues(hasSBOMSpec.Subject.Package, values)
-			arangoQueryBuilder.forOutBound(hasSBOMEdgesStr, "hasSBOM", "pVersion")
+			arangoQueryBuilder.forOutBound(hasSBOMPkgEdgesStr, "hasSBOM", "pVersion")
 			setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
 
 			return getPkgHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
 		} else {
 			arangoQueryBuilder = setArtifactMatchValues(nil, hasSBOMSpec.Subject.Artifact, values)
-			arangoQueryBuilder.forOutBound(hasSBOMEdgesStr, "hasSBOM", "art")
+			arangoQueryBuilder.forOutBound(hasSBOMArtEdgesStr, "hasSBOM", "art")
 			setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
 
 			return getArtifactHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
@@ -50,13 +50,10 @@ func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSp
 		// get packages
 		arangoQueryBuilder = newForQuery(hasSBOMsStr, "hasSBOM")
 		setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMEdgesStr, "pVersion", "hasSBOMEdge", "hasSBOM")
-		arangoQueryBuilder.prune("hasSBOMEdge", "label", "==", "@label")
+		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMPkgEdgesStr, "pVersion", "hasSBOMEdge", "hasSBOM")
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
-
-		values["label"] = "package"
 
 		pkgHasSBOMs, err := getPkgHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
 		if err != nil {
@@ -67,9 +64,7 @@ func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSp
 		// get artifacts
 		arangoQueryBuilder = newForQuery(hasSBOMsStr, "hasSBOM")
 		setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMEdgesStr, "art", "hasSBOMEdge", "hasSBOM")
-		arangoQueryBuilder.prune("hasSBOMEdge", "label", "==", "@label")
-		values["label"] = "artifact"
+		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMArtEdgesStr, "art", "hasSBOMEdge", "hasSBOM")
 
 		artifactHasSBOMs, err := getArtifactHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
 		if err != nil {
@@ -260,7 +255,7 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("hasSBOMEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id, label: "package" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("hasSBOMPkgEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id } INTO hasSBOMPkgEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {
@@ -344,7 +339,7 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		)
 		
 		LET edgeCollection = (
-		  INSERT {  _key: CONCAT("hasSBOMEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id, label: "artifact" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT {  _key: CONCAT("hasSBOMArtEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id } INTO hasSBOMArtEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
 		RETURN {
@@ -393,7 +388,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("hasSBOMEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id, label: "artifact" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("hasSBOMArtEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id } INTO hasSBOMArtEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {
@@ -461,7 +456,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("hasSBOMEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id, label: "package" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("hasSBOMPkgEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id } INTO hasSBOMPkgEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {

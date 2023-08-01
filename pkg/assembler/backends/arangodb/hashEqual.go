@@ -39,8 +39,8 @@ func (c *arangoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashE
 	} else {
 		arangoQueryBuilder := newForQuery(hashEqualsStr, "hashEqual")
 		setHashEqualMatchValues(arangoQueryBuilder, hashEqualSpec, values)
-		arangoQueryBuilder.forInBound(hashEqualsSubjectEdgesStr, "art", "hashEqual")
-		arangoQueryBuilder.forOutBound(hashEqualsEdgesStr, "equalArt", "hashEqual")
+		arangoQueryBuilder.forInBound(hashEqualSubjectArtEdgesStr, "art", "hashEqual")
+		arangoQueryBuilder.forOutBound(hashEqualArtEdgesStr, "equalArt", "hashEqual")
 
 		return getHashEqualForQuery(ctx, c, arangoQueryBuilder, values)
 	}
@@ -52,9 +52,9 @@ func matchHashEqualByInput(ctx context.Context, c *arangoClient, hashEqualSpec *
 	var combinedHashEqual []*model.HashEqual
 
 	arangoQueryBuilder := setArtifactMatchValues(nil, firstArtifact, values)
-	arangoQueryBuilder.forOutBound(hashEqualsSubjectEdgesStr, "hashEqual", "art")
+	arangoQueryBuilder.forOutBound(hashEqualSubjectArtEdgesStr, "hashEqual", "art")
 	setHashEqualMatchValues(arangoQueryBuilder, hashEqualSpec, values)
-	arangoQueryBuilder.forOutBound(hashEqualsEdgesStr, "equalArt", "hashEqual")
+	arangoQueryBuilder.forOutBound(hashEqualArtEdgesStr, "equalArt", "hashEqual")
 	if secondArtifact != nil {
 		if secondArtifact.ID != nil {
 			arangoQueryBuilder.filter("equalArt", "_id", "==", "@equal_id")
@@ -77,9 +77,9 @@ func matchHashEqualByInput(ctx context.Context, c *arangoClient, hashEqualSpec *
 	combinedHashEqual = append(combinedHashEqual, artSubjectHashEqual...)
 
 	arangoQueryBuilder = setArtifactMatchValues(nil, firstArtifact, values)
-	arangoQueryBuilder.forInBound(hashEqualsEdgesStr, "hashEqual", "art")
+	arangoQueryBuilder.forInBound(hashEqualArtEdgesStr, "hashEqual", "art")
 	setHashEqualMatchValues(arangoQueryBuilder, hashEqualSpec, values)
-	arangoQueryBuilder.forInBound(hashEqualsSubjectEdgesStr, "equalArt", "hashEqual")
+	arangoQueryBuilder.forInBound(hashEqualSubjectArtEdgesStr, "equalArt", "hashEqual")
 	if secondArtifact != nil {
 		if secondArtifact.ID != nil {
 			arangoQueryBuilder.filter("equalArt", "_id", "==", "@equal_id")
@@ -207,8 +207,8 @@ func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.
 			RETURN NEW
 	)
 	
-	INSERT { _key: CONCAT("hashEqualsSubjectEdges", artifact._key, hashEqual._key), _from: artifact._id, _to: hashEqual._id} INTO hashEqualsSubjectEdges OPTIONS { overwriteMode: "ignore" }
-	INSERT { _key: CONCAT("hashEqualsEdges", hashEqual._key, equalArtifact._key), _from: hashEqual._id, _to: equalArtifact._id} INTO hashEqualsEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("hashEqualSubjectArtEdges", artifact._key, hashEqual._key), _from: artifact._id, _to: hashEqual._id} INTO hashEqualSubjectArtEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("hashEqualArtEdges", hashEqual._key, equalArtifact._key), _from: hashEqual._id, _to: equalArtifact._id} INTO hashEqualArtEdges OPTIONS { overwriteMode: "ignore" }
 	
 	RETURN {
 		'artifact': {
@@ -249,8 +249,8 @@ LET hashEqual = FIRST(
 		RETURN NEW
 )
 
-INSERT { _key: CONCAT("hashEqualsSubjectEdges", artifact._key, hashEqual._key), _from: artifact._id, _to: hashEqual._id} INTO hashEqualsSubjectEdges OPTIONS { overwriteMode: "ignore" }
-INSERT { _key: CONCAT("hashEqualsEdges", hashEqual._key, equalArtifact._key), _from: hashEqual._id, _to: equalArtifact._id} INTO hashEqualsEdges OPTIONS { overwriteMode: "ignore" }
+INSERT { _key: CONCAT("hashEqualSubjectArtEdges", artifact._key, hashEqual._key), _from: artifact._id, _to: hashEqual._id} INTO hashEqualSubjectArtEdges OPTIONS { overwriteMode: "ignore" }
+INSERT { _key: CONCAT("hashEqualArtEdges", hashEqual._key, equalArtifact._key), _from: hashEqual._id, _to: equalArtifact._id} INTO hashEqualArtEdges OPTIONS { overwriteMode: "ignore" }
 
 RETURN {
 	'artifact': {

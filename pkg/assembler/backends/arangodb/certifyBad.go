@@ -106,7 +106,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("certifyBadEdges", firstPkg.versionDoc._key, certifyBad._key), _from: firstPkg.version_id, _to: certifyBad._id, label: "pkgVersion" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("certifyBadPkgVersionEdges", firstPkg.versionDoc._key, certifyBad._key), _from: firstPkg.version_id, _to: certifyBad._id } INTO certifyBadPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {
@@ -173,7 +173,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 			  )
 			  
 			  LET edgeCollection = (
-				INSERT {  _key: CONCAT("certifyBadEdges", firstPkg.nameDoc._key, certifyBad._key), _from: firstPkg.name_id, _to: certifyBad._id, label: "pkgName" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+				INSERT {  _key: CONCAT("certifyBadPkgNameEdges", firstPkg.nameDoc._key, certifyBad._key), _from: firstPkg.name_id, _to: certifyBad._id } INTO certifyBadPkgNameEdges OPTIONS { overwriteMode: "ignore" }
 			  )
 			  
 			  RETURN {
@@ -220,7 +220,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 		)
 		
 		LET edgeCollection = (
-		  INSERT {  _key: CONCAT("certifyBadEdges", artifact._key, certifyBad._key), _from: artifact._id, _to: certifyBad._id, label: "artifact" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT {  _key: CONCAT("certifyBadArtEdges", artifact._key, certifyBad._key), _from: artifact._id, _to: certifyBad._id } INTO certifyBadArtEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
 		RETURN {
@@ -282,7 +282,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 		)
 		
 		LET edgeCollection = (
-		  INSERT {  _key: CONCAT("certifyBadEdges", firstSrc.nameDoc._key, certifyBad._key), _from: firstSrc.name_id, _to: certifyBad._id, label: "source" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT {  _key: CONCAT("certifyBadSrcEdges", firstSrc.nameDoc._key, certifyBad._key), _from: firstSrc.name_id, _to: certifyBad._id } INTO certifyBadSrcEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
 		RETURN {
@@ -392,7 +392,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("certifyBadEdges", firstPkg.versionDoc._key, certifyBad._key), _from: firstPkg.version_id, _to: certifyBad._id, label: "pkgVersion" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("certifyBadPkgVersionEdges", firstPkg.versionDoc._key, certifyBad._key), _from: firstPkg.version_id, _to: certifyBad._id } INTO certifyBadPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {
@@ -457,7 +457,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 			  )
 			  
 			  LET edgeCollection = (
-				INSERT {  _key: CONCAT("certifyBadEdges", firstPkg.nameDoc._key, certifyBad._key), _from: firstPkg.name_id, _to: certifyBad._id, label: "pkgName" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+				INSERT {  _key: CONCAT("certifyBadPkgNameEdges", firstPkg.nameDoc._key, certifyBad._key), _from: firstPkg.name_id, _to: certifyBad._id } INTO certifyBadPkgNameEdges OPTIONS { overwriteMode: "ignore" }
 			  )
 			  
 			  RETURN {
@@ -535,7 +535,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		)
 		
 		LET edgeCollection = (
-		  INSERT {  _key: CONCAT("certifyBadEdges", artifact._key, certifyBad._key), _from: artifact._id, _to: certifyBad._id, label: "artifact" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT {  _key: CONCAT("certifyBadArtEdges", artifact._key, certifyBad._key), _from: artifact._id, _to: certifyBad._id } INTO certifyBadArtEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
 		RETURN {
@@ -628,7 +628,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		)
 		
 		LET edgeCollection = (
-		  INSERT {  _key: CONCAT("certifyBadEdges", firstSrc.nameDoc._key, certifyBad._key), _from: firstSrc.name_id, _to: certifyBad._id, label: "source" } INTO certifyBadEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT {  _key: CONCAT("certifyBadSrcEdges", firstSrc.nameDoc._key, certifyBad._key), _from: firstSrc.name_id, _to: certifyBad._id } INTO certifyBadSrcEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
 		RETURN {

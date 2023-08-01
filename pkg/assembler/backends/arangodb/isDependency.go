@@ -82,7 +82,7 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 
 func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any) {
 
-	arangoQueryBuilder.forOutBound(isDependencySubjectEdgesStr, "isDependency", "pVersion")
+	arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
 	if isDependencySpec.VersionRange != nil {
 		arangoQueryBuilder.filter("isDependency", versionRangeStr, "==", "@"+versionRangeStr)
 		queryValues[versionRangeStr] = isDependencySpec.VersionRange
@@ -100,7 +100,7 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 		queryValues[collector] = isDependencySpec.Collector
 	}
 	if isDependencySpec.DependentPackage != nil {
-		arangoQueryBuilder.forOutBound(isDependencyEdgesStr, "depName", "isDependency")
+		arangoQueryBuilder.forOutBound(isDependencyDepPkgEdgesStr, "depName", "isDependency")
 		if isDependencySpec.DependentPackage.Name != nil {
 			arangoQueryBuilder.filter("depName", "name", "==", "@name")
 			queryValues["name"] = *isDependencySpec.DependentPackage.Name
@@ -116,7 +116,7 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 			queryValues["type"] = *isDependencySpec.DependentPackage.Type
 		}
 	} else {
-		arangoQueryBuilder.forOutBound(isDependencyEdgesStr, "depName", "isDependency")
+		arangoQueryBuilder.forOutBound(isDependencyDepPkgEdgesStr, "depName", "isDependency")
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
 	}
@@ -232,8 +232,8 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 			RETURN NEW
 		)
 	
-	INSERT { _key: CONCAT("isDependencySubjectEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectEdges OPTIONS { overwriteMode: "ignore" }
-	INSERT { _key: CONCAT("isDependencyEdges", isDependency._key, secondPkg.nameDoc._key), _from: isDependency._id, _to: secondPkg.name_id} INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("isDependencySubjectPkgEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("isDependencyDepPkgEdges", isDependency._key, secondPkg.nameDoc._key), _from: isDependency._id, _to: secondPkg.name_id} INTO isDependencyDepPkgEdges OPTIONS { overwriteMode: "ignore" }
 
 	RETURN {
 		'pkgVersion': {
@@ -328,8 +328,8 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 			  RETURN NEW
 	  )
 	  
-	  INSERT { _key: CONCAT("isDependencySubjectEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectEdges OPTIONS { overwriteMode: "ignore" }
-	  INSERT { _key: CONCAT("isDependencyEdges", isDependency._key, secondPkg.nameDoc._key), _from: isDependency._id, _to: secondPkg.name_id} INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("isDependencySubjectPkgEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("isDependencyDepPkgEdges", isDependency._key, secondPkg.nameDoc._key), _from: isDependency._id, _to: secondPkg.name_id} INTO isDependencyDepPkgEdges OPTIONS { overwriteMode: "ignore" }
 	  
 	  RETURN {
 		'pkgVersion': {
