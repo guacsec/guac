@@ -38,7 +38,7 @@ type SourceNode struct {
 	Tag    string
 }
 
-var getSources func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error)
+var getSources func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error)
 var getNeighbors func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 
 // GetComponents get all the sources that do not have a certify scorecard attached or last scanned is more than daysSinceLastScan
@@ -46,7 +46,7 @@ func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interfac
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
 	}
-	response, err := getSources(ctx, s.client, nil)
+	response, err := getSources(ctx, s.client, generated.SourceSpec{})
 	if err != nil {
 		return fmt.Errorf("failed sources query: %w", err)
 	}

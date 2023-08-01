@@ -109,7 +109,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 	tests := []struct {
 		name              string
 		daysSinceLastScan int
-		getPackages       func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error)
+		getPackages       func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error)
 		getNeighbors      func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 		wantPackNode      []*PackageNode
 		wantErr           bool
@@ -117,7 +117,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		{
 			name:              "django: daysSinceLastScan=0",
 			daysSinceLastScan: 0,
-			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error) {
 				return &generated.PackagesResponse{
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
@@ -136,7 +136,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with certifyVuln",
 			daysSinceLastScan: 0,
-			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error) {
 				return &generated.PackagesResponse{
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
@@ -151,7 +151,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with certifyVuln, daysSinceLastScan=30",
 			daysSinceLastScan: 30,
-			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error) {
 				return &generated.PackagesResponse{
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
@@ -168,7 +168,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with certifyVuln, timestamp: time now, daysSinceLastScan=30",
 			daysSinceLastScan: 30,
-			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error) {
 				return &generated.PackagesResponse{
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
@@ -183,7 +183,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with certifyVuln, daysSinceLastScan=0, IsOccurrence",
 			daysSinceLastScan: 0,
-			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error) {
 				return &generated.PackagesResponse{
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
@@ -198,7 +198,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		}, {
 			name:              "django, daysSinceLastScan=0, IsOccurrence",
 			daysSinceLastScan: 0,
-			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error) {
 				return &generated.PackagesResponse{
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
@@ -215,7 +215,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		}, {
 			name:              "multiple packages",
 			daysSinceLastScan: 0,
-			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+			getPackages: func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error) {
 				return &generated.PackagesResponse{
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage, testOpenSSLPackage},
 				}, nil
