@@ -83,43 +83,61 @@ const (
 
 	// isDependency collections
 
-	isDependencyEdgesStr        string = "isDependencyEdges"
-	isDependencySubjectEdgesStr string = "isDependencySubjectEdges"
-	isDependenciesStr           string = "isDependencies"
+	isDependencyDepPkgEdgesStr     string = "isDependencyDepPkgEdges"
+	isDependencySubjectPkgEdgesStr string = "isDependencySubjectPkgEdges"
+	isDependenciesStr              string = "isDependencies"
 
 	//isOccurrences collections
 
-	isOccurrencesEdgesStr        string = "isOccurrencesEdges"
-	isOccurrencesSubjectEdgesStr string = "isOccurrencesSubjectEdges"
-	isOccurrencesStr             string = "isOccurrences"
+	isOccurrenceArtEdgesStr        string = "isOccurrenceArtEdges"
+	isOccurrenceSubjectPkgEdgesStr string = "isOccurrenceSubjectPkgEdges"
+	isOccurrenceSubjectSrcEdgesStr string = "isOccurrenceSubjectSrcEdges"
+	isOccurrencesStr               string = "isOccurrences"
 
 	// hasSLSA collections
 
-	hasSLSASubjectEdgesStr   string = "hasSLSASubjectEdges"
-	hasSLSABuiltByEdgesStr   string = "hasSLSABuiltByEdges"
-	hasSLSABuiltFromEdgesStr string = "hasSLSABuiltFromEdges"
-	hasSLSAsStr              string = "hasSLSAs"
+	hasSLSASubjectArtEdgesStr string = "hasSLSASubjectArtEdges"
+	hasSLSABuiltByEdgesStr    string = "hasSLSABuiltByEdges"
+	hasSLSABuiltFromEdgesStr  string = "hasSLSABuiltFromEdges"
+	hasSLSAsStr               string = "hasSLSAs"
 
 	// hashEquals collections
 
-	hashEqualsEdgesStr        string = "hashEqualsEdges"
-	hashEqualsSubjectEdgesStr string = "hashEqualsSubjectEdges"
-	hashEqualsStr             string = "hashEquals"
+	hashEqualArtEdgesStr        string = "hashEqualArtEdges"
+	hashEqualSubjectArtEdgesStr string = "hashEqualSubjectArtEdges"
+	hashEqualsStr               string = "hashEquals"
 
 	// hasSBOM collection
 
-	hasSBOMEdgesStr string = "hasSBOMEdges"
-	hasSBOMsStr     string = "hasSBOMs"
+	hasSBOMPkgEdgesStr string = "hasSBOMPkgEdges"
+	hasSBOMArtEdgesStr string = "hasSBOMArtEdges"
+	hasSBOMsStr        string = "hasSBOMs"
 
 	// certifyVuln collection
-
+	// TODO (pxp928): update collections based on edge collections
 	certifyVulnEdgesStr string = "certifyVulnEdges"
 	certifyVulnsStr     string = "certifyVulns"
 
 	// certifyScorecard collection
 
-	scorecardEdgesStr string = "scorecardEdges"
-	scorecardStr      string = "scorecards"
+	scorecardSrcEdgesStr string = "scorecardSrcEdges"
+	scorecardStr         string = "scorecards"
+
+	// certifyBad collection
+
+	certifyBadPkgVersionEdgesStr string = "certifyBadPkgVersionEdges"
+	certifyBadPkgNameEdgesStr    string = "certifyBadPkgNameEdges"
+	certifyBadSrcEdgesStr        string = "certifyBadSrcEdges"
+	certifyBadArtEdgesStr        string = "certifyBadArtEdges"
+	certifyBadsStr               string = "certifyBads"
+
+	// certifyGood collection
+
+	certifyGoodPkgVersionEdgesStr string = "certifyGoodPkgVersionEdges"
+	certifyGoodPkgNameEdgesStr    string = "certifyGoodPkgNameEdges"
+	certifyGoodSrcEdgesStr        string = "certifyGoodSrcEdges"
+	certifyGoodArtEdgesStr        string = "certifyGoodArtEdges"
+	certifyGoodsStr               string = "certifyGoods"
 )
 
 type ArangoConfig struct {
@@ -218,169 +236,175 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// setup package collections
 		var pkgHasType driver.EdgeDefinition
 		pkgHasType.Collection = pkgHasTypeStr
-		// define a set of collections where an edge is going out...
 		pkgHasType.From = []string{pkgRootsStr}
-
-		// repeat this for the collections where an edge is going into
 		pkgHasType.To = []string{pkgTypesStr}
 
 		var pkgHasNamespace driver.EdgeDefinition
 		pkgHasNamespace.Collection = pkgHasNamespaceStr
-		// define a set of collections where an edge is going out...
 		pkgHasNamespace.From = []string{pkgTypesStr}
-
-		// repeat this for the collections where an edge is going into
 		pkgHasNamespace.To = []string{pkgNamespacesStr}
 
 		var pkgHasName driver.EdgeDefinition
 		pkgHasName.Collection = pkgHasNameStr
-		// define a set of collections where an edge is going out...
 		pkgHasName.From = []string{pkgNamespacesStr}
-
-		// repeat this for the collections where an edge is going into
 		pkgHasName.To = []string{pkgNamesStr}
 
 		var pkgHasVersion driver.EdgeDefinition
 		pkgHasVersion.Collection = pkgHasVersionStr
-		// define a set of collections where an edge is going out...
 		pkgHasVersion.From = []string{pkgNamesStr}
-
-		// repeat this for the collections where an edge is going into
 		pkgHasVersion.To = []string{pkgVersionsStr}
 
 		// setup source collections
 		var srcHasType driver.EdgeDefinition
 		srcHasType.Collection = srcHasTypeStr
-		// define a set of collections where an edge is going out...
 		srcHasType.From = []string{srcRootsStr}
-
-		// repeat this for the collections where an edge is going into
 		srcHasType.To = []string{srcTypesStr}
 
 		var srcHasNamespace driver.EdgeDefinition
 		srcHasNamespace.Collection = srcHasNamespaceStr
-		// define a set of collections where an edge is going out...
 		srcHasNamespace.From = []string{srcTypesStr}
-
-		// repeat this for the collections where an edge is going into
 		srcHasNamespace.To = []string{srcNamespacesStr}
 
 		var srcHasName driver.EdgeDefinition
 		srcHasName.Collection = srcHasNameStr
-		// define a set of collections where an edge is going out...
 		srcHasName.From = []string{srcNamespacesStr}
-
-		// repeat this for the collections where an edge is going into
 		srcHasName.To = []string{srcNamesStr}
 
-		var isDependencyEdges driver.EdgeDefinition
-		isDependencyEdges.Collection = isDependencyEdgesStr
-		// define a set of collections where an edge is going out...
-		isDependencyEdges.From = []string{isDependenciesStr}
+		// setup isDependency collections
+		var isDependencyDepPkgEdges driver.EdgeDefinition
+		isDependencyDepPkgEdges.Collection = isDependencyDepPkgEdgesStr
+		isDependencyDepPkgEdges.From = []string{isDependenciesStr}
+		isDependencyDepPkgEdges.To = []string{pkgNamesStr}
 
-		// repeat this for the collections where an edge is going into
-		isDependencyEdges.To = []string{pkgNamesStr}
+		var isDependencySubjectPkgEdges driver.EdgeDefinition
+		isDependencySubjectPkgEdges.Collection = isDependencySubjectPkgEdgesStr
+		isDependencySubjectPkgEdges.From = []string{pkgVersionsStr}
+		isDependencySubjectPkgEdges.To = []string{isDependenciesStr}
 
-		var isDependencySubjectEdges driver.EdgeDefinition
-		isDependencySubjectEdges.Collection = isDependencySubjectEdgesStr
-		// define a set of collections where an edge is going out...
-		isDependencySubjectEdges.From = []string{pkgVersionsStr}
+		// setup isOccurrence collections
+		var isOccurrenceArtEdges driver.EdgeDefinition
+		isOccurrenceArtEdges.Collection = isOccurrenceArtEdgesStr
+		isOccurrenceArtEdges.From = []string{isOccurrencesStr}
+		isOccurrenceArtEdges.To = []string{artifactsStr}
 
-		// repeat this for the collections where an edge is going into
-		isDependencySubjectEdges.To = []string{isDependenciesStr}
+		var isOccurrenceSubjectPkgEdges driver.EdgeDefinition
+		isOccurrenceSubjectPkgEdges.Collection = isOccurrenceSubjectPkgEdgesStr
+		isOccurrenceSubjectPkgEdges.From = []string{pkgVersionsStr}
+		isOccurrenceSubjectPkgEdges.To = []string{isDependenciesStr}
 
-		var isOccurrencesEdges driver.EdgeDefinition
-		isOccurrencesEdges.Collection = isOccurrencesEdgesStr
-		// define a set of collections where an edge is going out...
-		isOccurrencesEdges.From = []string{isOccurrencesStr}
+		var isOccurrenceSubjectSrcEdges driver.EdgeDefinition
+		isOccurrenceSubjectSrcEdges.Collection = isOccurrenceSubjectSrcEdgesStr
+		isOccurrenceSubjectSrcEdges.From = []string{srcNamesStr}
+		isOccurrenceSubjectSrcEdges.To = []string{isDependenciesStr}
 
-		// repeat this for the collections where an edge is going into
-		isOccurrencesEdges.To = []string{artifactsStr}
-
-		var isOccurrencesSubjectEdges driver.EdgeDefinition
-		isOccurrencesSubjectEdges.Collection = isOccurrencesSubjectEdgesStr
-		// define a set of collections where an edge is going out...
-		isOccurrencesSubjectEdges.From = []string{pkgVersionsStr, srcNamesStr}
-
-		// repeat this for the collections where an edge is going into
-		isOccurrencesSubjectEdges.To = []string{isDependenciesStr}
-
-		var hasSLSASubjectEdges driver.EdgeDefinition
-		hasSLSASubjectEdges.Collection = hasSLSASubjectEdgesStr
-		// define a set of collections where an edge is going out...
-		hasSLSASubjectEdges.From = []string{artifactsStr}
-
-		// repeat this for the collections where an edge is going into
-		hasSLSASubjectEdges.To = []string{hasSLSAsStr}
+		// setup hasSLSA collections
+		var hasSLSASubjectArtEdges driver.EdgeDefinition
+		hasSLSASubjectArtEdges.Collection = hasSLSASubjectArtEdgesStr
+		hasSLSASubjectArtEdges.From = []string{artifactsStr}
+		hasSLSASubjectArtEdges.To = []string{hasSLSAsStr}
 
 		var hasSLSABuiltByEdges driver.EdgeDefinition
 		hasSLSABuiltByEdges.Collection = hasSLSABuiltByEdgesStr
-		// define a set of collections where an edge is going out...
 		hasSLSABuiltByEdges.From = []string{hasSLSAsStr}
-
-		// repeat this for the collections where an edge is going into
 		hasSLSABuiltByEdges.To = []string{buildersStr}
 
 		var hasSLSABuiltFromEdges driver.EdgeDefinition
 		hasSLSABuiltFromEdges.Collection = hasSLSABuiltFromEdgesStr
-		// define a set of collections where an edge is going out...
 		hasSLSABuiltFromEdges.From = []string{hasSLSAsStr}
-
-		// repeat this for the collections where an edge is going into
 		hasSLSABuiltFromEdges.To = []string{artifactsStr}
 
-		var hashEqualsEdges driver.EdgeDefinition
-		hashEqualsEdges.Collection = hashEqualsEdgesStr
-		// define a set of collections where an edge is going out...
-		hashEqualsEdges.From = []string{hashEqualsStr}
+		// setup hashEqual collections
+		var hashEqualArtEdges driver.EdgeDefinition
+		hashEqualArtEdges.Collection = hashEqualArtEdgesStr
+		hashEqualArtEdges.From = []string{hashEqualsStr}
+		hashEqualArtEdges.To = []string{artifactsStr}
 
-		// repeat this for the collections where an edge is going into
-		hashEqualsEdges.To = []string{artifactsStr}
+		var hashEqualSubjectArtEdges driver.EdgeDefinition
+		hashEqualSubjectArtEdges.Collection = hashEqualSubjectArtEdgesStr
+		hashEqualSubjectArtEdges.From = []string{artifactsStr}
+		hashEqualSubjectArtEdges.To = []string{hashEqualsStr}
 
-		var hashEqualsSubjectEdges driver.EdgeDefinition
-		hashEqualsSubjectEdges.Collection = hashEqualsSubjectEdgesStr
-		// define a set of collections where an edge is going out...
-		hashEqualsSubjectEdges.From = []string{artifactsStr}
+		// setup hasSBOM collections
+		var hasSBOMPkgEdges driver.EdgeDefinition
+		hasSBOMPkgEdges.Collection = hasSBOMPkgEdgesStr
+		hasSBOMPkgEdges.From = []string{artifactsStr}
+		hasSBOMPkgEdges.To = []string{hasSBOMsStr}
 
-		// repeat this for the collections where an edge is going into
-		hashEqualsSubjectEdges.To = []string{hashEqualsStr}
+		var hasSBOMArtEdges driver.EdgeDefinition
+		hasSBOMArtEdges.Collection = hasSBOMArtEdgesStr
+		hasSBOMArtEdges.From = []string{artifactsStr}
+		hasSBOMArtEdges.To = []string{hasSBOMsStr}
 
-		var hasSBOMEdges driver.EdgeDefinition
-		hasSBOMEdges.Collection = hasSBOMEdgesStr
-		// define a set of collections where an edge is going out...
-		hasSBOMEdges.From = []string{pkgVersionsStr, artifactsStr}
-
-		// repeat this for the collections where an edge is going into
-		hasSBOMEdges.To = []string{hasSBOMsStr}
-
+		// setup certifyVuln collections
 		var certifyVulnEdges driver.EdgeDefinition
 		certifyVulnEdges.Collection = certifyVulnEdgesStr
-		// define a set of collections where an edge is going out...
 		certifyVulnEdges.From = []string{pkgVersionsStr, certifyVulnsStr}
-
-		// repeat this for the collections where an edge is going into
 		certifyVulnEdges.To = []string{certifyVulnsStr, cvesStr, ghsasStr, osvsStr}
 
-		var certifyScorecardEdges driver.EdgeDefinition
-		certifyScorecardEdges.Collection = scorecardEdgesStr
-		// define a set of collections where an edge is going out...
-		certifyScorecardEdges.From = []string{srcNamesStr}
+		// setup certifyScorecard collections
+		var certifyScorecardSrcEdges driver.EdgeDefinition
+		certifyScorecardSrcEdges.Collection = scorecardSrcEdgesStr
+		certifyScorecardSrcEdges.From = []string{srcNamesStr}
+		certifyScorecardSrcEdges.To = []string{scorecardStr}
 
-		// repeat this for the collections where an edge is going into
-		certifyScorecardEdges.To = []string{scorecardStr}
+		// setup certifyBad collections
+		var certifyBadPkgVersionEdges driver.EdgeDefinition
+		certifyBadPkgVersionEdges.Collection = certifyBadPkgVersionEdgesStr
+		certifyBadPkgVersionEdges.From = []string{pkgVersionsStr}
+		certifyBadPkgVersionEdges.To = []string{certifyBadsStr}
+
+		var certifyBadPkgNameEdges driver.EdgeDefinition
+		certifyBadPkgNameEdges.Collection = certifyBadPkgNameEdgesStr
+		certifyBadPkgNameEdges.From = []string{pkgNamesStr}
+		certifyBadPkgNameEdges.To = []string{certifyBadsStr}
+
+		var certifyBadArtEdges driver.EdgeDefinition
+		certifyBadArtEdges.Collection = certifyBadArtEdgesStr
+		certifyBadArtEdges.From = []string{artifactsStr}
+		certifyBadArtEdges.To = []string{certifyBadsStr}
+
+		var certifyBadSrcEdges driver.EdgeDefinition
+		certifyBadSrcEdges.Collection = certifyBadSrcEdgesStr
+		certifyBadSrcEdges.From = []string{srcNamesStr}
+		certifyBadSrcEdges.To = []string{certifyBadsStr}
+
+		// setup certifyGood collections
+		var certifyGoodPkgVersionEdges driver.EdgeDefinition
+		certifyGoodPkgVersionEdges.Collection = certifyGoodPkgVersionEdgesStr
+		certifyGoodPkgVersionEdges.From = []string{pkgVersionsStr}
+		certifyGoodPkgVersionEdges.To = []string{certifyGoodsStr}
+
+		var certifyGoodPkgNameEdges driver.EdgeDefinition
+		certifyGoodPkgNameEdges.Collection = certifyGoodPkgNameEdgesStr
+		certifyGoodPkgNameEdges.From = []string{pkgNamesStr, pkgVersionsStr, artifactsStr, srcNamesStr}
+		certifyGoodPkgNameEdges.To = []string{certifyGoodsStr}
+
+		var certifyGoodArtEdges driver.EdgeDefinition
+		certifyGoodArtEdges.Collection = certifyGoodArtEdgesStr
+		certifyGoodArtEdges.From = []string{pkgNamesStr, pkgVersionsStr, artifactsStr, srcNamesStr}
+		certifyGoodArtEdges.To = []string{certifyGoodsStr}
+
+		var certifyGoodSrcEdges driver.EdgeDefinition
+		certifyGoodSrcEdges.Collection = certifyGoodSrcEdgesStr
+		certifyGoodSrcEdges.From = []string{pkgNamesStr, pkgVersionsStr, artifactsStr, srcNamesStr}
+		certifyGoodSrcEdges.To = []string{certifyGoodsStr}
 
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
 		options.EdgeDefinitions = []driver.EdgeDefinition{pkgHasType, pkgHasNamespace, pkgHasName,
-			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, hashEqualsSubjectEdges, hashEqualsEdges,
-			isDependencySubjectEdges, isDependencyEdges, isOccurrencesSubjectEdges, isOccurrencesEdges,
-			hasSBOMEdges, hasSLSASubjectEdges, hasSLSABuiltByEdges, hasSLSABuiltFromEdges, certifyVulnEdges, certifyScorecardEdges}
+			pkgHasVersion, srcHasType, srcHasNamespace, srcHasName, isDependencyDepPkgEdges, isDependencySubjectPkgEdges,
+			isOccurrenceArtEdges, isOccurrenceSubjectPkgEdges, isOccurrenceSubjectSrcEdges, hasSLSASubjectArtEdges,
+			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
+			hasSBOMArtEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
+			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create graph: %w", err)
 		}
+
+		// TODO (pxp928): Add missing indexes for verbs as needed
 
 		// add indexes to artifact and edge collections
 		if err := createIndexPerCollection(ctx, db, artifactsStr, []string{"digest"}, true, "byDigest"); err != nil {
@@ -411,10 +435,6 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, hashEqualsEdgesStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hashEqualsEdges: %w", err)
-		}
-
 		if err := createIndexPerCollection(ctx, db, pkgTypesStr, []string{"_parent", "type"}, true, "byPkgTypeParent"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgTypes: %w", err)
 		}
@@ -431,18 +451,6 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for pkgNames: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, pkgHasTypeStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgHasType: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgHasNamespaceStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgHasNamespace: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgHasNameStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgHasName: %w", err)
-		}
-
 		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"version"}, false, "byVersion"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgVersions: %w", err)
 		}
@@ -453,10 +461,6 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"qualifier_list[*]"}, false, "byQualifierList"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgVersions: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgHasVersionStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgHasVersion: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, srcTypesStr, []string{"_parent", "type"}, true, "bySrcTypeParent"); err != nil {
@@ -475,40 +479,16 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for srcNames: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, srcHasTypeStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for srcHasType: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, srcHasNamespaceStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for srcHasNamespace: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, srcHasNameStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for srcHasName: %w", err)
-		}
-
 		if err := createIndexPerCollection(ctx, db, isDependenciesStr, []string{"packageID", "depPackageID", "versionRange", "origin"}, false, "byPkgIDDepPkgIDversionRangeOrigin"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, isDependencyEdgesStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for isDependencyEdges: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "origin"}, true, "byPkgIDArtIDOrigin"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, isOccurrencesEdgesStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for isOccurrencesEdges: %w", err)
-		}
-
 		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"digest"}, true, "byDigest"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hasSBOMs: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, hasSBOMEdgesStr, []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hasSBOMEdges: %w", err)
 		}
 
 		// GUAC key indices for package
@@ -700,13 +680,6 @@ func (aqb *arangoQueryBuilder) forInBoundWithEdgeCounter(edgeCollectionName stri
 	return aqb
 }
 
-func (aqb *arangoQueryBuilder) prune(counterName string, fieldName string, condition string, value string) *arangoQueryFilter {
-	aqb.query.WriteString(" ")
-	aqb.query.WriteString(fmt.Sprintf("PRUNE %s.%s %s %s", counterName, fieldName, condition, value))
-
-	return newArangoQueryFilter(aqb)
-}
-
 func (aqb *arangoQueryBuilder) filter(counterName string, fieldName string, condition string, value string) *arangoQueryFilter {
 	aqb.query.WriteString(" ")
 
@@ -791,12 +764,7 @@ func getPreloadString(prefix, name string) string {
 }
 
 // Retrieval read-only queries for evidence trees
-func (c *arangoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	panic(fmt.Errorf("not implemented: CertifyBad - CertifyBad"))
-}
-func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
-	panic(fmt.Errorf("not implemented: CertifyGood - CertifyGood"))
-}
+
 func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	panic(fmt.Errorf("not implemented: CertifyVEXStatement - CertifyVEXStatement"))
 }
@@ -816,12 +784,7 @@ func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqua
 }
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
-func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
-}
-func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyGood - IngestCertifyGood"))
-}
+
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
 }

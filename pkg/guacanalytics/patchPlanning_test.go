@@ -1033,7 +1033,7 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, graph assembl
 			return fmt.Errorf("error in ingesting Package for CertifyGood: %v\n", err)
 		}
 
-		_, err = model.CertifyGoodPkg(ctx, client, *ingest.Pkg, &ingest.PkgMatchFlag, *ingest.CertifyGood)
+		_, err = model.CertifyGoodPkg(ctx, client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.CertifyGood)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting CertifyGood: %v\n", err)
@@ -1108,7 +1108,7 @@ func ingestPointOfContact(ctx context.Context, client graphql.Client, graph asse
 		if ingest.Src != nil {
 			_, err = model.PointOfContactSrc(ctx, client, *ingest.Src, *ingest.PointOfContact)
 		} else if ingest.Pkg != nil {
-			_, err = model.PointOfContactPkg(ctx, client, *ingest.Pkg, &ingest.PkgMatchFlag, *ingest.PointOfContact)
+			_, err = model.PointOfContactPkg(ctx, client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.PointOfContact)
 		} else {
 			_, err = model.PointOfContactArtifact(ctx, client, *ingest.Artifact, *ingest.PointOfContact)
 		}

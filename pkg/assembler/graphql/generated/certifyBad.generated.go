@@ -441,6 +441,53 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx conte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInputs(ctx context.Context, obj interface{}) (model.PackageSourceOrArtifactInputs, error) {
+	var it model.PackageSourceOrArtifactInputs
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"packages", "sources", "artifacts"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "packages":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packages"))
+			data, err := ec.unmarshalOPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Packages = data
+		case "sources":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
+			data, err := ec.unmarshalOSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Sources = data
+		case "artifacts":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
+			data, err := ec.unmarshalOArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Artifacts = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputPackageSourceOrArtifactSpec(ctx context.Context, obj interface{}) (model.PackageSourceOrArtifactSpec, error) {
 	var it model.PackageSourceOrArtifactSpec
 	asMap := map[string]interface{}{}
@@ -652,6 +699,28 @@ func (ec *executionContext) unmarshalNCertifyBadInputSpec2githubᚗcomᚋguacsec
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCertifyBadInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.CertifyBadInputSpec, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.CertifyBadInputSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNCertifyBadInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNCertifyBadInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadInputSpec(ctx context.Context, v interface{}) (*model.CertifyBadInputSpec, error) {
+	res, err := ec.unmarshalInputCertifyBadInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx context.Context, v interface{}) (model.CertifyBadSpec, error) {
 	res, err := ec.unmarshalInputCertifyBadSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -721,6 +790,11 @@ func (ec *executionContext) unmarshalNPackageSourceOrArtifactInput2githubᚗcom�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx context.Context, v interface{}) (model.PackageSourceOrArtifactInputs, error) {
+	res, err := ec.unmarshalInputPackageSourceOrArtifactInputs(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNPkgMatchType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgMatchType(ctx context.Context, v interface{}) (model.PkgMatchType, error) {
 	var res model.PkgMatchType
 	err := res.UnmarshalGQL(v)
@@ -729,14 +803,6 @@ func (ec *executionContext) unmarshalNPkgMatchType2githubᚗcomᚋguacsecᚋguac
 
 func (ec *executionContext) marshalNPkgMatchType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgMatchType(ctx context.Context, sel ast.SelectionSet, v model.PkgMatchType) graphql.Marshaler {
 	return v
-}
-
-func (ec *executionContext) unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx context.Context, v interface{}) (*model.MatchFlags, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputMatchFlags(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageSourceOrArtifactSpec, error) {

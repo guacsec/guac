@@ -11,8 +11,8 @@ import (
 )
 
 // IngestPointOfContact is the resolver for the ingestPointOfContact field.
-func (r *mutationResolver) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
-	return r.Backend.IngestPointOfContact(ctx, subject, pkgMatchType, pointOfContact)
+func (r *mutationResolver) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
+	return r.Backend.IngestPointOfContact(ctx, subject, &pkgMatchType, pointOfContact)
 }
 
 // PointOfContact is the resolver for the PointOfContact field.

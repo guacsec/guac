@@ -498,6 +498,28 @@ func (ec *executionContext) unmarshalNCertifyGoodInputSpec2githubᚗcomᚋguacse
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCertifyGoodInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.CertifyGoodInputSpec, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.CertifyGoodInputSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNCertifyGoodInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNCertifyGoodInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodInputSpec(ctx context.Context, v interface{}) (*model.CertifyGoodInputSpec, error) {
+	res, err := ec.unmarshalInputCertifyGoodInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx context.Context, v interface{}) (model.CertifyGoodSpec, error) {
 	res, err := ec.unmarshalInputCertifyGoodSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)

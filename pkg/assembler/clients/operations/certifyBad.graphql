@@ -17,20 +17,40 @@
 
 # Defines the GraphQL operations to ingest a CertifyBad into GUAC
 
-mutation CertifyBadPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyBad: CertifyBadInputSpec!) {
+mutation CertifyBadPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $certifyBad: CertifyBadInputSpec!) {
   ingestCertifyBad(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, certifyBad: $certifyBad) {
     ...AllCertifyBad
   }
 }
 
 mutation CertifyBadSrc($source: SourceInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-  ingestCertifyBad(subject: {source: $source}, certifyBad: $certifyBad) {
+  ingestCertifyBad(subject: {source: $source}, pkgMatchType: {pkg: ALL_VERSIONS}, certifyBad: $certifyBad) {
     ...AllCertifyBad
   }
 }
 
 mutation CertifyBadArtifact($artifact: ArtifactInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-  ingestCertifyBad(subject: {artifact: $artifact}, certifyBad: $certifyBad) {
+  ingestCertifyBad(subject: {artifact: $artifact}, pkgMatchType: {pkg: ALL_VERSIONS}, certifyBad: $certifyBad) {
+    ...AllCertifyBad
+  }
+}
+
+# Defines the GraphQL operations to bulk ingest a CertifyBad into GUAC
+
+mutation CertifyBadPkgs($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $certifyBads: [CertifyBadInputSpec!]!) {
+  ingestCertifyBads(subjects: {packages: $pkgs}, pkgMatchType: $pkgMatchType, certifyBads: $certifyBads) {
+    ...AllCertifyBad
+  }
+}
+
+mutation CertifyBadSrcs($sources: [SourceInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
+  ingestCertifyBads(subjects: {sources: $sources}, pkgMatchType: {pkg: ALL_VERSIONS}, certifyBads: $certifyBads) {
+    ...AllCertifyBad
+  }
+}
+
+mutation CertifyBadArtifacts($artifacts: [ArtifactInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
+  ingestCertifyBads(subjects: {artifacts: $artifacts}, pkgMatchType: {pkg: ALL_VERSIONS}, certifyBads: $certifyBads) {
     ...AllCertifyBad
   }
 }

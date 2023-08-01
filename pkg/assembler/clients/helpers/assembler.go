@@ -308,7 +308,7 @@ func ingestCertifyBad(ctx context.Context, client graphql.Client, bad assembler.
 	}
 
 	if bad.Pkg != nil {
-		_, err := model.CertifyBadPkg(ctx, client, *bad.Pkg, &bad.PkgMatchFlag, *bad.CertifyBad)
+		_, err := model.CertifyBadPkg(ctx, client, *bad.Pkg, bad.PkgMatchFlag, *bad.CertifyBad)
 		return err
 	}
 	if bad.Src != nil {
@@ -325,7 +325,7 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, good assemble
 	}
 
 	if good.Pkg != nil {
-		_, err := model.CertifyGoodPkg(ctx, client, *good.Pkg, &good.PkgMatchFlag, *good.CertifyGood)
+		_, err := model.CertifyGoodPkg(ctx, client, *good.Pkg, good.PkgMatchFlag, *good.CertifyGood)
 		return err
 	}
 	if good.Src != nil {
@@ -342,7 +342,7 @@ func ingestPointOfContact(ctx context.Context, client graphql.Client, poc assemb
 	}
 
 	if poc.Pkg != nil {
-		_, err := model.PointOfContactPkg(ctx, client, *poc.Pkg, &poc.PkgMatchFlag, *poc.PointOfContact)
+		_, err := model.PointOfContactPkg(ctx, client, *poc.Pkg, poc.PkgMatchFlag, *poc.PointOfContact)
 		return err
 	}
 	if poc.Src != nil {

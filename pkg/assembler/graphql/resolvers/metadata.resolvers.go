@@ -11,8 +11,8 @@ import (
 )
 
 // IngestHasMetadata is the resolver for the ingestHasMetadata field.
-func (r *mutationResolver) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
-	return r.Backend.IngestHasMetadata(ctx, subject, pkgMatchType, hasMetadata)
+func (r *mutationResolver) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
+	return r.Backend.IngestHasMetadata(ctx, subject, &pkgMatchType, hasMetadata)
 }
 
 // HasMetadata is the resolver for the HasMetadata field.

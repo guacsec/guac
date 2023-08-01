@@ -44,7 +44,7 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 
 	if certifyScorecardSpec.Source != nil {
 		arangoQueryBuilder = setSrcMatchValues(certifyScorecardSpec.Source, values)
-		arangoQueryBuilder.forOutBound(scorecardEdgesStr, "scorecard", "sName")
+		arangoQueryBuilder.forOutBound(scorecardSrcEdgesStr, "scorecard", "sName")
 	} else {
 		arangoQueryBuilder = newForQuery(scorecardStr, "scorecard")
 	}
@@ -116,7 +116,7 @@ func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, cert
 	}
 	if certifyScorecardSpec.Source == nil {
 		// get sources
-		arangoQueryBuilder.forInBound(scorecardEdgesStr, "sName", "scorecard")
+		arangoQueryBuilder.forInBound(scorecardSrcEdgesStr, "sName", "scorecard")
 		arangoQueryBuilder.forInBound(srcHasNameStr, "sNs", "sName")
 		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sType", "sNs")
 	}
@@ -231,7 +231,7 @@ func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.So
 	)
 	
 	LET edgeCollection = (
-	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id } INTO scorecardEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT {  _key: CONCAT("scorecardSrcEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id } INTO scorecardSrcEdges OPTIONS { overwriteMode: "ignore" }
 	)
 	  
 	  RETURN {
@@ -304,7 +304,7 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 	)
 	
 	LET edgeCollection = (
-	  INSERT {  _key: CONCAT("scorecardEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id } INTO scorecardEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT {  _key: CONCAT("scorecardSrcEdges", firstSrc.nameDoc._key, scorecard._key), _from: firstSrc.name_id, _to: scorecard._id } INTO scorecardSrcEdges OPTIONS { overwriteMode: "ignore" }
 	)
 	  
 	  RETURN {

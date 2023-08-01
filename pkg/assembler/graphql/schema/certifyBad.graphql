@@ -45,6 +45,18 @@ input PackageSourceOrArtifactInput {
 }
 
 """
+PackageSourceOrArtifactInputs allows using PackageSourceOrArtifact union as
+input type to be used in bulk mutations.
+
+Exactly one list must be specified.
+"""
+input PackageSourceOrArtifactInputs {
+  packages: [PkgInputSpec!]
+  sources: [SourceInputSpec!]
+  artifacts: [ArtifactInputSpec!]
+}
+
+"""
 CertifyBad is an attestation that a package, source, or artifact is considered
 bad.
 
@@ -115,5 +127,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered bad."
-  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
+  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyBad: CertifyBadInputSpec!): CertifyBad!
+  "Adds bulk certifications that a package, source or artifact is considered bad."
+  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
 }

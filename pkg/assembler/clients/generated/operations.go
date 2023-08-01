@@ -6382,6 +6382,125 @@ func (v *CertifyBadArtifactResponse) GetIngestCertifyBad() CertifyBadArtifactIng
 	return v.IngestCertifyBad
 }
 
+// CertifyBadArtifactsIngestCertifyBadsCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// The GraphQL type's documentation follows.
+//
+// CertifyBad is an attestation that a package, source, or artifact is considered
+// bad.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyBadArtifactsIngestCertifyBadsCertifyBad struct {
+	AllCertifyBad `json:"-"`
+}
+
+// GetId returns CertifyBadArtifactsIngestCertifyBadsCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadArtifactsIngestCertifyBadsCertifyBad) GetId() string { return v.AllCertifyBad.Id }
+
+// GetJustification returns CertifyBadArtifactsIngestCertifyBadsCertifyBad.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyBadArtifactsIngestCertifyBadsCertifyBad) GetJustification() string {
+	return v.AllCertifyBad.Justification
+}
+
+// GetSubject returns CertifyBadArtifactsIngestCertifyBadsCertifyBad.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyBadArtifactsIngestCertifyBadsCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
+	return v.AllCertifyBad.Subject
+}
+
+// GetOrigin returns CertifyBadArtifactsIngestCertifyBadsCertifyBad.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyBadArtifactsIngestCertifyBadsCertifyBad) GetOrigin() string {
+	return v.AllCertifyBad.Origin
+}
+
+// GetCollector returns CertifyBadArtifactsIngestCertifyBadsCertifyBad.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyBadArtifactsIngestCertifyBadsCertifyBad) GetCollector() string {
+	return v.AllCertifyBad.Collector
+}
+
+func (v *CertifyBadArtifactsIngestCertifyBadsCertifyBad) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyBadArtifactsIngestCertifyBadsCertifyBad
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyBadArtifactsIngestCertifyBadsCertifyBad = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyBad)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyBadArtifactsIngestCertifyBadsCertifyBad struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyBadArtifactsIngestCertifyBadsCertifyBad) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyBadArtifactsIngestCertifyBadsCertifyBad) __premarshalJSON() (*__premarshalCertifyBadArtifactsIngestCertifyBadsCertifyBad, error) {
+	var retval __premarshalCertifyBadArtifactsIngestCertifyBadsCertifyBad
+
+	retval.Id = v.AllCertifyBad.Id
+	retval.Justification = v.AllCertifyBad.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyBad.Subject
+		var err error
+		*dst, err = __marshalAllCertifyBadSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyBadArtifactsIngestCertifyBadsCertifyBad.AllCertifyBad.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyBad.Origin
+	retval.Collector = v.AllCertifyBad.Collector
+	return &retval, nil
+}
+
+// CertifyBadArtifactsResponse is returned by CertifyBadArtifacts on success.
+type CertifyBadArtifactsResponse struct {
+	// Adds bulk certifications that a package, source or artifact is considered bad.
+	IngestCertifyBads []CertifyBadArtifactsIngestCertifyBadsCertifyBad `json:"ingestCertifyBads"`
+}
+
+// GetIngestCertifyBads returns CertifyBadArtifactsResponse.IngestCertifyBads, and is useful for accessing the field via an interface.
+func (v *CertifyBadArtifactsResponse) GetIngestCertifyBads() []CertifyBadArtifactsIngestCertifyBadsCertifyBad {
+	return v.IngestCertifyBads
+}
+
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
 type CertifyBadInputSpec struct {
@@ -6512,6 +6631,123 @@ type CertifyBadPkgResponse struct {
 // GetIngestCertifyBad returns CertifyBadPkgResponse.IngestCertifyBad, and is useful for accessing the field via an interface.
 func (v *CertifyBadPkgResponse) GetIngestCertifyBad() CertifyBadPkgIngestCertifyBad {
 	return v.IngestCertifyBad
+}
+
+// CertifyBadPkgsIngestCertifyBadsCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// The GraphQL type's documentation follows.
+//
+// CertifyBad is an attestation that a package, source, or artifact is considered
+// bad.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyBadPkgsIngestCertifyBadsCertifyBad struct {
+	AllCertifyBad `json:"-"`
+}
+
+// GetId returns CertifyBadPkgsIngestCertifyBadsCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadPkgsIngestCertifyBadsCertifyBad) GetId() string { return v.AllCertifyBad.Id }
+
+// GetJustification returns CertifyBadPkgsIngestCertifyBadsCertifyBad.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyBadPkgsIngestCertifyBadsCertifyBad) GetJustification() string {
+	return v.AllCertifyBad.Justification
+}
+
+// GetSubject returns CertifyBadPkgsIngestCertifyBadsCertifyBad.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyBadPkgsIngestCertifyBadsCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
+	return v.AllCertifyBad.Subject
+}
+
+// GetOrigin returns CertifyBadPkgsIngestCertifyBadsCertifyBad.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyBadPkgsIngestCertifyBadsCertifyBad) GetOrigin() string { return v.AllCertifyBad.Origin }
+
+// GetCollector returns CertifyBadPkgsIngestCertifyBadsCertifyBad.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyBadPkgsIngestCertifyBadsCertifyBad) GetCollector() string {
+	return v.AllCertifyBad.Collector
+}
+
+func (v *CertifyBadPkgsIngestCertifyBadsCertifyBad) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyBadPkgsIngestCertifyBadsCertifyBad
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyBadPkgsIngestCertifyBadsCertifyBad = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyBad)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyBadPkgsIngestCertifyBadsCertifyBad struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyBadPkgsIngestCertifyBadsCertifyBad) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyBadPkgsIngestCertifyBadsCertifyBad) __premarshalJSON() (*__premarshalCertifyBadPkgsIngestCertifyBadsCertifyBad, error) {
+	var retval __premarshalCertifyBadPkgsIngestCertifyBadsCertifyBad
+
+	retval.Id = v.AllCertifyBad.Id
+	retval.Justification = v.AllCertifyBad.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyBad.Subject
+		var err error
+		*dst, err = __marshalAllCertifyBadSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyBadPkgsIngestCertifyBadsCertifyBad.AllCertifyBad.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyBad.Origin
+	retval.Collector = v.AllCertifyBad.Collector
+	return &retval, nil
+}
+
+// CertifyBadPkgsResponse is returned by CertifyBadPkgs on success.
+type CertifyBadPkgsResponse struct {
+	// Adds bulk certifications that a package, source or artifact is considered bad.
+	IngestCertifyBads []CertifyBadPkgsIngestCertifyBadsCertifyBad `json:"ingestCertifyBads"`
+}
+
+// GetIngestCertifyBads returns CertifyBadPkgsResponse.IngestCertifyBads, and is useful for accessing the field via an interface.
+func (v *CertifyBadPkgsResponse) GetIngestCertifyBads() []CertifyBadPkgsIngestCertifyBadsCertifyBad {
+	return v.IngestCertifyBads
 }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
@@ -6659,6 +6895,123 @@ type CertifyBadSrcResponse struct {
 // GetIngestCertifyBad returns CertifyBadSrcResponse.IngestCertifyBad, and is useful for accessing the field via an interface.
 func (v *CertifyBadSrcResponse) GetIngestCertifyBad() CertifyBadSrcIngestCertifyBad {
 	return v.IngestCertifyBad
+}
+
+// CertifyBadSrcsIngestCertifyBadsCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// The GraphQL type's documentation follows.
+//
+// CertifyBad is an attestation that a package, source, or artifact is considered
+// bad.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyBadSrcsIngestCertifyBadsCertifyBad struct {
+	AllCertifyBad `json:"-"`
+}
+
+// GetId returns CertifyBadSrcsIngestCertifyBadsCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadSrcsIngestCertifyBadsCertifyBad) GetId() string { return v.AllCertifyBad.Id }
+
+// GetJustification returns CertifyBadSrcsIngestCertifyBadsCertifyBad.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyBadSrcsIngestCertifyBadsCertifyBad) GetJustification() string {
+	return v.AllCertifyBad.Justification
+}
+
+// GetSubject returns CertifyBadSrcsIngestCertifyBadsCertifyBad.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyBadSrcsIngestCertifyBadsCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
+	return v.AllCertifyBad.Subject
+}
+
+// GetOrigin returns CertifyBadSrcsIngestCertifyBadsCertifyBad.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyBadSrcsIngestCertifyBadsCertifyBad) GetOrigin() string { return v.AllCertifyBad.Origin }
+
+// GetCollector returns CertifyBadSrcsIngestCertifyBadsCertifyBad.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyBadSrcsIngestCertifyBadsCertifyBad) GetCollector() string {
+	return v.AllCertifyBad.Collector
+}
+
+func (v *CertifyBadSrcsIngestCertifyBadsCertifyBad) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyBadSrcsIngestCertifyBadsCertifyBad
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyBadSrcsIngestCertifyBadsCertifyBad = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyBad)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyBadSrcsIngestCertifyBadsCertifyBad struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyBadSrcsIngestCertifyBadsCertifyBad) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyBadSrcsIngestCertifyBadsCertifyBad) __premarshalJSON() (*__premarshalCertifyBadSrcsIngestCertifyBadsCertifyBad, error) {
+	var retval __premarshalCertifyBadSrcsIngestCertifyBadsCertifyBad
+
+	retval.Id = v.AllCertifyBad.Id
+	retval.Justification = v.AllCertifyBad.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyBad.Subject
+		var err error
+		*dst, err = __marshalAllCertifyBadSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyBadSrcsIngestCertifyBadsCertifyBad.AllCertifyBad.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyBad.Origin
+	retval.Collector = v.AllCertifyBad.Collector
+	return &retval, nil
+}
+
+// CertifyBadSrcsResponse is returned by CertifyBadSrcs on success.
+type CertifyBadSrcsResponse struct {
+	// Adds bulk certifications that a package, source or artifact is considered bad.
+	IngestCertifyBads []CertifyBadSrcsIngestCertifyBadsCertifyBad `json:"ingestCertifyBads"`
+}
+
+// GetIngestCertifyBads returns CertifyBadSrcsResponse.IngestCertifyBads, and is useful for accessing the field via an interface.
+func (v *CertifyBadSrcsResponse) GetIngestCertifyBads() []CertifyBadSrcsIngestCertifyBadsCertifyBad {
+	return v.IngestCertifyBads
 }
 
 // CertifyBadsCertifyBad includes the requested fields of the GraphQL type CertifyBad.
@@ -7097,6 +7450,127 @@ func (v *CertifyGoodArtifactResponse) GetIngestCertifyGood() CertifyGoodArtifact
 	return v.IngestCertifyGood
 }
 
+// CertifyGoodArtifactsIngestCertifyGoodsCertifyGood includes the requested fields of the GraphQL type CertifyGood.
+// The GraphQL type's documentation follows.
+//
+// CertifyGood is an attestation that a package, source, or artifact is considered
+// good.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyGoodArtifactsIngestCertifyGoodsCertifyGood struct {
+	AllCertifyGood `json:"-"`
+}
+
+// GetId returns CertifyGoodArtifactsIngestCertifyGoodsCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGoodArtifactsIngestCertifyGoodsCertifyGood) GetId() string {
+	return v.AllCertifyGood.Id
+}
+
+// GetJustification returns CertifyGoodArtifactsIngestCertifyGoodsCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyGoodArtifactsIngestCertifyGoodsCertifyGood) GetJustification() string {
+	return v.AllCertifyGood.Justification
+}
+
+// GetSubject returns CertifyGoodArtifactsIngestCertifyGoodsCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyGoodArtifactsIngestCertifyGoodsCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.AllCertifyGood.Subject
+}
+
+// GetOrigin returns CertifyGoodArtifactsIngestCertifyGoodsCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyGoodArtifactsIngestCertifyGoodsCertifyGood) GetOrigin() string {
+	return v.AllCertifyGood.Origin
+}
+
+// GetCollector returns CertifyGoodArtifactsIngestCertifyGoodsCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyGoodArtifactsIngestCertifyGoodsCertifyGood) GetCollector() string {
+	return v.AllCertifyGood.Collector
+}
+
+func (v *CertifyGoodArtifactsIngestCertifyGoodsCertifyGood) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyGoodArtifactsIngestCertifyGoodsCertifyGood
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyGoodArtifactsIngestCertifyGoodsCertifyGood = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyGood)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyGoodArtifactsIngestCertifyGoodsCertifyGood struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyGoodArtifactsIngestCertifyGoodsCertifyGood) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyGoodArtifactsIngestCertifyGoodsCertifyGood) __premarshalJSON() (*__premarshalCertifyGoodArtifactsIngestCertifyGoodsCertifyGood, error) {
+	var retval __premarshalCertifyGoodArtifactsIngestCertifyGoodsCertifyGood
+
+	retval.Id = v.AllCertifyGood.Id
+	retval.Justification = v.AllCertifyGood.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyGood.Subject
+		var err error
+		*dst, err = __marshalAllCertifyGoodSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyGoodArtifactsIngestCertifyGoodsCertifyGood.AllCertifyGood.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyGood.Origin
+	retval.Collector = v.AllCertifyGood.Collector
+	return &retval, nil
+}
+
+// CertifyGoodArtifactsResponse is returned by CertifyGoodArtifacts on success.
+type CertifyGoodArtifactsResponse struct {
+	// Adds bulk certifications that a package, source or artifact is considered good.
+	IngestCertifyGoods []CertifyGoodArtifactsIngestCertifyGoodsCertifyGood `json:"ingestCertifyGoods"`
+}
+
+// GetIngestCertifyGoods returns CertifyGoodArtifactsResponse.IngestCertifyGoods, and is useful for accessing the field via an interface.
+func (v *CertifyGoodArtifactsResponse) GetIngestCertifyGoods() []CertifyGoodArtifactsIngestCertifyGoodsCertifyGood {
+	return v.IngestCertifyGoods
+}
+
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
 	Justification string `json:"justification"`
@@ -7228,6 +7702,125 @@ func (v *CertifyGoodPkgResponse) GetIngestCertifyGood() CertifyGoodPkgIngestCert
 	return v.IngestCertifyGood
 }
 
+// CertifyGoodPkgsIngestCertifyGoodsCertifyGood includes the requested fields of the GraphQL type CertifyGood.
+// The GraphQL type's documentation follows.
+//
+// CertifyGood is an attestation that a package, source, or artifact is considered
+// good.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyGoodPkgsIngestCertifyGoodsCertifyGood struct {
+	AllCertifyGood `json:"-"`
+}
+
+// GetId returns CertifyGoodPkgsIngestCertifyGoodsCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGoodPkgsIngestCertifyGoodsCertifyGood) GetId() string { return v.AllCertifyGood.Id }
+
+// GetJustification returns CertifyGoodPkgsIngestCertifyGoodsCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyGoodPkgsIngestCertifyGoodsCertifyGood) GetJustification() string {
+	return v.AllCertifyGood.Justification
+}
+
+// GetSubject returns CertifyGoodPkgsIngestCertifyGoodsCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyGoodPkgsIngestCertifyGoodsCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.AllCertifyGood.Subject
+}
+
+// GetOrigin returns CertifyGoodPkgsIngestCertifyGoodsCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyGoodPkgsIngestCertifyGoodsCertifyGood) GetOrigin() string {
+	return v.AllCertifyGood.Origin
+}
+
+// GetCollector returns CertifyGoodPkgsIngestCertifyGoodsCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyGoodPkgsIngestCertifyGoodsCertifyGood) GetCollector() string {
+	return v.AllCertifyGood.Collector
+}
+
+func (v *CertifyGoodPkgsIngestCertifyGoodsCertifyGood) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyGoodPkgsIngestCertifyGoodsCertifyGood
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyGoodPkgsIngestCertifyGoodsCertifyGood = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyGood)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyGoodPkgsIngestCertifyGoodsCertifyGood struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyGoodPkgsIngestCertifyGoodsCertifyGood) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyGoodPkgsIngestCertifyGoodsCertifyGood) __premarshalJSON() (*__premarshalCertifyGoodPkgsIngestCertifyGoodsCertifyGood, error) {
+	var retval __premarshalCertifyGoodPkgsIngestCertifyGoodsCertifyGood
+
+	retval.Id = v.AllCertifyGood.Id
+	retval.Justification = v.AllCertifyGood.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyGood.Subject
+		var err error
+		*dst, err = __marshalAllCertifyGoodSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyGoodPkgsIngestCertifyGoodsCertifyGood.AllCertifyGood.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyGood.Origin
+	retval.Collector = v.AllCertifyGood.Collector
+	return &retval, nil
+}
+
+// CertifyGoodPkgsResponse is returned by CertifyGoodPkgs on success.
+type CertifyGoodPkgsResponse struct {
+	// Adds bulk certifications that a package, source or artifact is considered good.
+	IngestCertifyGoods []CertifyGoodPkgsIngestCertifyGoodsCertifyGood `json:"ingestCertifyGoods"`
+}
+
+// GetIngestCertifyGoods returns CertifyGoodPkgsResponse.IngestCertifyGoods, and is useful for accessing the field via an interface.
+func (v *CertifyGoodPkgsResponse) GetIngestCertifyGoods() []CertifyGoodPkgsIngestCertifyGoodsCertifyGood {
+	return v.IngestCertifyGoods
+}
+
 // CertifyGoodSrcIngestCertifyGood includes the requested fields of the GraphQL type CertifyGood.
 // The GraphQL type's documentation follows.
 //
@@ -7341,6 +7934,125 @@ type CertifyGoodSrcResponse struct {
 // GetIngestCertifyGood returns CertifyGoodSrcResponse.IngestCertifyGood, and is useful for accessing the field via an interface.
 func (v *CertifyGoodSrcResponse) GetIngestCertifyGood() CertifyGoodSrcIngestCertifyGood {
 	return v.IngestCertifyGood
+}
+
+// CertifyGoodSrcsIngestCertifyGoodsCertifyGood includes the requested fields of the GraphQL type CertifyGood.
+// The GraphQL type's documentation follows.
+//
+// CertifyGood is an attestation that a package, source, or artifact is considered
+// good.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyGoodSrcsIngestCertifyGoodsCertifyGood struct {
+	AllCertifyGood `json:"-"`
+}
+
+// GetId returns CertifyGoodSrcsIngestCertifyGoodsCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSrcsIngestCertifyGoodsCertifyGood) GetId() string { return v.AllCertifyGood.Id }
+
+// GetJustification returns CertifyGoodSrcsIngestCertifyGoodsCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSrcsIngestCertifyGoodsCertifyGood) GetJustification() string {
+	return v.AllCertifyGood.Justification
+}
+
+// GetSubject returns CertifyGoodSrcsIngestCertifyGoodsCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSrcsIngestCertifyGoodsCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.AllCertifyGood.Subject
+}
+
+// GetOrigin returns CertifyGoodSrcsIngestCertifyGoodsCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSrcsIngestCertifyGoodsCertifyGood) GetOrigin() string {
+	return v.AllCertifyGood.Origin
+}
+
+// GetCollector returns CertifyGoodSrcsIngestCertifyGoodsCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSrcsIngestCertifyGoodsCertifyGood) GetCollector() string {
+	return v.AllCertifyGood.Collector
+}
+
+func (v *CertifyGoodSrcsIngestCertifyGoodsCertifyGood) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyGoodSrcsIngestCertifyGoodsCertifyGood
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyGoodSrcsIngestCertifyGoodsCertifyGood = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyGood)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyGoodSrcsIngestCertifyGoodsCertifyGood struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyGoodSrcsIngestCertifyGoodsCertifyGood) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyGoodSrcsIngestCertifyGoodsCertifyGood) __premarshalJSON() (*__premarshalCertifyGoodSrcsIngestCertifyGoodsCertifyGood, error) {
+	var retval __premarshalCertifyGoodSrcsIngestCertifyGoodsCertifyGood
+
+	retval.Id = v.AllCertifyGood.Id
+	retval.Justification = v.AllCertifyGood.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyGood.Subject
+		var err error
+		*dst, err = __marshalAllCertifyGoodSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyGoodSrcsIngestCertifyGoodsCertifyGood.AllCertifyGood.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyGood.Origin
+	retval.Collector = v.AllCertifyGood.Collector
+	return &retval, nil
+}
+
+// CertifyGoodSrcsResponse is returned by CertifyGoodSrcs on success.
+type CertifyGoodSrcsResponse struct {
+	// Adds bulk certifications that a package, source or artifact is considered good.
+	IngestCertifyGoods []CertifyGoodSrcsIngestCertifyGoodsCertifyGood `json:"ingestCertifyGoods"`
+}
+
+// GetIngestCertifyGoods returns CertifyGoodSrcsResponse.IngestCertifyGoods, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSrcsResponse) GetIngestCertifyGoods() []CertifyGoodSrcsIngestCertifyGoodsCertifyGood {
+	return v.IngestCertifyGoods
 }
 
 // CertifyNoKnownVulnIngestVulnerabilityCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
@@ -24713,10 +25425,22 @@ func (v *__CertifyBadArtifactInput) GetArtifact() ArtifactInputSpec { return v.A
 // GetCertifyBad returns __CertifyBadArtifactInput.CertifyBad, and is useful for accessing the field via an interface.
 func (v *__CertifyBadArtifactInput) GetCertifyBad() CertifyBadInputSpec { return v.CertifyBad }
 
+// __CertifyBadArtifactsInput is used internally by genqlient
+type __CertifyBadArtifactsInput struct {
+	Artifacts   []ArtifactInputSpec   `json:"artifacts"`
+	CertifyBads []CertifyBadInputSpec `json:"certifyBads"`
+}
+
+// GetArtifacts returns __CertifyBadArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__CertifyBadArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetCertifyBads returns __CertifyBadArtifactsInput.CertifyBads, and is useful for accessing the field via an interface.
+func (v *__CertifyBadArtifactsInput) GetCertifyBads() []CertifyBadInputSpec { return v.CertifyBads }
+
 // __CertifyBadPkgInput is used internally by genqlient
 type __CertifyBadPkgInput struct {
 	Pkg          PkgInputSpec        `json:"pkg"`
-	PkgMatchType *MatchFlags         `json:"pkgMatchType"`
+	PkgMatchType MatchFlags          `json:"pkgMatchType"`
 	CertifyBad   CertifyBadInputSpec `json:"certifyBad"`
 }
 
@@ -24724,10 +25448,26 @@ type __CertifyBadPkgInput struct {
 func (v *__CertifyBadPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
 
 // GetPkgMatchType returns __CertifyBadPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
-func (v *__CertifyBadPkgInput) GetPkgMatchType() *MatchFlags { return v.PkgMatchType }
+func (v *__CertifyBadPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
 
 // GetCertifyBad returns __CertifyBadPkgInput.CertifyBad, and is useful for accessing the field via an interface.
 func (v *__CertifyBadPkgInput) GetCertifyBad() CertifyBadInputSpec { return v.CertifyBad }
+
+// __CertifyBadPkgsInput is used internally by genqlient
+type __CertifyBadPkgsInput struct {
+	Pkgs         []PkgInputSpec        `json:"pkgs"`
+	PkgMatchType MatchFlags            `json:"pkgMatchType"`
+	CertifyBads  []CertifyBadInputSpec `json:"certifyBads"`
+}
+
+// GetPkgs returns __CertifyBadPkgsInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__CertifyBadPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetPkgMatchType returns __CertifyBadPkgsInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__CertifyBadPkgsInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
+
+// GetCertifyBads returns __CertifyBadPkgsInput.CertifyBads, and is useful for accessing the field via an interface.
+func (v *__CertifyBadPkgsInput) GetCertifyBads() []CertifyBadInputSpec { return v.CertifyBads }
 
 // __CertifyBadSrcInput is used internally by genqlient
 type __CertifyBadSrcInput struct {
@@ -24740,6 +25480,18 @@ func (v *__CertifyBadSrcInput) GetSource() SourceInputSpec { return v.Source }
 
 // GetCertifyBad returns __CertifyBadSrcInput.CertifyBad, and is useful for accessing the field via an interface.
 func (v *__CertifyBadSrcInput) GetCertifyBad() CertifyBadInputSpec { return v.CertifyBad }
+
+// __CertifyBadSrcsInput is used internally by genqlient
+type __CertifyBadSrcsInput struct {
+	Sources     []SourceInputSpec     `json:"sources"`
+	CertifyBads []CertifyBadInputSpec `json:"certifyBads"`
+}
+
+// GetSources returns __CertifyBadSrcsInput.Sources, and is useful for accessing the field via an interface.
+func (v *__CertifyBadSrcsInput) GetSources() []SourceInputSpec { return v.Sources }
+
+// GetCertifyBads returns __CertifyBadSrcsInput.CertifyBads, and is useful for accessing the field via an interface.
+func (v *__CertifyBadSrcsInput) GetCertifyBads() []CertifyBadInputSpec { return v.CertifyBads }
 
 // __CertifyBadsInput is used internally by genqlient
 type __CertifyBadsInput struct {
@@ -24793,10 +25545,22 @@ func (v *__CertifyGoodArtifactInput) GetArtifact() ArtifactInputSpec { return v.
 // GetCertifyGood returns __CertifyGoodArtifactInput.CertifyGood, and is useful for accessing the field via an interface.
 func (v *__CertifyGoodArtifactInput) GetCertifyGood() CertifyGoodInputSpec { return v.CertifyGood }
 
+// __CertifyGoodArtifactsInput is used internally by genqlient
+type __CertifyGoodArtifactsInput struct {
+	Artifacts    []ArtifactInputSpec    `json:"artifacts"`
+	CertifyGoods []CertifyGoodInputSpec `json:"certifyGoods"`
+}
+
+// GetArtifacts returns __CertifyGoodArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetCertifyGoods returns __CertifyGoodArtifactsInput.CertifyGoods, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodArtifactsInput) GetCertifyGoods() []CertifyGoodInputSpec { return v.CertifyGoods }
+
 // __CertifyGoodPkgInput is used internally by genqlient
 type __CertifyGoodPkgInput struct {
 	Pkg          PkgInputSpec         `json:"pkg"`
-	PkgMatchType *MatchFlags          `json:"pkgMatchType"`
+	PkgMatchType MatchFlags           `json:"pkgMatchType"`
 	CertifyGood  CertifyGoodInputSpec `json:"certifyGood"`
 }
 
@@ -24804,10 +25568,26 @@ type __CertifyGoodPkgInput struct {
 func (v *__CertifyGoodPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
 
 // GetPkgMatchType returns __CertifyGoodPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
-func (v *__CertifyGoodPkgInput) GetPkgMatchType() *MatchFlags { return v.PkgMatchType }
+func (v *__CertifyGoodPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
 
 // GetCertifyGood returns __CertifyGoodPkgInput.CertifyGood, and is useful for accessing the field via an interface.
 func (v *__CertifyGoodPkgInput) GetCertifyGood() CertifyGoodInputSpec { return v.CertifyGood }
+
+// __CertifyGoodPkgsInput is used internally by genqlient
+type __CertifyGoodPkgsInput struct {
+	Pkgs         []PkgInputSpec         `json:"pkgs"`
+	PkgMatchType MatchFlags             `json:"pkgMatchType"`
+	CertifyGoods []CertifyGoodInputSpec `json:"certifyGoods"`
+}
+
+// GetPkgs returns __CertifyGoodPkgsInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetPkgMatchType returns __CertifyGoodPkgsInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodPkgsInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
+
+// GetCertifyGoods returns __CertifyGoodPkgsInput.CertifyGoods, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodPkgsInput) GetCertifyGoods() []CertifyGoodInputSpec { return v.CertifyGoods }
 
 // __CertifyGoodSrcInput is used internally by genqlient
 type __CertifyGoodSrcInput struct {
@@ -24820,6 +25600,18 @@ func (v *__CertifyGoodSrcInput) GetSource() SourceInputSpec { return v.Source }
 
 // GetCertifyGood returns __CertifyGoodSrcInput.CertifyGood, and is useful for accessing the field via an interface.
 func (v *__CertifyGoodSrcInput) GetCertifyGood() CertifyGoodInputSpec { return v.CertifyGood }
+
+// __CertifyGoodSrcsInput is used internally by genqlient
+type __CertifyGoodSrcsInput struct {
+	Sources      []SourceInputSpec      `json:"sources"`
+	CertifyGoods []CertifyGoodInputSpec `json:"certifyGoods"`
+}
+
+// GetSources returns __CertifyGoodSrcsInput.Sources, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodSrcsInput) GetSources() []SourceInputSpec { return v.Sources }
+
+// GetCertifyGoods returns __CertifyGoodSrcsInput.CertifyGoods, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodSrcsInput) GetCertifyGoods() []CertifyGoodInputSpec { return v.CertifyGoods }
 
 // __CertifyNoKnownVulnInput is used internally by genqlient
 type __CertifyNoKnownVulnInput struct {
@@ -24904,7 +25696,7 @@ func (v *__HasMetadataArtifactInput) GetHasMetadata() HasMetadataInputSpec { ret
 // __HasMetadataPkgInput is used internally by genqlient
 type __HasMetadataPkgInput struct {
 	Pkg          PkgInputSpec         `json:"pkg"`
-	PkgMatchType *MatchFlags          `json:"pkgMatchType"`
+	PkgMatchType MatchFlags           `json:"pkgMatchType"`
 	HasMetadata  HasMetadataInputSpec `json:"hasMetadata"`
 }
 
@@ -24912,7 +25704,7 @@ type __HasMetadataPkgInput struct {
 func (v *__HasMetadataPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
 
 // GetPkgMatchType returns __HasMetadataPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
-func (v *__HasMetadataPkgInput) GetPkgMatchType() *MatchFlags { return v.PkgMatchType }
+func (v *__HasMetadataPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
 
 // GetHasMetadata returns __HasMetadataPkgInput.HasMetadata, and is useful for accessing the field via an interface.
 func (v *__HasMetadataPkgInput) GetHasMetadata() HasMetadataInputSpec { return v.HasMetadata }
@@ -25370,7 +26162,7 @@ func (v *__PointOfContactArtifactInput) GetPointOfContact() PointOfContactInputS
 // __PointOfContactPkgInput is used internally by genqlient
 type __PointOfContactPkgInput struct {
 	Pkg            PkgInputSpec            `json:"pkg"`
-	PkgMatchType   *MatchFlags             `json:"pkgMatchType"`
+	PkgMatchType   MatchFlags              `json:"pkgMatchType"`
 	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
 }
 
@@ -25378,7 +26170,7 @@ type __PointOfContactPkgInput struct {
 func (v *__PointOfContactPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
 
 // GetPkgMatchType returns __PointOfContactPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
-func (v *__PointOfContactPkgInput) GetPkgMatchType() *MatchFlags { return v.PkgMatchType }
+func (v *__PointOfContactPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
 
 // GetPointOfContact returns __PointOfContactPkgInput.PointOfContact, and is useful for accessing the field via an interface.
 func (v *__PointOfContactPkgInput) GetPointOfContact() PointOfContactInputSpec {
@@ -25626,7 +26418,7 @@ func CVEs(
 // The query or mutation executed by CertifyBadArtifact.
 const CertifyBadArtifact_Operation = `
 mutation CertifyBadArtifact ($artifact: ArtifactInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-	ingestCertifyBad(subject: {artifact:$artifact}, certifyBad: $certifyBad) {
+	ingestCertifyBad(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBad: $certifyBad) {
 		... AllCertifyBad
 	}
 }
@@ -25718,9 +26510,104 @@ func CertifyBadArtifact(
 	return &data, err
 }
 
+// The query or mutation executed by CertifyBadArtifacts.
+const CertifyBadArtifacts_Operation = `
+mutation CertifyBadArtifacts ($artifacts: [ArtifactInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
+	ingestCertifyBads(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBads: $certifyBads) {
+		... AllCertifyBad
+	}
+}
+fragment AllCertifyBad on CertifyBad {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyBadArtifacts(
+	ctx context.Context,
+	client graphql.Client,
+	artifacts []ArtifactInputSpec,
+	certifyBads []CertifyBadInputSpec,
+) (*CertifyBadArtifactsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyBadArtifacts",
+		Query:  CertifyBadArtifacts_Operation,
+		Variables: &__CertifyBadArtifactsInput{
+			Artifacts:   artifacts,
+			CertifyBads: certifyBads,
+		},
+	}
+	var err error
+
+	var data CertifyBadArtifactsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by CertifyBadPkg.
 const CertifyBadPkg_Operation = `
-mutation CertifyBadPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyBad: CertifyBadInputSpec!) {
+mutation CertifyBadPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $certifyBad: CertifyBadInputSpec!) {
 	ingestCertifyBad(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyBad: $certifyBad) {
 		... AllCertifyBad
 	}
@@ -25789,7 +26676,7 @@ func CertifyBadPkg(
 	ctx context.Context,
 	client graphql.Client,
 	pkg PkgInputSpec,
-	pkgMatchType *MatchFlags,
+	pkgMatchType MatchFlags,
 	certifyBad CertifyBadInputSpec,
 ) (*CertifyBadPkgResponse, error) {
 	req := &graphql.Request{
@@ -25815,10 +26702,107 @@ func CertifyBadPkg(
 	return &data, err
 }
 
+// The query or mutation executed by CertifyBadPkgs.
+const CertifyBadPkgs_Operation = `
+mutation CertifyBadPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $certifyBads: [CertifyBadInputSpec!]!) {
+	ingestCertifyBads(subjects: {packages:$pkgs}, pkgMatchType: $pkgMatchType, certifyBads: $certifyBads) {
+		... AllCertifyBad
+	}
+}
+fragment AllCertifyBad on CertifyBad {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyBadPkgs(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	pkgMatchType MatchFlags,
+	certifyBads []CertifyBadInputSpec,
+) (*CertifyBadPkgsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyBadPkgs",
+		Query:  CertifyBadPkgs_Operation,
+		Variables: &__CertifyBadPkgsInput{
+			Pkgs:         pkgs,
+			PkgMatchType: pkgMatchType,
+			CertifyBads:  certifyBads,
+		},
+	}
+	var err error
+
+	var data CertifyBadPkgsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by CertifyBadSrc.
 const CertifyBadSrc_Operation = `
 mutation CertifyBadSrc ($source: SourceInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-	ingestCertifyBad(subject: {source:$source}, certifyBad: $certifyBad) {
+	ingestCertifyBad(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBad: $certifyBad) {
 		... AllCertifyBad
 	}
 }
@@ -25899,6 +26883,101 @@ func CertifyBadSrc(
 	var err error
 
 	var data CertifyBadSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyBadSrcs.
+const CertifyBadSrcs_Operation = `
+mutation CertifyBadSrcs ($sources: [SourceInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
+	ingestCertifyBads(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBads: $certifyBads) {
+		... AllCertifyBad
+	}
+}
+fragment AllCertifyBad on CertifyBad {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyBadSrcs(
+	ctx context.Context,
+	client graphql.Client,
+	sources []SourceInputSpec,
+	certifyBads []CertifyBadInputSpec,
+) (*CertifyBadSrcsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyBadSrcs",
+		Query:  CertifyBadSrcs_Operation,
+		Variables: &__CertifyBadSrcsInput{
+			Sources:     sources,
+			CertifyBads: certifyBads,
+		},
+	}
+	var err error
+
+	var data CertifyBadSrcsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -26212,7 +27291,7 @@ func CertifyGHSA(
 // The query or mutation executed by CertifyGoodArtifact.
 const CertifyGoodArtifact_Operation = `
 mutation CertifyGoodArtifact ($artifact: ArtifactInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
-	ingestCertifyGood(subject: {artifact:$artifact}, certifyGood: $certifyGood) {
+	ingestCertifyGood(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGood: $certifyGood) {
 		... AllCertifyGood
 	}
 }
@@ -26304,9 +27383,104 @@ func CertifyGoodArtifact(
 	return &data, err
 }
 
+// The query or mutation executed by CertifyGoodArtifacts.
+const CertifyGoodArtifacts_Operation = `
+mutation CertifyGoodArtifacts ($artifacts: [ArtifactInputSpec!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
+	ingestCertifyGoods(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGoods: $certifyGoods) {
+		... AllCertifyGood
+	}
+}
+fragment AllCertifyGood on CertifyGood {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyGoodArtifacts(
+	ctx context.Context,
+	client graphql.Client,
+	artifacts []ArtifactInputSpec,
+	certifyGoods []CertifyGoodInputSpec,
+) (*CertifyGoodArtifactsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyGoodArtifacts",
+		Query:  CertifyGoodArtifacts_Operation,
+		Variables: &__CertifyGoodArtifactsInput{
+			Artifacts:    artifacts,
+			CertifyGoods: certifyGoods,
+		},
+	}
+	var err error
+
+	var data CertifyGoodArtifactsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by CertifyGoodPkg.
 const CertifyGoodPkg_Operation = `
-mutation CertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyGood: CertifyGoodInputSpec!) {
+mutation CertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $certifyGood: CertifyGoodInputSpec!) {
 	ingestCertifyGood(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyGood: $certifyGood) {
 		... AllCertifyGood
 	}
@@ -26375,7 +27549,7 @@ func CertifyGoodPkg(
 	ctx context.Context,
 	client graphql.Client,
 	pkg PkgInputSpec,
-	pkgMatchType *MatchFlags,
+	pkgMatchType MatchFlags,
 	certifyGood CertifyGoodInputSpec,
 ) (*CertifyGoodPkgResponse, error) {
 	req := &graphql.Request{
@@ -26401,10 +27575,107 @@ func CertifyGoodPkg(
 	return &data, err
 }
 
+// The query or mutation executed by CertifyGoodPkgs.
+const CertifyGoodPkgs_Operation = `
+mutation CertifyGoodPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $certifyGoods: [CertifyGoodInputSpec!]!) {
+	ingestCertifyGoods(subjects: {packages:$pkgs}, pkgMatchType: $pkgMatchType, certifyGoods: $certifyGoods) {
+		... AllCertifyGood
+	}
+}
+fragment AllCertifyGood on CertifyGood {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyGoodPkgs(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	pkgMatchType MatchFlags,
+	certifyGoods []CertifyGoodInputSpec,
+) (*CertifyGoodPkgsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyGoodPkgs",
+		Query:  CertifyGoodPkgs_Operation,
+		Variables: &__CertifyGoodPkgsInput{
+			Pkgs:         pkgs,
+			PkgMatchType: pkgMatchType,
+			CertifyGoods: certifyGoods,
+		},
+	}
+	var err error
+
+	var data CertifyGoodPkgsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by CertifyGoodSrc.
 const CertifyGoodSrc_Operation = `
 mutation CertifyGoodSrc ($source: SourceInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
-	ingestCertifyGood(subject: {source:$source}, certifyGood: $certifyGood) {
+	ingestCertifyGood(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGood: $certifyGood) {
 		... AllCertifyGood
 	}
 }
@@ -26485,6 +27756,101 @@ func CertifyGoodSrc(
 	var err error
 
 	var data CertifyGoodSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyGoodSrcs.
+const CertifyGoodSrcs_Operation = `
+mutation CertifyGoodSrcs ($sources: [SourceInputSpec!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
+	ingestCertifyGoods(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGoods: $certifyGoods) {
+		... AllCertifyGood
+	}
+}
+fragment AllCertifyGood on CertifyGood {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyGoodSrcs(
+	ctx context.Context,
+	client graphql.Client,
+	sources []SourceInputSpec,
+	certifyGoods []CertifyGoodInputSpec,
+) (*CertifyGoodSrcsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyGoodSrcs",
+		Query:  CertifyGoodSrcs_Operation,
+		Variables: &__CertifyGoodSrcsInput{
+			Sources:      sources,
+			CertifyGoods: certifyGoods,
+		},
+	}
+	var err error
+
+	var data CertifyGoodSrcsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -26964,7 +28330,7 @@ func GHSAs(
 // The query or mutation executed by HasMetadataArtifact.
 const HasMetadataArtifact_Operation = `
 mutation HasMetadataArtifact ($artifact: ArtifactInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
-	ingestHasMetadata(subject: {artifact:$artifact}, hasMetadata: $hasMetadata) {
+	ingestHasMetadata(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadata: $hasMetadata) {
 		... AllHasMetadata
 	}
 }
@@ -27061,7 +28427,7 @@ func HasMetadataArtifact(
 
 // The query or mutation executed by HasMetadataPkg.
 const HasMetadataPkg_Operation = `
-mutation HasMetadataPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $hasMetadata: HasMetadataInputSpec!) {
+mutation HasMetadataPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $hasMetadata: HasMetadataInputSpec!) {
 	ingestHasMetadata(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, hasMetadata: $hasMetadata) {
 		... AllHasMetadata
 	}
@@ -27133,7 +28499,7 @@ func HasMetadataPkg(
 	ctx context.Context,
 	client graphql.Client,
 	pkg PkgInputSpec,
-	pkgMatchType *MatchFlags,
+	pkgMatchType MatchFlags,
 	hasMetadata HasMetadataInputSpec,
 ) (*HasMetadataPkgResponse, error) {
 	req := &graphql.Request{
@@ -27162,7 +28528,7 @@ func HasMetadataPkg(
 // The query or mutation executed by HasMetadataSrc.
 const HasMetadataSrc_Operation = `
 mutation HasMetadataSrc ($source: SourceInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
-	ingestHasMetadata(subject: {source:$source}, hasMetadata: $hasMetadata) {
+	ingestHasMetadata(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadata: $hasMetadata) {
 		... AllHasMetadata
 	}
 }
@@ -30913,7 +32279,7 @@ func PkgEqual(
 // The query or mutation executed by PointOfContactArtifact.
 const PointOfContactArtifact_Operation = `
 mutation PointOfContactArtifact ($artifact: ArtifactInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
-	ingestPointOfContact(subject: {artifact:$artifact}, pointOfContact: $pointOfContact) {
+	ingestPointOfContact(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContact: $pointOfContact) {
 		... AllPointOfContact
 	}
 }
@@ -31010,7 +32376,7 @@ func PointOfContactArtifact(
 
 // The query or mutation executed by PointOfContactPkg.
 const PointOfContactPkg_Operation = `
-mutation PointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $pointOfContact: PointOfContactInputSpec!) {
+mutation PointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $pointOfContact: PointOfContactInputSpec!) {
 	ingestPointOfContact(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, pointOfContact: $pointOfContact) {
 		... AllPointOfContact
 	}
@@ -31082,7 +32448,7 @@ func PointOfContactPkg(
 	ctx context.Context,
 	client graphql.Client,
 	pkg PkgInputSpec,
-	pkgMatchType *MatchFlags,
+	pkgMatchType MatchFlags,
 	pointOfContact PointOfContactInputSpec,
 ) (*PointOfContactPkgResponse, error) {
 	req := &graphql.Request{
@@ -31111,7 +32477,7 @@ func PointOfContactPkg(
 // The query or mutation executed by PointOfContactSrc.
 const PointOfContactSrc_Operation = `
 mutation PointOfContactSrc ($source: SourceInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
-	ingestPointOfContact(subject: {source:$source}, pointOfContact: $pointOfContact) {
+	ingestPointOfContact(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContact: $pointOfContact) {
 		... AllPointOfContact
 	}
 }

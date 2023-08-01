@@ -79,7 +79,7 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *model.HasSLSASpec, queryValues map[string]any) {
 
 	// currently not filtering on builtFrom (artifacts). Is that a real usecase?
-	arangoQueryBuilder.forOutBound(hasSLSASubjectEdgesStr, "hasSLSA", "art")
+	arangoQueryBuilder.forOutBound(hasSLSASubjectArtEdgesStr, "hasSLSA", "art")
 	if hasSLSASpec.BuildType != nil {
 		arangoQueryBuilder.filter("hasSLSA", buildTypeStr, "==", "@"+buildTypeStr)
 		queryValues[buildTypeStr] = hasSLSASpec.BuildType
@@ -230,7 +230,7 @@ func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifa
 		RETURN NEW
 	)
 
-	INSERT { _key: CONCAT("hasSLSASubjectEdges", subject._key, hasSLSA._key), _from: subject._id, _to: hasSLSA._id } INTO hasSLSASubjectEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("hasSLSASubjectArtEdges", subject._key, hasSLSA._key), _from: subject._id, _to: hasSLSA._id } INTO hasSLSASubjectArtEdges OPTIONS { overwriteMode: "ignore" }
 	INSERT { _key: CONCAT("hasSLSABuiltByEdges", hasSLSA._key, builtBy._key), _from: hasSLSA._id, _to: builtBy._id } INTO hasSLSABuiltByEdges OPTIONS { overwriteMode: "ignore" }
 
 	LET buildFromCollection = (FOR bfData IN doc.buildFromKeyList
@@ -290,7 +290,7 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInp
 		RETURN NEW
 	)
 
-	INSERT { _key: CONCAT("hasSLSASubjectEdges", subject._key, hasSLSA._key), _from: subject._id, _to: hasSLSA._id } INTO hasSLSASubjectEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("hasSLSASubjectArtEdges", subject._key, hasSLSA._key), _from: subject._id, _to: hasSLSA._id } INTO hasSLSASubjectArtEdges OPTIONS { overwriteMode: "ignore" }
 	INSERT { _key: CONCAT("hasSLSABuiltByEdges", hasSLSA._key, builtBy._key), _from: hasSLSA._id, _to: builtBy._id } INTO hasSLSABuiltByEdges OPTIONS { overwriteMode: "ignore" }
 
 	LET buildFromCollection = (FOR bfData IN @buildFromKeyList

@@ -184,14 +184,16 @@ type ComplexityRoot struct {
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestBuilders        func(childComplexity int, builders []*model.BuilderInputSpec) int
 		IngestCVEs            func(childComplexity int, cves []*model.CVEInputSpec) int
-		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
-		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
+		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
+		IngestCertifyBads     func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
+		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
+		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGHSAs           func(childComplexity int, ghsas []*model.GHSAInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
-		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
+		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSBOMs        func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
@@ -205,7 +207,7 @@ type ComplexityRoot struct {
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestPackages        func(childComplexity int, pkgs []*model.PkgInputSpec) int
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
-		IngestPointOfContact  func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
+		IngestPointOfContact  func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
 		IngestSLSAs           func(childComplexity int, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) int
 		IngestScorecard       func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
 		IngestScorecards      func(childComplexity int, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) int
@@ -1067,7 +1069,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
+		return e.complexity.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
+
+	case "Mutation.ingestCertifyBads":
+		if e.complexity.Mutation.IngestCertifyBads == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyBads_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyBads(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyBads"].([]*model.CertifyBadInputSpec)), true
 
 	case "Mutation.ingestCertifyGood":
 		if e.complexity.Mutation.IngestCertifyGood == nil {
@@ -1079,7 +1093,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyGood(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyGood"].(model.CertifyGoodInputSpec)), true
+		return e.complexity.Mutation.IngestCertifyGood(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["certifyGood"].(model.CertifyGoodInputSpec)), true
+
+	case "Mutation.ingestCertifyGoods":
+		if e.complexity.Mutation.IngestCertifyGoods == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyGoods_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyGoods(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyGoods"].([]*model.CertifyGoodInputSpec)), true
 
 	case "Mutation.ingestCVE":
 		if e.complexity.Mutation.IngestCve == nil {
@@ -1151,7 +1177,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasMetadata(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["hasMetadata"].(model.HasMetadataInputSpec)), true
+		return e.complexity.Mutation.IngestHasMetadata(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["hasMetadata"].(model.HasMetadataInputSpec)), true
 
 	case "Mutation.ingestHasSBOMs":
 		if e.complexity.Mutation.IngestHasSBOMs == nil {
@@ -1319,7 +1345,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
+		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
 
 	case "Mutation.ingestSLSAs":
 		if e.complexity.Mutation.IngestSLSAs == nil {
@@ -2269,6 +2295,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
+		ec.unmarshalInputPackageSourceOrArtifactInputs,
 		ec.unmarshalInputPackageSourceOrArtifactSpec,
 		ec.unmarshalInputPkgEqualInputSpec,
 		ec.unmarshalInputPkgEqualSpec,
@@ -2552,6 +2579,18 @@ input PackageSourceOrArtifactInput {
 }
 
 """
+PackageSourceOrArtifactInputs allows using PackageSourceOrArtifact union as
+input type to be used in bulk mutations.
+
+Exactly one list must be specified.
+"""
+input PackageSourceOrArtifactInputs {
+  packages: [PkgInputSpec!]
+  sources: [SourceInputSpec!]
+  artifacts: [ArtifactInputSpec!]
+}
+
+"""
 CertifyBad is an attestation that a package, source, or artifact is considered
 bad.
 
@@ -2622,7 +2661,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered bad."
-  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
+  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyBad: CertifyBadInputSpec!): CertifyBad!
+  "Adds bulk certifications that a package, source or artifact is considered bad."
+  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyGood.graphql", Input: `#
@@ -2700,7 +2741,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered good."
-  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyGood: CertifyGoodInputSpec!): CertifyGood!
+  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyGood: CertifyGoodInputSpec!): CertifyGood!
+  "Adds bulk certifications that a package, source or artifact is considered good."
+  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyGoods: [CertifyGoodInputSpec!]!): [CertifyGood!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
@@ -3220,7 +3263,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a PointOfContact attestation to a package, source or artifact."
-  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, pointOfContact: PointOfContactInputSpec!): PointOfContact!
+  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): PointOfContact!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
@@ -4068,7 +4111,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds metadata about a package, source or artifact."
-  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, hasMetadata: HasMetadataInputSpec!): HasMetadata!
+  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, hasMetadata: HasMetadataInputSpec!): HasMetadata!
 }
 `, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#
