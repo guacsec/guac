@@ -177,7 +177,7 @@ input PackageQualifierInputSpec {
 
 extend type Query {
   "Returns all packages matching a filter."
-  packages(pkgSpec: PkgSpec): [Package!]!
+  packages(pkgSpec: PkgSpec!): [Package!]!
 }
 
 extend type Mutation {

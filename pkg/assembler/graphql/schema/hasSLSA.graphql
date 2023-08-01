@@ -129,7 +129,7 @@ input SLSAPredicateInputSpec {
 
 extend type Query {
   "Returns all SLSA attestations matching the filter."
-  HasSLSA(hasSLSASpec: HasSLSASpec): [HasSLSA!]!
+  HasSLSA(hasSLSASpec: HasSLSASpec!): [HasSLSA!]!
 }
 
 extend type Mutation {

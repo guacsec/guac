@@ -55,7 +55,7 @@ input HasSourceAtInputSpec {
 
 extend type Query {
   "Returns all source mappings that match the filter."
-  HasSourceAt(hasSourceAtSpec: HasSourceAtSpec): [HasSourceAt!]!
+  HasSourceAt(hasSourceAtSpec: HasSourceAtSpec!): [HasSourceAt!]!
 }
 
 extend type Mutation {

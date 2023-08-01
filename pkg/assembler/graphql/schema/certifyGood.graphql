@@ -68,7 +68,7 @@ input CertifyGoodInputSpec {
 
 extend type Query {
   "Returns all CertifyGood attestations matching a filter."
-  CertifyGood(certifyGoodSpec: CertifyGoodSpec): [CertifyGood!]!
+  CertifyGood(certifyGoodSpec: CertifyGoodSpec!): [CertifyGood!]!
 }
 
 extend type Mutation {

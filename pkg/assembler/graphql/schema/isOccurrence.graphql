@@ -91,7 +91,7 @@ input IsOccurrenceInputSpec {
 
 extend type Query {
   "Returns all artifacts-source/package mappings that match a filter."
-  IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
+  IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec!): [IsOccurrence!]!
 }
 
 extend type Mutation {

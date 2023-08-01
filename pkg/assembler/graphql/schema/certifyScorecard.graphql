@@ -121,7 +121,7 @@ input ScorecardCheckInputSpec {
 
 extend type Query {
   "Returns all Scorecard certifications matching the filter."
-  scorecards(scorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
+  scorecards(scorecardSpec: CertifyScorecardSpec!): [CertifyScorecard!]!
 }
 
 extend type Mutation {

@@ -45,7 +45,7 @@ input OSVInputSpec {
 
 extend type Query {
   "Returns all OSV vulnerabilities matching a filter."
-  osv(osvSpec: OSVSpec): [OSV!]!
+  osv(osvSpec: OSVSpec!): [OSV!]!
 }
 
 extend type Mutation {

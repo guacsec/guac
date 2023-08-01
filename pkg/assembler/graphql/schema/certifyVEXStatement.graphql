@@ -130,7 +130,7 @@ input VexStatementInputSpec {
 
 extend type Query {
   "Returns all VEX certifications matching the input filter."
-  CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec): [CertifyVEXStatement!]!
+  CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec!): [CertifyVEXStatement!]!
 }
 
 extend type Mutation {

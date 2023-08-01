@@ -82,7 +82,7 @@ input HasMetadataInputSpec {
 
 extend type Query {
   "Returns all HasMetdata attestations matching a filter."
-  HasMetadata(hasMetadataSpec: HasMetadataSpec): [HasMetadata!]!
+  HasMetadata(hasMetadataSpec: HasMetadataSpec!): [HasMetadata!]!
 }
 
 extend type Mutation {
