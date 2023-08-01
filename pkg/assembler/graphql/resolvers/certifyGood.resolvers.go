@@ -11,13 +11,13 @@ import (
 )
 
 // IngestCertifyGood is the resolver for the ingestCertifyGood field.
-func (r *mutationResolver) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-	return r.Backend.IngestCertifyGood(ctx, subject, pkgMatchType, certifyGood)
+func (r *mutationResolver) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
+	return r.Backend.IngestCertifyGood(ctx, subject, &pkgMatchType, certifyGood)
 }
 
 // IngestCertifyGoods is the resolver for the ingestCertifyGoods field.
-func (r *mutationResolver) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
-	return r.Backend.IngestCertifyGoods(ctx, subjects, pkgMatchType, certifyGoods)
+func (r *mutationResolver) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
+	return r.Backend.IngestCertifyGoods(ctx, subjects, &pkgMatchType, certifyGoods)
 }
 
 // CertifyGood is the resolver for the CertifyGood field.

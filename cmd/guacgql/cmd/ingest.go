@@ -1066,7 +1066,7 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client) {
 	ingestCertifyGood := []struct {
 		name         string
 		pkg          *model.PkgInputSpec
-		pkgMatchType *model.MatchFlags
+		pkgMatchType model.MatchFlags
 		source       *model.SourceInputSpec
 		artifact     *model.ArtifactInputSpec
 		certifyGood  model.CertifyGoodInputSpec
@@ -1080,7 +1080,7 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client) {
 				Version:    &opensslVersion,
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 			},
-			pkgMatchType: &model.MatchFlags{
+			pkgMatchType: model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
 			},
 			certifyGood: model.CertifyGoodInputSpec{
@@ -1096,7 +1096,7 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client) {
 				Namespace: &djangoNameSpace,
 				Name:      "django",
 			},
-			pkgMatchType: &model.MatchFlags{
+			pkgMatchType: model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
 			},
 			certifyGood: model.CertifyGoodInputSpec{
@@ -1140,7 +1140,7 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client) {
 				Version:    &opensslVersion,
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 			},
-			pkgMatchType: &model.MatchFlags{
+			pkgMatchType: model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
 			},
 			certifyGood: model.CertifyGoodInputSpec{
@@ -1156,7 +1156,7 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client) {
 				Namespace: &djangoNameSpace,
 				Name:      "django",
 			},
-			pkgMatchType: &model.MatchFlags{
+			pkgMatchType: model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
 			},
 			certifyGood: model.CertifyGoodInputSpec{

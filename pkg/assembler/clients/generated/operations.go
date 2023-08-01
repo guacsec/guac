@@ -25560,7 +25560,7 @@ func (v *__CertifyGoodArtifactsInput) GetCertifyGoods() []CertifyGoodInputSpec {
 // __CertifyGoodPkgInput is used internally by genqlient
 type __CertifyGoodPkgInput struct {
 	Pkg          PkgInputSpec         `json:"pkg"`
-	PkgMatchType *MatchFlags          `json:"pkgMatchType"`
+	PkgMatchType MatchFlags           `json:"pkgMatchType"`
 	CertifyGood  CertifyGoodInputSpec `json:"certifyGood"`
 }
 
@@ -25568,7 +25568,7 @@ type __CertifyGoodPkgInput struct {
 func (v *__CertifyGoodPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
 
 // GetPkgMatchType returns __CertifyGoodPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
-func (v *__CertifyGoodPkgInput) GetPkgMatchType() *MatchFlags { return v.PkgMatchType }
+func (v *__CertifyGoodPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
 
 // GetCertifyGood returns __CertifyGoodPkgInput.CertifyGood, and is useful for accessing the field via an interface.
 func (v *__CertifyGoodPkgInput) GetCertifyGood() CertifyGoodInputSpec { return v.CertifyGood }
@@ -26162,7 +26162,7 @@ func (v *__PointOfContactArtifactInput) GetPointOfContact() PointOfContactInputS
 // __PointOfContactPkgInput is used internally by genqlient
 type __PointOfContactPkgInput struct {
 	Pkg            PkgInputSpec            `json:"pkg"`
-	PkgMatchType   *MatchFlags             `json:"pkgMatchType"`
+	PkgMatchType   MatchFlags              `json:"pkgMatchType"`
 	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
 }
 
@@ -26170,7 +26170,7 @@ type __PointOfContactPkgInput struct {
 func (v *__PointOfContactPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
 
 // GetPkgMatchType returns __PointOfContactPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
-func (v *__PointOfContactPkgInput) GetPkgMatchType() *MatchFlags { return v.PkgMatchType }
+func (v *__PointOfContactPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
 
 // GetPointOfContact returns __PointOfContactPkgInput.PointOfContact, and is useful for accessing the field via an interface.
 func (v *__PointOfContactPkgInput) GetPointOfContact() PointOfContactInputSpec {
@@ -26418,7 +26418,7 @@ func CVEs(
 // The query or mutation executed by CertifyBadArtifact.
 const CertifyBadArtifact_Operation = `
 mutation CertifyBadArtifact ($artifact: ArtifactInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-	ingestCertifyBad(subject: {artifact:$artifact}, certifyBad: $certifyBad) {
+	ingestCertifyBad(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBad: $certifyBad) {
 		... AllCertifyBad
 	}
 }
@@ -26513,7 +26513,7 @@ func CertifyBadArtifact(
 // The query or mutation executed by CertifyBadArtifacts.
 const CertifyBadArtifacts_Operation = `
 mutation CertifyBadArtifacts ($artifacts: [ArtifactInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
-	ingestCertifyBads(subjects: {artifacts:$artifacts}, certifyBads: $certifyBads) {
+	ingestCertifyBads(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBads: $certifyBads) {
 		... AllCertifyBad
 	}
 }
@@ -26802,7 +26802,7 @@ func CertifyBadPkgs(
 // The query or mutation executed by CertifyBadSrc.
 const CertifyBadSrc_Operation = `
 mutation CertifyBadSrc ($source: SourceInputSpec!, $certifyBad: CertifyBadInputSpec!) {
-	ingestCertifyBad(subject: {source:$source}, certifyBad: $certifyBad) {
+	ingestCertifyBad(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBad: $certifyBad) {
 		... AllCertifyBad
 	}
 }
@@ -26897,7 +26897,7 @@ func CertifyBadSrc(
 // The query or mutation executed by CertifyBadSrcs.
 const CertifyBadSrcs_Operation = `
 mutation CertifyBadSrcs ($sources: [SourceInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
-	ingestCertifyBads(subjects: {sources:$sources}, certifyBads: $certifyBads) {
+	ingestCertifyBads(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBads: $certifyBads) {
 		... AllCertifyBad
 	}
 }
@@ -27291,7 +27291,7 @@ func CertifyGHSA(
 // The query or mutation executed by CertifyGoodArtifact.
 const CertifyGoodArtifact_Operation = `
 mutation CertifyGoodArtifact ($artifact: ArtifactInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
-	ingestCertifyGood(subject: {artifact:$artifact}, certifyGood: $certifyGood) {
+	ingestCertifyGood(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGood: $certifyGood) {
 		... AllCertifyGood
 	}
 }
@@ -27386,7 +27386,7 @@ func CertifyGoodArtifact(
 // The query or mutation executed by CertifyGoodArtifacts.
 const CertifyGoodArtifacts_Operation = `
 mutation CertifyGoodArtifacts ($artifacts: [ArtifactInputSpec!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
-	ingestCertifyGoods(subjects: {artifacts:$artifacts}, certifyGoods: $certifyGoods) {
+	ingestCertifyGoods(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGoods: $certifyGoods) {
 		... AllCertifyGood
 	}
 }
@@ -27480,7 +27480,7 @@ func CertifyGoodArtifacts(
 
 // The query or mutation executed by CertifyGoodPkg.
 const CertifyGoodPkg_Operation = `
-mutation CertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyGood: CertifyGoodInputSpec!) {
+mutation CertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $certifyGood: CertifyGoodInputSpec!) {
 	ingestCertifyGood(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyGood: $certifyGood) {
 		... AllCertifyGood
 	}
@@ -27549,7 +27549,7 @@ func CertifyGoodPkg(
 	ctx context.Context,
 	client graphql.Client,
 	pkg PkgInputSpec,
-	pkgMatchType *MatchFlags,
+	pkgMatchType MatchFlags,
 	certifyGood CertifyGoodInputSpec,
 ) (*CertifyGoodPkgResponse, error) {
 	req := &graphql.Request{
@@ -27675,7 +27675,7 @@ func CertifyGoodPkgs(
 // The query or mutation executed by CertifyGoodSrc.
 const CertifyGoodSrc_Operation = `
 mutation CertifyGoodSrc ($source: SourceInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
-	ingestCertifyGood(subject: {source:$source}, certifyGood: $certifyGood) {
+	ingestCertifyGood(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGood: $certifyGood) {
 		... AllCertifyGood
 	}
 }
@@ -27770,7 +27770,7 @@ func CertifyGoodSrc(
 // The query or mutation executed by CertifyGoodSrcs.
 const CertifyGoodSrcs_Operation = `
 mutation CertifyGoodSrcs ($sources: [SourceInputSpec!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
-	ingestCertifyGoods(subjects: {sources:$sources}, certifyGoods: $certifyGoods) {
+	ingestCertifyGoods(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGoods: $certifyGoods) {
 		... AllCertifyGood
 	}
 }
@@ -28330,7 +28330,7 @@ func GHSAs(
 // The query or mutation executed by HasMetadataArtifact.
 const HasMetadataArtifact_Operation = `
 mutation HasMetadataArtifact ($artifact: ArtifactInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
-	ingestHasMetadata(subject: {artifact:$artifact}, hasMetadata: $hasMetadata) {
+	ingestHasMetadata(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadata: $hasMetadata) {
 		... AllHasMetadata
 	}
 }
@@ -28528,7 +28528,7 @@ func HasMetadataPkg(
 // The query or mutation executed by HasMetadataSrc.
 const HasMetadataSrc_Operation = `
 mutation HasMetadataSrc ($source: SourceInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
-	ingestHasMetadata(subject: {source:$source}, hasMetadata: $hasMetadata) {
+	ingestHasMetadata(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadata: $hasMetadata) {
 		... AllHasMetadata
 	}
 }
@@ -32279,7 +32279,7 @@ func PkgEqual(
 // The query or mutation executed by PointOfContactArtifact.
 const PointOfContactArtifact_Operation = `
 mutation PointOfContactArtifact ($artifact: ArtifactInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
-	ingestPointOfContact(subject: {artifact:$artifact}, pointOfContact: $pointOfContact) {
+	ingestPointOfContact(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContact: $pointOfContact) {
 		... AllPointOfContact
 	}
 }
@@ -32376,7 +32376,7 @@ func PointOfContactArtifact(
 
 // The query or mutation executed by PointOfContactPkg.
 const PointOfContactPkg_Operation = `
-mutation PointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $pointOfContact: PointOfContactInputSpec!) {
+mutation PointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $pointOfContact: PointOfContactInputSpec!) {
 	ingestPointOfContact(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, pointOfContact: $pointOfContact) {
 		... AllPointOfContact
 	}
@@ -32448,7 +32448,7 @@ func PointOfContactPkg(
 	ctx context.Context,
 	client graphql.Client,
 	pkg PkgInputSpec,
-	pkgMatchType *MatchFlags,
+	pkgMatchType MatchFlags,
 	pointOfContact PointOfContactInputSpec,
 ) (*PointOfContactPkgResponse, error) {
 	req := &graphql.Request{
@@ -32477,7 +32477,7 @@ func PointOfContactPkg(
 // The query or mutation executed by PointOfContactSrc.
 const PointOfContactSrc_Operation = `
 mutation PointOfContactSrc ($source: SourceInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
-	ingestPointOfContact(subject: {source:$source}, pointOfContact: $pointOfContact) {
+	ingestPointOfContact(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContact: $pointOfContact) {
 		... AllPointOfContact
 	}
 }

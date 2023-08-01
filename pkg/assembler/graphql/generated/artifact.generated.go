@@ -23,15 +23,15 @@ type MutationResolver interface {
 	IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error)
 	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error)
 	IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error)
-	IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error)
-	IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error)
-	IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error)
-	IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error)
+	IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error)
+	IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error)
+	IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error)
+	IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error)
 	IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
 	IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error)
 	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
-	IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error)
+	IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestCVEs(ctx context.Context, cves []*model.CVEInputSpec) ([]*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
@@ -48,7 +48,7 @@ type MutationResolver interface {
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
 	IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error)
 	IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error)
-	IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error)
+	IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 	IngestOSVs(ctx context.Context, osvs []*model.OSVInputSpec) ([]*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
@@ -193,10 +193,10 @@ func (ec *executionContext) field_Mutation_ingestCertifyBad_args(ctx context.Con
 		}
 	}
 	args["subject"] = arg0
-	var arg1 *model.MatchFlags
+	var arg1 model.MatchFlags
 	if tmp, ok := rawArgs["pkgMatchType"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -226,10 +226,10 @@ func (ec *executionContext) field_Mutation_ingestCertifyBads_args(ctx context.Co
 		}
 	}
 	args["subjects"] = arg0
-	var arg1 *model.MatchFlags
+	var arg1 model.MatchFlags
 	if tmp, ok := rawArgs["pkgMatchType"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -259,10 +259,10 @@ func (ec *executionContext) field_Mutation_ingestCertifyGood_args(ctx context.Co
 		}
 	}
 	args["subject"] = arg0
-	var arg1 *model.MatchFlags
+	var arg1 model.MatchFlags
 	if tmp, ok := rawArgs["pkgMatchType"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -292,10 +292,10 @@ func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.C
 		}
 	}
 	args["subjects"] = arg0
-	var arg1 *model.MatchFlags
+	var arg1 model.MatchFlags
 	if tmp, ok := rawArgs["pkgMatchType"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -421,10 +421,10 @@ func (ec *executionContext) field_Mutation_ingestHasMetadata_args(ctx context.Co
 		}
 	}
 	args["subject"] = arg0
-	var arg1 *model.MatchFlags
+	var arg1 model.MatchFlags
 	if tmp, ok := rawArgs["pkgMatchType"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -802,10 +802,10 @@ func (ec *executionContext) field_Mutation_ingestPointOfContact_args(ctx context
 		}
 	}
 	args["subject"] = arg0
-	var arg1 *model.MatchFlags
+	var arg1 model.MatchFlags
 	if tmp, ok := rawArgs["pkgMatchType"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
-		arg1, err = ec.unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1909,7 +1909,7 @@ func (ec *executionContext) _Mutation_ingestCertifyBad(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyBad(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(*model.MatchFlags), fc.Args["certifyBad"].(model.CertifyBadInputSpec))
+		return ec.resolvers.Mutation().IngestCertifyBad(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyBad"].(model.CertifyBadInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1976,7 +1976,7 @@ func (ec *executionContext) _Mutation_ingestCertifyBads(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyBads(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(*model.MatchFlags), fc.Args["certifyBads"].([]*model.CertifyBadInputSpec))
+		return ec.resolvers.Mutation().IngestCertifyBads(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyBads"].([]*model.CertifyBadInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2043,7 +2043,7 @@ func (ec *executionContext) _Mutation_ingestCertifyGood(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyGood(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(*model.MatchFlags), fc.Args["certifyGood"].(model.CertifyGoodInputSpec))
+		return ec.resolvers.Mutation().IngestCertifyGood(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyGood"].(model.CertifyGoodInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2110,7 +2110,7 @@ func (ec *executionContext) _Mutation_ingestCertifyGoods(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyGoods(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(*model.MatchFlags), fc.Args["certifyGoods"].([]*model.CertifyGoodInputSpec))
+		return ec.resolvers.Mutation().IngestCertifyGoods(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["certifyGoods"].([]*model.CertifyGoodInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2445,7 +2445,7 @@ func (ec *executionContext) _Mutation_ingestPointOfContact(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestPointOfContact(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(*model.MatchFlags), fc.Args["pointOfContact"].(model.PointOfContactInputSpec))
+		return ec.resolvers.Mutation().IngestPointOfContact(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["pointOfContact"].(model.PointOfContactInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3596,7 +3596,7 @@ func (ec *executionContext) _Mutation_ingestHasMetadata(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestHasMetadata(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(*model.MatchFlags), fc.Args["hasMetadata"].(model.HasMetadataInputSpec))
+		return ec.resolvers.Mutation().IngestHasMetadata(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["hasMetadata"].(model.HasMetadataInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

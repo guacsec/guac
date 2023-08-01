@@ -17,20 +17,20 @@
 
 # Defines the GraphQL operations to ingest a CertifyGood into GUAC
 
-mutation CertifyGoodPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyGood: CertifyGoodInputSpec!) {
+mutation CertifyGoodPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $certifyGood: CertifyGoodInputSpec!) {
   ingestCertifyGood(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, certifyGood: $certifyGood) {
     ...AllCertifyGood
   }
 }
 
 mutation CertifyGoodSrc($source: SourceInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
-  ingestCertifyGood(subject: {source: $source}, certifyGood: $certifyGood) {
+  ingestCertifyGood(subject: {source: $source}, pkgMatchType: {pkg: ALL_VERSIONS}, certifyGood: $certifyGood) {
     ...AllCertifyGood
   }
 }
 
 mutation CertifyGoodArtifact($artifact: ArtifactInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
-  ingestCertifyGood(subject: {artifact: $artifact}, certifyGood: $certifyGood) {
+  ingestCertifyGood(subject: {artifact: $artifact}, pkgMatchType: {pkg: ALL_VERSIONS}, certifyGood: $certifyGood) {
     ...AllCertifyGood
   }
 }
@@ -44,13 +44,13 @@ mutation CertifyGoodPkgs($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $c
 }
 
 mutation CertifyGoodSrcs($sources: [SourceInputSpec!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
-  ingestCertifyGoods(subjects: {sources: $sources}, certifyGoods: $certifyGoods) {
+  ingestCertifyGoods(subjects: {sources: $sources}, pkgMatchType: {pkg: ALL_VERSIONS}, certifyGoods: $certifyGoods) {
     ...AllCertifyGood
   }
 }
 
 mutation CertifyGoodArtifacts($artifacts: [ArtifactInputSpec!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
-  ingestCertifyGoods(subjects: {artifacts: $artifacts}, certifyGoods: $certifyGoods) {
+  ingestCertifyGoods(subjects: {artifacts: $artifacts}, pkgMatchType: {pkg: ALL_VERSIONS}, certifyGoods: $certifyGoods) {
     ...AllCertifyGood
   }
 }

@@ -805,14 +805,6 @@ func (ec *executionContext) marshalNPkgMatchType2githubᚗcomᚋguacsecᚋguac�
 	return v
 }
 
-func (ec *executionContext) unmarshalOMatchFlags2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx context.Context, v interface{}) (*model.MatchFlags, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputMatchFlags(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageSourceOrArtifactSpec, error) {
 	if v == nil {
 		return nil, nil
