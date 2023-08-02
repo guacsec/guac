@@ -41,14 +41,17 @@ query Packages($filter: PkgSpec!) {
 
 query PackageTypes($filter: PkgSpec!) {
   packages(pkgSpec: $filter){
+    id
     type
   }
 }
 
 query PackageNamespaces($filter: PkgSpec!) {
   packages(pkgSpec: $filter){
+    id
     type
     namespaces {
+        id
         namespace
     }
   }
@@ -56,10 +59,13 @@ query PackageNamespaces($filter: PkgSpec!) {
 
 query PackageNames($filter: PkgSpec!) {
   packages(pkgSpec: $filter){
+    id
     type
     namespaces {
+        id
         namespace
         names {
+            id
             name
         }
     }
@@ -68,17 +74,22 @@ query PackageNames($filter: PkgSpec!) {
 
 query PackageVersions($filter: PkgSpec!) {
   packages(pkgSpec: $filter){
+    id
     type
     namespaces {
+        id
         namespace
         names {
+            id
             name
             versions {
+                id
                 version
-                qualifiers {
+                qualifiers {                  
                   key
                   value
                 }
+                subpath
             }
         }
     }
