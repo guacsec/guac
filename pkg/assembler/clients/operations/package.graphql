@@ -38,3 +38,49 @@ query Packages($filter: PkgSpec!) {
     ...AllPkgTree
   }
 }
+
+query PackageTypes($filter: PkgSpec!) {
+  packages(pkgSpec: $filter){
+    type
+  }
+}
+
+query PackageNamespaces($filter: PkgSpec!) {
+  packages(pkgSpec: $filter){
+    type
+    namespaces {
+        namespace
+    }
+  }
+}
+
+query PackageNames($filter: PkgSpec!) {
+  packages(pkgSpec: $filter){
+    type
+    namespaces {
+        namespace
+        names {
+            name
+        }
+    }
+  }
+}
+
+query PackageVersions($filter: PkgSpec!) {
+  packages(pkgSpec: $filter){
+    type
+    namespaces {
+        namespace
+        names {
+            name
+            versions {
+                version
+                qualifiers {
+                  key
+                  value
+                }
+            }
+        }
+    }
+  }
+}

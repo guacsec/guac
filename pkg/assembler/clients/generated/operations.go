@@ -20355,6 +20355,151 @@ type OSVsResponse struct {
 // GetOsv returns OSVsResponse.Osv, and is useful for accessing the field via an interface.
 func (v *OSVsResponse) GetOsv() []OSVsOsvOSV { return v.Osv }
 
+// PackageNamesPackagesPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type PackageNamesPackagesPackage struct {
+	Type       string                                                  `json:"type"`
+	Namespaces []PackageNamesPackagesPackageNamespacesPackageNamespace `json:"namespaces"`
+}
+
+// GetType returns PackageNamesPackagesPackage.Type, and is useful for accessing the field via an interface.
+func (v *PackageNamesPackagesPackage) GetType() string { return v.Type }
+
+// GetNamespaces returns PackageNamesPackagesPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *PackageNamesPackagesPackage) GetNamespaces() []PackageNamesPackagesPackageNamespacesPackageNamespace {
+	return v.Namespaces
+}
+
+// PackageNamesPackagesPackageNamespacesPackageNamespace includes the requested fields of the GraphQL type PackageNamespace.
+// The GraphQL type's documentation follows.
+//
+// PackageNamespace is a namespace for packages.
+//
+// In the pURL representation, each PackageNamespace matches the
+// pkg:<type>/<namespace>/ partial pURL.
+//
+// Namespaces are optional and type specific. Because they are optional, we use
+// empty string to denote missing namespaces.
+type PackageNamesPackagesPackageNamespacesPackageNamespace struct {
+	Namespace string                                                                  `json:"namespace"`
+	Names     []PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName `json:"names"`
+}
+
+// GetNamespace returns PackageNamesPackagesPackageNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
+func (v *PackageNamesPackagesPackageNamespacesPackageNamespace) GetNamespace() string {
+	return v.Namespace
+}
+
+// GetNames returns PackageNamesPackagesPackageNamespacesPackageNamespace.Names, and is useful for accessing the field via an interface.
+func (v *PackageNamesPackagesPackageNamespacesPackageNamespace) GetNames() []PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName {
+	return v.Names
+}
+
+// PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName includes the requested fields of the GraphQL type PackageName.
+// The GraphQL type's documentation follows.
+//
+// PackageName is a name for packages.
+//
+// In the pURL representation, each PackageName matches the
+// pkg:<type>/<namespace>/<name> pURL.
+//
+// Names are always mandatory.
+//
+// This is the first node in the trie that can be referred to by other parts of
+// GUAC.
+type PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName struct {
+	Name string `json:"name"`
+}
+
+// GetName returns PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName.Name, and is useful for accessing the field via an interface.
+func (v *PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName) GetName() string {
+	return v.Name
+}
+
+// PackageNamesResponse is returned by PackageNames on success.
+type PackageNamesResponse struct {
+	// Returns all packages matching a filter.
+	Packages []PackageNamesPackagesPackage `json:"packages"`
+}
+
+// GetPackages returns PackageNamesResponse.Packages, and is useful for accessing the field via an interface.
+func (v *PackageNamesResponse) GetPackages() []PackageNamesPackagesPackage { return v.Packages }
+
+// PackageNamespacesPackagesPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type PackageNamespacesPackagesPackage struct {
+	Type       string                                                       `json:"type"`
+	Namespaces []PackageNamespacesPackagesPackageNamespacesPackageNamespace `json:"namespaces"`
+}
+
+// GetType returns PackageNamespacesPackagesPackage.Type, and is useful for accessing the field via an interface.
+func (v *PackageNamespacesPackagesPackage) GetType() string { return v.Type }
+
+// GetNamespaces returns PackageNamespacesPackagesPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *PackageNamespacesPackagesPackage) GetNamespaces() []PackageNamespacesPackagesPackageNamespacesPackageNamespace {
+	return v.Namespaces
+}
+
+// PackageNamespacesPackagesPackageNamespacesPackageNamespace includes the requested fields of the GraphQL type PackageNamespace.
+// The GraphQL type's documentation follows.
+//
+// PackageNamespace is a namespace for packages.
+//
+// In the pURL representation, each PackageNamespace matches the
+// pkg:<type>/<namespace>/ partial pURL.
+//
+// Namespaces are optional and type specific. Because they are optional, we use
+// empty string to denote missing namespaces.
+type PackageNamespacesPackagesPackageNamespacesPackageNamespace struct {
+	Namespace string `json:"namespace"`
+}
+
+// GetNamespace returns PackageNamespacesPackagesPackageNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
+func (v *PackageNamespacesPackagesPackageNamespacesPackageNamespace) GetNamespace() string {
+	return v.Namespace
+}
+
+// PackageNamespacesResponse is returned by PackageNamespaces on success.
+type PackageNamespacesResponse struct {
+	// Returns all packages matching a filter.
+	Packages []PackageNamespacesPackagesPackage `json:"packages"`
+}
+
+// GetPackages returns PackageNamespacesResponse.Packages, and is useful for accessing the field via an interface.
+func (v *PackageNamespacesResponse) GetPackages() []PackageNamespacesPackagesPackage {
+	return v.Packages
+}
+
 // PackageQualifierInputSpec allows specifying package qualifiers in mutations.
 type PackageQualifierInputSpec struct {
 	Key   string `json:"key"`
@@ -20403,6 +20548,194 @@ func (v *PackageSourceOrArtifactSpec) GetSource() *SourceSpec { return v.Source 
 
 // GetArtifact returns PackageSourceOrArtifactSpec.Artifact, and is useful for accessing the field via an interface.
 func (v *PackageSourceOrArtifactSpec) GetArtifact() *ArtifactSpec { return v.Artifact }
+
+// PackageTypesPackagesPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type PackageTypesPackagesPackage struct {
+	Type string `json:"type"`
+}
+
+// GetType returns PackageTypesPackagesPackage.Type, and is useful for accessing the field via an interface.
+func (v *PackageTypesPackagesPackage) GetType() string { return v.Type }
+
+// PackageTypesResponse is returned by PackageTypes on success.
+type PackageTypesResponse struct {
+	// Returns all packages matching a filter.
+	Packages []PackageTypesPackagesPackage `json:"packages"`
+}
+
+// GetPackages returns PackageTypesResponse.Packages, and is useful for accessing the field via an interface.
+func (v *PackageTypesResponse) GetPackages() []PackageTypesPackagesPackage { return v.Packages }
+
+// PackageVersionsPackagesPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type PackageVersionsPackagesPackage struct {
+	Type       string                                                     `json:"type"`
+	Namespaces []PackageVersionsPackagesPackageNamespacesPackageNamespace `json:"namespaces"`
+}
+
+// GetType returns PackageVersionsPackagesPackage.Type, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackage) GetType() string { return v.Type }
+
+// GetNamespaces returns PackageVersionsPackagesPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackage) GetNamespaces() []PackageVersionsPackagesPackageNamespacesPackageNamespace {
+	return v.Namespaces
+}
+
+// PackageVersionsPackagesPackageNamespacesPackageNamespace includes the requested fields of the GraphQL type PackageNamespace.
+// The GraphQL type's documentation follows.
+//
+// PackageNamespace is a namespace for packages.
+//
+// In the pURL representation, each PackageNamespace matches the
+// pkg:<type>/<namespace>/ partial pURL.
+//
+// Namespaces are optional and type specific. Because they are optional, we use
+// empty string to denote missing namespaces.
+type PackageVersionsPackagesPackageNamespacesPackageNamespace struct {
+	Namespace string                                                                     `json:"namespace"`
+	Names     []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName `json:"names"`
+}
+
+// GetNamespace returns PackageVersionsPackagesPackageNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespace) GetNamespace() string {
+	return v.Namespace
+}
+
+// GetNames returns PackageVersionsPackagesPackageNamespacesPackageNamespace.Names, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespace) GetNames() []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName {
+	return v.Names
+}
+
+// PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName includes the requested fields of the GraphQL type PackageName.
+// The GraphQL type's documentation follows.
+//
+// PackageName is a name for packages.
+//
+// In the pURL representation, each PackageName matches the
+// pkg:<type>/<namespace>/<name> pURL.
+//
+// Names are always mandatory.
+//
+// This is the first node in the trie that can be referred to by other parts of
+// GUAC.
+type PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName struct {
+	Name     string                                                                                           `json:"name"`
+	Versions []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion `json:"versions"`
+}
+
+// GetName returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName.Name, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName) GetName() string {
+	return v.Name
+}
+
+// GetVersions returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName.Versions, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName) GetVersions() []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion {
+	return v.Versions
+}
+
+// PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+// The GraphQL type's documentation follows.
+//
+// PackageVersion is a package version.
+//
+// In the pURL representation, each PackageName matches the
+// pkg:<type>/<namespace>/<name>@<version> pURL.
+//
+// Versions are optional and each Package type defines own rules for handling
+// them. For this level of GUAC, these are just opaque strings.
+//
+// NOTE: The handling of versions might change before this schema becomes stable.
+//
+// This node can be referred to by other parts of GUAC.
+//
+// Subpath and qualifiers are optional. Lack of qualifiers is represented by an
+// empty list and lack of subpath by empty string (to be consistent with
+// optionality of namespace and version). Two nodes that have different qualifiers
+// and/or subpath but the same version mean two different packages in the trie
+// (they are different). Two nodes that have same version but qualifiers of one
+// are a subset of the qualifier of the other also mean two different packages in
+// the trie.
+type PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
+	Version    string                                                                                                                     `json:"version"`
+	Qualifiers []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
+}
+
+// GetVersion returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetVersion() string {
+	return v.Version
+}
+
+// GetQualifiers returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Qualifiers, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetQualifiers() []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier {
+	return v.Qualifiers
+}
+
+// PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier includes the requested fields of the GraphQL type PackageQualifier.
+// The GraphQL type's documentation follows.
+//
+// PackageQualifier is a qualifier for a package, a key-value pair.
+//
+// In the pURL representation, it is a part of the <qualifiers> part of the
+// pkg:<type>/<namespace>/<name>@<version>?<qualifiers> pURL.
+//
+// Qualifiers are optional, each Package type defines own rules for handling them,
+// and multiple qualifiers could be attached to the same package.
+//
+// This node cannot be directly referred by other parts of GUAC.
+type PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// GetKey returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Key, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetKey() string {
+	return v.Key
+}
+
+// GetValue returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Value, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetValue() string {
+	return v.Value
+}
+
+// PackageVersionsResponse is returned by PackageVersions on success.
+type PackageVersionsResponse struct {
+	// Returns all packages matching a filter.
+	Packages []PackageVersionsPackagesPackage `json:"packages"`
+}
+
+// GetPackages returns PackageVersionsResponse.Packages, and is useful for accessing the field via an interface.
+func (v *PackageVersionsResponse) GetPackages() []PackageVersionsPackagesPackage { return v.Packages }
 
 // PackagesPackagesPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
@@ -26101,6 +26434,38 @@ type __OSVsInput struct {
 // GetFilter returns __OSVsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__OSVsInput) GetFilter() OSVSpec { return v.Filter }
 
+// __PackageNamesInput is used internally by genqlient
+type __PackageNamesInput struct {
+	Filter PkgSpec `json:"filter"`
+}
+
+// GetFilter returns __PackageNamesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PackageNamesInput) GetFilter() PkgSpec { return v.Filter }
+
+// __PackageNamespacesInput is used internally by genqlient
+type __PackageNamespacesInput struct {
+	Filter PkgSpec `json:"filter"`
+}
+
+// GetFilter returns __PackageNamespacesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PackageNamespacesInput) GetFilter() PkgSpec { return v.Filter }
+
+// __PackageTypesInput is used internally by genqlient
+type __PackageTypesInput struct {
+	Filter PkgSpec `json:"filter"`
+}
+
+// GetFilter returns __PackageTypesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PackageTypesInput) GetFilter() PkgSpec { return v.Filter }
+
+// __PackageVersionsInput is used internally by genqlient
+type __PackageVersionsInput struct {
+	Filter PkgSpec `json:"filter"`
+}
+
+// GetFilter returns __PackageVersionsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PackageVersionsInput) GetFilter() PkgSpec { return v.Filter }
+
 // __PackagesInput is used internally by genqlient
 type __PackagesInput struct {
 	Filter PkgSpec `json:"filter"`
@@ -31707,6 +32072,168 @@ func OSVs(
 	var err error
 
 	var data OSVsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PackageNames.
+const PackageNames_Operation = `
+query PackageNames ($filter: PkgSpec!) {
+	packages(pkgSpec: $filter) {
+		type
+		namespaces {
+			namespace
+			names {
+				name
+			}
+		}
+	}
+}
+`
+
+func PackageNames(
+	ctx context.Context,
+	client graphql.Client,
+	filter PkgSpec,
+) (*PackageNamesResponse, error) {
+	req := &graphql.Request{
+		OpName: "PackageNames",
+		Query:  PackageNames_Operation,
+		Variables: &__PackageNamesInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data PackageNamesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PackageNamespaces.
+const PackageNamespaces_Operation = `
+query PackageNamespaces ($filter: PkgSpec!) {
+	packages(pkgSpec: $filter) {
+		type
+		namespaces {
+			namespace
+		}
+	}
+}
+`
+
+func PackageNamespaces(
+	ctx context.Context,
+	client graphql.Client,
+	filter PkgSpec,
+) (*PackageNamespacesResponse, error) {
+	req := &graphql.Request{
+		OpName: "PackageNamespaces",
+		Query:  PackageNamespaces_Operation,
+		Variables: &__PackageNamespacesInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data PackageNamespacesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PackageTypes.
+const PackageTypes_Operation = `
+query PackageTypes ($filter: PkgSpec!) {
+	packages(pkgSpec: $filter) {
+		type
+	}
+}
+`
+
+func PackageTypes(
+	ctx context.Context,
+	client graphql.Client,
+	filter PkgSpec,
+) (*PackageTypesResponse, error) {
+	req := &graphql.Request{
+		OpName: "PackageTypes",
+		Query:  PackageTypes_Operation,
+		Variables: &__PackageTypesInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data PackageTypesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PackageVersions.
+const PackageVersions_Operation = `
+query PackageVersions ($filter: PkgSpec!) {
+	packages(pkgSpec: $filter) {
+		type
+		namespaces {
+			namespace
+			names {
+				name
+				versions {
+					version
+					qualifiers {
+						key
+						value
+					}
+				}
+			}
+		}
+	}
+}
+`
+
+func PackageVersions(
+	ctx context.Context,
+	client graphql.Client,
+	filter PkgSpec,
+) (*PackageVersionsResponse, error) {
+	req := &graphql.Request{
+		OpName: "PackageVersions",
+		Query:  PackageVersions_Operation,
+		Variables: &__PackageVersionsInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data PackageVersionsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
