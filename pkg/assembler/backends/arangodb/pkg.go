@@ -343,7 +343,37 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	}
 }
 
-func setPkgMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *arangoQueryBuilder {
+func setPkgNameMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *arangoQueryBuilder {
+	var arangoQueryBuilder *arangoQueryBuilder
+	if pkgSpec != nil {
+		arangoQueryBuilder = newForQuery(pkgRootsStr, "pRoot")
+		arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
+		queryValues["pkg"] = "pkg"
+		arangoQueryBuilder.forOutBound(pkgHasTypeStr, "pType", "pRoot")
+		if pkgSpec.Type != nil {
+			arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
+			queryValues["pkgType"] = *pkgSpec.Type
+		}
+		arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		if pkgSpec.Namespace != nil {
+			arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
+			queryValues["namespace"] = *pkgSpec.Namespace
+		}
+		arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
+		if pkgSpec.Name != nil {
+			arangoQueryBuilder.filter("pName", "name", "==", "@name")
+			queryValues["name"] = *pkgSpec.Name
+		}
+	} else {
+		arangoQueryBuilder = newForQuery(pkgRootsStr, "pRoot")
+		arangoQueryBuilder.forOutBound(pkgHasTypeStr, "pType", "pRoot")
+		arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
+	}
+	return arangoQueryBuilder
+}
+
+func setPkgVersionMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *arangoQueryBuilder {
 	var arangoQueryBuilder *arangoQueryBuilder
 	if pkgSpec != nil {
 		arangoQueryBuilder = newForQuery(pkgRootsStr, "pRoot")
@@ -432,7 +462,7 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := setPkgMatchValues(pkgSpec, values)
+	arangoQueryBuilder := setPkgVersionMatchValues(pkgSpec, values)
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		"type_id": pType._id,

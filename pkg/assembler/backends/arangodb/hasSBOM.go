@@ -32,17 +32,19 @@ func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSp
 	var arangoQueryBuilder *arangoQueryBuilder
 	if hasSBOMSpec.Subject != nil {
 		if hasSBOMSpec.Subject.Package != nil {
-			arangoQueryBuilder = setPkgMatchValues(hasSBOMSpec.Subject.Package, values)
+			arangoQueryBuilder = setPkgVersionMatchValues(hasSBOMSpec.Subject.Package, values)
 			arangoQueryBuilder.forOutBound(hasSBOMPkgEdgesStr, "hasSBOM", "pVersion")
 			setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
 
 			return getPkgHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
-		} else {
+		} else if hasSBOMSpec.Subject.Artifact != nil {
 			arangoQueryBuilder = setArtifactMatchValues(nil, hasSBOMSpec.Subject.Artifact, values)
 			arangoQueryBuilder.forOutBound(hasSBOMArtEdgesStr, "hasSBOM", "art")
 			setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
 
 			return getArtifactHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
+		} else {
+			return nil, fmt.Errorf("subject package or artifact not specified")
 		}
 	} else {
 		var combinedHasSBOM []*model.HasSbom
@@ -50,7 +52,7 @@ func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSp
 		// get packages
 		arangoQueryBuilder = newForQuery(hasSBOMsStr, "hasSBOM")
 		setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMPkgEdgesStr, "pVersion", "hasSBOMEdge", "hasSBOM")
+		arangoQueryBuilder.forInBound(hasSBOMPkgEdgesStr, "pVersion", "hasSBOM")
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
@@ -64,7 +66,7 @@ func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSp
 		// get artifacts
 		arangoQueryBuilder = newForQuery(hasSBOMsStr, "hasSBOM")
 		setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMArtEdgesStr, "art", "hasSBOMEdge", "hasSBOM")
+		arangoQueryBuilder.forInBound(hasSBOMArtEdgesStr, "art", "hasSBOM")
 
 		artifactHasSBOMs, err := getArtifactHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
 		if err != nil {

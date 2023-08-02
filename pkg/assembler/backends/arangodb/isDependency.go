@@ -36,7 +36,7 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 
 	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
 	values := map[string]any{}
-	arangoQueryBuilder := setPkgMatchValues(isDependencySpec.Package, values)
+	arangoQueryBuilder := setPkgVersionMatchValues(isDependencySpec.Package, values)
 	setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
 
 	arangoQueryBuilder.query.WriteString("\n")

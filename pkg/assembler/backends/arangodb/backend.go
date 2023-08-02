@@ -376,17 +376,17 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		var certifyGoodPkgNameEdges driver.EdgeDefinition
 		certifyGoodPkgNameEdges.Collection = certifyGoodPkgNameEdgesStr
-		certifyGoodPkgNameEdges.From = []string{pkgNamesStr, pkgVersionsStr, artifactsStr, srcNamesStr}
+		certifyGoodPkgNameEdges.From = []string{pkgNamesStr}
 		certifyGoodPkgNameEdges.To = []string{certifyGoodsStr}
 
 		var certifyGoodArtEdges driver.EdgeDefinition
 		certifyGoodArtEdges.Collection = certifyGoodArtEdgesStr
-		certifyGoodArtEdges.From = []string{pkgNamesStr, pkgVersionsStr, artifactsStr, srcNamesStr}
+		certifyGoodArtEdges.From = []string{artifactsStr}
 		certifyGoodArtEdges.To = []string{certifyGoodsStr}
 
 		var certifyGoodSrcEdges driver.EdgeDefinition
 		certifyGoodSrcEdges.Collection = certifyGoodSrcEdgesStr
-		certifyGoodSrcEdges.From = []string{pkgNamesStr, pkgVersionsStr, artifactsStr, srcNamesStr}
+		certifyGoodSrcEdges.From = []string{srcNamesStr}
 		certifyGoodSrcEdges.To = []string{certifyGoodsStr}
 
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
@@ -668,14 +668,6 @@ func (aqb *arangoQueryBuilder) forInBound(edgeCollectionName string, counterVert
 	aqb.query.WriteString("\n")
 
 	aqb.query.WriteString(fmt.Sprintf("FOR %s IN INBOUND %s %s", counterVertexName, inBoundStartVertexName, edgeCollectionName))
-
-	return aqb
-}
-
-func (aqb *arangoQueryBuilder) forInBoundWithEdgeCounter(edgeCollectionName string, counterVertexName string, counterEdgeName string, inBoundStartVertexName string) *arangoQueryBuilder {
-	aqb.query.WriteString("\n")
-
-	aqb.query.WriteString(fmt.Sprintf("FOR %s, %s IN INBOUND %s %s", counterVertexName, counterEdgeName, inBoundStartVertexName, edgeCollectionName))
 
 	return aqb
 }

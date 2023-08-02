@@ -33,24 +33,26 @@ func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model
 	var arangoQueryBuilder *arangoQueryBuilder
 	if isOccurrenceSpec.Subject != nil {
 		if isOccurrenceSpec.Subject.Package != nil {
-			arangoQueryBuilder = setPkgMatchValues(isOccurrenceSpec.Subject.Package, values)
+			arangoQueryBuilder = setPkgVersionMatchValues(isOccurrenceSpec.Subject.Package, values)
 			arangoQueryBuilder.forOutBound(isOccurrenceSubjectPkgEdgesStr, "isOccurrence", "pVersion")
 			setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
 
 			return getPkgOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
-		} else {
+		} else if isOccurrenceSpec.Subject.Source != nil {
 			arangoQueryBuilder = setSrcMatchValues(isOccurrenceSpec.Subject.Source, values)
 			arangoQueryBuilder.forOutBound(isOccurrenceSubjectSrcEdgesStr, "isOccurrence", "sName")
 			setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
 
 			return getSrcOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
+		} else {
+			return nil, fmt.Errorf("subject package or artifact not specified")
 		}
 	} else {
 		var combinedOccurrence []*model.IsOccurrence
 		// get packages
 		arangoQueryBuilder = newForQuery(isOccurrencesStr, "isOccurrence")
 		setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(isOccurrenceSubjectPkgEdgesStr, "pVersion", "isOccurEdgePkg", "isOccurrence")
+		arangoQueryBuilder.forInBound(isOccurrenceSubjectPkgEdgesStr, "pVersion", "isOccurrence")
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
@@ -64,7 +66,7 @@ func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model
 		// get sources
 		arangoQueryBuilder = newForQuery(isOccurrencesStr, "isOccurrence")
 		setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(isOccurrenceSubjectSrcEdgesStr, "sName", "isOccurEdgeSrc", "isOccurrence")
+		arangoQueryBuilder.forInBound(isOccurrenceSubjectSrcEdgesStr, "sName", "isOccurrence")
 		arangoQueryBuilder.forInBound(srcHasNameStr, "sNs", "sName")
 		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sType", "sNs")
 
@@ -82,7 +84,7 @@ func getSrcOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		'srcName': {
-			'typeID': sType._id,
+			'type_id': sType._id,
 			'type': sType.type,
 			'namespace_id': sNs._id,
 			'namespace': sNs.namespace,
@@ -117,7 +119,7 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		'pkgVersion': {
-			'typeID': pType._id,
+			'type_id': pType._id,
 			'type': pType.type,
 			'namespace_id': pNs._id,
 			'namespace': pNs.namespace,
