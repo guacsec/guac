@@ -47,9 +47,8 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 }
 
 func setArtifactMatchValues(artifactSpec *model.ArtifactSpec, queryValues map[string]any) *arangoQueryBuilder {
-	var arangoQueryBuilder *arangoQueryBuilder
+	arangoQueryBuilder := newForQuery(artifactsStr, "art")
 	if artifactSpec != nil {
-		arangoQueryBuilder = newForQuery(artifactsStr, "art")
 		if artifactSpec.ID != nil {
 			arangoQueryBuilder.filter("art", "_id", "==", "@id")
 			queryValues["id"] = *artifactSpec.ID
