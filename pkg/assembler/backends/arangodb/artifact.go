@@ -28,7 +28,7 @@ import (
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	values := map[string]any{}
 
-	arangoQueryBuilder := setArtifactMatchValues(nil, artifactSpec, values)
+	arangoQueryBuilder := setArtifactMatchValues(artifactSpec, values)
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		"id": art._id,
@@ -46,11 +46,10 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 	return getArtifacts(ctx, cursor)
 }
 
-func setArtifactMatchValues(arangoQueryBuilder *arangoQueryBuilder, artifactSpec *model.ArtifactSpec, queryValues map[string]any) *arangoQueryBuilder {
-	if arangoQueryBuilder == nil {
-		arangoQueryBuilder = newForQuery(artifactsStr, "art")
-	}
+func setArtifactMatchValues(artifactSpec *model.ArtifactSpec, queryValues map[string]any) *arangoQueryBuilder {
+	var arangoQueryBuilder *arangoQueryBuilder
 	if artifactSpec != nil {
+		arangoQueryBuilder = newForQuery(artifactsStr, "art")
 		if artifactSpec.ID != nil {
 			arangoQueryBuilder.filter("art", "_id", "==", "@id")
 			queryValues["id"] = *artifactSpec.ID

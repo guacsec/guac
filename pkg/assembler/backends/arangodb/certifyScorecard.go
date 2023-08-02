@@ -85,6 +85,10 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 }
 
 func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyScorecardSpec *model.CertifyScorecardSpec, queryValues map[string]any) {
+	if certifyScorecardSpec.ID != nil {
+		arangoQueryBuilder.filter("scorecard", "_id", "==", "@id")
+		queryValues["id"] = *certifyScorecardSpec.ID
+	}
 	if certifyScorecardSpec.TimeScanned != nil {
 		arangoQueryBuilder.filter("scorecard", timeScannedStr, "==", "@"+timeScannedStr)
 		queryValues[timeScannedStr] = certifyScorecardSpec.TimeScanned.UTC()

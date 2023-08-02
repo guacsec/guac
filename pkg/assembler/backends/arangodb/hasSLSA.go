@@ -38,9 +38,9 @@ const (
 
 func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 
-	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
+	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval (like from builtBy/builtFrom if specified)
 	values := map[string]any{}
-	arangoQueryBuilder := setArtifactMatchValues(nil, hasSLSASpec.Subject, values)
+	arangoQueryBuilder := setArtifactMatchValues(hasSLSASpec.Subject, values)
 	setHasSLSAMatchValues(arangoQueryBuilder, hasSLSASpec, values)
 
 	arangoQueryBuilder.query.WriteString("\n")
@@ -80,6 +80,10 @@ func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *
 
 	// currently not filtering on builtFrom (artifacts). Is that a real usecase?
 	arangoQueryBuilder.forOutBound(hasSLSASubjectArtEdgesStr, "hasSLSA", "art")
+	if hasSLSASpec.ID != nil {
+		arangoQueryBuilder.filter("hasSLSA", "_id", "==", "@id")
+		queryValues["id"] = *hasSLSASpec.ID
+	}
 	if hasSLSASpec.BuildType != nil {
 		arangoQueryBuilder.filter("hasSLSA", buildTypeStr, "==", "@"+buildTypeStr)
 		queryValues[buildTypeStr] = hasSLSASpec.BuildType
