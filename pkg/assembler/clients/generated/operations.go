@@ -20373,9 +20373,13 @@ func (v *OSVsResponse) GetOsv() []OSVsOsvOSV { return v.Osv }
 // Since this node is at the root of the package trie, it is named Package, not
 // PackageType.
 type PackageNamesPackagesPackage struct {
+	Id         string                                                  `json:"id"`
 	Type       string                                                  `json:"type"`
 	Namespaces []PackageNamesPackagesPackageNamespacesPackageNamespace `json:"namespaces"`
 }
+
+// GetId returns PackageNamesPackagesPackage.Id, and is useful for accessing the field via an interface.
+func (v *PackageNamesPackagesPackage) GetId() string { return v.Id }
 
 // GetType returns PackageNamesPackagesPackage.Type, and is useful for accessing the field via an interface.
 func (v *PackageNamesPackagesPackage) GetType() string { return v.Type }
@@ -20396,9 +20400,13 @@ func (v *PackageNamesPackagesPackage) GetNamespaces() []PackageNamesPackagesPack
 // Namespaces are optional and type specific. Because they are optional, we use
 // empty string to denote missing namespaces.
 type PackageNamesPackagesPackageNamespacesPackageNamespace struct {
+	Id        string                                                                  `json:"id"`
 	Namespace string                                                                  `json:"namespace"`
 	Names     []PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName `json:"names"`
 }
+
+// GetId returns PackageNamesPackagesPackageNamespacesPackageNamespace.Id, and is useful for accessing the field via an interface.
+func (v *PackageNamesPackagesPackageNamespacesPackageNamespace) GetId() string { return v.Id }
 
 // GetNamespace returns PackageNamesPackagesPackageNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
 func (v *PackageNamesPackagesPackageNamespacesPackageNamespace) GetNamespace() string {
@@ -20423,7 +20431,13 @@ func (v *PackageNamesPackagesPackageNamespacesPackageNamespace) GetNames() []Pac
 // This is the first node in the trie that can be referred to by other parts of
 // GUAC.
 type PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName struct {
+	Id   string `json:"id"`
 	Name string `json:"name"`
+}
+
+// GetId returns PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName.Id, and is useful for accessing the field via an interface.
+func (v *PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName) GetId() string {
+	return v.Id
 }
 
 // GetName returns PackageNamesPackagesPackageNamespacesPackageNamespaceNamesPackageName.Name, and is useful for accessing the field via an interface.
@@ -20458,9 +20472,13 @@ func (v *PackageNamesResponse) GetPackages() []PackageNamesPackagesPackage { ret
 // Since this node is at the root of the package trie, it is named Package, not
 // PackageType.
 type PackageNamespacesPackagesPackage struct {
+	Id         string                                                       `json:"id"`
 	Type       string                                                       `json:"type"`
 	Namespaces []PackageNamespacesPackagesPackageNamespacesPackageNamespace `json:"namespaces"`
 }
+
+// GetId returns PackageNamespacesPackagesPackage.Id, and is useful for accessing the field via an interface.
+func (v *PackageNamespacesPackagesPackage) GetId() string { return v.Id }
 
 // GetType returns PackageNamespacesPackagesPackage.Type, and is useful for accessing the field via an interface.
 func (v *PackageNamespacesPackagesPackage) GetType() string { return v.Type }
@@ -20481,8 +20499,12 @@ func (v *PackageNamespacesPackagesPackage) GetNamespaces() []PackageNamespacesPa
 // Namespaces are optional and type specific. Because they are optional, we use
 // empty string to denote missing namespaces.
 type PackageNamespacesPackagesPackageNamespacesPackageNamespace struct {
+	Id        string `json:"id"`
 	Namespace string `json:"namespace"`
 }
+
+// GetId returns PackageNamespacesPackagesPackageNamespacesPackageNamespace.Id, and is useful for accessing the field via an interface.
+func (v *PackageNamespacesPackagesPackageNamespacesPackageNamespace) GetId() string { return v.Id }
 
 // GetNamespace returns PackageNamespacesPackagesPackageNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
 func (v *PackageNamespacesPackagesPackageNamespacesPackageNamespace) GetNamespace() string {
@@ -20567,8 +20589,12 @@ func (v *PackageSourceOrArtifactSpec) GetArtifact() *ArtifactSpec { return v.Art
 // Since this node is at the root of the package trie, it is named Package, not
 // PackageType.
 type PackageTypesPackagesPackage struct {
+	Id   string `json:"id"`
 	Type string `json:"type"`
 }
+
+// GetId returns PackageTypesPackagesPackage.Id, and is useful for accessing the field via an interface.
+func (v *PackageTypesPackagesPackage) GetId() string { return v.Id }
 
 // GetType returns PackageTypesPackagesPackage.Type, and is useful for accessing the field via an interface.
 func (v *PackageTypesPackagesPackage) GetType() string { return v.Type }
@@ -20600,9 +20626,13 @@ func (v *PackageTypesResponse) GetPackages() []PackageTypesPackagesPackage { ret
 // Since this node is at the root of the package trie, it is named Package, not
 // PackageType.
 type PackageVersionsPackagesPackage struct {
+	Id         string                                                     `json:"id"`
 	Type       string                                                     `json:"type"`
 	Namespaces []PackageVersionsPackagesPackageNamespacesPackageNamespace `json:"namespaces"`
 }
+
+// GetId returns PackageVersionsPackagesPackage.Id, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackage) GetId() string { return v.Id }
 
 // GetType returns PackageVersionsPackagesPackage.Type, and is useful for accessing the field via an interface.
 func (v *PackageVersionsPackagesPackage) GetType() string { return v.Type }
@@ -20623,9 +20653,13 @@ func (v *PackageVersionsPackagesPackage) GetNamespaces() []PackageVersionsPackag
 // Namespaces are optional and type specific. Because they are optional, we use
 // empty string to denote missing namespaces.
 type PackageVersionsPackagesPackageNamespacesPackageNamespace struct {
+	Id        string                                                                     `json:"id"`
 	Namespace string                                                                     `json:"namespace"`
 	Names     []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName `json:"names"`
 }
+
+// GetId returns PackageVersionsPackagesPackageNamespacesPackageNamespace.Id, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespace) GetId() string { return v.Id }
 
 // GetNamespace returns PackageVersionsPackagesPackageNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
 func (v *PackageVersionsPackagesPackageNamespacesPackageNamespace) GetNamespace() string {
@@ -20650,8 +20684,14 @@ func (v *PackageVersionsPackagesPackageNamespacesPackageNamespace) GetNames() []
 // This is the first node in the trie that can be referred to by other parts of
 // GUAC.
 type PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName struct {
+	Id       string                                                                                           `json:"id"`
 	Name     string                                                                                           `json:"name"`
 	Versions []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion `json:"versions"`
+}
+
+// GetId returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName.Id, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName) GetId() string {
+	return v.Id
 }
 
 // GetName returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageName.Name, and is useful for accessing the field via an interface.
@@ -20687,8 +20727,15 @@ func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNam
 // are a subset of the qualifier of the other also mean two different packages in
 // the trie.
 type PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
+	Id         string                                                                                                                     `json:"id"`
 	Version    string                                                                                                                     `json:"version"`
 	Qualifiers []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
+	Subpath    string                                                                                                                     `json:"subpath"`
+}
+
+// GetId returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Id, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetId() string {
+	return v.Id
 }
 
 // GetVersion returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
@@ -20699,6 +20746,11 @@ func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNam
 // GetQualifiers returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Qualifiers, and is useful for accessing the field via an interface.
 func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetQualifiers() []PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier {
 	return v.Qualifiers
+}
+
+// GetSubpath returns PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Subpath, and is useful for accessing the field via an interface.
+func (v *PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetSubpath() string {
+	return v.Subpath
 }
 
 // PackageVersionsPackagesPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier includes the requested fields of the GraphQL type PackageQualifier.
@@ -32087,10 +32139,13 @@ func OSVs(
 const PackageNames_Operation = `
 query PackageNames ($filter: PkgSpec!) {
 	packages(pkgSpec: $filter) {
+		id
 		type
 		namespaces {
+			id
 			namespace
 			names {
+				id
 				name
 			}
 		}
@@ -32128,8 +32183,10 @@ func PackageNames(
 const PackageNamespaces_Operation = `
 query PackageNamespaces ($filter: PkgSpec!) {
 	packages(pkgSpec: $filter) {
+		id
 		type
 		namespaces {
+			id
 			namespace
 		}
 	}
@@ -32166,6 +32223,7 @@ func PackageNamespaces(
 const PackageTypes_Operation = `
 query PackageTypes ($filter: PkgSpec!) {
 	packages(pkgSpec: $filter) {
+		id
 		type
 	}
 }
@@ -32201,17 +32259,22 @@ func PackageTypes(
 const PackageVersions_Operation = `
 query PackageVersions ($filter: PkgSpec!) {
 	packages(pkgSpec: $filter) {
+		id
 		type
 		namespaces {
+			id
 			namespace
 			names {
+				id
 				name
 				versions {
+					id
 					version
 					qualifiers {
 						key
 						value
 					}
+					subpath
 				}
 			}
 		}
