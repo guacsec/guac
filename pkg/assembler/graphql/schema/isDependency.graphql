@@ -32,9 +32,9 @@ type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST BE PackageName, not PackageVersion"
+  "Package for the dependency; MUST PackageName or PackageVersion"
   dependentPackage: Package!
-  "Version range for the dependency link"
+  "Version range for the dependency link, required if depedentPackage points to PackageName"
   versionRange: String!
   "Type of dependency"
   dependencyType: DependencyType!
@@ -57,7 +57,7 @@ Dependent packages must be defined at PackageName, not PackageVersion.
 input IsDependencySpec {
   id: ID
   package: PkgSpec
-  dependentPackage: PkgNameSpec
+  dependentPackage: PkgSpec
   versionRange: String
   dependencyType: DependencyType
   justification: String
@@ -65,23 +65,9 @@ input IsDependencySpec {
   collector: String
 }
 
-"""
-PkgNameSpec is used to query for dependent packages.
-
-This is different from PkgSpec as the IsDependency attestation should only be
-allowed to be made to the packageName node and not the packageVersion node.
-Versions will be handled by the version_range in the IsDependency attestation
-node.
-"""
-input PkgNameSpec {
-  id: ID
-  type: String
-  namespace: String
-  name: String
-}
-
 "IsDependencyInputSpec is the input to record a new dependency."
 input IsDependencyInputSpec {
+  "versionRange should be specified for depedentPackages that point to PackageName"
   versionRange: String!
   dependencyType: DependencyType!
   justification: String!
@@ -96,7 +82,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a dependency between two packages"
-  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
+  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, depPkgMatchType: MatchFlags!, dependency: IsDependencyInputSpec!): IsDependency!
   "Bulk adds a dependency between two packages"
-  ingestDependencies(pkgs: [PkgInputSpec!]!, depPkgs: [PkgInputSpec!]!, dependencies: [IsDependencyInputSpec!]!): [IsDependency!]!
+  ingestDependencies(pkgs: [PkgInputSpec!]!, depPkgs: [PkgInputSpec!]!, depPkgMatchType: MatchFlags!, dependencies: [IsDependencyInputSpec!]!): [IsDependency!]!
 }
