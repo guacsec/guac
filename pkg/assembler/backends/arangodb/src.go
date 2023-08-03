@@ -92,9 +92,6 @@ func guacSrcId(src model.SourceInputSpec) SrcIds {
 func getSourceQueryValues(c *arangoClient, source *model.SourceInputSpec) map[string]any {
 	values := map[string]any{}
 	// add guac keys
-	values["rootID"] = c.srcRoot.Id
-	values["rootKey"] = c.srcRoot.Key
-
 	guacIds := guacSrcId(*source)
 	values["guacNsKey"] = guacIds.NamespaceId
 	values["guacNameKey"] = guacIds.NameId
@@ -149,10 +146,10 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 
 	query := `
 	LET type = FIRST(
-		UPSERT { type: doc.srcType, _parent: doc.rootID }
-		INSERT { type: doc.srcType, _parent: doc.rootID }
+		UPSERT { type: doc.srcType }
+		INSERT { type: doc.srcType }
 		UPDATE {}
-		IN srcTypes OPTIONS { indexHint: "byType" }
+		IN srcTypes OPTIONS { indexHint: "bySrcType" }
 		RETURN NEW
     )
 
@@ -172,10 +169,6 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 	  RETURN NEW
 	)
 
-	LET pkgHasTypeCollection = (
-		INSERT { _key: CONCAT("srcHasType", doc.rootKey, type._key), _from: doc.rootID, _to: type._id } INTO srcHasType OPTIONS { overwriteMode: "ignore" }
-	)
-  
 	LET srcHasNamespaceCollection = (
 	  INSERT { _key: CONCAT("srcHasNamespace", type._key, ns._key), _from: type._id, _to: ns._id } INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
@@ -208,10 +201,10 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
 	query := `
 	LET type = FIRST(
-		UPSERT { type: @srcType, _parent: @rootID }
-		INSERT { type: @srcType, _parent: @rootID }
+		UPSERT { type: @srcType }
+		INSERT { type: @srcType }
 		UPDATE {}
-		IN srcTypes OPTIONS { indexHint: "byType" }
+		IN srcTypes OPTIONS { indexHint: "bySrcType" }
 		RETURN NEW
     )
 
@@ -229,11 +222,7 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 	  UPDATE {}
 	  IN srcNames OPTIONS { indexHint: "byNameGuacKey" }
 	  RETURN NEW
-	)
-
-	LET pkgHasTypeCollection = (
-		INSERT { _key: CONCAT("srcHasType", @rootKey, type._key), _from: @rootID, _to: type._id } INTO srcHasType OPTIONS { overwriteMode: "ignore" }
-	)	  
+	) 
   
 	LET srcHasNamespaceCollection = (
 	  INSERT { _key: CONCAT("srcHasNamespace", type._key, ns._key), _from: type._id, _to: ns._id } INTO srcHasNamespace OPTIONS { overwriteMode: "ignore" }
@@ -273,10 +262,7 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *arangoQueryBuilder {
 	var arangoQueryBuilder *arangoQueryBuilder
 	if srcSpec != nil {
-		arangoQueryBuilder = newForQuery(srcRootsStr, "sRoot")
-		arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
-		queryValues["src"] = "src"
-		arangoQueryBuilder.forOutBound(srcHasTypeStr, "sType", "sRoot")
+		arangoQueryBuilder = newForQuery(srcTypesStr, "sType")
 		if srcSpec.Type != nil {
 			arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
 			queryValues["srcType"] = *srcSpec.Type
@@ -304,8 +290,7 @@ func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *a
 			queryValues["tag"] = *srcSpec.Tag
 		}
 	} else {
-		arangoQueryBuilder = newForQuery(srcRootsStr, "sRoot")
-		arangoQueryBuilder.forOutBound(srcHasTypeStr, "sType", "sRoot")
+		arangoQueryBuilder = newForQuery(srcTypesStr, "sType")
 		arangoQueryBuilder.forOutBound(srcHasNamespaceStr, "sNs", "sType")
 		arangoQueryBuilder.forOutBound(srcHasNameStr, "sName", "sNs")
 	}
@@ -365,10 +350,7 @@ func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.Source
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery(srcRootsStr, "sRoot")
-	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
-	values["src"] = "src"
-	arangoQueryBuilder.forOutBound(srcHasTypeStr, "sType", "sRoot")
+	arangoQueryBuilder := newForQuery(srcTypesStr, "sType")
 	if sourceSpec.Type != nil {
 		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
 		values["srcType"] = *sourceSpec.Type
@@ -413,10 +395,7 @@ func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.Source
 func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery(srcRootsStr, "sRoot")
-	arangoQueryBuilder.filter("sRoot", "root", "==", "@src")
-	values["src"] = "src"
-	arangoQueryBuilder.forOutBound(srcHasTypeStr, "sType", "sRoot")
+	arangoQueryBuilder := newForQuery(srcTypesStr, "sType")
 	if sourceSpec.Type != nil {
 		arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
 		values["srcType"] = *sourceSpec.Type

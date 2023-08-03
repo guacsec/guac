@@ -28,6 +28,10 @@ import (
 func (c *arangoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
 	values := map[string]any{}
 	arangoQueryBuilder := newForQuery(ghsasStr, "ghsa")
+	if ghsaSpec.ID != nil {
+		arangoQueryBuilder.filter("ghsa", "_id", "==", "@id")
+		values["id"] = *ghsaSpec.ID
+	}
 	if ghsaSpec.GhsaID != nil {
 		arangoQueryBuilder.filter("ghsa", "ghsaId", "==", "@ghsaId")
 		values["ghsaId"] = strings.ToLower(*ghsaSpec.GhsaID)

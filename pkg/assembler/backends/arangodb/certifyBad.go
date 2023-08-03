@@ -26,23 +26,255 @@ import (
 )
 
 func (c *arangoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	return []*model.CertifyBad{}, fmt.Errorf("not implemented - CertifyBad")
+
+	var arangoQueryBuilder *arangoQueryBuilder
+	if certifyBadSpec.Subject != nil {
+		var combinedCertifyBad []*model.CertifyBad
+		if certifyBadSpec.Subject.Package != nil {
+			values := map[string]any{}
+			// pkgVersion certifyBad
+			arangoQueryBuilder = setPkgVersionMatchValues(certifyBadSpec.Subject.Package, values)
+			arangoQueryBuilder.forOutBound(certifyBadPkgVersionEdgesStr, "certifyBad", "pVersion")
+			setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
+
+			pkgVersionCertifyBads, err := getPkgVersionCertifyBadForQuery(ctx, c, arangoQueryBuilder, values)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve package version certifyBad with error: %w", err)
+			}
+
+			combinedCertifyBad = append(combinedCertifyBad, pkgVersionCertifyBads...)
+
+			// pkgName certifyBad
+			arangoQueryBuilder = setPkgNameMatchValues(certifyBadSpec.Subject.Package, values)
+			arangoQueryBuilder.forOutBound(certifyBadPkgNameEdgesStr, "certifyBad", "pName")
+			setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
+
+			pkgNameCertifyBads, err := getPkgNameCertifyBadForQuery(ctx, c, arangoQueryBuilder, values)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve package name certifyBad with error: %w", err)
+			}
+
+			combinedCertifyBad = append(combinedCertifyBad, pkgNameCertifyBads...)
+		}
+		if certifyBadSpec.Subject.Source != nil {
+			values := map[string]any{}
+			arangoQueryBuilder = setSrcMatchValues(certifyBadSpec.Subject.Source, values)
+			arangoQueryBuilder.forOutBound(certifyBadSrcEdgesStr, "certifyBad", "sName")
+			setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
+
+			srcCertifyBads, err := getSrcCertifyBadForQuery(ctx, c, arangoQueryBuilder, values)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve source certifyBad with error: %w", err)
+			}
+
+			combinedCertifyBad = append(combinedCertifyBad, srcCertifyBads...)
+		}
+		if certifyBadSpec.Subject.Artifact != nil {
+			values := map[string]any{}
+			arangoQueryBuilder = setArtifactMatchValues(certifyBadSpec.Subject.Artifact, values)
+			arangoQueryBuilder.forOutBound(certifyBadArtEdgesStr, "certifyBad", "art")
+			setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
+
+			artCertifyBads, err := getArtCertifyBadForQuery(ctx, c, arangoQueryBuilder, values)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve artifact certifyBad with error: %w", err)
+			}
+
+			combinedCertifyBad = append(combinedCertifyBad, artCertifyBads...)
+		}
+		return combinedCertifyBad, nil
+	} else {
+		values := map[string]any{}
+		var combinedCertifyBad []*model.CertifyBad
+
+		// pkgVersion certifyBad
+		arangoQueryBuilder = newForQuery(certifyBadsStr, "certifyBad")
+		setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
+		arangoQueryBuilder.forInBound(certifyBadPkgVersionEdgesStr, "pVersion", "certifyBad")
+		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
+
+		pkgVersionCertifyBads, err := getPkgVersionCertifyBadForQuery(ctx, c, arangoQueryBuilder, values)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve package version certifyBad  with error: %w", err)
+		}
+		combinedCertifyBad = append(combinedCertifyBad, pkgVersionCertifyBads...)
+
+		// pkgName certifyBad
+		arangoQueryBuilder = newForQuery(certifyBadsStr, "certifyBad")
+		setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
+		arangoQueryBuilder.forInBound(certifyBadPkgNameEdgesStr, "pName", "certifyBad")
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
+
+		pkgNameCertifyBads, err := getPkgNameCertifyBadForQuery(ctx, c, arangoQueryBuilder, values)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve package name certifyBad  with error: %w", err)
+		}
+		combinedCertifyBad = append(combinedCertifyBad, pkgNameCertifyBads...)
+
+		// get sources
+		arangoQueryBuilder = newForQuery(certifyBadsStr, "certifyBad")
+		setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
+		arangoQueryBuilder.forInBound(certifyBadSrcEdgesStr, "sName", "certifyBad")
+		arangoQueryBuilder.forInBound(srcHasNameStr, "sNs", "sName")
+		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sType", "sNs")
+
+		srcCertifyBads, err := getSrcCertifyBadForQuery(ctx, c, arangoQueryBuilder, values)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve source certifyBad with error: %w", err)
+		}
+		combinedCertifyBad = append(combinedCertifyBad, srcCertifyBads...)
+
+		// get artifacts
+		arangoQueryBuilder = newForQuery(certifyBadsStr, "certifyBad")
+		setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
+		arangoQueryBuilder.forInBound(certifyBadArtEdgesStr, "art", "certifyBad")
+
+		artCertifyBads, err := getArtCertifyBadForQuery(ctx, c, arangoQueryBuilder, values)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve artifact certifyBad with error: %w", err)
+		}
+		combinedCertifyBad = append(combinedCertifyBad, artCertifyBads...)
+
+		return combinedCertifyBad, nil
+	}
 }
 
-// func setCertifyBadMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyBadSpec *model.CertifyBadSpec, queryValues map[string]any) {
-// 	if certifyBadSpec.Justification != nil {
-// 		arangoQueryBuilder.filter("bad", justification, "==", "@"+justification)
-// 		queryValues[justification] = certifyBadSpec.Justification
-// 	}
-// 	if certifyBadSpec.Origin != nil {
-// 		arangoQueryBuilder.filter("bad", origin, "==", "@"+origin)
-// 		queryValues[origin] = certifyBadSpec.Origin
-// 	}
-// 	if certifyBadSpec.Collector != nil {
-// 		arangoQueryBuilder.filter("bad", collector, "==", "@"+collector)
-// 		queryValues[collector] = certifyBadSpec.Collector
-// 	}
-// }
+func getSrcCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.CertifyBad, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'srcName': {
+			'type_id': sType._id,
+			'type': sType.type,
+			'namespace_id': sNs._id,
+			'namespace': sNs.namespace,
+			'name_id': sName._id,
+			'name': sName.name,
+			'commit': sName.commit,
+			'tag': sName.tag
+		},
+		'certifyBad_id': certifyBad._id,
+		'justification': certifyBad.justification,
+		'collector': certifyBad.collector,
+		'origin': certifyBad.origin
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyBad")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for CertifyBad: %w", err)
+	}
+	defer cursor.Close()
+
+	return getSourceCertifyBad(ctx, cursor)
+}
+
+func getArtCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.CertifyBad, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'artifact': {
+			'id': art._id,
+			'algorithm': art.algorithm,
+			'digest': art.digest
+		},
+		'certifyBad_id': certifyBad._id,
+		'justification': certifyBad.justification,
+		'collector': certifyBad.collector,
+		'origin': certifyBad.origin
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyBad")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for CertifyBad: %w", err)
+	}
+	defer cursor.Close()
+
+	return getArtifactCertifyBad(ctx, cursor)
+}
+
+func getPkgNameCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.CertifyBad, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'pkgName': {
+			'type_id': pType._id,
+			'type': pType.type,
+			'namespace_id': pNs._id,
+			'namespace': pNs.namespace,
+			'name_id': pName._id,
+			'name': pName.name
+		},
+		'certifyBad_id': certifyBad._id,
+		'justification': certifyBad.justification,
+		'collector': certifyBad.collector,
+		'origin': certifyBad.origin
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyBad")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for CertifyBad: %w", err)
+	}
+	defer cursor.Close()
+
+	return getPkgNameCertifyBad(ctx, cursor)
+}
+
+func getPkgVersionCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.CertifyBad, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'pkgVersion': {
+			'type_id': pType._id,
+			'type': pType.type,
+			'namespace_id': pNs._id,
+			'namespace': pNs.namespace,
+			'name_id': pName._id,
+			'name': pName.name,
+			'version_id': pVersion._id,
+			'version': pVersion.version,
+			'subpath': pVersion.subpath,
+			'qualifier_list': pVersion.qualifier_list
+		},
+		'certifyBad_id': certifyBad._id,
+		'justification': certifyBad.justification,
+		'collector': certifyBad.collector,
+		'origin': certifyBad.origin
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyBad")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for CertifyBad: %w", err)
+	}
+	defer cursor.Close()
+
+	return getPkgVersionCertifyBad(ctx, cursor)
+}
+
+func setCertifyBadMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyBadSpec *model.CertifyBadSpec, queryValues map[string]any) {
+	if certifyBadSpec.ID != nil {
+		arangoQueryBuilder.filter("certifyBad", "_id", "==", "@id")
+		queryValues["id"] = *certifyBadSpec.ID
+	}
+	if certifyBadSpec.Justification != nil {
+		arangoQueryBuilder.filter("certifyBad", justification, "==", "@"+justification)
+		queryValues[justification] = certifyBadSpec.Justification
+	}
+	if certifyBadSpec.Origin != nil {
+		arangoQueryBuilder.filter("certifyBad", origin, "==", "@"+origin)
+		queryValues[origin] = certifyBadSpec.Origin
+	}
+	if certifyBadSpec.Collector != nil {
+		arangoQueryBuilder.filter("certifyBad", collector, "==", "@"+collector)
+		queryValues[collector] = certifyBadSpec.Collector
+	}
+}
 
 func getCertifyBadQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.MatchFlags, artifact *model.ArtifactInputSpec, source *model.SourceInputSpec, certifyBad *model.CertifyBadInputSpec) map[string]any {
 	values := map[string]any{}

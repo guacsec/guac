@@ -51,7 +51,7 @@ func matchHashEqualByInput(ctx context.Context, c *arangoClient, hashEqualSpec *
 
 	var combinedHashEqual []*model.HashEqual
 
-	arangoQueryBuilder := setArtifactMatchValues(nil, firstArtifact, values)
+	arangoQueryBuilder := setArtifactMatchValues(firstArtifact, values)
 	arangoQueryBuilder.forOutBound(hashEqualSubjectArtEdgesStr, "hashEqual", "art")
 	setHashEqualMatchValues(arangoQueryBuilder, hashEqualSpec, values)
 	arangoQueryBuilder.forOutBound(hashEqualArtEdgesStr, "equalArt", "hashEqual")
@@ -76,7 +76,7 @@ func matchHashEqualByInput(ctx context.Context, c *arangoClient, hashEqualSpec *
 	}
 	combinedHashEqual = append(combinedHashEqual, artSubjectHashEqual...)
 
-	arangoQueryBuilder = setArtifactMatchValues(nil, firstArtifact, values)
+	arangoQueryBuilder = setArtifactMatchValues(firstArtifact, values)
 	arangoQueryBuilder.forInBound(hashEqualArtEdgesStr, "hashEqual", "art")
 	setHashEqualMatchValues(arangoQueryBuilder, hashEqualSpec, values)
 	arangoQueryBuilder.forInBound(hashEqualSubjectArtEdgesStr, "equalArt", "hashEqual")
@@ -135,6 +135,10 @@ func getHashEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuild
 }
 
 func setHashEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, hashEqualSpec *model.HashEqualSpec, queryValues map[string]any) {
+	if hashEqualSpec.ID != nil {
+		arangoQueryBuilder.filter("hashEqual", "_id", "==", "@id")
+		queryValues["id"] = *hashEqualSpec.ID
+	}
 	if hashEqualSpec.Justification != nil {
 		arangoQueryBuilder.filter("hashEqual", justification, "==", "@"+justification)
 		queryValues[justification] = hashEqualSpec.Justification

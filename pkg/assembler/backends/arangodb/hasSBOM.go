@@ -28,29 +28,43 @@ import (
 func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
 	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
-	values := map[string]any{}
 	var arangoQueryBuilder *arangoQueryBuilder
 	if hasSBOMSpec.Subject != nil {
+		var combinedHasSBOM []*model.HasSbom
 		if hasSBOMSpec.Subject.Package != nil {
-			arangoQueryBuilder = setPkgMatchValues(hasSBOMSpec.Subject.Package, values)
+			values := map[string]any{}
+			arangoQueryBuilder = setPkgVersionMatchValues(hasSBOMSpec.Subject.Package, values)
 			arangoQueryBuilder.forOutBound(hasSBOMPkgEdgesStr, "hasSBOM", "pVersion")
 			setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
 
-			return getPkgHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
-		} else {
-			arangoQueryBuilder = setArtifactMatchValues(nil, hasSBOMSpec.Subject.Artifact, values)
+			pkgVersionHasSboms, err := getPkgHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve package version hasSBOM with error: %w", err)
+			}
+
+			combinedHasSBOM = append(combinedHasSBOM, pkgVersionHasSboms...)
+		}
+		if hasSBOMSpec.Subject.Artifact != nil {
+			values := map[string]any{}
+			arangoQueryBuilder = setArtifactMatchValues(hasSBOMSpec.Subject.Artifact, values)
 			arangoQueryBuilder.forOutBound(hasSBOMArtEdgesStr, "hasSBOM", "art")
 			setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
 
-			return getArtifactHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
+			artHasSboms, err := getArtifactHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve artifact hasSBOM with error: %w", err)
+			}
+			combinedHasSBOM = append(combinedHasSBOM, artHasSboms...)
 		}
+		return combinedHasSBOM, nil
 	} else {
+		values := map[string]any{}
 		var combinedHasSBOM []*model.HasSbom
 
 		// get packages
 		arangoQueryBuilder = newForQuery(hasSBOMsStr, "hasSBOM")
 		setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMPkgEdgesStr, "pVersion", "hasSBOMEdge", "hasSBOM")
+		arangoQueryBuilder.forInBound(hasSBOMPkgEdgesStr, "pVersion", "hasSBOM")
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
@@ -64,7 +78,7 @@ func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSp
 		// get artifacts
 		arangoQueryBuilder = newForQuery(hasSBOMsStr, "hasSBOM")
 		setHasSBOMMatchValues(arangoQueryBuilder, hasSBOMSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(hasSBOMArtEdgesStr, "art", "hasSBOMEdge", "hasSBOM")
+		arangoQueryBuilder.forInBound(hasSBOMArtEdgesStr, "art", "hasSBOM")
 
 		artifactHasSBOMs, err := getArtifactHasSBOMForQuery(ctx, c, arangoQueryBuilder, values)
 		if err != nil {
@@ -140,6 +154,10 @@ func getArtifactHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQuer
 }
 
 func setHasSBOMMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSBOMSpec *model.HasSBOMSpec, queryValues map[string]any) {
+	if hasSBOMSpec.ID != nil {
+		arangoQueryBuilder.filter("hasSBOM", "_id", "==", "@id")
+		queryValues["id"] = *hasSBOMSpec.ID
+	}
 	if hasSBOMSpec.URI != nil {
 		arangoQueryBuilder.filter("hasSBOM", "uri", "==", "@uri")
 		queryValues["uri"] = hasSBOMSpec.URI

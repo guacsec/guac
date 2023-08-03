@@ -28,6 +28,10 @@ import (
 func (c *arangoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
 	values := map[string]any{}
 	arangoQueryBuilder := newForQuery(cvesStr, "cve")
+	if cveSpec.ID != nil {
+		arangoQueryBuilder.filter("cve", "_id", "==", "@id")
+		values["id"] = *cveSpec.ID
+	}
 	if cveSpec.Year != nil {
 		arangoQueryBuilder.filter("cve", "year", "==", "@year")
 		values["year"] = *cveSpec.Year

@@ -28,6 +28,10 @@ import (
 func (c *arangoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
 	values := map[string]any{}
 	arangoQueryBuilder := newForQuery(osvsStr, "osv")
+	if osvSpec.ID != nil {
+		arangoQueryBuilder.filter("osv", "_id", "==", "@id")
+		values["id"] = *osvSpec.ID
+	}
 	if osvSpec.OsvID != nil {
 		arangoQueryBuilder.filter("osv", "osvId", "==", "@osvId")
 		values["osvId"] = strings.ToLower(*osvSpec.OsvID)

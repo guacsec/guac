@@ -28,29 +28,46 @@ import (
 // Query IsOccurrence
 func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
-	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
-	values := map[string]any{}
+	// TODO (pxp928): Optimization of the query can be done by starting from the occurrence artifact node (if specified)
 	var arangoQueryBuilder *arangoQueryBuilder
 	if isOccurrenceSpec.Subject != nil {
+		var combinedOccurrence []*model.IsOccurrence
 		if isOccurrenceSpec.Subject.Package != nil {
-			arangoQueryBuilder = setPkgMatchValues(isOccurrenceSpec.Subject.Package, values)
+			values := map[string]any{}
+
+			arangoQueryBuilder = setPkgVersionMatchValues(isOccurrenceSpec.Subject.Package, values)
 			arangoQueryBuilder.forOutBound(isOccurrenceSubjectPkgEdgesStr, "isOccurrence", "pVersion")
 			setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
 
-			return getPkgOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
-		} else {
+			pkgVersionOccurrences, err := getPkgOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve package version occurrences with error: %w", err)
+			}
+
+			combinedOccurrence = append(combinedOccurrence, pkgVersionOccurrences...)
+		}
+		if isOccurrenceSpec.Subject.Source != nil {
+			values := map[string]any{}
+
 			arangoQueryBuilder = setSrcMatchValues(isOccurrenceSpec.Subject.Source, values)
 			arangoQueryBuilder.forOutBound(isOccurrenceSubjectSrcEdgesStr, "isOccurrence", "sName")
 			setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
 
-			return getSrcOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
+			srcOccurrences, err := getSrcOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve source occurrences with error: %w", err)
+			}
+
+			combinedOccurrence = append(combinedOccurrence, srcOccurrences...)
 		}
+		return combinedOccurrence, nil
 	} else {
 		var combinedOccurrence []*model.IsOccurrence
+		values := map[string]any{}
 		// get packages
 		arangoQueryBuilder = newForQuery(isOccurrencesStr, "isOccurrence")
 		setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(isOccurrenceSubjectPkgEdgesStr, "pVersion", "isOccurEdgePkg", "isOccurrence")
+		arangoQueryBuilder.forInBound(isOccurrenceSubjectPkgEdgesStr, "pVersion", "isOccurrence")
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
@@ -64,7 +81,7 @@ func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model
 		// get sources
 		arangoQueryBuilder = newForQuery(isOccurrencesStr, "isOccurrence")
 		setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
-		arangoQueryBuilder.forInBoundWithEdgeCounter(isOccurrenceSubjectSrcEdgesStr, "sName", "isOccurEdgeSrc", "isOccurrence")
+		arangoQueryBuilder.forInBound(isOccurrenceSubjectSrcEdgesStr, "sName", "isOccurrence")
 		arangoQueryBuilder.forInBound(srcHasNameStr, "sNs", "sName")
 		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sType", "sNs")
 
@@ -82,7 +99,7 @@ func getSrcOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		'srcName': {
-			'typeID': sType._id,
+			'type_id': sType._id,
 			'type': sType.type,
 			'namespace_id': sNs._id,
 			'namespace': sNs.namespace,
@@ -117,7 +134,7 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		'pkgVersion': {
-			'typeID': pType._id,
+			'type_id': pType._id,
 			'type': pType.type,
 			'namespace_id': pNs._id,
 			'namespace': pNs.namespace,
@@ -151,6 +168,10 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 }
 
 func setIsOccurrenceMatchValues(arangoQueryBuilder *arangoQueryBuilder, isOccurrenceSpec *model.IsOccurrenceSpec, queryValues map[string]any) {
+	if isOccurrenceSpec.ID != nil {
+		arangoQueryBuilder.filter("isOccurrence", "_id", "==", "@id")
+		queryValues["id"] = *isOccurrenceSpec.ID
+	}
 	if isOccurrenceSpec.Justification != nil {
 		arangoQueryBuilder.filter("isOccurrence", justification, "==", "@"+justification)
 		queryValues[justification] = isOccurrenceSpec.Justification
@@ -165,7 +186,18 @@ func setIsOccurrenceMatchValues(arangoQueryBuilder *arangoQueryBuilder, isOccurr
 	}
 	arangoQueryBuilder.forOutBound(isOccurrenceArtEdgesStr, "art", "isOccurrence")
 	if isOccurrenceSpec.Artifact != nil {
-		setArtifactMatchValues(arangoQueryBuilder, isOccurrenceSpec.Artifact, queryValues)
+		if isOccurrenceSpec.Artifact.ID != nil {
+			arangoQueryBuilder.filter("art", "_id", "==", "@id")
+			queryValues["id"] = *isOccurrenceSpec.Artifact.ID
+		}
+		if isOccurrenceSpec.Artifact.Algorithm != nil {
+			arangoQueryBuilder.filter("art", "algorithm", "==", "@algorithm")
+			queryValues["algorithm"] = strings.ToLower(*isOccurrenceSpec.Artifact.Algorithm)
+		}
+		if isOccurrenceSpec.Artifact.Digest != nil {
+			arangoQueryBuilder.filter("art", "digest", "==", "@digest")
+			queryValues["digest"] = strings.ToLower(*isOccurrenceSpec.Artifact.Digest)
+		}
 	}
 
 }

@@ -34,11 +34,31 @@ const (
 
 func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 
-	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
-	values := map[string]any{}
-	arangoQueryBuilder := setPkgMatchValues(isDependencySpec.Package, values)
-	setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
+	// TODO (pxp928): Optimization of the query can be done by starting from the dependent package node (if specified)
+	var arangoQueryBuilder *arangoQueryBuilder
 
+	if isDependencySpec.Package != nil {
+		values := map[string]any{}
+		arangoQueryBuilder := setPkgVersionMatchValues(isDependencySpec.Package, values)
+		arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
+		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
+
+		return getDependencyForQuery(ctx, c, arangoQueryBuilder, values)
+	} else {
+		values := map[string]any{}
+		// get packages
+		arangoQueryBuilder = newForQuery(isDependenciesStr, "isDependency")
+		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
+		arangoQueryBuilder.forInBound(isDependencySubjectPkgEdgesStr, "pVersion", "isDependency")
+		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
+
+		return getDependencyForQuery(ctx, c, arangoQueryBuilder, values)
+	}
+}
+
+func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.IsDependency, error) {
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		'pkgVersion': {
@@ -81,8 +101,10 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 }
 
 func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any) {
-
-	arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
+	if isDependencySpec.ID != nil {
+		arangoQueryBuilder.filter("isDependency", "_id", "==", "@id")
+		queryValues["id"] = *isDependencySpec.ID
+	}
 	if isDependencySpec.VersionRange != nil {
 		arangoQueryBuilder.filter("isDependency", versionRangeStr, "==", "@"+versionRangeStr)
 		queryValues[versionRangeStr] = isDependencySpec.VersionRange
