@@ -63,7 +63,7 @@ return in a query.
 Specifying just the package allows to query for all vulnerabilities associated
 with the package.
 
-Only one vulnerability (or NoVuln) may be
+Only one vulnerability (or NoVuln vulnerability type) may be
 specified.
 """
 input CertifyVulnSpec {
@@ -100,5 +100,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }

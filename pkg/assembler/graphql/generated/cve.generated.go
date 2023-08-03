@@ -257,7 +257,7 @@ func (ec *executionContext) unmarshalInputCVESpec(ctx context.Context, obj inter
 
 // region    **************************** object.gotpl ****************************
 
-var cVEImplementors = []string{"CVE", "Vulnerability", "CveOrGhsa", "Node"}
+var cVEImplementors = []string{"CVE"}
 
 func (ec *executionContext) _CVE(ctx context.Context, sel ast.SelectionSet, obj *model.Cve) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, cVEImplementors)
@@ -400,14 +400,6 @@ func (ec *executionContext) unmarshalOCVEInputSpec2ᚖgithubᚗcomᚋguacsecᚋg
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputCVEInputSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx context.Context, v interface{}) (*model.CVESpec, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputCVESpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

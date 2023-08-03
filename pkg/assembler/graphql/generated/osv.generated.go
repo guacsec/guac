@@ -195,7 +195,7 @@ func (ec *executionContext) unmarshalInputOSVSpec(ctx context.Context, obj inter
 
 // region    **************************** object.gotpl ****************************
 
-var oSVImplementors = []string{"OSV", "Vulnerability", "Node"}
+var oSVImplementors = []string{"OSV"}
 
 func (ec *executionContext) _OSV(ctx context.Context, sel ast.SelectionSet, obj *model.Osv) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, oSVImplementors)
@@ -301,11 +301,6 @@ func (ec *executionContext) marshalNOSV2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkg�
 	return ec._OSV(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNOSVInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx context.Context, v interface{}) (model.OSVInputSpec, error) {
-	res, err := ec.unmarshalInputOSVInputSpec(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNOSVInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.OSVInputSpec, error) {
 	var vSlice []interface{}
 	if v != nil {
@@ -338,14 +333,6 @@ func (ec *executionContext) unmarshalOOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋg
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputOSVInputSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx context.Context, v interface{}) (*model.OSVSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputOSVSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

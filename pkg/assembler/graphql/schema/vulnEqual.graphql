@@ -17,7 +17,12 @@
 
 # Defines a GraphQL schema to link vulnerabilities together
 
-"VulnEqual is an attestation to link two vulnerabilities together as being equal"
+"""
+VulnEqual is an attestation to link two vulnerabilities together as being equal"
+
+Note that setting noVuln vulnerability type is invalid for VulnEqual!
+
+"""
 type VulnEqual {
   id: ID!
   "Collection of vulnerabilities that are similar"

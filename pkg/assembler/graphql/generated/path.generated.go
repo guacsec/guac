@@ -66,34 +66,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Builder(ctx, sel, obj)
-	case model.Osv:
-		return ec._OSV(ctx, sel, &obj)
-	case *model.Osv:
+	case model.Vulnerability:
+		return ec._Vulnerability(ctx, sel, &obj)
+	case *model.Vulnerability:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._OSV(ctx, sel, obj)
-	case model.Cve:
-		return ec._CVE(ctx, sel, &obj)
-	case *model.Cve:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CVE(ctx, sel, obj)
-	case model.Ghsa:
-		return ec._GHSA(ctx, sel, &obj)
-	case *model.Ghsa:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._GHSA(ctx, sel, obj)
-	case model.NoVuln:
-		return ec._NoVuln(ctx, sel, &obj)
-	case *model.NoVuln:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._NoVuln(ctx, sel, obj)
+		return ec._Vulnerability(ctx, sel, obj)
 	case model.IsOccurrence:
 		return ec._IsOccurrence(ctx, sel, &obj)
 	case *model.IsOccurrence:
@@ -108,13 +87,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._IsDependency(ctx, sel, obj)
-	case model.IsVulnerability:
-		return ec._IsVulnerability(ctx, sel, &obj)
-	case *model.IsVulnerability:
+	case model.VulnEqual:
+		return ec._VulnEqual(ctx, sel, &obj)
+	case *model.VulnEqual:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._IsVulnerability(ctx, sel, obj)
+		return ec._VulnEqual(ctx, sel, obj)
 	case model.CertifyVEXStatement:
 		return ec._CertifyVEXStatement(ctx, sel, &obj)
 	case *model.CertifyVEXStatement:

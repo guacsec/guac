@@ -30,7 +30,6 @@ union Node
   | Artifact
   | Builder
   | Vulnerability
-  | NoVuln
   | IsOccurrence
   | IsDependency
   | VulnEqual
