@@ -71,7 +71,7 @@ enum VexJustification {
 
 """
 CertifyVEXStatement is an attestation to attach VEX statements to a package or
-artifact to clarify the impact of a specific vulnerability (CVE, GHSA or OSV).
+artifact to clarify the impact of a specific vulnerability.
 """
 type CertifyVEXStatement {
   id: ID!
@@ -99,10 +99,8 @@ type CertifyVEXStatement {
 CertifyVEXStatementSpec allows filtering the list of VEX statements to
 return in a query.
 
-Only one subject type (package or artifact) and one vulnerability type (CVE,
-GHSA or OSV) may be specified.
+Only one subject type (package or artifact) and one vulnerability may be specified.
 
-Note that setting noVuln in VulnerabilitySpec is invalid for VEX statements!
 """
 input CertifyVEXStatementSpec {
   id: ID
@@ -135,5 +133,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds a VEX certification for a package."
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInputSpec!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }
