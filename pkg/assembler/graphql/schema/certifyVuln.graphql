@@ -17,50 +17,19 @@
 
 # Defines a GraphQL schema for the vulnerability certifications
 
-"Vulnerability is a union of a generic vulnerability or the NoVuln node."
-union VulnerabilityObj = Vulnerability | NoVuln
-
-"""
-VulnerabilityObjSpec allows using VulnerabilityObj union as input type to be used in
-read queries.
-
-Either noVuln must be set or vulnerability
-must be set to non-nil. Setting noVuln to true means retrieving only nodes where
-there is no vulnerability attached. Setting it to false means retrieving only nodes
-with identified vulnerabilities. Setting vulnerability fields means retrieving
-certifications for the corresponding vulnerability.
-"""
-input VulnerabilityObjSpec {
-  vulnerability: VulnerabilitySpec
-  noVuln: Boolean
-}
-
-"""
-VulnerabilityObjInput allows using Vulnerability union as
-input type to be used in mutations.
-
-Either noVuln must be set to true or vulnerability must be
-set to non-nil. If noVuln is set then this is an ingestion of a known lack of
-vulnerabilities, so the special NoVuln node will be used by the backend.
-Otherwise, the specific vulnerability will be linked to this attestation.
-"""
-input VulnerabilityObjInput {
-  vulnerability: VulnerabilityInputSpec
-  noVuln: Boolean
-}
-
 """
 CertifyVuln is an attestation to attach vulnerability information to a package.
 
 This information is obtained via a scanner. If there is no vulnerability
-detected, we attach the special NoVuln node.
+detected, we attach the a vulnerability with "NoVuln" type and an empty string 
+for the vulnerability ID.
 """
 type CertifyVuln {
   id: ID!
   "The package that is attested"
   package: Package!
-  "The vulnerability object. Can be an vulnerability or the special NoVuln node."
-  vulnerability: VulnerabilityObj!
+  "The vulnerability can be an be a specific vulnerability or NoVuln type."
+  vulnerability: Vulnerability!
   "Metadata attached to the certification"
   metadata: VulnerabilityMetaData!
 }
@@ -94,13 +63,13 @@ return in a query.
 Specifying just the package allows to query for all vulnerabilities associated
 with the package.
 
-Only one vulnerability (or special NoVuln) may be
+Only one vulnerability (or NoVuln) may be
 specified.
 """
 input CertifyVulnSpec {
   id: ID
   package: PkgSpec
-  vulnerability: VulnerabilityObjSpec
+  vulnerability: VulnerabilitySpec
   timeScanned: Time
   dbUri: String
   dbVersion: String
@@ -131,5 +100,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityObjInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }
