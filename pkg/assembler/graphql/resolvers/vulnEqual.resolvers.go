@@ -12,7 +12,7 @@ import (
 )
 
 // IngestVulnEqual is the resolver for the ingestVulnEqual field.
-func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqualInputSpec model.VulnEqualInputSpec) (*model.VulnEqual, error) {
+func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
 	panic(fmt.Errorf("not implemented: IngestVulnEqual - ingestVulnEqual"))
 }
 

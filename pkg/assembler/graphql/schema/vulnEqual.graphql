@@ -61,5 +61,5 @@ extend type Query {
 
 extend type Mutation {
   "Ingest a mapping between vulnerabilities."
-  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqualInputSpec: VulnEqualInputSpec!): VulnEqual!
+  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqual: VulnEqualInputSpec!): VulnEqual!
 }

@@ -49,7 +49,7 @@ type MutationResolver interface {
 	IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error)
 	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error)
 	IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error)
-	IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqualInputSpec model.VulnEqualInputSpec) (*model.VulnEqual, error)
+	IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error)
 	IngestVulnerability(ctx context.Context, vuln model.VulnerabilityInputSpec) (*model.Vulnerability, error)
 	IngestVulnerabilities(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]*model.Vulnerability, error)
 }
@@ -944,14 +944,14 @@ func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Cont
 	}
 	args["otherVulnerability"] = arg1
 	var arg2 model.VulnEqualInputSpec
-	if tmp, ok := rawArgs["vulnEqualInputSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqualInputSpec"))
+	if tmp, ok := rawArgs["vulnEqual"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqual"))
 		arg2, err = ec.unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["vulnEqualInputSpec"] = arg2
+	args["vulnEqual"] = arg2
 	return args, nil
 }
 
@@ -3575,7 +3575,7 @@ func (ec *executionContext) _Mutation_ingestVulnEqual(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnEqual(rctx, fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["otherVulnerability"].(model.VulnerabilityInputSpec), fc.Args["vulnEqualInputSpec"].(model.VulnEqualInputSpec))
+		return ec.resolvers.Mutation().IngestVulnEqual(rctx, fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["otherVulnerability"].(model.VulnerabilityInputSpec), fc.Args["vulnEqual"].(model.VulnEqualInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

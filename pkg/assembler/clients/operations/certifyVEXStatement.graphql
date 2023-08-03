@@ -17,38 +17,14 @@
 
 # Defines the GraphQL operations to ingest VEX statements into GUAC
 
-mutation VexPackageAndCve($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
-  ingestVEXStatement(subject: {package: $pkg}, vulnerability: {cve: $cve}, vexStatement: $vexStatement) {
+mutation CertifyVexPkg($pkg: PkgInputSpec!, $vulnerability: VulnerabilityInputSpec!, $vexStatement: VexStatementInputSpec!) {
+  ingestVEXStatement(subject: {package: $pkg}, vulnerability: $vulnerability, vexStatement: $vexStatement) {
     ...AllCertifyVEXStatement
   }
 }
 
-mutation VEXPackageAndGhsa($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
-  ingestVEXStatement(subject: {package: $pkg}, vulnerability: {ghsa: $ghsa}, vexStatement: $vexStatement) {
-    ...AllCertifyVEXStatement
-  }
-}
-
-mutation VexPackageAndOsv($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $vexStatement: VexStatementInputSpec!) {
-  ingestVEXStatement(subject: {package: $pkg}, vulnerability: {osv: $osv}, vexStatement: $vexStatement) {
-    ...AllCertifyVEXStatement
-  }
-}
-
-mutation VexArtifactAndCve($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
-  ingestVEXStatement(subject: {artifact: $artifact}, vulnerability: {cve: $cve}, vexStatement: $vexStatement) {
-    ...AllCertifyVEXStatement
-  }
-}
-
-mutation VexArtifactAndGhsa($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
-  ingestVEXStatement(subject: {artifact: $artifact}, vulnerability: {ghsa: $ghsa}, vexStatement: $vexStatement) {
-    ...AllCertifyVEXStatement
-  }
-}
-
-mutation VexArtifactAndOsv($artifact: ArtifactInputSpec!, $osv: OSVInputSpec!, $vexStatement: VexStatementInputSpec!) {
-  ingestVEXStatement(subject: {artifact: $artifact}, vulnerability: {osv: $osv}, vexStatement: $vexStatement) {
+mutation CertifyVexArtifact($artifact: ArtifactInputSpec!, $vulnerability: VulnerabilityInputSpec!, $vexStatement: VexStatementInputSpec!) {
+  ingestVEXStatement(subject: {artifact: $artifact}, vulnerability: $vulnerability,, vexStatement: $vexStatement) {
     ...AllCertifyVEXStatement
   }
 }
