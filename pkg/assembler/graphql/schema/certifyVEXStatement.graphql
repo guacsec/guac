@@ -101,6 +101,7 @@ return in a query.
 
 Only one subject type (package or artifact) and one vulnerability may be specified.
 
+Note that setting noVuln vulnerability type is invalid for VEX statements!
 """
 input CertifyVEXStatementSpec {
   id: ID

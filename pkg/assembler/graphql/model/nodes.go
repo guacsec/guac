@@ -9,11 +9,6 @@ import (
 	"time"
 )
 
-// CveOrGhsa is a union of CVE and GHSA.
-type CveOrGhsa interface {
-	IsCveOrGhsa()
-}
-
 // Node is a union type of all the possible nodes.
 //
 // It encapsulates the software tree nodes along with the evidence nodes. In a
@@ -36,11 +31,6 @@ type PackageOrSource interface {
 // PackageSourceOrArtifact is a union of Package, Source, and Artifact.
 type PackageSourceOrArtifact interface {
 	IsPackageSourceOrArtifact()
-}
-
-// Vulnerability is a union of OSV, CVE, GHSA or the NoVuln node.
-type Vulnerability interface {
-	IsVulnerability()
 }
 
 // Artifact represents an artifact identified by a checksum hash.
@@ -115,12 +105,6 @@ type Cve struct {
 	Year  int    `json:"year"`
 	CveID string `json:"cveId"`
 }
-
-func (Cve) IsVulnerability() {}
-
-func (Cve) IsCveOrGhsa() {}
-
-func (Cve) IsNode() {}
 
 // CVEInputSpec specifies a CVE vulnerability for mutations.
 type CVEInputSpec struct {
@@ -252,13 +236,13 @@ type CertifyScorecardSpec struct {
 }
 
 // CertifyVEXStatement is an attestation to attach VEX statements to a package or
-// artifact to clarify the impact of a specific vulnerability (CVE, GHSA or OSV).
+// artifact to clarify the impact of a specific vulnerability.
 type CertifyVEXStatement struct {
 	ID string `json:"id"`
 	// Subject of attestation
 	Subject PackageOrArtifact `json:"subject"`
 	// Attested vulnerability
-	Vulnerability Vulnerability `json:"vulnerability"`
+	Vulnerability *Vulnerability `json:"vulnerability"`
 	// Status of the vulnerabilities with respect to the subject
 	Status VexStatus `json:"status"`
 	// Justification from VEX statement
@@ -280,10 +264,9 @@ func (CertifyVEXStatement) IsNode() {}
 // CertifyVEXStatementSpec allows filtering the list of VEX statements to
 // return in a query.
 //
-// Only one subject type (package or artifact) and one vulnerability type (CVE,
-// GHSA or OSV) may be specified.
+// Only one subject type (package or artifact) and one vulnerability may be specified.
 //
-// Note that setting noVuln in VulnerabilitySpec is invalid for VEX statements!
+// Note that setting noVuln vulnerability type is invalid for VEX statements!
 type CertifyVEXStatementSpec struct {
 	ID               *string                `json:"id,omitempty"`
 	Subject          *PackageOrArtifactSpec `json:"subject,omitempty"`
@@ -300,13 +283,14 @@ type CertifyVEXStatementSpec struct {
 // CertifyVuln is an attestation to attach vulnerability information to a package.
 //
 // This information is obtained via a scanner. If there is no vulnerability
-// detected (no OSV, CVE, or GHSA), we attach the special NoVuln node.
+// detected, we attach the a vulnerability with "NoVuln" type and an empty string
+// for the vulnerability ID.
 type CertifyVuln struct {
 	ID string `json:"id"`
 	// The package that is attested
 	Package *Package `json:"package"`
-	// The vulnerability object. Can be an OSV, CVE, or GHSA or the special NoVuln node.
-	Vulnerability Vulnerability `json:"vulnerability"`
+	// The vulnerability can be an be a specific vulnerability or NoVuln type.
+	Vulnerability *Vulnerability `json:"vulnerability"`
 	// Metadata attached to the certification
 	Metadata *VulnerabilityMetaData `json:"metadata"`
 }
@@ -319,7 +303,7 @@ func (CertifyVuln) IsNode() {}
 // Specifying just the package allows to query for all vulnerabilities associated
 // with the package.
 //
-// Only one vulnerability type (OSV, CVE, GHSA, or special NoVuln) may be
+// Only one vulnerability (or NoVuln vulnerability type) may be
 // specified.
 type CertifyVulnSpec struct {
 	ID             *string            `json:"id,omitempty"`
@@ -334,22 +318,6 @@ type CertifyVulnSpec struct {
 	Collector      *string            `json:"collector,omitempty"`
 }
 
-// CveOrGhsaInput allows using CveOrGhsa union as input type for mutations.
-//
-// Exactly one field must be specified.
-type CveOrGhsaInput struct {
-	Cve  *CVEInputSpec  `json:"cve,omitempty"`
-	Ghsa *GHSAInputSpec `json:"ghsa,omitempty"`
-}
-
-// CveOrGhsaSpec allows using CveOrGhsa union as input type for queries.
-//
-// Exactly one field must be specified.
-type CveOrGhsaSpec struct {
-	Cve  *CVESpec  `json:"cve,omitempty"`
-	Ghsa *GHSASpec `json:"ghsa,omitempty"`
-}
-
 // GHSA represents GitHub security advisories.
 //
 // The advisory id field is mandatory and canonicalized to be lowercase.
@@ -359,12 +327,6 @@ type Ghsa struct {
 	ID     string `json:"id"`
 	GhsaID string `json:"ghsaId"`
 }
-
-func (Ghsa) IsVulnerability() {}
-
-func (Ghsa) IsCveOrGhsa() {}
-
-func (Ghsa) IsNode() {}
 
 // GHSAInputSpec specifies a GitHub Security Advisory for mutations.
 type GHSAInputSpec struct {
@@ -663,57 +625,10 @@ type IsOccurrenceSpec struct {
 	Collector     *string              `json:"collector,omitempty"`
 }
 
-// IsVulnerability is an attestation to link CVE/GHSA with data in OSV.
-type IsVulnerability struct {
-	ID string `json:"id"`
-	// The OSV that encapsulates the vulnerability
-	Osv *Osv `json:"osv"`
-	// The upstream vulnerability information
-	Vulnerability CveOrGhsa `json:"vulnerability"`
-	// Justification for the attested relationship
-	Justification string `json:"justification"`
-	// Document from which this attestation is generated from
-	Origin string `json:"origin"`
-	// GUAC collector for the document
-	Collector string `json:"collector"`
-}
-
-func (IsVulnerability) IsNode() {}
-
-// IsVulnerabilityInputSpec represents the input to link CVE/GHSA with OSV data.
-type IsVulnerabilityInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
-}
-
-// IsVulnerabilitySpec allows filtering the list of vulnerability links to return
-// in a query.
-type IsVulnerabilitySpec struct {
-	ID            *string        `json:"id,omitempty"`
-	Osv           *OSVSpec       `json:"osv,omitempty"`
-	Vulnerability *CveOrGhsaSpec `json:"vulnerability,omitempty"`
-	Justification *string        `json:"justification,omitempty"`
-	Origin        *string        `json:"origin,omitempty"`
-	Collector     *string        `json:"collector,omitempty"`
-}
-
 // MatchFlags is used to input the PkgMatchType enum.
 type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }
-
-// NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan.
-//
-// Backends guarantee that this is a singleton node.
-type NoVuln struct {
-	ID string `json:"id"`
-}
-
-func (NoVuln) IsVulnerability() {}
-
-func (NoVuln) IsNode() {}
 
 // OSV represents an Open Source Vulnerability.
 //
@@ -727,10 +642,6 @@ type Osv struct {
 	ID    string `json:"id"`
 	OsvID string `json:"osvId"`
 }
-
-func (Osv) IsVulnerability() {}
-
-func (Osv) IsNode() {}
 
 // OSVInputSpec specifies a OSV vulnerability for mutations.
 type OSVInputSpec struct {
@@ -1326,18 +1237,87 @@ type VexStatementInputSpec struct {
 	Collector        string           `json:"collector"`
 }
 
-// VulnerabilityInput allows using Vulnerability union as
-// input type to be used in mutations.
+// VulnEqual is an attestation to link two vulnerabilities together as being equal"
 //
-// Either noVuln must be set to true or one of osv, cve, or ghsa must be
-// set to non-nil. If noVuln is set then this is an ingestion of a known lack of
-// vulnerabilities, so the special NoVuln node will be used by the backend.
-// Otherwise, the specific vulnerability type will be linked to this attestation.
-type VulnerabilityInput struct {
-	Osv    *OSVInputSpec  `json:"osv,omitempty"`
-	Cve    *CVEInputSpec  `json:"cve,omitempty"`
-	Ghsa   *GHSAInputSpec `json:"ghsa,omitempty"`
-	NoVuln *bool          `json:"noVuln,omitempty"`
+// Note that setting noVuln vulnerability type is invalid for VulnEqual!
+type VulnEqual struct {
+	ID string `json:"id"`
+	// Collection of vulnerabilities that are similar
+	Vulnerabilities []*Vulnerability `json:"vulnerabilities"`
+	// Justification for the attested relationship
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+}
+
+func (VulnEqual) IsNode() {}
+
+// VulnEqualInputSpec represents the input to link vulnerabilities to each other.
+type VulnEqualInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
+// VulnEqualSpec allows filtering the list of vulnerability links to return
+// in a query.
+type VulnEqualSpec struct {
+	ID              *string              `json:"id,omitempty"`
+	Vulnerabilities []*VulnerabilitySpec `json:"vulnerabilities,omitempty"`
+	Justification   *string              `json:"justification,omitempty"`
+	Origin          *string              `json:"origin,omitempty"`
+	Collector       *string              `json:"collector,omitempty"`
+}
+
+// Vulnerability represents the root of the vulnerability trie/tree.
+//
+// We map vulnerability information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type and a vulnerability ID. This allows for generic
+// representation of the various vulnerabilities and does not limit to just cve, ghsa or osv.
+// This would be in the general format: vuln://<general-type>/<vuln-id>
+//
+// Examples:
+//
+// CVE, using path separator: vuln://cve/cve-2023-20753
+// OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
+// Random vendor: vuln://snyk/sn-whatever
+//
+// This node represents the type part of the trie path. It is used to represent
+// the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
+//
+// Since this node is at the root of the vulnerability trie, it is named Vulnerability, not
+// VulnerabilityType.
+//
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// for vulnerabilityID
+type Vulnerability struct {
+	ID               string             `json:"id"`
+	Type             string             `json:"type"`
+	VulnerabilityIDs []*VulnerabilityID `json:"vulnerabilityIDs"`
+}
+
+func (Vulnerability) IsNode() {}
+
+// VulnerabilityID is a specific vulnerability ID associated with the type of the vulnerability.
+//
+// This will be enforced to be all lowercase.
+//
+// The namespace field is mandatory.
+type VulnerabilityID struct {
+	ID              string `json:"id"`
+	VulnerabilityID string `json:"vulnerabilityID"`
+}
+
+// VulnInputSpec specifies a vulnerability for mutations.
+//
+// This is different than VulnSpec because we want to encode mandatory fields:
+// type and vulnerabilityID.
+type VulnerabilityInputSpec struct {
+	Type            string `json:"type"`
+	VulnerabilityID string `json:"vulnerabilityID"`
 }
 
 // VulnerabilityMetaData is the metadata attached to vulnerability certification.
@@ -1372,19 +1352,15 @@ type VulnerabilityMetaDataInput struct {
 	Collector      string    `json:"collector"`
 }
 
-// VulnerabilitySpec allows using Vulnerability union as input type to be used in
-// read queries.
+// VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
 //
-// Either noVuln must be set or exactly one of osv, cve or ghsa
-// must be set to non-nil. Setting noVuln to true means retrieving only nodes where
-// there is no vulnerability attached. Setting it to false means retrieving only nodes
-// with identified vulnerabilities. Setting one of the other fields means retrieving
-// certifications for the corresponding vulnerability types.
+// Use null to match on all values at that level.
+// For example, to get all vulnerabilities in GUAC backend, use a VulnSpec
+// where every field is null.
 type VulnerabilitySpec struct {
-	Osv    *OSVSpec  `json:"osv,omitempty"`
-	Cve    *CVESpec  `json:"cve,omitempty"`
-	Ghsa   *GHSASpec `json:"ghsa,omitempty"`
-	NoVuln *bool     `json:"noVuln,omitempty"`
+	ID              *string `json:"id,omitempty"`
+	Type            *string `json:"type,omitempty"`
+	VulnerabilityID *string `json:"vulnerabilityID,omitempty"`
 }
 
 // DependencyType determines the type of the dependency.
@@ -1447,83 +1423,69 @@ func (e DependencyType) MarshalGQL(w io.Writer) {
 type Edge string
 
 const (
-	EdgeArtifactCertifyBad          Edge = "ARTIFACT_CERTIFY_BAD"
-	EdgeArtifactCertifyGood         Edge = "ARTIFACT_CERTIFY_GOOD"
-	EdgeArtifactCertifyVexStatement Edge = "ARTIFACT_CERTIFY_VEX_STATEMENT"
-	EdgeArtifactHashEqual           Edge = "ARTIFACT_HASH_EQUAL"
-	EdgeArtifactHasSbom             Edge = "ARTIFACT_HAS_SBOM"
-	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
-	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
-	EdgeArtifactHasMetadata         Edge = "ARTIFACT_HAS_METADATA"
-	EdgeArtifactPointOfContact      Edge = "ARTIFACT_POINT_OF_CONTACT"
-	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
-	EdgeCveCertifyVexStatement      Edge = "CVE_CERTIFY_VEX_STATEMENT"
-	EdgeCveCertifyVuln              Edge = "CVE_CERTIFY_VULN"
-	EdgeCveIsVulnerability          Edge = "CVE_IS_VULNERABILITY"
-	EdgeGhsaCertifyVexStatement     Edge = "GHSA_CERTIFY_VEX_STATEMENT"
-	EdgeGhsaCertifyVuln             Edge = "GHSA_CERTIFY_VULN"
-	EdgeGhsaIsVulnerability         Edge = "GHSA_IS_VULNERABILITY"
-	EdgeNoVulnCertifyVuln           Edge = "NO_VULN_CERTIFY_VULN"
-	EdgeOsvCertifyVexStatement      Edge = "OSV_CERTIFY_VEX_STATEMENT"
-	EdgeOsvCertifyVuln              Edge = "OSV_CERTIFY_VULN"
-	EdgeOsvIsVulnerability          Edge = "OSV_IS_VULNERABILITY"
-	EdgePackageCertifyBad           Edge = "PACKAGE_CERTIFY_BAD"
-	EdgePackageCertifyGood          Edge = "PACKAGE_CERTIFY_GOOD"
-	EdgePackageCertifyVexStatement  Edge = "PACKAGE_CERTIFY_VEX_STATEMENT"
-	EdgePackageCertifyVuln          Edge = "PACKAGE_CERTIFY_VULN"
-	EdgePackageHasSbom              Edge = "PACKAGE_HAS_SBOM"
-	EdgePackageHasSourceAt          Edge = "PACKAGE_HAS_SOURCE_AT"
-	EdgePackageIsDependency         Edge = "PACKAGE_IS_DEPENDENCY"
-	EdgePackageIsOccurrence         Edge = "PACKAGE_IS_OCCURRENCE"
-	EdgePackagePkgEqual             Edge = "PACKAGE_PKG_EQUAL"
-	EdgePackageHasMetadata          Edge = "PACKAGE_HAS_METADATA"
-	EdgePackagePointOfContact       Edge = "PACKAGE_POINT_OF_CONTACT"
-	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
-	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
-	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
-	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
-	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
-	EdgeSourceHasMetadata           Edge = "SOURCE_HAS_METADATA"
-	EdgeSourcePointOfContact        Edge = "SOURCE_POINT_OF_CONTACT"
-	EdgeCertifyBadArtifact          Edge = "CERTIFY_BAD_ARTIFACT"
-	EdgeCertifyBadPackage           Edge = "CERTIFY_BAD_PACKAGE"
-	EdgeCertifyBadSource            Edge = "CERTIFY_BAD_SOURCE"
-	EdgeCertifyGoodArtifact         Edge = "CERTIFY_GOOD_ARTIFACT"
-	EdgeCertifyGoodPackage          Edge = "CERTIFY_GOOD_PACKAGE"
-	EdgeCertifyGoodSource           Edge = "CERTIFY_GOOD_SOURCE"
-	EdgeCertifyScorecardSource      Edge = "CERTIFY_SCORECARD_SOURCE"
-	EdgeCertifyVexStatementArtifact Edge = "CERTIFY_VEX_STATEMENT_ARTIFACT"
-	EdgeCertifyVexStatementCve      Edge = "CERTIFY_VEX_STATEMENT_CVE"
-	EdgeCertifyVexStatementGhsa     Edge = "CERTIFY_VEX_STATEMENT_GHSA"
-	EdgeCertifyVexStatementOsv      Edge = "CERTIFY_VEX_STATEMENT_OSV"
-	EdgeCertifyVexStatementPackage  Edge = "CERTIFY_VEX_STATEMENT_PACKAGE"
-	EdgeCertifyVulnCve              Edge = "CERTIFY_VULN_CVE"
-	EdgeCertifyVulnGhsa             Edge = "CERTIFY_VULN_GHSA"
-	EdgeCertifyVulnNoVuln           Edge = "CERTIFY_VULN_NO_VULN"
-	EdgeCertifyVulnOsv              Edge = "CERTIFY_VULN_OSV"
-	EdgeCertifyVulnPackage          Edge = "CERTIFY_VULN_PACKAGE"
-	EdgeHashEqualArtifact           Edge = "HASH_EQUAL_ARTIFACT"
-	EdgeHasSbomArtifact             Edge = "HAS_SBOM_ARTIFACT"
-	EdgeHasSbomPackage              Edge = "HAS_SBOM_PACKAGE"
-	EdgeHasSlsaBuiltBy              Edge = "HAS_SLSA_BUILT_BY"
-	EdgeHasSlsaMaterials            Edge = "HAS_SLSA_MATERIALS"
-	EdgeHasSlsaSubject              Edge = "HAS_SLSA_SUBJECT"
-	EdgeHasSourceAtPackage          Edge = "HAS_SOURCE_AT_PACKAGE"
-	EdgeHasSourceAtSource           Edge = "HAS_SOURCE_AT_SOURCE"
-	EdgeIsDependencyPackage         Edge = "IS_DEPENDENCY_PACKAGE"
-	EdgeIsOccurrenceArtifact        Edge = "IS_OCCURRENCE_ARTIFACT"
-	EdgeIsOccurrencePackage         Edge = "IS_OCCURRENCE_PACKAGE"
-	EdgeIsOccurrenceSource          Edge = "IS_OCCURRENCE_SOURCE"
-	EdgeIsVulnerabilityCve          Edge = "IS_VULNERABILITY_CVE"
-	EdgeIsVulnerabilityGhsa         Edge = "IS_VULNERABILITY_GHSA"
-	EdgeIsVulnerabilityOsv          Edge = "IS_VULNERABILITY_OSV"
-	EdgePkgEqualPackage             Edge = "PKG_EQUAL_PACKAGE"
-	EdgeHasMetadataPackage          Edge = "HAS_METADATA_PACKAGE"
-	EdgeHasMetadataArtifact         Edge = "HAS_METADATA_ARTIFACT"
-	EdgeHasMetadataSource           Edge = "HAS_METADATA_SOURCE"
-	EdgePointOfContactPackage       Edge = "POINT_OF_CONTACT_PACKAGE"
-	EdgePointOfContactArtifact      Edge = "POINT_OF_CONTACT_ARTIFACT"
-	EdgePointOfContactSource        Edge = "POINT_OF_CONTACT_SOURCE"
+	EdgeArtifactCertifyBad               Edge = "ARTIFACT_CERTIFY_BAD"
+	EdgeArtifactCertifyGood              Edge = "ARTIFACT_CERTIFY_GOOD"
+	EdgeArtifactCertifyVexStatement      Edge = "ARTIFACT_CERTIFY_VEX_STATEMENT"
+	EdgeArtifactHashEqual                Edge = "ARTIFACT_HASH_EQUAL"
+	EdgeArtifactHasSbom                  Edge = "ARTIFACT_HAS_SBOM"
+	EdgeArtifactHasSlsa                  Edge = "ARTIFACT_HAS_SLSA"
+	EdgeArtifactIsOccurrence             Edge = "ARTIFACT_IS_OCCURRENCE"
+	EdgeArtifactHasMetadata              Edge = "ARTIFACT_HAS_METADATA"
+	EdgeArtifactPointOfContact           Edge = "ARTIFACT_POINT_OF_CONTACT"
+	EdgeBuilderHasSlsa                   Edge = "BUILDER_HAS_SLSA"
+	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
+	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
+	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
+	EdgePackageCertifyBad                Edge = "PACKAGE_CERTIFY_BAD"
+	EdgePackageCertifyGood               Edge = "PACKAGE_CERTIFY_GOOD"
+	EdgePackageCertifyVexStatement       Edge = "PACKAGE_CERTIFY_VEX_STATEMENT"
+	EdgePackageCertifyVuln               Edge = "PACKAGE_CERTIFY_VULN"
+	EdgePackageHasSbom                   Edge = "PACKAGE_HAS_SBOM"
+	EdgePackageHasSourceAt               Edge = "PACKAGE_HAS_SOURCE_AT"
+	EdgePackageIsDependency              Edge = "PACKAGE_IS_DEPENDENCY"
+	EdgePackageIsOccurrence              Edge = "PACKAGE_IS_OCCURRENCE"
+	EdgePackagePkgEqual                  Edge = "PACKAGE_PKG_EQUAL"
+	EdgePackageHasMetadata               Edge = "PACKAGE_HAS_METADATA"
+	EdgePackagePointOfContact            Edge = "PACKAGE_POINT_OF_CONTACT"
+	EdgeSourceCertifyBad                 Edge = "SOURCE_CERTIFY_BAD"
+	EdgeSourceCertifyGood                Edge = "SOURCE_CERTIFY_GOOD"
+	EdgeSourceCertifyScorecard           Edge = "SOURCE_CERTIFY_SCORECARD"
+	EdgeSourceHasSourceAt                Edge = "SOURCE_HAS_SOURCE_AT"
+	EdgeSourceIsOccurrence               Edge = "SOURCE_IS_OCCURRENCE"
+	EdgeSourceHasMetadata                Edge = "SOURCE_HAS_METADATA"
+	EdgeSourcePointOfContact             Edge = "SOURCE_POINT_OF_CONTACT"
+	EdgeCertifyBadArtifact               Edge = "CERTIFY_BAD_ARTIFACT"
+	EdgeCertifyBadPackage                Edge = "CERTIFY_BAD_PACKAGE"
+	EdgeCertifyBadSource                 Edge = "CERTIFY_BAD_SOURCE"
+	EdgeCertifyGoodArtifact              Edge = "CERTIFY_GOOD_ARTIFACT"
+	EdgeCertifyGoodPackage               Edge = "CERTIFY_GOOD_PACKAGE"
+	EdgeCertifyGoodSource                Edge = "CERTIFY_GOOD_SOURCE"
+	EdgeCertifyScorecardSource           Edge = "CERTIFY_SCORECARD_SOURCE"
+	EdgeCertifyVexStatementArtifact      Edge = "CERTIFY_VEX_STATEMENT_ARTIFACT"
+	EdgeCertifyVexStatementVulnerability Edge = "CERTIFY_VEX_STATEMENT_VULNERABILITY"
+	EdgeCertifyVexStatementPackage       Edge = "CERTIFY_VEX_STATEMENT_PACKAGE"
+	EdgeCertifyVulnVulnerability         Edge = "CERTIFY_VULN_VULNERABILITY"
+	EdgeCertifyVulnPackage               Edge = "CERTIFY_VULN_PACKAGE"
+	EdgeHashEqualArtifact                Edge = "HASH_EQUAL_ARTIFACT"
+	EdgeHasSbomArtifact                  Edge = "HAS_SBOM_ARTIFACT"
+	EdgeHasSbomPackage                   Edge = "HAS_SBOM_PACKAGE"
+	EdgeHasSlsaBuiltBy                   Edge = "HAS_SLSA_BUILT_BY"
+	EdgeHasSlsaMaterials                 Edge = "HAS_SLSA_MATERIALS"
+	EdgeHasSlsaSubject                   Edge = "HAS_SLSA_SUBJECT"
+	EdgeHasSourceAtPackage               Edge = "HAS_SOURCE_AT_PACKAGE"
+	EdgeHasSourceAtSource                Edge = "HAS_SOURCE_AT_SOURCE"
+	EdgeIsDependencyPackage              Edge = "IS_DEPENDENCY_PACKAGE"
+	EdgeIsOccurrenceArtifact             Edge = "IS_OCCURRENCE_ARTIFACT"
+	EdgeIsOccurrencePackage              Edge = "IS_OCCURRENCE_PACKAGE"
+	EdgeIsOccurrenceSource               Edge = "IS_OCCURRENCE_SOURCE"
+	EdgeVulnEqualVulnerability           Edge = "VULN_EQUAL_VULNERABILITY"
+	EdgePkgEqualPackage                  Edge = "PKG_EQUAL_PACKAGE"
+	EdgeHasMetadataPackage               Edge = "HAS_METADATA_PACKAGE"
+	EdgeHasMetadataArtifact              Edge = "HAS_METADATA_ARTIFACT"
+	EdgeHasMetadataSource                Edge = "HAS_METADATA_SOURCE"
+	EdgePointOfContactPackage            Edge = "POINT_OF_CONTACT_PACKAGE"
+	EdgePointOfContactArtifact           Edge = "POINT_OF_CONTACT_ARTIFACT"
+	EdgePointOfContactSource             Edge = "POINT_OF_CONTACT_SOURCE"
 )
 
 var AllEdge = []Edge{
@@ -1537,16 +1499,9 @@ var AllEdge = []Edge{
 	EdgeArtifactHasMetadata,
 	EdgeArtifactPointOfContact,
 	EdgeBuilderHasSlsa,
-	EdgeCveCertifyVexStatement,
-	EdgeCveCertifyVuln,
-	EdgeCveIsVulnerability,
-	EdgeGhsaCertifyVexStatement,
-	EdgeGhsaCertifyVuln,
-	EdgeGhsaIsVulnerability,
-	EdgeNoVulnCertifyVuln,
-	EdgeOsvCertifyVexStatement,
-	EdgeOsvCertifyVuln,
-	EdgeOsvIsVulnerability,
+	EdgeVulnerabilityCertifyVexStatement,
+	EdgeVulnerabilityCertifyVuln,
+	EdgeVulnerabilityVulnEqual,
 	EdgePackageCertifyBad,
 	EdgePackageCertifyGood,
 	EdgePackageCertifyVexStatement,
@@ -1573,14 +1528,9 @@ var AllEdge = []Edge{
 	EdgeCertifyGoodSource,
 	EdgeCertifyScorecardSource,
 	EdgeCertifyVexStatementArtifact,
-	EdgeCertifyVexStatementCve,
-	EdgeCertifyVexStatementGhsa,
-	EdgeCertifyVexStatementOsv,
+	EdgeCertifyVexStatementVulnerability,
 	EdgeCertifyVexStatementPackage,
-	EdgeCertifyVulnCve,
-	EdgeCertifyVulnGhsa,
-	EdgeCertifyVulnNoVuln,
-	EdgeCertifyVulnOsv,
+	EdgeCertifyVulnVulnerability,
 	EdgeCertifyVulnPackage,
 	EdgeHashEqualArtifact,
 	EdgeHasSbomArtifact,
@@ -1594,9 +1544,7 @@ var AllEdge = []Edge{
 	EdgeIsOccurrenceArtifact,
 	EdgeIsOccurrencePackage,
 	EdgeIsOccurrenceSource,
-	EdgeIsVulnerabilityCve,
-	EdgeIsVulnerabilityGhsa,
-	EdgeIsVulnerabilityOsv,
+	EdgeVulnEqualVulnerability,
 	EdgePkgEqualPackage,
 	EdgeHasMetadataPackage,
 	EdgeHasMetadataArtifact,
@@ -1608,7 +1556,7 @@ var AllEdge = []Edge{
 
 func (e Edge) IsValid() bool {
 	switch e {
-	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeCveCertifyVexStatement, EdgeCveCertifyVuln, EdgeCveIsVulnerability, EdgeGhsaCertifyVexStatement, EdgeGhsaCertifyVuln, EdgeGhsaIsVulnerability, EdgeNoVulnCertifyVuln, EdgeOsvCertifyVexStatement, EdgeOsvCertifyVuln, EdgeOsvIsVulnerability, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeSourcePointOfContact, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementCve, EdgeCertifyVexStatementGhsa, EdgeCertifyVexStatementOsv, EdgeCertifyVexStatementPackage, EdgeCertifyVulnCve, EdgeCertifyVulnGhsa, EdgeCertifyVulnNoVuln, EdgeCertifyVulnOsv, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeIsVulnerabilityCve, EdgeIsVulnerabilityGhsa, EdgeIsVulnerabilityOsv, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource, EdgePointOfContactPackage, EdgePointOfContactArtifact, EdgePointOfContactSource:
+	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeSourcePointOfContact, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementVulnerability, EdgeCertifyVexStatementPackage, EdgeCertifyVulnVulnerability, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeVulnEqualVulnerability, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource, EdgePointOfContactPackage, EdgePointOfContactArtifact, EdgePointOfContactSource:
 		return true
 	}
 	return false

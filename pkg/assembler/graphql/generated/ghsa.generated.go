@@ -195,7 +195,7 @@ func (ec *executionContext) unmarshalInputGHSASpec(ctx context.Context, obj inte
 
 // region    **************************** object.gotpl ****************************
 
-var gHSAImplementors = []string{"GHSA", "Vulnerability", "CveOrGhsa", "Node"}
+var gHSAImplementors = []string{"GHSA"}
 
 func (ec *executionContext) _GHSA(ctx context.Context, sel ast.SelectionSet, obj *model.Ghsa) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, gHSAImplementors)
@@ -333,14 +333,6 @@ func (ec *executionContext) unmarshalOGHSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋ
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputGHSAInputSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx context.Context, v interface{}) (*model.GHSASpec, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputGHSASpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
