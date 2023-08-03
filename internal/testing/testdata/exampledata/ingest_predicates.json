@@ -87,6 +87,9 @@
         ],
         "subpath": ""
       },
+      "depPkgMatchFlag" : {
+        "pkg": "ALL_VERSIONS"
+      },
       "isDependency": {
         "versionRange": "3.2.0-r22",
         "dependencyType": "UNKNOWN",
@@ -124,6 +127,9 @@
           }
         ],
         "subpath": ""
+      },
+      "depPkgMatchFlag" : {
+        "pkg": "ALL_VERSIONS"
       },
       "isDependency": {
         "versionRange": "3.2.0-r22",

@@ -31,8 +31,9 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 		for _, rfileNode := range relatedFileNodes {
 			// TODO: Check is this always just expected to be one?
 			return &assembler.IsDependencyIngest{
-				Pkg:    foundNode,
-				DepPkg: rfileNode,
+				Pkg:             foundNode,
+				DepPkg:          rfileNode,
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: model.DependencyTypeUnknown,
 					Justification:  justification,
@@ -43,8 +44,9 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 	} else if len(relatedPackNodes) > 0 {
 		for _, rpackNode := range relatedPackNodes {
 			return &assembler.IsDependencyIngest{
-				Pkg:    foundNode,
-				DepPkg: rpackNode,
+				Pkg:             foundNode,
+				DepPkg:          rpackNode,
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: model.DependencyTypeUnknown,
 					Justification:  justification,
@@ -64,8 +66,9 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 		for _, packNode := range packNodes {
 			if !reflect.DeepEqual(packNode, topLevel) {
 				p := assembler.IsDependencyIngest{
-					Pkg:    topLevel,
-					DepPkg: packNode,
+					Pkg:             topLevel,
+					DepPkg:          packNode,
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeUnknown,
 						Justification:  justification,
@@ -80,8 +83,9 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 	for _, fileNodes := range files {
 		for _, fileNode := range fileNodes {
 			p := assembler.IsDependencyIngest{
-				Pkg:    topLevel,
-				DepPkg: fileNode,
+				Pkg:             topLevel,
+				DepPkg:          fileNode,
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: model.DependencyTypeUnknown,
 					Justification:  justification,
