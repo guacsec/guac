@@ -199,12 +199,27 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 		}
 	}
 	if !foundOne && filter != nil && filter.DependentPackage != nil {
-		exactPackage, err := c.exactPackageName(filter.DependentPackage)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		var exactPackageLinks []uint32
+		if filter.DependentPackage.Version == nil {
+			exactPackage, err := c.exactPackageName(filter.DependentPackage)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if exactPackage != nil {
+				exactPackageLinks = exactPackage.isDependencyLinks
+			}
+		} else {
+			exactPackage, err := c.exactPackageVersion(filter.Package)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if exactPackage != nil {
+				exactPackageLinks = exactPackage.isDependencyLinks
+			}
 		}
-		if exactPackage != nil {
-			search = append(search, exactPackage.isDependencyLinks...)
+
+		if exactPackageLinks != nil {
+			search = append(search, exactPackageLinks...)
 			foundOne = true
 		}
 	}

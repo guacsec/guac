@@ -283,20 +283,42 @@ func ingestCertifyScorecards(ctx context.Context, client graphql.Client, v []ass
 }
 
 func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assembler.IsDependencyIngest) error {
-	var pkgs []model.PkgInputSpec
-	var depPkgs []model.PkgInputSpec
-	var dependencies []model.IsDependencyInputSpec
-	for _, ingest := range v {
-		pkgs = append(pkgs, *ingest.Pkg)
-		depPkgs = append(depPkgs, *ingest.DepPkg)
-		dependencies = append(dependencies, *ingest.IsDependency)
+
+	var depToVersion, depToName struct {
+		pkgs            []model.PkgInputSpec
+		depPkgs         []model.PkgInputSpec
+		depPkgMatchFlag model.MatchFlags
+		dependencies    []model.IsDependencyInputSpec
 	}
-	if len(v) > 0 {
-		_, err := model.IsDependencies(ctx, client, pkgs, depPkgs, dependencies)
+
+	depToVersion.depPkgMatchFlag = model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
+	depToName.depPkgMatchFlag = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
+
+	for _, ingest := range v {
+		if ingest.DepPkgMatchFlag.Pkg == model.PkgMatchTypeSpecificVersion {
+			depToVersion.pkgs = append(depToVersion.pkgs, *ingest.Pkg)
+			depToVersion.depPkgs = append(depToVersion.depPkgs, *ingest.DepPkg)
+			depToVersion.dependencies = append(depToVersion.dependencies, *ingest.IsDependency)
+		} else if ingest.DepPkgMatchFlag.Pkg == model.PkgMatchTypeAllVersions {
+			depToName.pkgs = append(depToName.pkgs, *ingest.Pkg)
+			depToName.depPkgs = append(depToName.depPkgs, *ingest.DepPkg)
+			depToName.dependencies = append(depToName.dependencies, *ingest.IsDependency)
+		}
+	}
+
+	if len(depToVersion.pkgs) > 0 {
+		_, err := model.IsDependencies(ctx, client, depToVersion.pkgs, depToVersion.depPkgs, depToVersion.depPkgMatchFlag, depToVersion.dependencies)
 		if err != nil {
 			return fmt.Errorf("isDependencies failed with error: %w", err)
 		}
 	}
+	if len(depToName.pkgs) > 0 {
+		_, err := model.IsDependencies(ctx, client, depToName.pkgs, depToName.depPkgs, depToName.depPkgMatchFlag, depToName.dependencies)
+		if err != nil {
+			return fmt.Errorf("isDependencies failed with error: %w", err)
+		}
+	}
+
 	return nil
 }
 

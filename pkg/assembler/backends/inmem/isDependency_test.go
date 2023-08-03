@@ -198,7 +198,7 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgNameSpec{
+				DependentPackage: &model.PkgSpec{
 					Name: ptrfrom.String("openssl"),
 				},
 			},
@@ -259,7 +259,7 @@ func TestIsDependency(t *testing.T) {
 				Package: &model.PkgSpec{
 					Subpath: ptrfrom.String("saved_model_cli.py"),
 				},
-				DependentPackage: &model.PkgNameSpec{
+				DependentPackage: &model.PkgSpec{
 					Name: ptrfrom.String("openssl"),
 				},
 			},
