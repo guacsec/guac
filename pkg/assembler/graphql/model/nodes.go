@@ -90,35 +90,6 @@ type BuilderSpec struct {
 	URI *string `json:"uri,omitempty"`
 }
 
-// CVE represents a vulnerability in the Common Vulnerabilities and Exposures
-// schema.
-//
-// The vulnerability identifier contains a year field, so we are extracting that
-// to allow matching for vulnerabilities found in a given year.
-//
-// The vulnerability identifier field is mandatory and canonicalized to be
-// lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type Cve struct {
-	ID    string `json:"id"`
-	Year  int    `json:"year"`
-	CveID string `json:"cveId"`
-}
-
-// CVEInputSpec specifies a CVE vulnerability for mutations.
-type CVEInputSpec struct {
-	Year  int    `json:"year"`
-	CveID string `json:"cveId"`
-}
-
-// CVESpec allows filtering the list of advisories to return in a query.
-type CVESpec struct {
-	ID    *string `json:"id,omitempty"`
-	Year  *int    `json:"year,omitempty"`
-	CveID *string `json:"cveId,omitempty"`
-}
-
 // CertifyBad is an attestation that a package, source, or artifact is considered
 // bad.
 //
@@ -316,27 +287,6 @@ type CertifyVulnSpec struct {
 	ScannerVersion *string            `json:"scannerVersion,omitempty"`
 	Origin         *string            `json:"origin,omitempty"`
 	Collector      *string            `json:"collector,omitempty"`
-}
-
-// GHSA represents GitHub security advisories.
-//
-// The advisory id field is mandatory and canonicalized to be lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type Ghsa struct {
-	ID     string `json:"id"`
-	GhsaID string `json:"ghsaId"`
-}
-
-// GHSAInputSpec specifies a GitHub Security Advisory for mutations.
-type GHSAInputSpec struct {
-	GhsaID string `json:"ghsaId"`
-}
-
-// GHSASpec allows filtering the list of advisories to return in a query.
-type GHSASpec struct {
-	ID     *string `json:"id,omitempty"`
-	GhsaID *string `json:"ghsaId,omitempty"`
 }
 
 // HasMetadata is an attestation that a package, source, or artifact has a certain
@@ -628,30 +578,6 @@ type IsOccurrenceSpec struct {
 // MatchFlags is used to input the PkgMatchType enum.
 type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
-}
-
-// OSV represents an Open Source Vulnerability.
-//
-// The osvId field is mandatory and canonicalized to be lowercase.
-//
-// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
-// CVE ID).
-//
-// This node can be referred to by other parts of GUAC.
-type Osv struct {
-	ID    string `json:"id"`
-	OsvID string `json:"osvId"`
-}
-
-// OSVInputSpec specifies a OSV vulnerability for mutations.
-type OSVInputSpec struct {
-	OsvID string `json:"osvId"`
-}
-
-// OSVSpec allows filtering the list of advisories to return in a query.
-type OSVSpec struct {
-	ID    *string `json:"id,omitempty"`
-	OsvID *string `json:"osvId,omitempty"`
 }
 
 // Package represents the root of the package trie/tree.

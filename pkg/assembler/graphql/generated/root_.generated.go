@@ -50,12 +50,6 @@ type ComplexityRoot struct {
 		URI func(childComplexity int) int
 	}
 
-	CVE struct {
-		CveID func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Year  func(childComplexity int) int
-	}
-
 	CertifyBad struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
@@ -96,11 +90,6 @@ type ComplexityRoot struct {
 		Metadata      func(childComplexity int) int
 		Package       func(childComplexity int) int
 		Vulnerability func(childComplexity int) int
-	}
-
-	GHSA struct {
-		GhsaID func(childComplexity int) int
-		ID     func(childComplexity int) int
 	}
 
 	HasMetadata struct {
@@ -174,27 +163,21 @@ type ComplexityRoot struct {
 		IngestArtifacts       func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestBuilders        func(childComplexity int, builders []*model.BuilderInputSpec) int
-		IngestCVEs            func(childComplexity int, cves []*model.CVEInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
 		IngestCertifyBads     func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
 		IngestCertifyVuln     func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.VulnerabilityMetaDataInput) int
-		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
-		IngestGHSAs           func(childComplexity int, ghsas []*model.GHSAInputSpec) int
-		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSBOMs        func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestHashEquals      func(childComplexity int, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) int
-		IngestOSVs            func(childComplexity int, osvs []*model.OSVInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOccurrences     func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
-		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestPackages        func(childComplexity int, pkgs []*model.PkgInputSpec) int
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
@@ -209,11 +192,6 @@ type ComplexityRoot struct {
 		IngestVulnEqual       func(childComplexity int, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqualInputSpec model.VulnEqualInputSpec) int
 		IngestVulnerabilities func(childComplexity int, vulns []*model.VulnerabilityInputSpec) int
 		IngestVulnerability   func(childComplexity int, vuln model.VulnerabilityInputSpec) int
-	}
-
-	OSV struct {
-		ID    func(childComplexity int) int
-		OsvID func(childComplexity int) int
 	}
 
 	Package struct {
@@ -272,9 +250,7 @@ type ComplexityRoot struct {
 		CertifyGood         func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
 		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec) int
 		CertifyVuln         func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
-		Cve                 func(childComplexity int, cveSpec model.CVESpec) int
 		FindSoftware        func(childComplexity int, searchText string) int
-		Ghsa                func(childComplexity int, ghsaSpec model.GHSASpec) int
 		HasMetadata         func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
 		HasSbom             func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
 		HasSlsa             func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
@@ -285,7 +261,6 @@ type ComplexityRoot struct {
 		Neighbors           func(childComplexity int, node string, usingOnly []model.Edge) int
 		Node                func(childComplexity int, node string) int
 		Nodes               func(childComplexity int, nodes []string) int
-		Osv                 func(childComplexity int, osvSpec model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec model.PkgSpec) int
 		Path                func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
 		PkgEqual            func(childComplexity int, pkgEqualSpec model.PkgEqualSpec) int
@@ -426,27 +401,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Builder.URI(childComplexity), true
-
-	case "CVE.cveId":
-		if e.complexity.CVE.CveID == nil {
-			break
-		}
-
-		return e.complexity.CVE.CveID(childComplexity), true
-
-	case "CVE.id":
-		if e.complexity.CVE.ID == nil {
-			break
-		}
-
-		return e.complexity.CVE.ID(childComplexity), true
-
-	case "CVE.year":
-		if e.complexity.CVE.Year == nil {
-			break
-		}
-
-		return e.complexity.CVE.Year(childComplexity), true
 
 	case "CertifyBad.collector":
 		if e.complexity.CertifyBad.Collector == nil {
@@ -636,20 +590,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyVuln.Vulnerability(childComplexity), true
-
-	case "GHSA.ghsaId":
-		if e.complexity.GHSA.GhsaID == nil {
-			break
-		}
-
-		return e.complexity.GHSA.GhsaID(childComplexity), true
-
-	case "GHSA.id":
-		if e.complexity.GHSA.ID == nil {
-			break
-		}
-
-		return e.complexity.GHSA.ID(childComplexity), true
 
 	case "HasMetadata.collector":
 		if e.complexity.HasMetadata.Collector == nil {
@@ -1014,18 +954,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestBuilders(childComplexity, args["builders"].([]*model.BuilderInputSpec)), true
 
-	case "Mutation.ingestCVEs":
-		if e.complexity.Mutation.IngestCVEs == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestCVEs_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestCVEs(childComplexity, args["cves"].([]*model.CVEInputSpec)), true
-
 	case "Mutation.ingestCertifyBad":
 		if e.complexity.Mutation.IngestCertifyBad == nil {
 			break
@@ -1086,18 +1014,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestCertifyVuln(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.VulnerabilityInputSpec), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
 
-	case "Mutation.ingestCVE":
-		if e.complexity.Mutation.IngestCve == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestCVE_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestCve(childComplexity, args["cve"].(*model.CVEInputSpec)), true
-
 	case "Mutation.ingestDependencies":
 		if e.complexity.Mutation.IngestDependencies == nil {
 			break
@@ -1121,30 +1037,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["dependency"].(model.IsDependencyInputSpec)), true
-
-	case "Mutation.ingestGHSAs":
-		if e.complexity.Mutation.IngestGHSAs == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestGHSAs_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestGHSAs(childComplexity, args["ghsas"].([]*model.GHSAInputSpec)), true
-
-	case "Mutation.ingestGHSA":
-		if e.complexity.Mutation.IngestGhsa == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestGHSA_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestGhsa(childComplexity, args["ghsa"].(*model.GHSAInputSpec)), true
 
 	case "Mutation.ingestHasMetadata":
 		if e.complexity.Mutation.IngestHasMetadata == nil {
@@ -1218,18 +1110,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestHashEquals(childComplexity, args["artifacts"].([]*model.ArtifactInputSpec), args["otherArtifacts"].([]*model.ArtifactInputSpec), args["hashEquals"].([]*model.HashEqualInputSpec)), true
 
-	case "Mutation.ingestOSVs":
-		if e.complexity.Mutation.IngestOSVs == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestOSVs_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestOSVs(childComplexity, args["osvs"].([]*model.OSVInputSpec)), true
-
 	case "Mutation.ingestOccurrence":
 		if e.complexity.Mutation.IngestOccurrence == nil {
 			break
@@ -1253,18 +1133,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestOccurrences(childComplexity, args["subjects"].(model.PackageOrSourceInputs), args["artifacts"].([]*model.ArtifactInputSpec), args["occurrences"].([]*model.IsOccurrenceInputSpec)), true
-
-	case "Mutation.ingestOSV":
-		if e.complexity.Mutation.IngestOsv == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestOSV_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestOsv(childComplexity, args["osv"].(*model.OSVInputSpec)), true
 
 	case "Mutation.ingestPackage":
 		if e.complexity.Mutation.IngestPackage == nil {
@@ -1433,20 +1301,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["vuln"].(model.VulnerabilityInputSpec)), true
-
-	case "OSV.id":
-		if e.complexity.OSV.ID == nil {
-			break
-		}
-
-		return e.complexity.OSV.ID(childComplexity), true
-
-	case "OSV.osvId":
-		if e.complexity.OSV.OsvID == nil {
-			break
-		}
-
-		return e.complexity.OSV.OsvID(childComplexity), true
 
 	case "Package.id":
 		if e.complexity.Package.ID == nil {
@@ -1716,18 +1570,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyVuln(childComplexity, args["certifyVulnSpec"].(model.CertifyVulnSpec)), true
 
-	case "Query.cve":
-		if e.complexity.Query.Cve == nil {
-			break
-		}
-
-		args, err := ec.field_Query_cve_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Cve(childComplexity, args["cveSpec"].(model.CVESpec)), true
-
 	case "Query.findSoftware":
 		if e.complexity.Query.FindSoftware == nil {
 			break
@@ -1739,18 +1581,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.FindSoftware(childComplexity, args["searchText"].(string)), true
-
-	case "Query.ghsa":
-		if e.complexity.Query.Ghsa == nil {
-			break
-		}
-
-		args, err := ec.field_Query_ghsa_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(model.GHSASpec)), true
 
 	case "Query.HasMetadata":
 		if e.complexity.Query.HasMetadata == nil {
@@ -1871,18 +1701,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Nodes(childComplexity, args["nodes"].([]string)), true
-
-	case "Query.osv":
-		if e.complexity.Query.Osv == nil {
-			break
-		}
-
-		args, err := ec.field_Query_osv_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Osv(childComplexity, args["osvSpec"].(model.OSVSpec)), true
 
 	case "Query.packages":
 		if e.complexity.Query.Packages == nil {
@@ -2321,8 +2139,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputArtifactSpec,
 		ec.unmarshalInputBuilderInputSpec,
 		ec.unmarshalInputBuilderSpec,
-		ec.unmarshalInputCVEInputSpec,
-		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputCertifyBadInputSpec,
 		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyGoodInputSpec,
@@ -2330,8 +2146,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
 		ec.unmarshalInputCertifyVulnSpec,
-		ec.unmarshalInputGHSAInputSpec,
-		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasMetadataInputSpec,
 		ec.unmarshalInputHasMetadataSpec,
 		ec.unmarshalInputHasSBOMInputSpec,
@@ -2346,8 +2160,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIsOccurrenceInputSpec,
 		ec.unmarshalInputIsOccurrenceSpec,
 		ec.unmarshalInputMatchFlags,
-		ec.unmarshalInputOSVInputSpec,
-		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageOrArtifactInput,
 		ec.unmarshalInputPackageOrArtifactInputs,
 		ec.unmarshalInputPackageOrArtifactSpec,
@@ -3284,120 +3096,6 @@ extend type Mutation {
   ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): PointOfContact!
 }
 `, BuiltIn: false},
-	{Name: "../schema/cve.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-# Defines a GraphQL schema for a vulnerability in CVE schema
-
-"""
-CVE represents a vulnerability in the Common Vulnerabilities and Exposures
-schema.
-
-The vulnerability identifier contains a year field, so we are extracting that
-to allow matching for vulnerabilities found in a given year.
-
-The vulnerability identifier field is mandatory and canonicalized to be
-lowercase.
-
-This node can be referred to by other parts of GUAC.
-"""
-type CVE {
-  id: ID!
-  year: Int!
-  cveId: String!
-}
-
-"CVESpec allows filtering the list of advisories to return in a query."
-input CVESpec {
-  id: ID
-  year: Int
-  cveId: String
-}
-
-"CVEInputSpec specifies a CVE vulnerability for mutations."
-input CVEInputSpec {
-  year: Int!
-  cveId: String!
-}
-
-extend type Query {
-  "Returns all CVEs matching a filter."
-  cve(cveSpec: CVESpec!): [CVE!]!
-}
-
-extend type Mutation {
-  "Ingests new CVE and returns it."
-  ingestCVE(cve: CVEInputSpec): CVE!
-  "Bulk ingests new CVEs and returns a list of them."
-  ingestCVEs(cves: [CVEInputSpec!]!): [CVE!]!
-}
-`, BuiltIn: false},
-	{Name: "../schema/ghsa.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-"""
-GHSA represents GitHub security advisories.
-
-The advisory id field is mandatory and canonicalized to be lowercase.
-
-This node can be referred to by other parts of GUAC.
-"""
-type GHSA {
-  id: ID!
-  ghsaId: String!
-}
-
-"GHSASpec allows filtering the list of advisories to return in a query."
-input GHSASpec {
-  id: ID
-  ghsaId: String
-}
-
-"GHSAInputSpec specifies a GitHub Security Advisory for mutations."
-input GHSAInputSpec {
-  ghsaId: String!
-}
-
-extend type Query {
-  "Returns all GitHub Security Advisories matching a filter."
-  ghsa(ghsaSpec: GHSASpec!): [GHSA!]!
-}
-
-extend type Mutation {
-  "Ingests a new GitHub Security Advisory and returns it."
-  ingestGHSA(ghsa: GHSAInputSpec): GHSA!
-  "Bulk ingests new GHSAs and returns a list of them."
-  ingestGHSAs(ghsas: [GHSAInputSpec!]!): [GHSA!]!
-}
-`, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
@@ -4043,63 +3741,6 @@ extend type Query {
 extend type Mutation {
   "Adds metadata about a package, source or artifact."
   ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, hasMetadata: HasMetadataInputSpec!): HasMetadata!
-}
-`, BuiltIn: false},
-	{Name: "../schema/osv.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-# Defines a GraphQL schema for a vulnerability in OSV schema
-
-"""
-OSV represents an Open Source Vulnerability.
-
-The osvId field is mandatory and canonicalized to be lowercase.
-
-This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
-CVE ID).
-
-This node can be referred to by other parts of GUAC.
-"""
-type OSV {
-  id: ID!
-  osvId: String!
-}
-
-"OSVSpec allows filtering the list of advisories to return in a query."
-input OSVSpec {
-  id: ID
-  osvId: String
-}
-
-"OSVInputSpec specifies a OSV vulnerability for mutations."
-input OSVInputSpec {
-  osvId: String!
-}
-
-extend type Query {
-  "Returns all OSV vulnerabilities matching a filter."
-  osv(osvSpec: OSVSpec!): [OSV!]!
-}
-
-extend type Mutation {
-  "Ingests a new OSV vulnerability and returns it."
-  ingestOSV(osv: OSVInputSpec): OSV!
-  "Bulk ingests new OSVs and returns a list of them."
-  ingestOSVs(osvs: [OSVInputSpec!]!): [OSV!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/package.graphql", Input: `#
