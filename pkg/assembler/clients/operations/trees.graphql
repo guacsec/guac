@@ -242,13 +242,7 @@ fragment AllCertifyVuln on CertifyVuln {
     ...AllPkgTree
   }
   vulnerability {
-    __typename
-    ... on Vulnerability {
       ...AllVulnerabilityTree
-    }
-    ... on NoVuln {
-      id
-    }
   }
   metadata {
     dbUri

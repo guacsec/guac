@@ -32,17 +32,8 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
     ... on Builder {
       ...AllBuilderTree
     }
-    ... on OSV {
-      ...AllOSVTree
-    }
-    ... on CVE {
-      ...AllCveTree
-    }
-    ... on GHSA {
-      ...AllGHSATree
-    }
-    ... on NoVuln {
-      id
+    ... on Vulnerability {
+      ...AllVulnerabilityTree
     }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
@@ -80,8 +71,8 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
-    ... on IsVulnerability {
-      ...AllIsVulnerability
+    ... on VulnEqual {
+      ...AllVulnEqual
     }
     ... on CertifyVEXStatement {
       ...AllCertifyVEXStatement
@@ -107,17 +98,8 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
     ... on Builder {
       ...AllBuilderTree
     }
-    ... on OSV {
-      ...AllOSVTree
-    }
-    ... on CVE {
-      ...AllCveTree
-    }
-    ... on GHSA {
-      ...AllGHSATree
-    }
-    ... on NoVuln {
-      id
+    ... on Vulnerability {
+      ...AllVulnerabilityTree
     }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
@@ -155,8 +137,8 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
-    ... on IsVulnerability {
-      ...AllIsVulnerability
+    ... on VulnEqual {
+      ...AllVulnEqual
     }
     ... on CertifyVEXStatement {
       ...AllCertifyVEXStatement
@@ -182,17 +164,8 @@ query Node($node: ID!) {
     ... on Builder {
       ...AllBuilderTree
     }
-    ... on OSV {
-      ...AllOSVTree
-    }
-    ... on CVE {
-      ...AllCveTree
-    }
-    ... on GHSA {
-      ...AllGHSATree
-    }
-    ... on NoVuln {
-      id
+    ... on Vulnerability {
+      ...AllVulnerabilityTree
     }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
@@ -230,8 +203,8 @@ query Node($node: ID!) {
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
-    ... on IsVulnerability {
-      ...AllIsVulnerability
+    ... on VulnEqual {
+      ...AllVulnEqual
     }
     ... on CertifyVEXStatement {
       ...AllCertifyVEXStatement
@@ -257,17 +230,8 @@ query Nodes($nodes: [ID!]!) {
     ... on Builder {
       ...AllBuilderTree
     }
-    ... on OSV {
-      ...AllOSVTree
-    }
-    ... on CVE {
-      ...AllCveTree
-    }
-    ... on GHSA {
-      ...AllGHSATree
-    }
-    ... on NoVuln {
-      id
+    ... on Vulnerability {
+      ...AllVulnerabilityTree
     }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
@@ -305,8 +269,8 @@ query Nodes($nodes: [ID!]!) {
     ... on CertifyVuln {
       ...AllCertifyVuln
     }
-    ... on IsVulnerability {
-      ...AllIsVulnerability
+    ... on VulnEqual {
+      ...AllVulnEqual
     }
     ... on CertifyVEXStatement {
       ...AllCertifyVEXStatement

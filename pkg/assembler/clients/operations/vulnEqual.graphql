@@ -15,26 +15,16 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Ingest GHSA
+# Defines the GraphQL operations to certify that two vulnerabilities are identical
 
-mutation IngestGHSA($ghsa: GHSAInputSpec!) {
-  ingestGHSA(ghsa: $ghsa) {
-    ...AllGHSATree
+mutation VulnEqual($vulnerability: VulnerabilityInputSpec!, $otherVulnerability: VulnerabilityInputSpec!, $vulnEqual: VulnEqualInputSpec!) {
+  vuln: ingestVulnerability(vuln: $vulnerability) {
+    ...AllVulnerabilityTree
   }
-}
-
-# Bulk Ingest GHSA
-
-mutation IngestGHSAs($ghsas: [GHSAInputSpec!]!) {
-  ingestGHSAs(ghsas: $ghsas) {
-    ...AllGHSATree
+  otherVuln: ingestVulnerability(vuln: $otherVulnerability) {
+    ...AllVulnerabilityTree
   }
-}
-
-# Exposes GraphQL queries to retrieve GUAC GHSAs
-
-query GHSAs($filter: GHSASpec!) {
-  ghsa(ghsaSpec: $filter) {
-    ...AllGHSATree
+  ingestVulnEqual(vulnerability: $vulnerability, otherVulnerability: $otherVulnerability, vulnEqual: $vulnEqual) {
+    ...AllVulnEqual
   }
 }

@@ -189,7 +189,7 @@ type ComplexityRoot struct {
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestSources         func(childComplexity int, sources []*model.SourceInputSpec) int
 		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) int
-		IngestVulnEqual       func(childComplexity int, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqualInputSpec model.VulnEqualInputSpec) int
+		IngestVulnEqual       func(childComplexity int, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) int
 		IngestVulnerabilities func(childComplexity int, vulns []*model.VulnerabilityInputSpec) int
 		IngestVulnerability   func(childComplexity int, vuln model.VulnerabilityInputSpec) int
 	}
@@ -1276,7 +1276,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnEqual(childComplexity, args["vulnerability"].(model.VulnerabilityInputSpec), args["otherVulnerability"].(model.VulnerabilityInputSpec), args["vulnEqualInputSpec"].(model.VulnEqualInputSpec)), true
+		return e.complexity.Mutation.IngestVulnEqual(childComplexity, args["vulnerability"].(model.VulnerabilityInputSpec), args["otherVulnerability"].(model.VulnerabilityInputSpec), args["vulnEqual"].(model.VulnEqualInputSpec)), true
 
 	case "Mutation.ingestVulnerabilities":
 		if e.complexity.Mutation.IngestVulnerabilities == nil {
@@ -4376,7 +4376,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingest a mapping between vulnerabilities."
-  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqualInputSpec: VulnEqualInputSpec!): VulnEqual!
+  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqual: VulnEqualInputSpec!): VulnEqual!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnerability.graphql", Input: `#
