@@ -17,7 +17,7 @@
 
 # Defines a GraphQL schema for the vulnerability certifications
 
-"Vulnerability is a union of a generic vulnerability  or the NoVuln node."
+"Vulnerability is a union of a generic vulnerability or the NoVuln node."
 union VulnerabilityObj = Vulnerability | NoVuln
 
 """
