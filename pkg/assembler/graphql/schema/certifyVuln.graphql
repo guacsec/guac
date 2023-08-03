@@ -17,49 +17,35 @@
 
 # Defines a GraphQL schema for the vulnerability certifications
 
-"""
-NoVuln is a special vulnerability node to attest that no vulnerability has been
-found during a vulnerability scan.
-
-Backends guarantee that this is a singleton node.
-"""
-type NoVuln {
-  id: ID!
-}
-
-"Vulnerability is a union of OSV, CVE, GHSA or the NoVuln node."
-union Vulnerability = OSV | CVE | GHSA | NoVuln
+"Vulnerability is a union of a generic vulnerability  or the NoVuln node."
+union VulnerabilityObj = Vulnerability | NoVuln
 
 """
-VulnerabilitySpec allows using Vulnerability union as input type to be used in
+VulnerabilityObjSpec allows using VulnerabilityObj union as input type to be used in
 read queries.
 
-Either noVuln must be set or exactly one of osv, cve or ghsa
+Either noVuln must be set or vulnerability
 must be set to non-nil. Setting noVuln to true means retrieving only nodes where
 there is no vulnerability attached. Setting it to false means retrieving only nodes
-with identified vulnerabilities. Setting one of the other fields means retrieving
-certifications for the corresponding vulnerability types.
+with identified vulnerabilities. Setting vulnerability fields means retrieving
+certifications for the corresponding vulnerability.
 """
-input VulnerabilitySpec {
-  osv: OSVSpec
-  cve: CVESpec
-  ghsa: GHSASpec
+input VulnerabilityObjSpec {
+  vulnerability: VulnerabilitySpec
   noVuln: Boolean
 }
 
 """
-VulnerabilityInput allows using Vulnerability union as
+VulnerabilityObjInput allows using Vulnerability union as
 input type to be used in mutations.
 
-Either noVuln must be set to true or one of osv, cve, or ghsa must be
+Either noVuln must be set to true or vulnerability must be
 set to non-nil. If noVuln is set then this is an ingestion of a known lack of
 vulnerabilities, so the special NoVuln node will be used by the backend.
-Otherwise, the specific vulnerability type will be linked to this attestation.
+Otherwise, the specific vulnerability will be linked to this attestation.
 """
-input VulnerabilityInput {
-  osv: OSVInputSpec
-  cve: CVEInputSpec
-  ghsa: GHSAInputSpec
+input VulnerabilityObjInput {
+  vulnerability: VulnerabilityInputSpec
   noVuln: Boolean
 }
 
@@ -67,14 +53,14 @@ input VulnerabilityInput {
 CertifyVuln is an attestation to attach vulnerability information to a package.
 
 This information is obtained via a scanner. If there is no vulnerability
-detected (no OSV, CVE, or GHSA), we attach the special NoVuln node.
+detected, we attach the special NoVuln node.
 """
 type CertifyVuln {
   id: ID!
   "The package that is attested"
   package: Package!
-  "The vulnerability object. Can be an OSV, CVE, or GHSA or the special NoVuln node."
-  vulnerability: Vulnerability!
+  "The vulnerability object. Can be an vulnerability or the special NoVuln node."
+  vulnerability: VulnerabilityObj!
   "Metadata attached to the certification"
   metadata: VulnerabilityMetaData!
 }
@@ -108,13 +94,13 @@ return in a query.
 Specifying just the package allows to query for all vulnerabilities associated
 with the package.
 
-Only one vulnerability type (OSV, CVE, GHSA, or special NoVuln) may be
+Only one vulnerability (or special NoVuln) may be
 specified.
 """
 input CertifyVulnSpec {
   id: ID
   package: PkgSpec
-  vulnerability: VulnerabilitySpec
+  vulnerability: VulnerabilityObjSpec
   timeScanned: Time
   dbUri: String
   dbVersion: String
@@ -145,5 +131,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: VulnerabilityInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityObjInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }
