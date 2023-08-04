@@ -6,14 +6,13 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // IngestCertifyVuln is the resolver for the ingestCertifyVuln field.
 func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyVuln - ingestCertifyVuln"))
+	return r.Backend.IngestCertifyVuln(ctx, pkg, vulnerability, certifyVuln)
 }
 
 // CertifyVuln is the resolver for the CertifyVuln field.

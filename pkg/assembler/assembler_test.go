@@ -83,9 +83,7 @@ func TestIngestPredicates(t *testing.T) {
 		wantArtifact  []*generated.ArtifactInputSpec
 		wantMaterials []generated.ArtifactInputSpec
 		wantBuilder   []*generated.BuilderInputSpec
-		wantOSV       []*generated.OSVInputSpec
-		wantCVE       []*generated.CVEInputSpec
-		wantGHSA      []*generated.GHSAInputSpec
+		wantVuln      []*generated.VulnerabilityInputSpec
 	}{{
 		name: "get nouns",
 		field: IngestPredicates{
@@ -205,9 +203,9 @@ func TestIngestPredicates(t *testing.T) {
 						Version:   ptrfrom.String("2.8.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					CVE: &generated.CVEInputSpec{
-						Year:  2023,
-						CveId: "CVE-2023-1944",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "cve",
+						VulnerabilityID: "cve-2023-1944",
 					},
 					VulnData: &generated.VulnerabilityMetaDataInput{
 						TimeScanned:    tm,
@@ -223,8 +221,9 @@ func TestIngestPredicates(t *testing.T) {
 						Version:   ptrfrom.String("2.8.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-8489-44mv-ggj8",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-8489-44mv-ggj8",
 					},
 					VulnData: &generated.VulnerabilityMetaDataInput{
 						TimeScanned:    tm,
@@ -240,8 +239,9 @@ func TestIngestPredicates(t *testing.T) {
 						Version:   ptrfrom.String("2.8.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-fxph-q3j8-mv87",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 					},
 					VulnData: &generated.VulnerabilityMetaDataInput{
 						TimeScanned:    tm,
@@ -257,8 +257,9 @@ func TestIngestPredicates(t *testing.T) {
 						Version:   ptrfrom.String("2.8.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-jfh8-c2jp-5v3q",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 					},
 					VulnData: &generated.VulnerabilityMetaDataInput{
 						TimeScanned:    tm,
@@ -274,8 +275,9 @@ func TestIngestPredicates(t *testing.T) {
 						Version:   ptrfrom.String("2.8.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-p6xc-xr62-6r2g",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 					},
 					VulnData: &generated.VulnerabilityMetaDataInput{
 						TimeScanned:    tm,
@@ -291,8 +293,9 @@ func TestIngestPredicates(t *testing.T) {
 						Version:   ptrfrom.String("2.8.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-vwqq-5vrc-xw9h",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
 					},
 					VulnData: &generated.VulnerabilityMetaDataInput{
 						TimeScanned:    tm,
@@ -301,77 +304,82 @@ func TestIngestPredicates(t *testing.T) {
 					},
 				},
 			},
-			IsVuln: []IsVulnIngest{
+			VulnEqual: []VulnEqualIngest{
 				{
-					OSV: &generated.OSVInputSpec{
-						OsvId: "CVE-2023-1944",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "cve-2023-1944",
 					},
-					CVE: &generated.CVEInputSpec{
-						Year:  2023,
-						CveId: "CVE-2023-1944",
+					EqualVulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "cve",
+						VulnerabilityID: "cve-2023-1944",
 					},
-					GHSA: nil,
-					IsVuln: &generated.IsVulnerabilityInputSpec{
+					VulnEqual: &generated.VulnEqualInputSpec{
 						Justification: "Decoded OSV data",
 					},
 				},
 				{
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-7rjr-3q55-vv33",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-7rjr-3q55-vv33",
 					},
-					CVE: nil,
-					GHSA: &generated.GHSAInputSpec{
-						GhsaId: "GHSA-7rjr-3q55-vv33",
+					EqualVulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "ghsa",
+						VulnerabilityID: "ghsa-7rjr-3q55-vv33",
 					},
-					IsVuln: &generated.IsVulnerabilityInputSpec{
+					VulnEqual: &generated.VulnEqualInputSpec{
 						Justification: "Decoded OSV data",
 					},
 				},
 				{
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-8489-44mv-ggj8",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-8489-44mv-ggj8",
 					},
-					CVE: nil,
-					GHSA: &generated.GHSAInputSpec{
-						GhsaId: "GHSA-8489-44mv-ggj8",
+					EqualVulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "ghsa",
+						VulnerabilityID: "ghsa-8489-44mv-ggj8",
 					},
-					IsVuln: &generated.IsVulnerabilityInputSpec{
+					VulnEqual: &generated.VulnEqualInputSpec{
 						Justification: "Decoded OSV data",
 					},
 				},
 				{
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-fxph-q3j8-mv87",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 					},
-					CVE: nil,
-					GHSA: &generated.GHSAInputSpec{
-						GhsaId: "GHSA-fxph-q3j8-mv87",
+					EqualVulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "ghsa",
+						VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 					},
-					IsVuln: &generated.IsVulnerabilityInputSpec{
+					VulnEqual: &generated.VulnEqualInputSpec{
 						Justification: "Decoded OSV data",
 					},
 				},
 				{
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-jfh8-c2jp-5v3q",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 					},
-					CVE: nil,
-					GHSA: &generated.GHSAInputSpec{
-						GhsaId: "GHSA-jfh8-c2jp-5v3q",
+					EqualVulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "ghsa",
+						VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 					},
-					IsVuln: &generated.IsVulnerabilityInputSpec{
+					VulnEqual: &generated.VulnEqualInputSpec{
 						Justification: "Decoded OSV data",
 					},
 				},
 				{
-					OSV: &generated.OSVInputSpec{
-						OsvId: "GHSA-p6xc-xr62-6r2g",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 					},
-					CVE: nil,
-					GHSA: &generated.GHSAInputSpec{
-						GhsaId: "GHSA-p6xc-xr62-6r2g",
+					EqualVulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "ghsa",
+						VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 					},
-					IsVuln: &generated.IsVulnerabilityInputSpec{
+					VulnEqual: &generated.VulnEqualInputSpec{
 						Justification: "Decoded OSV data",
 					},
 				},
@@ -472,8 +480,9 @@ func TestIngestPredicates(t *testing.T) {
 			Vex: []VexIngest{
 				{
 					Pkg: openSSLWithQualifier,
-					GHSA: &generated.GHSAInputSpec{
-						GhsaId: "GHSA-h45f-rjvw-2rv2",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "ghsa",
+						VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
 					},
 					VexData: &generated.VexStatementInputSpec{
 						Status:           generated.VexStatusNotAffected,
@@ -488,8 +497,9 @@ func TestIngestPredicates(t *testing.T) {
 						Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 						Algorithm: "sha256",
 					},
-					OSV: &generated.OSVInputSpec{
-						OsvId: "CVE-2018-15710",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "cve-2018-15710",
 					},
 					VexData: &generated.VexStatementInputSpec{
 						Status:           generated.VexStatusUnderInvestigation,
@@ -504,9 +514,9 @@ func TestIngestPredicates(t *testing.T) {
 						Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 						Algorithm: "sha256",
 					},
-					CVE: &generated.CVEInputSpec{
-						Year:  2018,
-						CveId: "CVE-2018-43610",
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "cve",
+						VulnerabilityID: "cve-2018-43610",
 					},
 					VexData: &generated.VexStatementInputSpec{
 						Status:           generated.VexStatusNotAffected,
@@ -559,60 +569,70 @@ func TestIngestPredicates(t *testing.T) {
 				Uri: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1",
 			},
 		},
-		wantOSV: []*generated.OSVInputSpec{
+		wantVuln: []*generated.VulnerabilityInputSpec{
 			{
-				OsvId: "CVE-2018-15710",
+				Type:            "osv",
+				VulnerabilityID: "cve-2018-15710",
 			},
 			{
-				OsvId: "CVE-2023-1944",
+				Type:            "osv",
+				VulnerabilityID: "cve-2023-1944",
 			},
 			{
-				OsvId: "GHSA-7rjr-3q55-vv33",
+				Type:            "osv",
+				VulnerabilityID: "ghsa-7rjr-3q55-vv33",
 			},
 			{
-				OsvId: "GHSA-8489-44mv-ggj8",
+				Type:            "osv",
+				VulnerabilityID: "ghsa-8489-44mv-ggj8",
 			},
 			{
-				OsvId: "GHSA-fxph-q3j8-mv87",
+				Type:            "osv",
+				VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 			},
 			{
-				OsvId: "GHSA-jfh8-c2jp-5v3q",
+				Type:            "osv",
+				VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 			},
 			{
-				OsvId: "GHSA-p6xc-xr62-6r2g",
+				Type:            "osv",
+				VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 			},
 			{
-				OsvId: "GHSA-vwqq-5vrc-xw9h",
-			},
-		},
-		wantCVE: []*generated.CVEInputSpec{
-			{
-				Year:  2018,
-				CveId: "CVE-2018-43610",
+				Type:            "osv",
+				VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
 			},
 			{
-				Year:  2023,
-				CveId: "CVE-2023-1944",
-			},
-		},
-		wantGHSA: []*generated.GHSAInputSpec{
-			{
-				GhsaId: "GHSA-7rjr-3q55-vv33",
+				Type:            "cve",
+				VulnerabilityID: "cve-2018-43610",
 			},
 			{
-				GhsaId: "GHSA-8489-44mv-ggj8",
+				Type:            "cve",
+				VulnerabilityID: "cve-2023-1944",
 			},
 			{
-				GhsaId: "GHSA-fxph-q3j8-mv87",
+				Type:            "ghsa",
+				VulnerabilityID: "ghsa-7rjr-3q55-vv33",
 			},
 			{
-				GhsaId: "GHSA-h45f-rjvw-2rv2",
+				Type:            "ghsa",
+				VulnerabilityID: "ghsa-8489-44mv-ggj8",
 			},
 			{
-				GhsaId: "GHSA-jfh8-c2jp-5v3q",
+				Type:            "ghsa",
+				VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 			},
 			{
-				GhsaId: "GHSA-p6xc-xr62-6r2g",
+				Type:            "ghsa",
+				VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
+			},
+			{
+				Type:            "ghsa",
+				VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
+			},
+			{
+				Type:            "ghsa",
+				VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 			},
 		},
 	}}
@@ -651,22 +671,12 @@ func TestIngestPredicates(t *testing.T) {
 				t.Errorf("Unexpected GetBuilders results. (-want +got):\n%s", diff)
 			}
 
-			gotOSVs := i.GetOSVs(ctx)
-			osvSort := func(a, b *generated.OSVInputSpec) bool { return a.OsvId < b.OsvId }
-			if diff := cmp.Diff(tt.wantOSV, gotOSVs, cmpopts.SortSlices(osvSort)); diff != "" {
-				t.Errorf("Unexpected GetOSVs results. (-want +got):\n%s", diff)
+			gotVulns := i.GetVulnerabilities(ctx)
+			vulnSort := func(a, b *generated.VulnerabilityInputSpec) bool {
+				return helpers.VulnInputToVURI(a) < helpers.VulnInputToVURI(b)
 			}
-
-			gotCVEs := i.GetCVEs(ctx)
-			cveSort := func(a, b *generated.CVEInputSpec) bool { return a.CveId < b.CveId }
-			if diff := cmp.Diff(tt.wantCVE, gotCVEs, cmpopts.SortSlices(cveSort)); diff != "" {
-				t.Errorf("Unexpected GetCVEs results. (-want +got):\n%s", diff)
-			}
-
-			gotGHSAs := i.GetGHSAs(ctx)
-			ghsaSort := func(a, b *generated.GHSAInputSpec) bool { return a.GhsaId < b.GhsaId }
-			if diff := cmp.Diff(tt.wantGHSA, gotGHSAs, cmpopts.SortSlices(ghsaSort)); diff != "" {
-				t.Errorf("Unexpected GetGHSAs results. (-want +got):\n%s", diff)
+			if diff := cmp.Diff(tt.wantVuln, gotVulns, cmpopts.SortSlices(vulnSort)); diff != "" {
+				t.Errorf("Unexpected gotVulns results. (-want +got):\n%s", diff)
 			}
 		})
 	}
