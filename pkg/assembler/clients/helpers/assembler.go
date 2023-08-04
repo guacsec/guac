@@ -68,26 +68,10 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
-			cves := p.GetCVEs(ctx)
-			logger.Infof("assembling CVE: %v", len(cves))
-			for _, v := range cves {
-				if err := ingestCVE(ctx, gqlclient, v); err != nil {
-					return err
-				}
-			}
-
-			osvs := p.GetOSVs(ctx)
-			logger.Infof("assembling OSV: %v", len(osvs))
-			for _, v := range osvs {
-				if err := ingestOSV(ctx, gqlclient, v); err != nil {
-					return err
-				}
-			}
-
-			ghsas := p.GetGHSAs(ctx)
-			logger.Infof("assembling GHSA: %v", len(ghsas))
-			for _, v := range ghsas {
-				if err := ingestGHSA(ctx, gqlclient, v); err != nil {
+			vulns := p.GetVulnerabilities(ctx)
+			logger.Infof("assembling Vulnerability: %v", len(vulns))
+			for _, v := range vulns {
+				if err := ingestVulnerability(ctx, gqlclient, v); err != nil {
 					return err
 				}
 			}
@@ -127,9 +111,9 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
-			logger.Infof("assembling IsVuln: %v", len(p.IsVuln))
-			for _, iv := range p.IsVuln {
-				if err := ingestIsVuln(ctx, gqlclient, iv); err != nil {
+			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
+			for _, ve := range p.VulnEqual {
+				if err := ingestVulnEqual(ctx, gqlclient, ve); err != nil {
 					return err
 				}
 			}
@@ -214,18 +198,8 @@ func ingestBuilder(ctx context.Context, client graphql.Client, v *model.BuilderI
 	return err
 }
 
-func ingestCVE(ctx context.Context, client graphql.Client, v *model.CVEInputSpec) error {
-	_, err := model.IngestCVE(ctx, client, *v)
-	return err
-}
-
-func ingestOSV(ctx context.Context, client graphql.Client, v *model.OSVInputSpec) error {
-	_, err := model.IngestOSV(ctx, client, *v)
-	return err
-}
-
-func ingestGHSA(ctx context.Context, client graphql.Client, v *model.GHSAInputSpec) error {
-	_, err := model.IngestGHSA(ctx, client, *v)
+func ingestVulnerability(ctx context.Context, client graphql.Client, v *model.VulnerabilityInputSpec) error {
+	_, err := model.IngestVulnerability(ctx, client, *v)
 	return err
 }
 
@@ -261,39 +235,19 @@ func ingestHasSlsa(ctx context.Context, client graphql.Client, v assembler.HasSl
 }
 
 func ingestCertifyVuln(ctx context.Context, client graphql.Client, cv assembler.CertifyVulnIngest) error {
-	if err := ValidateVulnerabilityInput(cv.OSV, cv.CVE, cv.GHSA, "certifyVulnerability"); err != nil {
-		return fmt.Errorf("input validation failed for certifyVulnerability: %w", err)
-	}
-
-	if cv.OSV != nil {
-		_, err := model.CertifyOSV(ctx, client, *cv.Pkg, *cv.OSV, *cv.VulnData)
-		return err
-	}
-	if cv.CVE != nil {
-		_, err := model.CertifyCVE(ctx, client, *cv.Pkg, *cv.CVE, *cv.VulnData)
-		return err
-	}
-	if cv.GHSA != nil {
-		_, err := model.CertifyGHSA(ctx, client, *cv.Pkg, *cv.GHSA, *cv.VulnData)
-		return err
-	}
-	_, err := model.CertifyNoKnownVuln(ctx, client, *cv.Pkg, *cv.VulnData)
+	_, err := model.CertifyVulnPkg(ctx, client, *cv.Pkg, *cv.Vulnerability, *cv.VulnData)
 	return err
 }
 
-func ingestIsVuln(ctx context.Context, client graphql.Client, iv assembler.IsVulnIngest) error {
-	if iv.CVE != nil && iv.GHSA != nil {
-		return fmt.Errorf("unable to create IsVuln with both CVE and GHSA specified")
+func ingestVulnEqual(ctx context.Context, client graphql.Client, ve assembler.VulnEqualIngest) error {
+	if ve.Vulnerability == nil {
+		return fmt.Errorf("unable to create VulnEqual without vulnerability")
 	}
-	if iv.CVE == nil && iv.GHSA == nil {
-		return fmt.Errorf("unable to create IsVuln without either CVE or GHSA specified")
+	if ve.EqualVulnerability == nil {
+		return fmt.Errorf("unable to create VulnEqual without equal vulnerability")
 	}
 
-	if iv.CVE != nil {
-		_, err := model.IsVulnerabilityCVE(ctx, client, *iv.OSV, *iv.CVE, *iv.IsVuln)
-		return err
-	}
-	_, err := model.IsVulnerabilityGHSA(ctx, client, *iv.OSV, *iv.GHSA, *iv.IsVuln)
+	_, err := model.VulnEqual(ctx, client, *ve.Vulnerability, *ve.EqualVulnerability, *ve.VulnEqual)
 	return err
 }
 
@@ -370,10 +324,6 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasS
 }
 
 func ingestVex(ctx context.Context, client graphql.Client, vi assembler.VexIngest) error {
-	if err := ValidateVulnerabilityInput(vi.OSV, vi.CVE, vi.GHSA, "VexIngest"); err != nil {
-		return fmt.Errorf("input validation failed for VexIngest: %w", err)
-	}
-
 	if vi.Artifact != nil && vi.Pkg != nil {
 		return fmt.Errorf("unable to create VexIngest with both Pkg and Artifact specified")
 	}
@@ -382,51 +332,17 @@ func ingestVex(ctx context.Context, client graphql.Client, vi assembler.VexInges
 		return fmt.Errorf("unable to create VexIngest without either Pkg or Artifact specified")
 	}
 
-	if vi.CVE != nil {
-		if vi.Pkg != nil {
-			_, err := model.VexPackageAndCve(ctx, client, *vi.Pkg, *vi.CVE, *vi.VexData)
-			if err != nil {
-				return err
-			}
-		}
-
-		if vi.Artifact != nil {
-			_, err := model.VexArtifactAndCve(ctx, client, *vi.Artifact, *vi.CVE, *vi.VexData)
-			if err != nil {
-				return err
-			}
+	if vi.Pkg != nil {
+		_, err := model.CertifyVexPkg(ctx, client, *vi.Pkg, *vi.Vulnerability, *vi.VexData)
+		if err != nil {
+			return err
 		}
 	}
 
-	if vi.GHSA != nil {
-		if vi.Pkg != nil {
-			_, err := model.VEXPackageAndGhsa(ctx, client, *vi.Pkg, *vi.GHSA, *vi.VexData)
-			if err != nil {
-				return err
-			}
-		}
-
-		if vi.Artifact != nil {
-			_, err := model.VexArtifactAndGhsa(ctx, client, *vi.Artifact, *vi.GHSA, *vi.VexData)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if vi.OSV != nil {
-		if vi.Pkg != nil {
-			_, err := model.VexPackageAndOsv(ctx, client, *vi.Pkg, *vi.OSV, *vi.VexData)
-			if err != nil {
-				return err
-			}
-		}
-
-		if vi.Artifact != nil {
-			_, err := model.VexArtifactAndOsv(ctx, client, *vi.Artifact, *vi.OSV, *vi.VexData)
-			if err != nil {
-				return err
-			}
+	if vi.Artifact != nil {
+		_, err := model.CertifyVexArtifact(ctx, client, *vi.Artifact, *vi.Vulnerability, *vi.VexData)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -469,23 +385,6 @@ func validatePackageSourceOrArtifactInput(pkg *model.PkgInputSpec, src *model.So
 		return fmt.Errorf("must specify at most one package, source, or artifact for %v", path)
 	}
 
-	return nil
-}
-
-func ValidateVulnerabilityInput(osv *model.OSVInputSpec, cve *model.CVEInputSpec, ghsa *model.GHSAInputSpec, path string) error {
-	vulnDefined := 0
-	if osv != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if ghsa != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if cve != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnDefined > 2 {
-		return fmt.Errorf("must specify at most one vulnerability (cve, osv, or ghsa) for %v", path)
-	}
 	return nil
 }
 

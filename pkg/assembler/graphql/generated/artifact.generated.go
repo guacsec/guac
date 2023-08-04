@@ -30,7 +30,7 @@ type MutationResolver interface {
 	IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
 	IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error)
 	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
-	IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
+	IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error)
 	IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error)
 	IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error)
 	IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error)
@@ -298,10 +298,10 @@ func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Co
 		}
 	}
 	args["vulnerability"] = arg1
-	var arg2 model.VulnerabilityMetaDataInput
+	var arg2 model.ScanMetadataInput
 	if tmp, ok := rawArgs["certifyVuln"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVuln"))
-		arg2, err = ec.unmarshalNVulnerabilityMetaDataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaDataInput(ctx, tmp)
+		arg2, err = ec.unmarshalNScanMetadataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2284,7 +2284,7 @@ func (ec *executionContext) _Mutation_ingestCertifyVuln(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyVuln(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["certifyVuln"].(model.VulnerabilityMetaDataInput))
+		return ec.resolvers.Mutation().IngestCertifyVuln(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["certifyVuln"].(model.ScanMetadataInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

@@ -207,7 +207,7 @@ func TestIngestPredicates(t *testing.T) {
 						Type:            "cve",
 						VulnerabilityID: "cve-2023-1944",
 					},
-					VulnData: &generated.VulnerabilityMetaDataInput{
+					VulnData: &generated.ScanMetadataInput{
 						TimeScanned:    tm,
 						ScannerUri:     "osv.dev",
 						ScannerVersion: "0.0.14",
@@ -225,7 +225,7 @@ func TestIngestPredicates(t *testing.T) {
 						Type:            "osv",
 						VulnerabilityID: "ghsa-8489-44mv-ggj8",
 					},
-					VulnData: &generated.VulnerabilityMetaDataInput{
+					VulnData: &generated.ScanMetadataInput{
 						TimeScanned:    tm,
 						ScannerUri:     "osv.dev",
 						ScannerVersion: "0.0.14",
@@ -243,7 +243,7 @@ func TestIngestPredicates(t *testing.T) {
 						Type:            "osv",
 						VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 					},
-					VulnData: &generated.VulnerabilityMetaDataInput{
+					VulnData: &generated.ScanMetadataInput{
 						TimeScanned:    tm,
 						ScannerUri:     "osv.dev",
 						ScannerVersion: "0.0.14",
@@ -261,7 +261,7 @@ func TestIngestPredicates(t *testing.T) {
 						Type:            "osv",
 						VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 					},
-					VulnData: &generated.VulnerabilityMetaDataInput{
+					VulnData: &generated.ScanMetadataInput{
 						TimeScanned:    tm,
 						ScannerUri:     "osv.dev",
 						ScannerVersion: "0.0.14",
@@ -279,7 +279,7 @@ func TestIngestPredicates(t *testing.T) {
 						Type:            "osv",
 						VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 					},
-					VulnData: &generated.VulnerabilityMetaDataInput{
+					VulnData: &generated.ScanMetadataInput{
 						TimeScanned:    tm,
 						ScannerUri:     "osv.dev",
 						ScannerVersion: "0.0.14",
@@ -297,7 +297,7 @@ func TestIngestPredicates(t *testing.T) {
 						Type:            "osv",
 						VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
 					},
-					VulnData: &generated.VulnerabilityMetaDataInput{
+					VulnData: &generated.ScanMetadataInput{
 						TimeScanned:    tm,
 						ScannerUri:     "osv.dev",
 						ScannerVersion: "0.0.14",

@@ -263,7 +263,7 @@ type CertifyVuln struct {
 	// The vulnerability can be an be a specific vulnerability or NoVuln type.
 	Vulnerability *Vulnerability `json:"vulnerability"`
 	// Metadata attached to the certification
-	Metadata *VulnerabilityMetaData `json:"metadata"`
+	Metadata *ScanMetadata `json:"metadata"`
 }
 
 func (CertifyVuln) IsNode() {}
@@ -1006,6 +1006,38 @@ type SLSAPredicateSpec struct {
 	Value string `json:"value"`
 }
 
+// ScanMetadata is the metadata attached to vulnerability certification.
+//
+// It contains metadata about the scanner process that created the certification.
+type ScanMetadata struct {
+	// Time of scan (in RFC 3339 format)
+	TimeScanned time.Time `json:"timeScanned"`
+	// URI of the vulnerability database used by the scanner
+	DbURI string `json:"dbUri"`
+	// Version of the vulnerability database used by the scanner
+	DbVersion string `json:"dbVersion"`
+	// URI of the scanner
+	ScannerURI string `json:"scannerUri"`
+	// Version of the scanner
+	ScannerVersion string `json:"scannerVersion"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+}
+
+// ScanMetadataInput represents the input for certifying vulnerability
+// scans in mutations.
+type ScanMetadataInput struct {
+	TimeScanned    time.Time `json:"timeScanned"`
+	DbURI          string    `json:"dbUri"`
+	DbVersion      string    `json:"dbVersion"`
+	ScannerURI     string    `json:"scannerUri"`
+	ScannerVersion string    `json:"scannerVersion"`
+	Origin         string    `json:"origin"`
+	Collector      string    `json:"collector"`
+}
+
 // Scorecard contains all of the fields present in a Scorecard attestation.
 //
 // We also include fields to specify under what conditions the check was performed
@@ -1244,38 +1276,6 @@ type VulnerabilityID struct {
 type VulnerabilityInputSpec struct {
 	Type            string `json:"type"`
 	VulnerabilityID string `json:"vulnerabilityID"`
-}
-
-// VulnerabilityMetaData is the metadata attached to vulnerability certification.
-//
-// It contains metadata about the scanner process that created the certification.
-type VulnerabilityMetaData struct {
-	// Time of scan (in RFC 3339 format)
-	TimeScanned time.Time `json:"timeScanned"`
-	// URI of the vulnerability database used by the scanner
-	DbURI string `json:"dbUri"`
-	// Version of the vulnerability database used by the scanner
-	DbVersion string `json:"dbVersion"`
-	// URI of the scanner
-	ScannerURI string `json:"scannerUri"`
-	// Version of the scanner
-	ScannerVersion string `json:"scannerVersion"`
-	// Document from which this attestation is generated from
-	Origin string `json:"origin"`
-	// GUAC collector for the document
-	Collector string `json:"collector"`
-}
-
-// VulnerabilityMetaDataInput represents the input for certifying vulnerability
-// scans in mutations.
-type VulnerabilityMetaDataInput struct {
-	TimeScanned    time.Time `json:"timeScanned"`
-	DbURI          string    `json:"dbUri"`
-	DbVersion      string    `json:"dbVersion"`
-	ScannerURI     string    `json:"scannerUri"`
-	ScannerVersion string    `json:"scannerVersion"`
-	Origin         string    `json:"origin"`
-	Collector      string    `json:"collector"`
 }
 
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
