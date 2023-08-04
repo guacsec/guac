@@ -97,12 +97,12 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 	})
 
 	neighborCertifyVulnTimeStamp := generated.NeighborsNeighborsCertifyVuln{}
-	neighborCertifyVulnTimeStamp.Metadata = generated.AllCertifyVulnMetadataVulnerabilityMetaData{
+	neighborCertifyVulnTimeStamp.Metadata = generated.AllCertifyVulnMetadataScanMetadata{
 		TimeScanned: tm.UTC(),
 	}
 
 	neighborCertifyVulnTimeNow := generated.NeighborsNeighborsCertifyVuln{}
-	neighborCertifyVulnTimeNow.Metadata = generated.AllCertifyVulnMetadataVulnerabilityMetaData{
+	neighborCertifyVulnTimeNow.Metadata = generated.AllCertifyVulnMetadataScanMetadata{
 		TimeScanned: time.Now().UTC(),
 	}
 

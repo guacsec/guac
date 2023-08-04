@@ -89,7 +89,7 @@ type CertifyVulnIngest struct {
 	// vulnerability or noVuln if no vulnerability is found
 	Vulnerability *generated.VulnerabilityInputSpec `json:"vulnerability,omitempty"`
 
-	VulnData *generated.VulnerabilityMetaDataInput `json:"vulnData,omitempty"`
+	VulnData *generated.ScanMetadataInput `json:"vulnData,omitempty"`
 }
 
 type VulnEqualIngest struct {

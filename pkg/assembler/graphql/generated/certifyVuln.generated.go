@@ -204,9 +204,9 @@ func (ec *executionContext) _CertifyVuln_metadata(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.VulnerabilityMetaData)
+	res := resTmp.(*model.ScanMetadata)
 	fc.Result = res
-	return ec.marshalNVulnerabilityMetaData2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaData(ctx, field.Selections, res)
+	return ec.marshalNScanMetadata2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadata(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyVuln_metadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -218,28 +218,28 @@ func (ec *executionContext) fieldContext_CertifyVuln_metadata(ctx context.Contex
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "timeScanned":
-				return ec.fieldContext_VulnerabilityMetaData_timeScanned(ctx, field)
+				return ec.fieldContext_ScanMetadata_timeScanned(ctx, field)
 			case "dbUri":
-				return ec.fieldContext_VulnerabilityMetaData_dbUri(ctx, field)
+				return ec.fieldContext_ScanMetadata_dbUri(ctx, field)
 			case "dbVersion":
-				return ec.fieldContext_VulnerabilityMetaData_dbVersion(ctx, field)
+				return ec.fieldContext_ScanMetadata_dbVersion(ctx, field)
 			case "scannerUri":
-				return ec.fieldContext_VulnerabilityMetaData_scannerUri(ctx, field)
+				return ec.fieldContext_ScanMetadata_scannerUri(ctx, field)
 			case "scannerVersion":
-				return ec.fieldContext_VulnerabilityMetaData_scannerVersion(ctx, field)
+				return ec.fieldContext_ScanMetadata_scannerVersion(ctx, field)
 			case "origin":
-				return ec.fieldContext_VulnerabilityMetaData_origin(ctx, field)
+				return ec.fieldContext_ScanMetadata_origin(ctx, field)
 			case "collector":
-				return ec.fieldContext_VulnerabilityMetaData_collector(ctx, field)
+				return ec.fieldContext_ScanMetadata_collector(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetaData", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type ScanMetadata", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _VulnerabilityMetaData_timeScanned(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityMetaData_timeScanned(ctx, field)
+func (ec *executionContext) _ScanMetadata_timeScanned(ctx context.Context, field graphql.CollectedField, obj *model.ScanMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScanMetadata_timeScanned(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -269,9 +269,9 @@ func (ec *executionContext) _VulnerabilityMetaData_timeScanned(ctx context.Conte
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetaData_timeScanned(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ScanMetadata_timeScanned(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityMetaData",
+		Object:     "ScanMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -282,8 +282,8 @@ func (ec *executionContext) fieldContext_VulnerabilityMetaData_timeScanned(ctx c
 	return fc, nil
 }
 
-func (ec *executionContext) _VulnerabilityMetaData_dbUri(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityMetaData_dbUri(ctx, field)
+func (ec *executionContext) _ScanMetadata_dbUri(ctx context.Context, field graphql.CollectedField, obj *model.ScanMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScanMetadata_dbUri(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -313,9 +313,9 @@ func (ec *executionContext) _VulnerabilityMetaData_dbUri(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetaData_dbUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ScanMetadata_dbUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityMetaData",
+		Object:     "ScanMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -326,8 +326,8 @@ func (ec *executionContext) fieldContext_VulnerabilityMetaData_dbUri(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _VulnerabilityMetaData_dbVersion(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityMetaData_dbVersion(ctx, field)
+func (ec *executionContext) _ScanMetadata_dbVersion(ctx context.Context, field graphql.CollectedField, obj *model.ScanMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScanMetadata_dbVersion(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -357,9 +357,9 @@ func (ec *executionContext) _VulnerabilityMetaData_dbVersion(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetaData_dbVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ScanMetadata_dbVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityMetaData",
+		Object:     "ScanMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -370,8 +370,8 @@ func (ec *executionContext) fieldContext_VulnerabilityMetaData_dbVersion(ctx con
 	return fc, nil
 }
 
-func (ec *executionContext) _VulnerabilityMetaData_scannerUri(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityMetaData_scannerUri(ctx, field)
+func (ec *executionContext) _ScanMetadata_scannerUri(ctx context.Context, field graphql.CollectedField, obj *model.ScanMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScanMetadata_scannerUri(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -401,9 +401,9 @@ func (ec *executionContext) _VulnerabilityMetaData_scannerUri(ctx context.Contex
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetaData_scannerUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ScanMetadata_scannerUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityMetaData",
+		Object:     "ScanMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -414,8 +414,8 @@ func (ec *executionContext) fieldContext_VulnerabilityMetaData_scannerUri(ctx co
 	return fc, nil
 }
 
-func (ec *executionContext) _VulnerabilityMetaData_scannerVersion(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityMetaData_scannerVersion(ctx, field)
+func (ec *executionContext) _ScanMetadata_scannerVersion(ctx context.Context, field graphql.CollectedField, obj *model.ScanMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScanMetadata_scannerVersion(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -445,9 +445,9 @@ func (ec *executionContext) _VulnerabilityMetaData_scannerVersion(ctx context.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetaData_scannerVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ScanMetadata_scannerVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityMetaData",
+		Object:     "ScanMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -458,8 +458,8 @@ func (ec *executionContext) fieldContext_VulnerabilityMetaData_scannerVersion(ct
 	return fc, nil
 }
 
-func (ec *executionContext) _VulnerabilityMetaData_origin(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityMetaData_origin(ctx, field)
+func (ec *executionContext) _ScanMetadata_origin(ctx context.Context, field graphql.CollectedField, obj *model.ScanMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScanMetadata_origin(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -489,9 +489,9 @@ func (ec *executionContext) _VulnerabilityMetaData_origin(ctx context.Context, f
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetaData_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ScanMetadata_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityMetaData",
+		Object:     "ScanMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -502,8 +502,8 @@ func (ec *executionContext) fieldContext_VulnerabilityMetaData_origin(ctx contex
 	return fc, nil
 }
 
-func (ec *executionContext) _VulnerabilityMetaData_collector(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityMetaData_collector(ctx, field)
+func (ec *executionContext) _ScanMetadata_collector(ctx context.Context, field graphql.CollectedField, obj *model.ScanMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScanMetadata_collector(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -533,9 +533,9 @@ func (ec *executionContext) _VulnerabilityMetaData_collector(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetaData_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ScanMetadata_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityMetaData",
+		Object:     "ScanMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -660,8 +660,8 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputVulnerabilityMetaDataInput(ctx context.Context, obj interface{}) (model.VulnerabilityMetaDataInput, error) {
-	var it model.VulnerabilityMetaDataInput
+func (ec *executionContext) unmarshalInputScanMetadataInput(ctx context.Context, obj interface{}) (model.ScanMetadataInput, error) {
+	var it model.ScanMetadataInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -805,49 +805,49 @@ func (ec *executionContext) _CertifyVuln(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
-var vulnerabilityMetaDataImplementors = []string{"VulnerabilityMetaData"}
+var scanMetadataImplementors = []string{"ScanMetadata"}
 
-func (ec *executionContext) _VulnerabilityMetaData(ctx context.Context, sel ast.SelectionSet, obj *model.VulnerabilityMetaData) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, vulnerabilityMetaDataImplementors)
+func (ec *executionContext) _ScanMetadata(ctx context.Context, sel ast.SelectionSet, obj *model.ScanMetadata) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, scanMetadataImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("VulnerabilityMetaData")
+			out.Values[i] = graphql.MarshalString("ScanMetadata")
 		case "timeScanned":
-			out.Values[i] = ec._VulnerabilityMetaData_timeScanned(ctx, field, obj)
+			out.Values[i] = ec._ScanMetadata_timeScanned(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "dbUri":
-			out.Values[i] = ec._VulnerabilityMetaData_dbUri(ctx, field, obj)
+			out.Values[i] = ec._ScanMetadata_dbUri(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "dbVersion":
-			out.Values[i] = ec._VulnerabilityMetaData_dbVersion(ctx, field, obj)
+			out.Values[i] = ec._ScanMetadata_dbVersion(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "scannerUri":
-			out.Values[i] = ec._VulnerabilityMetaData_scannerUri(ctx, field, obj)
+			out.Values[i] = ec._ScanMetadata_scannerUri(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "scannerVersion":
-			out.Values[i] = ec._VulnerabilityMetaData_scannerVersion(ctx, field, obj)
+			out.Values[i] = ec._ScanMetadata_scannerVersion(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "origin":
-			out.Values[i] = ec._VulnerabilityMetaData_origin(ctx, field, obj)
+			out.Values[i] = ec._ScanMetadata_origin(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "collector":
-			out.Values[i] = ec._VulnerabilityMetaData_collector(ctx, field, obj)
+			out.Values[i] = ec._ScanMetadata_collector(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -941,18 +941,18 @@ func (ec *executionContext) unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋg
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNVulnerabilityMetaData2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaData(ctx context.Context, sel ast.SelectionSet, v *model.VulnerabilityMetaData) graphql.Marshaler {
+func (ec *executionContext) marshalNScanMetadata2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadata(ctx context.Context, sel ast.SelectionSet, v *model.ScanMetadata) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._VulnerabilityMetaData(ctx, sel, v)
+	return ec._ScanMetadata(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNVulnerabilityMetaDataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaDataInput(ctx context.Context, v interface{}) (model.VulnerabilityMetaDataInput, error) {
-	res, err := ec.unmarshalInputVulnerabilityMetaDataInput(ctx, v)
+func (ec *executionContext) unmarshalNScanMetadataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx context.Context, v interface{}) (model.ScanMetadataInput, error) {
+	res, err := ec.unmarshalInputScanMetadataInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -11,7 +11,7 @@ import (
 )
 
 // IngestCertifyVuln is the resolver for the ingestCertifyVuln field.
-func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
+func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
 	return r.Backend.IngestCertifyVuln(ctx, pkg, vulnerability, certifyVuln)
 }
 

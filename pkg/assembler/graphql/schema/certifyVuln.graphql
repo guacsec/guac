@@ -31,15 +31,15 @@ type CertifyVuln {
   "The vulnerability can be an be a specific vulnerability or NoVuln type."
   vulnerability: Vulnerability!
   "Metadata attached to the certification"
-  metadata: VulnerabilityMetaData!
+  metadata: ScanMetadata!
 }
 
 """
-VulnerabilityMetaData is the metadata attached to vulnerability certification.
+ScanMetadata is the metadata attached to vulnerability certification.
 
 It contains metadata about the scanner process that created the certification.
 """
-type VulnerabilityMetaData {
+type ScanMetadata {
   "Time of scan (in RFC 3339 format)"
   timeScanned: Time!
   "URI of the vulnerability database used by the scanner"
@@ -80,10 +80,10 @@ input CertifyVulnSpec {
 }
 
 """
-VulnerabilityMetaDataInput represents the input for certifying vulnerability
+ScanMetadataInput represents the input for certifying vulnerability
 scans in mutations.
 """
-input VulnerabilityMetaDataInput {
+input ScanMetadataInput {
   timeScanned: Time!
   dbUri: String!
   dbVersion: String!
@@ -100,5 +100,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): CertifyVuln!
 }

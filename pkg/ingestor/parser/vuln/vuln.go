@@ -46,7 +46,7 @@ import (
 
 type parser struct {
 	packages []*generated.PkgInputSpec
-	vulnData *generated.VulnerabilityMetaDataInput
+	vulnData *generated.ScanMetadataInput
 	vulns    []*generated.OSVInputSpec
 	isVulns  []assembler.IsVulnIngest
 }
@@ -98,8 +98,8 @@ func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgI
 	return ps, nil
 }
 
-func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.VulnerabilityMetaDataInput {
-	return &generated.VulnerabilityMetaDataInput{
+func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMetadataInput {
+	return &generated.ScanMetadataInput{
 		TimeScanned:    *s.Predicate.Metadata.ScannedOn,
 		DbUri:          s.Predicate.Scanner.Database.Uri,
 		DbVersion:      s.Predicate.Scanner.Database.Version,

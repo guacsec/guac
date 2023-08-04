@@ -1679,7 +1679,7 @@ type AllCertifyVuln struct {
 	// The vulnerability can be an be a specific vulnerability or NoVuln type.
 	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
 	// Metadata attached to the certification
-	Metadata AllCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
 }
 
 // GetId returns AllCertifyVuln.Id, and is useful for accessing the field via an interface.
@@ -1692,15 +1692,15 @@ func (v *AllCertifyVuln) GetPackage() AllCertifyVulnPackage { return v.Package }
 func (v *AllCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability { return v.Vulnerability }
 
 // GetMetadata returns AllCertifyVuln.Metadata, and is useful for accessing the field via an interface.
-func (v *AllCertifyVuln) GetMetadata() AllCertifyVulnMetadataVulnerabilityMetaData { return v.Metadata }
+func (v *AllCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata { return v.Metadata }
 
-// AllCertifyVulnMetadataVulnerabilityMetaData includes the requested fields of the GraphQL type VulnerabilityMetaData.
+// AllCertifyVulnMetadataScanMetadata includes the requested fields of the GraphQL type ScanMetadata.
 // The GraphQL type's documentation follows.
 //
-// VulnerabilityMetaData is the metadata attached to vulnerability certification.
+// ScanMetadata is the metadata attached to vulnerability certification.
 //
 // It contains metadata about the scanner process that created the certification.
-type AllCertifyVulnMetadataVulnerabilityMetaData struct {
+type AllCertifyVulnMetadataScanMetadata struct {
 	// URI of the vulnerability database used by the scanner
 	DbUri string `json:"dbUri"`
 	// Version of the vulnerability database used by the scanner
@@ -1717,30 +1717,26 @@ type AllCertifyVulnMetadataVulnerabilityMetaData struct {
 	Collector string `json:"collector"`
 }
 
-// GetDbUri returns AllCertifyVulnMetadataVulnerabilityMetaData.DbUri, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnMetadataVulnerabilityMetaData) GetDbUri() string { return v.DbUri }
+// GetDbUri returns AllCertifyVulnMetadataScanMetadata.DbUri, and is useful for accessing the field via an interface.
+func (v *AllCertifyVulnMetadataScanMetadata) GetDbUri() string { return v.DbUri }
 
-// GetDbVersion returns AllCertifyVulnMetadataVulnerabilityMetaData.DbVersion, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnMetadataVulnerabilityMetaData) GetDbVersion() string { return v.DbVersion }
+// GetDbVersion returns AllCertifyVulnMetadataScanMetadata.DbVersion, and is useful for accessing the field via an interface.
+func (v *AllCertifyVulnMetadataScanMetadata) GetDbVersion() string { return v.DbVersion }
 
-// GetScannerUri returns AllCertifyVulnMetadataVulnerabilityMetaData.ScannerUri, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnMetadataVulnerabilityMetaData) GetScannerUri() string { return v.ScannerUri }
+// GetScannerUri returns AllCertifyVulnMetadataScanMetadata.ScannerUri, and is useful for accessing the field via an interface.
+func (v *AllCertifyVulnMetadataScanMetadata) GetScannerUri() string { return v.ScannerUri }
 
-// GetScannerVersion returns AllCertifyVulnMetadataVulnerabilityMetaData.ScannerVersion, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnMetadataVulnerabilityMetaData) GetScannerVersion() string {
-	return v.ScannerVersion
-}
+// GetScannerVersion returns AllCertifyVulnMetadataScanMetadata.ScannerVersion, and is useful for accessing the field via an interface.
+func (v *AllCertifyVulnMetadataScanMetadata) GetScannerVersion() string { return v.ScannerVersion }
 
-// GetTimeScanned returns AllCertifyVulnMetadataVulnerabilityMetaData.TimeScanned, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnMetadataVulnerabilityMetaData) GetTimeScanned() time.Time {
-	return v.TimeScanned
-}
+// GetTimeScanned returns AllCertifyVulnMetadataScanMetadata.TimeScanned, and is useful for accessing the field via an interface.
+func (v *AllCertifyVulnMetadataScanMetadata) GetTimeScanned() time.Time { return v.TimeScanned }
 
-// GetOrigin returns AllCertifyVulnMetadataVulnerabilityMetaData.Origin, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnMetadataVulnerabilityMetaData) GetOrigin() string { return v.Origin }
+// GetOrigin returns AllCertifyVulnMetadataScanMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *AllCertifyVulnMetadataScanMetadata) GetOrigin() string { return v.Origin }
 
-// GetCollector returns AllCertifyVulnMetadataVulnerabilityMetaData.Collector, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnMetadataVulnerabilityMetaData) GetCollector() string { return v.Collector }
+// GetCollector returns AllCertifyVulnMetadataScanMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *AllCertifyVulnMetadataScanMetadata) GetCollector() string { return v.Collector }
 
 // AllCertifyVulnPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
@@ -7296,7 +7292,7 @@ func (v *CertifyVulnPkgIngestCertifyVuln) GetVulnerability() AllCertifyVulnVulne
 }
 
 // GetMetadata returns CertifyVulnPkgIngestCertifyVuln.Metadata, and is useful for accessing the field via an interface.
-func (v *CertifyVulnPkgIngestCertifyVuln) GetMetadata() AllCertifyVulnMetadataVulnerabilityMetaData {
+func (v *CertifyVulnPkgIngestCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
 	return v.AllCertifyVuln.Metadata
 }
 
@@ -7332,7 +7328,7 @@ type __premarshalCertifyVulnPkgIngestCertifyVuln struct {
 
 	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
 
-	Metadata AllCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
 }
 
 func (v *CertifyVulnPkgIngestCertifyVuln) MarshalJSON() ([]byte, error) {
@@ -11382,7 +11378,7 @@ func (v *NeighborsNeighborsCertifyVuln) GetVulnerability() AllCertifyVulnVulnera
 }
 
 // GetMetadata returns NeighborsNeighborsCertifyVuln.Metadata, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCertifyVuln) GetMetadata() AllCertifyVulnMetadataVulnerabilityMetaData {
+func (v *NeighborsNeighborsCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
 	return v.AllCertifyVuln.Metadata
 }
 
@@ -11420,7 +11416,7 @@ type __premarshalNeighborsNeighborsCertifyVuln struct {
 
 	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
 
-	Metadata AllCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
 }
 
 func (v *NeighborsNeighborsCertifyVuln) MarshalJSON() ([]byte, error) {
@@ -14154,7 +14150,7 @@ func (v *NodeNodeCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
 }
 
 // GetMetadata returns NodeNodeCertifyVuln.Metadata, and is useful for accessing the field via an interface.
-func (v *NodeNodeCertifyVuln) GetMetadata() AllCertifyVulnMetadataVulnerabilityMetaData {
+func (v *NodeNodeCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
 	return v.AllCertifyVuln.Metadata
 }
 
@@ -14192,7 +14188,7 @@ type __premarshalNodeNodeCertifyVuln struct {
 
 	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
 
-	Metadata AllCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
 }
 
 func (v *NodeNodeCertifyVuln) MarshalJSON() ([]byte, error) {
@@ -16107,7 +16103,7 @@ func (v *NodesNodesCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
 }
 
 // GetMetadata returns NodesNodesCertifyVuln.Metadata, and is useful for accessing the field via an interface.
-func (v *NodesNodesCertifyVuln) GetMetadata() AllCertifyVulnMetadataVulnerabilityMetaData {
+func (v *NodesNodesCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
 	return v.AllCertifyVuln.Metadata
 }
 
@@ -16145,7 +16141,7 @@ type __premarshalNodesNodesCertifyVuln struct {
 
 	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
 
-	Metadata AllCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
 }
 
 func (v *NodesNodesCertifyVuln) MarshalJSON() ([]byte, error) {
@@ -18993,7 +18989,7 @@ func (v *PathPathCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
 }
 
 // GetMetadata returns PathPathCertifyVuln.Metadata, and is useful for accessing the field via an interface.
-func (v *PathPathCertifyVuln) GetMetadata() AllCertifyVulnMetadataVulnerabilityMetaData {
+func (v *PathPathCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
 	return v.AllCertifyVuln.Metadata
 }
 
@@ -19031,7 +19027,7 @@ type __premarshalPathPathCertifyVuln struct {
 
 	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
 
-	Metadata AllCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
 }
 
 func (v *PathPathCertifyVuln) MarshalJSON() ([]byte, error) {
@@ -21779,6 +21775,39 @@ func (v *SLSAPredicateInputSpec) GetKey() string { return v.Key }
 // GetValue returns SLSAPredicateInputSpec.Value, and is useful for accessing the field via an interface.
 func (v *SLSAPredicateInputSpec) GetValue() string { return v.Value }
 
+// ScanMetadataInput represents the input for certifying vulnerability
+// scans in mutations.
+type ScanMetadataInput struct {
+	TimeScanned    time.Time `json:"timeScanned"`
+	DbUri          string    `json:"dbUri"`
+	DbVersion      string    `json:"dbVersion"`
+	ScannerUri     string    `json:"scannerUri"`
+	ScannerVersion string    `json:"scannerVersion"`
+	Origin         string    `json:"origin"`
+	Collector      string    `json:"collector"`
+}
+
+// GetTimeScanned returns ScanMetadataInput.TimeScanned, and is useful for accessing the field via an interface.
+func (v *ScanMetadataInput) GetTimeScanned() time.Time { return v.TimeScanned }
+
+// GetDbUri returns ScanMetadataInput.DbUri, and is useful for accessing the field via an interface.
+func (v *ScanMetadataInput) GetDbUri() string { return v.DbUri }
+
+// GetDbVersion returns ScanMetadataInput.DbVersion, and is useful for accessing the field via an interface.
+func (v *ScanMetadataInput) GetDbVersion() string { return v.DbVersion }
+
+// GetScannerUri returns ScanMetadataInput.ScannerUri, and is useful for accessing the field via an interface.
+func (v *ScanMetadataInput) GetScannerUri() string { return v.ScannerUri }
+
+// GetScannerVersion returns ScanMetadataInput.ScannerVersion, and is useful for accessing the field via an interface.
+func (v *ScanMetadataInput) GetScannerVersion() string { return v.ScannerVersion }
+
+// GetOrigin returns ScanMetadataInput.Origin, and is useful for accessing the field via an interface.
+func (v *ScanMetadataInput) GetOrigin() string { return v.Origin }
+
+// GetCollector returns ScanMetadataInput.Collector, and is useful for accessing the field via an interface.
+func (v *ScanMetadataInput) GetCollector() string { return v.Collector }
+
 // ScorecardCheckInputSpec represents the mutation input for a Scorecard check.
 type ScorecardCheckInputSpec struct {
 	Check string `json:"check"`
@@ -22449,39 +22478,6 @@ func (v *VulnerabilityInputSpec) GetType() string { return v.Type }
 // GetVulnerabilityID returns VulnerabilityInputSpec.VulnerabilityID, and is useful for accessing the field via an interface.
 func (v *VulnerabilityInputSpec) GetVulnerabilityID() string { return v.VulnerabilityID }
 
-// VulnerabilityMetaDataInput represents the input for certifying vulnerability
-// scans in mutations.
-type VulnerabilityMetaDataInput struct {
-	TimeScanned    time.Time `json:"timeScanned"`
-	DbUri          string    `json:"dbUri"`
-	DbVersion      string    `json:"dbVersion"`
-	ScannerUri     string    `json:"scannerUri"`
-	ScannerVersion string    `json:"scannerVersion"`
-	Origin         string    `json:"origin"`
-	Collector      string    `json:"collector"`
-}
-
-// GetTimeScanned returns VulnerabilityMetaDataInput.TimeScanned, and is useful for accessing the field via an interface.
-func (v *VulnerabilityMetaDataInput) GetTimeScanned() time.Time { return v.TimeScanned }
-
-// GetDbUri returns VulnerabilityMetaDataInput.DbUri, and is useful for accessing the field via an interface.
-func (v *VulnerabilityMetaDataInput) GetDbUri() string { return v.DbUri }
-
-// GetDbVersion returns VulnerabilityMetaDataInput.DbVersion, and is useful for accessing the field via an interface.
-func (v *VulnerabilityMetaDataInput) GetDbVersion() string { return v.DbVersion }
-
-// GetScannerUri returns VulnerabilityMetaDataInput.ScannerUri, and is useful for accessing the field via an interface.
-func (v *VulnerabilityMetaDataInput) GetScannerUri() string { return v.ScannerUri }
-
-// GetScannerVersion returns VulnerabilityMetaDataInput.ScannerVersion, and is useful for accessing the field via an interface.
-func (v *VulnerabilityMetaDataInput) GetScannerVersion() string { return v.ScannerVersion }
-
-// GetOrigin returns VulnerabilityMetaDataInput.Origin, and is useful for accessing the field via an interface.
-func (v *VulnerabilityMetaDataInput) GetOrigin() string { return v.Origin }
-
-// GetCollector returns VulnerabilityMetaDataInput.Collector, and is useful for accessing the field via an interface.
-func (v *VulnerabilityMetaDataInput) GetCollector() string { return v.Collector }
-
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
 //
 // Use null to match on all values at that level.
@@ -22736,9 +22732,9 @@ func (v *__CertifyVexPkgInput) GetVexStatement() VexStatementInputSpec { return 
 
 // __CertifyVulnPkgInput is used internally by genqlient
 type __CertifyVulnPkgInput struct {
-	Pkg           PkgInputSpec               `json:"pkg"`
-	Vulnerability VulnerabilityInputSpec     `json:"vulnerability"`
-	CertifyVuln   VulnerabilityMetaDataInput `json:"certifyVuln"`
+	Pkg           PkgInputSpec           `json:"pkg"`
+	Vulnerability VulnerabilityInputSpec `json:"vulnerability"`
+	CertifyVuln   ScanMetadataInput      `json:"certifyVuln"`
 }
 
 // GetPkg returns __CertifyVulnPkgInput.Pkg, and is useful for accessing the field via an interface.
@@ -22748,7 +22744,7 @@ func (v *__CertifyVulnPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
 func (v *__CertifyVulnPkgInput) GetVulnerability() VulnerabilityInputSpec { return v.Vulnerability }
 
 // GetCertifyVuln returns __CertifyVulnPkgInput.CertifyVuln, and is useful for accessing the field via an interface.
-func (v *__CertifyVulnPkgInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
+func (v *__CertifyVulnPkgInput) GetCertifyVuln() ScanMetadataInput { return v.CertifyVuln }
 
 // __FindSoftwareInput is used internally by genqlient
 type __FindSoftwareInput struct {
@@ -24909,7 +24905,7 @@ func CertifyVexPkg(
 
 // The query or mutation executed by CertifyVulnPkg.
 const CertifyVulnPkg_Operation = `
-mutation CertifyVulnPkg ($pkg: PkgInputSpec!, $vulnerability: VulnerabilityInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
+mutation CertifyVulnPkg ($pkg: PkgInputSpec!, $vulnerability: VulnerabilityInputSpec!, $certifyVuln: ScanMetadataInput!) {
 	ingestCertifyVuln(pkg: $pkg, vulnerability: $vulnerability, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
 	}
@@ -24968,7 +24964,7 @@ func CertifyVulnPkg(
 	client graphql.Client,
 	pkg PkgInputSpec,
 	vulnerability VulnerabilityInputSpec,
-	certifyVuln VulnerabilityMetaDataInput,
+	certifyVuln ScanMetadataInput,
 ) (*CertifyVulnPkgResponse, error) {
 	req := &graphql.Request{
 		OpName: "CertifyVulnPkg",

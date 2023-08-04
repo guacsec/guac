@@ -230,7 +230,7 @@ func (c *csafParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 						}
 
 						if status == "known_affected" || status == "under_investigation" {
-							vulnData := generated.VulnerabilityMetaDataInput{
+							vulnData := generated.ScanMetadataInput{
 								TimeScanned: c.csaf.Document.Tracking.CurrentReleaseDate,
 							}
 							cv := assembler.CertifyVulnIngest{

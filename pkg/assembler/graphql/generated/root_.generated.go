@@ -167,7 +167,7 @@ type ComplexityRoot struct {
 		IngestCertifyBads     func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
-		IngestCertifyVuln     func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.VulnerabilityMetaDataInput) int
+		IngestCertifyVuln     func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
@@ -288,6 +288,16 @@ type ComplexityRoot struct {
 		Value func(childComplexity int) int
 	}
 
+	ScanMetadata struct {
+		Collector      func(childComplexity int) int
+		DbURI          func(childComplexity int) int
+		DbVersion      func(childComplexity int) int
+		Origin         func(childComplexity int) int
+		ScannerURI     func(childComplexity int) int
+		ScannerVersion func(childComplexity int) int
+		TimeScanned    func(childComplexity int) int
+	}
+
 	Scorecard struct {
 		AggregateScore   func(childComplexity int) int
 		Checks           func(childComplexity int) int
@@ -339,16 +349,6 @@ type ComplexityRoot struct {
 	VulnerabilityID struct {
 		ID              func(childComplexity int) int
 		VulnerabilityID func(childComplexity int) int
-	}
-
-	VulnerabilityMetaData struct {
-		Collector      func(childComplexity int) int
-		DbURI          func(childComplexity int) int
-		DbVersion      func(childComplexity int) int
-		Origin         func(childComplexity int) int
-		ScannerURI     func(childComplexity int) int
-		ScannerVersion func(childComplexity int) int
-		TimeScanned    func(childComplexity int) int
 	}
 }
 
@@ -1012,7 +1012,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyVuln(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.VulnerabilityInputSpec), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
+		return e.complexity.Mutation.IngestCertifyVuln(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.VulnerabilityInputSpec), args["certifyVuln"].(model.ScanMetadataInput)), true
 
 	case "Mutation.ingestDependencies":
 		if e.complexity.Mutation.IngestDependencies == nil {
@@ -1875,6 +1875,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SLSAPredicate.Value(childComplexity), true
 
+	case "ScanMetadata.collector":
+		if e.complexity.ScanMetadata.Collector == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.Collector(childComplexity), true
+
+	case "ScanMetadata.dbUri":
+		if e.complexity.ScanMetadata.DbURI == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.DbURI(childComplexity), true
+
+	case "ScanMetadata.dbVersion":
+		if e.complexity.ScanMetadata.DbVersion == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.DbVersion(childComplexity), true
+
+	case "ScanMetadata.origin":
+		if e.complexity.ScanMetadata.Origin == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.Origin(childComplexity), true
+
+	case "ScanMetadata.scannerUri":
+		if e.complexity.ScanMetadata.ScannerURI == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.ScannerURI(childComplexity), true
+
+	case "ScanMetadata.scannerVersion":
+		if e.complexity.ScanMetadata.ScannerVersion == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.ScannerVersion(childComplexity), true
+
+	case "ScanMetadata.timeScanned":
+		if e.complexity.ScanMetadata.TimeScanned == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.TimeScanned(childComplexity), true
+
 	case "Scorecard.aggregateScore":
 		if e.complexity.Scorecard.AggregateScore == nil {
 			break
@@ -2078,55 +2127,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.VulnerabilityID.VulnerabilityID(childComplexity), true
 
-	case "VulnerabilityMetaData.collector":
-		if e.complexity.VulnerabilityMetaData.Collector == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityMetaData.Collector(childComplexity), true
-
-	case "VulnerabilityMetaData.dbUri":
-		if e.complexity.VulnerabilityMetaData.DbURI == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityMetaData.DbURI(childComplexity), true
-
-	case "VulnerabilityMetaData.dbVersion":
-		if e.complexity.VulnerabilityMetaData.DbVersion == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityMetaData.DbVersion(childComplexity), true
-
-	case "VulnerabilityMetaData.origin":
-		if e.complexity.VulnerabilityMetaData.Origin == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityMetaData.Origin(childComplexity), true
-
-	case "VulnerabilityMetaData.scannerUri":
-		if e.complexity.VulnerabilityMetaData.ScannerURI == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityMetaData.ScannerURI(childComplexity), true
-
-	case "VulnerabilityMetaData.scannerVersion":
-		if e.complexity.VulnerabilityMetaData.ScannerVersion == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityMetaData.ScannerVersion(childComplexity), true
-
-	case "VulnerabilityMetaData.timeScanned":
-		if e.complexity.VulnerabilityMetaData.TimeScanned == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityMetaData.TimeScanned(childComplexity), true
-
 	}
 	return 0, false
 }
@@ -2181,6 +2181,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSLSAInputSpec,
 		ec.unmarshalInputSLSAPredicateInputSpec,
 		ec.unmarshalInputSLSAPredicateSpec,
+		ec.unmarshalInputScanMetadataInput,
 		ec.unmarshalInputScorecardCheckInputSpec,
 		ec.unmarshalInputScorecardCheckSpec,
 		ec.unmarshalInputScorecardInputSpec,
@@ -2190,7 +2191,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputVulnEqualInputSpec,
 		ec.unmarshalInputVulnEqualSpec,
 		ec.unmarshalInputVulnerabilityInputSpec,
-		ec.unmarshalInputVulnerabilityMetaDataInput,
 		ec.unmarshalInputVulnerabilitySpec,
 	)
 	first := true
@@ -2927,15 +2927,15 @@ type CertifyVuln {
   "The vulnerability can be an be a specific vulnerability or NoVuln type."
   vulnerability: Vulnerability!
   "Metadata attached to the certification"
-  metadata: VulnerabilityMetaData!
+  metadata: ScanMetadata!
 }
 
 """
-VulnerabilityMetaData is the metadata attached to vulnerability certification.
+ScanMetadata is the metadata attached to vulnerability certification.
 
 It contains metadata about the scanner process that created the certification.
 """
-type VulnerabilityMetaData {
+type ScanMetadata {
   "Time of scan (in RFC 3339 format)"
   timeScanned: Time!
   "URI of the vulnerability database used by the scanner"
@@ -2976,10 +2976,10 @@ input CertifyVulnSpec {
 }
 
 """
-VulnerabilityMetaDataInput represents the input for certifying vulnerability
+ScanMetadataInput represents the input for certifying vulnerability
 scans in mutations.
 """
-input VulnerabilityMetaDataInput {
+input ScanMetadataInput {
   timeScanned: Time!
   dbUri: String!
   dbVersion: String!
@@ -2996,7 +2996,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): CertifyVuln!
 }
 `, BuiltIn: false},
 	{Name: "../schema/contact.graphql", Input: `#
