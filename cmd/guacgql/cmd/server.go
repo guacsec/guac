@@ -56,7 +56,7 @@ func startServer(cmd *cobra.Command) {
 	logger := logging.FromContext(ctx)
 
 	if err := validateFlags(); err != nil {
-		fmt.Printf("unable to validate flags: %v\n", err)
+		logger.Errorf("unable to validate flags: %v\n", err)
 		_ = cmd.Help()
 		os.Exit(1)
 	}
