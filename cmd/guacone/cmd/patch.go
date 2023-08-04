@@ -184,7 +184,7 @@ var queryPatchCmd = &cobra.Command{
 		)
 
 		if err != nil {
-			fmt.Printf("unable to validate flags: %v\n", err)
+			fmt.Printf("unable to validate flags: %s\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
@@ -196,7 +196,11 @@ var queryPatchCmd = &cobra.Command{
 		var stopID *string
 		stopID = nil
 		if opts.sampleData {
-			analysis.IngestTestData(ctx, gqlClient, sampleGraph)
+			err = analysis.IngestTestData(ctx, gqlClient, sampleGraph)
+
+			if err != nil {
+				fmt.Printf("error ingesting test data: %s\n", err)
+			}
 			getPackageIDsValues, err := analysis.GetPackageIDs(ctx, gqlClient, ptrfrom.String("3pkgType"), "3pkgNamespace", "3pkgName", ptrfrom.String("1.19.0"), true, false)
 
 			startID = *getPackageIDsValues[0]
@@ -267,7 +271,7 @@ var queryPatchCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("\n\n---SUBGRAPH VISUALIZER URL--- \nhttp://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
+		fmt.Printf("\n\n---SUBGRAPH VISUALIZER URL--- \nhttp://localhost:3000/?path=%s\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
 	},
 }
 
@@ -377,12 +381,12 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 func init() {
 	set, err := cli.BuildFlags([]string{"start-purl", "stop-purl", "search-depth", "sample-data"})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
 		os.Exit(1)
 	}
 	queryPatchCmd.Flags().AddFlagSet(set)
 	if err := viper.BindPFlags(queryPatchCmd.Flags()); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %s", err)
 		os.Exit(1)
 	}
 
