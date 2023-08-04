@@ -48,6 +48,12 @@ func init() {
 	set.String("neo4j-pass", "", "neo4j password credential to connect to graph db")
 	set.String("neo4j-realm", "neo4j", "realm to connect to graph db")
 
+	set.String("neptune-endpoint", "localhost", "address to neptune db")
+	set.Int("neptune-port", 8182, "port used for neptune db connection")
+	set.String("neptune-region", "us-east-1", "region to connect to neptune db")
+	set.String("neptune-user", "", "neptune user credential to connect to graph db")
+	set.String("neptune-realm", "neptune", "realm to connect to graph db")
+
 	set.String("arango-addr", "http://localhost:8529", "address to arango db")
 	set.String("arango-user", "", "arango user to connect to graph db")
 	set.String("arango-pass", "", "arango password to connect to graph db")
