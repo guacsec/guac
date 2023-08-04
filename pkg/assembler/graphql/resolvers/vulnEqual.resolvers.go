@@ -6,17 +6,16 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // IngestVulnEqual is the resolver for the ingestVulnEqual field.
 func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestVulnEqual - ingestVulnEqual"))
+	return r.Backend.IngestVulnEqual(ctx, vulnerability, otherVulnerability, vulnEqual)
 }
 
 // VulnEqual is the resolver for the vulnEqual field.
 func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error) {
-	panic(fmt.Errorf("not implemented: VulnEqual - vulnEqual"))
+	return r.Backend.VulnEqual(ctx, vulnEqualSpec)
 }

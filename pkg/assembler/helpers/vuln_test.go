@@ -23,20 +23,69 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
+func TestVulnInputToVURI(t *testing.T) {
+	tests := []struct {
+		Name    string
+		Input   *generated.VulnerabilityInputSpec
+		ExpVURI string
+	}{
+		{
+			Name: "cve",
+			Input: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-2023-8675",
+			},
+			ExpVURI: "vuln://cve/cve-2023-8675",
+		},
+		{
+			Name: "ghsa",
+			Input: &generated.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-gwvq-rgqf-993f",
+			},
+			ExpVURI: "vuln://ghsa/ghsa-gwvq-rgqf-993f",
+		},
+		{
+			Name: "dsa",
+			Input: &generated.VulnerabilityInputSpec{
+				Type:            "DSA",
+				VulnerabilityID: "DSA-5464-1",
+			},
+			ExpVURI: "vuln://dsa/dsa-5464-1",
+		},
+		{
+			Name: "osv",
+			Input: &generated.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "DLA-3515-1",
+			},
+			ExpVURI: "vuln://osv/dla-3515-1",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			vuln := helpers.VulnInputToVURI(test.Input)
+			if diff := cmp.Diff(test.ExpVURI, vuln); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestOSVToGHSACVE(t *testing.T) {
 	tests := []struct {
 		Name    string
 		Input   string
-		ExpCVE  *generated.CVEInputSpec
-		ExpGHSA *generated.GHSAInputSpec
+		ExpCVE  *generated.VulnerabilityInputSpec
+		ExpGHSA *generated.VulnerabilityInputSpec
 		ExpErr  bool
 	}{
 		{
 			Name:  "Good CVE",
 			Input: "CVE-1999-1234",
-			ExpCVE: &generated.CVEInputSpec{
-				CveId: "CVE-1999-1234",
-				Year:  1999,
+			ExpCVE: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-1999-1234",
 			},
 			ExpGHSA: nil,
 			ExpErr:  false,
@@ -45,8 +94,9 @@ func TestOSVToGHSACVE(t *testing.T) {
 			Name:   "Good GHSA",
 			Input:  "GHSA-1234-asdf-qwer",
 			ExpCVE: nil,
-			ExpGHSA: &generated.GHSAInputSpec{
-				GhsaId: "GHSA-1234-asdf-qwer",
+			ExpGHSA: &generated.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "ghsa-1234-asdf-qwer",
 			},
 			ExpErr: false,
 		},

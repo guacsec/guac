@@ -17,30 +17,31 @@ package helpers
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
-func OSVToGHSACVE(OSVId string) (*generated.CVEInputSpec, *generated.GHSAInputSpec, error) {
+func VulnInputToVURI(vuln *generated.VulnerabilityInputSpec) string {
+	s := fmt.Sprintf("vuln://"+"%s/%s", strings.ToLower(vuln.Type), strings.ToLower(vuln.VulnerabilityID))
+	return s
+}
+
+func OSVToGHSACVE(OSVId string) (*generated.VulnerabilityInputSpec, *generated.VulnerabilityInputSpec, error) {
 	if strings.HasPrefix(OSVId, "CVE") {
 		p := strings.Split(OSVId, "-")
 		if len(p) != 3 {
 			return nil, nil, fmt.Errorf("malformed CVE identifier: %q", OSVId)
 		}
-		year, err := strconv.Atoi(p[1])
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to convert year to int: %w", err)
-		}
-		return &generated.CVEInputSpec{
-			CveId: OSVId,
-			Year:  year,
+		return &generated.VulnerabilityInputSpec{
+			Type:            "cve",
+			VulnerabilityID: strings.ToLower(OSVId),
 		}, nil, nil
 	}
 	if strings.HasPrefix(OSVId, "GHSA") {
-		return nil, &generated.GHSAInputSpec{
-			GhsaId: OSVId,
+		return nil, &generated.VulnerabilityInputSpec{
+			Type:            "ghsa",
+			VulnerabilityID: strings.ToLower(OSVId),
 		}, nil
 	}
 	return nil, nil, fmt.Errorf("unknown OSV identifier: %q", OSVId)
