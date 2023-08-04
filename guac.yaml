@@ -9,6 +9,14 @@ neo4j-pass: s3cr3t
 neo4j-addr: neo4j://localhost:7687
 neo4j-realm: neo4j
 
+# Neptune details
+# Populate neptune-endpoint, neptune-port and neptune-region with accurate values.
+neptune-user: username
+neptune-endpoint: localhost
+neptune-port: 8182
+neptune-region: us-east-1
+neptune-realm: neptune
+
 # Nats setup
 nats-addr: nats://localhost:4222
 
