@@ -75,29 +75,27 @@ type demoClient struct {
 	id uint32
 	m  sync.RWMutex
 
-	artifacts            artMap
-	builders             builderMap
-	certifyBads          badList
-	certifyGoods         goodList
-	pkgEquals            pkgEqualList
-	cves                 cveMap
-	equalVulnerabilities equalVulnerabilityList
-	ghsas                ghsaMap
-	hasMetadatas         hasMetadataList
-	pointOfContacts      pointOfContactList
-	hasSBOMs             hasSBOMList
-	hasSLSAs             hasSLSAList
-	hasSources           hasSrcList
-	hashEquals           hashEqualList
-	index                indexType
-	isDependencies       isDependencyList
-	occurrences          isOccurrenceList
-	osvs                 osvMap
-	packages             pkgTypeMap
-	scorecards           scorecardList
-	sources              srcTypeMap
-	vexs                 vexList
-	vulnerabilities      vulnerabilityList
+	artifacts              artMap
+	builders               builderMap
+	certifyBads            badList
+	certifyGoods           goodList
+	pkgEquals              pkgEqualList
+	vulnerabilities        vulnTypeMap
+	equalVulnerabilities   equalVulnerabilityList
+	hasMetadatas           hasMetadataList
+	pointOfContacts        pointOfContactList
+	hasSBOMs               hasSBOMList
+	hasSLSAs               hasSLSAList
+	hasSources             hasSrcList
+	hashEquals             hashEqualList
+	index                  indexType
+	isDependencies         isDependencyList
+	occurrences            isOccurrenceList
+	packages               pkgTypeMap
+	scorecards             scorecardList
+	sources                srcTypeMap
+	vexs                   vexList
+	certifyVulnerabilities certifyVulnerabilityList
 
 	// Ensures that only one noKnownVuln node is created
 	noKnownVulnNode noKnownVuln
@@ -128,28 +126,26 @@ func (n *noKnownVuln) setVulnerabilityLinks(id uint32) {
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		artifacts:            artMap{},
-		builders:             builderMap{},
-		certifyBads:          badList{},
-		certifyGoods:         goodList{},
-		pkgEquals:            pkgEqualList{},
-		cves:                 cveMap{},
-		equalVulnerabilities: equalVulnerabilityList{},
-		ghsas:                ghsaMap{},
-		hasSBOMs:             hasSBOMList{},
-		hasSLSAs:             hasSLSAList{},
-		hasSources:           hasSrcList{},
-		hashEquals:           hashEqualList{},
-		index:                indexType{},
-		isDependencies:       isDependencyList{},
-		occurrences:          isOccurrenceList{},
-		osvs:                 osvMap{},
-		packages:             pkgTypeMap{},
-		scorecards:           scorecardList{},
-		sources:              srcTypeMap{},
-		vexs:                 vexList{},
-		vulnerabilities:      vulnerabilityList{},
-		noKnownVulnNode:      noKnownVuln{},
+		artifacts:              artMap{},
+		builders:               builderMap{},
+		certifyBads:            badList{},
+		certifyGoods:           goodList{},
+		pkgEquals:              pkgEqualList{},
+		vulnerabilities:        vulnTypeMap{},
+		equalVulnerabilities:   equalVulnerabilityList{},
+		hasSBOMs:               hasSBOMList{},
+		hasSLSAs:               hasSLSAList{},
+		hasSources:             hasSrcList{},
+		hashEquals:             hashEqualList{},
+		index:                  indexType{},
+		isDependencies:         isDependencyList{},
+		occurrences:            isOccurrenceList{},
+		packages:               pkgTypeMap{},
+		scorecards:             scorecardList{},
+		sources:                srcTypeMap{},
+		vexs:                   vexList{},
+		certifyVulnerabilities: certifyVulnerabilityList{},
+		noKnownVulnNode:        noKnownVuln{},
 	}
 
 	// Build the special noKnownVuln node and link it everywhere

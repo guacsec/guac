@@ -27,7 +27,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (c *neo4jClient) IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error) {
+func (c *neo4jClient) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 
 	// TODO: Fix validation
 	queryAll := true
@@ -195,10 +195,10 @@ func generateModelIsVulnerability(osv *model.Osv, vuln model.CveOrGhsa, justific
 	return &isVulnerability
 }
 
-func (c *neo4jClient) IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error) {
-	err := helper.ValidateCveOrGhsaIngestionInput(vulnerability, "IngestIsVulnerability")
+func (c *neo4jClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
+	err := helper.ValidateCveOrGhsaIngestionInput(vulnerability, "IngestVulnEqual")
 	if err != nil {
 		return nil, err
 	}
-	panic(fmt.Errorf("not implemented: IngestIsVulnerability - IngestIsVulnerability"))
+	panic(fmt.Errorf("not implemented - IngestVulnEqual"))
 }
