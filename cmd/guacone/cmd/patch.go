@@ -254,16 +254,16 @@ var queryPatchCmd = &cobra.Command{
 			poc = append(poc, printNodesInfo(ctx, gqlClient, bfsMap, allNodes)...)
 		}
 
-		fmt.Println("\n---INFO NODES---")
+		fmt.Printf("\n---INFO NODES---\n")
 		if len(infoNodes) == 0 {
-			fmt.Println("no info nodes found")
+			fmt.Printf("no info nodes found\n")
 		} else {
 			poc = append(poc, printNodesInfo(ctx, gqlClient, bfsMap, infoNodes)...)
 		}
 
 		fmt.Printf("\n---POINTS OF CONTACT---")
 		if len(poc) == 0 {
-			fmt.Println("\nno POCs found")
+			fmt.Printf("\nno POCs found\n")
 		} else {
 			for _, id := range poc {
 				fmt.Printf("\n%s: %s", id, makePOCPretty(bfsMap[id].PointOfContact))
