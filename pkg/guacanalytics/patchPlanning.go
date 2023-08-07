@@ -102,7 +102,17 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		q.queue = append(q.queue, startID)
 	}
 
-	// The following code performs a breadth-first search on a graph to find dependencies.
+	bfsNodeMap, err := q.bfsOfDependencies(ctx, gqlClient, stopID, maxDepth)
+	if err != nil {
+		return bfsNodeMap, err
+	}
+
+	return q.nodeMap, nil
+
+}
+
+// bfsOfDependencies performs a breadth-first search on a graph to find dependencies
+func (q *queueValues) bfsOfDependencies(ctx context.Context, gqlClient graphql.Client, stopID *string, maxDepth int) (map[string]BfsNode, error) {
 	for len(q.queue) > 0 {
 		q.now = q.queue[0]
 		q.queue = q.queue[1:]
@@ -123,20 +133,18 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 			return nil, fmt.Errorf("failed getting neighbors:%w", err)
 		}
 
-		for _, neighbor := range neighborsResponse.Neighbors { // It gets the node's neighbors and processes each one
-			err = caseOnPredicates(ctx, gqlClient, &q, neighbor, q.nowNode.Type)
+		for _, neighbor := range neighborsResponse.Neighbors {
+			err = caseOnPredicates(ctx, gqlClient, q, neighbor, q.nowNode.Type)
 
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		q.nowNode.Expanded = true // After handling all neighbors, it marks the node expanded in the map
+		q.nowNode.Expanded = true
 		q.nodeMap[q.now] = q.nowNode
 	}
-
-	return q.nodeMap, nil
-
+	return nil, nil
 }
 
 func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode, nodeType NodeType) error {
