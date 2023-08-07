@@ -36,11 +36,13 @@ import (
 )
 
 type queryPatchOptions struct {
-	graphqlEndpoint string
-	startPurl       string
-	stopPurl        string
-	depth           int
-	sampleData      bool
+	graphqlEndpoint       string
+	startPurl             string
+	stopPurl              string
+	depth                 int
+	sampleData            bool
+	isPackageVersionStart bool
+	isPackageVersionStop  bool
 }
 
 var (
@@ -180,6 +182,8 @@ var queryPatchCmd = &cobra.Command{
 			viper.GetString("stop-purl"),
 			viper.GetInt("search-depth"),
 			viper.GetBool("patch-sample-data"),
+			viper.GetBool("is-pkg-version-start"),
+			viper.GetBool("is-pkg-version-stop"),
 			args,
 		)
 
@@ -207,14 +211,14 @@ var queryPatchCmd = &cobra.Command{
 			}
 
 		} else {
-			startID, err = getPkgID(ctx, gqlClient, opts.startPurl)
+			startID, err = getPkgID(ctx, gqlClient, opts.startPurl, opts.isPackageVersionStart)
 
 			if err != nil {
 				logger.Fatalf("error getting start pkg from purl inputted %s \n", err)
 			}
 
 			if opts.stopPurl != "" {
-				stopPkg, err := getPkgID(ctx, gqlClient, opts.stopPurl)
+				stopPkg, err := getPkgID(ctx, gqlClient, opts.stopPurl, opts.isPackageVersionStop)
 
 				if err != nil {
 					logger.Fatalf("error getting stop pkg from purl inputted %s\n", err)
@@ -323,7 +327,7 @@ func makeArtifactPretty(artifact model.NodeNodeArtifact) string {
 	return fmt.Sprintf("artifact: algorithm-%s | digest:%s", artifact.Algorithm, artifact.Digest)
 }
 
-func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string) (string, error) {
+func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string, isPackageVersion bool) (string, error) {
 	pkgInput, err := helpers.PurlToPkg(purl)
 
 	if err != nil {
@@ -333,12 +337,21 @@ func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string) (strin
 	var pkgFilter model.PkgSpec
 	version := false
 
-	if pkgInput.Version != nil && *pkgInput.Version != "" {
+	if isPackageVersion {
+		pkgQualifierFilter := []model.PackageQualifierSpec{}
+		for _, qualifier := range pkgInput.Qualifiers {
+			pkgQualifierFilter = append(pkgQualifierFilter, model.PackageQualifierSpec{
+				Key:   qualifier.Key,
+				Value: &qualifier.Value,
+			})
+		}
 		pkgFilter = model.PkgSpec{
-			Type:      &pkgInput.Type,
-			Namespace: pkgInput.Namespace,
-			Name:      &pkgInput.Name,
-			Version:   pkgInput.Version,
+			Type:       &pkgInput.Type,
+			Namespace:  pkgInput.Namespace,
+			Name:       &pkgInput.Name,
+			Version:    pkgInput.Version,
+			Subpath:    pkgInput.Subpath,
+			Qualifiers: pkgQualifierFilter,
 		}
 		version = true
 	} else {
@@ -352,7 +365,7 @@ func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string) (strin
 	pkgResponse, err := model.Packages(ctx, gqlClient, pkgFilter)
 
 	if err != nil || len(pkgResponse.Packages) == 0 {
-		return "", fmt.Errorf("error finding package with given purl: %s", purl)
+		return "", fmt.Errorf("error finding package with given purl (may have set is-pkg-version incorrectly): %s", purl)
 	}
 
 	if version {
@@ -361,7 +374,7 @@ func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string) (strin
 	return pkgResponse.Packages[0].Namespaces[0].Names[0].Id, nil
 }
 
-func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string, depth int, sampleData bool, args []string) (queryPatchOptions, error) {
+func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string, depth int, sampleData bool, isPackageVersionStart bool, isPackageVersionStop bool, args []string) (queryPatchOptions, error) {
 	var opts queryPatchOptions
 	opts.startPurl = startPurl
 
@@ -373,16 +386,14 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 	opts.stopPurl = stopPurl
 	opts.depth = depth
 	opts.sampleData = sampleData
-
-	if len(opts.startPurl) > 0 && strings.Index(opts.startPurl, "pkg:") != 0 {
-		return opts, fmt.Errorf("expected input to be purl")
-	}
+	opts.isPackageVersionStart = isPackageVersionStart
+	opts.isPackageVersionStop = isPackageVersionStop
 
 	return opts, nil
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"start-purl", "stop-purl", "search-depth", "patch-sample-data"})
+	set, err := cli.BuildFlags([]string{"start-purl", "stop-purl", "search-depth", "patch-sample-data", "is-pkg-version-start", "is-pkg-version-stop"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
 		os.Exit(1)
