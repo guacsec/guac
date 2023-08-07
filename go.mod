@@ -38,7 +38,7 @@ require (
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.10.0
 	golang.org/x/sync v0.3.0
-	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -147,7 +147,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	gocloud.dev v0.30.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/term v0.10.0 // indirect
+	golang.org/x/term v0.11.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.11.0 // indirect
 	golang.org/x/vuln v1.0.0 // indirect
@@ -188,7 +188,7 @@ require (
 	github.com/package-url/packageurl-go v0.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.16.0
-	github.com/regclient/regclient v0.5.0
+	github.com/regclient/regclient v0.5.1
 	github.com/sigstore/sigstore v1.7.1
 	github.com/spdx/tools-golang v0.5.3
 	github.com/spf13/viper v1.16.0
