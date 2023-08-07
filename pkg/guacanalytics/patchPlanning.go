@@ -102,6 +102,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		q.queue = append(q.queue, startID)
 	}
 
+	// The following code performs a breadth-first search on a graph to find dependencies.
 	for len(q.queue) > 0 {
 		q.now = q.queue[0]
 		q.queue = q.queue[1:]
@@ -115,13 +116,14 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 			break
 		}
 
+		// model.Neighbors performs a GraphQL query to get the neighbor nodes of a given node.
 		neighborsResponse, err := model.Neighbors(ctx, gqlClient, q.now, []model.Edge{})
 
 		if err != nil {
 			return nil, fmt.Errorf("failed getting neighbors:%w", err)
 		}
 
-		for _, neighbor := range neighborsResponse.Neighbors {
+		for _, neighbor := range neighborsResponse.Neighbors { // It gets the node's neighbors and processes each one
 			err = caseOnPredicates(ctx, gqlClient, &q, neighbor, q.nowNode.Type)
 
 			if err != nil {
@@ -129,7 +131,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 			}
 		}
 
-		q.nowNode.Expanded = true
+		q.nowNode.Expanded = true // After handling all neighbors, it marks the node expanded in the map
 		q.nodeMap[q.now] = q.nowNode
 	}
 
