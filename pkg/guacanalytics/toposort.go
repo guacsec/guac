@@ -22,58 +22,65 @@ import (
 	"github.com/Khan/genqlient/graphql"
 )
 
-// TODO: add tests
-func ToposortFromBfsNodeMap(ctx context.Context, gqlClient graphql.Client, nodeMap map[string]BfsNode) (map[int][]string, []string, error) {
-	frontiers := make(map[int][]string)
-	parentsMap, infoNodes := copyParents(nodeMap)
-	frontierLevel := 0
+// TopoSortFromBfsNodeMap sorts the nodes such that it returns a map of level -> list of nodeIDs at that level
+func TopoSortFromBfsNodeMap(ctx context.Context, gqlClient graphql.Client, nodeMap map[string]BfsNode) (map[int][]string, []string, error) {
+	sortedNodes := make(map[int][]string) // map of level -> list of nodeIDs at that level
+	parentsMap, childrensMap, infoNodes := copyParents(nodeMap)
+	// parentsMap: map of nodeID (child) -> list of parents in the form of a map
+	// childrensMap: map of nodeID (parent) -> list of children in the form of a list
+	bfsLevel := 0
 	numNodes := 0
 	totalNodes := len(parentsMap)
 
 	for numNodes < totalNodes {
 		foundIDs := make(map[string]bool)
-		for id, parentsList := range parentsMap {
-			if len(parentsList) == 0 || (parentsList[0] == "" && len(parentsList) == 1) {
-				frontiers[frontierLevel] = append(frontiers[frontierLevel], id)
-				foundIDs[id] = true
+		for id, pMap := range parentsMap {
+			if pMap.parents != nil && len(pMap.parents) == 0 { // if this node has no parents, it is a root node
+				sortedNodes[bfsLevel] = append(sortedNodes[bfsLevel], id)
 				numNodes++
+				foundIDs[id] = true
+				delete(parentsMap, id)
+			}
+		}
+
+		for id := range foundIDs {
+			for _, childID := range childrensMap[id] { // loop through all the children of this node
+				delete(parentsMap[childID].parents, id) // remove this node from the map of parents of the child
 			}
 		}
 
 		if len(foundIDs) == 0 {
-			// TODO: print out offending cycle
-			return frontiers, infoNodes, fmt.Errorf("error: cycle detected")
+			return sortedNodes, infoNodes, fmt.Errorf("error: cycle detected")
 		}
 
-		for id := range foundIDs {
-			delete(parentsMap, id)
-		}
-
-		for id, parentsList := range parentsMap {
-			newParentsList := []string{}
-			for _, parentID := range parentsList {
-				if !foundIDs[parentID] {
-					newParentsList = append(newParentsList, parentID)
-				}
-			}
-
-			parentsMap[id] = newParentsList
-		}
-		frontierLevel++
+		bfsLevel++
 	}
 
-	return frontiers, infoNodes, nil
+	return sortedNodes, infoNodes, nil
 }
 
-func copyParents(inputMap map[string]BfsNode) (map[string][]string, []string) {
-	retMap := map[string][]string{}
+func copyParents(inputMap map[string]BfsNode) (map[string]parent, map[string][]string, []string) {
+	parentsMap := map[string]parent{}    // map of nodeID (child) -> map of the childs parents
+	childrenMap := map[string][]string{} // map of nodeID (parent) -> list of the parents children
 	var infoNodes []string
 	for key, value := range inputMap {
 		if !value.NotInBlastRadius {
-			retMap[key] = append(retMap[key], value.Parents...)
+			if _, ok := parentsMap[key]; !ok {
+				parentsMap[key] = parent{make(map[string]bool)}
+			}
+
+			for _, parent := range value.Parents {
+				parentsMap[key].parents[parent] = true
+				childrenMap[parent] = append(childrenMap[parent], key)
+			}
 		} else {
 			infoNodes = append(infoNodes, key)
 		}
 	}
-	return retMap, infoNodes
+
+	return parentsMap, childrenMap, infoNodes
+}
+
+type parent struct {
+	parents map[string]bool // Consider the map[string]bool as a set, the value doesn't matter just the key
 }
