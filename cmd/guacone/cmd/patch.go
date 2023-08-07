@@ -242,7 +242,6 @@ var queryPatchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// TODO: print out nodes themselves, not just IDs
 		poc := []string{}
 		for level := 0; level < len(frontiers); level++ {
 			frontierList := frontiers[level]
