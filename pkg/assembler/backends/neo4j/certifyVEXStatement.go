@@ -634,7 +634,7 @@ func convertJustificationToEnum(justification string) (model.VexJustification, e
 	return model.VexJustificationNotProvided, fmt.Errorf("failed to convert justification to enum")
 }
 
-func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 
 	err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
 	if err != nil {

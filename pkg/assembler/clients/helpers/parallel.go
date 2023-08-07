@@ -83,34 +83,14 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 			logger.Infof("assembling Materials: %v", len(materials))
 			nouns.Go(func() error { return ingestArtifacts(errGroupNounCtx, gqlclient, materials) })
 
-			cves := p.GetCVEs(errGroupNounCtx)
-			logger.Infof("assembling CVE: %v", len(cves))
-			for _, v := range cves {
+			vulns := p.GetVulnerabilities(errGroupNounCtx)
+			logger.Infof("assembling Vulnerability: %v", len(vulns))
+			for _, v := range vulns {
 				if errGroupNounCtx.Err() != nil {
 					break
 				}
 				v := v
-				nouns.Go(func() error { return ingestCVE(errGroupNounCtx, gqlclient, v) })
-			}
-
-			osvs := p.GetOSVs(errGroupNounCtx)
-			logger.Infof("assembling OSV: %v", len(osvs))
-			for _, v := range osvs {
-				if errGroupNounCtx.Err() != nil {
-					break
-				}
-				v := v
-				nouns.Go(func() error { return ingestOSV(errGroupNounCtx, gqlclient, v) })
-			}
-
-			ghsas := p.GetGHSAs(errGroupNounCtx)
-			logger.Infof("assembling GHSA: %v", len(ghsas))
-			for _, v := range ghsas {
-				if errGroupNounCtx.Err() != nil {
-					break
-				}
-				v := v
-				nouns.Go(func() error { return ingestGHSA(errGroupNounCtx, gqlclient, v) })
+				nouns.Go(func() error { return ingestVulnerability(errGroupNounCtx, gqlclient, v) })
 			}
 		}
 
@@ -170,13 +150,13 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 				verbs.Go(func() error { return ingestCertifyVuln(errGroupVerbCtx, gqlclient, cv) })
 			}
 
-			logger.Infof("assembling IsVuln: %v", len(p.IsVuln))
-			for _, iv := range p.IsVuln {
+			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
+			for _, iv := range p.VulnEqual {
 				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				iv := iv
-				verbs.Go(func() error { return ingestIsVuln(errGroupVerbCtx, gqlclient, iv) })
+				verbs.Go(func() error { return ingestVulnEqual(errGroupVerbCtx, gqlclient, iv) })
 			}
 
 			logger.Infof("assembling HasSourceAt: %v", len(p.HasSourceAt))

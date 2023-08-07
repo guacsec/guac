@@ -81,38 +81,15 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestBuilders failed with error: %w", err)
 			}
 
-			cves := p.GetCVEs(ctx)
-			logger.Infof("assembling CVE: %v", len(cves))
-			var collectedCVEs []model.CVEInputSpec
-			collectedCVEs = make([]model.CVEInputSpec, 0)
-			for _, v := range cves {
-				collectedCVEs = append(collectedCVEs, *v)
+			vulns := p.GetVulnerabilities(ctx)
+			logger.Infof("assembling Vulnerability: %v", len(vulns))
+			var collectedVulns []model.VulnerabilityInputSpec
+			collectedVulns = make([]model.VulnerabilityInputSpec, 0)
+			for _, v := range vulns {
+				collectedVulns = append(collectedVulns, *v)
 			}
-			if err := ingestCVEs(ctx, gqlclient, collectedCVEs); err != nil {
-				return fmt.Errorf("ingestCVEs failed with error: %w", err)
-			}
-
-			osvs := p.GetOSVs(ctx)
-			logger.Infof("assembling OSV: %v", len(osvs))
-			var collectedOSVs []model.OSVInputSpec
-			collectedOSVs = make([]model.OSVInputSpec, 0)
-			for _, v := range osvs {
-				collectedOSVs = append(collectedOSVs, *v)
-			}
-			if err := ingestOSVs(ctx, gqlclient, collectedOSVs); err != nil {
-				return fmt.Errorf("ingestOSVs failed with error: %w", err)
-			}
-
-			// TODO(pxp928): add bulk ingestion for ghsas
-			ghsas := p.GetGHSAs(ctx)
-			logger.Infof("assembling GHSA: %v", len(ghsas))
-			var collectedGHSAs []model.GHSAInputSpec
-			collectedGHSAs = make([]model.GHSAInputSpec, 0)
-			for _, v := range ghsas {
-				collectedGHSAs = append(collectedGHSAs, *v)
-			}
-			if err := ingestGHSAs(ctx, gqlclient, collectedGHSAs); err != nil {
-				return fmt.Errorf("ingestGHSAs failed with error: %w", err)
+			if err := ingestVulnerabilities(ctx, gqlclient, collectedVulns); err != nil {
+				return fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
 			}
 
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
@@ -144,9 +121,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 
 			// TODO(pxp928): add bulk ingestion for IsVuln
-			logger.Infof("assembling IsVuln: %v", len(p.IsVuln))
-			for _, iv := range p.IsVuln {
-				if err := ingestIsVuln(ctx, gqlclient, iv); err != nil {
+			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
+			for _, iv := range p.VulnEqual {
+				if err := ingestVulnEqual(ctx, gqlclient, iv); err != nil {
 					return fmt.Errorf("ingestIsVuln failed with error: %w", err)
 
 				}
@@ -246,26 +223,10 @@ func ingestBuilders(ctx context.Context, client graphql.Client, v []model.Builde
 	return nil
 }
 
-func ingestCVEs(ctx context.Context, client graphql.Client, v []model.CVEInputSpec) error {
-	_, err := model.IngestCVEs(ctx, client, v)
+func ingestVulnerabilities(ctx context.Context, client graphql.Client, v []model.VulnerabilityInputSpec) error {
+	_, err := model.IngestVulnerabilities(ctx, client, v)
 	if err != nil {
-		return fmt.Errorf("ingestCVEs failed with error: %w", err)
-	}
-	return nil
-}
-
-func ingestOSVs(ctx context.Context, client graphql.Client, v []model.OSVInputSpec) error {
-	_, err := model.IngestOSVs(ctx, client, v)
-	if err != nil {
-		return fmt.Errorf("ingestOSVs failed with error: %w", err)
-	}
-	return nil
-}
-
-func ingestGHSAs(ctx context.Context, client graphql.Client, v []model.GHSAInputSpec) error {
-	_, err := model.IngestGHSAs(ctx, client, v)
-	if err != nil {
-		return fmt.Errorf("ingestGHSAs failed with error: %w", err)
+		return fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
 	}
 	return nil
 }

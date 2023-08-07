@@ -28,8 +28,8 @@ import (
 )
 
 // Internal data: link between packages and vulnerabilities (certifyVulnerability)
-type vulnerabilityList []*vulnerabilityLink
-type vulnerabilityLink struct {
+type certifyVulnerabilityList []*certifyVulnerabilityLink
+type certifyVulnerabilityLink struct {
 	id             uint32
 	packageID      uint32
 	osvID          uint32
@@ -45,9 +45,9 @@ type vulnerabilityLink struct {
 	collector      string
 }
 
-func (n *vulnerabilityLink) ID() uint32 { return n.id }
+func (n *certifyVulnerabilityLink) ID() uint32 { return n.id }
 
-func (n *vulnerabilityLink) Neighbors(allowedEdges edgeMap) []uint32 {
+func (n *certifyVulnerabilityLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 2)
 	if allowedEdges[model.EdgeCertifyVulnPackage] {
 		out = append(out, n.packageID)
@@ -67,16 +67,16 @@ func (n *vulnerabilityLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	return out
 }
 
-func (n *vulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, error) {
+func (n *certifyVulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildCertifyVulnerability(n, nil, true)
 }
 
 // Ingest CertifyVuln
-func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
-	return c.ingestVulnerability(ctx, packageArg, vulnerability, certifyVuln, true)
+func (c *demoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
+	return c.ingestVulnerability(ctx, pkg, vulnerability, certifyVuln, true)
 }
 
-func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput, readOnly bool) (*model.CertifyVuln, error) {
+func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput, readOnly bool) (*model.CertifyVuln, error) {
 	funcName := "IngestVulnerability"
 	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVulnerability", true); err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
@@ -147,9 +147,9 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 
 	// Don't insert duplicates
 	duplicate := false
-	collectedCertifyVulnLink := vulnerabilityLink{}
+	collectedCertifyVulnLink := certifyVulnerabilityLink{}
 	for _, id := range searchIDs {
-		v, err := byID[*vulnerabilityLink](id, c)
+		v, err := byID[*certifyVulnerabilityLink](id, c)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
@@ -184,7 +184,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 			return cv, err
 		}
 		// store the link
-		collectedCertifyVulnLink = vulnerabilityLink{
+		collectedCertifyVulnLink = certifyVulnerabilityLink{
 			id:             c.getNextID(),
 			packageID:      packageID,
 			osvID:          osvID,
@@ -200,7 +200,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 			collector:      certifyVuln.Collector,
 		}
 		c.index[collectedCertifyVulnLink.id] = &collectedCertifyVulnLink
-		c.vulnerabilities = append(c.vulnerabilities, &collectedCertifyVulnLink)
+		c.certifyVulnerabilities = append(c.certifyVulnerabilities, &collectedCertifyVulnLink)
 		// set the backlinks
 		foundPackage.setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		if osvID != 0 {
@@ -243,7 +243,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
 		id := uint32(id64)
-		link, err := byID[*vulnerabilityLink](id, c)
+		link, err := byID[*certifyVulnerabilityLink](id, c)
 		if err != nil {
 			// Not found
 			return nil, nil
@@ -307,7 +307,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	var out []*model.CertifyVuln
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*vulnerabilityLink](id, c)
+			link, err := byID[*certifyVulnerabilityLink](id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -317,7 +317,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			}
 		}
 	} else {
-		for _, link := range c.vulnerabilities {
+		for _, link := range c.certifyVulnerabilities {
 			var err error
 			out, err = c.addCVIfMatch(out, filter, link)
 			if err != nil {
@@ -331,7 +331,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 
 func (c *demoClient) addCVIfMatch(out []*model.CertifyVuln,
 	filter *model.CertifyVulnSpec,
-	link *vulnerabilityLink) ([]*model.CertifyVuln, error) {
+	link *certifyVulnerabilityLink) ([]*model.CertifyVuln, error) {
 	if filter != nil && filter.TimeScanned != nil && !filter.TimeScanned.Equal(link.timeScanned) {
 		return out, nil
 	}
@@ -364,7 +364,7 @@ func (c *demoClient) addCVIfMatch(out []*model.CertifyVuln,
 	return append(out, foundCertifyVuln), nil
 }
 
-func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *model.CertifyVulnSpec, ingestOrIDProvided bool) (*model.CertifyVuln, error) {
+func (c *demoClient) buildCertifyVulnerability(link *certifyVulnerabilityLink, filter *model.CertifyVulnSpec, ingestOrIDProvided bool) (*model.CertifyVuln, error) {
 	var p *model.Package
 	var osv *model.Osv
 	var cve *model.Cve
