@@ -77,6 +77,8 @@ func init() {
 	set.String("start-purl", "", "string input of purl with package to start search from")
 	set.String("stop-purl", "", "string input of purl with package to stop search at")
 	set.Bool("patch-sample-data", false, "ingest patch planning sample data instead of using a purl")
+	set.Bool("is-pkg-version-start", false, "for query path are you inputting a packageVersion to start the search from (if false then packageName)")
+	set.Bool("is-pkg-version-stop", false, "for query path are you inputting a packageVersion to stop the search at (if false then packageName)")
 
 	// Google Cloud platform flags
 	set.String("gcp-credentials-path", "", "Path to the Google Cloud service account credentials json file.\nAlternatively you can set GOOGLE_APPLICATION_CREDENTIALS=<path> in your environment.")
