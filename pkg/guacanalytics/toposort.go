@@ -66,7 +66,7 @@ func ToposortFromBfsNodeMap(ctx context.Context, gqlClient graphql.Client, nodeM
 
 func copyParents(inputMap map[string]BfsNode) (map[string][]string, []string) {
 	retMap := map[string][]string{}
-	infoNodes := []string{}
+	var infoNodes []string
 	for key, value := range inputMap {
 		if !value.NotInBlastRadius {
 			retMap[key] = append(retMap[key], value.Parents...)

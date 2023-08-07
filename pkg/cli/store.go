@@ -76,7 +76,7 @@ func init() {
 	set.Int("num-path", 0, "number of paths to return, 0 means all paths")
 	set.String("start-purl", "", "string input of purl with package to start search from")
 	set.String("stop-purl", "", "string input of purl with package to stop search at")
-	set.Bool("sample-data", false, "ingest sample data")
+	set.Bool("patch-sample-data", false, "ingest patch planning sample data instead of using a purl")
 
 	// Google Cloud platform flags
 	set.String("gcp-credentials-path", "", "Path to the Google Cloud service account credentials json file.\nAlternatively you can set GOOGLE_APPLICATION_CREDENTIALS=<path> in your environment.")

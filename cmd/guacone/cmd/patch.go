@@ -179,14 +179,12 @@ var queryPatchCmd = &cobra.Command{
 			viper.GetString("start-purl"),
 			viper.GetString("stop-purl"),
 			viper.GetInt("search-depth"),
-			viper.GetBool("sample-data"),
+			viper.GetBool("patch-sample-data"),
 			args,
 		)
 
 		if err != nil {
-			fmt.Printf("unable to validate flags: %s\n", err)
-			_ = cmd.Help()
-			os.Exit(1)
+			logger.Fatalf("unable to validate flags: %s\n", err)
 		}
 
 		httpClient := http.Client{}
@@ -205,22 +203,21 @@ var queryPatchCmd = &cobra.Command{
 
 			startID = *getPackageIDsValues[0]
 			if err != nil {
-				logger.Errorf("error get start pkg for simple data: %s", err)
+				logger.Fatalf("error get start pkg for simple data: %s", err)
 			}
 
 		} else {
 			startID, err = getPkgID(ctx, gqlClient, opts.startPurl)
 
 			if err != nil {
-				logger.Errorf("error getting start pkg from purl inputted %s \n", err)
-				os.Exit(1)
+				logger.Fatalf("error getting start pkg from purl inputted %s \n", err)
 			}
 
 			if opts.stopPurl != "" {
 				stopPkg, err := getPkgID(ctx, gqlClient, opts.stopPurl)
 
 				if err != nil {
-					logger.Errorf("error getting stop pkg from purl inputted %s\n", err)
+					logger.Fatalf("error getting stop pkg from purl inputted %s\n", err)
 				}
 
 				stopID = &stopPkg
@@ -231,18 +228,16 @@ var queryPatchCmd = &cobra.Command{
 		bfsMap, path, err := analysis.SearchDependenciesFromStartNode(ctx, gqlClient, startID, stopID, opts.depth)
 
 		if err != nil {
-			logger.Errorf("error searching dependencies-- %s\n", err)
-			os.Exit(1)
+			logger.Fatalf("error searching dependencies-- %s\n", err)
 		}
 
 		frontiers, infoNodes, err := analysis.ToposortFromBfsNodeMap(ctx, gqlClient, bfsMap)
 
 		if err != nil {
-			logger.Errorf("error toposorting-- %s\n", err)
-			os.Exit(1)
+			logger.Fatalf("error toposorting-- %s\n", err)
 		}
 
-		poc := []string{}
+		var poc []string
 		for level := 0; level < len(frontiers); level++ {
 			frontierList := frontiers[level]
 			allNodes := []string{}
@@ -368,8 +363,13 @@ func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string) (strin
 
 func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string, depth int, sampleData bool, args []string) (queryPatchOptions, error) {
 	var opts queryPatchOptions
-	opts.graphqlEndpoint = graphqlEndpoint
 	opts.startPurl = startPurl
+
+	if _, err := helpers.PurlToPkg(startPurl); startPurl != "" && err != nil {
+		return opts, fmt.Errorf("expected input to be purl")
+	}
+
+	opts.graphqlEndpoint = graphqlEndpoint
 	opts.stopPurl = stopPurl
 	opts.depth = depth
 	opts.sampleData = sampleData
@@ -382,7 +382,7 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"start-purl", "stop-purl", "search-depth", "sample-data"})
+	set, err := cli.BuildFlags([]string{"start-purl", "stop-purl", "search-depth", "patch-sample-data"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
 		os.Exit(1)
