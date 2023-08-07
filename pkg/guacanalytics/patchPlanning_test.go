@@ -36,7 +36,8 @@ import (
 )
 
 var (
-	tm, _                   = time.Parse(time.RFC3339, "2023-07-17T17:45:50.52Z")
+	tm, _ = time.Parse(time.RFC3339, "2023-07-17T17:45:50.52Z")
+	// TODO: add tests with use of subpath and qualifiers
 	simpleIsDependencyGraph = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
 			{

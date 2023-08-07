@@ -277,7 +277,9 @@ func IngestTestData(ctx context.Context, client graphql.Client, graph assembler.
 // This function return matching packageName and/or packageVersion node IDs depending on if you specified to only find name nodes or version nodes
 func GetPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *string, nodeNamespace string, nodeName string, nodeVersion *string, justFindVersion bool, justFindName bool) ([]*string, error) {
 	var pkgFilter model.PkgSpec
+
 	if nodeVersion != nil {
+		// TODO: extend to make use of subpath and qualifiers
 		pkgFilter = model.PkgSpec{
 			Type:      nodeType,
 			Namespace: &nodeNamespace,
