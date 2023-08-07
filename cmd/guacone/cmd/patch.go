@@ -374,6 +374,10 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 	opts.depth = depth
 	opts.sampleData = sampleData
 
+	if len(opts.startPurl) > 0 && strings.Index(opts.startPurl, "pkg:") != 0 {
+		return opts, fmt.Errorf("expected input to be purl")
+	}
+
 	return opts, nil
 }
 
