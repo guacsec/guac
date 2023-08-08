@@ -16,30 +16,37 @@
 package guacanalytics
 
 import (
+	"context"
 	"fmt"
+
+	"github.com/Khan/genqlient/graphql"
 )
 
 // TODO: add tests
-func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]string, error) {
+func ToposortFromBfsNodeMap(ctx context.Context, gqlClient graphql.Client, nodeMap map[string]BfsNode) (map[int][]string, []string, error) {
 	frontiers := make(map[int][]string)
-	parentsMap := copyParents(nodeMap)
+	parentsMap, infoNodes := copyParents(nodeMap)
 	frontierLevel := 0
 	numNodes := 0
 	totalNodes := len(parentsMap)
 
-	for numNodes <= totalNodes {
+	for numNodes < totalNodes {
 		foundIDs := make(map[string]bool)
 		for id, parentsList := range parentsMap {
-			if len(parentsList) == 0 {
+			if len(parentsList) == 0 || (parentsList[0] == "" && len(parentsList) == 1) {
 				frontiers[frontierLevel] = append(frontiers[frontierLevel], id)
 				foundIDs[id] = true
 				numNodes++
-				delete(parentsMap, id)
 			}
 		}
 
 		if len(foundIDs) == 0 {
-			return frontiers, fmt.Errorf("Error: cycle detected")
+			// TODO: print out offending cycle
+			return frontiers, infoNodes, fmt.Errorf("error: cycle detected")
+		}
+
+		for id := range foundIDs {
+			delete(parentsMap, id)
 		}
 
 		for id, parentsList := range parentsMap {
@@ -55,15 +62,18 @@ func ToposortFromBfsNodeMap(nodeMap map[string]BfsNode) (map[int][]string, error
 		frontierLevel++
 	}
 
-	return frontiers, nil
+	return frontiers, infoNodes, nil
 }
 
-func copyParents(inputMap map[string]BfsNode) map[string][]string {
+func copyParents(inputMap map[string]BfsNode) (map[string][]string, []string) {
 	retMap := map[string][]string{}
+	var infoNodes []string
 	for key, value := range inputMap {
 		if !value.NotInBlastRadius {
 			retMap[key] = append(retMap[key], value.Parents...)
+		} else {
+			infoNodes = append(infoNodes, key)
 		}
 	}
-	return retMap
+	return retMap, infoNodes
 }
