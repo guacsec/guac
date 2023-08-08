@@ -107,14 +107,27 @@ var queryPatchCmd = &cobra.Command{
 				allNodes = append(allNodes, id)
 			}
 			fmt.Printf("\n---FRONTIER LEVEL %d---\n", level)
-			poc = append(poc, printNodesInfo(ctx, gqlClient, bfsMap, allNodes)...)
+
+			nodesInfo, err := printNodesInfo(ctx, gqlClient, bfsMap, allNodes)
+
+			if err != nil {
+				logger.Fatalf("%s", err)
+			}
+
+			poc = append(poc, nodesInfo...)
 		}
 
 		fmt.Printf("\n---INFO NODES---\n")
 		if len(infoNodes) == 0 {
 			fmt.Printf("no info nodes found\n")
 		} else {
-			poc = append(poc, printNodesInfo(ctx, gqlClient, bfsMap, infoNodes)...)
+			nodesInfo, err := printNodesInfo(ctx, gqlClient, bfsMap, infoNodes)
+
+			if err != nil {
+				logger.Fatalf("%s", err)
+			}
+
+			poc = append(poc, nodesInfo...)
 		}
 
 		fmt.Printf("\n---POINTS OF CONTACT---")
@@ -130,7 +143,7 @@ var queryPatchCmd = &cobra.Command{
 	},
 }
 
-func printNodesInfo(ctx context.Context, gqlClient graphql.Client, bfsMap map[string]analysis.BfsNode, nodes []string) []string {
+func printNodesInfo(ctx context.Context, gqlClient graphql.Client, bfsMap map[string]analysis.BfsNode, nodes []string) ([]string, error) {
 	poc := []string{}
 	for _, id := range nodes {
 		node, err := model.Node(ctx, gqlClient, id)
@@ -151,6 +164,8 @@ func printNodesInfo(ctx context.Context, gqlClient graphql.Client, bfsMap map[st
 			pretty = makeSrcPretty(*node)
 		case *model.NodeNodeArtifact:
 			pretty = makeArtifactPretty(*node)
+		default:
+			return nil, fmt.Errorf("discovered unexpected node type in bfsMap (expect plg, source, or artifact)")
 		}
 
 		fmt.Printf("%s: %s\n", id, pretty)
@@ -159,7 +174,7 @@ func printNodesInfo(ctx context.Context, gqlClient graphql.Client, bfsMap map[st
 			poc = append(poc, id)
 		}
 	}
-	return poc
+	return poc, nil
 }
 
 func makePOCPretty(poc model.AllPointOfContact) string {
@@ -247,11 +262,16 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 	opts.startPurl = startPurl
 
 	if _, err := helpers.PurlToPkg(startPurl); startPurl != "" && err != nil {
-		return opts, fmt.Errorf("expected input to be purl")
+		return opts, fmt.Errorf("expected start input to be purl")
+	}
+
+	opts.stopPurl = stopPurl
+
+	if _, err := helpers.PurlToPkg(stopPurl); stopPurl != "" && err != nil {
+		return opts, fmt.Errorf("expected stop input to be purl")
 	}
 
 	opts.graphqlEndpoint = graphqlEndpoint
-	opts.stopPurl = stopPurl
 	opts.depth = depth
 	opts.isPackageVersionStart = isPackageVersionStart
 	opts.isPackageVersionStop = isPackageVersionStop
