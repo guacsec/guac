@@ -21,11 +21,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/Khan/genqlient/graphql"
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/cli"
@@ -45,130 +42,6 @@ type queryPatchOptions struct {
 	isPackageVersionStop  bool
 }
 
-var (
-	tm, _       = time.Parse(time.RFC3339, "2023-08-02T17:45:50.52Z")
-	sampleGraph = assembler.IngestPredicates{
-		IsDependency: []assembler.IsDependencyIngest{
-			{
-				Pkg: &model.PkgInputSpec{
-					Type:      "1pkgType",
-					Namespace: ptrfrom.String("1pkgNamespace"),
-					Name:      "1pkgName",
-					Version:   ptrfrom.String("1.19.0"),
-				},
-				DepPkg: &model.PkgInputSpec{
-					Type:      "3pkgType",
-					Namespace: ptrfrom.String("3pkgNamespace"),
-					Name:      "3pkgName",
-					Version:   ptrfrom.String("1.19.0"),
-				},
-				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
-					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
-				},
-			},
-		},
-
-		IsOccurrence: []assembler.IsOccurrenceIngest{
-			{
-				Pkg: &model.PkgInputSpec{
-					Type:      "1pkgType",
-					Namespace: ptrfrom.String("1pkgNamespace"),
-					Name:      "1pkgName",
-					Version:   ptrfrom.String("1.19.0"),
-				},
-				Artifact: &model.ArtifactInputSpec{
-					Algorithm: "1testArtifactAlgorithm",
-					Digest:    "1testArtifactDigest",
-				},
-				IsOccurrence: &model.IsOccurrenceInputSpec{
-					Justification: "connect 1pkg and 1artifact",
-				},
-			},
-			{
-				Pkg: &model.PkgInputSpec{
-					Type:      "2pkgType",
-					Namespace: ptrfrom.String("2pkgNamespace"),
-					Name:      "2pkgName",
-					Version:   ptrfrom.String("1.19.0"),
-				},
-				Artifact: &model.ArtifactInputSpec{
-					Algorithm: "2testArtifactAlgorithm",
-					Digest:    "2testArtifactDigest",
-				},
-				IsOccurrence: &model.IsOccurrenceInputSpec{
-					Justification: "connect 2pkg and 2artifact",
-				},
-			},
-		},
-		HasSlsa: []assembler.HasSlsaIngest{
-			{
-				Artifact: &model.ArtifactInputSpec{
-					Algorithm: "2testArtifactAlgorithm",
-					Digest:    "2testArtifactDigest",
-				},
-				Builder: &model.BuilderInputSpec{
-					Uri: "testUri",
-				},
-				Materials: []model.ArtifactInputSpec{{
-					Algorithm: "1testArtifactAlgorithm",
-					Digest:    "1testArtifactDigest",
-				}},
-				HasSlsa: &model.SLSAInputSpec{
-					BuildType:   "testBuildType",
-					SlsaVersion: "testSlsaVersion",
-					SlsaPredicate: []model.SLSAPredicateInputSpec{
-						{Key: "slsa.testKey", Value: "testValue"},
-					},
-				},
-			},
-		},
-		PointOfContact: []assembler.PointOfContactIngest{
-			{
-				Pkg: &model.PkgInputSpec{
-					Type:      "1pkgType",
-					Namespace: ptrfrom.String("1pkgNamespace"),
-					Name:      "1pkgName",
-					Version:   ptrfrom.String("1.19.0"),
-				},
-				PkgMatchFlag: model.MatchFlags{
-					Pkg: model.PkgMatchTypeSpecificVersion,
-				},
-				PointOfContact: &model.PointOfContactInputSpec{
-					Email:         "testEmail1",
-					Info:          "testInfo",
-					Since:         tm,
-					Justification: "testJustification",
-					Origin:        "testOrigin",
-					Collector:     "testCollector",
-				},
-			},
-			{
-				Pkg: &model.PkgInputSpec{
-					Type:      "2pkgType",
-					Namespace: ptrfrom.String("2pkgNamespace"),
-					Name:      "2pkgName",
-					Version:   ptrfrom.String("1.19.0"),
-				},
-				PkgMatchFlag: model.MatchFlags{
-					Pkg: model.PkgMatchTypeSpecificVersion,
-				},
-				PointOfContact: &model.PointOfContactInputSpec{
-					Email:         "testEmail2",
-					Info:          "testInfo",
-					Since:         tm,
-					Justification: "testJustification",
-					Origin:        "testOrigin",
-					Collector:     "testCollector",
-				},
-			},
-		},
-	}
-)
-
 var queryPatchCmd = &cobra.Command{
 	Use:   "patch plan [flags] purl",
 	Short: "query which packages are affected by the vulnerability associated with specified packageName or packageVersion",
@@ -181,7 +54,6 @@ var queryPatchCmd = &cobra.Command{
 			viper.GetString("start-purl"),
 			viper.GetString("stop-purl"),
 			viper.GetInt("search-depth"),
-			viper.GetBool("patch-sample-data"),
 			viper.GetBool("is-pkg-version-start"),
 			viper.GetBool("is-pkg-version-stop"),
 			args,
@@ -197,35 +69,21 @@ var queryPatchCmd = &cobra.Command{
 		var startID string
 		var stopID *string
 		stopID = nil
-		if opts.sampleData {
-			err = analysis.IngestTestData(ctx, gqlClient, sampleGraph)
+
+		startID, err = getPkgID(ctx, gqlClient, opts.startPurl, opts.isPackageVersionStart)
+
+		if err != nil {
+			logger.Fatalf("error getting start pkg from purl inputted %s \n", err)
+		}
+
+		if opts.stopPurl != "" {
+			stopPkg, err := getPkgID(ctx, gqlClient, opts.stopPurl, opts.isPackageVersionStop)
 
 			if err != nil {
-				fmt.Printf("error ingesting test data: %s\n", err)
-			}
-			getPackageIDsValues, err := analysis.GetPackageIDs(ctx, gqlClient, ptrfrom.String("3pkgType"), "3pkgNamespace", "3pkgName", ptrfrom.String("1.19.0"), true, false)
-
-			startID = *getPackageIDsValues[0]
-			if err != nil {
-				logger.Fatalf("error get start pkg for simple data: %s", err)
+				logger.Fatalf("error getting stop pkg from purl inputted %s\n", err)
 			}
 
-		} else {
-			startID, err = getPkgID(ctx, gqlClient, opts.startPurl, opts.isPackageVersionStart)
-
-			if err != nil {
-				logger.Fatalf("error getting start pkg from purl inputted %s \n", err)
-			}
-
-			if opts.stopPurl != "" {
-				stopPkg, err := getPkgID(ctx, gqlClient, opts.stopPurl, opts.isPackageVersionStop)
-
-				if err != nil {
-					logger.Fatalf("error getting stop pkg from purl inputted %s\n", err)
-				}
-
-				stopID = &stopPkg
-			}
+			stopID = &stopPkg
 
 		}
 
@@ -374,7 +232,7 @@ func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string, isPack
 	return pkgResponse.Packages[0].Namespaces[0].Names[0].Id, nil
 }
 
-func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string, depth int, sampleData bool, isPackageVersionStart bool, isPackageVersionStop bool, args []string) (queryPatchOptions, error) {
+func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string, depth int, isPackageVersionStart bool, isPackageVersionStop bool, args []string) (queryPatchOptions, error) {
 	var opts queryPatchOptions
 	opts.startPurl = startPurl
 
@@ -385,7 +243,6 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.stopPurl = stopPurl
 	opts.depth = depth
-	opts.sampleData = sampleData
 	opts.isPackageVersionStart = isPackageVersionStart
 	opts.isPackageVersionStop = isPackageVersionStop
 
