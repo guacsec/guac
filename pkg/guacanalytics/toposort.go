@@ -41,6 +41,7 @@ func ToposortFromBfsNodeMap(ctx context.Context, gqlClient graphql.Client, nodeM
 		}
 
 		if len(foundIDs) == 0 {
+			// TODO: print out offending cycle
 			return frontiers, infoNodes, fmt.Errorf("error: cycle detected")
 		}
 

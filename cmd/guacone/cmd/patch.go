@@ -95,7 +95,7 @@ var queryPatchCmd = &cobra.Command{
 		frontiers, infoNodes, err := analysis.ToposortFromBfsNodeMap(ctx, gqlClient, bfsMap)
 
 		if err != nil {
-			logger.Fatalf("error toposorting-- %s\n", err)
+			fmt.Printf("WARNING: There was cycle detected in the toposort so the results are incomplete: %s\n", err)
 		}
 
 		var poc []string
