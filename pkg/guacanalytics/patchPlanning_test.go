@@ -36,7 +36,8 @@ import (
 )
 
 var (
-	tm, _                   = time.Parse(time.RFC3339, "2023-07-17T17:45:50.52Z")
+	tm, _ = time.Parse(time.RFC3339, "2023-07-17T17:45:50.52Z")
+	// TODO: add tests with use of subpath and qualifiers
 	simpleIsDependencyGraph = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
 			{
@@ -180,7 +181,7 @@ var (
 					Digest:    "testArtifactDigest4",
 				},
 				IsOccurrence: &model.IsOccurrenceInputSpec{
-					Justification: "connect pkg5 and artifact3",
+					Justification: "connect pkg5 and artifact4",
 				},
 			},
 		},
@@ -1180,6 +1181,50 @@ func ingestTestData(ctx context.Context, client graphql.Client, graph assembler.
 	return nil
 }
 
+// This function return matching packageName and/or packageVersion node IDs depending on if you specified to only find name nodes or version nodes
+func GetPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *string, nodeNamespace string, nodeName string, nodeVersion *string, justFindVersion bool, justFindName bool) ([]*string, error) {
+	var pkgFilter model.PkgSpec
+
+	if nodeVersion != nil {
+		// TODO: extend to make use of subpath and qualifiers
+		pkgFilter = model.PkgSpec{
+			Type:      nodeType,
+			Namespace: &nodeNamespace,
+			Name:      &nodeName,
+			Version:   nodeVersion,
+		}
+	} else {
+		pkgFilter = model.PkgSpec{
+			Type: nodeType,
+		}
+	}
+
+	pkgResponse, err := model.Packages(ctx, gqlClient, pkgFilter)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting id for test case: %s\n", err)
+	}
+	var foundIDs []*string
+
+	if len(pkgResponse.Packages[0].Namespaces[0].Names) > 0 && !justFindVersion {
+		for _, name := range pkgResponse.Packages[0].Namespaces[0].Names {
+			foundIDs = append(foundIDs, &name.Id)
+		}
+	}
+
+	if len(pkgResponse.Packages[0].Namespaces[0].Names[0].Versions) > 0 && !justFindName {
+		for index := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+			foundIDs = append(foundIDs, &pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[index].Id)
+		}
+	}
+
+	if len(foundIDs) < 1 {
+		return nil, fmt.Errorf("no matching nodes found\n")
+	}
+
+	return foundIDs, nil
+}
+
 func Test_SearchSubgraphFromVuln(t *testing.T) {
 	server, err := startTestServer()
 
@@ -1351,7 +1396,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			expectedLen:       11,
 			expectedPkgs:      []string{"pkgType3", "pkgType2", "pkgType1", "pkgType4"},
 			expectedArtifacts: []string{"testArtifactAlgorithm1", "testArtifactAlgorithm2", "testArtifactAlgorithm3"},
-			graphInputs:       []assembler.IngestPredicates{simpleHasSLSAGraph, simpleIsDependencyGraph, isDependencyAndHasSLSARelationship},
+			graphInputs:       []assembler.IngestPredicates{simpleHasSLSAGraph, isDependencyAndHasSLSARelationship},
 		},
 		{
 			name:           "13: should not explore certifyGood case",
@@ -1468,9 +1513,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			var getPackageIDsValues []*string
 			var startID string
 			if tt.startVersion != nil {
-				getPackageIDsValues, err = getPackageIDs(ctx, gqlClient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, tt.startVersion, true, false)
+				getPackageIDsValues, err = GetPackageIDs(ctx, gqlClient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, tt.startVersion, true, false)
 			} else {
-				getPackageIDsValues, err = getPackageIDs(ctx, gqlClient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, nil, false, true)
+				getPackageIDsValues, err = GetPackageIDs(ctx, gqlClient, ptrfrom.String(tt.startType), tt.startNamespace, tt.startName, nil, false, true)
 			}
 
 			if err != nil {
@@ -1487,9 +1532,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			var stopID *string
 			if tt.stopType != nil {
 				if tt.stopVersion != nil {
-					getPackageIDsValues, err = getPackageIDs(ctx, gqlClient, tt.stopType, tt.stopNamespace, tt.stopName, tt.stopVersion, true, false)
+					getPackageIDsValues, err = GetPackageIDs(ctx, gqlClient, tt.stopType, tt.stopNamespace, tt.stopName, tt.stopVersion, true, false)
 				} else {
-					getPackageIDsValues, err = getPackageIDs(ctx, gqlClient, tt.stopType, tt.stopNamespace, tt.stopName, nil, false, true)
+					getPackageIDsValues, err = GetPackageIDs(ctx, gqlClient, tt.stopType, tt.stopNamespace, tt.stopName, nil, false, true)
 				}
 
 				if err != nil {
@@ -1505,7 +1550,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				stopID = getPackageIDsValues[0]
 			}
 
-			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlClient, startID, stopID, tt.maxDepth)
+			gotMap, _, err := SearchDependenciesFromStartNode(ctx, gqlClient, startID, stopID, tt.maxDepth)
 
 			if err != nil {
 				t.Errorf("got err from SearchDependenciesFromStartNode: %s", err)
@@ -1517,7 +1562,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 			var expectedPkgIDs []string
 			for _, pkg := range tt.expectedPkgs {
-				pkgIDs, err := getPackageIDs(ctx, gqlClient, &pkg, "", "", nil, false, false)
+				pkgIDs, err := GetPackageIDs(ctx, gqlClient, &pkg, "", "", nil, false, false)
 				if err != nil {
 					t.Errorf("expected package %s not found: %s\n", pkg, err)
 				}
@@ -1656,48 +1701,6 @@ func getGraphqlTestServer() (*handler.Server, error) {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
 	return srv, nil
-}
-
-// This function return matching packageName and/or packageVersion node IDs depending on if you specified to only find name nodes or version nodes
-func getPackageIDs(ctx context.Context, gqlClient graphql.Client, nodeType *string, nodeNamespace string, nodeName string, nodeVersion *string, justFindVersion bool, justFindName bool) ([]*string, error) {
-	var pkgFilter model.PkgSpec
-	if nodeVersion != nil {
-		pkgFilter = model.PkgSpec{
-			Type:      nodeType,
-			Namespace: &nodeNamespace,
-			Name:      &nodeName,
-			Version:   nodeVersion,
-		}
-	} else {
-		pkgFilter = model.PkgSpec{
-			Type: nodeType,
-		}
-	}
-
-	pkgResponse, err := model.Packages(ctx, gqlClient, pkgFilter)
-
-	if err != nil {
-		return nil, fmt.Errorf("error getting id for test case: %s\n", err)
-	}
-	var foundIDs []*string
-
-	if len(pkgResponse.Packages[0].Namespaces[0].Names) > 0 && !justFindVersion {
-		for _, name := range pkgResponse.Packages[0].Namespaces[0].Names {
-			foundIDs = append(foundIDs, &name.Id)
-		}
-	}
-
-	if len(pkgResponse.Packages[0].Namespaces[0].Names[0].Versions) > 0 && !justFindName {
-		for index := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-			foundIDs = append(foundIDs, &pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[index].Id)
-		}
-	}
-
-	if len(foundIDs) < 1 {
-		return nil, fmt.Errorf("no matching nodes found\n")
-	}
-
-	return foundIDs, nil
 }
 
 func getArtifactIDs(ctx context.Context, gqlClient graphql.Client, algorithm string) ([]string, error) {
