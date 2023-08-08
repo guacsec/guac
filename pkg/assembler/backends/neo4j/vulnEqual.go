@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -196,9 +195,5 @@ func generateModelIsVulnerability(osv *model.Osv, vuln model.CveOrGhsa, justific
 }
 
 func (c *neo4jClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
-	err := helper.ValidateCveOrGhsaIngestionInput(vulnerability, "IngestVulnEqual")
-	if err != nil {
-		return nil, err
-	}
 	panic(fmt.Errorf("not implemented - IngestVulnEqual"))
 }

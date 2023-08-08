@@ -81,7 +81,7 @@ type demoClient struct {
 	certifyGoods           goodList
 	pkgEquals              pkgEqualList
 	vulnerabilities        vulnTypeMap
-	equalVulnerabilities   equalVulnerabilityList
+	vulnerabilityEquals    vulnerabilityEqualList
 	hasMetadatas           hasMetadataList
 	pointOfContacts        pointOfContactList
 	hasSBOMs               hasSBOMList
@@ -132,7 +132,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		certifyGoods:           goodList{},
 		pkgEquals:              pkgEqualList{},
 		vulnerabilities:        vulnTypeMap{},
-		equalVulnerabilities:   equalVulnerabilityList{},
+		vulnerabilityEquals:    vulnerabilityEqualList{},
 		hasSBOMs:               hasSBOMList{},
 		hasSLSAs:               hasSLSAList{},
 		hasSources:             hasSrcList{},

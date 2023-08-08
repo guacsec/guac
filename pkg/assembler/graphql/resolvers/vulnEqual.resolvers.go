@@ -17,5 +17,5 @@ func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability mo
 
 // VulnEqual is the resolver for the vulnEqual field.
 func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error) {
-	return r.Backend.VulnEqual(ctx, vulnEqualSpec)
+	return r.Backend.VulnEqual(ctx, &vulnEqualSpec)
 }
