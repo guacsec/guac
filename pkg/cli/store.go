@@ -76,7 +76,6 @@ func init() {
 	set.Int("num-path", 0, "number of paths to return, 0 means all paths")
 	set.String("start-purl", "", "string input of purl with package to start search from")
 	set.String("stop-purl", "", "string input of purl with package to stop search at")
-	set.Bool("patch-sample-data", false, "ingest patch planning sample data instead of using a purl")
 	set.Bool("is-pkg-version-start", false, "for query path are you inputting a packageVersion to start the search from (if false then packageName)")
 	set.Bool("is-pkg-version-stop", false, "for query path are you inputting a packageVersion to stop the search at (if false then packageName)")
 
