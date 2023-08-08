@@ -37,7 +37,6 @@ type queryPatchOptions struct {
 	startPurl             string
 	stopPurl              string
 	depth                 int
-	sampleData            bool
 	isPackageVersionStart bool
 	isPackageVersionStop  bool
 }
@@ -167,12 +166,23 @@ func makePOCPretty(poc model.AllPointOfContact) string {
 	return fmt.Sprintf("id- %s | email- %s | info- %s | collector- %s | justification- %s | origin- %s | since- %s", poc.Id, poc.Email, poc.Info, poc.Collector, poc.Justification, poc.Origin, poc.Since)
 }
 
-func makePkgPretty(pkg model.NodeNodePackage, version bool) string {
-	pkgString := fmt.Sprintf("pkg:%s/%s/%s", pkg.Type, pkg.Namespaces[0].Namespace, pkg.Namespaces[0].Names[0].Name)
+func makePkgPretty(pkg model.NodeNodePackage, isPackageVersion bool) string {
+	version := ""
+	subpath := ""
+	var qualifiers []string
 
-	if version {
-		return fmt.Sprintf("%s@%s", pkgString, pkg.Namespaces[0].Names[0].Versions[0].Version)
+	if isPackageVersion {
+		version = pkg.Namespaces[0].Names[0].Versions[0].Version
+
+		subpath = pkg.Namespaces[0].Names[0].Versions[0].Subpath
+
+		for _, qualifier := range pkg.Namespaces[0].Names[0].Versions[0].Qualifiers {
+			qualifiers = append(qualifiers, qualifier.Key, qualifier.Value)
+		}
+
 	}
+
+	pkgString := helpers.PkgToPurl(pkg.Type, pkg.Namespaces[0].Namespace, pkg.Namespaces[0].Names[0].Name, version, subpath, qualifiers)
 
 	return pkgString
 }
@@ -189,7 +199,7 @@ func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string, isPack
 	pkgInput, err := helpers.PurlToPkg(purl)
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error getting pkg ID: %s", err)
 	}
 
 	var pkgFilter model.PkgSpec
@@ -250,7 +260,7 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"start-purl", "stop-purl", "search-depth", "patch-sample-data", "is-pkg-version-start", "is-pkg-version-stop"})
+	set, err := cli.BuildFlags([]string{"start-purl", "stop-purl", "search-depth", "is-pkg-version-start", "is-pkg-version-stop"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
 		os.Exit(1)
