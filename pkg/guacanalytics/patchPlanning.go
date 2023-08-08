@@ -102,9 +102,9 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		q.queue = append(q.queue, startID)
 	}
 
-	bfsNodeMap, err := q.bfsOfDependencies(ctx, gqlClient, stopID, maxDepth)
+	err = q.bfsOfDependencies(ctx, gqlClient, stopID, maxDepth)
 	if err != nil {
-		return bfsNodeMap, err
+		return nil, err
 	}
 
 	return q.nodeMap, nil
@@ -112,7 +112,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 }
 
 // bfsOfDependencies performs a breadth-first search on a graph to find dependencies
-func (q *queueValues) bfsOfDependencies(ctx context.Context, gqlClient graphql.Client, stopID *string, maxDepth int) (map[string]BfsNode, error) {
+func (q *queueValues) bfsOfDependencies(ctx context.Context, gqlClient graphql.Client, stopID *string, maxDepth int) error {
 	for len(q.queue) > 0 {
 		q.now = q.queue[0]
 		q.queue = q.queue[1:]
@@ -130,21 +130,21 @@ func (q *queueValues) bfsOfDependencies(ctx context.Context, gqlClient graphql.C
 		neighborsResponse, err := model.Neighbors(ctx, gqlClient, q.now, []model.Edge{})
 
 		if err != nil {
-			return nil, fmt.Errorf("failed getting neighbors:%w", err)
+			return fmt.Errorf("failed getting neighbors:%w", err)
 		}
 
 		for _, neighbor := range neighborsResponse.Neighbors {
 			err = caseOnPredicates(ctx, gqlClient, q, neighbor, q.nowNode.Type)
 
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 
 		q.nowNode.Expanded = true
 		q.nodeMap[q.now] = q.nowNode
 	}
-	return nil, nil
+	return nil
 }
 
 func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode, nodeType NodeType) error {
