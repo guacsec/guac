@@ -389,7 +389,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 			},
 			Query: &model.HasSourceAtSpec{
-				ID: ptrfrom.String("10"),
+				ID: ptrfrom.String("9"),
 			},
 			ExpHSA: []*model.HasSourceAt{
 				{
@@ -569,9 +569,9 @@ func TestHasSourceAtNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "9"}, // Package Version
-				"8": []string{"6", "9"}, // Source Name
-				"9": []string{"2", "6"}, // HSA
+				"4": []string{"1", "8"}, // Package Version
+				"7": []string{"5", "8"}, // Source Name
+				"8": []string{"1", "5"}, // HSA
 			},
 		},
 		{
@@ -599,11 +599,11 @@ func TestHasSourceAtNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4":  []string{"2", "2", "10"}, // Package Name
-				"5":  []string{"2", "9"},       // Package Version
-				"8":  []string{"6", "9", "10"}, // Source Name
-				"9":  []string{"2", "6"},       // HSA -> Version
-				"10": []string{"2", "6"},       // HSA -> Name
+				"3": []string{"1", "1", "9"}, // Package Name
+				"4": []string{"1", "8"},      // Package Version
+				"7": []string{"5", "8", "9"}, // Source Name
+				"8": []string{"1", "5"},      // HSA -> Version
+				"9": []string{"1", "5"},      // HSA -> Name
 			},
 		},
 	}

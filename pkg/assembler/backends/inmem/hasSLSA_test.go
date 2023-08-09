@@ -361,7 +361,7 @@ func TestHasSLSA(t *testing.T) {
 				},
 			},
 			Query: &model.HasSLSASpec{
-				ID: ptrfrom.String("6"),
+				ID: ptrfrom.String("5"),
 			},
 			ExpHS: []*model.HasSlsa{
 				{
@@ -804,10 +804,10 @@ func TestHasSLSANeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"5"},           // a1
-				"3": []string{"5"},           // a2
-				"4": []string{"5"},           // b1
-				"5": []string{"2", "3", "4"}, // hasSBOM
+				"1": []string{"4"},           // a1
+				"2": []string{"4"},           // a2
+				"3": []string{"4"},           // b1
+				"4": []string{"1", "2", "3"}, // hasSBOM
 			},
 		},
 		{
@@ -833,13 +833,13 @@ func TestHasSLSANeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"7"},           // a1
-				"3": []string{"7"},           // a2
-				"4": []string{"8"},           // a3
-				"5": []string{"8"},           // a4
-				"6": []string{"7", "8"},      // b1
-				"7": []string{"2", "3", "6"}, // hasSBOM 1
-				"8": []string{"4", "5", "6"}, // hasSBOM 2
+				"1": []string{"6"},           // a1
+				"2": []string{"6"},           // a2
+				"3": []string{"7"},           // a3
+				"4": []string{"7"},           // a4
+				"5": []string{"6", "7"},      // b1
+				"6": []string{"1", "2", "5"}, // hasSBOM 1
+				"7": []string{"3", "4", "5"}, // hasSBOM 2
 			},
 		},
 	}

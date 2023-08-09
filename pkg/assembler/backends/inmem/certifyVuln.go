@@ -78,15 +78,13 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 	}
 	packageVulns := foundPackage.certifyVulnLinks
 
-	var vulnID uint32
-	var foundVulnNode *vulnIDNode
 	var vulnerabilityLinks []uint32
 
-	vulnID, err = getVulnerabilityIDFromInput(c, vulnerability)
+	vulnID, err := getVulnerabilityIDFromInput(c, vulnerability)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	foundVulnNode, err = byID[*vulnIDNode](vulnID, c)
+	foundVulnNode, err := byID[*vulnIDNode](vulnID, c)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
@@ -297,6 +295,7 @@ func (c *demoClient) buildCertifyVulnerability(link *certifyVulnerabilityLink, f
 			}
 		}
 	}
+
 	// if package not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search
 	if p == nil && ingestOrIDProvided {
 		return nil, gqlerror.Errorf("failed to retrieve package via packageID")

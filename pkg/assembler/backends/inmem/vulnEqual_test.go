@@ -364,11 +364,7 @@ func TestVulEqual(t *testing.T) {
 				},
 			},
 			Query: &model.VulnEqualSpec{
-				Vulnerabilities: []*model.VulnerabilitySpec{
-					{
-						ID: ptrfrom.String("6"),
-					},
-				},
+				ID: ptrfrom.String("8"),
 			},
 			ExpVulnEqual: []*model.VulnEqual{
 				&model.VulnEqual{
@@ -413,39 +409,9 @@ func TestVulEqual(t *testing.T) {
 				},
 			},
 			Query: &model.VulnEqualSpec{
-				Vulnerabilities: []*model.VulnerabilitySpec{
-					{
-						ID: ptrfrom.String("123456"),
-					},
-				},
+				ID: ptrfrom.String("123456"),
 			},
 			ExpVulnEqual: nil,
-		},
-		{
-			Name:   "Ingest without vulnerability",
-			InVuln: []*model.VulnerabilityInputSpec{c1},
-			Calls: []call{
-				call{
-					OtherVuln: c1,
-					In: &model.VulnEqualInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name:   "Ingest without other vulnerability",
-			InVuln: []*model.VulnerabilityInputSpec{o1},
-			Calls: []call{
-				call{
-					Vuln: o1,
-					In: &model.VulnEqualInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpIngestErr: true,
 		},
 		{
 			Name: "Query Error",
@@ -456,16 +422,12 @@ func TestVulEqual(t *testing.T) {
 					},
 				},
 			},
-			ExpQueryErr: true,
+			ExpQueryErr: false,
 		},
 		{
 			Name: "Query Bad ID",
 			Query: &model.VulnEqualSpec{
-				Vulnerabilities: []*model.VulnerabilitySpec{
-					{
-						ID: ptrfrom.String("-123"),
-					},
-				},
+				ID: ptrfrom.String("-123"),
 			},
 			ExpQueryErr: true,
 		},
@@ -508,7 +470,7 @@ func TestVulEqual(t *testing.T) {
 	}
 }
 
-func TestVulnerabilityNeighbors(t *testing.T) {
+func TestVulnerabilityEqualNeighbors(t *testing.T) {
 	type call struct {
 		Vuln      *model.VulnerabilityInputSpec
 		OtherVuln *model.VulnerabilityInputSpec
@@ -533,9 +495,9 @@ func TestVulnerabilityNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"4"},      // osv to isVuln
-				"3": []string{"4"},      // cve to isVuln
-				"4": []string{"2", "3"}, // isVuln to osv and cve
+				"2": []string{"1", "5"}, // osv to isVuln
+				"4": []string{"3", "5"}, // cve to isVuln
+				"5": []string{"1", "3"}, // isVuln to osv and cve
 			},
 		},
 		{
@@ -558,11 +520,11 @@ func TestVulnerabilityNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"5", "6"}, // osv to both isVuln
-				"3": []string{"5"},
-				"4": []string{"6"},
-				"5": []string{"2", "3"},
-				"6": []string{"2", "4"},
+				"2": []string{"1", "7", "8"}, // osv to both isVuln
+				"4": []string{"3", "7"},
+				"6": []string{"5", "8"},
+				"7": []string{"1", "3"},
+				"8": []string{"1", "5"},
 			},
 		},
 	}

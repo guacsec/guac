@@ -118,7 +118,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 				{
 					Package: p2out,
 					Vulnerability: &model.Vulnerability{
-						Type:             "noVuln",
+						Type:             "novuln",
 						VulnerabilityIDs: []*model.VulnerabilityID{noVulnOut},
 					},
 					Metadata: vmd1,
@@ -410,9 +410,9 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "7"}, // pkg version -> pkg name, vex
-				"6": []string{"7"},      // Vuln -> vex
-				"7": []string{"2", "6"}, // Vex -> pkg version, vuln
+				"4": []string{"1", "7"}, // pkg version -> pkg name, vex
+				"6": []string{"5", "7"}, // Vuln -> vex
+				"7": []string{"1", "5"}, // Vex -> pkg version, vuln
 			},
 		},
 		{
@@ -448,11 +448,11 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "8", "9"}, // pkg version -> pkg name, vex1, vex2
-				"6": []string{"8"},           // Vuln1 -> vex1
-				"7": []string{"9"},           // Vuln2 -> vex2
-				"8": []string{"2", "6"},      // Vex1 -> pkg version, vuln1
-				"9": []string{"2", "7"},      // Vex2 -> pkg version, vuln2
+				"4": []string{"1", "7", "8"}, // pkg version -> pkg name, vex1, vex2
+				"5": []string{"7"},           // Vuln1 -> vex1
+				"6": []string{"8"},           // Vuln2 -> vex2
+				"7": []string{"1", "5"},      // Vex1 -> pkg version, vuln1
+				"8": []string{"1", "6"},      // Vex2 -> pkg version, vuln2
 			},
 		},
 	}
