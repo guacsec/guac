@@ -18,6 +18,7 @@ package slsa
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -39,6 +40,9 @@ import (
 // - A artifact for each digest information
 // - a pkg or source depending on what is represented by the name/URI
 // - An IsOccurence input spec which will generate a predicate for each occurence
+
+var ErrMetadataNil = errors.New("SLSA01 Metadata is nil")
+
 type slsaEntity struct {
 	artifacts []*model.ArtifactInputSpec
 	occurence *model.IsOccurrenceInputSpec
@@ -194,14 +198,20 @@ func getSlsaEntity(name string, digests scommon.DigestSet) (*slsaEntity, error) 
 	return nil, fmt.Errorf("%w unable to get Guac Generic Purl, this should not happen", err)
 }
 
-func fillSLSA01(inp *model.SLSAInputSpec, stmt *in_toto.ProvenanceStatementSLSA01) {
+func fillSLSA01(inp *model.SLSAInputSpec, stmt *in_toto.ProvenanceStatementSLSA01) error {
 	inp.BuildType = stmt.Predicate.Recipe.Type
+
+	if stmt.Predicate.Metadata == nil {
+		return ErrMetadataNil
+	}
 	if stmt.Predicate.Metadata.BuildStartedOn != nil {
 		inp.StartedOn = stmt.Predicate.Metadata.BuildStartedOn
 	}
 	if stmt.Predicate.Metadata.BuildFinishedOn != nil {
-		inp.FinishedOn = stmt.Predicate.Metadata.BuildStartedOn
+		inp.FinishedOn = stmt.Predicate.Metadata.BuildFinishedOn
 	}
+
+	return nil
 }
 
 func fillSLSA02(inp *model.SLSAInputSpec, stmt *in_toto.ProvenanceStatementSLSA02) {
@@ -232,7 +242,9 @@ func (s *slsaParser) getSLSA() error {
 	var pred any
 	switch s.header.PredicateType {
 	case slsa01.PredicateSLSAProvenance:
-		fillSLSA01(inp, s.s01smt)
+		if err := fillSLSA01(inp, s.s01smt); err != nil {
+			return fmt.Errorf("could not fill SLSA01: %w", err)
+		}
 		pred = s.s01smt.Predicate
 	case slsa02.PredicateSLSAProvenance:
 		fillSLSA02(inp, s.s02smt)
