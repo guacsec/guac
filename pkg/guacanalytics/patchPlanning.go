@@ -104,7 +104,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 		q.queue = append(q.queue, startID)
 	}
 
-	err = q.bfsOfDependencies(ctx, gqlClient, stopID, maxDepth)
+	err = q.bfsOfDependents(ctx, gqlClient, stopID, maxDepth)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -113,8 +113,8 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 
 }
 
-// bfsOfDependencies performs a breadth-first search on a graph to find dependencies
-func (q *queueValues) bfsOfDependencies(ctx context.Context, gqlClient graphql.Client, stopID *string, maxDepth int) error {
+// bfsOfDependents performs a breadth-first search on a graph to find dependencies
+func (q *queueValues) bfsOfDependents(ctx context.Context, gqlClient graphql.Client, stopID *string, maxDepth int) error {
 	for len(q.queue) > 0 {
 		q.now = q.queue[0]
 		q.queue = q.queue[1:]
