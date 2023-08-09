@@ -1258,7 +1258,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		graphInputs       []assembler.IngestPredicates
 	}{
 		{
-			name:           "1: two levels of dependencies, no stopID and no limiting maxDepth",
+			name:           "1: two levels of dependents, no stopID and no limiting maxDepth",
 			startType:      "conan",
 			startNamespace: "openssl.org",
 			startName:      "openssl",
@@ -1269,7 +1269,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInputs:    []assembler.IngestPredicates{simpleIsDependencyGraph},
 		},
 		{
-			name:           "2:  one level of dependencies, no stopID and no limiting maxDepth",
+			name:           "2:  one level of dependents, no stopID and no limiting maxDepth",
 			startType:      "deb",
 			startNamespace: "ubuntu",
 			startName:      "dpkg",
@@ -1280,7 +1280,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInputs:    []assembler.IngestPredicates{simpleIsDependencyGraph},
 		},
 		{
-			name:           "3: two levels of dependencies, a stopID at the first level and no limiting maxDepth",
+			name:           "3: two levels of dependents, a stopID at the first level and no limiting maxDepth",
 			startType:      "conan",
 			startNamespace: "openssl.org",
 			startName:      "openssl",
@@ -1295,7 +1295,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInputs:    []assembler.IngestPredicates{simpleIsDependencyGraph},
 		},
 		{
-			name:           "4: two levels of dependencies, no stopID and a limiting maxDepth at the first level",
+			name:           "4: two levels of dependents, no stopID and a limiting maxDepth at the first level",
 			startType:      "conan",
 			startNamespace: "openssl.org",
 			startName:      "openssl",
@@ -1550,10 +1550,10 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				stopID = getPackageIDsValues[0]
 			}
 
-			gotMap, _, err := SearchDependenciesFromStartNode(ctx, gqlClient, startID, stopID, tt.maxDepth)
+			gotMap, _, err := SearchDependentsFromStartPackage(ctx, gqlClient, startID, stopID, tt.maxDepth)
 
 			if err != nil {
-				t.Errorf("got err from SearchDependenciesFromStartNode: %s", err)
+				t.Errorf("got err from SearchDependentsFromStartPackage: %s", err)
 			}
 
 			if diff := cmp.Diff(tt.expectedLen, len(gotMap)); len(diff) > 0 {
