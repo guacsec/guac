@@ -139,7 +139,7 @@ func TestHashEqual(t *testing.T) {
 			},
 			Query: &model.HashEqualSpec{
 				Artifacts: []*model.ArtifactSpec{{
-					ID: ptrfrom.String("4"),
+					ID: ptrfrom.String("3"),
 				}},
 			},
 			ExpHE: []*model.HashEqual{
@@ -165,7 +165,7 @@ func TestHashEqual(t *testing.T) {
 			},
 			Query: &model.HashEqualSpec{
 				Artifacts: []*model.ArtifactSpec{{
-					ID: ptrfrom.String("2"),
+					ID: ptrfrom.String("1"),
 				}},
 			},
 			ExpHE: []*model.HashEqual{
@@ -252,7 +252,7 @@ func TestHashEqual(t *testing.T) {
 						Digest:    ptrfrom.String("7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
 					},
 					{
-						ID: ptrfrom.String("4"),
+						ID: ptrfrom.String("3"),
 					},
 				},
 			},
@@ -351,7 +351,7 @@ func TestHashEqual(t *testing.T) {
 				},
 			},
 			Query: &model.HashEqualSpec{
-				ID: ptrfrom.String("6"),
+				ID: ptrfrom.String("5"),
 			},
 			ExpHE: []*model.HashEqual{
 				{
@@ -597,7 +597,7 @@ func TestIngestHashEquals(t *testing.T) {
 			},
 			Query: &model.HashEqualSpec{
 				Artifacts: []*model.ArtifactSpec{{
-					ID: ptrfrom.String("4"),
+					ID: ptrfrom.String("3"),
 				}},
 			},
 			ExpHE: []*model.HashEqual{
@@ -621,7 +621,7 @@ func TestIngestHashEquals(t *testing.T) {
 			},
 			Query: &model.HashEqualSpec{
 				Artifacts: []*model.ArtifactSpec{{
-					ID: ptrfrom.String("2"),
+					ID: ptrfrom.String("1"),
 				}},
 			},
 			ExpHE: []*model.HashEqual{
@@ -702,7 +702,7 @@ func TestIngestHashEquals(t *testing.T) {
 						Digest:    ptrfrom.String("7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
 					},
 					{
-						ID: ptrfrom.String("4"),
+						ID: ptrfrom.String("3"),
 					},
 				},
 			},
@@ -783,9 +783,9 @@ func TestHashEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"4"},      // a1
-				"3": []string{"4"},      // a2
-				"4": []string{"2", "3"}, // hashequal
+				"1": []string{"3"},      // a1
+				"2": []string{"3"},      // a2
+				"3": []string{"1", "2"}, // hashequal
 			},
 		},
 		{
@@ -808,11 +808,11 @@ func TestHashEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"5", "6"}, // a1
-				"3": []string{"5"},      // a2
-				"4": []string{"6"},      // a3
-				"5": []string{"2", "3"}, // hashequal 1
-				"6": []string{"2", "4"}, // hashequal 2
+				"1": []string{"4", "5"}, // a1
+				"2": []string{"4"},      // a2
+				"3": []string{"5"},      // a3
+				"4": []string{"1", "2"}, // hashequal 1
+				"5": []string{"1", "3"}, // hashequal 2
 			},
 		},
 	}

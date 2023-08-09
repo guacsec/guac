@@ -353,7 +353,7 @@ func TestCertifyScorecard(t *testing.T) {
 				},
 			},
 			Query: &model.CertifyScorecardSpec{
-				ID: ptrfrom.String("5"),
+				ID: ptrfrom.String("4"),
 			},
 			ExpSC: []*model.CertifyScorecard{
 				{
@@ -646,8 +646,8 @@ func TestCertifyScorecardNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"2", "5"}, // src name
-				"5": []string{"2"},      // SC
+				"3": []string{"1", "4"}, // src name
+				"4": []string{"1"},      // SC
 			},
 		},
 		{
@@ -675,11 +675,11 @@ func TestCertifyScorecardNeighbors(t *testing.T) {
 			},
 			ExpNeighbors: map[string][]string{
 				// test sources are all type git, id:2
-				"4": []string{"2", "7"},      // src name 1 -> src namespace, SC1
-				"6": []string{"2", "8", "9"}, // src name 2 -> src namespace, SC2, SC3
-				"7": []string{"2"},           // SC 1
-				"8": []string{"2"},           // SC 2
-				"9": []string{"2"},           // SC 3
+				"3": []string{"1", "6"},      // src name 1 -> src namespace, SC1
+				"5": []string{"1", "7", "8"}, // src name 2 -> src namespace, SC2, SC3
+				"6": []string{"1"},           // SC 1
+				"7": []string{"1"},           // SC 2
+				"8": []string{"1"},           // SC 3
 			},
 		},
 	}

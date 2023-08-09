@@ -38,7 +38,11 @@ type vulnerabilityEqualLink struct {
 func (n *vulnerabilityEqualLink) ID() uint32 { return n.id }
 
 func (n *vulnerabilityEqualLink) Neighbors(allowedEdges edgeMap) []uint32 {
-	return n.vulnerabilities
+	out := make([]uint32, 0, 2)
+	if len(n.vulnerabilities) > 0 && allowedEdges[model.EdgeVulnEqualVulnerability] {
+		out = append(out, n.vulnerabilities...)
+	}
+	return out
 }
 
 func (n *vulnerabilityEqualLink) BuildModelNode(c *demoClient) (model.Node, error) {

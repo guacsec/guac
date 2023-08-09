@@ -139,7 +139,7 @@ func TestPkgEqual(t *testing.T) {
 			},
 			Query: &model.PkgEqualSpec{
 				Packages: []*model.PkgSpec{{
-					ID: ptrfrom.String("7"),
+					ID: ptrfrom.String("6"),
 				}},
 			},
 			ExpHE: []*model.PkgEqual{
@@ -165,7 +165,7 @@ func TestPkgEqual(t *testing.T) {
 			},
 			Query: &model.PkgEqualSpec{
 				Packages: []*model.PkgSpec{{
-					ID: ptrfrom.String("5"),
+					ID: ptrfrom.String("4"),
 				}},
 			},
 			ExpHE: []*model.PkgEqual{
@@ -351,7 +351,7 @@ func TestPkgEqual(t *testing.T) {
 				},
 			},
 			Query: &model.PkgEqualSpec{
-				ID: ptrfrom.String("9"),
+				ID: ptrfrom.String("8"),
 			},
 			ExpHE: []*model.PkgEqual{
 				{
@@ -514,9 +514,9 @@ func TestPkgEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "7"}, // p1
-				"6": []string{"2", "7"}, // p2
-				"7": []string{"2", "2"}, // pkgequal
+				"4": []string{"1", "6"}, // p1
+				"5": []string{"1", "6"}, // p2
+				"6": []string{"1", "1"}, // pkgequal
 			},
 		},
 		{
@@ -539,11 +539,11 @@ func TestPkgEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "8", "9"}, // p1
-				"6": []string{"2", "8"},      // p2
-				"7": []string{"2", "9"},      // p3
-				"8": []string{"2", "2"},      // pkgequal 1
-				"9": []string{"2", "2"},      // pkgequal 2
+				"4": []string{"1", "7", "8"}, // p1
+				"5": []string{"1", "7"},      // p2
+				"6": []string{"1", "8"},      // p3
+				"7": []string{"1", "1"},      // pkgequal 1
+				"8": []string{"1", "1"},      // pkgequal 2
 			},
 		},
 	}

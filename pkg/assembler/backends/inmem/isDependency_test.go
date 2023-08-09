@@ -172,7 +172,7 @@ func TestIsDependency(t *testing.T) {
 			},
 			Query: &model.IsDependencySpec{
 				Package: &model.PkgSpec{
-					ID: ptrfrom.String("5"),
+					ID: ptrfrom.String("4"),
 				},
 			},
 			ExpID: []*model.IsDependency{
@@ -318,7 +318,7 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				ID: ptrfrom.String("9"),
+				ID: ptrfrom.String("8"),
 			},
 			ExpID: []*model.IsDependency{
 				{
@@ -580,10 +580,10 @@ func TestIsDependencyNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"2", "2", "2", "7"}, // p1/p2 name
-				"5": []string{"2", "7"},           // p1 version
-				"6": []string{"2"},                // p2 version
-				"7": []string{"2", "2"},           // isDep
+				"3": []string{"1", "1", "1", "6"}, // p1/p2 name
+				"4": []string{"1", "6"},           // p1 version
+				"5": []string{"1"},                // p2 version
+				"6": []string{"1", "1"},           // isDep
 			},
 		},
 		{
@@ -606,12 +606,12 @@ func TestIsDependencyNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4":  []string{"2", "2", "2"},        // p1/p2 name, 1 up, 2 down
-				"5":  []string{"2", "11"},            // p1 version, 1 up, isdep
-				"6":  []string{"2", "12"},            // p2 version, 1 up, isdep
-				"9":  []string{"7", "7", "11", "12"}, // p4 name, 1 up, 1 down, 2 isdeps
-				"11": []string{"2", "7"},             // isdep 1
-				"12": []string{"2", "7"},             // isdep 2
+				"3":  []string{"1", "1", "1"},        // p1/p2 name, 1 up, 2 down
+				"4":  []string{"1", "10"},            // p1 version, 1 up, isdep
+				"5":  []string{"1", "11"},            // p2 version, 1 up, isdep
+				"8":  []string{"6", "6", "10", "11"}, // p4 name, 1 up, 1 down, 2 isdeps
+				"10": []string{"1", "6"},             // isdep 1
+				"11": []string{"1", "6"},             // isdep 2
 			},
 		},
 	}

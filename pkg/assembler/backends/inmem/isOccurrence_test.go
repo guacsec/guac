@@ -738,12 +738,12 @@ func TestOccurrenceNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"2"},
-				"3": []string{"2", "2"},
-				"4": []string{"2", "2"},
-				"5": []string{"2", "7"}, // pkg version
-				"6": []string{"7"},      // artifact
-				"7": []string{"2", "6"}, // isOccurence
+				"1": []string{"1"},
+				"2": []string{"1", "1"},
+				"3": []string{"1", "1"},
+				"4": []string{"1", "6"}, // pkg version
+				"5": []string{"6"},      // artifact
+				"6": []string{"1", "5"}, // isOccurence
 			},
 		},
 		{
@@ -771,11 +771,11 @@ func TestOccurrenceNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "8", "9"}, // pkg version
-				"6": []string{"8"},           // artifact1
-				"7": []string{"9"},           // artifact2
-				"8": []string{"2", "6"},      // isOccurence 1
-				"9": []string{"2", "7"},      // isOccurence 2
+				"4": []string{"1", "7", "8"}, // pkg version
+				"5": []string{"7"},           // artifact1
+				"6": []string{"8"},           // artifact2
+				"7": []string{"1", "5"},      // isOccurence 1
+				"8": []string{"1", "6"},      // isOccurence 2
 			},
 		},
 	}
