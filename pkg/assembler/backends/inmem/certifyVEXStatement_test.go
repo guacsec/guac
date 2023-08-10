@@ -653,7 +653,7 @@ func TestVEX(t *testing.T) {
 				{
 					Subject: p1out,
 					Vulnerability: &model.Vulnerability{
-						Type:             "osv",
+						Type:             "cve",
 						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 					},
 					VexJustification: "test justification two",
@@ -878,8 +878,8 @@ func TestVEXNeighbors(t *testing.T) {
 			},
 			ExpNeighbors: map[string][]string{
 				"4": []string{"1", "7"}, // pkg version -> pkg name, vex
-				"5": []string{"6"},      // Vuln -> vex
-				"6": []string{"1", "5"}, // Vex -> pkg version, vuln
+				"6": []string{"5", "7"}, // vuln -> vuln type, vex
+				"7": []string{"1", "5"}, // Vex -> pkg version, vuln
 			},
 		},
 		{
@@ -910,10 +910,10 @@ func TestVEXNeighbors(t *testing.T) {
 			},
 			ExpNeighbors: map[string][]string{
 				"4": []string{"1", "8", "9"}, // pkg version -> pkg name, vex1, vex2
-				"5": []string{"7"},           // Vuln1 -> vex1
-				"6": []string{"8"},           // Vuln2 -> vex2
-				"7": []string{"1", "5"},      // Vex1 -> pkg version, vuln1
-				"8": []string{"1", "6"},      // Vex2 -> pkg version, vuln2
+				"6": []string{"5", "8"},      // Vuln1 -> vulnType, vex1
+				"7": []string{"5", "9"},      // Vuln2 -> vulnType, vex2
+				"8": []string{"1", "5"},      // Vex1 -> pkg version, vuln1
+				"9": []string{"1", "5"},      // Vex2 -> pkg version, vuln2
 			},
 		},
 	}

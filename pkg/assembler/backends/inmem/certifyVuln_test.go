@@ -227,6 +227,39 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 			},
 		},
 		{
+			Name:   "Query ID",
+			InVuln: []*model.VulnerabilityInputSpec{g1},
+			InPkg:  []*model.PkgInputSpec{p2},
+			Calls: []call{
+				{
+					Pkg:  p2,
+					Vuln: g1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				ID: ptrfrom.String("7"),
+			},
+			ExpVuln: []*model.CertifyVuln{
+				{
+					Package: p2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "ghsa",
+						VulnerabilityIDs: []*model.VulnerabilityID{g1out},
+					},
+					Metadata: vmd1,
+				},
+			},
+		},
+		{
 			Name:   "Query on Package",
 			InVuln: []*model.VulnerabilityInputSpec{g1},
 			InPkg:  []*model.PkgInputSpec{p2},
@@ -262,8 +295,34 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 			},
 		},
 		{
-			Name:   "Query No Vuln",
+			Name:   "Query none",
 			InVuln: []*model.VulnerabilityInputSpec{g1},
+			InPkg:  []*model.PkgInputSpec{p2},
+			Calls: []call{
+				{
+					Pkg:  p2,
+					Vuln: g1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					VulnerabilityID: ptrfrom.String("asdf"),
+				},
+			},
+			ExpVuln: nil,
+		},
+		{
+			Name:   "Query No Vuln",
+			InVuln: []*model.VulnerabilityInputSpec{noVulnInput},
 			InPkg:  []*model.PkgInputSpec{p2},
 			Calls: []call{
 				{
@@ -289,7 +348,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 				{
 					Package: p2out,
 					Vulnerability: &model.Vulnerability{
-						Type:             "noVuln",
+						Type:             "novuln",
 						VulnerabilityIDs: []*model.VulnerabilityID{noVulnOut},
 					},
 					Metadata: vmd1,
@@ -329,7 +388,6 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			// b, err := inmem.GetBackend(nil)
 			b, err := inmem.GetBackend(nil)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
@@ -448,11 +506,11 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "7", "8"}, // pkg version -> pkg name, vex1, vex2
-				"5": []string{"7"},           // Vuln1 -> vex1
-				"6": []string{"8"},           // Vuln2 -> vex2
-				"7": []string{"1", "5"},      // Vex1 -> pkg version, vuln1
-				"8": []string{"1", "6"},      // Vex2 -> pkg version, vuln2
+				"4": []string{"1", "8", "9"}, // pkg version -> pkg name, certVuln1, certVuln2
+				"6": []string{"5", "8"},      // Vuln1 -> vunType, certVuln1
+				"7": []string{"5", "9"},      // Vuln2 -> vunType, certVuln2
+				"8": []string{"1", "5"},      // certVuln1 -> pkg version, vuln1
+				"9": []string{"1", "5"},      // certVuln2 -> pkg version, vuln2
 			},
 		},
 	}
