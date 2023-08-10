@@ -72,62 +72,66 @@ func TestVulnInputToVURI(t *testing.T) {
 	}
 }
 
-func TestOSVToGHSACVE(t *testing.T) {
+func TestCreateVulnInput(t *testing.T) {
 	tests := []struct {
 		Name    string
 		Input   string
-		ExpCVE  *generated.VulnerabilityInputSpec
-		ExpGHSA *generated.VulnerabilityInputSpec
+		ExpVuln *generated.VulnerabilityInputSpec
 		ExpErr  bool
 	}{
 		{
 			Name:  "Good CVE",
 			Input: "CVE-1999-1234",
-			ExpCVE: &generated.VulnerabilityInputSpec{
+			ExpVuln: &generated.VulnerabilityInputSpec{
 				Type:            "cve",
 				VulnerabilityID: "cve-1999-1234",
 			},
-			ExpGHSA: nil,
-			ExpErr:  false,
+			ExpErr: false,
 		},
 		{
-			Name:   "Good GHSA",
-			Input:  "GHSA-1234-asdf-qwer",
-			ExpCVE: nil,
-			ExpGHSA: &generated.VulnerabilityInputSpec{
+			Name:  "Good GHSA",
+			Input: "GHSA-1234-asdf-qwer",
+			ExpVuln: &generated.VulnerabilityInputSpec{
 				Type:            "ghsa",
 				VulnerabilityID: "ghsa-1234-asdf-qwer",
 			},
 			ExpErr: false,
 		},
 		{
-			Name:    "Bad CVE",
-			Input:   "CVE-1999",
-			ExpCVE:  nil,
-			ExpGHSA: nil,
-			ExpErr:  true,
+			Name:  "Good OSV - asb",
+			Input: "ASB-A-189942529",
+			ExpVuln: &generated.VulnerabilityInputSpec{
+				Type:            "asb",
+				VulnerabilityID: "asb-a-189942529",
+			},
+			ExpErr: false,
+		},
+		{
+			Name:  "Good OSV - dsa",
+			Input: "DSA-5474-1",
+			ExpVuln: &generated.VulnerabilityInputSpec{
+				Type:            "dsa",
+				VulnerabilityID: "dsa-5474-1",
+			},
+			ExpErr: false,
 		},
 		{
 			Name:    "Bad",
 			Input:   "asdf",
-			ExpCVE:  nil,
-			ExpGHSA: nil,
+			ExpVuln: nil,
 			ExpErr:  true,
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			cve, ghsa, err := helpers.OSVToGHSACVE(test.Input)
+			vuln, err := helpers.CreateVulnInput(test.Input)
 			if (err != nil) != test.ExpErr {
 				t.Errorf("Expected error: %v got: %v", test.ExpErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpCVE, cve); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-			}
-			if diff := cmp.Diff(test.ExpGHSA, ghsa); diff != "" {
+			if diff := cmp.Diff(test.ExpVuln, vuln); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

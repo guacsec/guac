@@ -39,7 +39,7 @@ func TestParser(t *testing.T) {
 		name    string
 		doc     *processor.Document
 		wantCVs []assembler.CertifyVulnIngest
-		wantIVs []assembler.IsVulnIngest
+		wantIVs []assembler.VulnEqualIngest
 		wantErr bool
 	}{{
 		name: "valid vulnerability certifier document",
@@ -62,10 +62,11 @@ func TestParser(t *testing.T) {
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-7rjr-3q55-vv33",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    tm,
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -79,10 +80,11 @@ func TestParser(t *testing.T) {
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-8489-44mv-ggj8",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-8489-44mv-ggj8",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    tm,
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -96,10 +98,11 @@ func TestParser(t *testing.T) {
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-fxph-q3j8-mv87",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    tm,
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -113,10 +116,11 @@ func TestParser(t *testing.T) {
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-jfh8-c2jp-5v3q",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    tm,
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -130,10 +134,11 @@ func TestParser(t *testing.T) {
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-p6xc-xr62-6r2g",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    tm,
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -147,86 +152,93 @@ func TestParser(t *testing.T) {
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-vwqq-5vrc-xw9h",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    tm,
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
 				},
 			},
 		},
-		wantIVs: []assembler.IsVulnIngest{
+		wantIVs: []assembler.VulnEqualIngest{
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-vwqq-5vrc-xw9h",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-vwqq-5vrc-xw9h",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-7rjr-3q55-vv33",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-7rjr-3q55-vv33",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-8489-44mv-ggj8",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-8489-44mv-ggj8",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-8489-44mv-ggj8",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-8489-44mv-ggj8",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-fxph-q3j8-mv87",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-fxph-q3j8-mv87",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-jfh8-c2jp-5v3q",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-jfh8-c2jp-5v3q",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-p6xc-xr62-6r2g",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-p6xc-xr62-6r2g",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
@@ -251,26 +263,26 @@ func TestParser(t *testing.T) {
 				Version:   ptrfrom.String("2.8.1"),
 				Subpath:   ptrfrom.String(""),
 			},
-			VulnData: &generated.VulnerabilityMetaDataInput{
+			VulnData: &generated.ScanMetadataInput{
 				TimeScanned:    tm,
 				ScannerUri:     "osv.dev",
 				ScannerVersion: "0.0.14",
 			},
 		}},
-		wantIVs: []assembler.IsVulnIngest{},
+		wantIVs: []assembler.VulnEqualIngest{},
 		wantErr: false,
 	}}
-	ivSortOpt := cmp.Transformer("Sort", func(in []assembler.IsVulnIngest) []assembler.IsVulnIngest {
-		out := append([]assembler.IsVulnIngest(nil), in...)
+	ivSortOpt := cmp.Transformer("Sort", func(in []assembler.VulnEqualIngest) []assembler.VulnEqualIngest {
+		out := append([]assembler.VulnEqualIngest(nil), in...)
 		sort.Slice(out, func(i, j int) bool {
-			return strings.Compare(out[i].OSV.OsvId, out[j].OSV.OsvId) > 0
+			return strings.Compare(out[i].Vulnerability.VulnerabilityID, out[j].Vulnerability.VulnerabilityID) > 0
 		})
 		return out
 	})
 	cvSortOpt := cmp.Transformer("Sort", func(in []assembler.CertifyVulnIngest) []assembler.CertifyVulnIngest {
 		out := append([]assembler.CertifyVulnIngest(nil), in...)
 		sort.Slice(out, func(i, j int) bool {
-			return strings.Compare(out[i].OSV.OsvId, out[j].OSV.OsvId) > 0
+			return strings.Compare(out[i].Vulnerability.VulnerabilityID, out[j].Vulnerability.VulnerabilityID) > 0
 		})
 		return out
 	})
@@ -288,7 +300,7 @@ func TestParser(t *testing.T) {
 			if diff := cmp.Diff(tt.wantCVs, ip.CertifyVuln, cvSortOpt); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
-			if diff := cmp.Diff(tt.wantIVs, ip.IsVuln, ivSortOpt); diff != "" {
+			if diff := cmp.Diff(tt.wantIVs, ip.VulnEqual, ivSortOpt); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

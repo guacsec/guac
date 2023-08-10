@@ -27,22 +27,13 @@ func VulnInputToVURI(vuln *generated.VulnerabilityInputSpec) string {
 	return s
 }
 
-func OSVToGHSACVE(OSVId string) (*generated.VulnerabilityInputSpec, *generated.VulnerabilityInputSpec, error) {
-	if strings.HasPrefix(OSVId, "CVE") {
-		p := strings.Split(OSVId, "-")
-		if len(p) != 3 {
-			return nil, nil, fmt.Errorf("malformed CVE identifier: %q", OSVId)
-		}
-		return &generated.VulnerabilityInputSpec{
-			Type:            "cve",
-			VulnerabilityID: strings.ToLower(OSVId),
-		}, nil, nil
+func CreateVulnInput(vulnID string) (*generated.VulnerabilityInputSpec, error) {
+	v := strings.Split(vulnID, "-")
+	if len(v) == 1 {
+		return nil, fmt.Errorf("malformed vulnerability identifier: %q", vulnID)
 	}
-	if strings.HasPrefix(OSVId, "GHSA") {
-		return nil, &generated.VulnerabilityInputSpec{
-			Type:            "ghsa",
-			VulnerabilityID: strings.ToLower(OSVId),
-		}, nil
-	}
-	return nil, nil, fmt.Errorf("unknown OSV identifier: %q", OSVId)
+	return &generated.VulnerabilityInputSpec{
+		Type:            strings.ToLower(v[0]),
+		VulnerabilityID: strings.ToLower(vulnID),
+	}, nil
 }
