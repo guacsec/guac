@@ -1905,7 +1905,7 @@ var (
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "x86_64"}, {Key: "epoch", Value: "1"}},
 				Subpath:    strP(""),
 			},
-			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "CVE-2023-0286"},
+			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2023-0286"},
 			VexData: &model.VexStatementInputSpec{
 				Status:           "AFFECTED",
 				VexJustification: "NOT_PROVIDED",
@@ -1933,7 +1933,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Subpath: strP(""),
 			},
-			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "CVE-2023-0286"},
+			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2023-0286"},
 			VulnData: &model.ScanMetadataInput{
 				TimeScanned: parseRfc3339("2023-03-23T11:14:00Z"),
 			},
