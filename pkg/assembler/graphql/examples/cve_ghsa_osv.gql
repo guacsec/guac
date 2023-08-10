@@ -1,99 +1,92 @@
-fragment allCveTree on CVE {
+fragment allVulnerabilityTree on Vulnerability {
   id
-  year
-  cveId
-}
-
-fragment allGHSATree on GHSA {
-  id
-  ghsaId
-}
-
-fragment allOSVTree on OSV {
-  id
-  osvId
+  type
+  vulnerabilityIDs {
+    id
+    vulnerabilityID
+  }
 }
 
 query CVEQ1 {
-  cve(cveSpec: {}) {
-    ...allCveTree
+  vulnerabilities(vulnSpec: {}) {
+    ...allVulnerabilityTree
   }
 }
 
 query CVEQ2 {
-  cve(cveSpec: {year: 2014}) {
-    ...allCveTree
+  vulnerabilities(vulnSpec: {type: "cve"}) {
+    ...allVulnerabilityTree
   }
 }
 
 query CVEQ3 {
-  cve(cveSpec: {cveId: "CVE-2014-8139"}) {
-    ...allCveTree
+  vulnerabilities(vulnSpec: {vulnerabilityID: "CVE-2014-8139"}) {
+    ...allVulnerabilityTree
   }
 }
 
 query CVEQ4 {
-  cve(cveSpec: {year: 2014, cveId: "CVE-2014-8140"}) {
-    ...allCveTree
+  vulnerabilities(vulnSpec: {type: "cve", vulnerabilityID: "CVE-2014-8140"}) {
+    ...allVulnerabilityTree
   }
 }
 
 mutation CVEM1 {
-  ingestCVE(cve: {year: 2023, cveId: "CVE-2023-12345"}) {
-    ...allCveTree
+  ingestVulnerability(vuln: {type: "cve", vulnerabilityID: "CVE-2023-12345"}) {
+    ...allVulnerabilityTree
   }
 }
 
 mutation CVEM2 {
-  ingestCVE(cve: {year: 2032, cveId: "cve-2032-12345"}) {
-    ...allCveTree
+  ingestVulnerability(vuln: {type: "cve", vulnerabilityID: "cve-2032-12345"}) {
+    ...allVulnerabilityTree
   }
 }
 
 query GHSAQ1 {
-  ghsa(ghsaSpec: {}) {
-    ...allGHSATree
+  vulnerabilities(vulnSpec: {type: "ghsa"}) {
+    ...allVulnerabilityTree
   }
 }
 
 query GHSAQ2 {
-  ghsa(ghsaSpec: {ghsaId: "GHSA-h45f-rjvw-2rv2"}) {
-    ...allGHSATree
+  vulnerabilities(vulnSpec: {vulnerabilityID: "GHSA-h45f-rjvw-2rv2"}) {
+    ...allVulnerabilityTree
   }
 }
 
 mutation GHSAM1 {
-  ingestGHSA(ghsa: {ghsaId: "GHSA-abcd-efgh-1234"}) {
-    ...allGHSATree
+  ingestVulnerability(vuln: {type: "ghsa", vulnerabilityID: "GHSA-abcd-efgh-1234"}) {
+    ...allVulnerabilityTree
   }
 }
 
 query OSVQ1 {
-  osv(osvSpec: {}) {
-    ...allOSVTree
+  vulnerabilities(vulnSpec: {type: "osv"}) {
+    ...allVulnerabilityTree
   }
 }
 
 query OSVQ2 {
-  osv(osvSpec: {osvId: "CVE-2014-8139"}) {
-    ...allOSVTree
+  vulnerabilities(vulnSpec: {type: "osv", vulnerabilityID: "CVE-2014-8139"}) {
+    ...allVulnerabilityTree
   }
 }
 
 query OSVQ3 {
-  osv(osvSpec: {osvId: "ghsa-h45f-rjvw-2rv2"}) {
-    ...allOSVTree
+  vulnerabilities(vulnSpec: {vulnerabilityID: "ghsa-h45f-rjvw-2rv2"}) {
+    ...allVulnerabilityTree
   }
 }
 
 mutation OSVM1 {
-  ingestOSV(osv: {osvId: "GHSA-abcd-efgh-1234"}) {
-    ...allOSVTree
+  ingestVulnerability(vuln: {type: "osv", vulnerabilityID: "GHSA-abcd-efgh-1234"}) {
+    ...allVulnerabilityTree
   }
 }
 
 mutation OSVM2 {
-  ingestOSV(osv: {osvId: "CVE-2023-12345"}) {
-    ...allOSVTree
+  ingestVulnerability(vuln: {type: "osv", vulnerabilityID: "CVE-2023-12345"}) {
+    ...allVulnerabilityTree
   }
 }
