@@ -34,7 +34,7 @@ const (
 	namespaces      string        = "namespaces"
 	names           string        = namespaces + ".names"
 	versions        string        = names + ".versions"
-	vulnerabilityID string        = "vulnerabilityID"
+	vulnerabilityID string        = "vulnerabilityIDs"
 	origin          string        = "origin"
 	collector       string        = "collector"
 	justification   string        = "justification"
