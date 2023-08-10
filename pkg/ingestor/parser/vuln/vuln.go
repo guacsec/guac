@@ -45,10 +45,10 @@ import (
 )
 
 type parser struct {
-	packages []*generated.PkgInputSpec
-	vulnData *generated.ScanMetadataInput
-	vulns    []*generated.OSVInputSpec
-	isVulns  []assembler.IsVulnIngest
+	packages   []*generated.PkgInputSpec
+	vulnData   *generated.ScanMetadataInput
+	vulns      []*generated.VulnerabilityInputSpec
+	vulnEquals []assembler.VulnEqualIngest
 }
 
 // NewVulnCertificationParser initializes the parser
@@ -73,7 +73,7 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("unable to parse vulns of statement: %w", err)
 	}
 	c.vulns = vs
-	c.isVulns = ivs
+	c.vulnEquals = ivs
 	return nil
 }
 
@@ -108,7 +108,7 @@ func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMe
 	}
 }
 
-func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.OSVInputSpec,
+func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.VulnerabilityInputSpec,
 	[]assembler.IsVulnIngest, error) {
 	logger := logging.FromContext(ctx)
 	var vs []*generated.OSVInputSpec
