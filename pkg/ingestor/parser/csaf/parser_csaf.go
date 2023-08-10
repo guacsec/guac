@@ -84,14 +84,19 @@ func (c *csafParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStri
 	return nil, fmt.Errorf("not yet implemented")
 }
 
-func findPurl(ctx context.Context, tree csaf.ProductBranch, product_ref string) *string {
+func findPurl(ctx context.Context, tree csaf.ProductBranch, product_ref string, visited map[string]bool) *string {
+	if visited[tree.Name] {
+		return nil
+	}
+	visited[tree.Name] = true
+
 	if tree.Name == product_ref {
 		purl := tree.Product.IdentificationHelper["purl"]
 		return &purl
 	}
 
 	for _, b := range tree.Branches {
-		purl := findPurl(ctx, b, product_ref)
+		purl := findPurl(ctx, b, product_ref, visited)
 		if purl != nil {
 			return purl
 		}
@@ -146,7 +151,7 @@ func (c *csafParser) findPkgSpec(ctx context.Context, product_id string) (*gener
 		return nil, fmt.Errorf("unable to locate product reference for id %s", product_id)
 	}
 
-	purl := findPurl(ctx, c.csaf.ProductTree, *pref)
+	purl := findPurl(ctx, c.csaf.ProductTree, *pref, make(map[string]bool))
 	if purl == nil {
 		return nil, fmt.Errorf("unable to locate product url for reference %s", *pref)
 	}
