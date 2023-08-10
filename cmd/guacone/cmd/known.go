@@ -331,15 +331,9 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	var tableRows []table.Row
 	switch nodeType {
 	case certifyVulnStr:
-		for _, vuln := range collectedNeighbors.certifyVulns {
-			if osv, ok := vuln.Vulnerability.(*model.AllCertifyVulnVulnerabilityOSV); ok {
-				tableRows = append(tableRows, table.Row{certifyVulnStr, vuln.Id, "vulnerability ID: " + osv.OsvId})
-			} else if cve, ok := vuln.Vulnerability.(*model.AllCertifyVulnVulnerabilityCVE); ok {
-				tableRows = append(tableRows, table.Row{certifyVulnStr, vuln.Id, "vulnerability ID: " + cve.CveId})
-			} else if ghsa, ok := vuln.Vulnerability.(*model.AllCertifyVulnVulnerabilityGHSA); ok {
-				tableRows = append(tableRows, table.Row{certifyVulnStr, vuln.Id, "vulnerability ID: " + ghsa.GhsaId})
-			} else if noVuln, ok := vuln.Vulnerability.(*model.AllCertifyVulnVulnerabilityNoVuln); ok {
-				tableRows = append(tableRows, table.Row{certifyVulnStr, vuln.Id, "vulnerability ID: " + *noVuln.Typename})
+		for _, certVuln := range collectedNeighbors.certifyVulns {
+			for _, vuln := range certVuln.Vulnerability.VulnerabilityIDs {
+				tableRows = append(tableRows, table.Row{certifyVulnStr, certVuln.Id, "vulnerability ID: " + vuln.VulnerabilityID})
 			}
 		}
 	case badLinkStr:
