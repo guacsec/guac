@@ -89,7 +89,7 @@ func guacSrcId(src model.SourceInputSpec) SrcIds {
 	return ids
 }
 
-func getSourceQueryValues(c *arangoClient, source *model.SourceInputSpec) map[string]any {
+func getSourceQueryValues(source *model.SourceInputSpec) map[string]any {
 	values := map[string]any{}
 	// add guac keys
 	guacIds := guacSrcId(*source)
@@ -119,7 +119,7 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 	var listOfValues []map[string]any
 
 	for i := range sources {
-		listOfValues = append(listOfValues, getSourceQueryValues(c, sources[i]))
+		listOfValues = append(listOfValues, getSourceQueryValues(sources[i]))
 	}
 
 	var documents []string
@@ -243,7 +243,7 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 	  "tag": name.tag
 	}`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getSourceQueryValues(c, &source), "IngestSource")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getSourceQueryValues(&source), "IngestSource")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest source: %w", err)
 	}
