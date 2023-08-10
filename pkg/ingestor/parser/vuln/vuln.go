@@ -51,6 +51,8 @@ type parser struct {
 	vulnEquals []assembler.VulnEqualIngest
 }
 
+var noVulnInput *generated.VulnerabilityInputSpec = &generated.VulnerabilityInputSpec{Type: "noVuln", VulnerabilityID: ""}
+
 // NewVulnCertificationParser initializes the parser
 func NewVulnCertificationParser() common.DocumentParser {
 	return &parser{}
@@ -151,8 +153,9 @@ func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates 
 			}
 		} else {
 			rv.CertifyVuln = append(rv.CertifyVuln, assembler.CertifyVulnIngest{
-				Pkg:      p,
-				VulnData: c.vulnData,
+				Pkg:           p,
+				Vulnerability: noVulnInput,
+				VulnData:      c.vulnData,
 			})
 		}
 	}
