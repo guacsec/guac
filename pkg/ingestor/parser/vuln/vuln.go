@@ -34,6 +34,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -41,7 +42,6 @@ import (
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-	"github.com/guacsec/guac/pkg/logging"
 )
 
 type parser struct {
@@ -108,26 +108,25 @@ func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMe
 	}
 }
 
+// TODO (pxp928): Remove creation of osv node and just create the vulnerability nodes specified
 func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.VulnerabilityInputSpec,
-	[]assembler.IsVulnIngest, error) {
-	logger := logging.FromContext(ctx)
-	var vs []*generated.OSVInputSpec
-	var ivs []assembler.IsVulnIngest
+	[]assembler.VulnEqualIngest, error) {
+	var vs []*generated.VulnerabilityInputSpec
+	var ivs []assembler.VulnEqualIngest
 	for _, id := range s.Predicate.Scanner.Result {
-		v := &generated.OSVInputSpec{
-			OsvId: id.VulnerabilityId,
+		v := &generated.VulnerabilityInputSpec{
+			Type:            "osv",
+			VulnerabilityID: strings.ToLower(id.VulnerabilityId),
 		}
 		vs = append(vs, v)
-		cve, ghsa, err := helpers.OSVToGHSACVE(id.VulnerabilityId)
+		vuln, err := helpers.CreateVulnInput(id.VulnerabilityId)
 		if err != nil {
-			logger.Debugf("osvID is not a CVE or GHSA: %v", err)
-			continue
+			return nil, nil, fmt.Errorf("createVulnInput failed with error: %w", err)
 		}
-		iv := assembler.IsVulnIngest{
-			OSV:  v,
-			CVE:  cve,
-			GHSA: ghsa,
-			IsVuln: &generated.IsVulnerabilityInputSpec{
+		iv := assembler.VulnEqualIngest{
+			Vulnerability:      v,
+			EqualVulnerability: vuln,
+			VulnEqual: &generated.VulnEqualInputSpec{
 				Justification: "Decoded OSV data",
 			},
 		}
@@ -138,15 +137,15 @@ func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement)
 
 func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	rv := &assembler.IngestPredicates{
-		IsVuln: c.isVulns,
+		VulnEqual: c.vulnEquals,
 	}
 	for _, p := range c.packages {
 		if len(c.vulns) > 0 {
 			for _, v := range c.vulns {
 				cv := assembler.CertifyVulnIngest{
-					Pkg:      p,
-					OSV:      v,
-					VulnData: c.vulnData,
+					Pkg:           p,
+					Vulnerability: v,
+					VulnData:      c.vulnData,
 				}
 				rv.CertifyVuln = append(rv.CertifyVuln, cv)
 			}
