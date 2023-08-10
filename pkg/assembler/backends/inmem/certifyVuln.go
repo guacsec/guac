@@ -303,6 +303,14 @@ func (c *demoClient) buildCertifyVulnerability(link *certifyVulnerabilityLink, f
 		return nil, nil
 	}
 
+	if link.vulnerabilityID != 0 {
+		if vuln == nil && ingestOrIDProvided {
+			return nil, gqlerror.Errorf("failed to retrieve vuln via vulnID")
+		} else if vuln == nil && !ingestOrIDProvided {
+			return nil, nil
+		}
+	}
+
 	metadata := &model.ScanMetadata{
 		TimeScanned:    link.timeScanned,
 		DbURI:          link.dbURI,

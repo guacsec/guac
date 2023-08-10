@@ -394,6 +394,14 @@ func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.Certi
 		subj = a
 	}
 
+	if link.vulnerabilityID != 0 {
+		if vuln == nil && ingestOrIDProvided {
+			return nil, gqlerror.Errorf("failed to retrieve vuln via vulnID")
+		} else if vuln == nil && !ingestOrIDProvided {
+			return nil, nil
+		}
+	}
+
 	certifyVuln := model.CertifyVEXStatement{
 		ID:               nodeID(link.id),
 		Subject:          subj,
