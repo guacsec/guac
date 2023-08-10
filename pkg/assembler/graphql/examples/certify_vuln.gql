@@ -1,43 +1,32 @@
 fragment allCertifyVulnTree on CertifyVuln {
   id
   package {
+    id
+    type
+    namespaces {
       id
-      type
-      namespaces {
+      namespace
+      names {
         id
-        namespace
-        names {
+        name
+        versions {
           id
-          name
-          versions {
-            id
-            version
-            qualifiers {
-              key
-              value
-            }
-            subpath
+          version
+          qualifiers {
+            key
+            value
           }
+          subpath
         }
       }
     }
+  }
   vulnerability {
-    __typename
-    ... on CVE {
+    id
+    type
+    vulnerabilityIDs {
       id
-      year
-      cveId
-    }
-    ... on OSV {
-      id
-      osvId
-    }
-    ... on GHSA {
-      id
-      ghsaId
-    }
-    ... on NoVuln {
-      id
+      vulnerabilityID
     }
   }
   metadata {
@@ -76,20 +65,21 @@ query CertifyVulnQ4 {
 }
 
 query CertifyVulnQ5 {
-  CertifyVuln(certifyVulnSpec: {vulnerability: {cve: {cveId: "CVE-2019-13110"}}}) {
+  CertifyVuln(certifyVulnSpec: {vulnerability: {vulnerabilityID: "CVE-2019-13110"}}) {
     ...allCertifyVulnTree
   }
 }
 
-
 query CertifyVulnQ6 {
-  CertifyVuln(certifyVulnSpec: {vulnerability: {ghsa: {ghsaId: "GHSA-h45f-rjvw-2rv2"}}}) {
+  CertifyVuln(
+    certifyVulnSpec: {vulnerability: {vulnerabilityID: "GHSA-h45f-rjvw-2rv2"}}
+  ) {
     ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ7 {
-  CertifyVuln(certifyVulnSpec: {vulnerability: {osv: {osvId: "CVE-2019-13110"}}}) {
+  CertifyVuln(certifyVulnSpec: {vulnerability: {type: "osv", vulnerabilityID: "CVE-2019-13110"}}) {
     ...allCertifyVulnTree
   }
 }
