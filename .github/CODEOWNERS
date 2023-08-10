@@ -21,7 +21,7 @@
 /pkg/cli  @jeffmendoza
 /cmd  @jeffmendoza
 
-# Maintiners may be codeowners of broader directories.
+# Maintainers may be codeowners of broader directories.
 
 # Make sure @mihaimaruseac is notified for any changes to assembler (in
 # particular the GraphQL interface) while it is in flux
