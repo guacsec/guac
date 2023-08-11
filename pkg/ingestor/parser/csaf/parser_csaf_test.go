@@ -115,6 +115,11 @@ func Test_findPurl(t *testing.T) {
 				ctx: context.Background(),
 				tree: csaf.ProductBranch{
 					Name: "node1",
+					Branches: []csaf.ProductBranch{
+						{
+							Name: "node2",
+						},
+					},
 				},
 				product_ref: "not equal to any tree nodes",
 			},
@@ -125,9 +130,6 @@ func Test_findPurl(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if test.stackOverflow {
-				test.args.tree.Branches = append(test.args.tree.Branches, csaf.ProductBranch{
-					Name: "node2",
-				})
 				test.args.tree.Branches[0].Branches = append(test.args.tree.Branches[0].Branches, test.args.tree)
 			}
 
