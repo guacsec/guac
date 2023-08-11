@@ -716,9 +716,6 @@ func getPreloadString(prefix, name string) string {
 func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	panic(fmt.Errorf("not implemented: CertifyVEXStatement - CertifyVEXStatement"))
 }
-func (c *arangoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	panic(fmt.Errorf("not implemented: CertifyVuln - CertifyVuln"))
-}
 
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
@@ -744,9 +741,6 @@ func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpe
 }
 func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))
-}
-func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyVuln"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type

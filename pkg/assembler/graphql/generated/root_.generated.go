@@ -168,6 +168,7 @@ type ComplexityRoot struct {
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
 		IngestCertifyVuln     func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) int
+		IngestCertifyVulns    func(childComplexity int, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
@@ -1013,6 +1014,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestCertifyVuln(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.VulnerabilityInputSpec), args["certifyVuln"].(model.ScanMetadataInput)), true
+
+	case "Mutation.ingestCertifyVulns":
+		if e.complexity.Mutation.IngestCertifyVulns == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyVulns_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyVulns(childComplexity, args["pkgs"].([]*model.PkgInputSpec), args["vulnerabilities"].([]*model.VulnerabilityInputSpec), args["certifyVulns"].([]*model.ScanMetadataInput)), true
 
 	case "Mutation.ingestDependencies":
 		if e.complexity.Mutation.IngestDependencies == nil {
@@ -2997,6 +3010,8 @@ extend type Query {
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
   ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): CertifyVuln!
+  "Bulk add certifications that a package has been scanned for vulnerabilities."
+  ingestCertifyVulns(pkgs: [PkgInputSpec!]!, vulnerabilities: [VulnerabilityInputSpec!]!, certifyVulns: [ScanMetadataInput!]!): [CertifyVuln!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/contact.graphql", Input: `#
