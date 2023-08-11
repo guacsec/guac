@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -59,6 +60,10 @@ func (n *certifyVulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, er
 }
 
 // Ingest CertifyVuln
+func (c *demoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
+	return nil, fmt.Errorf("not implemented - IngestCertifyVulns")
+}
+
 func (c *demoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
 	return c.ingestVulnerability(ctx, pkg, vulnerability, certifyVuln, true)
 }
