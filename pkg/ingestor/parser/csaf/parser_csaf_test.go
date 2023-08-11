@@ -131,7 +131,7 @@ func Test_findPurl(t *testing.T) {
 				test.args.tree.Branches[0].Branches = append(test.args.tree.Branches[0].Branches, test.args.tree)
 			}
 
-			if got := findPurl(test.args.ctx, test.args.tree, test.args.product_ref, make(map[string]bool)); !reflect.DeepEqual(got, test.want) {
+			if got := findPurl(test.args.ctx, test.args.tree, test.args.product_ref); !reflect.DeepEqual(got, test.want) {
 				t.Errorf("findPurl() = %v, want %v", got, test.want)
 			}
 		})
