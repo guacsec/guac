@@ -60,15 +60,15 @@ type dbPkgType struct {
 	PkgType string `json:"type"`
 }
 
-type PkgIds struct {
+type pkgIds struct {
 	TypeId      string
 	NamespaceId string
 	NameId      string
 	VersionId   string
 }
 
-func guacPkgId(pkg model.PkgInputSpec) PkgIds {
-	ids := PkgIds{}
+func guacPkgId(pkg model.PkgInputSpec) pkgIds {
+	ids := pkgIds{}
 
 	ids.TypeId = pkg.Type
 

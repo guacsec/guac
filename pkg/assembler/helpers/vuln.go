@@ -23,7 +23,7 @@ import (
 )
 
 func VulnInputToVURI(vuln *generated.VulnerabilityInputSpec) string {
-	s := fmt.Sprintf("vuln://"+"%s/%s", strings.ToLower(vuln.Type), strings.ToLower(vuln.VulnerabilityID))
+	s := fmt.Sprintf("vuln://%s/%s", strings.ToLower(vuln.Type), strings.ToLower(vuln.VulnerabilityID))
 	return s
 }
 

@@ -1241,6 +1241,7 @@ type VulnEqualSpec struct {
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -1249,8 +1250,10 @@ type VulnEqualSpec struct {
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type Vulnerability struct {
 	ID               string             `json:"id"`
 	Type             string             `json:"type"`

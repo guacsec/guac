@@ -1589,6 +1589,7 @@ func __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(v *AllCertifyVEXSta
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -1597,8 +1598,10 @@ func __marshalAllCertifyVEXStatementSubjectPackageOrArtifact(v *AllCertifyVEXSta
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type AllCertifyVEXStatementVulnerability struct {
 	AllVulnerabilityTree `json:"-"`
 }
@@ -1835,6 +1838,7 @@ func (v *AllCertifyVulnPackage) __premarshalJSON() (*__premarshalAllCertifyVulnP
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -1843,8 +1847,10 @@ func (v *AllCertifyVulnPackage) __premarshalJSON() (*__premarshalAllCertifyVulnP
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type AllCertifyVulnVulnerability struct {
 	AllVulnerabilityTree `json:"-"`
 }
@@ -4950,6 +4956,7 @@ func (v *AllVulnEqual) GetCollector() string { return v.Collector }
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -4958,8 +4965,10 @@ func (v *AllVulnEqual) GetCollector() string { return v.Collector }
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type AllVulnEqualVulnerabilitiesVulnerability struct {
 	AllVulnerabilityTree `json:"-"`
 }
@@ -5042,6 +5051,7 @@ func (v *AllVulnEqualVulnerabilitiesVulnerability) __premarshalJSON() (*__premar
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -5050,8 +5060,10 @@ func (v *AllVulnEqualVulnerabilitiesVulnerability) __premarshalJSON() (*__premar
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type AllVulnerabilityTree struct {
 	Id               string                                                `json:"id"`
 	Type             string                                                `json:"type"`
@@ -9782,6 +9794,7 @@ func (v *IngestSourcesResponse) GetIngestSources() []IngestSourcesIngestSourcesS
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -9790,8 +9803,10 @@ func (v *IngestSourcesResponse) GetIngestSources() []IngestSourcesIngestSourcesS
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type IngestVulnerabilitiesIngestVulnerabilitiesVulnerability struct {
 	AllVulnerabilityTree `json:"-"`
 }
@@ -9887,6 +9902,7 @@ func (v *IngestVulnerabilitiesResponse) GetIngestVulnerabilities() []IngestVulne
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -9895,8 +9911,10 @@ func (v *IngestVulnerabilitiesResponse) GetIngestVulnerabilities() []IngestVulne
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type IngestVulnerabilityIngestVulnerability struct {
 	AllVulnerabilityTree `json:"-"`
 }
@@ -12974,6 +12992,7 @@ func (v *NeighborsNeighborsVulnEqual) __premarshalJSON() (*__premarshalNeighbors
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -12982,8 +13001,10 @@ func (v *NeighborsNeighborsVulnEqual) __premarshalJSON() (*__premarshalNeighbors
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type NeighborsNeighborsVulnerability struct {
 	Typename             *string `json:"__typename"`
 	AllVulnerabilityTree `json:"-"`
@@ -15330,6 +15351,7 @@ func (v *NodeNodeVulnEqual) __premarshalJSON() (*__premarshalNodeNodeVulnEqual, 
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -15338,8 +15360,10 @@ func (v *NodeNodeVulnEqual) __premarshalJSON() (*__premarshalNodeNodeVulnEqual, 
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type NodeNodeVulnerability struct {
 	Typename             *string `json:"__typename"`
 	AllVulnerabilityTree `json:"-"`
@@ -17679,6 +17703,7 @@ func (v *NodesNodesVulnEqual) __premarshalJSON() (*__premarshalNodesNodesVulnEqu
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -17687,8 +17712,10 @@ func (v *NodesNodesVulnEqual) __premarshalJSON() (*__premarshalNodesNodesVulnEqu
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type NodesNodesVulnerability struct {
 	Typename             *string `json:"__typename"`
 	AllVulnerabilityTree `json:"-"`
@@ -20557,6 +20584,7 @@ func (v *PathPathVulnEqual) __premarshalJSON() (*__premarshalPathPathVulnEqual, 
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -20565,8 +20593,10 @@ func (v *PathPathVulnEqual) __premarshalJSON() (*__premarshalPathPathVulnEqual, 
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type PathPathVulnerability struct {
 	Typename             *string `json:"__typename"`
 	AllVulnerabilityTree `json:"-"`
@@ -22174,6 +22204,7 @@ func (v *VulnEqualInputSpec) GetCollector() string { return v.Collector }
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -22182,8 +22213,10 @@ func (v *VulnEqualInputSpec) GetCollector() string { return v.Collector }
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type VulnEqualOtherVulnVulnerability struct {
 	AllVulnerabilityTree `json:"-"`
 }
@@ -22283,6 +22316,7 @@ func (v *VulnEqualResponse) GetIngestVulnEqual() VulnEqualIngestVulnEqual { retu
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -22291,8 +22325,10 @@ func (v *VulnEqualResponse) GetIngestVulnEqual() VulnEqualIngestVulnEqual { retu
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type VulnEqualVulnVulnerability struct {
 	AllVulnerabilityTree `json:"-"`
 }
@@ -22384,6 +22420,7 @@ func (v *VulnerabilitiesResponse) GetVulnerabilities() []VulnerabilitiesVulnerab
 // CVE, using path separator: vuln://cve/cve-2023-20753
 // OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
 // Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
 //
 // This node represents the type part of the trie path. It is used to represent
 // the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
@@ -22392,8 +22429,10 @@ func (v *VulnerabilitiesResponse) GetVulnerabilities() []VulnerabilitiesVulnerab
 // VulnerabilityType.
 //
 // NoVuln is a special vulnerability node to attest that no vulnerability has been
-// found during a vulnerability scan. It will have the type "NoVuln" and contain an empty string
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 // for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
 type VulnerabilitiesVulnerabilitiesVulnerability struct {
 	AllVulnerabilityTree `json:"-"`
 }

@@ -1,4 +1,4 @@
-fragment allIsVulnerabilityTree on VulnEqual {
+fragment allVulnEqualTree on VulnEqual {
   id
   vulnerabilities {
     id
@@ -15,24 +15,24 @@ fragment allIsVulnerabilityTree on VulnEqual {
 
 query IsVulnerabilityQ1 {
   vulnEqual(vulnEqualSpec: {}) {
-    ...allIsVulnerabilityTree
+    ...allVulnEqualTree
   }
 }
 
 query IsVulnerabilityQ2 {
   vulnEqual(vulnEqualSpec: {origin: "testing backend"}) {
-    ...allIsVulnerabilityTree
+    ...allVulnEqualTree
   }
 }
 
 query IsVulnerabilityQ3 {
   vulnEqual(vulnEqualSpec: {vulnerabilities: {vulnerabilityID: "GHSA-h45f-rjvw-2rv2"}}) {
-    ...allIsVulnerabilityTree
+    ...allVulnEqualTree
   }
 }
 
 query IsVulnerabilityQ4 {
   vulnEqual(vulnEqualSpec: {vulnerabilities: {vulnerabilityID: "CVE-2019-13110"}}) {
-    ...allIsVulnerabilityTree
+    ...allVulnEqualTree
   }
 }
