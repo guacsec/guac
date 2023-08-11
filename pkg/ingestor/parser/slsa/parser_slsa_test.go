@@ -18,10 +18,16 @@ package slsa
 import (
 	"context"
 	"testing"
+	"time"
+
+	slsa01 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.1"
+
+	"github.com/in-toto/in-toto-golang/in_toto"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -63,6 +69,70 @@ func Test_slsaParser(t *testing.T) {
 			//fmt.Println(preds.HasSlsa[0].HasSlsa.SlsaPredicate)
 			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
 				t.Errorf("slsa.GetPredicate mismatch values (+got, -expected): %s", d)
+			}
+		})
+	}
+}
+
+func Test_fillSLSA01(t *testing.T) {
+	startTime := time.Now()
+	endTime := time.Now()
+	type args struct {
+		inp  *model.SLSAInputSpec
+		stmt *in_toto.ProvenanceStatementSLSA01
+	}
+	tests := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "default",
+			args: args{
+				inp: &model.SLSAInputSpec{},
+				stmt: &in_toto.ProvenanceStatementSLSA01{
+					Predicate: slsa01.ProvenancePredicate{
+						Metadata: &slsa01.ProvenanceMetadata{
+							BuildStartedOn:  &startTime,
+							BuildFinishedOn: &endTime,
+						},
+						Recipe: slsa01.ProvenanceRecipe{
+							Type: "test",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "stmt predicate metadata is nil",
+			args: args{
+				inp:  &model.SLSAInputSpec{},
+				stmt: &in_toto.ProvenanceStatementSLSA01{},
+			},
+			err: ErrMetadataNil,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := fillSLSA01(test.args.inp, test.args.stmt)
+			if err != test.err {
+				t.Fatalf("fillSLSA01() error = %v, expected error %v", err, test.err)
+			}
+			if err != nil {
+				// if the error is equal to the expected error, we can return
+				// we know that the error is equal to the expected error because we checked if it wasn't equal above
+				// if err == nil then we know that the function didn't throw an error, and we have to check the values
+				return
+			}
+
+			if test.args.inp.BuildType != test.args.stmt.Predicate.Recipe.Type {
+				t.Errorf("fillSLSA01() inp.BuildType not equal to stmt.Predicate.Recipe.Type")
+			}
+			if test.args.inp.StartedOn != test.args.stmt.Predicate.Metadata.BuildStartedOn {
+				t.Errorf("fillSLSA01() inp.BuildStartedOn not equal to stmt.Predicate.Metadata.BuildStartedOn")
+			}
+			if test.args.inp.FinishedOn != test.args.stmt.Predicate.Metadata.BuildFinishedOn {
+				t.Errorf("fillSLSA01() inp.BuildFinishedOn not equal to stmt.Predicate.Metadata.BuildFinishedOn")
 			}
 		})
 	}
