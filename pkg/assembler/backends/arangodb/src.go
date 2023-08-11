@@ -48,14 +48,14 @@ type dbSrcType struct {
 	SrcType string `json:"type"`
 }
 
-type SrcIds struct {
+type srcIds struct {
 	TypeId      string
 	NamespaceId string
 	NameId      string
 }
 
-func guacSrcId(src model.SourceInputSpec) SrcIds {
-	ids := SrcIds{}
+func guacSrcId(src model.SourceInputSpec) srcIds {
+	ids := srcIds{}
 
 	ids.TypeId = src.Type
 
