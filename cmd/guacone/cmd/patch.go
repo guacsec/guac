@@ -72,14 +72,14 @@ var queryPatchCmd = &cobra.Command{
 		startID, err = getPkgID(ctx, gqlClient, opts.startPurl, opts.isPackageVersionStart)
 
 		if err != nil {
-			logger.Fatalf("error getting start pkg from purl inputted %s \n", err)
+			logger.Fatalf("error getting start pkg from purl inputted: %s \n", err)
 		}
 
 		if opts.stopPurl != "" {
 			stopPkg, err := getPkgID(ctx, gqlClient, opts.stopPurl, opts.isPackageVersionStop)
 
 			if err != nil {
-				logger.Fatalf("error getting stop pkg from purl inputted %s\n", err)
+				logger.Fatalf("error getting stop pkg from purl inputted: %s\n", err)
 			}
 
 			stopID = &stopPkg
@@ -248,7 +248,10 @@ func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string, isPack
 	pkgResponse, err := model.Packages(ctx, gqlClient, pkgFilter)
 
 	if err != nil || len(pkgResponse.Packages) == 0 {
-		return "", fmt.Errorf("error finding package with given purl (may have set is-pkg-version incorrectly): %s", purl)
+		if err != nil {
+			return "", fmt.Errorf("error finding package with given purl: %s, got error: %s", purl, err)
+		}
+		return "", fmt.Errorf("error finding a matching package with given purl: %s", purl)
 	}
 
 	if version {
@@ -262,6 +265,9 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 	opts.startPurl = startPurl
 
 	if _, err := helpers.PurlToPkg(startPurl); startPurl != "" && err != nil {
+		if err != nil {
+			return opts, fmt.Errorf("expected start input to be purl but got an error parsing: %s", err)
+		}
 		return opts, fmt.Errorf("expected start input to be purl")
 	}
 
