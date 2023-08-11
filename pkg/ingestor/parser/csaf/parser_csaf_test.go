@@ -17,9 +17,10 @@ package csaf
 
 import (
 	"context"
-	"github.com/openvex/go-vex/pkg/csaf"
 	"reflect"
 	"testing"
+
+	"github.com/openvex/go-vex/pkg/csaf"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
