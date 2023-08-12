@@ -314,7 +314,7 @@ func Test_spdxParser(t *testing.T) {
 					{
 						Pkg:             pUrlToPkgDiscardError("pkg:oci/redhat/ubi9-container@sha256:4227a4b5013999a412196237c62e40d778d09cdc751720a66ff3701fbe5a4a9d?repository_url=registry.redhat.io/ubi9&tag=9.1.0-1750"),
 						DepPkg:          pUrlToPkgDiscardError("pkg:rpm/redhat/python3-libcomps@0.1.18-1.el9?arch=x86_64"),
-						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeAllVersions},
+						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
 						IsDependency: &generated.IsDependencyInputSpec{
 							DependencyType: generated.DependencyTypeUnknown,
 							VersionRange:   "0.1.18-1.el9",

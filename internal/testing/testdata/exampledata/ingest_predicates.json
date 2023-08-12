@@ -88,7 +88,7 @@
         "subpath": ""
       },
       "depPkgMatchFlag" : {
-        "pkg": "ALL_VERSIONS"
+        "pkg": "SPECIFIC_VERSION"
       },
       "isDependency": {
         "versionRange": "3.2.0-r22",
@@ -129,7 +129,7 @@
         "subpath": ""
       },
       "depPkgMatchFlag" : {
-        "pkg": "ALL_VERSIONS"
+        "pkg": "SPECIFIC_VERSION"
       },
       "isDependency": {
         "versionRange": "3.2.0-r22",
