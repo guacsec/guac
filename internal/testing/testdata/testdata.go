@@ -2064,7 +2064,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "cve",
-					VulnerabilityID: "CVE-2023-1944",
+					VulnerabilityID: "cve-2023-1944",
 				},
 				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
@@ -2082,7 +2082,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-8489-44mv-ggj8",
+					VulnerabilityID: "ghsa-8489-44mv-ggj8",
 				},
 				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
@@ -2100,7 +2100,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-fxph-q3j8-mv87",
+					VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 				},
 				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
@@ -2118,7 +2118,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-jfh8-c2jp-5v3q",
+					VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 				},
 				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
@@ -2136,7 +2136,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-p6xc-xr62-6r2g",
+					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 				},
 				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
@@ -2154,7 +2154,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-vwqq-5vrc-xw9h",
+					VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
 				},
 				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
@@ -2167,11 +2167,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 			{
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "CVE-2023-1944",
+					VulnerabilityID: "cve-2023-1944",
 				},
 				EqualVulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "cve",
-					VulnerabilityID: "CVE-2023-1944",
+					VulnerabilityID: "cve-2023-1944",
 				},
 				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
@@ -2180,11 +2180,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 			{
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-7rjr-3q55-vv33",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
 				},
 				EqualVulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "ghsa",
-					VulnerabilityID: "GHSA-7rjr-3q55-vv33",
+					VulnerabilityID: "ghsa-7rjr-3q55-vv33",
 				},
 				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
@@ -2193,11 +2193,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 			{
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-8489-44mv-ggj8",
+					VulnerabilityID: "ghsa-8489-44mv-ggj8",
 				},
 				EqualVulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "ghsa",
-					VulnerabilityID: "GHSA-8489-44mv-ggj8",
+					VulnerabilityID: "ghsa-8489-44mv-ggj8",
 				},
 				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
@@ -2206,11 +2206,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 			{
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-fxph-q3j8-mv87",
+					VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 				},
 				EqualVulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "ghsa",
-					VulnerabilityID: "GHSA-fxph-q3j8-mv87",
+					VulnerabilityID: "ghsa-fxph-q3j8-mv87",
 				},
 				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
@@ -2219,11 +2219,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 			{
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-jfh8-c2jp-5v3q",
+					VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 				},
 				EqualVulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "ghsa",
-					VulnerabilityID: "GHSA-jfh8-c2jp-5v3q",
+					VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
 				},
 				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
@@ -2232,11 +2232,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 			{
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "GHSA-p6xc-xr62-6r2g",
+					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 				},
 				EqualVulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "ghsa",
-					VulnerabilityID: "GHSA-p6xc-xr62-6r2g",
+					VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 				},
 				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
@@ -2371,7 +2371,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "ghsa",
-					VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+					VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
 				},
 				VexData: &generated.VexStatementInputSpec{
 					Status:           generated.VexStatusNotAffected,
@@ -2388,7 +2388,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "osv",
-					VulnerabilityID: "CVE-2018-15710",
+					VulnerabilityID: "cve-2018-15710",
 				},
 				VexData: &generated.VexStatementInputSpec{
 					Status:           generated.VexStatusUnderInvestigation,
@@ -2405,7 +2405,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Vulnerability: &generated.VulnerabilityInputSpec{
 					Type:            "cve",
-					VulnerabilityID: "CVE-2018-43610",
+					VulnerabilityID: "cve-2018-43610",
 				},
 				VexData: &generated.VexStatementInputSpec{
 					Status:           generated.VexStatusNotAffected,

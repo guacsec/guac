@@ -263,6 +263,7 @@ func TestParser(t *testing.T) {
 				Version:   ptrfrom.String("2.8.1"),
 				Subpath:   ptrfrom.String(""),
 			},
+			Vulnerability: &generated.VulnerabilityInputSpec{Type: "noVuln"},
 			VulnData: &generated.ScanMetadataInput{
 				TimeScanned:    tm,
 				ScannerUri:     "osv.dev",
