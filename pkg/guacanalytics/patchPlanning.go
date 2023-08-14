@@ -191,6 +191,12 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 			if err != nil {
 				return err
 			}
+		case *model.NeighborsNeighborsIsDependency:
+			err := exploreIsDependencyFromDepPkg(ctx, gqlClient, q, *neighbor)
+			if err != nil {
+				return err
+			}
+
 		}
 	case SourceName:
 		switch neighbor := neighbor.(type) {
@@ -229,15 +235,23 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 }
 
 func exploreIsDependencyFromDepPkg(ctx context.Context, gqlClient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) error {
-	path = append(path, isDependency.Id)
-	doesRangeInclude, err := depversion.DoesRangeInclude(q.nowNode.nodeVersions, isDependency.VersionRange)
-
-	if err != nil {
-		return err
+	// if coming from dependent, ignore
+	if isDependency.Package.Namespaces[0].Names[0].Versions[0].Id == q.now {
+		return nil
 	}
 
-	if !doesRangeInclude {
-		return nil
+	path = append(path, isDependency.Id)
+	targetDepPkgVersion := len(isDependency.DependentPackage.Namespaces[0].Names[0].Versions) > 0
+
+	if !targetDepPkgVersion {
+		doesRangeInclude, err := depversion.DoesRangeInclude(q.nowNode.nodeVersions, isDependency.VersionRange)
+		if err != nil {
+			return err
+		}
+
+		if !doesRangeInclude {
+			return nil
+		}
 	}
 
 	q.addNodeToQueue(PackageVersion, nil, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
