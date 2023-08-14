@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -61,7 +60,22 @@ func (n *certifyVulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, er
 
 // Ingest CertifyVuln
 func (c *demoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
-	return nil, fmt.Errorf("not implemented - IngestCertifyVulns")
+	// TODO (pxp928): move checks to resolver so all backends don't have to implement
+	if len(pkgs) != len(vulnerabilities) {
+		return nil, gqlerror.Errorf("uneven packages and vulnerabilities for ingestion")
+	}
+	if len(pkgs) != len(certifyVulns) {
+		return nil, gqlerror.Errorf("uneven packages and certifyVuln for ingestion")
+	}
+	var modelCertifyVulnList []*model.CertifyVuln
+	for i := range certifyVulns {
+		certifyVuln, err := c.IngestCertifyVuln(ctx, *pkgs[i], *vulnerabilities[i], *certifyVulns[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestCertifyVuln failed with err: %v", err)
+		}
+		modelCertifyVulnList = append(modelCertifyVulnList, certifyVuln)
+	}
+	return modelCertifyVulnList, nil
 }
 
 func (c *demoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
