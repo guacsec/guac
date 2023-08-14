@@ -22,8 +22,12 @@
         ]
       },
       "vulnerability": {
-        "__typename": "OSV",
-        "osvId": "ghsa-jfh8-c2jp-5v3q"
+        "type": "osv",
+        "vulnerabilityIDs": [
+          {
+            "vulnerabilityID": "ghsa-jfh8-c2jp-5v3q"
+          }
+        ]
       },
       "metadata": {
         "dbUri": "",
