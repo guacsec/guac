@@ -166,7 +166,8 @@ func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpe
 	return values
 }
 
-func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+	// TODO(LUMJJB): handle pkgmatchtype
 	if len(pkgs) != len(depPkgs) {
 		return nil, fmt.Errorf("uneven packages and dependent packages for ingestion")
 	} else if len(pkgs) != len(dependencies) {
@@ -297,7 +298,8 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 	return getIsDependency(ctx, cursor)
 }
 
-func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+	// TODO(LUMJJB): handle pkgmatchtype
 	query := `
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions
