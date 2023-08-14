@@ -381,10 +381,8 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 	ingestVulnerabilities := []struct {
 		name          string
 		pkg           *model.PkgInputSpec
-		cve           *model.CVEInputSpec
-		osv           *model.OSVInputSpec
-		ghsa          *model.GHSAInputSpec
-		vulnerability model.VulnerabilityMetaDataInput
+		vuln          *model.VulnerabilityInputSpec
+		vulnerability model.ScanMetadataInput
 	}{
 		{
 			name: "cve openssl",
@@ -398,11 +396,11 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 					{Key: "channel", Value: "stable"},
 				},
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2019,
-				CveId: "CVE-2019-13110",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2019-13110",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			vulnerability: model.ScanMetadataInput{
 				TimeScanned:    tm,
 				DbUri:          "MITRE",
 				DbVersion:      "v1.0.0",
@@ -424,10 +422,11 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 					{Key: "channel", Value: "stable"},
 				},
 			},
-			osv: &model.OSVInputSpec{
-				OsvId: "CVE-2019-13110",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2019-13110",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			vulnerability: model.ScanMetadataInput{
 				TimeScanned:    tm,
 				DbUri:          "MITRE",
 				DbVersion:      "v1.0.0",
@@ -449,10 +448,11 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 					{Key: "channel", Value: "stable"},
 				},
 			},
-			ghsa: &model.GHSAInputSpec{
-				GhsaId: "GHSA-h45f-rjvw-2rv2",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			vulnerability: model.ScanMetadataInput{
 				TimeScanned:    tm,
 				DbUri:          "MITRE",
 				DbVersion:      "v1.0.0",
@@ -469,11 +469,11 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 				Namespace: &djangoNs,
 				Name:      "django",
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2018,
-				CveId: "CVE-2018-12310",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2018-12310",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			vulnerability: model.ScanMetadataInput{
 				TimeScanned:    tm,
 				DbUri:          "MITRE",
 				DbVersion:      "v1.2.0",
@@ -490,10 +490,11 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 				Namespace: &djangoNs,
 				Name:      "django",
 			},
-			osv: &model.OSVInputSpec{
-				OsvId: "CVE-2018-12310",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2018-12310",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			vulnerability: model.ScanMetadataInput{
 				TimeScanned:    tm,
 				DbUri:          "MITRE",
 				DbVersion:      "v1.2.0",
@@ -510,10 +511,32 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 				Namespace: &djangoNs,
 				Name:      "django",
 			},
-			ghsa: &model.GHSAInputSpec{
-				GhsaId: "GHSA-f45f-jj4w-2rv2",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-f45f-jj4w-2rv2",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			vulnerability: model.ScanMetadataInput{
+				TimeScanned:    tm,
+				DbUri:          "MITRE",
+				DbVersion:      "v1.2.0",
+				ScannerUri:     "osv.dev",
+				ScannerVersion: "0.0.14",
+				Origin:         "Demo ingestion",
+				Collector:      "Demo ingestion",
+			},
+		},
+		{
+			name: "noVuln",
+			pkg: &model.PkgInputSpec{
+				Type:      "pypi",
+				Namespace: &djangoNs,
+				Name:      "django",
+			},
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "noVuln",
+				VulnerabilityID: "",
+			},
+			vulnerability: model.ScanMetadataInput{
 				TimeScanned:    tm,
 				DbUri:          "MITRE",
 				DbVersion:      "v1.2.0",
@@ -535,11 +558,11 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 					{Key: "channel", Value: "stable"},
 				},
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2019,
-				CveId: "CVE-2019-13110",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2019-13110",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			vulnerability: model.ScanMetadataInput{
 				TimeScanned:    tm,
 				DbUri:          "MITRE",
 				DbVersion:      "v1.0.0",
@@ -556,10 +579,11 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 				Namespace: &djangoNs,
 				Name:      "django",
 			},
-			ghsa: &model.GHSAInputSpec{
-				GhsaId: "GHSA-f45f-jj4w-2rv2",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-f45f-jj4w-2rv2",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			vulnerability: model.ScanMetadataInput{
 				TimeScanned:    tm,
 				DbUri:          "MITRE",
 				DbVersion:      "v1.2.0",
@@ -581,13 +605,35 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 					{Key: "channel", Value: "stable"},
 				},
 			},
-			osv: &model.OSVInputSpec{
-				OsvId: "CVE-2019-13110",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2019-13110",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			vulnerability: model.ScanMetadataInput{
 				TimeScanned:    tm,
 				DbUri:          "MITRE",
 				DbVersion:      "v1.0.0",
+				ScannerUri:     "osv.dev",
+				ScannerVersion: "0.0.14",
+				Origin:         "Demo ingestion",
+				Collector:      "Demo ingestion",
+			},
+		},
+		{
+			name: "noVuln (duplicate)",
+			pkg: &model.PkgInputSpec{
+				Type:      "pypi",
+				Namespace: &djangoNs,
+				Name:      "django",
+			},
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "noVuln",
+				VulnerabilityID: "",
+			},
+			vulnerability: model.ScanMetadataInput{
+				TimeScanned:    tm,
+				DbUri:          "MITRE",
+				DbVersion:      "v1.2.0",
 				ScannerUri:     "osv.dev",
 				ScannerVersion: "0.0.14",
 				Origin:         "Demo ingestion",
@@ -599,30 +645,13 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestPackage(ctx, client, *ingest.pkg); err != nil {
 			logger.Errorf("Error in ingesting package: %v\n", err)
 		}
-		if ingest.cve != nil {
-			if _, err := model.IngestCVE(ctx, client, *ingest.cve); err != nil {
-				logger.Errorf("Error in ingesting CVE: %v\n", err)
-			}
-			if _, err := model.CertifyCVE(ctx, client, *ingest.pkg, *ingest.cve, ingest.vulnerability); err != nil {
-				logger.Errorf("Error in ingesting: %v\n", err)
-			}
-		} else if ingest.osv != nil {
-			if _, err := model.IngestOSV(ctx, client, *ingest.osv); err != nil {
-				logger.Errorf("Error in ingesting OSV: %v\n", err)
-			}
-			if _, err := model.CertifyOSV(ctx, client, *ingest.pkg, *ingest.osv, ingest.vulnerability); err != nil {
-				logger.Errorf("Error in ingesting: %v\n", err)
-			}
-		} else if ingest.ghsa != nil {
-			if _, err := model.IngestGHSA(ctx, client, *ingest.ghsa); err != nil {
-				logger.Errorf("Error in ingesting GHSA: %v\n", err)
-			}
-			if _, err := model.CertifyGHSA(ctx, client, *ingest.pkg, *ingest.ghsa, ingest.vulnerability); err != nil {
-				logger.Errorf("Error in ingesting: %v\n", err)
-			}
-		} else {
-			fmt.Printf("input missing for cve, osv or ghsa")
+		if _, err := model.IngestVulnerability(ctx, client, *ingest.vuln); err != nil {
+			logger.Errorf("Error in ingesting vulnerability: %v\n", err)
 		}
+		if _, err := model.CertifyVulnPkg(ctx, client, *ingest.pkg, *ingest.vuln, ingest.vulnerability); err != nil {
+			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+
 	}
 }
 
@@ -1638,22 +1667,22 @@ func ingestHasSourceAt(ctx context.Context, client graphql.Client) {
 func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 	ingestIsVulnerability := []struct {
-		name            string
-		osv             *model.OSVInputSpec
-		cve             *model.CVEInputSpec
-		ghsa            *model.GHSAInputSpec
-		isVulnerability model.IsVulnerabilityInputSpec
+		name      string
+		vuln      *model.VulnerabilityInputSpec
+		otherVuln *model.VulnerabilityInputSpec
+		vulnEqual model.VulnEqualInputSpec
 	}{
 		{
 			name: "OSV maps to CVE",
-			osv: &model.OSVInputSpec{
-				OsvId: "CVE-2019-13110",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2019-13110",
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2019,
-				CveId: "CVE-2019-13110",
+			otherVuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2019-13110",
 			},
-			isVulnerability: model.IsVulnerabilityInputSpec{
+			vulnEqual: model.VulnEqualInputSpec{
 				Justification: "OSV maps to CVE",
 				Origin:        "Demo ingestion",
 				Collector:     "Demo ingestion",
@@ -1661,13 +1690,15 @@ func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 		},
 		{
 			name: "OSV maps to GHSA",
-			osv: &model.OSVInputSpec{
-				OsvId: "GHSA-h45f-rjvw-2rv2",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
 			},
-			ghsa: &model.GHSAInputSpec{
-				GhsaId: "GHSA-h45f-rjvw-2rv2",
+			otherVuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
 			},
-			isVulnerability: model.IsVulnerabilityInputSpec{
+			vulnEqual: model.VulnEqualInputSpec{
 				Justification: "OSV maps to GHSA",
 				Origin:        "Demo ingestion",
 				Collector:     "Demo ingestion",
@@ -1675,27 +1706,30 @@ func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 		},
 		{
 			name: "OSV maps to CVE (duplicate)",
-			osv: &model.OSVInputSpec{
-				OsvId: "CVE-2019-13110",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2019-13110",
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2019,
-				CveId: "CVE-2019-13110",
+			otherVuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2019-13110",
 			},
-			isVulnerability: model.IsVulnerabilityInputSpec{
+			vulnEqual: model.VulnEqualInputSpec{
 				Justification: "OSV maps to CVE",
 				Origin:        "Demo ingestion",
 				Collector:     "Demo ingestion",
 			},
 		}, {
 			name: "OSV maps to GHSA (duplicate)",
-			osv: &model.OSVInputSpec{
-				OsvId: "GHSA-h45f-rjvw-2rv2",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
 			},
-			ghsa: &model.GHSAInputSpec{
-				GhsaId: "GHSA-h45f-rjvw-2rv2",
+			otherVuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
 			},
-			isVulnerability: model.IsVulnerabilityInputSpec{
+			vulnEqual: model.VulnEqualInputSpec{
 				Justification: "OSV maps to GHSA",
 				Origin:        "Demo ingestion",
 				Collector:     "Demo ingestion",
@@ -1703,26 +1737,16 @@ func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 		},
 	}
 	for _, ingest := range ingestIsVulnerability {
-		if _, err := model.IngestOSV(ctx, client, *ingest.osv); err != nil {
-			logger.Errorf("Error in ingesting osv: %v\n", err)
+		if _, err := model.IngestVulnerability(ctx, client, *ingest.vuln); err != nil {
+			logger.Errorf("Error in ingesting vuln: %v\n", err)
 		}
-		if ingest.cve != nil {
-			if _, err := model.IngestCVE(ctx, client, *ingest.cve); err != nil {
-				logger.Errorf("Error in ingesting cve: %v\n", err)
-			}
-			if _, err := model.IsVulnerabilityCVE(ctx, client, *ingest.osv, *ingest.cve, ingest.isVulnerability); err != nil {
-				logger.Errorf("Error in ingesting: %v\n", err)
-			}
-		} else if ingest.ghsa != nil {
-			if _, err := model.IngestGHSA(ctx, client, *ingest.ghsa); err != nil {
-				logger.Errorf("Error in ingesting ghsa: %v\n", err)
-			}
-			if _, err := model.IsVulnerabilityGHSA(ctx, client, *ingest.osv, *ingest.ghsa, ingest.isVulnerability); err != nil {
-				logger.Errorf("Error in ingesting: %v\n", err)
-			}
-		} else {
-			fmt.Printf("input missing for cve or ghsa")
+		if _, err := model.IngestVulnerability(ctx, client, *ingest.otherVuln); err != nil {
+			logger.Errorf("Error in ingesting other vuln: %v\n", err)
 		}
+		if _, err := model.VulnEqual(ctx, client, *ingest.vuln, *ingest.otherVuln, ingest.vulnEqual); err != nil {
+			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+
 	}
 }
 
@@ -1735,9 +1759,7 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 		name         string
 		pkg          *model.PkgInputSpec
 		artifact     *model.ArtifactInputSpec
-		cve          *model.CVEInputSpec
-		ghsa         *model.GHSAInputSpec
-		osv          *model.OSVInputSpec
+		vuln         *model.VulnerabilityInputSpec
 		vexStatement model.VexStatementInputSpec
 	}{
 		{
@@ -1749,8 +1771,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Version:    &opensslVersion,
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 			},
-			osv: &model.OSVInputSpec{
-				OsvId: "CVE-2019-14750",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2019-14750",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusFixed,
@@ -1769,9 +1792,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Version:    &opensslVersion,
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2019,
-				CveId: "CVE-2019-13110",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2019-13110",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusAffected,
@@ -1791,8 +1814,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Version:    &opensslVersion,
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 			},
-			ghsa: &model.GHSAInputSpec{
-				GhsaId: "GHSA-h45f-rjvw-2rv2",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusNotAffected,
@@ -1808,8 +1832,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 				Algorithm: "sha256",
 			},
-			osv: &model.OSVInputSpec{
-				OsvId: "CVE-2018-15710",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2018-15710",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusUnderInvestigation,
@@ -1825,9 +1850,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 				Algorithm: "sha256",
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2018,
-				CveId: "CVE-2018-43610",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2018-43610",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusNotAffected,
@@ -1845,8 +1870,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 				Algorithm: "sha256",
 			},
-			ghsa: &model.GHSAInputSpec{
-				GhsaId: "GHSA-hj5f-4gvw-4rv2",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-hj5f-4gvw-4rv2",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusNotAffected,
@@ -1865,8 +1891,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Version:    &opensslVersion,
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 			},
-			osv: &model.OSVInputSpec{
-				OsvId: "CVE-2019-14750",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2019-14750",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusFixed,
@@ -1885,9 +1912,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Version:    &opensslVersion,
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2019,
-				CveId: "CVE-2019-13110",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2019-13110",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusAffected,
@@ -1907,8 +1934,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Version:    &opensslVersion,
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 			},
-			ghsa: &model.GHSAInputSpec{
-				GhsaId: "GHSA-h45f-rjvw-2rv2",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusNotAffected,
@@ -1924,8 +1952,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 				Algorithm: "sha256",
 			},
-			osv: &model.OSVInputSpec{
-				OsvId: "CVE-2018-15710",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2018-15710",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusUnderInvestigation,
@@ -1941,9 +1970,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 				Algorithm: "sha256",
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2018,
-				CveId: "CVE-2018-43610",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2018-43610",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusNotAffected,
@@ -1961,8 +1990,9 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 				Algorithm: "sha256",
 			},
-			ghsa: &model.GHSAInputSpec{
-				GhsaId: "GHSA-hj5f-4gvw-4rv2",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-hj5f-4gvw-4rv2",
 			},
 			vexStatement: model.VexStatementInputSpec{
 				Status:           model.VexStatusNotAffected,
@@ -1978,58 +2008,24 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			if _, err := model.IngestPackage(ctx, client, *ingest.pkg); err != nil {
 				logger.Errorf("Error in ingesting package: %v\n", err)
 			}
-			if ingest.cve != nil {
-				if _, err := model.IngestCVE(ctx, client, *ingest.cve); err != nil {
-					logger.Errorf("Error in ingesting CVE: %v\n", err)
-				}
-				if _, err := model.VexPackageAndCve(ctx, client, *ingest.pkg, *ingest.cve, ingest.vexStatement); err != nil {
-					logger.Errorf("Error in ingesting: %v\n", err)
-				}
-			} else if ingest.ghsa != nil {
-				if _, err := model.IngestGHSA(ctx, client, *ingest.ghsa); err != nil {
-					logger.Errorf("Error in ingesting GHSA: %v\n", err)
-				}
-				if _, err := model.VEXPackageAndGhsa(ctx, client, *ingest.pkg, *ingest.ghsa, ingest.vexStatement); err != nil {
-					logger.Errorf("Error in ingesting: %v\n", err)
-				}
-			} else if ingest.osv != nil {
-				if _, err := model.IngestOSV(ctx, client, *ingest.osv); err != nil {
-					logger.Errorf("Error in ingesting OSV: %v\n", err)
-				}
-				if _, err := model.VexPackageAndOsv(ctx, client, *ingest.pkg, *ingest.osv, ingest.vexStatement); err != nil {
-					logger.Errorf("Error in ingesting: %v\n", err)
-				}
-			} else {
-				fmt.Printf("input missing for cve, ghsa or osv")
+			if _, err := model.IngestVulnerability(ctx, client, *ingest.vuln); err != nil {
+				logger.Errorf("Error in ingesting vulnerability: %v\n", err)
 			}
+			if _, err := model.CertifyVexPkg(ctx, client, *ingest.pkg, *ingest.vuln, ingest.vexStatement); err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+
 		} else if ingest.artifact != nil {
 			if _, err := model.IngestArtifact(ctx, client, *ingest.artifact); err != nil {
 				logger.Errorf("Error in ingesting artifact: %v\n", err)
 			}
-			if ingest.cve != nil {
-				if _, err := model.IngestCVE(ctx, client, *ingest.cve); err != nil {
-					logger.Errorf("Error in ingesting CVE: %v\n", err)
-				}
-				if _, err := model.VexArtifactAndCve(ctx, client, *ingest.artifact, *ingest.cve, ingest.vexStatement); err != nil {
-					logger.Errorf("Error in ingesting: %v\n", err)
-				}
-			} else if ingest.ghsa != nil {
-				if _, err := model.IngestGHSA(ctx, client, *ingest.ghsa); err != nil {
-					logger.Errorf("Error in ingesting GHSA: %v\n", err)
-				}
-				if _, err := model.VexArtifactAndGhsa(ctx, client, *ingest.artifact, *ingest.ghsa, ingest.vexStatement); err != nil {
-					logger.Errorf("Error in ingesting: %v\n", err)
-				}
-			} else if ingest.osv != nil {
-				if _, err := model.IngestOSV(ctx, client, *ingest.osv); err != nil {
-					logger.Errorf("Error in ingesting OSV: %v\n", err)
-				}
-				if _, err := model.VexArtifactAndOsv(ctx, client, *ingest.artifact, *ingest.osv, ingest.vexStatement); err != nil {
-					logger.Errorf("Error in ingesting: %v\n", err)
-				}
-			} else {
-				fmt.Printf("input missing for cve, ghsa or osv")
+			if _, err := model.IngestVulnerability(ctx, client, *ingest.vuln); err != nil {
+				logger.Errorf("Error in ingesting vulnerability: %v\n", err)
 			}
+			if _, err := model.CertifyVexArtifact(ctx, client, *ingest.artifact, *ingest.vuln, ingest.vexStatement); err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+
 		} else {
 			fmt.Printf("input missing for package or artifact")
 		}
@@ -2056,8 +2052,8 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 		hasSourceAt       model.HasSourceAtInputSpec
 		sourceArt         model.ArtifactInputSpec
 		sourceOccurrence  model.IsOccurrenceInputSpec
-		cve               *model.CVEInputSpec
-		vulnerability     model.VulnerabilityMetaDataInput
+		vuln              *model.VulnerabilityInputSpec
+		scanMetadata      model.ScanMetadataInput
 	}{
 		{
 			name: "deb: part of SBOM - openssl",
@@ -2118,11 +2114,11 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 				Origin:        "Demo ingestion",
 				Collector:     "Demo ingestion",
 			},
-			cve: &model.CVEInputSpec{
-				Year:  2019,
-				CveId: "CVE-2019-13110",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2019-13110",
 			},
-			vulnerability: model.VulnerabilityMetaDataInput{
+			scanMetadata: model.ScanMetadataInput{
 				TimeScanned:    time.Now(),
 				DbUri:          "MITRE",
 				DbVersion:      "v1.0.0",
@@ -2152,8 +2148,8 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestSource(ctx, client, ingest.source); err != nil {
 			logger.Errorf("Error in ingesting source: %v\n", err)
 		}
-		if _, err := model.IngestCVE(ctx, client, *ingest.cve); err != nil {
-			logger.Errorf("Error in ingesting CVE: %v\n", err)
+		if _, err := model.IngestVulnerability(ctx, client, *ingest.vuln); err != nil {
+			logger.Errorf("Error in ingesting vuln: %v\n", err)
 		}
 		if _, err := model.IsDependency(ctx, client, ingest.pkg, ingest.depPkg, ingest.dependency); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
@@ -2167,7 +2163,7 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 		if _, err := model.IsOccurrenceSrc(ctx, client, ingest.source, ingest.sourceArt, ingest.sourceOccurrence); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
-		if _, err := model.CertifyCVE(ctx, client, ingest.depPkgWithVersion, *ingest.cve, ingest.vulnerability); err != nil {
+		if _, err := model.CertifyVulnPkg(ctx, client, ingest.depPkgWithVersion, *ingest.vuln, ingest.scanMetadata); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}

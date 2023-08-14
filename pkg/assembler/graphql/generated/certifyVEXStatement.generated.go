@@ -144,9 +144,9 @@ func (ec *executionContext) _CertifyVEXStatement_vulnerability(ctx context.Conte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.Vulnerability)
+	res := resTmp.(*model.Vulnerability)
 	fc.Result = res
-	return ec.marshalNVulnerability2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerability(ctx, field.Selections, res)
+	return ec.marshalNVulnerability2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerability(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyVEXStatement_vulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -156,7 +156,15 @@ func (ec *executionContext) fieldContext_CertifyVEXStatement_vulnerability(ctx c
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Vulnerability does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Vulnerability_id(ctx, field)
+			case "type":
+				return ec.fieldContext_Vulnerability_type(ctx, field)
+			case "vulnerabilityIDs":
+				return ec.fieldContext_Vulnerability_vulnerabilityIDs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Vulnerability", field.Name)
 		},
 	}
 	return fc, nil

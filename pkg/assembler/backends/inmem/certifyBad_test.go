@@ -454,7 +454,7 @@ func TestCertifyBad(t *testing.T) {
 				},
 			},
 			Query: &model.CertifyBadSpec{
-				ID: ptrfrom.String("4"),
+				ID: ptrfrom.String("3"),
 			},
 			ExpCB: []*model.CertifyBad{
 				{
@@ -905,8 +905,8 @@ func TestCertifyBadNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "6"}, // pkg version
-				"6": []string{"2"},      // certify bad
+				"4": []string{"1", "5"}, // pkg version
+				"5": []string{"1"},      // certify bad
 			},
 		},
 		{
@@ -944,17 +944,17 @@ func TestCertifyBadNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2":  []string{"2"},
-				"3":  []string{"2", "2"},
-				"4":  []string{"2", "2", "10"}, // pkg name
-				"5":  []string{"2"},            // pkg version
-				"6":  []string{"6"},
-				"7":  []string{"6", "6"},
-				"8":  []string{"6", "11"}, // src name
-				"9":  []string{"12"},      // art
-				"10": []string{"2"},       // cb 1 -> pkg name
-				"11": []string{"6"},       // cb 2 -> src name
-				"12": []string{"9"},       // cb 3 -> art
+				"1":  []string{"1"},
+				"2":  []string{"1", "1"},
+				"3":  []string{"1", "1", "9"}, // pkg name
+				"4":  []string{"1"},           // pkg version
+				"5":  []string{"5"},
+				"6":  []string{"5", "5"},
+				"7":  []string{"5", "10"}, // src name
+				"8":  []string{"11"},      // art
+				"9":  []string{"1"},       // cb 1 -> pkg name
+				"10": []string{"5"},       // cb 2 -> src name
+				"11": []string{"8"},       // cb 3 -> art
 			},
 		},
 	}

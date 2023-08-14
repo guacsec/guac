@@ -30,19 +30,17 @@ import (
 // Internal data: link between a package or an artifact with its corresponding vulnerability VEX statement
 type vexList []*vexLink
 type vexLink struct {
-	id            uint32
-	packageID     uint32
-	artifactID    uint32
-	cveID         uint32
-	ghsaID        uint32
-	osvID         uint32
-	knownSince    time.Time
-	status        model.VexStatus
-	statement     string
-	statusNotes   string
-	justification model.VexJustification
-	origin        string
-	collector     string
+	id              uint32
+	packageID       uint32
+	artifactID      uint32
+	vulnerabilityID uint32
+	knownSince      time.Time
+	status          model.VexStatus
+	statement       string
+	statusNotes     string
+	justification   model.VexJustification
+	origin          string
+	collector       string
 }
 
 func (n *vexLink) ID() uint32 { return n.id }
@@ -55,14 +53,8 @@ func (n *vexLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	if n.artifactID != 0 && allowedEdges[model.EdgeCertifyVexStatementArtifact] {
 		out = append(out, n.artifactID)
 	}
-	if n.cveID != 0 && allowedEdges[model.EdgeCertifyVexStatementCve] {
-		out = append(out, n.cveID)
-	}
-	if n.ghsaID != 0 && allowedEdges[model.EdgeCertifyVexStatementGhsa] {
-		out = append(out, n.ghsaID)
-	}
-	if n.osvID != 0 && allowedEdges[model.EdgeCertifyVexStatementOsv] {
-		out = append(out, n.osvID)
+	if n.vulnerabilityID != 0 && allowedEdges[model.EdgeCertifyVexStatementVulnerability] {
+		out = append(out, n.vulnerabilityID)
 	}
 	return out
 }
@@ -73,16 +65,13 @@ func (n *vexLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest CertifyVex
 
-func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	return c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, true)
 }
 
-func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {
+func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {
 	funcName := "IngestVEXStatement"
 	if err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement"); err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVEXStatement", false); err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 
@@ -123,47 +112,16 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		subjectVexLinks = foundArtStrct.vexLinks
 	}
 
-	var osvID uint32
-	var foundOsvNode *osvNode
-	var cveID uint32
-	var foundCveNode *cveNode
-	var ghsaID uint32
-	var foundGhsaNode *ghsaNode
 	var vulnerabilityVexLinks []uint32
-	if vulnerability.Osv != nil {
-		var err error
-		osvID, err = getOsvIDFromInput(c, *vulnerability.Osv)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		foundOsvNode, err = byID[*osvNode](osvID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		vulnerabilityVexLinks = foundOsvNode.vexLinks
-	} else if vulnerability.Cve != nil {
-		var err error
-		cveID, err = getCveIDFromInput(c, *vulnerability.Cve)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		foundCveNode, err = byID[*cveNode](cveID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		vulnerabilityVexLinks = foundCveNode.vexLinks
-	} else {
-		var err error
-		ghsaID, err = getGhsaIDFromInput(c, *vulnerability.Ghsa)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		foundGhsaNode, err = byID[*ghsaNode](ghsaID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		vulnerabilityVexLinks = foundGhsaNode.vexLinks
+	vulnID, err := getVulnerabilityIDFromInput(c, vulnerability)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	foundVulnNode, err := byID[*vulnIDNode](vulnID, c)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+	vulnerabilityVexLinks = foundVulnNode.vexLinks
 
 	var searchIDs []uint32
 	if len(subjectVexLinks) < len(vulnerabilityVexLinks) {
@@ -182,13 +140,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		}
 		vulnMatch := false
 		subjectMatch := false
-		if osvID != 0 && osvID == v.osvID {
-			vulnMatch = true
-		}
-		if cveID != 0 && cveID == v.cveID {
-			vulnMatch = true
-		}
-		if ghsaID != 0 && ghsaID == v.ghsaID {
+		if vulnID != 0 && vulnID == v.vulnerabilityID {
 			vulnMatch = true
 		}
 		if packageID != 0 && packageID == v.packageID {
@@ -215,19 +167,17 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		}
 		// store the link
 		collectedCertifyVexLink = vexLink{
-			id:            c.getNextID(),
-			packageID:     packageID,
-			artifactID:    artifactID,
-			cveID:         cveID,
-			ghsaID:        ghsaID,
-			osvID:         osvID,
-			knownSince:    vexStatement.KnownSince.UTC(),
-			status:        vexStatement.Status,
-			justification: vexStatement.VexJustification,
-			statement:     vexStatement.Statement,
-			statusNotes:   vexStatement.StatusNotes,
-			origin:        vexStatement.Origin,
-			collector:     vexStatement.Collector,
+			id:              c.getNextID(),
+			packageID:       packageID,
+			artifactID:      artifactID,
+			vulnerabilityID: vulnID,
+			knownSince:      vexStatement.KnownSince.UTC(),
+			status:          vexStatement.Status,
+			justification:   vexStatement.VexJustification,
+			statement:       vexStatement.Statement,
+			statusNotes:     vexStatement.StatusNotes,
+			origin:          vexStatement.Origin,
+			collector:       vexStatement.Collector,
 		}
 		c.index[collectedCertifyVexLink.id] = &collectedCertifyVexLink
 		c.vexs = append(c.vexs, &collectedCertifyVexLink)
@@ -238,14 +188,8 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		if artifactID != 0 {
 			foundArtStrct.setVexLinks(collectedCertifyVexLink.id)
 		}
-		if osvID != 0 {
-			foundOsvNode.setVexLinks(collectedCertifyVexLink.id)
-		}
-		if cveID != 0 {
-			foundCveNode.setVexLinks(collectedCertifyVexLink.id)
-		}
-		if ghsaID != 0 {
-			foundGhsaNode.setVexLinks(collectedCertifyVexLink.id)
+		if vulnID != 0 {
+			foundVulnNode.setVexLinks(collectedCertifyVexLink.id)
 		}
 	}
 
@@ -265,9 +209,6 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 
 	if filter != nil {
 		if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
-			return nil, err
-		}
-		if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability, false); err != nil {
 			return nil, err
 		}
 	}
@@ -314,33 +255,13 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 			foundOne = true
 		}
 	}
-	if !foundOne && filter != nil && filter.Vulnerability != nil && filter.Vulnerability.Osv != nil {
-		exactOSV, err := c.exactOSV(filter.Vulnerability.Osv)
+	if !foundOne && filter != nil && filter.Vulnerability != nil {
+		exactVuln, err := c.exactVulnerability(filter.Vulnerability)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
-		if exactOSV != nil {
-			search = append(search, exactOSV.vexLinks...)
-			foundOne = true
-		}
-	}
-	if !foundOne && filter != nil && filter.Vulnerability != nil && filter.Vulnerability.Cve != nil {
-		exactCVE, err := c.exactCVE(filter.Vulnerability.Cve)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-		if exactCVE != nil {
-			search = append(search, exactCVE.vexLinks...)
-			foundOne = true
-		}
-	}
-	if !foundOne && filter != nil && filter.Vulnerability != nil && filter.Vulnerability.Ghsa != nil {
-		exactGHSA, err := c.exactGHSA(filter.Vulnerability.Ghsa)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-		if exactGHSA != nil {
-			search = append(search, exactGHSA.vexLinks...)
+		if exactVuln != nil {
+			search = append(search, exactVuln.vexLinks...)
 			foundOne = true
 		}
 	}
@@ -409,9 +330,7 @@ func (c *demoClient) addVexIfMatch(out []*model.CertifyVEXStatement,
 func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.CertifyVEXStatementSpec, ingestOrIDProvided bool) (*model.CertifyVEXStatement, error) {
 	var p *model.Package
 	var a *model.Artifact
-	var osv *model.Osv
-	var cve *model.Cve
-	var ghsa *model.Ghsa
+	var vuln *model.Vulnerability
 	var err error
 	if filter != nil && filter.Subject != nil {
 		if filter.Subject.Package != nil && link.packageID != 0 {
@@ -442,39 +361,15 @@ func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.Certi
 	}
 
 	if filter != nil && filter.Vulnerability != nil {
-		if filter.Vulnerability.Osv != nil && link.osvID != 0 {
-			osv, err = c.buildOsvResponse(link.osvID, filter.Vulnerability.Osv)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if filter.Vulnerability.Cve != nil && link.cveID != 0 {
-			cve, err = c.buildCveResponse(link.cveID, filter.Vulnerability.Cve)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if filter.Vulnerability.Ghsa != nil && link.ghsaID != 0 {
-			ghsa, err = c.buildGhsaResponse(link.ghsaID, filter.Vulnerability.Ghsa)
+		if filter.Vulnerability != nil && link.vulnerabilityID != 0 {
+			vuln, err = c.buildVulnResponse(link.vulnerabilityID, filter.Vulnerability)
 			if err != nil {
 				return nil, err
 			}
 		}
 	} else {
-		if link.osvID != 0 {
-			osv, err = c.buildOsvResponse(link.osvID, nil)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if link.cveID != 0 {
-			cve, err = c.buildCveResponse(link.cveID, nil)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if link.ghsaID != 0 {
-			ghsa, err = c.buildGhsaResponse(link.ghsaID, nil)
+		if link.vulnerabilityID != 0 {
+			vuln, err = c.buildVulnResponse(link.vulnerabilityID, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -499,30 +394,12 @@ func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.Certi
 		subj = a
 	}
 
-	var vuln model.Vulnerability
-	if link.osvID != 0 {
-		if osv == nil && ingestOrIDProvided {
-			return nil, gqlerror.Errorf("failed to retrieve osv via osvID")
-		} else if osv == nil && !ingestOrIDProvided {
+	if link.vulnerabilityID != 0 {
+		if vuln == nil && ingestOrIDProvided {
+			return nil, gqlerror.Errorf("failed to retrieve vuln via vulnID")
+		} else if vuln == nil && !ingestOrIDProvided {
 			return nil, nil
 		}
-		vuln = osv
-	}
-	if link.cveID != 0 {
-		if cve == nil && ingestOrIDProvided {
-			return nil, gqlerror.Errorf("failed to retrieve cve via cveID")
-		} else if cve == nil && !ingestOrIDProvided {
-			return nil, nil
-		}
-		vuln = cve
-	}
-	if link.ghsaID != 0 {
-		if ghsa == nil && ingestOrIDProvided {
-			return nil, gqlerror.Errorf("failed to retrieve ghsa via ghsaID")
-		} else if ghsa == nil && !ingestOrIDProvided {
-			return nil, nil
-		}
-		vuln = ghsa
 	}
 
 	certifyVuln := model.CertifyVEXStatement{

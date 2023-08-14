@@ -576,7 +576,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 			},
 			Query: &model.HasMetadataSpec{
-				ID: ptrfrom.String("4"),
+				ID: ptrfrom.String("3"),
 			},
 			ExpHM: []*model.HasMetadata{
 				{
@@ -739,8 +739,8 @@ func TestHasMetadataNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": {"2", "6"}, // pkg version
-				"6": {"2"},      // certify good
+				"4": {"1", "5"}, // pkg version
+				"5": {"1"},      // certify good
 			},
 		},
 		{
@@ -778,17 +778,17 @@ func TestHasMetadataNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2":  {"2"},
-				"3":  {"2", "2"},
-				"4":  {"2", "2", "10"}, // pkg name
-				"5":  {"2"},            // pkg version
-				"6":  {"6"},
-				"7":  {"6", "6"},
-				"8":  {"6", "11"}, // src name
-				"9":  {"12"},      // art
-				"10": {"2"},       // cb 1 -> pkg name
-				"11": {"6"},       // cb 2 -> src name
-				"12": {"9"},       // cb 3 -> art
+				"1":  {"1"},
+				"2":  {"1", "1"},
+				"3":  {"1", "1", "9"}, // pkg name
+				"4":  {"1"},           // pkg version
+				"5":  {"5"},
+				"6":  {"5", "5"},
+				"7":  {"5", "10"}, // src name
+				"8":  {"11"},      // art
+				"9":  {"1"},       // cb 1 -> pkg name
+				"10": {"5"},       // cb 2 -> src name
+				"11": {"8"},       // cb 3 -> art
 			},
 		},
 	}

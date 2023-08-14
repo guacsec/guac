@@ -60,7 +60,7 @@ type node interface {
 
 type indexType map[uint32]node
 
-var errNotFound = errors.New("Not found")
+var errNotFound = errors.New("not found")
 
 // Scorecard scores are in range of 1-10, so a single step at 100 should be
 // plenty big
@@ -75,86 +75,51 @@ type demoClient struct {
 	id uint32
 	m  sync.RWMutex
 
-	artifacts            artMap
-	builders             builderMap
-	certifyBads          badList
-	certifyGoods         goodList
-	pkgEquals            pkgEqualList
-	cves                 cveMap
-	equalVulnerabilities equalVulnerabilityList
-	ghsas                ghsaMap
-	hasMetadatas         hasMetadataList
-	pointOfContacts      pointOfContactList
-	hasSBOMs             hasSBOMList
-	hasSLSAs             hasSLSAList
-	hasSources           hasSrcList
-	hashEquals           hashEqualList
-	index                indexType
-	isDependencies       isDependencyList
-	occurrences          isOccurrenceList
-	osvs                 osvMap
-	packages             pkgTypeMap
-	scorecards           scorecardList
-	sources              srcTypeMap
-	vexs                 vexList
-	vulnerabilities      vulnerabilityList
-
-	// Ensures that only one noKnownVuln node is created
-	noKnownVulnNode noKnownVuln
-}
-
-// This node is a singleton!
-type noKnownVuln struct {
-	id               uint32
-	certifyVulnLinks []uint32
-}
-
-func (n *noKnownVuln) ID() uint32 { return n.id }
-
-func (n *noKnownVuln) Neighbors(allowedEdges edgeMap) []uint32 {
-	if allowedEdges[model.EdgeNoVulnCertifyVuln] {
-		return n.certifyVulnLinks
-	}
-	return []uint32{}
-}
-
-func (n *noKnownVuln) BuildModelNode(c *demoClient) (model.Node, error) {
-	return &model.NoVuln{ID: nodeID(n.id)}, nil
-}
-
-func (n *noKnownVuln) setVulnerabilityLinks(id uint32) {
-	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
+	artifacts              artMap
+	builders               builderMap
+	certifyBads            badList
+	certifyGoods           goodList
+	pkgEquals              pkgEqualList
+	vulnerabilities        vulnTypeMap
+	vulnerabilityEquals    vulnerabilityEqualList
+	hasMetadatas           hasMetadataList
+	pointOfContacts        pointOfContactList
+	hasSBOMs               hasSBOMList
+	hasSLSAs               hasSLSAList
+	hasSources             hasSrcList
+	hashEquals             hashEqualList
+	index                  indexType
+	isDependencies         isDependencyList
+	occurrences            isOccurrenceList
+	packages               pkgTypeMap
+	scorecards             scorecardList
+	sources                srcTypeMap
+	vexs                   vexList
+	certifyVulnerabilities certifyVulnerabilityList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		artifacts:            artMap{},
-		builders:             builderMap{},
-		certifyBads:          badList{},
-		certifyGoods:         goodList{},
-		pkgEquals:            pkgEqualList{},
-		cves:                 cveMap{},
-		equalVulnerabilities: equalVulnerabilityList{},
-		ghsas:                ghsaMap{},
-		hasSBOMs:             hasSBOMList{},
-		hasSLSAs:             hasSLSAList{},
-		hasSources:           hasSrcList{},
-		hashEquals:           hashEqualList{},
-		index:                indexType{},
-		isDependencies:       isDependencyList{},
-		occurrences:          isOccurrenceList{},
-		osvs:                 osvMap{},
-		packages:             pkgTypeMap{},
-		scorecards:           scorecardList{},
-		sources:              srcTypeMap{},
-		vexs:                 vexList{},
-		vulnerabilities:      vulnerabilityList{},
-		noKnownVulnNode:      noKnownVuln{},
+		artifacts:              artMap{},
+		builders:               builderMap{},
+		certifyBads:            badList{},
+		certifyGoods:           goodList{},
+		pkgEquals:              pkgEqualList{},
+		vulnerabilities:        vulnTypeMap{},
+		vulnerabilityEquals:    vulnerabilityEqualList{},
+		hasSBOMs:               hasSBOMList{},
+		hasSLSAs:               hasSLSAList{},
+		hasSources:             hasSrcList{},
+		hashEquals:             hashEqualList{},
+		index:                  indexType{},
+		isDependencies:         isDependencyList{},
+		occurrences:            isOccurrenceList{},
+		packages:               pkgTypeMap{},
+		scorecards:             scorecardList{},
+		sources:                srcTypeMap{},
+		vexs:                   vexList{},
+		certifyVulnerabilities: certifyVulnerabilityList{},
 	}
-
-	// Build the special noKnownVuln node and link it everywhere
-	client.noKnownVulnNode.id = client.getNextID()
-	client.index[client.noKnownVulnNode.id] = &client.noKnownVulnNode
 
 	return client, nil
 }
@@ -240,13 +205,4 @@ func unlock(m *sync.RWMutex, readOnly bool) {
 	} else {
 		m.Unlock()
 	}
-}
-
-func (c *demoClient) buildNoVulnResponse() (*model.NoVuln, error) {
-	if c.noKnownVulnNode.id == 0 {
-		return nil, fmt.Errorf("noKnownVulnNode has not been initialized")
-	}
-	return &model.NoVuln{
-		ID: nodeID(c.noKnownVulnNode.id),
-	}, nil
 }

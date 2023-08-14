@@ -484,10 +484,6 @@ var (
 		Justification: "spdx file with checksum",
 	}
 
-	isOccJustifyPkg = &model.IsOccurrenceInputSpec{
-		Justification: "spdx package with checksum",
-	}
-
 	SpdxDeps = []assembler.IsDependencyIngest{
 		{
 			Pkg:    topLevelPack,
@@ -1909,7 +1905,7 @@ var (
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "x86_64"}, {Key: "epoch", Value: "1"}},
 				Subpath:    strP(""),
 			},
-			CVE: &model.CVEInputSpec{Year: 2023, CveId: "CVE-2023-0286"},
+			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2023-0286"},
 			VexData: &model.VexStatementInputSpec{
 				Status:           "AFFECTED",
 				VexJustification: "NOT_PROVIDED",
@@ -1937,8 +1933,8 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 				Subpath: strP(""),
 			},
-			CVE: &model.CVEInputSpec{Year: 2023, CveId: "CVE-2023-0286"},
-			VulnData: &model.VulnerabilityMetaDataInput{
+			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2023-0286"},
+			VulnData: &model.ScanMetadataInput{
 				TimeScanned: parseRfc3339("2023-03-23T11:14:00Z"),
 			},
 		},
@@ -2066,11 +2062,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				CVE: &generated.CVEInputSpec{
-					Year:  2023,
-					CveId: "CVE-2023-1944",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2023-1944",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -2084,10 +2080,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-8489-44mv-ggj8",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-8489-44mv-ggj8",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -2101,10 +2098,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-fxph-q3j8-mv87",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-fxph-q3j8-mv87",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -2118,10 +2116,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-jfh8-c2jp-5v3q",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-jfh8-c2jp-5v3q",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -2135,10 +2134,11 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-p6xc-xr62-6r2g",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-p6xc-xr62-6r2g",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
@@ -2152,87 +2152,93 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Version:   ptrfrom.String("2.8.1"),
 					Subpath:   ptrfrom.String(""),
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-vwqq-5vrc-xw9h",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-vwqq-5vrc-xw9h",
 				},
-				VulnData: &generated.VulnerabilityMetaDataInput{
+				VulnData: &generated.ScanMetadataInput{
 					TimeScanned:    parseRfc3339("2022-11-21T17:45:50.52Z"),
 					ScannerUri:     "osv.dev",
 					ScannerVersion: "0.0.14",
 				},
 			},
 		},
-		IsVuln: []assembler.IsVulnIngest{
+		VulnEqual: []assembler.VulnEqualIngest{
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "CVE-2023-1944",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2023-1944",
 				},
-				CVE: &generated.CVEInputSpec{
-					Year:  2023,
-					CveId: "CVE-2023-1944",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2023-1944",
 				},
-				GHSA: nil,
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-7rjr-3q55-vv33",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-7rjr-3q55-vv33",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-7rjr-3q55-vv33",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-7rjr-3q55-vv33",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-8489-44mv-ggj8",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-8489-44mv-ggj8",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-8489-44mv-ggj8",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-8489-44mv-ggj8",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-fxph-q3j8-mv87",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-fxph-q3j8-mv87",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-fxph-q3j8-mv87",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-fxph-q3j8-mv87",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-jfh8-c2jp-5v3q",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-jfh8-c2jp-5v3q",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-jfh8-c2jp-5v3q",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-jfh8-c2jp-5v3q",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
 			{
-				OSV: &generated.OSVInputSpec{
-					OsvId: "GHSA-p6xc-xr62-6r2g",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "GHSA-p6xc-xr62-6r2g",
 				},
-				CVE: nil,
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-p6xc-xr62-6r2g",
+				EqualVulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-p6xc-xr62-6r2g",
 				},
-				IsVuln: &generated.IsVulnerabilityInputSpec{
+				VulnEqual: &generated.VulnEqualInputSpec{
 					Justification: "Decoded OSV data",
 				},
 			},
@@ -2363,8 +2369,9 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Qualifiers: []generated.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 					Subpath:    ptrfrom.String(""),
 				},
-				GHSA: &generated.GHSAInputSpec{
-					GhsaId: "GHSA-h45f-rjvw-2rv2",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
 				},
 				VexData: &generated.VexStatementInputSpec{
 					Status:           generated.VexStatusNotAffected,
@@ -2379,8 +2386,9 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 					Algorithm: "sha256",
 				},
-				OSV: &generated.OSVInputSpec{
-					OsvId: "CVE-2018-15710",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2018-15710",
 				},
 				VexData: &generated.VexStatementInputSpec{
 					Status:           generated.VexStatusUnderInvestigation,
@@ -2395,9 +2403,9 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 					Algorithm: "sha256",
 				},
-				CVE: &generated.CVEInputSpec{
-					Year:  2018,
-					CveId: "CVE-2018-43610",
+				Vulnerability: &generated.VulnerabilityInputSpec{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2018-43610",
 				},
 				VexData: &generated.VexStatementInputSpec{
 					Status:           generated.VexStatusNotAffected,

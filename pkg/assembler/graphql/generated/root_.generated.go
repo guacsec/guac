@@ -50,12 +50,6 @@ type ComplexityRoot struct {
 		URI func(childComplexity int) int
 	}
 
-	CVE struct {
-		CveID func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Year  func(childComplexity int) int
-	}
-
 	CertifyBad struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
@@ -96,11 +90,6 @@ type ComplexityRoot struct {
 		Metadata      func(childComplexity int) int
 		Package       func(childComplexity int) int
 		Vulnerability func(childComplexity int) int
-	}
-
-	GHSA struct {
-		GhsaID func(childComplexity int) int
-		ID     func(childComplexity int) int
 	}
 
 	HasMetadata struct {
@@ -169,41 +158,26 @@ type ComplexityRoot struct {
 		Subject       func(childComplexity int) int
 	}
 
-	IsVulnerability struct {
-		Collector     func(childComplexity int) int
-		ID            func(childComplexity int) int
-		Justification func(childComplexity int) int
-		Origin        func(childComplexity int) int
-		Osv           func(childComplexity int) int
-		Vulnerability func(childComplexity int) int
-	}
-
 	Mutation struct {
 		IngestArtifact        func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestArtifacts       func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestBuilders        func(childComplexity int, builders []*model.BuilderInputSpec) int
-		IngestCVEs            func(childComplexity int, cves []*model.CVEInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
 		IngestCertifyBads     func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
-		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
+		IngestCertifyVuln     func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
-		IngestGHSAs           func(childComplexity int, ghsas []*model.GHSAInputSpec) int
-		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSBOMs        func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestHashEquals      func(childComplexity int, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) int
-		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
-		IngestOSVs            func(childComplexity int, osvs []*model.OSVInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOccurrences     func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
-		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestPackages        func(childComplexity int, pkgs []*model.PkgInputSpec) int
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
@@ -214,17 +188,10 @@ type ComplexityRoot struct {
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestSources         func(childComplexity int, sources []*model.SourceInputSpec) int
-		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) int
-		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) int
-	}
-
-	NoVuln struct {
-		ID func(childComplexity int) int
-	}
-
-	OSV struct {
-		ID    func(childComplexity int) int
-		OsvID func(childComplexity int) int
+		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) int
+		IngestVulnEqual       func(childComplexity int, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) int
+		IngestVulnerabilities func(childComplexity int, vulns []*model.VulnerabilityInputSpec) int
+		IngestVulnerability   func(childComplexity int, vuln model.VulnerabilityInputSpec) int
 	}
 
 	Package struct {
@@ -283,9 +250,7 @@ type ComplexityRoot struct {
 		CertifyGood         func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
 		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec) int
 		CertifyVuln         func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
-		Cve                 func(childComplexity int, cveSpec model.CVESpec) int
 		FindSoftware        func(childComplexity int, searchText string) int
-		Ghsa                func(childComplexity int, ghsaSpec model.GHSASpec) int
 		HasMetadata         func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
 		HasSbom             func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
 		HasSlsa             func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
@@ -293,17 +258,17 @@ type ComplexityRoot struct {
 		HashEqual           func(childComplexity int, hashEqualSpec model.HashEqualSpec) int
 		IsDependency        func(childComplexity int, isDependencySpec model.IsDependencySpec) int
 		IsOccurrence        func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
-		IsVulnerability     func(childComplexity int, isVulnerabilitySpec model.IsVulnerabilitySpec) int
 		Neighbors           func(childComplexity int, node string, usingOnly []model.Edge) int
 		Node                func(childComplexity int, node string) int
 		Nodes               func(childComplexity int, nodes []string) int
-		Osv                 func(childComplexity int, osvSpec model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec model.PkgSpec) int
 		Path                func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
 		PkgEqual            func(childComplexity int, pkgEqualSpec model.PkgEqualSpec) int
 		PointOfContact      func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
 		Scorecards          func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec model.SourceSpec) int
+		VulnEqual           func(childComplexity int, vulnEqualSpec model.VulnEqualSpec) int
+		Vulnerabilities     func(childComplexity int, vulnSpec model.VulnerabilitySpec) int
 	}
 
 	SLSA struct {
@@ -321,6 +286,16 @@ type ComplexityRoot struct {
 	SLSAPredicate struct {
 		Key   func(childComplexity int) int
 		Value func(childComplexity int) int
+	}
+
+	ScanMetadata struct {
+		Collector      func(childComplexity int) int
+		DbURI          func(childComplexity int) int
+		DbVersion      func(childComplexity int) int
+		Origin         func(childComplexity int) int
+		ScannerURI     func(childComplexity int) int
+		ScannerVersion func(childComplexity int) int
+		TimeScanned    func(childComplexity int) int
 	}
 
 	Scorecard struct {
@@ -357,14 +332,23 @@ type ComplexityRoot struct {
 		Namespace func(childComplexity int) int
 	}
 
-	VulnerabilityMetaData struct {
-		Collector      func(childComplexity int) int
-		DbURI          func(childComplexity int) int
-		DbVersion      func(childComplexity int) int
-		Origin         func(childComplexity int) int
-		ScannerURI     func(childComplexity int) int
-		ScannerVersion func(childComplexity int) int
-		TimeScanned    func(childComplexity int) int
+	VulnEqual struct {
+		Collector       func(childComplexity int) int
+		ID              func(childComplexity int) int
+		Justification   func(childComplexity int) int
+		Origin          func(childComplexity int) int
+		Vulnerabilities func(childComplexity int) int
+	}
+
+	Vulnerability struct {
+		ID               func(childComplexity int) int
+		Type             func(childComplexity int) int
+		VulnerabilityIDs func(childComplexity int) int
+	}
+
+	VulnerabilityID struct {
+		ID              func(childComplexity int) int
+		VulnerabilityID func(childComplexity int) int
 	}
 }
 
@@ -417,27 +401,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Builder.URI(childComplexity), true
-
-	case "CVE.cveId":
-		if e.complexity.CVE.CveID == nil {
-			break
-		}
-
-		return e.complexity.CVE.CveID(childComplexity), true
-
-	case "CVE.id":
-		if e.complexity.CVE.ID == nil {
-			break
-		}
-
-		return e.complexity.CVE.ID(childComplexity), true
-
-	case "CVE.year":
-		if e.complexity.CVE.Year == nil {
-			break
-		}
-
-		return e.complexity.CVE.Year(childComplexity), true
 
 	case "CertifyBad.collector":
 		if e.complexity.CertifyBad.Collector == nil {
@@ -627,20 +590,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyVuln.Vulnerability(childComplexity), true
-
-	case "GHSA.ghsaId":
-		if e.complexity.GHSA.GhsaID == nil {
-			break
-		}
-
-		return e.complexity.GHSA.GhsaID(childComplexity), true
-
-	case "GHSA.id":
-		if e.complexity.GHSA.ID == nil {
-			break
-		}
-
-		return e.complexity.GHSA.ID(childComplexity), true
 
 	case "HasMetadata.collector":
 		if e.complexity.HasMetadata.Collector == nil {
@@ -957,48 +906,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsOccurrence.Subject(childComplexity), true
 
-	case "IsVulnerability.collector":
-		if e.complexity.IsVulnerability.Collector == nil {
-			break
-		}
-
-		return e.complexity.IsVulnerability.Collector(childComplexity), true
-
-	case "IsVulnerability.id":
-		if e.complexity.IsVulnerability.ID == nil {
-			break
-		}
-
-		return e.complexity.IsVulnerability.ID(childComplexity), true
-
-	case "IsVulnerability.justification":
-		if e.complexity.IsVulnerability.Justification == nil {
-			break
-		}
-
-		return e.complexity.IsVulnerability.Justification(childComplexity), true
-
-	case "IsVulnerability.origin":
-		if e.complexity.IsVulnerability.Origin == nil {
-			break
-		}
-
-		return e.complexity.IsVulnerability.Origin(childComplexity), true
-
-	case "IsVulnerability.osv":
-		if e.complexity.IsVulnerability.Osv == nil {
-			break
-		}
-
-		return e.complexity.IsVulnerability.Osv(childComplexity), true
-
-	case "IsVulnerability.vulnerability":
-		if e.complexity.IsVulnerability.Vulnerability == nil {
-			break
-		}
-
-		return e.complexity.IsVulnerability.Vulnerability(childComplexity), true
-
 	case "Mutation.ingestArtifact":
 		if e.complexity.Mutation.IngestArtifact == nil {
 			break
@@ -1046,18 +953,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestBuilders(childComplexity, args["builders"].([]*model.BuilderInputSpec)), true
-
-	case "Mutation.ingestCVEs":
-		if e.complexity.Mutation.IngestCVEs == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestCVEs_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestCVEs(childComplexity, args["cves"].([]*model.CVEInputSpec)), true
 
 	case "Mutation.ingestCertifyBad":
 		if e.complexity.Mutation.IngestCertifyBad == nil {
@@ -1107,17 +1002,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestCertifyGoods(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyGoods"].([]*model.CertifyGoodInputSpec)), true
 
-	case "Mutation.ingestCVE":
-		if e.complexity.Mutation.IngestCve == nil {
+	case "Mutation.ingestCertifyVuln":
+		if e.complexity.Mutation.IngestCertifyVuln == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestCVE_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestCertifyVuln_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCve(childComplexity, args["cve"].(*model.CVEInputSpec)), true
+		return e.complexity.Mutation.IngestCertifyVuln(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.VulnerabilityInputSpec), args["certifyVuln"].(model.ScanMetadataInput)), true
 
 	case "Mutation.ingestDependencies":
 		if e.complexity.Mutation.IngestDependencies == nil {
@@ -1142,30 +1037,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["dependency"].(model.IsDependencyInputSpec)), true
-
-	case "Mutation.ingestGHSAs":
-		if e.complexity.Mutation.IngestGHSAs == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestGHSAs_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestGHSAs(childComplexity, args["ghsas"].([]*model.GHSAInputSpec)), true
-
-	case "Mutation.ingestGHSA":
-		if e.complexity.Mutation.IngestGhsa == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestGHSA_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestGhsa(childComplexity, args["ghsa"].(*model.GHSAInputSpec)), true
 
 	case "Mutation.ingestHasMetadata":
 		if e.complexity.Mutation.IngestHasMetadata == nil {
@@ -1239,30 +1110,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestHashEquals(childComplexity, args["artifacts"].([]*model.ArtifactInputSpec), args["otherArtifacts"].([]*model.ArtifactInputSpec), args["hashEquals"].([]*model.HashEqualInputSpec)), true
 
-	case "Mutation.ingestIsVulnerability":
-		if e.complexity.Mutation.IngestIsVulnerability == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestIsVulnerability_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestIsVulnerability(childComplexity, args["osv"].(model.OSVInputSpec), args["vulnerability"].(model.CveOrGhsaInput), args["isVulnerability"].(model.IsVulnerabilityInputSpec)), true
-
-	case "Mutation.ingestOSVs":
-		if e.complexity.Mutation.IngestOSVs == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestOSVs_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestOSVs(childComplexity, args["osvs"].([]*model.OSVInputSpec)), true
-
 	case "Mutation.ingestOccurrence":
 		if e.complexity.Mutation.IngestOccurrence == nil {
 			break
@@ -1286,18 +1133,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestOccurrences(childComplexity, args["subjects"].(model.PackageOrSourceInputs), args["artifacts"].([]*model.ArtifactInputSpec), args["occurrences"].([]*model.IsOccurrenceInputSpec)), true
-
-	case "Mutation.ingestOSV":
-		if e.complexity.Mutation.IngestOsv == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestOSV_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestOsv(childComplexity, args["osv"].(*model.OSVInputSpec)), true
 
 	case "Mutation.ingestPackage":
 		if e.complexity.Mutation.IngestPackage == nil {
@@ -1429,7 +1264,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.VulnerabilityInput), args["vexStatement"].(model.VexStatementInputSpec)), true
+		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.VulnerabilityInputSpec), args["vexStatement"].(model.VexStatementInputSpec)), true
+
+	case "Mutation.ingestVulnEqual":
+		if e.complexity.Mutation.IngestVulnEqual == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestVulnEqual_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestVulnEqual(childComplexity, args["vulnerability"].(model.VulnerabilityInputSpec), args["otherVulnerability"].(model.VulnerabilityInputSpec), args["vulnEqual"].(model.VulnEqualInputSpec)), true
+
+	case "Mutation.ingestVulnerabilities":
+		if e.complexity.Mutation.IngestVulnerabilities == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestVulnerabilities_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestVulnerabilities(childComplexity, args["vulns"].([]*model.VulnerabilityInputSpec)), true
 
 	case "Mutation.ingestVulnerability":
 		if e.complexity.Mutation.IngestVulnerability == nil {
@@ -1441,28 +1300,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.VulnerabilityInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
-
-	case "NoVuln.id":
-		if e.complexity.NoVuln.ID == nil {
-			break
-		}
-
-		return e.complexity.NoVuln.ID(childComplexity), true
-
-	case "OSV.id":
-		if e.complexity.OSV.ID == nil {
-			break
-		}
-
-		return e.complexity.OSV.ID(childComplexity), true
-
-	case "OSV.osvId":
-		if e.complexity.OSV.OsvID == nil {
-			break
-		}
-
-		return e.complexity.OSV.OsvID(childComplexity), true
+		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["vuln"].(model.VulnerabilityInputSpec)), true
 
 	case "Package.id":
 		if e.complexity.Package.ID == nil {
@@ -1732,18 +1570,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyVuln(childComplexity, args["certifyVulnSpec"].(model.CertifyVulnSpec)), true
 
-	case "Query.cve":
-		if e.complexity.Query.Cve == nil {
-			break
-		}
-
-		args, err := ec.field_Query_cve_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Cve(childComplexity, args["cveSpec"].(model.CVESpec)), true
-
 	case "Query.findSoftware":
 		if e.complexity.Query.FindSoftware == nil {
 			break
@@ -1755,18 +1581,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.FindSoftware(childComplexity, args["searchText"].(string)), true
-
-	case "Query.ghsa":
-		if e.complexity.Query.Ghsa == nil {
-			break
-		}
-
-		args, err := ec.field_Query_ghsa_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(model.GHSASpec)), true
 
 	case "Query.HasMetadata":
 		if e.complexity.Query.HasMetadata == nil {
@@ -1852,18 +1666,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.IsOccurrence(childComplexity, args["isOccurrenceSpec"].(model.IsOccurrenceSpec)), true
 
-	case "Query.IsVulnerability":
-		if e.complexity.Query.IsVulnerability == nil {
-			break
-		}
-
-		args, err := ec.field_Query_IsVulnerability_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.IsVulnerability(childComplexity, args["isVulnerabilitySpec"].(model.IsVulnerabilitySpec)), true
-
 	case "Query.neighbors":
 		if e.complexity.Query.Neighbors == nil {
 			break
@@ -1899,18 +1701,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Nodes(childComplexity, args["nodes"].([]string)), true
-
-	case "Query.osv":
-		if e.complexity.Query.Osv == nil {
-			break
-		}
-
-		args, err := ec.field_Query_osv_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Osv(childComplexity, args["osvSpec"].(model.OSVSpec)), true
 
 	case "Query.packages":
 		if e.complexity.Query.Packages == nil {
@@ -1983,6 +1773,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Sources(childComplexity, args["sourceSpec"].(model.SourceSpec)), true
+
+	case "Query.vulnEqual":
+		if e.complexity.Query.VulnEqual == nil {
+			break
+		}
+
+		args, err := ec.field_Query_vulnEqual_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.VulnEqual(childComplexity, args["vulnEqualSpec"].(model.VulnEqualSpec)), true
+
+	case "Query.vulnerabilities":
+		if e.complexity.Query.Vulnerabilities == nil {
+			break
+		}
+
+		args, err := ec.field_Query_vulnerabilities_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Vulnerabilities(childComplexity, args["vulnSpec"].(model.VulnerabilitySpec)), true
 
 	case "SLSA.buildType":
 		if e.complexity.SLSA.BuildType == nil {
@@ -2060,6 +1874,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SLSAPredicate.Value(childComplexity), true
+
+	case "ScanMetadata.collector":
+		if e.complexity.ScanMetadata.Collector == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.Collector(childComplexity), true
+
+	case "ScanMetadata.dbUri":
+		if e.complexity.ScanMetadata.DbURI == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.DbURI(childComplexity), true
+
+	case "ScanMetadata.dbVersion":
+		if e.complexity.ScanMetadata.DbVersion == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.DbVersion(childComplexity), true
+
+	case "ScanMetadata.origin":
+		if e.complexity.ScanMetadata.Origin == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.Origin(childComplexity), true
+
+	case "ScanMetadata.scannerUri":
+		if e.complexity.ScanMetadata.ScannerURI == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.ScannerURI(childComplexity), true
+
+	case "ScanMetadata.scannerVersion":
+		if e.complexity.ScanMetadata.ScannerVersion == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.ScannerVersion(childComplexity), true
+
+	case "ScanMetadata.timeScanned":
+		if e.complexity.ScanMetadata.TimeScanned == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.TimeScanned(childComplexity), true
 
 	case "Scorecard.aggregateScore":
 		if e.complexity.Scorecard.AggregateScore == nil {
@@ -2194,54 +2057,75 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SourceNamespace.Namespace(childComplexity), true
 
-	case "VulnerabilityMetaData.collector":
-		if e.complexity.VulnerabilityMetaData.Collector == nil {
+	case "VulnEqual.collector":
+		if e.complexity.VulnEqual.Collector == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetaData.Collector(childComplexity), true
+		return e.complexity.VulnEqual.Collector(childComplexity), true
 
-	case "VulnerabilityMetaData.dbUri":
-		if e.complexity.VulnerabilityMetaData.DbURI == nil {
+	case "VulnEqual.id":
+		if e.complexity.VulnEqual.ID == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetaData.DbURI(childComplexity), true
+		return e.complexity.VulnEqual.ID(childComplexity), true
 
-	case "VulnerabilityMetaData.dbVersion":
-		if e.complexity.VulnerabilityMetaData.DbVersion == nil {
+	case "VulnEqual.justification":
+		if e.complexity.VulnEqual.Justification == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetaData.DbVersion(childComplexity), true
+		return e.complexity.VulnEqual.Justification(childComplexity), true
 
-	case "VulnerabilityMetaData.origin":
-		if e.complexity.VulnerabilityMetaData.Origin == nil {
+	case "VulnEqual.origin":
+		if e.complexity.VulnEqual.Origin == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetaData.Origin(childComplexity), true
+		return e.complexity.VulnEqual.Origin(childComplexity), true
 
-	case "VulnerabilityMetaData.scannerUri":
-		if e.complexity.VulnerabilityMetaData.ScannerURI == nil {
+	case "VulnEqual.vulnerabilities":
+		if e.complexity.VulnEqual.Vulnerabilities == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetaData.ScannerURI(childComplexity), true
+		return e.complexity.VulnEqual.Vulnerabilities(childComplexity), true
 
-	case "VulnerabilityMetaData.scannerVersion":
-		if e.complexity.VulnerabilityMetaData.ScannerVersion == nil {
+	case "Vulnerability.id":
+		if e.complexity.Vulnerability.ID == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetaData.ScannerVersion(childComplexity), true
+		return e.complexity.Vulnerability.ID(childComplexity), true
 
-	case "VulnerabilityMetaData.timeScanned":
-		if e.complexity.VulnerabilityMetaData.TimeScanned == nil {
+	case "Vulnerability.type":
+		if e.complexity.Vulnerability.Type == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetaData.TimeScanned(childComplexity), true
+		return e.complexity.Vulnerability.Type(childComplexity), true
+
+	case "Vulnerability.vulnerabilityIDs":
+		if e.complexity.Vulnerability.VulnerabilityIDs == nil {
+			break
+		}
+
+		return e.complexity.Vulnerability.VulnerabilityIDs(childComplexity), true
+
+	case "VulnerabilityID.id":
+		if e.complexity.VulnerabilityID.ID == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityID.ID(childComplexity), true
+
+	case "VulnerabilityID.vulnerabilityID":
+		if e.complexity.VulnerabilityID.VulnerabilityID == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityID.VulnerabilityID(childComplexity), true
 
 	}
 	return 0, false
@@ -2255,8 +2139,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputArtifactSpec,
 		ec.unmarshalInputBuilderInputSpec,
 		ec.unmarshalInputBuilderSpec,
-		ec.unmarshalInputCVEInputSpec,
-		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputCertifyBadInputSpec,
 		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyGoodInputSpec,
@@ -2264,10 +2146,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
 		ec.unmarshalInputCertifyVulnSpec,
-		ec.unmarshalInputCveOrGhsaInput,
-		ec.unmarshalInputCveOrGhsaSpec,
-		ec.unmarshalInputGHSAInputSpec,
-		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasMetadataInputSpec,
 		ec.unmarshalInputHasMetadataSpec,
 		ec.unmarshalInputHasSBOMInputSpec,
@@ -2281,11 +2159,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceInputSpec,
 		ec.unmarshalInputIsOccurrenceSpec,
-		ec.unmarshalInputIsVulnerabilityInputSpec,
-		ec.unmarshalInputIsVulnerabilitySpec,
 		ec.unmarshalInputMatchFlags,
-		ec.unmarshalInputOSVInputSpec,
-		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageOrArtifactInput,
 		ec.unmarshalInputPackageOrArtifactInputs,
 		ec.unmarshalInputPackageOrArtifactSpec,
@@ -2307,14 +2181,16 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSLSAInputSpec,
 		ec.unmarshalInputSLSAPredicateInputSpec,
 		ec.unmarshalInputSLSAPredicateSpec,
+		ec.unmarshalInputScanMetadataInput,
 		ec.unmarshalInputScorecardCheckInputSpec,
 		ec.unmarshalInputScorecardCheckSpec,
 		ec.unmarshalInputScorecardInputSpec,
 		ec.unmarshalInputSourceInputSpec,
 		ec.unmarshalInputSourceSpec,
 		ec.unmarshalInputVexStatementInputSpec,
-		ec.unmarshalInputVulnerabilityInput,
-		ec.unmarshalInputVulnerabilityMetaDataInput,
+		ec.unmarshalInputVulnEqualInputSpec,
+		ec.unmarshalInputVulnEqualSpec,
+		ec.unmarshalInputVulnerabilityInputSpec,
 		ec.unmarshalInputVulnerabilitySpec,
 	)
 	first := true
@@ -2952,7 +2828,7 @@ enum VexJustification {
 
 """
 CertifyVEXStatement is an attestation to attach VEX statements to a package or
-artifact to clarify the impact of a specific vulnerability (CVE, GHSA or OSV).
+artifact to clarify the impact of a specific vulnerability.
 """
 type CertifyVEXStatement {
   id: ID!
@@ -2980,10 +2856,9 @@ type CertifyVEXStatement {
 CertifyVEXStatementSpec allows filtering the list of VEX statements to
 return in a query.
 
-Only one subject type (package or artifact) and one vulnerability type (CVE,
-GHSA or OSV) may be specified.
+Only one subject type (package or artifact) and one vulnerability may be specified.
 
-Note that setting noVuln in VulnerabilitySpec is invalid for VEX statements!
+Note that setting noVuln vulnerability type is invalid for VEX statements!
 """
 input CertifyVEXStatementSpec {
   id: ID
@@ -3016,7 +2891,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a VEX certification for a package."
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInputSpec!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#
@@ -3039,73 +2914,28 @@ extend type Mutation {
 # Defines a GraphQL schema for the vulnerability certifications
 
 """
-NoVuln is a special vulnerability node to attest that no vulnerability has been
-found during a vulnerability scan.
-
-Backends guarantee that this is a singleton node.
-"""
-type NoVuln {
-  id: ID!
-}
-
-"Vulnerability is a union of OSV, CVE, GHSA or the NoVuln node."
-union Vulnerability = OSV | CVE | GHSA | NoVuln
-
-"""
-VulnerabilitySpec allows using Vulnerability union as input type to be used in
-read queries.
-
-Either noVuln must be set or exactly one of osv, cve or ghsa
-must be set to non-nil. Setting noVuln to true means retrieving only nodes where
-there is no vulnerability attached. Setting it to false means retrieving only nodes
-with identified vulnerabilities. Setting one of the other fields means retrieving
-certifications for the corresponding vulnerability types.
-"""
-input VulnerabilitySpec {
-  osv: OSVSpec
-  cve: CVESpec
-  ghsa: GHSASpec
-  noVuln: Boolean
-}
-
-"""
-VulnerabilityInput allows using Vulnerability union as
-input type to be used in mutations.
-
-Either noVuln must be set to true or one of osv, cve, or ghsa must be
-set to non-nil. If noVuln is set then this is an ingestion of a known lack of
-vulnerabilities, so the special NoVuln node will be used by the backend.
-Otherwise, the specific vulnerability type will be linked to this attestation.
-"""
-input VulnerabilityInput {
-  osv: OSVInputSpec
-  cve: CVEInputSpec
-  ghsa: GHSAInputSpec
-  noVuln: Boolean
-}
-
-"""
 CertifyVuln is an attestation to attach vulnerability information to a package.
 
 This information is obtained via a scanner. If there is no vulnerability
-detected (no OSV, CVE, or GHSA), we attach the special NoVuln node.
+detected, we attach the a vulnerability with "NoVuln" type and an empty string 
+for the vulnerability ID.
 """
 type CertifyVuln {
   id: ID!
   "The package that is attested"
   package: Package!
-  "The vulnerability object. Can be an OSV, CVE, or GHSA or the special NoVuln node."
+  "The vulnerability can be an be a specific vulnerability or NoVuln type."
   vulnerability: Vulnerability!
   "Metadata attached to the certification"
-  metadata: VulnerabilityMetaData!
+  metadata: ScanMetadata!
 }
 
 """
-VulnerabilityMetaData is the metadata attached to vulnerability certification.
+ScanMetadata is the metadata attached to vulnerability certification.
 
 It contains metadata about the scanner process that created the certification.
 """
-type VulnerabilityMetaData {
+type ScanMetadata {
   "Time of scan (in RFC 3339 format)"
   timeScanned: Time!
   "URI of the vulnerability database used by the scanner"
@@ -3129,7 +2959,7 @@ return in a query.
 Specifying just the package allows to query for all vulnerabilities associated
 with the package.
 
-Only one vulnerability type (OSV, CVE, GHSA, or special NoVuln) may be
+Only one vulnerability (or NoVuln vulnerability type) may be
 specified.
 """
 input CertifyVulnSpec {
@@ -3146,10 +2976,10 @@ input CertifyVulnSpec {
 }
 
 """
-VulnerabilityMetaDataInput represents the input for certifying vulnerability
+ScanMetadataInput represents the input for certifying vulnerability
 scans in mutations.
 """
-input VulnerabilityMetaDataInput {
+input ScanMetadataInput {
   timeScanned: Time!
   dbUri: String!
   dbVersion: String!
@@ -3166,7 +2996,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: VulnerabilityInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): CertifyVuln!
 }
 `, BuiltIn: false},
 	{Name: "../schema/contact.graphql", Input: `#
@@ -3264,120 +3094,6 @@ extend type Query {
 extend type Mutation {
   "Adds a PointOfContact attestation to a package, source or artifact."
   ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): PointOfContact!
-}
-`, BuiltIn: false},
-	{Name: "../schema/cve.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-# Defines a GraphQL schema for a vulnerability in CVE schema
-
-"""
-CVE represents a vulnerability in the Common Vulnerabilities and Exposures
-schema.
-
-The vulnerability identifier contains a year field, so we are extracting that
-to allow matching for vulnerabilities found in a given year.
-
-The vulnerability identifier field is mandatory and canonicalized to be
-lowercase.
-
-This node can be referred to by other parts of GUAC.
-"""
-type CVE {
-  id: ID!
-  year: Int!
-  cveId: String!
-}
-
-"CVESpec allows filtering the list of advisories to return in a query."
-input CVESpec {
-  id: ID
-  year: Int
-  cveId: String
-}
-
-"CVEInputSpec specifies a CVE vulnerability for mutations."
-input CVEInputSpec {
-  year: Int!
-  cveId: String!
-}
-
-extend type Query {
-  "Returns all CVEs matching a filter."
-  cve(cveSpec: CVESpec!): [CVE!]!
-}
-
-extend type Mutation {
-  "Ingests new CVE and returns it."
-  ingestCVE(cve: CVEInputSpec): CVE!
-  "Bulk ingests new CVEs and returns a list of them."
-  ingestCVEs(cves: [CVEInputSpec!]!): [CVE!]!
-}
-`, BuiltIn: false},
-	{Name: "../schema/ghsa.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-"""
-GHSA represents GitHub security advisories.
-
-The advisory id field is mandatory and canonicalized to be lowercase.
-
-This node can be referred to by other parts of GUAC.
-"""
-type GHSA {
-  id: ID!
-  ghsaId: String!
-}
-
-"GHSASpec allows filtering the list of advisories to return in a query."
-input GHSASpec {
-  id: ID
-  ghsaId: String
-}
-
-"GHSAInputSpec specifies a GitHub Security Advisory for mutations."
-input GHSAInputSpec {
-  ghsaId: String!
-}
-
-extend type Query {
-  "Returns all GitHub Security Advisories matching a filter."
-  ghsa(ghsaSpec: GHSASpec!): [GHSA!]!
-}
-
-extend type Mutation {
-  "Ingests a new GitHub Security Advisory and returns it."
-  ingestGHSA(ghsa: GHSAInputSpec): GHSA!
-  "Bulk ingests new GHSAs and returns a list of them."
-  ingestGHSAs(ghsas: [GHSAInputSpec!]!): [GHSA!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
@@ -3935,93 +3651,6 @@ extend type Mutation {
   ingestOccurrences(subjects: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [IsOccurrence!]!
 }
 `, BuiltIn: false},
-	{Name: "../schema/isVulnerability.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-# Defines a GraphQL schema to link CVE/GHSA to the OSV data
-
-"CveOrGhsa is a union of CVE and GHSA."
-union CveOrGhsa = CVE | GHSA
-
-"""
-CveOrGhsaSpec allows using CveOrGhsa union as input type for queries.
-
-Exactly one field must be specified.
-"""
-input CveOrGhsaSpec {
-  cve: CVESpec
-  ghsa: GHSASpec
-}
-
-"""
-CveOrGhsaInput allows using CveOrGhsa union as input type for mutations.
-
-Exactly one field must be specified.
-"""
-input CveOrGhsaInput {
-  cve: CVEInputSpec
-  ghsa: GHSAInputSpec
-}
-
-"IsVulnerability is an attestation to link CVE/GHSA with data in OSV."
-type IsVulnerability {
-  id: ID!
-  "The OSV that encapsulates the vulnerability"
-  osv: OSV!
-  "The upstream vulnerability information"
-  vulnerability: CveOrGhsa!
-  "Justification for the attested relationship"
-  justification: String!
-  "Document from which this attestation is generated from"
-  origin: String!
-  "GUAC collector for the document"
-  collector: String!
-}
-
-"""
-IsVulnerabilitySpec allows filtering the list of vulnerability links to return
-in a query.
-"""
-input IsVulnerabilitySpec {
-  id: ID
-  osv: OSVSpec
-  vulnerability: CveOrGhsaSpec
-  justification: String
-  origin: String
-  collector: String
-}
-
-"IsVulnerabilityInputSpec represents the input to link CVE/GHSA with OSV data."
-input IsVulnerabilityInputSpec {
-  justification: String!
-  origin: String!
-  collector: String!
-}
-
-extend type Query {
-  "Returns all OSV-CVE/GHSA vulnerability mappings that match a filter."
-  IsVulnerability(isVulnerabilitySpec: IsVulnerabilitySpec!): [IsVulnerability!]!
-}
-
-extend type Mutation {
-  "Ingest a mapping between an OSV entry and a CVE/GHSA vulnerability."
-  ingestIsVulnerability(osv: OSVInputSpec!, vulnerability: CveOrGhsaInput!, isVulnerability: IsVulnerabilityInputSpec!): IsVulnerability!
-}
-`, BuiltIn: false},
 	{Name: "../schema/metadata.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
@@ -4112,63 +3741,6 @@ extend type Query {
 extend type Mutation {
   "Adds metadata about a package, source or artifact."
   ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, hasMetadata: HasMetadataInputSpec!): HasMetadata!
-}
-`, BuiltIn: false},
-	{Name: "../schema/osv.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-# Defines a GraphQL schema for a vulnerability in OSV schema
-
-"""
-OSV represents an Open Source Vulnerability.
-
-The osvId field is mandatory and canonicalized to be lowercase.
-
-This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
-CVE ID).
-
-This node can be referred to by other parts of GUAC.
-"""
-type OSV {
-  id: ID!
-  osvId: String!
-}
-
-"OSVSpec allows filtering the list of advisories to return in a query."
-input OSVSpec {
-  id: ID
-  osvId: String
-}
-
-"OSVInputSpec specifies a OSV vulnerability for mutations."
-input OSVInputSpec {
-  osvId: String!
-}
-
-extend type Query {
-  "Returns all OSV vulnerabilities matching a filter."
-  osv(osvSpec: OSVSpec!): [OSV!]!
-}
-
-extend type Mutation {
-  "Ingests a new OSV vulnerability and returns it."
-  ingestOSV(osv: OSVInputSpec): OSV!
-  "Bulk ingests new OSVs and returns a list of them."
-  ingestOSVs(osvs: [OSVInputSpec!]!): [OSV!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/package.graphql", Input: `#
@@ -4391,13 +3963,10 @@ union Node
   | Source
   | Artifact
   | Builder
-  | OSV
-  | CVE
-  | GHSA
-  | NoVuln
+  | Vulnerability
   | IsOccurrence
   | IsDependency
-  | IsVulnerability
+  | VulnEqual
   | CertifyVEXStatement
   | HashEqual
   | CertifyBad
@@ -4434,16 +4003,9 @@ enum Edge {
   ARTIFACT_HAS_METADATA
   ARTIFACT_POINT_OF_CONTACT
   BUILDER_HAS_SLSA
-  CVE_CERTIFY_VEX_STATEMENT
-  CVE_CERTIFY_VULN
-  CVE_IS_VULNERABILITY
-  GHSA_CERTIFY_VEX_STATEMENT
-  GHSA_CERTIFY_VULN
-  GHSA_IS_VULNERABILITY
-  NO_VULN_CERTIFY_VULN
-  OSV_CERTIFY_VEX_STATEMENT
-  OSV_CERTIFY_VULN
-  OSV_IS_VULNERABILITY
+  VULNERABILITY_CERTIFY_VEX_STATEMENT
+  VULNERABILITY_CERTIFY_VULN
+  VULNERABILITY_VULN_EQUAL
   PACKAGE_CERTIFY_BAD
   PACKAGE_CERTIFY_GOOD
   PACKAGE_CERTIFY_VEX_STATEMENT
@@ -4471,14 +4033,9 @@ enum Edge {
   CERTIFY_GOOD_SOURCE
   CERTIFY_SCORECARD_SOURCE
   CERTIFY_VEX_STATEMENT_ARTIFACT
-  CERTIFY_VEX_STATEMENT_CVE
-  CERTIFY_VEX_STATEMENT_GHSA
-  CERTIFY_VEX_STATEMENT_OSV
+  CERTIFY_VEX_STATEMENT_VULNERABILITY
   CERTIFY_VEX_STATEMENT_PACKAGE
-  CERTIFY_VULN_CVE
-  CERTIFY_VULN_GHSA
-  CERTIFY_VULN_NO_VULN
-  CERTIFY_VULN_OSV
+  CERTIFY_VULN_VULNERABILITY
   CERTIFY_VULN_PACKAGE
   HASH_EQUAL_ARTIFACT
   HAS_SBOM_ARTIFACT
@@ -4492,9 +4049,7 @@ enum Edge {
   IS_OCCURRENCE_ARTIFACT
   IS_OCCURRENCE_PACKAGE
   IS_OCCURRENCE_SOURCE
-  IS_VULNERABILITY_CVE
-  IS_VULNERABILITY_GHSA
-  IS_VULNERABILITY_OSV
+  VULN_EQUAL_VULNERABILITY
   PKG_EQUAL_PACKAGE
   HAS_METADATA_PACKAGE
   HAS_METADATA_ARTIFACT
@@ -4756,6 +4311,174 @@ extend type Mutation {
   ingestSource(source: SourceInputSpec!): Source!
   "Bulk ingests sources and returns the list of corresponding source trie path."
   ingestSources(sources: [SourceInputSpec!]!): [Source!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/vulnEqual.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema to link vulnerabilities together
+
+"""
+VulnEqual is an attestation to link two vulnerabilities together as being equal"
+
+Note that setting noVuln vulnerability type is invalid for VulnEqual!
+
+"""
+type VulnEqual {
+  id: ID!
+  "Collection of vulnerabilities that are similar"
+  vulnerabilities: [Vulnerability!]!
+  "Justification for the attested relationship"
+  justification: String!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
+}
+
+"""
+VulnEqualSpec allows filtering the list of vulnerability links to return
+in a query.
+"""
+input VulnEqualSpec {
+  id: ID
+  vulnerabilities: [VulnerabilitySpec]
+  justification: String
+  origin: String
+  collector: String
+}
+
+"VulnEqualInputSpec represents the input to link vulnerabilities to each other."
+input VulnEqualInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all equal vulnerability mappings that match a filter."
+  vulnEqual(vulnEqualSpec: VulnEqualSpec!): [VulnEqual!]!
+}
+
+extend type Mutation {
+  "Ingest a mapping between vulnerabilities."
+  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqual: VulnEqualInputSpec!): VulnEqual!
+}
+`, BuiltIn: false},
+	{Name: "../schema/vulnerability.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the vulnerability trie/tree
+
+"""
+Vulnerability represents the root of the vulnerability trie/tree.
+
+We map vulnerability information to a trie, as a derivative of the pURL specification:
+each path in the trie represents a type and a vulnerability ID. This allows for generic
+representation of the various vulnerabilities and does not limit to just cve, ghsa or osv. 
+This would be in the general format: vuln://<general-type>/<vuln-id>
+
+Examples:
+
+CVE, using path separator: vuln://cve/cve-2023-20753
+OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
+Random vendor: vuln://snyk/sn-whatever
+NoVuln: vuln://novuln/
+
+
+This node represents the type part of the trie path. It is used to represent
+the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
+
+Since this node is at the root of the vulnerability trie, it is named Vulnerability, not
+VulnerabilityType.
+
+NoVuln is a special vulnerability node to attest that no vulnerability has been
+found during a vulnerability scan. It will have the type "novuln" and contain an empty string 
+for vulnerabilityID
+
+The resolvers will enforce that both the type and vulnerability IDs are lower case.
+"""
+type Vulnerability {
+  id: ID!
+  type: String!
+  vulnerabilityIDs: [VulnerabilityID!]!
+}
+
+"""
+VulnerabilityID is a specific vulnerability ID associated with the type of the vulnerability.
+
+This will be enforced to be all lowercase.
+
+The namespace field is mandatory.
+"""
+type VulnerabilityID {
+  id: ID!
+  vulnerabilityID: String!
+}
+
+"""
+VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
+
+Use null to match on all values at that level. 
+For example, to get all vulnerabilities in GUAC backend, use a VulnSpec
+where every field is null.
+
+"""
+input VulnerabilitySpec {
+  id: ID
+  type: String
+  vulnerabilityID: String
+}
+
+"""
+VulnInputSpec specifies a vulnerability for mutations.
+
+This is different than VulnSpec because we want to encode mandatory fields:
+type and vulnerabilityID.
+"""
+input VulnerabilityInputSpec {
+  type: String!
+  vulnerabilityID: String!
+}
+
+extend type Query {
+  "Returns all vulnerabilities matching a filter."
+  vulnerabilities(vulnSpec: VulnerabilitySpec!): [Vulnerability!]!
+}
+
+extend type Mutation {
+  "Ingests a new vulnerability and returns the corresponding vulnerability trie path."
+  ingestVulnerability(vuln: VulnerabilityInputSpec!): Vulnerability!
+  "Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path."
+  ingestVulnerabilities(vulns: [VulnerabilityInputSpec!]!): [Vulnerability!]!
 }
 `, BuiltIn: false},
 }

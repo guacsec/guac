@@ -16,8 +16,6 @@
 package helper
 
 import (
-	"strings"
-
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -78,34 +76,6 @@ func ConvertSrcInputSpecToSrcSpec(srcInput *model.SourceInputSpec) *model.Source
 		Commit:    &commit,
 	}
 	return &srcSpec
-}
-
-// TODO: maybe use generics for OSVInputSpec and OSVSpec?
-func ConvertOsvInputSpecToOsvSpec(osvInput *model.OSVInputSpec) *model.OSVSpec {
-	osvID := strings.ToLower(osvInput.OsvID)
-	osvSpec := model.OSVSpec{
-		OsvID: &osvID,
-	}
-	return &osvSpec
-}
-
-// TODO: maybe use generics for GHSAInputSpec and GHSASpec?
-func ConvertGhsaInputSpecToGhsaSpec(ghsaInput *model.GHSAInputSpec) *model.GHSASpec {
-	ghsaID := strings.ToLower(ghsaInput.GhsaID)
-	ghsaSpec := model.GHSASpec{
-		GhsaID: &ghsaID,
-	}
-	return &ghsaSpec
-}
-
-// TODO: maybe use generics for CVEInputSpec and CVESpec?
-func ConvertCveInputSpecToCveSpec(cveInput *model.CVEInputSpec) *model.CVESpec {
-	cveID := strings.ToLower(cveInput.CveID)
-	cveSpec := model.CVESpec{
-		Year:  &cveInput.Year,
-		CveID: &cveID,
-	}
-	return &cveSpec
 }
 
 // TODO: maybe use generics for ArtifactInputSpec and ArtifactSpec?

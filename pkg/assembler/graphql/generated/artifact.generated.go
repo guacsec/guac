@@ -29,13 +29,9 @@ type MutationResolver interface {
 	IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error)
 	IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
 	IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error)
-	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
-	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
+	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
+	IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error)
 	IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error)
-	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
-	IngestCVEs(ctx context.Context, cves []*model.CVEInputSpec) ([]*model.Cve, error)
-	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
-	IngestGHSAs(ctx context.Context, ghsas []*model.GHSAInputSpec) ([]*model.Ghsa, error)
 	IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error)
 	IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error)
 	IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error)
@@ -47,15 +43,15 @@ type MutationResolver interface {
 	IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error)
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
 	IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error)
-	IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error)
 	IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error)
-	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
-	IngestOSVs(ctx context.Context, osvs []*model.OSVInputSpec) ([]*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
 	IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error)
 	IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error)
 	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error)
 	IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error)
+	IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error)
+	IngestVulnerability(ctx context.Context, vuln model.VulnerabilityInputSpec) (*model.Vulnerability, error)
+	IngestVulnerabilities(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]*model.Vulnerability, error)
 }
 type QueryResolver interface {
 	Artifacts(ctx context.Context, artifactSpec model.ArtifactSpec) ([]*model.Artifact, error)
@@ -66,17 +62,13 @@ type QueryResolver interface {
 	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
 	CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
 	PointOfContact(ctx context.Context, pointOfContactSpec model.PointOfContactSpec) ([]*model.PointOfContact, error)
-	Cve(ctx context.Context, cveSpec model.CVESpec) ([]*model.Cve, error)
-	Ghsa(ctx context.Context, ghsaSpec model.GHSASpec) ([]*model.Ghsa, error)
 	HasSbom(ctx context.Context, hasSBOMSpec model.HasSBOMSpec) ([]*model.HasSbom, error)
 	HasSlsa(ctx context.Context, hasSLSASpec model.HasSLSASpec) ([]*model.HasSlsa, error)
 	HasSourceAt(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec) ([]*model.HasSourceAt, error)
 	HashEqual(ctx context.Context, hashEqualSpec model.HashEqualSpec) ([]*model.HashEqual, error)
 	IsDependency(ctx context.Context, isDependencySpec model.IsDependencySpec) ([]*model.IsDependency, error)
 	IsOccurrence(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
-	IsVulnerability(ctx context.Context, isVulnerabilitySpec model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error)
 	HasMetadata(ctx context.Context, hasMetadataSpec model.HasMetadataSpec) ([]*model.HasMetadata, error)
-	Osv(ctx context.Context, osvSpec model.OSVSpec) ([]*model.Osv, error)
 	Packages(ctx context.Context, pkgSpec model.PkgSpec) ([]*model.Package, error)
 	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
 	Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error)
@@ -85,6 +77,8 @@ type QueryResolver interface {
 	PkgEqual(ctx context.Context, pkgEqualSpec model.PkgEqualSpec) ([]*model.PkgEqual, error)
 	FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error)
 	Sources(ctx context.Context, sourceSpec model.SourceSpec) ([]*model.Source, error)
+	VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error)
+	Vulnerabilities(ctx context.Context, vulnSpec model.VulnerabilitySpec) ([]*model.Vulnerability, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -148,36 +142,6 @@ func (ec *executionContext) field_Mutation_ingestBuilders_args(ctx context.Conte
 		}
 	}
 	args["builders"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_ingestCVE_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *model.CVEInputSpec
-	if tmp, ok := rawArgs["cve"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
-		arg0, err = ec.unmarshalOCVEInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["cve"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_ingestCVEs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 []*model.CVEInputSpec
-	if tmp, ok := rawArgs["cves"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cves"))
-		arg0, err = ec.unmarshalNCVEInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["cves"] = arg0
 	return args, nil
 }
 
@@ -313,6 +277,39 @@ func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.C
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PkgInputSpec
+	if tmp, ok := rawArgs["pkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkg"] = arg0
+	var arg1 model.VulnerabilityInputSpec
+	if tmp, ok := rawArgs["vulnerability"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+		arg1, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnerability"] = arg1
+	var arg2 model.ScanMetadataInput
+	if tmp, ok := rawArgs["certifyVuln"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVuln"))
+		arg2, err = ec.unmarshalNScanMetadataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyVuln"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -376,36 +373,6 @@ func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Con
 		}
 	}
 	args["dependency"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_ingestGHSA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *model.GHSAInputSpec
-	if tmp, ok := rawArgs["ghsa"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
-		arg0, err = ec.unmarshalOGHSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["ghsa"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_ingestGHSAs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 []*model.GHSAInputSpec
-	if tmp, ok := rawArgs["ghsas"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsas"))
-		arg0, err = ec.unmarshalNGHSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["ghsas"] = arg0
 	return args, nil
 }
 
@@ -595,69 +562,6 @@ func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Con
 		}
 	}
 	args["hashEquals"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_ingestIsVulnerability_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.OSVInputSpec
-	if tmp, ok := rawArgs["osv"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
-		arg0, err = ec.unmarshalNOSVInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["osv"] = arg0
-	var arg1 model.CveOrGhsaInput
-	if tmp, ok := rawArgs["vulnerability"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNCveOrGhsaInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveOrGhsaInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["vulnerability"] = arg1
-	var arg2 model.IsVulnerabilityInputSpec
-	if tmp, ok := rawArgs["isVulnerability"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isVulnerability"))
-		arg2, err = ec.unmarshalNIsVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsVulnerabilityInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["isVulnerability"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_ingestOSV_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *model.OSVInputSpec
-	if tmp, ok := rawArgs["osv"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
-		arg0, err = ec.unmarshalOOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["osv"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_ingestOSVs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 []*model.OSVInputSpec
-	if tmp, ok := rawArgs["osvs"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osvs"))
-		arg0, err = ec.unmarshalNOSVInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["osvs"] = arg0
 	return args, nil
 }
 
@@ -997,10 +901,10 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.C
 		}
 	}
 	args["subject"] = arg0
-	var arg1 model.VulnerabilityInput
+	var arg1 model.VulnerabilityInputSpec
 	if tmp, ok := rawArgs["vulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInput(ctx, tmp)
+		arg1, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1018,36 +922,66 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.C
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.VulnerabilityInputSpec
+	if tmp, ok := rawArgs["vulnerability"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+		arg0, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnerability"] = arg0
+	var arg1 model.VulnerabilityInputSpec
+	if tmp, ok := rawArgs["otherVulnerability"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherVulnerability"))
+		arg1, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["otherVulnerability"] = arg1
+	var arg2 model.VulnEqualInputSpec
+	if tmp, ok := rawArgs["vulnEqual"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqual"))
+		arg2, err = ec.unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnEqual"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVulnerabilities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*model.VulnerabilityInputSpec
+	if tmp, ok := rawArgs["vulns"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulns"))
+		arg0, err = ec.unmarshalNVulnerabilityInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulns"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgInputSpec
-	if tmp, ok := rawArgs["pkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+	var arg0 model.VulnerabilityInputSpec
+	if tmp, ok := rawArgs["vuln"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vuln"))
+		arg0, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["pkg"] = arg0
-	var arg1 model.VulnerabilityInput
-	if tmp, ok := rawArgs["vulnerability"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["vulnerability"] = arg1
-	var arg2 model.VulnerabilityMetaDataInput
-	if tmp, ok := rawArgs["certifyVuln"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVuln"))
-		arg2, err = ec.unmarshalNVulnerabilityMetaDataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaDataInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["certifyVuln"] = arg2
+	args["vuln"] = arg0
 	return args, nil
 }
 
@@ -1216,21 +1150,6 @@ func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_IsVulnerability_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.IsVulnerabilitySpec
-	if tmp, ok := rawArgs["isVulnerabilitySpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isVulnerabilitySpec"))
-		arg0, err = ec.unmarshalNIsVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsVulnerabilitySpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["isVulnerabilitySpec"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1306,21 +1225,6 @@ func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_cve_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CVESpec
-	if tmp, ok := rawArgs["cveSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cveSpec"))
-		arg0, err = ec.unmarshalNCVESpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["cveSpec"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1333,21 +1237,6 @@ func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, r
 		}
 	}
 	args["searchText"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_ghsa_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.GHSASpec
-	if tmp, ok := rawArgs["ghsaSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsaSpec"))
-		arg0, err = ec.unmarshalNGHSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["ghsaSpec"] = arg0
 	return args, nil
 }
 
@@ -1402,21 +1291,6 @@ func (ec *executionContext) field_Query_nodes_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["nodes"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_osv_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.OSVSpec
-	if tmp, ok := rawArgs["osvSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osvSpec"))
-		arg0, err = ec.unmarshalNOSVSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["osvSpec"] = arg0
 	return args, nil
 }
 
@@ -1504,6 +1378,36 @@ func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArg
 		}
 	}
 	args["sourceSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_vulnEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.VulnEqualSpec
+	if tmp, ok := rawArgs["vulnEqualSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqualSpec"))
+		arg0, err = ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnEqualSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_vulnerabilities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.VulnerabilitySpec
+	if tmp, ok := rawArgs["vulnSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnSpec"))
+		arg0, err = ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnSpec"] = arg0
 	return args, nil
 }
 
@@ -2303,7 +2207,7 @@ func (ec *executionContext) _Mutation_ingestVEXStatement(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.VulnerabilityInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
+		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["vexStatement"].(model.VexStatementInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2366,8 +2270,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestVEXStatement(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ingestVulnerability(ctx, field)
+func (ec *executionContext) _Mutation_ingestCertifyVuln(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestCertifyVuln(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2380,7 +2284,7 @@ func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(model.VulnerabilityInput), fc.Args["certifyVuln"].(model.VulnerabilityMetaDataInput))
+		return ec.resolvers.Mutation().IngestCertifyVuln(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["certifyVuln"].(model.ScanMetadataInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2397,7 +2301,7 @@ func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, f
 	return ec.marshalNCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVuln(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_ingestVulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_ingestCertifyVuln(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -2424,7 +2328,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestVulnerability(ctx contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ingestVulnerability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_ingestCertifyVuln_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2498,254 +2402,6 @@ func (ec *executionContext) fieldContext_Mutation_ingestPointOfContact(ctx conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestPointOfContact_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_ingestCVE(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ingestCVE(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCve(rctx, fc.Args["cve"].(*model.CVEInputSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Cve)
-	fc.Result = res
-	return ec.marshalNCVE2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCve(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_ingestCVE(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CVE_id(ctx, field)
-			case "year":
-				return ec.fieldContext_CVE_year(ctx, field)
-			case "cveId":
-				return ec.fieldContext_CVE_cveId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CVE", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ingestCVE_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_ingestCVEs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ingestCVEs(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCVEs(rctx, fc.Args["cves"].([]*model.CVEInputSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Cve)
-	fc.Result = res
-	return ec.marshalNCVE2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_ingestCVEs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CVE_id(ctx, field)
-			case "year":
-				return ec.fieldContext_CVE_year(ctx, field)
-			case "cveId":
-				return ec.fieldContext_CVE_cveId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CVE", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ingestCVEs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_ingestGHSA(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ingestGHSA(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestGhsa(rctx, fc.Args["ghsa"].(*model.GHSAInputSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Ghsa)
-	fc.Result = res
-	return ec.marshalNGHSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGhsa(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_ingestGHSA(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_GHSA_id(ctx, field)
-			case "ghsaId":
-				return ec.fieldContext_GHSA_ghsaId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type GHSA", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ingestGHSA_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_ingestGHSAs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ingestGHSAs(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestGHSAs(rctx, fc.Args["ghsas"].([]*model.GHSAInputSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Ghsa)
-	fc.Result = res
-	return ec.marshalNGHSA2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGhsaᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_ingestGHSAs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_GHSA_id(ctx, field)
-			case "ghsaId":
-				return ec.fieldContext_GHSA_ghsaId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type GHSA", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ingestGHSAs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3513,75 +3169,6 @@ func (ec *executionContext) fieldContext_Mutation_ingestOccurrences(ctx context.
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_ingestIsVulnerability(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ingestIsVulnerability(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestIsVulnerability(rctx, fc.Args["osv"].(model.OSVInputSpec), fc.Args["vulnerability"].(model.CveOrGhsaInput), fc.Args["isVulnerability"].(model.IsVulnerabilityInputSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.IsVulnerability)
-	fc.Result = res
-	return ec.marshalNIsVulnerability2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsVulnerability(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_ingestIsVulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_IsVulnerability_id(ctx, field)
-			case "osv":
-				return ec.fieldContext_IsVulnerability_osv(ctx, field)
-			case "vulnerability":
-				return ec.fieldContext_IsVulnerability_vulnerability(ctx, field)
-			case "justification":
-				return ec.fieldContext_IsVulnerability_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_IsVulnerability_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_IsVulnerability_collector(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type IsVulnerability", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ingestIsVulnerability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_ingestHasMetadata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_ingestHasMetadata(ctx, field)
 	if err != nil {
@@ -3649,128 +3236,6 @@ func (ec *executionContext) fieldContext_Mutation_ingestHasMetadata(ctx context.
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestHasMetadata_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_ingestOSV(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ingestOSV(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestOsv(rctx, fc.Args["osv"].(*model.OSVInputSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Osv)
-	fc.Result = res
-	return ec.marshalNOSV2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsv(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_ingestOSV(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_OSV_id(ctx, field)
-			case "osvId":
-				return ec.fieldContext_OSV_osvId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type OSV", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ingestOSV_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_ingestOSVs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ingestOSVs(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestOSVs(rctx, fc.Args["osvs"].([]*model.OSVInputSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Osv)
-	fc.Result = res
-	return ec.marshalNOSV2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_ingestOSVs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_OSV_id(ctx, field)
-			case "osvId":
-				return ec.fieldContext_OSV_osvId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type OSV", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ingestOSVs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4090,6 +3555,199 @@ func (ec *executionContext) fieldContext_Mutation_ingestSources(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestSources_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestVulnEqual(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestVulnEqual(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestVulnEqual(rctx, fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["otherVulnerability"].(model.VulnerabilityInputSpec), fc.Args["vulnEqual"].(model.VulnEqualInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.VulnEqual)
+	fc.Result = res
+	return ec.marshalNVulnEqual2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqual(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestVulnEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_VulnEqual_id(ctx, field)
+			case "vulnerabilities":
+				return ec.fieldContext_VulnEqual_vulnerabilities(ctx, field)
+			case "justification":
+				return ec.fieldContext_VulnEqual_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_VulnEqual_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_VulnEqual_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VulnEqual", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestVulnEqual_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestVulnerability(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["vuln"].(model.VulnerabilityInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Vulnerability)
+	fc.Result = res
+	return ec.marshalNVulnerability2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerability(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestVulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Vulnerability_id(ctx, field)
+			case "type":
+				return ec.fieldContext_Vulnerability_type(ctx, field)
+			case "vulnerabilityIDs":
+				return ec.fieldContext_Vulnerability_vulnerabilityIDs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Vulnerability", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestVulnerability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestVulnerabilities(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestVulnerabilities(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestVulnerabilities(rctx, fc.Args["vulns"].([]*model.VulnerabilityInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Vulnerability)
+	fc.Result = res
+	return ec.marshalNVulnerability2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestVulnerabilities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Vulnerability_id(ctx, field)
+			case "type":
+				return ec.fieldContext_Vulnerability_type(ctx, field)
+			case "vulnerabilityIDs":
+				return ec.fieldContext_Vulnerability_vulnerabilityIDs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Vulnerability", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestVulnerabilities_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4632,130 +4290,6 @@ func (ec *executionContext) fieldContext_Query_PointOfContact(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_cve(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_cve(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Cve(rctx, fc.Args["cveSpec"].(model.CVESpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Cve)
-	fc.Result = res
-	return ec.marshalNCVE2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_cve(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CVE_id(ctx, field)
-			case "year":
-				return ec.fieldContext_CVE_year(ctx, field)
-			case "cveId":
-				return ec.fieldContext_CVE_cveId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CVE", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_cve_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_ghsa(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_ghsa(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Ghsa(rctx, fc.Args["ghsaSpec"].(model.GHSASpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Ghsa)
-	fc.Result = res
-	return ec.marshalNGHSA2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGhsaᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_ghsa(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_GHSA_id(ctx, field)
-			case "ghsaId":
-				return ec.fieldContext_GHSA_ghsaId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type GHSA", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_ghsa_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_HasSBOM(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_HasSBOM(ctx, field)
 	if err != nil {
@@ -5172,75 +4706,6 @@ func (ec *executionContext) fieldContext_Query_IsOccurrence(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_IsVulnerability(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_IsVulnerability(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().IsVulnerability(rctx, fc.Args["isVulnerabilitySpec"].(model.IsVulnerabilitySpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.IsVulnerability)
-	fc.Result = res
-	return ec.marshalNIsVulnerability2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsVulnerabilityᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_IsVulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_IsVulnerability_id(ctx, field)
-			case "osv":
-				return ec.fieldContext_IsVulnerability_osv(ctx, field)
-			case "vulnerability":
-				return ec.fieldContext_IsVulnerability_vulnerability(ctx, field)
-			case "justification":
-				return ec.fieldContext_IsVulnerability_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_IsVulnerability_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_IsVulnerability_collector(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type IsVulnerability", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_IsVulnerability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_HasMetadata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_HasMetadata(ctx, field)
 	if err != nil {
@@ -5308,67 +4773,6 @@ func (ec *executionContext) fieldContext_Query_HasMetadata(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_HasMetadata_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_osv(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_osv(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Osv(rctx, fc.Args["osvSpec"].(model.OSVSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Osv)
-	fc.Result = res
-	return ec.marshalNOSV2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_osv(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_OSV_id(ctx, field)
-			case "osvId":
-				return ec.fieldContext_OSV_osvId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type OSV", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_osv_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5843,6 +5247,136 @@ func (ec *executionContext) fieldContext_Query_sources(ctx context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_vulnEqual(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_vulnEqual(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VulnEqual(rctx, fc.Args["vulnEqualSpec"].(model.VulnEqualSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.VulnEqual)
+	fc.Result = res
+	return ec.marshalNVulnEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_vulnEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_VulnEqual_id(ctx, field)
+			case "vulnerabilities":
+				return ec.fieldContext_VulnEqual_vulnerabilities(ctx, field)
+			case "justification":
+				return ec.fieldContext_VulnEqual_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_VulnEqual_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_VulnEqual_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VulnEqual", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_vulnEqual_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_vulnerabilities(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_vulnerabilities(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Vulnerabilities(rctx, fc.Args["vulnSpec"].(model.VulnerabilitySpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Vulnerability)
+	fc.Result = res
+	return ec.marshalNVulnerability2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_vulnerabilities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Vulnerability_id(ctx, field)
+			case "type":
+				return ec.fieldContext_Vulnerability_type(ctx, field)
+			case "vulnerabilityIDs":
+				return ec.fieldContext_Vulnerability_vulnerabilityIDs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Vulnerability", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_vulnerabilities_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
@@ -6214,9 +5748,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "ingestVulnerability":
+		case "ingestCertifyVuln":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ingestVulnerability(ctx, field)
+				return ec._Mutation_ingestCertifyVuln(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6224,34 +5758,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "ingestPointOfContact":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestPointOfContact(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "ingestCVE":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ingestCVE(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "ingestCVEs":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ingestCVEs(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "ingestGHSA":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ingestGHSA(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "ingestGHSAs":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ingestGHSAs(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6333,30 +5839,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "ingestIsVulnerability":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ingestIsVulnerability(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "ingestHasMetadata":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestHasMetadata(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "ingestOSV":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ingestOSV(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "ingestOSVs":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ingestOSVs(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6392,6 +5877,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "ingestSources":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestSources(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestVulnEqual":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestVulnEqual(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestVulnerability":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestVulnerability(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestVulnerabilities":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestVulnerabilities(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6614,50 +6120,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "cve":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_cve(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "ghsa":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_ghsa(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "HasSBOM":
 			field := field
 
@@ -6790,28 +6252,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "IsVulnerability":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_IsVulnerability(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "HasMetadata":
 			field := field
 
@@ -6822,28 +6262,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_HasMetadata(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "osv":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_osv(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -7020,6 +6438,50 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_sources(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "vulnEqual":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_vulnEqual(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "vulnerabilities":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_vulnerabilities(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
