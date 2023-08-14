@@ -168,7 +168,7 @@ require (
 	github.com/Khan/genqlient v0.6.0
 	github.com/Masterminds/semver v1.5.0
 	github.com/arangodb/go-driver v1.6.0
-	github.com/aws/aws-sdk-go v1.44.318
+	github.com/aws/aws-sdk-go v1.44.323
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-git/go-git/v5 v5.8.1
 	github.com/gobwas/glob v0.2.3
