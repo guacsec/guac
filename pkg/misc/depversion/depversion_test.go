@@ -243,6 +243,14 @@ func Test_VersionRangeParse(t *testing.T) {
 			},
 		},
 		{
+			input: "~0.10.x",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=,<0.11.0"},
+				},
+			},
+		},
+		{
 			// special case latest set to no constraint
 			input: "latest",
 			expect: VersionMatchObject{
@@ -262,7 +270,7 @@ func Test_VersionRangeParse(t *testing.T) {
 
 			got, err := ParseVersionRange(tt.input)
 			if err != nil {
-				t.Errorf("got unexpected err: %v", err)
+				t.Errorf("got unexpected err from ParseVersionRange: %v", err)
 				return
 			}
 

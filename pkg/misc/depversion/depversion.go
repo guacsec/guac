@@ -252,27 +252,36 @@ func parseSemver(s string) (semver, major, minor, patch, prerelease, metadata st
 }
 
 func parseSemverHelper(re *regexp.Regexp, s string) (semver, major, minor, patch, prerelease, metadata string, err error) {
-	matches := re.FindStringSubmatch(s)
+	tildeRegex := regexp.MustCompile(`^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>[xX])$`)
 
-	if len(matches) == 0 {
-		err = fmt.Errorf("Did not match regex: %q %s", s, re)
-		return
-	}
-	semverIdx := re.SubexpIndex("semver")
-	majorIdx := re.SubexpIndex("major")
-	minorIdx := re.SubexpIndex("minor")
-	patchIdx := re.SubexpIndex("patch")
-	prereleaseIdx := re.SubexpIndex("prerelease")
-	metadataIdx := re.SubexpIndex("metadata")
+	var matches []string
+	var semverIdx, majorIdx, minorIdx, patchIdx, prereleaseIdx, metadataIdx int
 
-	if semverIdx < 0 {
-		err = fmt.Errorf("unable to find semver")
-		return
-	}
+	if matches = re.FindStringSubmatch(s); len(matches) > 0 {
+		semverIdx = re.SubexpIndex("semver")
+		majorIdx = re.SubexpIndex("major")
+		minorIdx = re.SubexpIndex("minor")
+		patchIdx = re.SubexpIndex("patch")
+		prereleaseIdx = re.SubexpIndex("prerelease")
+		metadataIdx = re.SubexpIndex("metadata")
+		if semverIdx < 0 {
+			err = fmt.Errorf("unable to find semver")
+			return
+		}
 
-	semver = matches[re.SubexpIndex("semver")]
-	if semver == "" {
-		err = fmt.Errorf("unable to find semver")
+		semver = matches[re.SubexpIndex("semver")]
+		if semver == "" {
+			err = fmt.Errorf("unable to find semver")
+			return
+		}
+	} else if matches = tildeRegex.FindStringSubmatch(s); len(matches) > 0 {
+		fmt.Println("tilde regex")
+		majorIdx = tildeRegex.SubexpIndex("major") + semverIdx
+		minorIdx = tildeRegex.SubexpIndex("minor") + semverIdx
+		patchIdx = tildeRegex.SubexpIndex("patch") + semverIdx
+		metadataIdx = tildeRegex.SubexpIndex("tilde_x") + semverIdx
+	} else {
+		err = fmt.Errorf("tilde regex failed")
 		return
 	}
 
