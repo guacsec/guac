@@ -186,6 +186,7 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 	ns := "ubuntu"
 	version := "1.19.0.4"
 	depns := "openssl.org"
+	opensslVersion := "3.0.3"
 	smartentryNs := "smartentry"
 	ingestDependencies := []struct {
 		name             string
@@ -230,8 +231,13 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 				Type:      "conan",
 				Namespace: &depns,
 				Name:      "openssl",
+				Version:   &opensslVersion,
+				Qualifiers: []model.PackageQualifierInputSpec{
+					{Key: "user", Value: "bincrafters"},
+					{Key: "channel", Value: "stable"},
+				},
 			},
-			depPkgMatchFlags: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			depPkgMatchFlags: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			dependency: model.IsDependencyInputSpec{
 				VersionRange:   "3.0.3",
 				DependencyType: model.DependencyTypeIndirect,
@@ -241,7 +247,7 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 			},
 		},
 		{
-			name: "deb: part of SBOM - openssl (duplicate)",
+			name: "deb: part of SBOM - openssl (indirect)",
 			pkg: model.PkgInputSpec{
 				Type:      "deb",
 				Namespace: &ns,
@@ -255,8 +261,13 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 				Type:      "conan",
 				Namespace: &depns,
 				Name:      "openssl",
+				Version:   &opensslVersion,
+				Qualifiers: []model.PackageQualifierInputSpec{
+					{Key: "user", Value: "bincrafters"},
+					{Key: "channel", Value: "stable"},
+				},
 			},
-			depPkgMatchFlags: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			depPkgMatchFlags: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			dependency: model.IsDependencyInputSpec{
 				VersionRange:   "3.0.3",
 				DependencyType: model.DependencyTypeDirect,

@@ -176,7 +176,7 @@ RETURN {
 				if p == nil {
 					return nil, fmt.Errorf("failed to parse result of pkgVersion, got nil when expected non-nil")
 				}
-				pkg := generateModelPackage(p.TypeID, p.PkgType, p.NamespaceID, p.Namespace, p.NameID, p.Name, &p.VersionID, &p.Version, &p.Subpath, p.QualifierList)
+				pkg := generateModelPackage(p.TypeID, p.PkgType, p.NamespaceID, p.Namespace, p.NameID, p.Name, p.VersionID, p.Version, p.Subpath, p.QualifierList)
 				results = append(results, pkg)
 			case "pkgName":
 				p := d.PkgName
