@@ -646,7 +646,7 @@ func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDepe
 			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
 
 		depPkg := generateModelPackage(createdValue.DepPkg.TypeID, createdValue.DepPkg.PkgType, createdValue.DepPkg.NamespaceID, createdValue.DepPkg.Namespace, createdValue.DepPkg.NameID,
-			createdValue.DepPkg.Name, &createdValue.DepPkg.VersionID, &createdValue.DepPkg.Version, &createdValue.DepPkg.Subpath, createdValue.DepPkg.QualifierList)
+			createdValue.DepPkg.Name, nilIfEmpty(&createdValue.DepPkg.VersionID), nilIfEmpty(&createdValue.DepPkg.Version), nilIfEmpty(&createdValue.DepPkg.Subpath), createdValue.DepPkg.QualifierList)
 
 		dependencyTypeEnum, err := convertDependencyTypeToEnum(createdValue.DependencyType)
 		if err != nil {
