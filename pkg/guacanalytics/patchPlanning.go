@@ -52,7 +52,7 @@ type queueValues struct {
 	queue   []string
 }
 
-func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Client, startID string, stopID *string, maxDepth int) (map[string]BfsNode, []string, error) {
+func SearchDependentsFromStartPackage(ctx context.Context, gqlClient graphql.Client, startID string, stopID *string, maxDepth int) (map[string]BfsNode, []string, error) {
 	startNode, err := model.Node(ctx, gqlClient, startID)
 
 	if err != nil {
@@ -80,7 +80,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlClient graphql.Clie
 	}
 
 	if len(nodePkg.AllPkgTree.Namespaces[0].Names[0].Versions) == 0 {
-		// TODO: handle case where there are circular dependencies that introduce more versions to the version list on a node that requires revisiting
+		// TODO: handle case where there are circular dependents that introduce more versions to the version list on a node that requires revisiting
 		err := q.addNodesToQueueFromPackageName(ctx, gqlClient, nodePkg.AllPkgTree.Type, nodePkg.AllPkgTree.Namespaces[0].Namespace, nodePkg.AllPkgTree.Namespaces[0].Names[0].Name, startID)
 
 		if err != nil {

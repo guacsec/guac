@@ -86,10 +86,10 @@ var queryPatchCmd = &cobra.Command{
 
 		}
 
-		bfsMap, path, err := analysis.SearchDependenciesFromStartNode(ctx, gqlClient, startID, stopID, opts.depth)
+		bfsMap, path, err := analysis.SearchDependentsFromStartPackage(ctx, gqlClient, startID, stopID, opts.depth)
 
 		if err != nil {
-			logger.Fatalf("error searching dependencies-- %s\n", err)
+			logger.Fatalf("error searching dependents-- %s\n", err)
 		}
 
 		frontiers, infoNodes, err := analysis.ToposortFromBfsNodeMap(ctx, gqlClient, bfsMap)
