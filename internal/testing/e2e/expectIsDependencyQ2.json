@@ -37,11 +37,11 @@
               {
                 "name": "logrus",
                 "versions": [
-                    {
-                        "version": "v1.4.2",
-                        "qualifiers": [],
-                        "subpath": ""
-                    }
+                  {
+                    "version": "v1.4.2",
+                    "qualifiers": [],
+                    "subpath": ""
+                  }
                 ]
               }
             ]
