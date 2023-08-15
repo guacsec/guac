@@ -112,12 +112,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestHasSLSAs failed with error: %w", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for CertifyVuln
 			logger.Infof("assembling CertifyVuln: %v", len(p.CertifyVuln))
-			for _, cv := range p.CertifyVuln {
-				if err := ingestCertifyVuln(ctx, gqlclient, cv); err != nil {
-					return fmt.Errorf("ingestCertifyVuln failed with error: %w", err)
-				}
+			if err := ingestCertifyVulns(ctx, gqlclient, p.CertifyVuln); err != nil {
+				return fmt.Errorf("ingestCertifyVulns failed with error: %w", err)
 			}
 
 			// TODO(pxp928): add bulk ingestion for IsVuln
@@ -227,6 +224,24 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client, v []model
 	_, err := model.IngestVulnerabilities(ctx, client, v)
 	if err != nil {
 		return fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
+	}
+	return nil
+}
+
+func ingestCertifyVulns(ctx context.Context, client graphql.Client, cv []assembler.CertifyVulnIngest) error {
+	var pkgs []model.PkgInputSpec
+	var vulnerabilities []model.VulnerabilityInputSpec
+	var scanMetadataList []model.ScanMetadataInput
+	for _, ingest := range cv {
+		pkgs = append(pkgs, *ingest.Pkg)
+		vulnerabilities = append(vulnerabilities, *ingest.Vulnerability)
+		scanMetadataList = append(scanMetadataList, *ingest.VulnData)
+	}
+	if len(cv) > 0 {
+		_, err := model.CertifyVulnPkgs(ctx, client, pkgs, vulnerabilities, scanMetadataList)
+		if err != nil {
+			return fmt.Errorf("CertifyVulnPkgs failed with error: %w", err)
+		}
 	}
 	return nil
 }

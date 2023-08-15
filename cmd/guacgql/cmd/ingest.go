@@ -47,6 +47,7 @@ func ingestData(port int) {
 	ingestDependency(ctx, gqlclient)
 	ingestOccurrence(ctx, gqlclient)
 	ingestVulnerability(ctx, gqlclient)
+	ingestVulnerabilities(ctx, gqlclient)
 	ingestPkgEqual(ctx, gqlclient)
 	ingestCertifyBad(ctx, gqlclient)
 	ingestCertifyBads(ctx, gqlclient)
@@ -650,6 +651,265 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 		}
 		if _, err := model.CertifyVulnPkg(ctx, client, *ingest.pkg, *ingest.vuln, ingest.vulnerability); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+
+	}
+}
+
+func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
+	opensslNs := "openssl.org"
+	opensslVersion := "3.0.3"
+	djangoNs := ""
+	ingestVulnerabilities := []struct {
+		name              string
+		pkgs              []model.PkgInputSpec
+		vulns             []model.VulnerabilityInputSpec
+		vulnerabilityList []model.ScanMetadataInput
+	}{
+		{
+			name: "bulk ingest",
+			pkgs: []model.PkgInputSpec{
+				{
+					Type:      "conan",
+					Namespace: &opensslNs,
+					Name:      "openssl",
+					Version:   &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{
+						{Key: "user", Value: "bincrafters"},
+						{Key: "channel", Value: "stable"},
+					},
+				},
+				{
+					Type:      "conan",
+					Namespace: &opensslNs,
+					Name:      "openssl",
+					Version:   &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{
+						{Key: "user", Value: "bincrafters"},
+						{Key: "channel", Value: "stable"},
+					},
+				},
+				{
+					Type:      "conan",
+					Namespace: &opensslNs,
+					Name:      "openssl",
+					Version:   &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{
+						{Key: "user", Value: "bincrafters"},
+						{Key: "channel", Value: "stable"},
+					},
+				},
+				{
+					Type:      "pypi",
+					Namespace: &djangoNs,
+					Name:      "django",
+				},
+				{
+					Type:      "pypi",
+					Namespace: &djangoNs,
+					Name:      "django",
+				},
+				{
+					Type:      "pypi",
+					Namespace: &djangoNs,
+					Name:      "django",
+				},
+				{
+					Type:      "pypi",
+					Namespace: &djangoNs,
+					Name:      "django",
+				},
+				{
+					Type:      "conan",
+					Namespace: &opensslNs,
+					Name:      "openssl",
+					Version:   &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{
+						{Key: "user", Value: "bincrafters"},
+						{Key: "channel", Value: "stable"},
+					},
+				},
+				{
+					Type:      "pypi",
+					Namespace: &djangoNs,
+					Name:      "django",
+				},
+				{
+					Type:      "conan",
+					Namespace: &opensslNs,
+					Name:      "openssl",
+					Version:   &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{
+						{Key: "user", Value: "bincrafters"},
+						{Key: "channel", Value: "stable"},
+					},
+				},
+				{
+					Type:      "pypi",
+					Namespace: &djangoNs,
+					Name:      "django",
+				},
+			},
+			vulns: []model.VulnerabilityInputSpec{
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+				},
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2018-12310",
+				},
+				{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2018-12310",
+				},
+				{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-f45f-jj4w-2rv2",
+				},
+				{
+					Type:            "noVuln",
+					VulnerabilityID: "",
+				},
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-f45f-jj4w-2rv2",
+				},
+				{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "noVuln",
+					VulnerabilityID: "",
+				},
+			},
+			vulnerabilityList: []model.ScanMetadataInput{
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+				{
+					TimeScanned:    tm,
+					DbUri:          "MITRE",
+					DbVersion:      "v1.0.0",
+					ScannerUri:     "osv.dev",
+					ScannerVersion: "0.0.14",
+					Origin:         "Demo ingestion",
+					Collector:      "Demo ingestion",
+				},
+			},
+		},
+	}
+	for _, ingest := range ingestVulnerabilities {
+		if _, err := model.IngestPackages(ctx, client, ingest.pkgs); err != nil {
+			logger.Errorf("Error in ingesting packages: %v\n", err)
+		}
+		if _, err := model.IngestVulnerabilities(ctx, client, ingest.vulns); err != nil {
+			logger.Errorf("Error in ingesting vulnerabilities: %v\n", err)
+		}
+		if _, err := model.CertifyVulnPkgs(ctx, client, ingest.pkgs, ingest.vulns, ingest.vulnerabilityList); err != nil {
+			logger.Errorf("Error in ingesting CertifyVulnPkgs: %v\n", err)
 		}
 
 	}
