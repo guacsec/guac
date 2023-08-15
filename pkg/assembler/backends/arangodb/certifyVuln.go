@@ -38,104 +38,116 @@ func (c *arangoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.C
 	// TODO (pxp928): Optimization of the query can be done by starting from the vulnerability node (if specified)
 	var arangoQueryBuilder *arangoQueryBuilder
 	if certifyVulnSpec.Package != nil {
-		var combinedCertifyVuln []*model.CertifyVuln
-		if certifyVulnSpec.Package != nil {
-			values := map[string]any{}
-
-			arangoQueryBuilder = setPkgVersionMatchValues(certifyVulnSpec.Package, values)
-			arangoQueryBuilder.forOutBound(certifyVulnPkgEdgesStr, "certVuln", "pVersion")
-			setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
-
-			pkgVersionOccurrences, err := getPkgOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve package version occurrences with error: %w", err)
-			}
-
-			combinedCertifyVuln = append(combinedCertifyVuln, pkgVersionOccurrences...)
-		}
-	} else {
-		var combinedOccurrence []*model.CertifyVuln
 		values := map[string]any{}
-		// get packages
-		arangoQueryBuilder = newForQuery(isOccurrencesStr, "isOccurrence")
-		setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
-		arangoQueryBuilder.forInBound(isOccurrenceSubjectPkgEdgesStr, "pVersion", "isOccurrence")
+		arangoQueryBuilder = setPkgVersionMatchValues(certifyVulnSpec.Package, values)
+		arangoQueryBuilder.forOutBound(certifyVulnPkgEdgesStr, "certifyVuln", "pVersion")
+		setCertifyVulnMatchValues(arangoQueryBuilder, certifyVulnSpec, values)
+
+		return getPkgCertifyVulnForQuery(ctx, c, arangoQueryBuilder, values)
+
+	} else {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(certifyVulnsStr, "certifyVuln")
+		setCertifyVulnMatchValues(arangoQueryBuilder, certifyVulnSpec, values)
+		arangoQueryBuilder.forInBound(certifyVulnPkgEdgesStr, "pVersion", "certifyVuln")
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
 
-		pkgIsOccurrences, err := getPkgOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve package occurrences with error: %w", err)
-		}
-		combinedOccurrence = append(combinedOccurrence, pkgIsOccurrences...)
-
-		// get sources
-		arangoQueryBuilder = newForQuery(isOccurrencesStr, "isOccurrence")
-		setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
-		arangoQueryBuilder.forInBound(isOccurrenceSubjectSrcEdgesStr, "sName", "isOccurrence")
-		arangoQueryBuilder.forInBound(srcHasNameStr, "sNs", "sName")
-		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sType", "sNs")
-
-		srcIsOccurrences, err := getSrcOccurrencesForQuery(ctx, c, arangoQueryBuilder, values)
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve source occurrences with error: %w", err)
-		}
-		combinedOccurrence = append(combinedOccurrence, srcIsOccurrences...)
-
-		return combinedOccurrence, nil
+		return getPkgCertifyVulnForQuery(ctx, c, arangoQueryBuilder, values)
 	}
+}
+
+func getPkgCertifyVulnForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.CertifyVuln, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'pkgVersion': {
+			'type_id': pType._id,
+			'type': pType.type,
+			'namespace_id': pNs._id,
+			'namespace': pNs.namespace,
+			'name_id': pName._id,
+			'name': pName.name,
+			'version_id': pVersion._id,
+			'version': pVersion.version,
+			'subpath': pVersion.subpath,
+			'qualifier_list': pVersion.qualifier_list
+		},
+		'vulnerability': {
+			"type_id": vType._id,
+		    "type": vType.type,
+		    "vuln_id": vVulnID._id,
+		    "vuln": vVulnID.vulnerabilityID
+		},
+		'certifyVuln_id': certifyVuln._id,
+		'timeScanned': certifyVuln.timeScanned,
+		'dbUri': certifyVuln.dbUri,
+		'dbVersion': certifyVuln.dbVersion,
+		'scannerUri': certifyVuln.scannerUri,
+		'scannerVersion': certifyVuln.scannerVersion,
+		'collector': certifyVuln.collector,
+		'origin': certifyVuln.origin
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVuln")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for CertifyVuln: %w", err)
+	}
+	defer cursor.Close()
+
+	return geCertifyVuln(ctx, cursor)
 }
 
 func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVulnSpec *model.CertifyVulnSpec, queryValues map[string]any) {
 	if certifyVulnSpec.ID != nil {
-		arangoQueryBuilder.filter("certVuln", "_id", "==", "@id")
+		arangoQueryBuilder.filter("certifyVuln", "_id", "==", "@id")
 		queryValues["id"] = *certifyVulnSpec.ID
 	}
 	if certifyVulnSpec.TimeScanned != nil {
-		arangoQueryBuilder.filter("certVuln", justification, "==", "@"+timeScannedStr)
+		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+timeScannedStr)
 		queryValues[timeScannedStr] = certifyVulnSpec.TimeScanned
 	}
 	if certifyVulnSpec.DbURI != nil {
-		arangoQueryBuilder.filter("certVuln", justification, "==", "@"+dbUriStr)
+		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+dbUriStr)
 		queryValues[dbUriStr] = certifyVulnSpec.DbURI
 	}
 	if certifyVulnSpec.DbVersion != nil {
-		arangoQueryBuilder.filter("certVuln", justification, "==", "@"+dbVersionStr)
+		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+dbVersionStr)
 		queryValues[dbVersionStr] = certifyVulnSpec.DbVersion
 	}
 	if certifyVulnSpec.ScannerURI != nil {
-		arangoQueryBuilder.filter("certVuln", justification, "==", "@"+scannerUriStr)
+		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+scannerUriStr)
 		queryValues[scannerUriStr] = certifyVulnSpec.ScannerURI
 	}
 	if certifyVulnSpec.ScannerVersion != nil {
-		arangoQueryBuilder.filter("certVuln", justification, "==", "@"+scannerVersionStr)
+		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+scannerVersionStr)
 		queryValues[scannerVersionStr] = certifyVulnSpec.ScannerVersion
 	}
 	if certifyVulnSpec.Origin != nil {
-		arangoQueryBuilder.filter("certVuln", origin, "==", "@"+origin)
+		arangoQueryBuilder.filter("certifyVuln", origin, "==", "@"+origin)
 		queryValues[origin] = certifyVulnSpec.Origin
 	}
 	if certifyVulnSpec.Collector != nil {
-		arangoQueryBuilder.filter("certVuln", collector, "==", "@"+collector)
+		arangoQueryBuilder.filter("certifyVuln", collector, "==", "@"+collector)
 		queryValues[collector] = certifyVulnSpec.Collector
 	}
-	arangoQueryBuilder.forOutBound(certifyVulnEdgesStr, "vuln", "certVuln")
 	if certifyVulnSpec.Vulnerability != nil {
-		if certifyVulnSpec.Vulnerability.ID != nil {
-			arangoQueryBuilder.filter("art", "_id", "==", "@id")
-			queryValues["id"] = *isOccurrenceSpec.Artifact.ID
-		}
+		arangoQueryBuilder.forOutBound(certifyVulnEdgesStr, "vVulnID", "certifyVuln")
 		if certifyVulnSpec.Vulnerability.VulnerabilityID != nil {
-			arangoQueryBuilder.filter("art", "digest", "==", "@digest")
-			queryValues["digest"] = strings.ToLower(*isOccurrenceSpec.Artifact.Digest)
+			arangoQueryBuilder.filter("vVulnID", "vulnerabilityID", "==", "@vulnerabilityID")
+			queryValues["vulnerabilityID"] = *certifyVulnSpec.Vulnerability.VulnerabilityID
 		}
+		arangoQueryBuilder.forInBound(vulnHasVulnerabilityIDStr, "vType", "vVulnID")
 		if certifyVulnSpec.Vulnerability.Type != nil {
-			arangoQueryBuilder.filter("art", "algorithm", "==", "@algorithm")
-			queryValues["algorithm"] = strings.ToLower(*isOccurrenceSpec.Artifact.Algorithm)
+			arangoQueryBuilder.filter("vType", "type", "==", "@vulnType")
+			queryValues["vulnType"] = *certifyVulnSpec.Vulnerability.Type
 		}
+	} else {
+		arangoQueryBuilder.forOutBound(certifyVulnEdgesStr, "vVulnID", "certifyVuln")
+		arangoQueryBuilder.forInBound(vulnHasVulnerabilityIDStr, "vType", "vVulnID")
 	}
-
 }
 
 func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.VulnerabilityInputSpec, certifyVuln *model.ScanMetadataInput) map[string]any {
@@ -234,19 +246,20 @@ func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.Pkg
 			  "typeID": vType._id,
 			  "type": vType.type,
 			  "vuln_id": vVulnID._id,
-			  "vuln": vVulnID.vulnerabilityID
+			  "vuln": vVulnID.vulnerabilityID,
+			  "vulnDoc": vVulnID
 			}
 		)
 		  
 		  LET certifyVuln = FIRST(
-			  UPSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln._id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
-				  INSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln._id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
+			  UPSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
+				  INSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN certifyVulns
 				  RETURN NEW
 		  )
 		  			
 		  INSERT { _key: CONCAT("certifyVulnPkgEdges", firstPkg.versionDoc._key, certifyVuln._key), _from: firstPkg.versionDoc._id, _to: certifyVuln._id } INTO certifyVulnPkgEdges OPTIONS { overwriteMode: "ignore" }
-		  INSERT { _key: CONCAT("certifyVulnEdges", certifyVuln._key, artifact._key), _from: certifyVuln._id, _to: firstVuln._id } INTO certifyVulnEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("certifyVulnEdges", certifyVuln._key, firstVuln.vulnDoc._key), _from: certifyVuln._id, _to: firstVuln.vulnDoc._id } INTO certifyVulnEdges OPTIONS { overwriteMode: "ignore" }
 		  
 		  RETURN {
 			'pkgVersion': {
@@ -265,7 +278,7 @@ func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.Pkg
 				'type_id': firstVuln.typeID,
 				'type': firstVuln.type,
 				'vuln_id': firstVuln.vuln_id,
-				'vuln': firstVuln.vuln,
+				'vuln': firstVuln.vuln
 			},
 			'certifyVuln_id': certifyVuln._id,
      		'timeScanned': certifyVuln.timeScanned,
@@ -330,19 +343,20 @@ func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInput
 			  "typeID": vType._id,
 			  "type": vType.type,
 			  "vuln_id": vVulnID._id,
-			  "vuln": vVulnID.vulnerabilityID
+			  "vuln": vVulnID.vulnerabilityID,
+			  "vulnDoc": vVulnID
 			}
 		)
 		  
 		  LET certifyVuln = FIRST(
-			  UPSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln._id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
-				  INSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln._id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
+			  UPSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
+				  INSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
 				  UPDATE {} IN certifyVulns
 				  RETURN NEW
 		  )
 		  			
 		  INSERT { _key: CONCAT("certifyVulnPkgEdges", firstPkg.versionDoc._key, certifyVuln._key), _from: firstPkg.versionDoc._id, _to: certifyVuln._id } INTO certifyVulnPkgEdges OPTIONS { overwriteMode: "ignore" }
-		  INSERT { _key: CONCAT("certifyVulnEdges", certifyVuln._key, artifact._key), _from: certifyVuln._id, _to: firstVuln._id } INTO certifyVulnEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("certifyVulnEdges", certifyVuln._key, firstVuln.vulnDoc._key), _from: certifyVuln._id, _to: firstVuln.vulnDoc._id } INTO certifyVulnEdges OPTIONS { overwriteMode: "ignore" }
 		  
 		  RETURN {
 			'pkgVersion': {
@@ -361,7 +375,7 @@ func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInput
 				'type_id': firstVuln.typeID,
 				'type': firstVuln.type,
 				'vuln_id': firstVuln.vuln_id,
-				'vuln': firstVuln.vuln,
+				'vuln': firstVuln.vuln
 			},
 			'certifyVuln_id': certifyVuln._id,
      		'timeScanned': certifyVuln.timeScanned,
