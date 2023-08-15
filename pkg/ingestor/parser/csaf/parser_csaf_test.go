@@ -74,6 +74,7 @@ func Test_csafParser(t *testing.T) {
 }
 
 func Test_findPurl(t *testing.T) {
+	// The tree for the default test case
 	defaultTestTree := csaf.ProductBranch{
 		Name: "node1",
 		Branches: []csaf.ProductBranch{
@@ -88,17 +89,30 @@ func Test_findPurl(t *testing.T) {
 		},
 	}
 
-	returnedPurl := defaultTestTree.Branches[0].Product.IdentificationHelper["purl"]
+	defaultReturnedPurl := defaultTestTree.Branches[0].Product.IdentificationHelper["purl"]
+
+	// The tree for the stack overflow test case
+
+	stackOverflowTree := csaf.ProductBranch{
+		Name: "node1",
+		Branches: []csaf.ProductBranch{
+			{
+				Name: "node2",
+			},
+		},
+	}
+
+	stackOverflowTree.Branches[0].Branches = append(stackOverflowTree.Branches[0].Branches, stackOverflowTree)
+
 	type args struct {
 		ctx         context.Context
 		tree        csaf.ProductBranch
 		product_ref string
 	}
 	tests := []struct {
-		name          string
-		args          args
-		stackOverflow bool
-		want          *string
+		name string
+		args args
+		want *string
 	}{
 		{
 			name: "default",
@@ -107,32 +121,20 @@ func Test_findPurl(t *testing.T) {
 				tree:        defaultTestTree,
 				product_ref: "node2",
 			},
-			want: &returnedPurl,
+			want: &defaultReturnedPurl,
 		},
 		{
 			name: "can stack overflow",
 			args: args{
-				ctx: context.Background(),
-				tree: csaf.ProductBranch{
-					Name: "node1",
-					Branches: []csaf.ProductBranch{
-						{
-							Name: "node2",
-						},
-					},
-				},
+				ctx:         context.Background(),
+				tree:        stackOverflowTree,
 				product_ref: "not equal to any tree nodes",
 			},
-			stackOverflow: true,
-			want:          nil,
+			want: nil,
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if test.stackOverflow {
-				test.args.tree.Branches[0].Branches = append(test.args.tree.Branches[0].Branches, test.args.tree)
-			}
-
 			if got := findPurl(test.args.ctx, test.args.tree, test.args.product_ref); !reflect.DeepEqual(got, test.want) {
 				t.Errorf("findPurl() = %v, want %v", got, test.want)
 			}
