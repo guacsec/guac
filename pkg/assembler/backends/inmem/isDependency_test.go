@@ -27,10 +27,16 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+var (
+	mAll      = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
+	mSpecific = model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
+)
+
 func TestIsDependency(t *testing.T) {
 	type call struct {
 		P1 *model.PkgInputSpec
 		P2 *model.PkgInputSpec
+		MF model.MatchFlags
 		ID *model.IsDependencyInputSpec
 	}
 	tests := []struct {
@@ -49,6 +55,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
@@ -72,6 +79,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
@@ -79,6 +87,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
@@ -102,6 +111,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
@@ -109,6 +119,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p3,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
@@ -132,6 +143,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						Justification: "test justification one",
 					},
@@ -139,6 +151,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						Justification: "test justification two",
 					},
@@ -162,11 +175,13 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p2,
 					P2: p3,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -189,11 +204,13 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p2,
 					P2: p4,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p2,
 					P2: p1,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -216,11 +233,13 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p3,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -247,11 +266,13 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p2,
 					P2: p1,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p3,
 					P2: p4,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -277,16 +298,19 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p2,
 					P2: p3,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p1,
 					P2: p3,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -304,16 +328,19 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p2,
 					P2: p3,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p1,
 					P2: p3,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -334,6 +361,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p1,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						VersionRange: "1-3",
 					},
@@ -341,6 +369,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p2,
 					P2: p1,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						VersionRange: "4-5",
 					},
@@ -364,6 +393,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p1,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
 					},
@@ -371,6 +401,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p2,
 					P2: p1,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeIndirect,
 					},
@@ -394,6 +425,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -406,6 +438,7 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p4,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -418,16 +451,19 @@ func TestIsDependency(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p2,
 					P2: p3,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 				{
 					P1: p1,
 					P2: p3,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -435,6 +471,91 @@ func TestIsDependency(t *testing.T) {
 				ID: ptrfrom.String("asdf"),
 			},
 			ExpQueryErr: true,
+		},
+		{
+			Name:  "IsDep from version to version",
+			InPkg: []*model.PkgInputSpec{p2, p3},
+			Calls: []call{
+				{
+					P1: p3,
+					P2: p2,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          p3out,
+					DependentPackage: p2out,
+					Justification:    "test justification",
+				},
+			},
+		},
+		{
+			Name:  "IsDep from version to name",
+			InPkg: []*model.PkgInputSpec{p2, p3},
+			Calls: []call{
+				{
+					P1: p3,
+					P2: p2,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          p3out,
+					DependentPackage: p2outName,
+					Justification:    "test justification",
+				},
+			},
+		},
+		{
+			Name:  "IsDep from version to name and version",
+			InPkg: []*model.PkgInputSpec{p2, p3},
+			Calls: []call{
+				{
+					P1: p3,
+					P2: p2,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					P1: p3,
+					P2: p2,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          p3out,
+					DependentPackage: p2out,
+					Justification:    "test justification",
+				},
+				{
+					Package:          p3out,
+					DependentPackage: p2outName,
+					Justification:    "test justification",
+				},
+			},
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -453,7 +574,7 @@ func TestIsDependency(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestDependency(ctx, *o.P1, *o.P2, *o.ID)
+				_, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -486,6 +607,7 @@ func TestIsDependencies(t *testing.T) {
 	type call struct {
 		P1s []*model.PkgInputSpec
 		P2s []*model.PkgInputSpec
+		MF  model.MatchFlags
 		IDs []*model.IsDependencyInputSpec
 	}
 	tests := []struct {
@@ -502,6 +624,7 @@ func TestIsDependencies(t *testing.T) {
 			Calls: []call{{
 				P1s: []*model.PkgInputSpec{p1, p2},
 				P2s: []*model.PkgInputSpec{p2, p4},
+				MF:  mAll,
 				IDs: []*model.IsDependencyInputSpec{
 					{
 						Justification: "test justification",
@@ -541,7 +664,7 @@ func TestIsDependencies(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				got, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.IDs)
+				got, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -561,6 +684,7 @@ func TestIsDependencyNeighbors(t *testing.T) {
 	type call struct {
 		P1 *model.PkgInputSpec
 		P2 *model.PkgInputSpec
+		MF model.MatchFlags
 		ID *model.IsDependencyInputSpec
 	}
 	tests := []struct {
@@ -576,6 +700,7 @@ func TestIsDependencyNeighbors(t *testing.T) {
 				{
 					P1: p1,
 					P2: p2,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
@@ -593,6 +718,7 @@ func TestIsDependencyNeighbors(t *testing.T) {
 				{
 					P1: p1,
 					P2: p4,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
@@ -600,6 +726,7 @@ func TestIsDependencyNeighbors(t *testing.T) {
 				{
 					P1: p2,
 					P2: p4,
+					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
@@ -628,7 +755,7 @@ func TestIsDependencyNeighbors(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				if _, err := b.IngestDependency(ctx, *o.P1, *o.P2, *o.ID); err != nil {
+				if _, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID); err != nil {
 					t.Fatalf("Could not ingest IsDependency: %v", err)
 				}
 			}
