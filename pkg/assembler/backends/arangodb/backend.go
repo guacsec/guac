@@ -105,9 +105,9 @@ const (
 	hasSBOMsStr        string = "hasSBOMs"
 
 	// certifyVuln collection
-	// TODO (pxp928): update collections based on edge collections
-	certifyVulnEdgesStr string = "certifyVulnEdges"
-	certifyVulnsStr     string = "certifyVulns"
+	certifyVulnPkgEdgesStr string = "certifyVulnPkgEdges"
+	certifyVulnEdgesStr    string = "certifyVulnEdges"
+	certifyVulnsStr        string = "certifyVulns"
 
 	// certifyScorecard collection
 
@@ -309,10 +309,16 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		hasSBOMArtEdges.To = []string{hasSBOMsStr}
 
 		// setup certifyVuln collections
+		var certifyVulnPkgEdges driver.EdgeDefinition
+		certifyVulnPkgEdges.Collection = certifyVulnPkgEdgesStr
+		certifyVulnPkgEdges.From = []string{pkgVersionsStr}
+		certifyVulnPkgEdges.To = []string{certifyVulnsStr}
+
+		// setup certifyVuln collections
 		var certifyVulnEdges driver.EdgeDefinition
 		certifyVulnEdges.Collection = certifyVulnEdgesStr
-		certifyVulnEdges.From = []string{pkgVersionsStr, certifyVulnsStr}
-		certifyVulnEdges.To = []string{certifyVulnsStr, vulnerabilitiesStr}
+		certifyVulnEdges.From = []string{certifyVulnsStr}
+		certifyVulnEdges.To = []string{vulnerabilitiesStr}
 
 		// setup certifyScorecard collections
 		var certifyScorecardSrcEdges driver.EdgeDefinition
@@ -368,7 +374,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			pkgHasVersion, srcHasNamespace, srcHasName, vulnHasVulnerabilityID, isDependencyDepPkgEdges, isDependencySubjectPkgEdges,
 			isOccurrenceArtEdges, isOccurrenceSubjectPkgEdges, isOccurrenceSubjectSrcEdges, hasSLSASubjectArtEdges,
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
-			hasSBOMArtEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
+			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges}
 
 		// create a graph
