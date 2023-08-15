@@ -246,7 +246,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "~0.10.x",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=,<0.11.0"},
+					{">=0.10.0,<0.11.0"},
 				},
 			},
 		},

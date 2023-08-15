@@ -159,6 +159,9 @@ var exactSvR = regexp.MustCompile(`^v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<min
 // check for 1.x or 1.0.x cases
 var exactSvRWithWildcard = regexp.MustCompile(`^v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<minor>x|0|[1-9]\d*))?(\.(?P<patch>0|x|[1-9]\d*))?(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
 
+// check for ~1.x or ~1.0.x cases
+var exactSvRWithWildcardAndTidle = regexp.MustCompile(`~.*[.]x`)
+
 // for bad semvers like v1.0.0rc8 that don't include prerelease dashes
 var almostExactSvR = regexp.MustCompile(`^v?(?P<beforerel>(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*))(?P<afterrel>(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
 
@@ -188,7 +191,7 @@ func isSemver(s string) bool {
 }
 
 func isSemVerWildcard(s string) bool {
-	return !exactSvR.Match([]byte(s)) && exactSvRWithWildcard.Match([]byte(s))
+	return !exactSvR.Match([]byte(s)) && (exactSvRWithWildcardAndTidle.Match([]byte(s)) || exactSvRWithWildcard.Match([]byte(s)))
 }
 
 func isValidConstraint(s string) bool {
@@ -252,36 +255,27 @@ func parseSemver(s string) (semver, major, minor, patch, prerelease, metadata st
 }
 
 func parseSemverHelper(re *regexp.Regexp, s string) (semver, major, minor, patch, prerelease, metadata string, err error) {
-	tildeRegex := regexp.MustCompile(`^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>[xX])$`)
+	matches := re.FindStringSubmatch(s)
 
-	var matches []string
-	var semverIdx, majorIdx, minorIdx, patchIdx, prereleaseIdx, metadataIdx int
+	if len(matches) == 0 {
+		err = fmt.Errorf("did not match regex: %q %s", s, re)
+		return
+	}
+	semverIdx := re.SubexpIndex("semver")
+	majorIdx := re.SubexpIndex("major")
+	minorIdx := re.SubexpIndex("minor")
+	patchIdx := re.SubexpIndex("patch")
+	prereleaseIdx := re.SubexpIndex("prerelease")
+	metadataIdx := re.SubexpIndex("metadata")
 
-	if matches = re.FindStringSubmatch(s); len(matches) > 0 {
-		semverIdx = re.SubexpIndex("semver")
-		majorIdx = re.SubexpIndex("major")
-		minorIdx = re.SubexpIndex("minor")
-		patchIdx = re.SubexpIndex("patch")
-		prereleaseIdx = re.SubexpIndex("prerelease")
-		metadataIdx = re.SubexpIndex("metadata")
-		if semverIdx < 0 {
-			err = fmt.Errorf("unable to find semver")
-			return
-		}
+	if semverIdx < 0 {
+		err = fmt.Errorf("unable to find semver")
+		return
+	}
 
-		semver = matches[re.SubexpIndex("semver")]
-		if semver == "" {
-			err = fmt.Errorf("unable to find semver")
-			return
-		}
-	} else if matches = tildeRegex.FindStringSubmatch(s); len(matches) > 0 {
-		fmt.Println("tilde regex")
-		majorIdx = tildeRegex.SubexpIndex("major") + semverIdx
-		minorIdx = tildeRegex.SubexpIndex("minor") + semverIdx
-		patchIdx = tildeRegex.SubexpIndex("patch") + semverIdx
-		metadataIdx = tildeRegex.SubexpIndex("tilde_x") + semverIdx
-	} else {
-		err = fmt.Errorf("tilde regex failed")
+	semver = matches[re.SubexpIndex("semver")]
+	if semver == "" {
+		err = fmt.Errorf("unable to find semver")
 		return
 	}
 
@@ -341,7 +335,7 @@ func getConstraint(s string) (string, error) {
 	}
 	// check for 1.x minor and patch versions
 	if isSemVerWildcard(s) {
-		_, major, minor, _, _, _, err := parseWildcardSemver(s)
+		_, major, minor, _, _, _, err := parseWildcardSemver(strings.TrimPrefix(s, "~"))
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver with wildcard: %v", err)
 		}
@@ -362,7 +356,7 @@ func getConstraint(s string) (string, error) {
 
 	// NPM ^ for major versions
 	if strings.HasPrefix(s, "^") {
-		version := strings.TrimPrefix(s, ("^"))
+		version := strings.TrimPrefix(s, "^")
 		semver, major, _, _, _, _, err := parseSemver(version)
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver %v", err)
@@ -374,7 +368,7 @@ func getConstraint(s string) (string, error) {
 
 	// NPM ~ for minor version
 	if strings.HasPrefix(s, "~") {
-		version := strings.TrimPrefix(s, ("~"))
+		version := strings.TrimPrefix(s, "~")
 		semver, major, minor, _, _, _, err := parseSemver(version)
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver %v", err)
