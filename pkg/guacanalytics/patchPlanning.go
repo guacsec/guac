@@ -104,6 +104,17 @@ func SearchDependentsFromStartPackage(ctx context.Context, gqlClient graphql.Cli
 		q.queue = append(q.queue, startID)
 	}
 
+	err = q.bfsOfDependents(ctx, gqlClient, stopID, maxDepth)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return q.nodeMap, path, nil
+
+}
+
+// bfsOfDependents performs a breadth-first search on a graph to find dependencies
+func (q *queueValues) bfsOfDependents(ctx context.Context, gqlClient graphql.Client, stopID *string, maxDepth int) error {
 	for len(q.queue) > 0 {
 		q.now = &q.queue[0]
 		q.queue = q.queue[1:]
@@ -117,17 +128,18 @@ func SearchDependentsFromStartPackage(ctx context.Context, gqlClient graphql.Cli
 			break
 		}
 
+		// model.Neighbors performs a GraphQL query to get the neighbor nodes of a given node.
 		neighborsResponse, err := model.Neighbors(ctx, gqlClient, *q.now, []model.Edge{})
 
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed getting neighbors:%w", err)
+			return fmt.Errorf("failed getting neighbors:%w", err)
 		}
 
 		for _, neighbor := range neighborsResponse.Neighbors {
-			err = caseOnPredicates(ctx, gqlClient, &q, neighbor, q.nowNode.Type)
+			err = caseOnPredicates(ctx, gqlClient, q, neighbor, q.nowNode.Type)
 
 			if err != nil {
-				return nil, nil, err
+				return err
 			}
 		}
 
@@ -135,8 +147,7 @@ func SearchDependentsFromStartPackage(ctx context.Context, gqlClient graphql.Cli
 		q.nodeMap[*q.now] = q.nowNode
 	}
 
-	return q.nodeMap, path, nil
-
+	return nil
 }
 
 func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueValues, neighbor model.NeighborsNeighborsNode, nodeType NodeType) error {
