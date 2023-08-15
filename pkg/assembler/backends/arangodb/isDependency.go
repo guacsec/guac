@@ -48,11 +48,11 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 		values := map[string]any{}
 		// get packages
 		arangoQueryBuilder = newForQuery(isDependenciesStr, "isDependency")
-		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
 		arangoQueryBuilder.forInBound(isDependencySubjectPkgEdgesStr, "pVersion", "isDependency")
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
+		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
 
 		return getDependencyForQuery(ctx, c, arangoQueryBuilder, values)
 	}
@@ -146,14 +146,18 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 
 // Ingest IsDependency
 
-func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpec, dependency *model.IsDependencyInputSpec) map[string]any {
+func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency *model.IsDependencyInputSpec) map[string]any {
 	values := map[string]any{}
 
 	// add guac keys
 	pkgId := guacPkgId(*pkg)
 	depPkgId := guacPkgId(*depPkg)
 	values["pkgVersionGuacKey"] = pkgId.VersionId
-	values["secondPkgNameGuacKey"] = depPkgId.NameId
+	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+		values["secondPkgGuacKey"] = depPkgId.NameId
+	} else {
+		values["secondPkgGuacKey"] = depPkgId.VersionId
+	}
 
 	// isDependency
 
@@ -177,7 +181,7 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 	var listOfValues []map[string]any
 
 	for i := range pkgs {
-		listOfValues = append(listOfValues, getDependencyQueryValues(pkgs[i], depPkgs[i], dependencies[i]))
+		listOfValues = append(listOfValues, getDependencyQueryValues(pkgs[i], depPkgs[i], depPkgMatchType, dependencies[i]))
 	}
 
 	var documents []string
@@ -202,7 +206,9 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 	}
 	sb.WriteString("]")
 
-	query := `
+	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+
+		query := `
 
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions
@@ -231,7 +237,7 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 
     LET secondPkg = FIRST(
         FOR pName in pkgNames
-          FILTER pName.guacKey == doc.secondPkgNameGuacKey
+          FILTER pName.guacKey == doc.secondPkgGuacKey
         FOR pNs in pkgNamespaces
           FILTER pNs._id == pName._parent
         FOR pType in pkgTypes
@@ -287,8 +293,103 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 		'origin': isDependency.origin
 	}`
 
-	sb.WriteString(query)
+		sb.WriteString(query)
+	} else {
+		query := `
+	LET firstPkg = FIRST(
+		FOR pVersion in pkgVersions
+		  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
+		FOR pName in pkgNames
+		  FILTER pName._id == pVersion._parent
+		FOR pNs in pkgNamespaces
+		  FILTER pNs._id == pName._parent
+		FOR pType in pkgTypes
+		  FILTER pType._id == pNs._parent
 
+		RETURN {
+		  'typeID': pType._id,
+		  'type': pType.type,
+		  'namespace_id': pNs._id,
+		  'namespace': pNs.namespace,
+		  'name_id': pName._id,
+		  'name': pName.name,
+		  'version_id': pVersion._id,
+		  'version': pVersion.version,
+		  'subpath': pVersion.subpath,
+		  'qualifier_list': pVersion.qualifier_list,
+		  'versionDoc': pVersion
+		}
+	)
+
+    LET secondPkg = FIRST(
+		FOR pVersion in pkgVersions
+		  FILTER pVersion.guacKey == doc.secondPkgGuacKey
+		FOR pName in pkgNames
+		  FILTER pName._id == pVersion._parent
+		FOR pNs in pkgNamespaces
+		  FILTER pNs._id == pName._parent
+		FOR pType in pkgTypes
+		  FILTER pType._id == pNs._parent
+
+
+        RETURN {
+		  'typeID': pType._id,
+		  'type': pType.type,
+		  'namespace_id': pNs._id,
+		  'namespace': pNs.namespace,
+		  'name_id': pName._id,
+		  'name': pName.name,
+		  'version_id': pVersion._id,
+		  'version': pVersion.version,
+          'subpath': pVersion.subpath,
+          'qualifier_list': pVersion.qualifier_list,
+          'versionDoc': pVersion
+        }
+    )
+		
+	LET isDependency = FIRST(
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin }
+			UPDATE {} IN isDependencies
+			RETURN NEW
+		)
+	
+	INSERT { _key: CONCAT("isDependencySubjectPkgEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("isDependencyDepPkgEdges", isDependency._key, secondPkg.versionDoc._key), _from: isDependency._id, _to: secondPkg.version_id} INTO isDependencyDepPkgEdges OPTIONS { overwriteMode: "ignore" }
+
+	RETURN {
+		'pkgVersion': {
+			'type_id': firstPkg.typeID,
+			'type': firstPkg.type,
+			'namespace_id': firstPkg.namespace_id,
+			'namespace': firstPkg.namespace,
+			'name_id': firstPkg.name_id,
+			'name': firstPkg.name,
+			'version_id': firstPkg.version_id,
+			'version': firstPkg.version,
+			'subpath': firstPkg.subpath,
+			'qualifier_list': firstPkg.qualifier_list
+		},
+		'depPkg': {
+			'type_id': secondPkg.typeID,
+			'type': secondPkg.type,
+			'namespace_id': secondPkg.namespace_id,
+			'namespace': secondPkg.namespace,
+			'name_id': secondPkg.name_id,
+			'name': secondPkg.name
+		},
+		'isDependency_id': isDependency._id,
+		'versionRange': isDependency.versionRange,
+		'dependencyType': isDependency.dependencyType,
+		'justification': isDependency.justification,
+		'collector': isDependency.collector,
+		'origin': isDependency.origin
+	}`
+		sb.WriteString(query)
+		// TODO: add version into return
+	}
+
+	fmt.Println(sb.String())
 	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestDependency")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest isDependency: %w", err)
@@ -299,8 +400,10 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 }
 
 func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
-	// TODO(LUMJJB): handle pkgmatchtype
-	query := `
+
+	var query string
+	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+		query = `
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions
 		  FILTER pVersion.guacKey == @pkgVersionGuacKey
@@ -328,7 +431,7 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 
     LET secondPkg = FIRST(
         FOR pName in pkgNames
-          FILTER pName.guacKey == @secondPkgNameGuacKey
+          FILTER pName.guacKey == @secondPkgGuacKey
         FOR pNs in pkgNamespaces
           FILTER pNs._id == pName._parent
         FOR pType in pkgTypes
@@ -383,8 +486,103 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 		'collector': isDependency.collector,
 		'origin': isDependency.origin
 	  }`
+	} else {
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getDependencyQueryValues(&pkg, &depPkg, &dependency), "IngestDependency")
+		// Specific version
+		query = `
+	LET firstPkg = FIRST(
+		FOR pVersion in pkgVersions
+		  FILTER pVersion.guacKey == @pkgVersionGuacKey
+		FOR pName in pkgNames
+		  FILTER pName._id == pVersion._parent
+		FOR pNs in pkgNamespaces
+		  FILTER pNs._id == pName._parent
+		FOR pType in pkgTypes
+		  FILTER pType._id == pNs._parent
+
+		RETURN {
+		  'typeID': pType._id,
+		  'type': pType.type,
+		  'namespace_id': pNs._id,
+		  'namespace': pNs.namespace,
+		  'name_id': pName._id,
+		  'name': pName.name,
+		  'version_id': pVersion._id,
+		  'version': pVersion.version,
+		  'subpath': pVersion.subpath,
+		  'qualifier_list': pVersion.qualifier_list,
+		  'versionDoc': pVersion
+		}
+	)
+
+	LET secondPkg = FIRST(
+        FOR pVersion in pkgVersions
+          FILTER pVersion.guacKey == @secondPkgGuacKey
+        FOR pName in pkgNames
+          FILTER pName._id == pVersion._parent
+        FOR pNs in pkgNamespaces
+          FILTER pNs._id == pName._parent
+        FOR pType in pkgTypes
+          FILTER pType._id == pNs._parent
+
+
+        RETURN {
+          'typeID': pType._id,
+          'type': pType.type,
+          'namespace_id': pNs._id,
+          'namespace': pNs.namespace,
+          'name_id': pName._id,
+          'name': pName.name,
+          'version_id': pVersion._id,
+          'version': pVersion.version,
+          'subpath': pVersion.subpath,
+          'qualifier_list': pVersion.qualifier_list,
+          'versionDoc': pVersion
+        }
+    )
+
+	  
+	  LET isDependency = FIRST(
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+			  INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.version_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+			  UPDATE {} IN isDependencies
+			  RETURN NEW
+	  )
+	  
+	  INSERT { _key: CONCAT("isDependencySubjectPkgEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("isDependencyDepPkgEdges", isDependency._key, secondPkg.versionDoc._key), _from: isDependency._id, _to: secondPkg.version_id} INTO isDependencyDepPkgEdges OPTIONS { overwriteMode: "ignore" }
+	  
+	  RETURN {
+		'pkgVersion': {
+			'type_id': firstPkg.typeID,
+			'type': firstPkg.type,
+			'namespace_id': firstPkg.namespace_id,
+			'namespace': firstPkg.namespace,
+			'name_id': firstPkg.name_id,
+			'name': firstPkg.name,
+			'version_id': firstPkg.version_id,
+			'version': firstPkg.version,
+			'subpath': firstPkg.subpath,
+			'qualifier_list': firstPkg.qualifier_list
+		},
+		'depPkg': {
+			'type_id': secondPkg.typeID,
+			'type': secondPkg.type,
+			'namespace_id': secondPkg.namespace_id,
+			'namespace': secondPkg.namespace,
+			'name_id': secondPkg.name_id,
+			'name': secondPkg.name
+		},
+		'isDependency_id': isDependency._id,
+		'versionRange': isDependency.versionRange,
+		'dependencyType': isDependency.dependencyType,
+		'justification': isDependency.justification,
+		'collector': isDependency.collector,
+		'origin': isDependency.origin
+	  }`
+	}
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getDependencyQueryValues(&pkg, &depPkg, depPkgMatchType, &dependency), "IngestDependency")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest isDependency: %w", err)
 	}
@@ -418,7 +616,7 @@ func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
 func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDependency, error) {
 	type collectedData struct {
 		PkgVersion     *dbPkgVersion `json:"pkgVersion"`
-		DepPkg         *dbPkgName    `json:"depPkg"`
+		DepPkg         *dbPkgVersion `json:"depPkg"`
 		IsDependencyID string        `json:"isDependency_id"`
 		VersionRange   string        `json:"versionRange"`
 		DependencyType string        `json:"dependencyType"`
@@ -448,7 +646,7 @@ func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDepe
 			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
 
 		depPkg := generateModelPackage(createdValue.DepPkg.TypeID, createdValue.DepPkg.PkgType, createdValue.DepPkg.NamespaceID, createdValue.DepPkg.Namespace, createdValue.DepPkg.NameID,
-			createdValue.DepPkg.Name, nil, nil, nil, nil)
+			createdValue.DepPkg.Name, &createdValue.DepPkg.VersionID, &createdValue.DepPkg.Version, &createdValue.DepPkg.Subpath, createdValue.DepPkg.QualifierList)
 
 		dependencyTypeEnum, err := convertDependencyTypeToEnum(createdValue.DependencyType)
 		if err != nil {
@@ -469,4 +667,11 @@ func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDepe
 	}
 
 	return isDependencyList, nil
+}
+
+func nilIfEmpty(s *string) *string {
+	if *s == "" {
+		return nil
+	}
+	return s
 }
