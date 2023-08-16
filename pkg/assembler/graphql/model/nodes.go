@@ -1286,10 +1286,17 @@ type VulnerabilityInputSpec struct {
 // Use null to match on all values at that level.
 // For example, to get all vulnerabilities in GUAC backend, use a VulnSpec
 // where every field is null.
+//
+// Setting the noVuln boolean true will ignore the other inputs for type and vulnerabilityID.
+// Setting noVuln to true means retrieving only nodes where the type of the vulnerability is "novuln"
+// and the it has an empty string for vulnerabilityID. Setting it to false means retrieving only nodes
+// with identified vulnerabilities. Setting one of the other fields and omitting the noVuln means retrieving
+// vulnerabilities for the corresponding type and vulnerabilityID.
 type VulnerabilitySpec struct {
 	ID              *string `json:"id,omitempty"`
 	Type            *string `json:"type,omitempty"`
 	VulnerabilityID *string `json:"vulnerabilityID,omitempty"`
+	NoVuln          *bool   `json:"noVuln,omitempty"`
 }
 
 // DependencyType determines the type of the dependency.
