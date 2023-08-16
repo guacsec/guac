@@ -26,12 +26,6 @@
             "versions": [
               {
                 "version": "sha256:e9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d",
-                "qualifiers": [
-                  {
-                    "key": "tag",
-                    "value": "latest"
-                  }
-                ],
                 "subpath": ""
               }
             ]
@@ -55,12 +49,6 @@
               "versions": [
                 {
                   "version": "sha256:e9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d",
-                  "qualifiers": [
-                    {
-                      "key": "tag",
-                      "value": "latest"
-                    }
-                  ],
                   "subpath": ""
                 }
               ]
@@ -80,20 +68,6 @@
               "versions": [
                 {
                   "version": "3.34.1-3",
-                  "qualifiers": [
-                    {
-                      "key": "distro",
-                      "value": "debian-11"
-                    },
-                    {
-                      "key": "arch",
-                      "value": "amd64"
-                    },
-                    {
-                      "key": "upstream",
-                      "value": "sqlite3"
-                    }
-                  ],
                   "subpath": ""
                 }
               ]
@@ -116,20 +90,6 @@
             "versions": [
               {
                 "version": "3.34.1-3",
-                "qualifiers": [
-                  {
-                    "key": "distro",
-                    "value": "debian-11"
-                  },
-                  {
-                    "key": "arch",
-                    "value": "amd64"
-                  },
-                  {
-                    "key": "upstream",
-                    "value": "sqlite3"
-                  }
-                ],
                 "subpath": ""
               }
             ]
