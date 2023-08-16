@@ -18,6 +18,7 @@ package process
 import (
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 
 	uuid "github.com/gofrs/uuid"
@@ -175,6 +176,10 @@ func validateFormat(i *processor.Document) error {
 	case processor.FormatJSON:
 		if !json.Valid(i.Blob) {
 			return fmt.Errorf("invalid JSON document")
+		}
+	case processor.FormatXML:
+		if err := xml.Unmarshal(i.Blob, &struct{}{}); err != nil {
+			return fmt.Errorf("invalid XML document")
 		}
 	case processor.FormatUnknown:
 		return nil
