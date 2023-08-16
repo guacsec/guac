@@ -3105,7 +3105,7 @@ type AllIsDependencyTree struct {
 	Justification string `json:"justification"`
 	// Package that has the dependency
 	Package AllIsDependencyTreePackage `json:"package"`
-	// Package for the dependency; MUST PackageName or PackageVersion
+	// Package for the dependency; MUST be PackageName or PackageVersion
 	DependentPackage AllIsDependencyTreeDependentPackage `json:"dependentPackage"`
 	// Type of dependency
 	DependencyType DependencyType `json:"dependencyType"`
