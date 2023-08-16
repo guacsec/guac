@@ -102,10 +102,22 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
 func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
-	pkgID, err := client.PackageType.Create().SetType(pkg.Type).
-		OnConflict(sql.ConflictColumns(packagetype.FieldType)).UpdateNewValues().ID(ctx)
+
+	_, err := client.PackageType.Create().
+		SetType(pkg.Type).
+		OnConflict(sql.ConflictColumns(packagetype.FieldType)).
+		DoNothing().
+		ID(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "upsert package node")
+		if err != stdsql.ErrNoRows {
+			// return nil, errors.Wrap(err, "upsert package type (constraint error)")
+			return nil, errors.Wrap(err, "upsert package node")
+		}
+	}
+
+	pkgID, err := client.PackageType.Query().Where(packagetype.TypeEQ(pkg.Type)).OnlyID(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "get package type")
 	}
 
 	nsID, err := client.PackageNamespace.Create().SetPackageID(pkgID).SetNamespace(valueOrDefault(pkg.Namespace, "")).
@@ -120,7 +132,7 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 		return nil, errors.Wrap(err, "upsert package name")
 	}
 
-	pvID, err := client.PackageVersion.Create().
+	err = client.PackageVersion.Create().
 		SetNameID(nameID).
 		SetNillableVersion(pkg.Version).
 		SetSubpath(ptrWithDefault(pkg.Subpath, "")).
@@ -132,13 +144,15 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 				packageversion.FieldNameID,
 			),
 		).
-		UpdateNewValues().
-		ID(ctx)
+		DoNothing().
+		Exec(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "upsert package version")
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert package version")
+		}
 	}
 
-	pv, err := client.PackageVersion.Query().Where(packageversion.IDEQ(pvID)).
+	pv, err := client.PackageVersion.Query().Where(packageVersionInputQuery(pkg)).
 		WithName(withPackageNameTree()).
 		Only(ctx)
 	if err != nil {

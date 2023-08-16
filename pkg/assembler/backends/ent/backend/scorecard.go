@@ -110,19 +110,7 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.SourceInputSp
 		return nil, err
 	}
 
-	// src, err := tx.SourceName.Query().Where(
-	// 	sourceQuery(&model.SourceSpec{
-	// 		Type:      &source.Type,
-	// 		Namespace: &source.Namespace,
-	// 		Name:      &source.Name,
-	// 		Tag:       source.Tag,
-	// 		Commit:    source.Commit,
-	// 	}),
-	// ).Only(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
+	// NOTE: This might be better as a query, but using insert here since the spec is an inputspec
 	src, err := upsertSource(ctx, tx, source)
 	if err != nil {
 		return nil, err
