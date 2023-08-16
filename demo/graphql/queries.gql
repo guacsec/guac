@@ -230,6 +230,10 @@ query PkgQ8 {
       names {
         id
         name
+        versions {
+            id
+            version
+        }
       }
     }
   }
