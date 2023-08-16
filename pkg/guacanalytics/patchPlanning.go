@@ -236,7 +236,7 @@ func caseOnPredicates(ctx context.Context, gqlClient graphql.Client, q *queueVal
 
 func exploreIsDependencyFromDepPkg(ctx context.Context, gqlClient graphql.Client, q *queueValues, isDependency model.NeighborsNeighborsIsDependency) error {
 	// if coming from dependent, ignore
-	if isDependency.Package.Namespaces[0].Names[0].Versions[0].Id == q.now {
+	if isDependency.Package.Namespaces[0].Names[0].Versions[0].Id == *q.now {
 		return nil
 	}
 
