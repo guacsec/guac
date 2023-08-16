@@ -275,9 +275,9 @@
         "qualifiers": null,
         "subpath": ""
       },
-      "cve": {
-        "year": 2023,
-        "cveId": "CVE-2023-1944"
+      "vulnerability": {
+        "type": "cve",
+        "vulnerabilityID": "cve-2023-1944"
       },
       "vulnData": {
         "timeScanned": "2022-11-21T17:45:50.52Z",
@@ -298,8 +298,9 @@
         "qualifiers": null,
         "subpath": ""
       },
-      "osv": {
-        "osvId": "GHSA-8489-44mv-ggj8"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-8489-44mv-ggj8"
       },
       "vulnData": {
         "timeScanned": "2022-11-21T17:45:50.52Z",
@@ -320,8 +321,9 @@
         "qualifiers": null,
         "subpath": ""
       },
-      "osv": {
-        "osvId": "GHSA-fxph-q3j8-mv87"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-fxph-q3j8-mv87"
       },
       "vulnData": {
         "timeScanned": "2022-11-21T17:45:50.52Z",
@@ -342,8 +344,9 @@
         "qualifiers": null,
         "subpath": ""
       },
-      "osv": {
-        "osvId": "GHSA-jfh8-c2jp-5v3q"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-jfh8-c2jp-5v3q"  
       },
       "vulnData": {
         "timeScanned": "2022-11-21T17:45:50.52Z",
@@ -364,8 +367,9 @@
         "qualifiers": null,
         "subpath": ""
       },
-      "osv": {
-        "osvId": "GHSA-p6xc-xr62-6r2g"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-p6xc-xr62-6r2g"
       },
       "vulnData": {
         "timeScanned": "2022-11-21T17:45:50.52Z",
@@ -386,8 +390,9 @@
         "qualifiers": null,
         "subpath": ""
       },
-      "osv": {
-        "osvId": "GHSA-vwqq-5vrc-xw9h"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-vwqq-5vrc-xw9h"
       },
       "vulnData": {
         "timeScanned": "2022-11-21T17:45:50.52Z",
@@ -400,81 +405,92 @@
       }
     }
   ],
-  "isVuln": [
+  "vulnEqual": [
     {
-      "osv": {
-        "osvId": "CVE-2023-1944"
+      "vulnerability": {
+          "type": "osv",
+          "vulnerabilityID": "cve-2023-1944"
       },
-      "cve": {
-        "year": 2023,
-        "cveId": "CVE-2023-1944"
+      "equalVulnerability": {
+          "type": "cve",
+          "vulnerabilityID": "cve-2023-1944"
       },
-      "isVuln": {
+      "vulnEqual": {
         "justification": "Decoded OSV data",
         "origin": "",
         "collector": ""
       }
     },
     {
-      "osv": {
-        "osvId": "GHSA-7rjr-3q55-vv33"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-7rjr-3q55-vv33"
       },
-      "ghsa": {
-        "ghsaId": "GHSA-7rjr-3q55-vv33"
+      "equalVulnerability": {
+        "type": "ghsa",
+        "vulnerabilityID": "ghsa-7rjr-3q55-vv33"
       },
-      "isVuln": {
+      "vulnEqual": {
         "justification": "Decoded OSV data",
         "origin": "",
         "collector": ""
       }
     },
     {
-      "osv": {
-        "osvId": "GHSA-8489-44mv-ggj8"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-8489-44mv-ggj8"
       },
-      "ghsa": {
-        "ghsaId": "GHSA-8489-44mv-ggj8"
+      "equalVulnerability": {
+        "type": "ghsa",
+        "vulnerabilityID": "ghsa-8489-44mv-ggj8"
       },
-      "isVuln": {
+      "vulnEqual": {
         "justification": "Decoded OSV data",
         "origin": "",
         "collector": ""
       }
     },
     {
-      "osv": {
-        "osvId": "GHSA-fxph-q3j8-mv87"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-fxph-q3j8-mv87"
       },
-      "ghsa": {
-        "ghsaId": "GHSA-fxph-q3j8-mv87"
+      "equalVulnerability": {
+        "type": "ghsa",
+        "vulnerabilityID": "ghsa-fxph-q3j8-mv87"
       },
-      "isVuln": {
+      "vulnEqual": {
         "justification": "Decoded OSV data",
         "origin": "",
         "collector": ""
       }
     },
     {
-      "osv": {
-        "osvId": "GHSA-jfh8-c2jp-5v3q"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-jfh8-c2jp-5v3q"
       },
-      "ghsa": {
-        "ghsaId": "GHSA-jfh8-c2jp-5v3q"
+      "equalVulnerability": {
+        "type": "ghsa",
+        "vulnerabilityID": "ghsa-jfh8-c2jp-5v3q"
       },
-      "isVuln": {
+      "vulnEqual": {
         "justification": "Decoded OSV data",
         "origin": "",
         "collector": ""
       }
     },
     {
-      "osv": {
-        "osvId": "GHSA-p6xc-xr62-6r2g"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "ghsa-p6xc-xr62-6r2g"
       },
-      "ghsa": {
-        "ghsaId": "GHSA-p6xc-xr62-6r2g"
+      "equalVulnerability": {
+        "type": "ghsa",
+        "vulnerabilityID": "ghsa-p6xc-xr62-6r2g"
       },
-      "isVuln": {
+      "vulnEqual": {
         "justification": "Decoded OSV data",
         "origin": "",
         "collector": ""
@@ -701,8 +717,9 @@
         ],
         "subpath": ""
       },
-      "ghsa": {
-        "ghsaId": "GHSA-h45f-rjvw-2rv2"
+      "vulnerability": {
+        "type": "ghsa",
+        "vulnerabilityID": "ghsa-h45f-rjvw-2rv2"
       },
       "vexData": {
         "status": "NOT_AFFECTED",
@@ -719,8 +736,9 @@
         "algorithm": "sha256",
         "digest": "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
       },
-      "osv": {
-        "osvId": "CVE-2018-15710"
+      "vulnerability": {
+        "type": "osv",
+        "vulnerabilityID": "cve-2018-15710"
       },
       "vexData": {
         "status": "UNDER_INVESTIGATION",
@@ -737,9 +755,9 @@
         "algorithm": "sha256",
         "digest": "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
       },
-      "cve": {
-        "year": 2018,
-        "cveId": "CVE-2018-43610"
+      "vulnerability": {
+        "type": "cve",
+        "vulnerabilityID": "cve-2018-43610"
       },
       "vexData": {
         "status": "NOT_AFFECTED",

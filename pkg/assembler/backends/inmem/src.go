@@ -424,7 +424,7 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 
 	namespaceStruct, ok := node.(*srcNamespaceStruct)
 	if !ok {
-		return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
+		return nil, fmt.Errorf("%w: ID does not match expected node type for source namespace", errNotFound)
 	}
 	s := model.Source{
 		ID:         nodeID(namespaceStruct.id),

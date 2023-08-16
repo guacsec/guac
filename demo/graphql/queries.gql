@@ -146,37 +146,44 @@ query Node ($nodeId: ID!) {
   }
 }
 
-fragment allCveTree on CVE {
+fragment allVulnerabilityTree on Vulnerability {
   id
-  year
-  cveId
-}
-
-fragment allGHSATree on GHSA {
-  id
-  ghsaId
-}
-
-fragment allOSVTree on OSV {
-  id
-  osvId
+  type
+  vulnerabilityIDs {
+    id
+    vulnerabilityID
+  }
 }
 
 fragment allCertifyVulnTree on CertifyVuln {
   id
   package {
-    ...allPkgTree
+    id
+    type
+    namespaces {
+      id
+      namespace
+      names {
+        id
+        name
+        versions {
+          id
+          version
+          qualifiers {
+            key
+            value
+          }
+          subpath
+        }
+      }
+    }
   }
   vulnerability {
-    __typename
-    ... on CVE {
-      ...allCveTree
-    }
-    ... on OSV {
-      ...allOSVTree
-    }
-    ... on GHSA {
-      ...allGHSATree
+    id
+    type
+    vulnerabilityIDs {
+      id
+      vulnerabilityID
     }
   }
   metadata {
@@ -191,13 +198,13 @@ fragment allCertifyVulnTree on CertifyVuln {
 }
 
 query OSVQ1 {
-  osv(osvSpec: {osvId: "ghsa-jfh8-c2jp-5v3q"}) {
-    ...allOSVTree
+  vulnerabilities(vulnSpec: {type: "osv", vulnerabilityID: "ghsa-jfh8-c2jp-5v3q"}) {
+    ...allVulnerabilityTree
   }
 }
 
 query CertifyVulnQ1 {
-  CertifyVuln(certifyVulnSpec: {vulnerability: {osv: {osvId: "ghsa-jfh8-c2jp-5v3q"}}}) {
+  CertifyVuln(certifyVulnSpec: {vulnerability: {type: "osv", vulnerabilityID: "ghsa-jfh8-c2jp-5v3q"}}) {
     ...allCertifyVulnTree
   }
 }

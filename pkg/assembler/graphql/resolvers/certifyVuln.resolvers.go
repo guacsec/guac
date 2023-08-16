@@ -6,16 +6,42 @@ package resolvers
 
 import (
 	"context"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// IngestVulnerability is the resolver for the ingestVulnerability field.
-func (r *mutationResolver) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
-	return r.Backend.IngestVulnerability(ctx, pkg, vulnerability, certifyVuln)
+// IngestCertifyVuln is the resolver for the ingestCertifyVuln field.
+func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
+	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+	return r.Backend.IngestCertifyVuln(ctx, pkg,
+		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
+		certifyVuln)
 }
 
 // CertifyVuln is the resolver for the CertifyVuln field.
 func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	return r.Backend.CertifyVuln(ctx, &certifyVulnSpec)
+	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+	if certifyVulnSpec.Vulnerability != nil {
+		lowercaseVulnFilter := model.VulnerabilitySpec{
+			Type:            toLower(certifyVulnSpec.Vulnerability.Type),
+			VulnerabilityID: toLower(certifyVulnSpec.Vulnerability.VulnerabilityID),
+		}
+
+		lowercaseCertifyVulnFilter := model.CertifyVulnSpec{
+			ID:             certifyVulnSpec.ID,
+			Package:        certifyVulnSpec.Package,
+			Vulnerability:  &lowercaseVulnFilter,
+			TimeScanned:    certifyVulnSpec.TimeScanned,
+			DbURI:          certifyVulnSpec.DbURI,
+			DbVersion:      certifyVulnSpec.DbVersion,
+			ScannerURI:     certifyVulnSpec.ScannerURI,
+			ScannerVersion: certifyVulnSpec.ScannerVersion,
+			Origin:         certifyVulnSpec.Origin,
+			Collector:      certifyVulnSpec.Collector,
+		}
+		return r.Backend.CertifyVuln(ctx, &lowercaseCertifyVulnFilter)
+	} else {
+		return r.Backend.CertifyVuln(ctx, &certifyVulnSpec)
+	}
 }

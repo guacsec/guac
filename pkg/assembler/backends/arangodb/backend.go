@@ -31,15 +31,16 @@ import (
 )
 
 const (
-	namespaces    string        = "namespaces"
-	names         string        = namespaces + ".names"
-	versions      string        = names + ".versions"
-	origin        string        = "origin"
-	collector     string        = "collector"
-	justification string        = "justification"
-	maxRetires    int           = 100
-	retryTimer    time.Duration = time.Microsecond
-	guacEmpty     string        = "guac-empty-@@"
+	namespaces      string        = "namespaces"
+	names           string        = namespaces + ".names"
+	versions        string        = names + ".versions"
+	vulnerabilityID string        = "vulnerabilityIDs"
+	origin          string        = "origin"
+	collector       string        = "collector"
+	justification   string        = "justification"
+	maxRetires      int           = 100
+	retryTimer      time.Duration = time.Microsecond
+	guacEmpty       string        = "guac-empty-@@"
 
 	// Package collections
 	pkgTypesStr        string = "pkgTypes"
@@ -65,17 +66,11 @@ const (
 
 	artifactsStr string = "artifacts"
 
-	// cve collection
+	// vulnerabilities collection
 
-	cvesStr string = "cves"
-
-	// ghsa collection
-
-	ghsasStr string = "ghsas"
-
-	// osv collection
-
-	osvsStr string = "osvs"
+	vulnTypesStr              string = "vulnTypes"
+	vulnHasVulnerabilityIDStr string = "vulnHasVulnerabilityID"
+	vulnerabilitiesStr        string = "vulnerabilities"
 
 	// isDependency collections
 
@@ -242,6 +237,12 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		srcHasName.From = []string{srcNamespacesStr}
 		srcHasName.To = []string{srcNamesStr}
 
+		// setup vulnerability collections
+		var vulnHasVulnerabilityID driver.EdgeDefinition
+		vulnHasVulnerabilityID.Collection = vulnHasVulnerabilityIDStr
+		vulnHasVulnerabilityID.From = []string{vulnTypesStr}
+		vulnHasVulnerabilityID.To = []string{vulnerabilitiesStr}
+
 		// setup isDependency collections
 		var isDependencyDepPkgEdges driver.EdgeDefinition
 		isDependencyDepPkgEdges.Collection = isDependencyDepPkgEdgesStr
@@ -311,7 +312,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var certifyVulnEdges driver.EdgeDefinition
 		certifyVulnEdges.Collection = certifyVulnEdgesStr
 		certifyVulnEdges.From = []string{pkgVersionsStr, certifyVulnsStr}
-		certifyVulnEdges.To = []string{certifyVulnsStr, cvesStr, ghsasStr, osvsStr}
+		certifyVulnEdges.To = []string{certifyVulnsStr, vulnerabilitiesStr}
 
 		// setup certifyScorecard collections
 		var certifyScorecardSrcEdges driver.EdgeDefinition
@@ -364,7 +365,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
 		options.EdgeDefinitions = []driver.EdgeDefinition{pkgHasNamespace, pkgHasName,
-			pkgHasVersion, srcHasNamespace, srcHasName, isDependencyDepPkgEdges, isDependencySubjectPkgEdges,
+			pkgHasVersion, srcHasNamespace, srcHasName, vulnHasVulnerabilityID, isDependencyDepPkgEdges, isDependencySubjectPkgEdges,
 			isOccurrenceArtEdges, isOccurrenceSubjectPkgEdges, isOccurrenceSubjectSrcEdges, hasSLSASubjectArtEdges,
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
 			hasSBOMArtEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
@@ -391,16 +392,12 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for builders: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, cvesStr, []string{"cveID"}, false, "byCveID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for cves: %w", err)
+		if err := createIndexPerCollection(ctx, db, vulnTypesStr, []string{"type"}, true, "byVulnType"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for vulnTypes: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, ghsasStr, []string{"ghsaID"}, false, "byGhsaID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for ghsas: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, osvsStr, []string{"osvID"}, false, "byOsvID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for osvs: %w", err)
+		if err := createIndexPerCollection(ctx, db, vulnerabilitiesStr, []string{"vulnerabilityID"}, false, "byVulnID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for vulnerabilities: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID"}, true, "byArtIDEqualArtID"); err != nil {
@@ -475,6 +472,11 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		if err := createIndexPerCollection(ctx, db, srcNamesStr, []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
 			return nil, fmt.Errorf("failed to generate guackey index for srcNames: %w", err)
+		}
+
+		// GUAC key indices for vulnerabilities
+		if err := createIndexPerCollection(ctx, db, vulnerabilitiesStr, []string{"guacKey"}, false, "byVulnGuacKey"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for vulnerabilities: %w", err)
 		}
 
 		if err := createAnalyzer(ctx, db, driver.ArangoSearchAnalyzerDefinition{
@@ -722,8 +724,8 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
 
-func (c *arangoClient) IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error) {
-	panic(fmt.Errorf("not implemented: IsVulnerability - IsVulnerability"))
+func (c *arangoClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
+	panic(fmt.Errorf("not implemented: VulnEqual"))
 }
 func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
@@ -734,17 +736,17 @@ func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqua
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
 }
-func (c *arangoClient) IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error) {
-	panic(fmt.Errorf("not implemented: IngestIsVulnerability - IngestIsVulnerability"))
+func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
+	panic(fmt.Errorf("not implemented: IngestVulnEqual"))
 }
 func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
 }
-func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))
 }
-func (c *arangoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
-	panic(fmt.Errorf("not implemented: IngestVulnerability - IngestVulnerability"))
+func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
+	panic(fmt.Errorf("not implemented: IngestCertifyVuln"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type

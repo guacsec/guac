@@ -36,7 +36,7 @@ type IngestPredicates struct {
 	IsOccurrence     []IsOccurrenceIngest     `json:"isOccurrence,omitempty"`
 	HasSlsa          []HasSlsaIngest          `json:"hasSlsa,omitempty"`
 	CertifyVuln      []CertifyVulnIngest      `json:"certifyVuln,omitempty"`
-	IsVuln           []IsVulnIngest           `json:"isVuln,omitempty"`
+	VulnEqual        []VulnEqualIngest        `json:"vulnEqual,omitempty"`
 	HasSourceAt      []HasSourceAtIngest      `json:"hasSourceAt,omitempty"`
 	CertifyBad       []CertifyBadIngest       `json:"certifyBad,omitempty"`
 	CertifyGood      []CertifyGoodIngest      `json:"certifyGood,omitempty"`
@@ -86,20 +86,16 @@ type CertifyVulnIngest struct {
 	// pkg is required
 	Pkg *generated.PkgInputSpec `json:"pkg,omitempty"`
 
-	// vulnerability should be either OSV, CVE, GHSA, or none if no vulnerability is found
-	OSV  *generated.OSVInputSpec  `json:"osv,omitempty"`
-	CVE  *generated.CVEInputSpec  `json:"cve,omitempty"`
-	GHSA *generated.GHSAInputSpec `json:"ghsa,omitempty"`
+	// vulnerability or noVuln if no vulnerability is found
+	Vulnerability *generated.VulnerabilityInputSpec `json:"vulnerability,omitempty"`
 
-	VulnData *generated.VulnerabilityMetaDataInput `json:"vulnData,omitempty"`
+	VulnData *generated.ScanMetadataInput `json:"vulnData,omitempty"`
 }
 
-// Only CVE or GHSA needed, not both
-type IsVulnIngest struct {
-	OSV    *generated.OSVInputSpec             `json:"osv,omitempty"`
-	CVE    *generated.CVEInputSpec             `json:"cve,omitempty"`
-	GHSA   *generated.GHSAInputSpec            `json:"ghsa,omitempty"`
-	IsVuln *generated.IsVulnerabilityInputSpec `json:"isVuln,omitempty"`
+type VulnEqualIngest struct {
+	Vulnerability      *generated.VulnerabilityInputSpec `json:"vulnerability,omitempty"`
+	EqualVulnerability *generated.VulnerabilityInputSpec `json:"equalVulnerability,omitempty"`
+	VulnEqual          *generated.VulnEqualInputSpec     `json:"vulnEqual,omitempty"`
 }
 
 type HasSourceAtIngest struct {
@@ -140,10 +136,8 @@ type VexIngest struct {
 	Pkg      *generated.PkgInputSpec      `json:"pkg,omitempty"`
 	Artifact *generated.ArtifactInputSpec `json:"artifact,omitempty"`
 
-	// vulnerability should be either OSV, CVE, GHSA
-	OSV  *generated.OSVInputSpec  `json:"osv,omitempty"`
-	CVE  *generated.CVEInputSpec  `json:"cve,omitempty"`
-	GHSA *generated.GHSAInputSpec `json:"ghsa,omitempty"`
+	// vulnerability (cannot be set to noVuln)
+	Vulnerability *generated.VulnerabilityInputSpec `json:"vulnerability,omitempty"`
 
 	VexData *generated.VexStatementInputSpec `json:"vexData,omitempty"`
 }
@@ -448,97 +442,41 @@ func (i IngestPredicates) GetBuilders(ctx context.Context) []*generated.BuilderI
 	return builders
 }
 
-func (i IngestPredicates) GetCVEs(ctx context.Context) []*generated.CVEInputSpec {
-	cveMap := make(map[string]*generated.CVEInputSpec)
-	for _, vuln := range i.CertifyVuln {
-		if vuln.CVE != nil {
-			if _, ok := cveMap[vuln.CVE.CveId]; !ok {
-				cveMap[vuln.CVE.CveId] = vuln.CVE
+func (i IngestPredicates) GetVulnerabilities(ctx context.Context) []*generated.VulnerabilityInputSpec {
+	vulnMap := make(map[string]*generated.VulnerabilityInputSpec)
+	for _, v := range i.CertifyVuln {
+		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
+		if _, ok := vulnMap[equalVURI]; !ok {
+			vulnMap[equalVURI] = v.Vulnerability
+		}
+
+	}
+	for _, v := range i.VulnEqual {
+		if v.Vulnerability != nil {
+			equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
+			if _, ok := vulnMap[equalVURI]; !ok {
+				vulnMap[equalVURI] = v.Vulnerability
 			}
 		}
-	}
-	for _, v := range i.IsVuln {
-		if v.CVE != nil {
-			if _, ok := cveMap[v.CVE.CveId]; !ok {
-				cveMap[v.CVE.CveId] = v.CVE
+		if v.EqualVulnerability != nil {
+			equalVURI := helpers.VulnInputToVURI(v.EqualVulnerability)
+			if _, ok := vulnMap[equalVURI]; !ok {
+				vulnMap[equalVURI] = v.EqualVulnerability
 			}
 		}
 	}
 	for _, v := range i.Vex {
-		if v.CVE != nil {
-			if _, ok := cveMap[v.CVE.CveId]; !ok {
-				cveMap[v.CVE.CveId] = v.CVE
-			}
+		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
+		if _, ok := vulnMap[equalVURI]; !ok {
+			vulnMap[equalVURI] = v.Vulnerability
 		}
 	}
-	cves := make([]*generated.CVEInputSpec, 0, len(cveMap))
+	vulns := make([]*generated.VulnerabilityInputSpec, 0, len(vulnMap))
 
-	for _, cve := range cveMap {
-		cves = append(cves, cve)
+	for _, vuln := range vulnMap {
+		vulns = append(vulns, vuln)
 	}
-	return cves
-}
-
-func (i IngestPredicates) GetOSVs(ctx context.Context) []*generated.OSVInputSpec {
-	osvMap := make(map[string]*generated.OSVInputSpec)
-	for _, vuln := range i.CertifyVuln {
-		if vuln.OSV != nil {
-			if _, ok := osvMap[vuln.OSV.OsvId]; !ok {
-				osvMap[vuln.OSV.OsvId] = vuln.OSV
-			}
-		}
-	}
-	for _, v := range i.IsVuln {
-		if v.OSV != nil {
-			if _, ok := osvMap[v.OSV.OsvId]; !ok {
-				osvMap[v.OSV.OsvId] = v.OSV
-			}
-		}
-	}
-	for _, v := range i.Vex {
-		if v.OSV != nil {
-			if _, ok := osvMap[v.OSV.OsvId]; !ok {
-				osvMap[v.OSV.OsvId] = v.OSV
-			}
-		}
-	}
-	osvs := make([]*generated.OSVInputSpec, 0, len(osvMap))
-
-	for _, osv := range osvMap {
-		osvs = append(osvs, osv)
-	}
-	return osvs
-}
-
-func (i IngestPredicates) GetGHSAs(ctx context.Context) []*generated.GHSAInputSpec {
-	ghsaMap := make(map[string]*generated.GHSAInputSpec)
-	for _, vuln := range i.CertifyVuln {
-		if vuln.GHSA != nil {
-			if _, ok := ghsaMap[vuln.GHSA.GhsaId]; !ok {
-				ghsaMap[vuln.GHSA.GhsaId] = vuln.GHSA
-			}
-		}
-	}
-	for _, v := range i.IsVuln {
-		if v.GHSA != nil {
-			if _, ok := ghsaMap[v.GHSA.GhsaId]; !ok {
-				ghsaMap[v.GHSA.GhsaId] = v.GHSA
-			}
-		}
-	}
-	for _, v := range i.Vex {
-		if v.GHSA != nil {
-			if _, ok := ghsaMap[v.GHSA.GhsaId]; !ok {
-				ghsaMap[v.GHSA.GhsaId] = v.GHSA
-			}
-		}
-	}
-	ghsas := make([]*generated.GHSAInputSpec, 0, len(ghsaMap))
-
-	for _, ghsa := range ghsaMap {
-		ghsas = append(ghsas, ghsa)
-	}
-	return ghsas
+	return vulns
 }
 
 func concatenateSourceInput(source *generated.SourceInputSpec) string {

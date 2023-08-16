@@ -88,9 +88,9 @@ func addMetadata(predicates *assembler.IngestPredicates, foundIdentities []Trust
 		v.VulnData.Origin = srcInfo.Source
 	}
 
-	for _, v := range predicates.IsVuln {
-		v.IsVuln.Collector = srcInfo.Collector
-		v.IsVuln.Origin = srcInfo.Source
+	for _, v := range predicates.VulnEqual {
+		v.VulnEqual.Collector = srcInfo.Collector
+		v.VulnEqual.Origin = srcInfo.Source
 	}
 
 	for _, v := range predicates.HasSourceAt {

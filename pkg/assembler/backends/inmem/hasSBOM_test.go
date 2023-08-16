@@ -399,7 +399,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 			},
 			Query: &model.HasSBOMSpec{
-				ID: ptrfrom.String("7"),
+				ID: ptrfrom.String("6"),
 			},
 			ExpHS: []*model.HasSbom{
 				{
@@ -782,8 +782,8 @@ func TestHasSBOMNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "6"}, // pkg version
-				"6": []string{"2"},      // hasSBOM
+				"4": []string{"1", "5"}, // pkg version
+				"5": []string{"1"},      // hasSBOM
 			},
 		},
 		{
@@ -809,10 +809,10 @@ func TestHasSBOMNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "7"}, // pkg version -> hs1
-				"6": []string{"8"},      // artifact -> hs2
-				"7": []string{"2"},      // hs1 -> pkg version
-				"8": []string{"6"},      // hs2 -> artifact
+				"4": []string{"1", "6"}, // pkg version -> hs1
+				"5": []string{"7"},      // artifact -> hs2
+				"6": []string{"1"},      // hs1 -> pkg version
+				"7": []string{"5"},      // hs2 -> artifact
 			},
 		},
 	}

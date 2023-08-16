@@ -42,8 +42,6 @@
 ./pkg/assembler/graphql/resolvers/isVulnerability.resolvers.go
 ./pkg/assembler/graphql/generated/hasSLSA.generated.go
 ./pkg/assembler/graphql/resolvers/hasSLSA.resolvers.go
-./pkg/assembler/graphql/generated/isVulnerability.generated.go
-./pkg/assembler/graphql/resolvers/isVulnerability.resolvers.go
 ./pkg/assembler/graphql/generated/certifyVEXStatement.generated.go
 ./pkg/assembler/graphql/resolvers/certifyVEXStatement.resolvers.go
 ./pkg/assembler/graphql/resolvers/search.resolvers.go
@@ -53,5 +51,9 @@
 ./pkg/assembler/graphql/resolvers/metadata.resolvers.go
 ./pkg/assembler/graphql/resolvers/contact.resolvers.go
 ./pkg/assembler/graphql/generated/contact.generated.go
+./pkg/assembler/graphql/generated/vulnEqual.generated.go
+./pkg/assembler/graphql/generated/vulnerability.generated.go
+./pkg/assembler/graphql/resolvers/vulnEqual.resolvers.go
+./pkg/assembler/graphql/resolvers/vulnerability.resolvers.go
 ./internal/testing/mocks/scorecard.go
 ./internal/testing/mocks/documentparser.go
