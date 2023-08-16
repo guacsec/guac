@@ -6,16 +6,56 @@ package resolvers
 
 import (
 	"context"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // IngestVEXStatement is the resolver for the ingestVEXStatement field.
-func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
-	return r.Backend.IngestVEXStatement(ctx, subject, vulnerability, vexStatement)
+func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+	return r.Backend.IngestVEXStatement(ctx, subject,
+		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
+		vexStatement)
 }
 
 // CertifyVEXStatement is the resolver for the CertifyVEXStatement field.
 func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
-	return r.Backend.CertifyVEXStatement(ctx, &certifyVEXStatementSpec)
+	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+	if certifyVEXStatementSpec.Vulnerability != nil {
+		lowercaseVulnFilter := model.VulnerabilitySpec{
+			Type:            toLower(certifyVEXStatementSpec.Vulnerability.Type),
+			VulnerabilityID: toLower(certifyVEXStatementSpec.Vulnerability.VulnerabilityID),
+		}
+
+		lowercaseCertifyVexFilter := model.CertifyVEXStatementSpec{
+			ID:               certifyVEXStatementSpec.ID,
+			Subject:          certifyVEXStatementSpec.Subject,
+			Vulnerability:    &lowercaseVulnFilter,
+			Status:           certifyVEXStatementSpec.Status,
+			VexJustification: certifyVEXStatementSpec.VexJustification,
+			Statement:        certifyVEXStatementSpec.Statement,
+			StatusNotes:      certifyVEXStatementSpec.StatusNotes,
+			KnownSince:       certifyVEXStatementSpec.KnownSince,
+			Origin:           certifyVEXStatementSpec.Origin,
+			Collector:        certifyVEXStatementSpec.Collector,
+		}
+		return r.Backend.CertifyVEXStatement(ctx, &lowercaseCertifyVexFilter)
+	} else {
+		return r.Backend.CertifyVEXStatement(ctx, &certifyVEXStatementSpec)
+	}
+}
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func toLower(filter *string) *string {
+	if filter != nil {
+		lower := strings.ToLower(*filter)
+		return &lower
+	}
+	return nil
 }

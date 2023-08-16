@@ -34,6 +34,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -41,15 +42,16 @@ import (
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-	"github.com/guacsec/guac/pkg/logging"
 )
 
 type parser struct {
-	packages []*generated.PkgInputSpec
-	vulnData *generated.VulnerabilityMetaDataInput
-	vulns    []*generated.OSVInputSpec
-	isVulns  []assembler.IsVulnIngest
+	packages   []*generated.PkgInputSpec
+	vulnData   *generated.ScanMetadataInput
+	vulns      []*generated.VulnerabilityInputSpec
+	vulnEquals []assembler.VulnEqualIngest
 }
+
+var noVulnInput *generated.VulnerabilityInputSpec = &generated.VulnerabilityInputSpec{Type: "noVuln", VulnerabilityID: ""}
 
 // NewVulnCertificationParser initializes the parser
 func NewVulnCertificationParser() common.DocumentParser {
@@ -73,7 +75,7 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("unable to parse vulns of statement: %w", err)
 	}
 	c.vulns = vs
-	c.isVulns = ivs
+	c.vulnEquals = ivs
 	return nil
 }
 
@@ -98,8 +100,8 @@ func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgI
 	return ps, nil
 }
 
-func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.VulnerabilityMetaDataInput {
-	return &generated.VulnerabilityMetaDataInput{
+func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.ScanMetadataInput {
+	return &generated.ScanMetadataInput{
 		TimeScanned:    *s.Predicate.Metadata.ScannedOn,
 		DbUri:          s.Predicate.Scanner.Database.Uri,
 		DbVersion:      s.Predicate.Scanner.Database.Version,
@@ -108,26 +110,25 @@ func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.Vulner
 	}
 }
 
-func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.OSVInputSpec,
-	[]assembler.IsVulnIngest, error) {
-	logger := logging.FromContext(ctx)
-	var vs []*generated.OSVInputSpec
-	var ivs []assembler.IsVulnIngest
+// TODO (pxp928): Remove creation of osv node and just create the vulnerability nodes specified
+func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.VulnerabilityInputSpec,
+	[]assembler.VulnEqualIngest, error) {
+	var vs []*generated.VulnerabilityInputSpec
+	var ivs []assembler.VulnEqualIngest
 	for _, id := range s.Predicate.Scanner.Result {
-		v := &generated.OSVInputSpec{
-			OsvId: id.VulnerabilityId,
+		v := &generated.VulnerabilityInputSpec{
+			Type:            "osv",
+			VulnerabilityID: strings.ToLower(id.VulnerabilityId),
 		}
 		vs = append(vs, v)
-		cve, ghsa, err := helpers.OSVToGHSACVE(id.VulnerabilityId)
+		vuln, err := helpers.CreateVulnInput(id.VulnerabilityId)
 		if err != nil {
-			logger.Debugf("osvID is not a CVE or GHSA: %v", err)
-			continue
+			return nil, nil, fmt.Errorf("createVulnInput failed with error: %w", err)
 		}
-		iv := assembler.IsVulnIngest{
-			OSV:  v,
-			CVE:  cve,
-			GHSA: ghsa,
-			IsVuln: &generated.IsVulnerabilityInputSpec{
+		iv := assembler.VulnEqualIngest{
+			Vulnerability:      v,
+			EqualVulnerability: vuln,
+			VulnEqual: &generated.VulnEqualInputSpec{
 				Justification: "Decoded OSV data",
 			},
 		}
@@ -138,22 +139,23 @@ func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement)
 
 func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	rv := &assembler.IngestPredicates{
-		IsVuln: c.isVulns,
+		VulnEqual: c.vulnEquals,
 	}
 	for _, p := range c.packages {
 		if len(c.vulns) > 0 {
 			for _, v := range c.vulns {
 				cv := assembler.CertifyVulnIngest{
-					Pkg:      p,
-					OSV:      v,
-					VulnData: c.vulnData,
+					Pkg:           p,
+					Vulnerability: v,
+					VulnData:      c.vulnData,
 				}
 				rv.CertifyVuln = append(rv.CertifyVuln, cv)
 			}
 		} else {
 			rv.CertifyVuln = append(rv.CertifyVuln, assembler.CertifyVulnIngest{
-				Pkg:      p,
-				VulnData: c.vulnData,
+				Pkg:           p,
+				Vulnerability: noVulnInput,
+				VulnData:      c.vulnData,
 			})
 		}
 	}

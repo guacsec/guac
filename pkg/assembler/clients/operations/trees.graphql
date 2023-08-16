@@ -67,20 +67,13 @@ fragment AllBuilderTree on Builder {
   uri
 }
 
-fragment AllCveTree on CVE {
+fragment AllVulnerabilityTree on Vulnerability {
   id
-  year
-  cveId
-}
-
-fragment AllGHSATree on GHSA {
-  id
-  ghsaId
-}
-
-fragment AllOSVTree on OSV {
-  id
-  osvId
+  type
+  vulnerabilityIDs {
+    id
+    vulnerabilityID
+  }
 }
 
 fragment AllCertifyScorecard on CertifyScorecard {
@@ -249,19 +242,7 @@ fragment AllCertifyVuln on CertifyVuln {
     ...AllPkgTree
   }
   vulnerability {
-    __typename
-    ... on CVE {
-      ...AllCveTree
-    }
-    ... on OSV {
-      ...AllOSVTree
-    }
-    ... on GHSA {
-      ...AllGHSATree
-    }
-    ... on NoVuln {
-      id
-    }
+      ...AllVulnerabilityTree
   }
   metadata {
     dbUri
@@ -284,19 +265,10 @@ fragment AllPkgEqual on PkgEqual {
   collector
 }
 
-fragment AllIsVulnerability on IsVulnerability {
+fragment AllVulnEqual on VulnEqual {
   id
-  osv {
-    ...AllOSVTree
-  }
-  vulnerability {
-    __typename
-    ... on CVE {
-      ...AllCveTree
-    }
-    ... on GHSA {
-      ...AllGHSATree
-    }
+  vulnerabilities {
+    ...AllVulnerabilityTree
   }
   justification
   origin
@@ -315,16 +287,7 @@ fragment AllCertifyVEXStatement on CertifyVEXStatement {
     }
   }
   vulnerability {
-    __typename
-    ... on CVE {
-      ...AllCveTree
-    }
-    ... on GHSA {
-      ...AllGHSATree
-    }
-    ... on OSV {
-      ...AllOSVTree
-    }
+    ...AllVulnerabilityTree
   }
   status
   vexJustification

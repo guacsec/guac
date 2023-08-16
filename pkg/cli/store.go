@@ -77,7 +77,7 @@ func init() {
 
 	set.IntP("search-depth", "d", 0, "depth to search, 0 has no limit")
 
-	set.StringP("vuln-id", "v", "", "CVE, GHSA or OSV ID to check")
+	set.StringP("vuln-id", "v", "", "vulnerability ID to check")
 	set.Int("num-path", 0, "number of paths to return, 0 means all paths")
 	set.String("start-purl", "", "string input of purl with package to start search from")
 	set.String("stop-purl", "", "string input of purl with package to stop search at")

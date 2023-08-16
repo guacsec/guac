@@ -60,15 +60,15 @@ type dbPkgType struct {
 	PkgType string `json:"type"`
 }
 
-type PkgIds struct {
+type pkgIds struct {
 	TypeId      string
 	NamespaceId string
 	NameId      string
 	VersionId   string
 }
 
-func guacPkgId(pkg model.PkgInputSpec) PkgIds {
-	ids := PkgIds{}
+func guacPkgId(pkg model.PkgInputSpec) pkgIds {
+	ids := pkgIds{}
 
 	ids.TypeId = pkg.Type
 
@@ -117,7 +117,7 @@ func guacPkgId(pkg model.PkgInputSpec) PkgIds {
 	return ids
 }
 
-func getPackageQueryValues(c *arangoClient, pkg *model.PkgInputSpec) map[string]any {
+func getPackageQueryValues(pkg *model.PkgInputSpec) map[string]any {
 	values := map[string]any{}
 
 	// add guac keys
@@ -163,7 +163,7 @@ func getPackageQueryValues(c *arangoClient, pkg *model.PkgInputSpec) map[string]
 func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
 	var listOfValues []map[string]any
 	for i := range pkgs {
-		listOfValues = append(listOfValues, getPackageQueryValues(c, pkgs[i]))
+		listOfValues = append(listOfValues, getPackageQueryValues(pkgs[i]))
 	}
 
 	var documents []string
@@ -315,7 +315,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	  "qualifier_list": pkgVersionObj.qualifier_list
   }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getPackageQueryValues(c, &pkg), "IngestPackage")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getPackageQueryValues(&pkg), "IngestPackage")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest package: %w", err)
 	}

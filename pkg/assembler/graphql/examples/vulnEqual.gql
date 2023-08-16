@@ -1,0 +1,38 @@
+fragment allVulnEqualTree on VulnEqual {
+  id
+  vulnerabilities {
+    id
+    type
+    vulnerabilityIDs {
+      id
+      vulnerabilityID
+    }
+  }
+  justification
+  origin
+  collector
+}
+
+query IsVulnerabilityQ1 {
+  vulnEqual(vulnEqualSpec: {}) {
+    ...allVulnEqualTree
+  }
+}
+
+query IsVulnerabilityQ2 {
+  vulnEqual(vulnEqualSpec: {origin: "testing backend"}) {
+    ...allVulnEqualTree
+  }
+}
+
+query IsVulnerabilityQ3 {
+  vulnEqual(vulnEqualSpec: {vulnerabilities: {vulnerabilityID: "GHSA-h45f-rjvw-2rv2"}}) {
+    ...allVulnEqualTree
+  }
+}
+
+query IsVulnerabilityQ4 {
+  vulnEqual(vulnEqualSpec: {vulnerabilities: {vulnerabilityID: "CVE-2019-13110"}}) {
+    ...allVulnEqualTree
+  }
+}
