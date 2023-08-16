@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestVulnEqual is the resolver for the ingestVulnEqual field.
@@ -23,6 +24,11 @@ func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability mo
 // VulnEqual is the resolver for the vulnEqual field.
 func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+
+	if vulnEqualSpec.Vulnerabilities != nil && len(vulnEqualSpec.Vulnerabilities) > 2 {
+		return nil, gqlerror.Errorf("cannot specify more than 2 vulnerabilities in VulnEqual")
+	}
+
 	if len(vulnEqualSpec.Vulnerabilities) > 0 {
 		var lowercaseVulnFilterList []*model.VulnerabilitySpec
 		for _, v := range vulnEqualSpec.Vulnerabilities {
