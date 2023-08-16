@@ -32,7 +32,7 @@ type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST PackageName or PackageVersion"
+  "Package for the dependency; MUST be PackageName or PackageVersion"
   dependentPackage: Package!
   "Version range for the dependency link, required if depedentPackage points to PackageName"
   versionRange: String!
