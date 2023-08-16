@@ -808,6 +808,13 @@ type PackageOrArtifactInput struct {
 	Artifact *ArtifactInputSpec `json:"artifact,omitempty"`
 }
 
+// PackageOrArtifactInputs allows using packages and artifacts as input for batch mutations.
+// Exactly one list must be specified.
+type PackageOrArtifactInputs struct {
+	Packages  []*PkgInputSpec      `json:"packages,omitempty"`
+	Artifacts []*ArtifactInputSpec `json:"artifacts,omitempty"`
+}
+
 // PackageOrArtifactSpec allows using PackageOrArtifact union as
 // input type to be used in read queries.
 //
@@ -880,6 +887,16 @@ type PackageSourceOrArtifactInput struct {
 	Package  *PkgInputSpec      `json:"package,omitempty"`
 	Source   *SourceInputSpec   `json:"source,omitempty"`
 	Artifact *ArtifactInputSpec `json:"artifact,omitempty"`
+}
+
+// PackageSourceOrArtifactInputs allows using PackageSourceOrArtifact union as
+// input type to be used in bulk mutations.
+//
+// Exactly one list must be specified.
+type PackageSourceOrArtifactInputs struct {
+	Packages  []*PkgInputSpec      `json:"packages,omitempty"`
+	Sources   []*SourceInputSpec   `json:"sources,omitempty"`
+	Artifacts []*ArtifactInputSpec `json:"artifacts,omitempty"`
 }
 
 // PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
@@ -1358,11 +1375,11 @@ type VulnerabilityMetaDataInput struct {
 // VulnerabilitySpec allows using Vulnerability union as input type to be used in
 // read queries.
 //
-// Either noVuln must be set to true or exactly one of osv, cve or ghsa
-// must be set to non-nil. Setting noVuln to true means retrieving nodes where
-// there is no vulnerability attached (thus, the special NoVuln node). Setting one
-// of the other fields means retrieving certifications for the corresponding
-// vulnerability types.
+// Either noVuln must be set or exactly one of osv, cve or ghsa
+// must be set to non-nil. Setting noVuln to true means retrieving only nodes where
+// there is no vulnerability attached. Setting it to false means retrieving only nodes
+// with identified vulnerabilities. Setting one of the other fields means retrieving
+// certifications for the corresponding vulnerability types.
 type VulnerabilitySpec struct {
 	Osv    *OSVSpec  `json:"osv,omitempty"`
 	Cve    *CVESpec  `json:"cve,omitempty"`

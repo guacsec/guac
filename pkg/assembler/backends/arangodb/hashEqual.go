@@ -17,6 +17,7 @@ package arangodb
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -28,44 +29,131 @@ func (c *arangoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashE
 	if hashEqualSpec.Artifacts != nil && len(hashEqualSpec.Artifacts) > 2 {
 		return nil, fmt.Errorf("cannot specify more than 2 artifacts in HashEquals")
 	}
+	values := map[string]any{}
+	if hashEqualSpec.Artifacts != nil {
+		if len(hashEqualSpec.Artifacts) == 1 {
+			return matchHashEqualByInput(ctx, c, hashEqualSpec, hashEqualSpec.Artifacts[0], nil, values)
+		} else {
+			return matchHashEqualByInput(ctx, c, hashEqualSpec, hashEqualSpec.Artifacts[0], hashEqualSpec.Artifacts[1], values)
+		}
+	} else {
+		arangoQueryBuilder := newForQuery(hashEqualsStr, "hashEqual")
+		setHashEqualMatchValues(arangoQueryBuilder, hashEqualSpec, values)
+		arangoQueryBuilder.forInBound(hashEqualSubjectArtEdgesStr, "art", "hashEqual")
+		arangoQueryBuilder.forOutBound(hashEqualArtEdgesStr, "equalArt", "hashEqual")
 
-	// 	query := `
-	// LET a = (
-	// 	FOR art IN artifacts
-	// 	  FILTER art.algorithm == "sha256" && art.digest == "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
-	// 	  FOR hashEqual IN OUTBOUND art hashEqualsEdges
-	// 		FOR objArt IN OUTBOUND hashEqual hashEqualsEdges
-	// 		FILTER objArt.algorithm == "sha512" && objArt.digest == "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7"
-	// 		RETURN {
-	// 			"algorithmA" : art.algorithm,
-	// 			"digestA" : art.digest,
-	// 			"hashEqual" : hashEqual,
-	// 			"algorithmB" : objArt.algorithm,
-	// 			"digestB" : objArt.digest
-	// 		  }
-	//   )
-
-	//   LET b = (
-	// 	FOR objArt IN artifacts
-	// 	  FILTER objArt.algorithm == "sha256" && objArt.digest == "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
-	// 	  FOR hashEqual IN INBOUND objArt hashEqualsEdges
-	// 		FOR art IN INBOUND hashEqual hashEqualsEdges
-	// 		FILTER art.algorithm == "sha512" && art.digest == "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7"
-	// 		  RETURN {
-	// 			"algorithmA" : objArt.algorithm,
-	// 			"digestA" : objArt.digest,
-	// 			"hashEqual" : hashEqual,
-	// 			"algorithmB" : art.algorithm,
-	// 			"digestB" : art.digest
-	// 		  }
-	//   )
-
-	//   RETURN APPEND(a, b)`
-
-	return []*model.HashEqual{}, fmt.Errorf("not implemented: HashEqual")
+		return getHashEqualForQuery(ctx, c, arangoQueryBuilder, values)
+	}
 }
 
-func getHashEqualQueryValues(artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) map[string]any {
+func matchHashEqualByInput(ctx context.Context, c *arangoClient, hashEqualSpec *model.HashEqualSpec, firstArtifact *model.ArtifactSpec,
+	secondArtifact *model.ArtifactSpec, values map[string]any) ([]*model.HashEqual, error) {
+
+	var combinedHashEqual []*model.HashEqual
+
+	arangoQueryBuilder := setArtifactMatchValues(firstArtifact, values)
+	arangoQueryBuilder.forOutBound(hashEqualSubjectArtEdgesStr, "hashEqual", "art")
+	setHashEqualMatchValues(arangoQueryBuilder, hashEqualSpec, values)
+	arangoQueryBuilder.forOutBound(hashEqualArtEdgesStr, "equalArt", "hashEqual")
+	if secondArtifact != nil {
+		if secondArtifact.ID != nil {
+			arangoQueryBuilder.filter("equalArt", "_id", "==", "@equal_id")
+			values["equal_id"] = *secondArtifact.ID
+		}
+		if secondArtifact.Algorithm != nil {
+			arangoQueryBuilder.filter("equalArt", "algorithm", "==", "@equal_algorithm")
+			values["equal_algorithm"] = strings.ToLower(*secondArtifact.Algorithm)
+		}
+		if secondArtifact.Digest != nil {
+			arangoQueryBuilder.filter("equalArt", "digest", "==", "@equal_digest")
+			values["equal_digest"] = strings.ToLower(*secondArtifact.Digest)
+		}
+	}
+
+	artSubjectHashEqual, err := getHashEqualForQuery(ctx, c, arangoQueryBuilder, values)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve artifact hashEqual with error: %w", err)
+	}
+	combinedHashEqual = append(combinedHashEqual, artSubjectHashEqual...)
+
+	arangoQueryBuilder = setArtifactMatchValues(firstArtifact, values)
+	arangoQueryBuilder.forInBound(hashEqualArtEdgesStr, "hashEqual", "art")
+	setHashEqualMatchValues(arangoQueryBuilder, hashEqualSpec, values)
+	arangoQueryBuilder.forInBound(hashEqualSubjectArtEdgesStr, "equalArt", "hashEqual")
+	if secondArtifact != nil {
+		if secondArtifact.ID != nil {
+			arangoQueryBuilder.filter("equalArt", "_id", "==", "@equal_id")
+			values["equal_id"] = *secondArtifact.ID
+		}
+		if secondArtifact.Algorithm != nil {
+			arangoQueryBuilder.filter("equalArt", "algorithm", "==", "@equal_algorithm")
+			values["equal_algorithm"] = strings.ToLower(*secondArtifact.Algorithm)
+		}
+		if secondArtifact.Digest != nil {
+			arangoQueryBuilder.filter("equalArt", "digest", "==", "@equal_digest")
+			values["equal_digest"] = strings.ToLower(*secondArtifact.Digest)
+		}
+	}
+
+	artEqualHashEqual, err := getHashEqualForQuery(ctx, c, arangoQueryBuilder, values)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve artifact hashEqual with error: %w", err)
+	}
+	combinedHashEqual = append(combinedHashEqual, artEqualHashEqual...)
+
+	return combinedHashEqual, nil
+}
+
+func getHashEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.HashEqual, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+				'artifact': {
+					'id': art._id,
+					'algorithm': art.algorithm,
+					'digest': art.digest
+				},
+				'equalArtifact': {
+					'id': equalArt._id,
+					'algorithm': equalArt.algorithm,
+					'digest': equalArt.digest
+				},
+				'hashEqual_id': hashEqual._id,
+				'justification': hashEqual.justification,
+				'collector': hashEqual.collector,
+				'origin': hashEqual.origin
+			}`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HashEqual")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for HashEqual: %w", err)
+	}
+	defer cursor.Close()
+
+	return getHashEqual(ctx, cursor)
+}
+
+func setHashEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, hashEqualSpec *model.HashEqualSpec, queryValues map[string]any) {
+	if hashEqualSpec.ID != nil {
+		arangoQueryBuilder.filter("hashEqual", "_id", "==", "@id")
+		queryValues["id"] = *hashEqualSpec.ID
+	}
+	if hashEqualSpec.Justification != nil {
+		arangoQueryBuilder.filter("hashEqual", justification, "==", "@"+justification)
+		queryValues[justification] = hashEqualSpec.Justification
+	}
+	if hashEqualSpec.Origin != nil {
+		arangoQueryBuilder.filter("hashEqual", origin, "==", "@"+origin)
+		queryValues[origin] = hashEqualSpec.Origin
+	}
+	if hashEqualSpec.Collector != nil {
+		arangoQueryBuilder.filter("hashEqual", collector, "==", "@"+collector)
+		queryValues[collector] = hashEqualSpec.Collector
+	}
+}
+
+func getHashEqualQueryValues(artifact *model.ArtifactInputSpec, equalArtifact *model.ArtifactInputSpec, hashEqual *model.HashEqualInputSpec) map[string]any {
 	values := map[string]any{}
 	values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
 	values["art_digest"] = strings.ToLower(artifact.Digest)
@@ -78,6 +166,82 @@ func getHashEqualQueryValues(artifact model.ArtifactInputSpec, equalArtifact mod
 	return values
 }
 
+func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
+	if len(artifacts) != len(otherArtifacts) {
+		return nil, fmt.Errorf("uneven artifacts and other artifacts for ingestion")
+	} else if len(artifacts) != len(hashEquals) {
+		return nil, fmt.Errorf("uneven artifacts and hashEquals for ingestion")
+	}
+
+	var listOfValues []map[string]any
+
+	for i := range artifacts {
+		listOfValues = append(listOfValues, getHashEqualQueryValues(artifacts[i], otherArtifacts[i], hashEquals[i]))
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+
+	query := `
+	LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
+	LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.equal_algorithm FILTER art.digest == doc.equal_digest RETURN art)
+	LET hashEqual = FIRST(
+		UPSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			INSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			UPDATE {} IN hashEquals
+			RETURN NEW
+	)
+	
+	INSERT { _key: CONCAT("hashEqualSubjectArtEdges", artifact._key, hashEqual._key), _from: artifact._id, _to: hashEqual._id} INTO hashEqualSubjectArtEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("hashEqualArtEdges", hashEqual._key, equalArtifact._key), _from: hashEqual._id, _to: equalArtifact._id} INTO hashEqualArtEdges OPTIONS { overwriteMode: "ignore" }
+	
+	RETURN {
+		'artifact': {
+			'id': artifact._id,
+			'algorithm': artifact.algorithm,
+			'digest': artifact.digest
+		},
+		'equalArtifact': {
+			'id': equalArtifact._id,
+			'algorithm': equalArtifact.algorithm,
+			'digest': equalArtifact.digest
+		},
+		'hashEqual_id': hashEqual._id,
+		'justification': hashEqual.justification,
+		'collector': hashEqual.collector,
+		'origin': hashEqual.origin
+	}`
+
+	sb.WriteString(query)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHashEquals")
+	if err != nil {
+		return nil, fmt.Errorf("failed to ingest hashEquals: %w", err)
+	}
+	defer cursor.Close()
+
+	return getHashEqual(ctx, cursor)
+}
+
 func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 	query := `
 LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
@@ -88,12 +252,10 @@ LET hashEqual = FIRST(
 		UPDATE {} IN hashEquals
 		RETURN NEW
 )
-LET edgeCollection = (FOR edgeData IN [
-    {fromKey: hashEqual._key, toKey: equalArtifact._key, from: hashEqual._id, to: equalArtifact._id, label: "is_equal"}, 
-    {fromKey: artifact._key, toKey: hashEqual._key, from: artifact._id, to: hashEqual._id, label: "subject"}]
 
-    INSERT { _key: CONCAT("hashEqualsEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO hashEqualsEdges OPTIONS { overwriteMode: "ignore" }
-)
+INSERT { _key: CONCAT("hashEqualSubjectArtEdges", artifact._key, hashEqual._key), _from: artifact._id, _to: hashEqual._id} INTO hashEqualSubjectArtEdges OPTIONS { overwriteMode: "ignore" }
+INSERT { _key: CONCAT("hashEqualArtEdges", hashEqual._key, equalArtifact._key), _from: hashEqual._id, _to: equalArtifact._id} INTO hashEqualArtEdges OPTIONS { overwriteMode: "ignore" }
+
 RETURN {
 	'artifact': {
 		'id': artifact._id,
@@ -111,7 +273,7 @@ RETURN {
     'origin': hashEqual.origin
 }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getHashEqualQueryValues(artifact, equalArtifact, hashEqual), "IngestHashEqual")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getHashEqualQueryValues(&artifact, &equalArtifact, &hashEqual), "IngestHashEqual")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest hashEqual: %w", err)
 	}
@@ -131,12 +293,12 @@ RETURN {
 
 func getHashEqual(ctx context.Context, cursor driver.Cursor) ([]*model.HashEqual, error) {
 	type collectedData struct {
-		Artifact      model.Artifact `json:"artifact"`
-		EqualArtifact model.Artifact `json:"equalArtifact"`
-		HashEqualId   string         `json:"hashEqual"`
-		Justification string         `json:"justification"`
-		Collector     string         `json:"collector"`
-		Origin        string         `json:"origin"`
+		Artifact      *model.Artifact `json:"artifact"`
+		EqualArtifact *model.Artifact `json:"equalArtifact"`
+		HashEqualId   string          `json:"hashEqual"`
+		Justification string          `json:"justification"`
+		Collector     string          `json:"collector"`
+		Origin        string          `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -158,7 +320,7 @@ func getHashEqual(ctx context.Context, cursor driver.Cursor) ([]*model.HashEqual
 	for _, createdValue := range createdValues {
 		hashEqual := &model.HashEqual{
 			ID:            createdValue.HashEqualId,
-			Artifacts:     []*model.Artifact{&createdValue.Artifact, &createdValue.EqualArtifact},
+			Artifacts:     []*model.Artifact{createdValue.Artifact, createdValue.EqualArtifact},
 			Justification: createdValue.Justification,
 			Origin:        createdValue.Collector,
 			Collector:     createdValue.Origin,

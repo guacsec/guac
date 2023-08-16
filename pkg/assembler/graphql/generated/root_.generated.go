@@ -179,30 +179,38 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CertifyScorecard      func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
 		IngestArtifact        func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestArtifacts       func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestBuilders        func(childComplexity int, builders []*model.BuilderInputSpec) int
-		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
-		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
+		IngestCVEs            func(childComplexity int, cves []*model.CVEInputSpec) int
+		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
+		IngestCertifyBads     func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
+		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
+		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
+		IngestGHSAs           func(childComplexity int, ghsas []*model.GHSAInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
-		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
+		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
+		IngestHasSBOMs        func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
+		IngestHashEquals      func(childComplexity int, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) int
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
-		IngestMaterials       func(childComplexity int, materials []*model.ArtifactInputSpec) int
+		IngestOSVs            func(childComplexity int, osvs []*model.OSVInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOccurrences     func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestPackages        func(childComplexity int, pkgs []*model.PkgInputSpec) int
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
-		IngestPointOfContact  func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
+		IngestPointOfContact  func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
+		IngestSLSAs           func(childComplexity int, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) int
+		IngestScorecard       func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
+		IngestScorecards      func(childComplexity int, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestSources         func(childComplexity int, sources []*model.SourceInputSpec) int
@@ -269,33 +277,33 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Artifacts           func(childComplexity int, artifactSpec *model.ArtifactSpec) int
-		Builders            func(childComplexity int, builderSpec *model.BuilderSpec) int
-		CertifyBad          func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
-		CertifyGood         func(childComplexity int, certifyGoodSpec *model.CertifyGoodSpec) int
-		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) int
-		CertifyVuln         func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
-		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
+		Artifacts           func(childComplexity int, artifactSpec model.ArtifactSpec) int
+		Builders            func(childComplexity int, builderSpec model.BuilderSpec) int
+		CertifyBad          func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
+		CertifyGood         func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
+		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec) int
+		CertifyVuln         func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
+		Cve                 func(childComplexity int, cveSpec model.CVESpec) int
 		FindSoftware        func(childComplexity int, searchText string) int
-		Ghsa                func(childComplexity int, ghsaSpec *model.GHSASpec) int
-		HasMetadata         func(childComplexity int, hasMetadataSpec *model.HasMetadataSpec) int
-		HasSbom             func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
-		HasSlsa             func(childComplexity int, hasSLSASpec *model.HasSLSASpec) int
-		HasSourceAt         func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
-		HashEqual           func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
-		IsDependency        func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
-		IsOccurrence        func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
-		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
+		Ghsa                func(childComplexity int, ghsaSpec model.GHSASpec) int
+		HasMetadata         func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
+		HasSbom             func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
+		HasSlsa             func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
+		HasSourceAt         func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec) int
+		HashEqual           func(childComplexity int, hashEqualSpec model.HashEqualSpec) int
+		IsDependency        func(childComplexity int, isDependencySpec model.IsDependencySpec) int
+		IsOccurrence        func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
+		IsVulnerability     func(childComplexity int, isVulnerabilitySpec model.IsVulnerabilitySpec) int
 		Neighbors           func(childComplexity int, node string, usingOnly []model.Edge) int
 		Node                func(childComplexity int, node string) int
 		Nodes               func(childComplexity int, nodes []string) int
-		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
-		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
+		Osv                 func(childComplexity int, osvSpec model.OSVSpec) int
+		Packages            func(childComplexity int, pkgSpec model.PkgSpec) int
 		Path                func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
-		PkgEqual            func(childComplexity int, pkgEqualSpec *model.PkgEqualSpec) int
-		PointOfContact      func(childComplexity int, pointOfContactSpec *model.PointOfContactSpec) int
-		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
-		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
+		PkgEqual            func(childComplexity int, pkgEqualSpec model.PkgEqualSpec) int
+		PointOfContact      func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
+		Scorecards          func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
+		Sources             func(childComplexity int, sourceSpec model.SourceSpec) int
 	}
 
 	SLSA struct {
@@ -991,18 +999,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsVulnerability.Vulnerability(childComplexity), true
 
-	case "Mutation.certifyScorecard":
-		if e.complexity.Mutation.CertifyScorecard == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_certifyScorecard_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CertifyScorecard(childComplexity, args["source"].(model.SourceInputSpec), args["scorecard"].(model.ScorecardInputSpec)), true
-
 	case "Mutation.ingestArtifact":
 		if e.complexity.Mutation.IngestArtifact == nil {
 			break
@@ -1051,6 +1047,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestBuilders(childComplexity, args["builders"].([]*model.BuilderInputSpec)), true
 
+	case "Mutation.ingestCVEs":
+		if e.complexity.Mutation.IngestCVEs == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCVEs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCVEs(childComplexity, args["cves"].([]*model.CVEInputSpec)), true
+
 	case "Mutation.ingestCertifyBad":
 		if e.complexity.Mutation.IngestCertifyBad == nil {
 			break
@@ -1061,7 +1069,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
+		return e.complexity.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
+
+	case "Mutation.ingestCertifyBads":
+		if e.complexity.Mutation.IngestCertifyBads == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyBads_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyBads(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyBads"].([]*model.CertifyBadInputSpec)), true
 
 	case "Mutation.ingestCertifyGood":
 		if e.complexity.Mutation.IngestCertifyGood == nil {
@@ -1073,7 +1093,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestCertifyGood(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyGood"].(model.CertifyGoodInputSpec)), true
+		return e.complexity.Mutation.IngestCertifyGood(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["certifyGood"].(model.CertifyGoodInputSpec)), true
+
+	case "Mutation.ingestCertifyGoods":
+		if e.complexity.Mutation.IngestCertifyGoods == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyGoods_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyGoods(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyGoods"].([]*model.CertifyGoodInputSpec)), true
 
 	case "Mutation.ingestCVE":
 		if e.complexity.Mutation.IngestCve == nil {
@@ -1111,6 +1143,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["dependency"].(model.IsDependencyInputSpec)), true
 
+	case "Mutation.ingestGHSAs":
+		if e.complexity.Mutation.IngestGHSAs == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestGHSAs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestGHSAs(childComplexity, args["ghsas"].([]*model.GHSAInputSpec)), true
+
 	case "Mutation.ingestGHSA":
 		if e.complexity.Mutation.IngestGhsa == nil {
 			break
@@ -1133,7 +1177,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasMetadata(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["hasMetadata"].(model.HasMetadataInputSpec)), true
+		return e.complexity.Mutation.IngestHasMetadata(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["hasMetadata"].(model.HasMetadataInputSpec)), true
+
+	case "Mutation.ingestHasSBOMs":
+		if e.complexity.Mutation.IngestHasSBOMs == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHasSBOMs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHasSBOMs(childComplexity, args["subjects"].(model.PackageOrArtifactInputs), args["hasSBOMs"].([]*model.HasSBOMInputSpec)), true
 
 	case "Mutation.ingestHasSBOM":
 		if e.complexity.Mutation.IngestHasSbom == nil {
@@ -1171,6 +1227,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestHashEqual(childComplexity, args["artifact"].(model.ArtifactInputSpec), args["otherArtifact"].(model.ArtifactInputSpec), args["hashEqual"].(model.HashEqualInputSpec)), true
 
+	case "Mutation.ingestHashEquals":
+		if e.complexity.Mutation.IngestHashEquals == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHashEquals_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHashEquals(childComplexity, args["artifacts"].([]*model.ArtifactInputSpec), args["otherArtifacts"].([]*model.ArtifactInputSpec), args["hashEquals"].([]*model.HashEqualInputSpec)), true
+
 	case "Mutation.ingestIsVulnerability":
 		if e.complexity.Mutation.IngestIsVulnerability == nil {
 			break
@@ -1183,17 +1251,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestIsVulnerability(childComplexity, args["osv"].(model.OSVInputSpec), args["vulnerability"].(model.CveOrGhsaInput), args["isVulnerability"].(model.IsVulnerabilityInputSpec)), true
 
-	case "Mutation.ingestMaterials":
-		if e.complexity.Mutation.IngestMaterials == nil {
+	case "Mutation.ingestOSVs":
+		if e.complexity.Mutation.IngestOSVs == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_ingestMaterials_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_ingestOSVs_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestMaterials(childComplexity, args["materials"].([]*model.ArtifactInputSpec)), true
+		return e.complexity.Mutation.IngestOSVs(childComplexity, args["osvs"].([]*model.OSVInputSpec)), true
 
 	case "Mutation.ingestOccurrence":
 		if e.complexity.Mutation.IngestOccurrence == nil {
@@ -1277,7 +1345,43 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
+		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
+
+	case "Mutation.ingestSLSAs":
+		if e.complexity.Mutation.IngestSLSAs == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestSLSAs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestSLSAs(childComplexity, args["subjects"].([]*model.ArtifactInputSpec), args["builtFromList"].([][]*model.ArtifactInputSpec), args["builtByList"].([]*model.BuilderInputSpec), args["slsaList"].([]*model.SLSAInputSpec)), true
+
+	case "Mutation.ingestScorecard":
+		if e.complexity.Mutation.IngestScorecard == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestScorecard_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestScorecard(childComplexity, args["source"].(model.SourceInputSpec), args["scorecard"].(model.ScorecardInputSpec)), true
+
+	case "Mutation.ingestScorecards":
+		if e.complexity.Mutation.IngestScorecards == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestScorecards_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestScorecards(childComplexity, args["sources"].([]*model.SourceInputSpec), args["scorecards"].([]*model.ScorecardInputSpec)), true
 
 	case "Mutation.ingestSLSA":
 		if e.complexity.Mutation.IngestSlsa == nil {
@@ -1566,7 +1670,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Artifacts(childComplexity, args["artifactSpec"].(*model.ArtifactSpec)), true
+		return e.complexity.Query.Artifacts(childComplexity, args["artifactSpec"].(model.ArtifactSpec)), true
 
 	case "Query.builders":
 		if e.complexity.Query.Builders == nil {
@@ -1578,7 +1682,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Builders(childComplexity, args["builderSpec"].(*model.BuilderSpec)), true
+		return e.complexity.Query.Builders(childComplexity, args["builderSpec"].(model.BuilderSpec)), true
 
 	case "Query.CertifyBad":
 		if e.complexity.Query.CertifyBad == nil {
@@ -1590,7 +1694,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyBad(childComplexity, args["certifyBadSpec"].(*model.CertifyBadSpec)), true
+		return e.complexity.Query.CertifyBad(childComplexity, args["certifyBadSpec"].(model.CertifyBadSpec)), true
 
 	case "Query.CertifyGood":
 		if e.complexity.Query.CertifyGood == nil {
@@ -1602,7 +1706,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyGood(childComplexity, args["certifyGoodSpec"].(*model.CertifyGoodSpec)), true
+		return e.complexity.Query.CertifyGood(childComplexity, args["certifyGoodSpec"].(model.CertifyGoodSpec)), true
 
 	case "Query.CertifyVEXStatement":
 		if e.complexity.Query.CertifyVEXStatement == nil {
@@ -1614,7 +1718,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyVEXStatement(childComplexity, args["certifyVEXStatementSpec"].(*model.CertifyVEXStatementSpec)), true
+		return e.complexity.Query.CertifyVEXStatement(childComplexity, args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec)), true
 
 	case "Query.CertifyVuln":
 		if e.complexity.Query.CertifyVuln == nil {
@@ -1626,7 +1730,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.CertifyVuln(childComplexity, args["certifyVulnSpec"].(*model.CertifyVulnSpec)), true
+		return e.complexity.Query.CertifyVuln(childComplexity, args["certifyVulnSpec"].(model.CertifyVulnSpec)), true
 
 	case "Query.cve":
 		if e.complexity.Query.Cve == nil {
@@ -1638,7 +1742,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Cve(childComplexity, args["cveSpec"].(*model.CVESpec)), true
+		return e.complexity.Query.Cve(childComplexity, args["cveSpec"].(model.CVESpec)), true
 
 	case "Query.findSoftware":
 		if e.complexity.Query.FindSoftware == nil {
@@ -1662,7 +1766,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(*model.GHSASpec)), true
+		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(model.GHSASpec)), true
 
 	case "Query.HasMetadata":
 		if e.complexity.Query.HasMetadata == nil {
@@ -1674,7 +1778,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.HasMetadata(childComplexity, args["hasMetadataSpec"].(*model.HasMetadataSpec)), true
+		return e.complexity.Query.HasMetadata(childComplexity, args["hasMetadataSpec"].(model.HasMetadataSpec)), true
 
 	case "Query.HasSBOM":
 		if e.complexity.Query.HasSbom == nil {
@@ -1686,7 +1790,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSbom(childComplexity, args["hasSBOMSpec"].(*model.HasSBOMSpec)), true
+		return e.complexity.Query.HasSbom(childComplexity, args["hasSBOMSpec"].(model.HasSBOMSpec)), true
 
 	case "Query.HasSLSA":
 		if e.complexity.Query.HasSlsa == nil {
@@ -1698,7 +1802,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSlsa(childComplexity, args["hasSLSASpec"].(*model.HasSLSASpec)), true
+		return e.complexity.Query.HasSlsa(childComplexity, args["hasSLSASpec"].(model.HasSLSASpec)), true
 
 	case "Query.HasSourceAt":
 		if e.complexity.Query.HasSourceAt == nil {
@@ -1710,7 +1814,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSourceAt(childComplexity, args["hasSourceAtSpec"].(*model.HasSourceAtSpec)), true
+		return e.complexity.Query.HasSourceAt(childComplexity, args["hasSourceAtSpec"].(model.HasSourceAtSpec)), true
 
 	case "Query.HashEqual":
 		if e.complexity.Query.HashEqual == nil {
@@ -1722,7 +1826,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.HashEqual(childComplexity, args["hashEqualSpec"].(*model.HashEqualSpec)), true
+		return e.complexity.Query.HashEqual(childComplexity, args["hashEqualSpec"].(model.HashEqualSpec)), true
 
 	case "Query.IsDependency":
 		if e.complexity.Query.IsDependency == nil {
@@ -1734,7 +1838,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.IsDependency(childComplexity, args["isDependencySpec"].(*model.IsDependencySpec)), true
+		return e.complexity.Query.IsDependency(childComplexity, args["isDependencySpec"].(model.IsDependencySpec)), true
 
 	case "Query.IsOccurrence":
 		if e.complexity.Query.IsOccurrence == nil {
@@ -1746,7 +1850,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.IsOccurrence(childComplexity, args["isOccurrenceSpec"].(*model.IsOccurrenceSpec)), true
+		return e.complexity.Query.IsOccurrence(childComplexity, args["isOccurrenceSpec"].(model.IsOccurrenceSpec)), true
 
 	case "Query.IsVulnerability":
 		if e.complexity.Query.IsVulnerability == nil {
@@ -1758,7 +1862,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.IsVulnerability(childComplexity, args["isVulnerabilitySpec"].(*model.IsVulnerabilitySpec)), true
+		return e.complexity.Query.IsVulnerability(childComplexity, args["isVulnerabilitySpec"].(model.IsVulnerabilitySpec)), true
 
 	case "Query.neighbors":
 		if e.complexity.Query.Neighbors == nil {
@@ -1806,7 +1910,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Osv(childComplexity, args["osvSpec"].(*model.OSVSpec)), true
+		return e.complexity.Query.Osv(childComplexity, args["osvSpec"].(model.OSVSpec)), true
 
 	case "Query.packages":
 		if e.complexity.Query.Packages == nil {
@@ -1818,7 +1922,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Packages(childComplexity, args["pkgSpec"].(*model.PkgSpec)), true
+		return e.complexity.Query.Packages(childComplexity, args["pkgSpec"].(model.PkgSpec)), true
 
 	case "Query.path":
 		if e.complexity.Query.Path == nil {
@@ -1842,7 +1946,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.PkgEqual(childComplexity, args["pkgEqualSpec"].(*model.PkgEqualSpec)), true
+		return e.complexity.Query.PkgEqual(childComplexity, args["pkgEqualSpec"].(model.PkgEqualSpec)), true
 
 	case "Query.PointOfContact":
 		if e.complexity.Query.PointOfContact == nil {
@@ -1854,7 +1958,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.PointOfContact(childComplexity, args["pointOfContactSpec"].(*model.PointOfContactSpec)), true
+		return e.complexity.Query.PointOfContact(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec)), true
 
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
@@ -1866,7 +1970,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Scorecards(childComplexity, args["scorecardSpec"].(*model.CertifyScorecardSpec)), true
+		return e.complexity.Query.Scorecards(childComplexity, args["scorecardSpec"].(model.CertifyScorecardSpec)), true
 
 	case "Query.sources":
 		if e.complexity.Query.Sources == nil {
@@ -1878,7 +1982,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Sources(childComplexity, args["sourceSpec"].(*model.SourceSpec)), true
+		return e.complexity.Query.Sources(childComplexity, args["sourceSpec"].(model.SourceSpec)), true
 
 	case "SLSA.buildType":
 		if e.complexity.SLSA.BuildType == nil {
@@ -2183,6 +2287,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputOSVInputSpec,
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageOrArtifactInput,
+		ec.unmarshalInputPackageOrArtifactInputs,
 		ec.unmarshalInputPackageOrArtifactSpec,
 		ec.unmarshalInputPackageOrSourceInput,
 		ec.unmarshalInputPackageOrSourceInputs,
@@ -2190,6 +2295,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
+		ec.unmarshalInputPackageSourceOrArtifactInputs,
 		ec.unmarshalInputPackageSourceOrArtifactSpec,
 		ec.unmarshalInputPkgEqualInputSpec,
 		ec.unmarshalInputPkgEqualSpec,
@@ -2364,7 +2470,7 @@ input ArtifactInputSpec {
 
 extend type Query {
   "Returns all artifacts matching a filter."
-  artifacts(artifactSpec: ArtifactSpec): [Artifact!]!
+  artifacts(artifactSpec: ArtifactSpec!): [Artifact!]!
 }
 
 extend type Mutation {
@@ -2416,7 +2522,7 @@ input BuilderInputSpec {
 
 extend type Query {
   "Returns all builders matching a filter."
-  builders(builderSpec: BuilderSpec): [Builder!]!
+  builders(builderSpec: BuilderSpec!): [Builder!]!
 }
 
 extend type Mutation {
@@ -2470,6 +2576,18 @@ input PackageSourceOrArtifactInput {
   package: PkgInputSpec
   source: SourceInputSpec
   artifact: ArtifactInputSpec
+}
+
+"""
+PackageSourceOrArtifactInputs allows using PackageSourceOrArtifact union as
+input type to be used in bulk mutations.
+
+Exactly one list must be specified.
+"""
+input PackageSourceOrArtifactInputs {
+  packages: [PkgInputSpec!]
+  sources: [SourceInputSpec!]
+  artifacts: [ArtifactInputSpec!]
 }
 
 """
@@ -2538,12 +2656,14 @@ input MatchFlags {
 
 extend type Query {
   "Returns all CertifyBad attestations matching a filter."
-  CertifyBad(certifyBadSpec: CertifyBadSpec): [CertifyBad!]!
+  CertifyBad(certifyBadSpec: CertifyBadSpec!): [CertifyBad!]!
 }
 
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered bad."
-  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
+  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyBad: CertifyBadInputSpec!): CertifyBad!
+  "Adds bulk certifications that a package, source or artifact is considered bad."
+  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyGood.graphql", Input: `#
@@ -2616,12 +2736,14 @@ input CertifyGoodInputSpec {
 
 extend type Query {
   "Returns all CertifyGood attestations matching a filter."
-  CertifyGood(certifyGoodSpec: CertifyGoodSpec): [CertifyGood!]!
+  CertifyGood(certifyGoodSpec: CertifyGoodSpec!): [CertifyGood!]!
 }
 
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered good."
-  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyGood: CertifyGoodInputSpec!): CertifyGood!
+  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyGood: CertifyGoodInputSpec!): CertifyGood!
+  "Adds bulk certifications that a package, source or artifact is considered good."
+  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyGoods: [CertifyGoodInputSpec!]!): [CertifyGood!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
@@ -2747,12 +2869,14 @@ input ScorecardCheckInputSpec {
 
 extend type Query {
   "Returns all Scorecard certifications matching the filter."
-  scorecards(scorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
+  scorecards(scorecardSpec: CertifyScorecardSpec!): [CertifyScorecard!]!
 }
 
 extend type Mutation {
   "Adds a certification that a source repository has a Scorecard."
-  certifyScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
+  ingestScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
+  "Adds bulk certifications that a source repository has a Scorecard."
+  ingestScorecards(sources: [SourceInputSpec!]!, scorecards: [ScorecardInputSpec!]!): [CertifyScorecard!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVEXStatement.graphql", Input: `#
@@ -2797,6 +2921,15 @@ Exactly one of the value must be set to non-nil.
 input PackageOrArtifactInput {
   package: PkgInputSpec
   artifact: ArtifactInputSpec
+}
+
+"""
+PackageOrArtifactInputs allows using packages and artifacts as input for batch mutations.
+Exactly one list must be specified.
+"""
+input PackageOrArtifactInputs {
+  packages: [PkgInputSpec!]
+  artifacts: [ArtifactInputSpec!]
 }
 
 "Records the status of a VEX statement subject."
@@ -2878,7 +3011,7 @@ input VexStatementInputSpec {
 
 extend type Query {
   "Returns all VEX certifications matching the input filter."
-  CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec): [CertifyVEXStatement!]!
+  CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec!): [CertifyVEXStatement!]!
 }
 
 extend type Mutation {
@@ -2922,11 +3055,11 @@ union Vulnerability = OSV | CVE | GHSA | NoVuln
 VulnerabilitySpec allows using Vulnerability union as input type to be used in
 read queries.
 
-Either noVuln must be set to true or exactly one of osv, cve or ghsa
-must be set to non-nil. Setting noVuln to true means retrieving nodes where
-there is no vulnerability attached (thus, the special NoVuln node). Setting one
-of the other fields means retrieving certifications for the corresponding
-vulnerability types.
+Either noVuln must be set or exactly one of osv, cve or ghsa
+must be set to non-nil. Setting noVuln to true means retrieving only nodes where
+there is no vulnerability attached. Setting it to false means retrieving only nodes
+with identified vulnerabilities. Setting one of the other fields means retrieving
+certifications for the corresponding vulnerability types.
 """
 input VulnerabilitySpec {
   osv: OSVSpec
@@ -3028,7 +3161,7 @@ input VulnerabilityMetaDataInput {
 
 extend type Query {
   "Returns all vulnerability certifications matching the input filter."
-  CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
+  CertifyVuln(certifyVulnSpec: CertifyVulnSpec!): [CertifyVuln!]!
 }
 
 extend type Mutation {
@@ -3125,12 +3258,12 @@ input PointOfContactInputSpec {
 
 extend type Query {
   "Returns all PointOfContact attestations matching a filter."
-  PointOfContact (pointOfContactSpec: PointOfContactSpec): [PointOfContact!]!
+  PointOfContact (pointOfContactSpec: PointOfContactSpec!): [PointOfContact!]!
 }
 
 extend type Mutation {
   "Adds a PointOfContact attestation to a package, source or artifact."
-  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, pointOfContact: PointOfContactInputSpec!): PointOfContact!
+  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): PointOfContact!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
@@ -3185,12 +3318,14 @@ input CVEInputSpec {
 
 extend type Query {
   "Returns all CVEs matching a filter."
-  cve(cveSpec: CVESpec): [CVE!]!
+  cve(cveSpec: CVESpec!): [CVE!]!
 }
 
 extend type Mutation {
   "Ingests new CVE and returns it."
   ingestCVE(cve: CVEInputSpec): CVE!
+  "Bulk ingests new CVEs and returns a list of them."
+  ingestCVEs(cves: [CVEInputSpec!]!): [CVE!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/ghsa.graphql", Input: `#
@@ -3235,12 +3370,14 @@ input GHSAInputSpec {
 
 extend type Query {
   "Returns all GitHub Security Advisories matching a filter."
-  ghsa(ghsaSpec: GHSASpec): [GHSA!]!
+  ghsa(ghsaSpec: GHSASpec!): [GHSA!]!
 }
 
 extend type Mutation {
   "Ingests a new GitHub Security Advisory and returns it."
   ingestGHSA(ghsa: GHSAInputSpec): GHSA!
+  "Bulk ingests new GHSAs and returns a list of them."
+  ingestGHSAs(ghsas: [GHSAInputSpec!]!): [GHSA!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
@@ -3308,12 +3445,14 @@ input HasSBOMInputSpec {
 
 extend type Query {
   "Returns all SBOM certifications."
-  HasSBOM(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
+  HasSBOM(hasSBOMSpec: HasSBOMSpec!): [HasSBOM!]!
 }
 
 extend type Mutation {
   "Certifies that a package or artifact has an SBOM."
   ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
+  "Bulk ingest that package or artifact has an SBOM."
+  ingestHasSBOMs(subjects: PackageOrArtifactInputs!, hasSBOMs: [HasSBOMInputSpec!]!): [HasSBOM!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSLSA.graphql", Input: `#
@@ -3447,15 +3586,14 @@ input SLSAPredicateInputSpec {
 
 extend type Query {
   "Returns all SLSA attestations matching the filter."
-  HasSLSA(hasSLSASpec: HasSLSASpec): [HasSLSA!]!
+  HasSLSA(hasSLSASpec: HasSLSASpec!): [HasSLSA!]!
 }
 
 extend type Mutation {
-  "Ingests a SLSA attestation."
+  "Ingests a SLSA attestation"
   ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
-
-  "Helper mutation to ingest multiple artifacts as materials for SLSA."
-  ingestMaterials(materials: [ArtifactInputSpec!]!): [Artifact!]!
+  "Bulk Ingest SLSA attestations"
+  ingestSLSAs(subjects: [ArtifactInputSpec!]!, builtFromList: [[ArtifactInputSpec!]!]!, builtByList: [BuilderInputSpec!]!, slsaList: [SLSAInputSpec!]!): [HasSLSA!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSourceAt.graphql", Input: `#
@@ -3515,7 +3653,7 @@ input HasSourceAtInputSpec {
 
 extend type Query {
   "Returns all source mappings that match the filter."
-  HasSourceAt(hasSourceAtSpec: HasSourceAtSpec): [HasSourceAt!]!
+  HasSourceAt(hasSourceAtSpec: HasSourceAtSpec!): [HasSourceAt!]!
 }
 
 extend type Mutation {
@@ -3581,12 +3719,14 @@ input HashEqualInputSpec {
 
 extend type Query {
   "Returns all artifact equality statements matching a filter."
-  HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
+  HashEqual(hashEqualSpec: HashEqualSpec!): [HashEqual!]!
 }
 
 extend type Mutation {
-  "Adds a certification that two artifacts are similar."
+ "Adds a certification that two artifacts are equal."
   ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
+  "Bulk ingest certifications that two artifacts are equal."
+  ingestHashEquals(artifacts: [ArtifactInputSpec!]!, otherArtifacts: [ArtifactInputSpec!]!, hashEquals: [HashEqualInputSpec!]!): [HashEqual!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isDependency.graphql", Input: `#
@@ -3682,7 +3822,7 @@ input IsDependencyInputSpec {
 
 extend type Query {
   "Returns all package dependencies that match the filter."
-  IsDependency(isDependencySpec: IsDependencySpec): [IsDependency!]!
+  IsDependency(isDependencySpec: IsDependencySpec!): [IsDependency!]!
 }
 
 extend type Mutation {
@@ -3785,7 +3925,7 @@ input IsOccurrenceInputSpec {
 
 extend type Query {
   "Returns all artifacts-source/package mappings that match a filter."
-  IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
+  IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec!): [IsOccurrence!]!
 }
 
 extend type Mutation {
@@ -3874,7 +4014,7 @@ input IsVulnerabilityInputSpec {
 
 extend type Query {
   "Returns all OSV-CVE/GHSA vulnerability mappings that match a filter."
-  IsVulnerability(isVulnerabilitySpec: IsVulnerabilitySpec): [IsVulnerability!]!
+  IsVulnerability(isVulnerabilitySpec: IsVulnerabilitySpec!): [IsVulnerability!]!
 }
 
 extend type Mutation {
@@ -3966,12 +4106,12 @@ input HasMetadataInputSpec {
 
 extend type Query {
   "Returns all HasMetdata attestations matching a filter."
-  HasMetadata(hasMetadataSpec: HasMetadataSpec): [HasMetadata!]!
+  HasMetadata(hasMetadataSpec: HasMetadataSpec!): [HasMetadata!]!
 }
 
 extend type Mutation {
   "Adds metadata about a package, source or artifact."
-  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, hasMetadata: HasMetadataInputSpec!): HasMetadata!
+  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, hasMetadata: HasMetadataInputSpec!): HasMetadata!
 }
 `, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#
@@ -4021,12 +4161,14 @@ input OSVInputSpec {
 
 extend type Query {
   "Returns all OSV vulnerabilities matching a filter."
-  osv(osvSpec: OSVSpec): [OSV!]!
+  osv(osvSpec: OSVSpec!): [OSV!]!
 }
 
 extend type Mutation {
   "Ingests a new OSV vulnerability and returns it."
   ingestOSV(osv: OSVInputSpec): OSV!
+  "Bulk ingests new OSVs and returns a list of them."
+  ingestOSVs(osvs: [OSVInputSpec!]!): [OSV!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/package.graphql", Input: `#
@@ -4208,7 +4350,7 @@ input PackageQualifierInputSpec {
 
 extend type Query {
   "Returns all packages matching a filter."
-  packages(pkgSpec: PkgSpec): [Package!]!
+  packages(pkgSpec: PkgSpec!): [Package!]!
 }
 
 extend type Mutation {
@@ -4455,7 +4597,7 @@ input PkgEqualInputSpec {
 
 extend type Query {
   "Returns all package equality statements matching a filter."
-  PkgEqual(pkgEqualSpec: PkgEqualSpec): [PkgEqual!]!
+  PkgEqual(pkgEqualSpec: PkgEqualSpec!): [PkgEqual!]!
 }
 
 extend type Mutation {
@@ -4606,7 +4748,7 @@ input SourceInputSpec {
 
 extend type Query {
   "Returns all sources matching a filter."
-  sources(sourceSpec: SourceSpec): [Source!]!
+  sources(sourceSpec: SourceSpec!): [Source!]!
 }
 
 extend type Mutation {

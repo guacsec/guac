@@ -138,7 +138,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 	tests := []struct {
 		name              string
 		daysSinceLastScan int
-		getSources        func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error)
+		getSources        func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error)
 		getNeighbors      func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 		wantSourceNode    []*SourceNode
 		wantErr           bool
@@ -146,7 +146,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		{
 			name:              "django: daysSinceLastScan=0, tag specified",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error) {
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
 				return &generated.SourcesResponse{
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
 				}, nil
@@ -167,7 +167,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django: daysSinceLastScan=0, commit specified",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error) {
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
 				return &generated.SourcesResponse{
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoCommit},
 				}, nil
@@ -188,7 +188,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django: daysSinceLastScan=0, commit with algorithm specified",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error) {
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
 				return &generated.SourcesResponse{
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoCommitWithAlgo},
 				}, nil
@@ -209,7 +209,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with scorecard, daysSinceLastScan=0",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error) {
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
 				return &generated.SourcesResponse{
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
 				}, nil
@@ -224,7 +224,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with scorecard, timestamp: time past, daysSinceLastScan=30",
 			daysSinceLastScan: 30,
-			getSources: func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error) {
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
 				return &generated.SourcesResponse{
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
 				}, nil
@@ -245,7 +245,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "django with scorecard, timestamp: time now, daysSinceLastScan=30",
 			daysSinceLastScan: 30,
-			getSources: func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error) {
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
 				return &generated.SourcesResponse{
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
 				}, nil
@@ -260,7 +260,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		}, {
 			name:              "multiple packages",
 			daysSinceLastScan: 0,
-			getSources: func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error) {
+			getSources: func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error) {
 				return &generated.SourcesResponse{
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag, testSourceDjangoCommit, testSourceKubeTestTag},
 				}, nil

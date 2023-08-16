@@ -40,7 +40,7 @@ input BuilderInputSpec {
 
 extend type Query {
   "Returns all builders matching a filter."
-  builders(builderSpec: BuilderSpec): [Builder!]!
+  builders(builderSpec: BuilderSpec!): [Builder!]!
 }
 
 extend type Mutation {

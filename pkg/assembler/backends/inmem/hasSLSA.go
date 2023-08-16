@@ -158,21 +158,25 @@ func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSp
 
 // Ingest HasSlsa
 
-func (c *demoClient) IngestMaterials(ctx context.Context,
-	materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	var output []*model.Artifact
-
-	// For this backend, there's no optimization we can do, we need to
-	// ingest everything sequentially
-	for _, material := range materials {
-		artifact, err := c.IngestArtifact(ctx, material)
-		if err != nil {
-			return nil, err
-		}
-		output = append(output, artifact)
+func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
+	if len(subjects) != len(slsaList) {
+		return nil, gqlerror.Errorf("uneven subjects and slsa attestation for ingestion")
 	}
-
-	return output, nil
+	if len(subjects) != len(builtFromList) {
+		return nil, gqlerror.Errorf("uneven subjects and built from artifact list for ingestion")
+	}
+	if len(subjects) != len(builtByList) {
+		return nil, gqlerror.Errorf("uneven subjects and built by for ingestion")
+	}
+	var modelHasSLSAList []*model.HasSlsa
+	for i := range subjects {
+		hasSLSA, err := c.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsaList[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestSLSA failed with err: %v", err)
+		}
+		modelHasSLSAList = append(modelHasSLSAList, hasSLSA)
+	}
+	return modelHasSLSAList, nil
 }
 
 func (c *demoClient) IngestSLSA(ctx context.Context,

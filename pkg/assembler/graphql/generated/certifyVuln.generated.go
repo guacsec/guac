@@ -1160,6 +1160,11 @@ func (ec *executionContext) marshalNCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._CertifyVuln(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx context.Context, v interface{}) (model.CertifyVulnSpec, error) {
+	res, err := ec.unmarshalInputCertifyVulnSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNVulnerability2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerability(ctx context.Context, sel ast.SelectionSet, v model.Vulnerability) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -1188,14 +1193,6 @@ func (ec *executionContext) marshalNVulnerabilityMetaData2ᚖgithubᚗcomᚋguac
 func (ec *executionContext) unmarshalNVulnerabilityMetaDataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaDataInput(ctx context.Context, v interface{}) (model.VulnerabilityMetaDataInput, error) {
 	res, err := ec.unmarshalInputVulnerabilityMetaDataInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOCertifyVulnSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx context.Context, v interface{}) (*model.CertifyVulnSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputCertifyVulnSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOVulnerabilitySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx context.Context, v interface{}) (*model.VulnerabilitySpec, error) {

@@ -40,10 +40,12 @@ input GHSAInputSpec {
 
 extend type Query {
   "Returns all GitHub Security Advisories matching a filter."
-  ghsa(ghsaSpec: GHSASpec): [GHSA!]!
+  ghsa(ghsaSpec: GHSASpec!): [GHSA!]!
 }
 
 extend type Mutation {
   "Ingests a new GitHub Security Advisory and returns it."
   ingestGHSA(ghsa: GHSAInputSpec): GHSA!
+  "Bulk ingests new GHSAs and returns a list of them."
+  ingestGHSAs(ghsas: [GHSAInputSpec!]!): [GHSA!]!
 }

@@ -55,44 +55,48 @@ func (n *hasSBOMStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convHasSBOM(n)
 }
 
-// TODO convert to unit tests
-// func registerAllhasSBOM(client *demoClient) error {
-// 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-// 	// "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable"
-// 	selectedType := "conan"
-// 	selectedNameSpace := "openssl.org"
-// 	selectedName := "openssl"
-// 	selectedVersion := "3.0.3"
-// 	qualifierA := "bincrafters"
-// 	qualifierB := "stable"
-// 	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
-// 	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Qualifiers: selectedQualifiers}
-// 	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	_, err = client.registerHasSBOM(selectedPackage[0], nil, "uri:location of SBOM", "inmem backend", "inmem backend")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	// "git", "github", "github.com/guacsec/guac", "tag=v0.0.1"
-// 	selectedSourceType := "git"
-// 	selectedSourceNameSpace := "github"
-// 	selectedSourceName := "github.com/guacsec/guac"
-// 	selectedTag := "v0.0.1"
-// 	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
-// 	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	_, err = client.registerHasSBOM(nil, selectedSource[0], "uri:location of SBOM", "inmem backend", "inmem backend")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
 // Ingest HasSBOM
+
+func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
+	valuesDefined := 0
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(hasSBOMs) {
+			return nil, gqlerror.Errorf("uneven packages and hasSBOMs for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Artifacts) > 0 {
+		if len(subjects.Artifacts) != len(hasSBOMs) {
+			return nil, gqlerror.Errorf("uneven artifact and hasSBOMs for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return nil, gqlerror.Errorf("must specify at most packages or artifacts for %v", "IngestHasSBOMs")
+	}
+
+	var modelHasSboms []*model.HasSbom
+
+	for i := range hasSBOMs {
+		var hasSBOM *model.HasSbom
+		var err error
+		if len(subjects.Packages) > 0 {
+			subject := model.PackageOrArtifactInput{Package: subjects.Packages[i]}
+			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
+			}
+		} else {
+			subject := model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
+			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
+			}
+		}
+		modelHasSboms = append(modelHasSboms, hasSBOM)
+	}
+	return modelHasSboms, nil
+}
 
 func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec) (*model.HasSbom, error) {
 	return c.ingestHasSbom(ctx, subject, input, true)
@@ -220,7 +224,7 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	c.m.RLock()
 	defer c.m.RUnlock()
 
-	if filter.ID != nil {
+	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: invalid ID %v", funcName, err)
@@ -290,32 +294,34 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 	filter *model.HasSBOMSpec, link *hasSBOMStruct) (
 	[]*model.HasSbom, error) {
 
-	if noMatch(filter.URI, link.uri) ||
-		noMatch(toLower(filter.Algorithm), link.algorithm) ||
-		noMatch(toLower(filter.Digest), link.digest) ||
-		noMatch(filter.DownloadLocation, link.downloadLocation) ||
-		noMatch(filter.Origin, link.origin) ||
-		noMatch(filter.Collector, link.collector) {
-		return out, nil
-	}
-	if filter.Subject != nil {
-		if filter.Subject.Package != nil {
-			if link.pkg == 0 {
-				return out, nil
-			}
-			p, err := c.buildPackageResponse(link.pkg, filter.Subject.Package)
-			if err != nil {
-				return nil, err
-			}
-			if p == nil {
-				return out, nil
-			}
-		} else if filter.Subject.Artifact != nil {
-			if link.artifact == 0 {
-				return out, nil
-			}
-			if !c.artifactMatch(link.artifact, filter.Subject.Artifact) {
-				return out, nil
+	if filter != nil {
+		if noMatch(filter.URI, link.uri) ||
+			noMatch(toLower(filter.Algorithm), link.algorithm) ||
+			noMatch(toLower(filter.Digest), link.digest) ||
+			noMatch(filter.DownloadLocation, link.downloadLocation) ||
+			noMatch(filter.Origin, link.origin) ||
+			noMatch(filter.Collector, link.collector) {
+			return out, nil
+		}
+		if filter.Subject != nil {
+			if filter.Subject.Package != nil {
+				if link.pkg == 0 {
+					return out, nil
+				}
+				p, err := c.buildPackageResponse(link.pkg, filter.Subject.Package)
+				if err != nil {
+					return nil, err
+				}
+				if p == nil {
+					return out, nil
+				}
+			} else if filter.Subject.Artifact != nil {
+				if link.artifact == 0 {
+					return out, nil
+				}
+				if !c.artifactMatch(link.artifact, filter.Subject.Artifact) {
+					return out, nil
+				}
 			}
 		}
 	}

@@ -41,7 +41,7 @@ type packageQuery struct {
 	daysSinceLastScan int
 }
 
-var getPackages func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error)
+var getPackages func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error)
 var getNeighbors func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
@@ -67,7 +67,7 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 	// errChan to receive error from collectors
 	errChan := make(chan error, 1)
 
-	response, err := getPackages(ctx, p.client, nil)
+	response, err := getPackages(ctx, p.client, generated.PkgSpec{})
 	if err != nil {
 		return fmt.Errorf("failed sources query: %w", err)
 	}

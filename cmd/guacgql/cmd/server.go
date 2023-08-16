@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -27,6 +28,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	v4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 	"github.com/spf13/cobra"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
@@ -39,10 +43,13 @@ import (
 )
 
 const (
-	arango = "arango"
-	neo4js = "neo4j"
-	inmems = "inmem"
-	ent    = "ent"
+	arango  = "arango"
+	neo4js  = "neo4j"
+	inmems  = "inmem"
+	neptune = "neptune"
+
+	neptuneServiceName = "neptune-db"
+	ent                = "ent"
 )
 
 func startServer(cmd *cobra.Command) {
@@ -65,6 +72,8 @@ func startServer(cmd *cobra.Command) {
 		tracer := &debug.Tracer{}
 		srv.Use(tracer)
 	}
+
+	http.HandleFunc("/healthz", healthHandler)
 
 	http.Handle("/query", srv)
 	if flags.debug {
@@ -103,11 +112,9 @@ func startServer(cmd *cobra.Command) {
 }
 
 func validateFlags() error {
-	switch flags.backend {
-	case neo4js, ent, arango, inmems:
-		// Valid
-	default:
-		return fmt.Errorf("invalid graphql backend specified: %q", flags.backend)
+	if flags.backend != neo4js &&
+		flags.backend != inmems && flags.backend != arango {
+		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
 	}
 
 	return nil
@@ -169,6 +176,28 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 		}
 
 		topResolver = resolvers.Resolver{Backend: backend}
+
+	case neptune:
+		// TODO: rename the neo4j config to something more generic since it would be used by Neptune as well.
+		neptuneRequestURL := fmt.Sprintf("https://%s:%d/opencypher", flags.neptuneEndpoint, flags.neptunePort)
+		neptuneToken, err := generateNeptuneToken(neptuneRequestURL, flags.neptuneRegion)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create password for neptune: %w", err)
+		}
+
+		neptuneDBAddr := fmt.Sprintf("bolt+s://%s:%d/opencypher", flags.neptuneEndpoint, flags.neptunePort)
+		args := neo4j.Neo4jConfig{
+			User:   flags.neptuneUser,
+			Pass:   neptuneToken,
+			DBAddr: neptuneDBAddr,
+			Realm:  flags.neptuneRealm,
+		}
+		backend, err := neo4j.GetBackend(&args)
+		if err != nil {
+			return nil, fmt.Errorf("error creating neptune backend: %w", err)
+		}
+
+		topResolver = resolvers.Resolver{Backend: backend}
 	default:
 		return nil, fmt.Errorf("invalid backend specified: %q", flags.backend)
 	}
@@ -177,4 +206,61 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
 	return srv, nil
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprint(w, "Server is healthy")
+}
+
+// generateNeptuneToken generates a token for neptune using the AWS SDK.
+func generateNeptuneToken(neptuneURL string, region string) (string, error) {
+	req, err := http.NewRequest(http.MethodGet, neptuneURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("error creating http request for neptune: %w", err)
+	}
+
+	signer, err := getAWSRequestSigner()
+	if err != nil {
+		return "", fmt.Errorf("error creating AWS request signer: %w", err)
+	}
+
+	if _, err := signer.Sign(req, nil, neptuneServiceName, region, time.Now()); err != nil {
+		return "", fmt.Errorf("error signing neptune request: %w", err)
+	}
+
+	headers := []string{"Authorization", "X-Amz-Date", "X-Amz-Security-Token"}
+	hdrMap := make(map[string]string)
+	for _, h := range headers {
+		hdrMap[h] = req.Header.Get(h)
+	}
+
+	hdrMap["Host"] = req.Host
+	hdrMap["HttpMethod"] = req.Method
+	password, err := json.Marshal(hdrMap)
+	if err != nil {
+		return "", fmt.Errorf("error marshalling header map: %w", err)
+	}
+
+	return string(password), nil
+}
+
+// This method returns the AWS signer to be used for signing the request to be sent to Neptune Cluster.
+// It checks for the presence of AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN in the environment.
+// If not found, it creates a new session and gets the credentials from the session.
+func getAWSRequestSigner() (*v4.Signer, error) {
+	accessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
+	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	sessionToken := os.Getenv("AWS_SESSION_TOKEN")
+
+	if accessKeyID != "" && secretAccessKey != "" && sessionToken != "" {
+		return v4.NewSigner(credentials.NewEnvCredentials()), nil
+	}
+
+	sess, err := session.NewSession()
+	if err != nil {
+		return nil, err
+	}
+
+	return v4.NewSigner(sess.Config.Credentials), nil
 }

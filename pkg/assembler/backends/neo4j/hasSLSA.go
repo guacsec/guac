@@ -601,6 +601,6 @@ func (c *neo4jClient) IngestSLSA(ctx context.Context, subject model.ArtifactInpu
 	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSA"))
 }
 
-func (c *neo4jClient) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSA"))
+func (c *neo4jClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
+	return []*model.HasSlsa{}, fmt.Errorf("not implemented: IngestSLSAs")
 }

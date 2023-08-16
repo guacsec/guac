@@ -59,7 +59,7 @@ var queryBadCmd = &cobra.Command{
 		httpClient := http.Client{}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
-		certifyBadResponse, err := model.CertifyBads(ctx, gqlclient, nil)
+		certifyBadResponse, err := model.CertifyBads(ctx, gqlclient, model.CertifyBadSpec{})
 		if err != nil {
 			logger.Fatalf("error querying for package: %v", err)
 		}
@@ -120,7 +120,7 @@ var queryBadCmd = &cobra.Command{
 						Namespace: &subject.Namespaces[0].Namespace,
 						Name:      &subject.Namespaces[0].Names[0].Name,
 					}
-					pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
+					pkgResponse, err := model.Packages(ctx, gqlclient, *pkgFilter)
 					if err != nil {
 						logger.Fatalf("error querying for package: %v", err)
 					}
@@ -159,7 +159,7 @@ var queryBadCmd = &cobra.Command{
 					Tag:       subject.Namespaces[0].Names[0].Tag,
 					Commit:    subject.Namespaces[0].Names[0].Commit,
 				}
-				srcResponse, err := model.Sources(ctx, gqlclient, srcFilter)
+				srcResponse, err := model.Sources(ctx, gqlclient, *srcFilter)
 				if err != nil {
 					logger.Fatalf("error querying for sources: %v", err)
 				}
@@ -203,7 +203,7 @@ var queryBadCmd = &cobra.Command{
 					Digest:    &subject.Digest,
 				}
 
-				artifactResponse, err := model.Artifacts(ctx, gqlclient, artifactFilter)
+				artifactResponse, err := model.Artifacts(ctx, gqlclient, *artifactFilter)
 				if err != nil {
 					logger.Fatalf("error querying for artifacts: %v", err)
 				}

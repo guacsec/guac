@@ -26,14 +26,122 @@ import (
 )
 
 const (
-	versionRange   string = "versionRange"
-	dependencyType string = "dependencyType"
+	versionRangeStr   string = "versionRange"
+	dependencyTypeStr string = "dependencyType"
 )
 
 // Query IsDependency
 
 func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	return []*model.IsDependency{}, fmt.Errorf("not implemented: IsDependency")
+
+	// TODO (pxp928): Optimization of the query can be done by starting from the dependent package node (if specified)
+	var arangoQueryBuilder *arangoQueryBuilder
+
+	if isDependencySpec.Package != nil {
+		values := map[string]any{}
+		arangoQueryBuilder := setPkgVersionMatchValues(isDependencySpec.Package, values)
+		arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
+		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
+
+		return getDependencyForQuery(ctx, c, arangoQueryBuilder, values)
+	} else {
+		values := map[string]any{}
+		// get packages
+		arangoQueryBuilder = newForQuery(isDependenciesStr, "isDependency")
+		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values)
+		arangoQueryBuilder.forInBound(isDependencySubjectPkgEdgesStr, "pVersion", "isDependency")
+		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
+
+		return getDependencyForQuery(ctx, c, arangoQueryBuilder, values)
+	}
+}
+
+func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.IsDependency, error) {
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'pkgVersion': {
+			'type_id': pType._id,
+			'type': pType.type,
+			'namespace_id': pNs._id,
+			'namespace': pNs.namespace,
+			'name_id': pName._id,
+			'name': pName.name,
+			'version_id': pVersion._id,
+			'version': pVersion.version,
+			'subpath': pVersion.subpath,
+			'qualifier_list': pVersion.qualifier_list
+		},
+		'depPkg': {
+			'type_id': depType._id,
+			'type': depType.type,
+			'namespace_id': depNamespace._id,
+			'namespace': depNamespace.namespace,
+			'name_id': depName._id,
+			'name': depName.name
+		},
+		'isDependency_id': isDependency._id,
+		'versionRange': isDependency.versionRange,
+		'dependencyType': isDependency.dependencyType,
+		'justification': isDependency.justification,
+		'collector': isDependency.collector,
+		'origin': isDependency.origin
+	}`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsDependency")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for IsDependency: %w", err)
+	}
+	defer cursor.Close()
+
+	return getIsDependency(ctx, cursor)
+}
+
+func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any) {
+	if isDependencySpec.ID != nil {
+		arangoQueryBuilder.filter("isDependency", "_id", "==", "@id")
+		queryValues["id"] = *isDependencySpec.ID
+	}
+	if isDependencySpec.VersionRange != nil {
+		arangoQueryBuilder.filter("isDependency", versionRangeStr, "==", "@"+versionRangeStr)
+		queryValues[versionRangeStr] = isDependencySpec.VersionRange
+	}
+	if isDependencySpec.DependencyType != nil {
+		arangoQueryBuilder.filter("isDependency", dependencyTypeStr, "==", "@"+dependencyTypeStr)
+		queryValues[dependencyTypeStr] = isDependencySpec.DependencyType.String()
+	}
+	if isDependencySpec.Origin != nil {
+		arangoQueryBuilder.filter("isDependency", origin, "==", "@"+origin)
+		queryValues[origin] = isDependencySpec.Origin
+	}
+	if isDependencySpec.Collector != nil {
+		arangoQueryBuilder.filter("isDependency", collector, "==", "@"+collector)
+		queryValues[collector] = isDependencySpec.Collector
+	}
+	if isDependencySpec.DependentPackage != nil {
+		arangoQueryBuilder.forOutBound(isDependencyDepPkgEdgesStr, "depName", "isDependency")
+		if isDependencySpec.DependentPackage.Name != nil {
+			arangoQueryBuilder.filter("depName", "name", "==", "@depName")
+			queryValues["depName"] = *isDependencySpec.DependentPackage.Name
+		}
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
+		if isDependencySpec.DependentPackage.Namespace != nil {
+			arangoQueryBuilder.filter("depNamespace", "namespace", "==", "@depNamespace")
+			queryValues["depNamespace"] = *isDependencySpec.DependentPackage.Namespace
+		}
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
+		if isDependencySpec.DependentPackage.Type != nil {
+			arangoQueryBuilder.filter("depType", "type", "==", "@depType")
+			queryValues["depType"] = *isDependencySpec.DependentPackage.Type
+		}
+	} else {
+		arangoQueryBuilder.forOutBound(isDependencyDepPkgEdgesStr, "depName", "isDependency")
+		arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
+		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
+	}
 }
 
 // Ingest IsDependency
@@ -49,8 +157,8 @@ func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpe
 
 	// isDependency
 
-	values[versionRange] = dependency.VersionRange
-	values[dependencyType] = dependency.DependencyType.String()
+	values[versionRangeStr] = dependency.VersionRange
+	values[dependencyTypeStr] = dependency.DependencyType.String()
 	values[justification] = dependency.Justification
 	values[origin] = dependency.Origin
 	values[collector] = dependency.Collector
@@ -65,7 +173,7 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 		return nil, fmt.Errorf("uneven packages and isDependency for ingestion")
 	}
 
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 
 	for i := range pkgs {
 		listOfValues = append(listOfValues, getDependencyQueryValues(pkgs[i], depPkgs[i], dependencies[i]))
@@ -140,19 +248,15 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
     )
 		
 	LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-			INSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin }
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin }
 			UPDATE {} IN isDependencies
 			RETURN NEW
 		)
-		
-	LET edgeCollection = (FOR edgeData IN [
-		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: 'dependency'}, 
-		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: 'subject'}]
-	  
-		INSERT { _key: CONCAT('isDependencyEdges', edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: 'ignore' }
-		)
-		
+	
+	INSERT { _key: CONCAT("isDependencySubjectPkgEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("isDependencyDepPkgEdges", isDependency._key, secondPkg.nameDoc._key), _from: isDependency._id, _to: secondPkg.name_id} INTO isDependencyDepPkgEdges OPTIONS { overwriteMode: "ignore" }
+
 	RETURN {
 		'pkgVersion': {
 			'type_id': firstPkg.typeID,
@@ -240,18 +344,14 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
     )
 	  
 	  LET isDependency = FIRST(
-		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
-			  INSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+		  UPSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+			  INSERT { packageID:firstPkg.version_id, depPackageID:secondPkg.name_id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
 			  UPDATE {} IN isDependencies
 			  RETURN NEW
 	  )
 	  
-	  LET edgeCollection = (FOR edgeData IN [
-		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: "dependency"}, 
-		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: "subject"}]
-	
-		INSERT { _key: CONCAT("isDependencyEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
-	  )
+	  INSERT { _key: CONCAT("isDependencySubjectPkgEdges", firstPkg.versionDoc._key, isDependency._key), _from: firstPkg.version_id, _to: isDependency._id} INTO isDependencySubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("isDependencyDepPkgEdges", isDependency._key, secondPkg.nameDoc._key), _from: isDependency._id, _to: secondPkg.name_id} INTO isDependencyDepPkgEdges OPTIONS { overwriteMode: "ignore" }
 	  
 	  RETURN {
 		'pkgVersion': {
@@ -315,32 +415,14 @@ func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
 
 func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDependency, error) {
 	type collectedData struct {
-		PkgVersion struct {
-			TypeID        string        `json:"type_id"`
-			PkgType       string        `json:"type"`
-			NamespaceID   string        `json:"namespace_id"`
-			Namespace     string        `json:"namespace"`
-			NameID        string        `json:"name_id"`
-			Name          string        `json:"name"`
-			VersionID     string        `json:"version_id"`
-			Version       string        `json:"version"`
-			Subpath       string        `json:"subpath"`
-			QualifierList []interface{} `json:"qualifier_list"`
-		} `json:"pkgVersion"`
-		DepPkg struct {
-			TypeID      string `json:"type_id"`
-			PkgType     string `json:"type"`
-			NamespaceID string `json:"namespace_id"`
-			Namespace   string `json:"namespace"`
-			NameID      string `json:"name_id"`
-			Name        string `json:"name"`
-		} `json:"depPkg"`
-		IsDependencyID string `json:"isDependency_id"`
-		VersionRange   string `json:"versionRange"`
-		DependencyType string `json:"dependencyType"`
-		Justification  string `json:"justification"`
-		Collector      string `json:"collector"`
-		Origin         string `json:"origin"`
+		PkgVersion     *dbPkgVersion `json:"pkgVersion"`
+		DepPkg         *dbPkgName    `json:"depPkg"`
+		IsDependencyID string        `json:"isDependency_id"`
+		VersionRange   string        `json:"versionRange"`
+		DependencyType string        `json:"dependencyType"`
+		Justification  string        `json:"justification"`
+		Collector      string        `json:"collector"`
+		Origin         string        `json:"origin"`
 	}
 
 	var createdValues []collectedData
@@ -360,16 +442,12 @@ func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDepe
 
 	var isDependencyList []*model.IsDependency
 	for _, createdValue := range createdValues {
-		pkg, err := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
 			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get model.package with err: %w", err)
-		}
-		depPkg, err := generateModelPackage(createdValue.DepPkg.TypeID, createdValue.DepPkg.PkgType, createdValue.DepPkg.NamespaceID, createdValue.DepPkg.Namespace, createdValue.DepPkg.NameID,
+
+		depPkg := generateModelPackage(createdValue.DepPkg.TypeID, createdValue.DepPkg.PkgType, createdValue.DepPkg.NamespaceID, createdValue.DepPkg.Namespace, createdValue.DepPkg.NameID,
 			createdValue.DepPkg.Name, nil, nil, nil, nil)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get dependent model.package with err: %w", err)
-		}
+
 		dependencyTypeEnum, err := convertDependencyTypeToEnum(createdValue.DependencyType)
 		if err != nil {
 			return nil, fmt.Errorf("convertDependencyTypeToEnum failed with error: %w", err)

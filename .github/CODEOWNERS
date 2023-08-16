@@ -1,3 +1,28 @@
+# Owner role assigments in topic areas
+
+# Ingestion topic area
+#/pkg/assembler
+#/pkg/certifier
+#/pkg/collectsub
+#/pkg/emitter
+#/pkg/ingestor
+
+# GraphQL topic area
+/pkg/assembler/graphql @jeffmendoza
+
+# Backends topic area
+/pkg/assembler/backends @jeffmendoza
+
+# Frontend topic area
+# ?
+
+# Clients topic area
+/pkg/assembler/clients  @jeffmendoza
+/pkg/cli  @jeffmendoza
+/cmd  @jeffmendoza
+
+# Maintainers may be codeowners of broader directories.
+
 # Make sure @mihaimaruseac is notified for any changes to assembler (in
 # particular the GraphQL interface) while it is in flux
 /pkg/assembler @mihaimaruseac

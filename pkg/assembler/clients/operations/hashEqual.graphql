@@ -19,6 +19,14 @@
 
 mutation HashEqual($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
   ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual) {
-    ...allHashEqualTree
+    ...AllHashEqualTree
+  }
+}
+
+# Defines the GraphQL operations to bulk ingest hasEqual information into GUAC
+
+mutation HashEquals($artifacts: [ArtifactInputSpec!]!, $otherArtifacts: [ArtifactInputSpec!]!, $hashEquals: [HashEqualInputSpec!]!) {
+  ingestHashEquals(artifacts: $artifacts, otherArtifacts: $otherArtifacts, hashEquals: $hashEquals) {
+    ...AllHashEqualTree
   }
 }

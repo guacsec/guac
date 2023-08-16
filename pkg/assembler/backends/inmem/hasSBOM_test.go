@@ -465,6 +465,27 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpQueryErr: true,
 		},
+		{
+			Name:  "Query without hasSBOMSpec",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: p1,
+					},
+					HS: &model.HasSBOMInputSpec{
+						DownloadLocation: "location one",
+					},
+				},
+			},
+			Query: nil,
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:          p1out,
+					DownloadLocation: "location one",
+				},
+			},
+		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
@@ -488,6 +509,232 @@ func TestHasSBOM(t *testing.T) {
 			}
 			for _, o := range test.Calls {
 				_, err := b.IngestHasSbom(ctx, o.Sub, *o.HS)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.HasSBOM(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpHS, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestIngestHasSBOM(t *testing.T) {
+	type call struct {
+		Sub model.PackageOrArtifactInputs
+		HS  []*model.HasSBOMInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		Query        *model.HasSBOMSpec
+		ExpHS        []*model.HasSbom
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				URI: ptrfrom.String("test uri"),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject: p1out,
+					URI:     "test uri",
+				},
+			},
+		},
+		{
+			Name:  "Ingest same twice",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p1},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+						{
+							URI: "test uri",
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				URI: ptrfrom.String("test uri"),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject: p1out,
+					URI:     "test uri",
+				},
+			},
+		},
+		{
+			Name:  "Query on URI",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p1},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri one",
+						},
+						{
+							URI: "test uri two",
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				URI: ptrfrom.String("test uri one"),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject: p1out,
+					URI:     "test uri one",
+				},
+			},
+		},
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{p1, p2},
+			InArt: []*model.ArtifactInputSpec{a1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p2},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+						{
+							URI: "test uri",
+						},
+					},
+				},
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Artifacts: []*model.ArtifactInputSpec{a1},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				Subject: &model.PackageOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String("2.11.1"),
+					},
+				},
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject: p2out,
+					URI:     "test uri",
+				},
+			},
+		},
+		{
+			Name:  "Query on Artifact",
+			InPkg: []*model.PkgInputSpec{p1},
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+					},
+				},
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Artifacts: []*model.ArtifactInputSpec{a1, a2},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+						{
+							URI: "test uri",
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				Subject: &model.PackageOrArtifactSpec{
+					Artifact: &model.ArtifactSpec{
+						Algorithm: ptrfrom.String("sha1"),
+					},
+				},
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject: a2out,
+					URI:     "test uri",
+				},
+			},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	ctx := context.Background()
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			b, err := inmem.GetBackend(nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestHasSBOMs(ctx, o.Sub, o.HS)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

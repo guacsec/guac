@@ -54,7 +54,21 @@ func PkgInputSpecToPurl(currentPkg *model.PkgInputSpec) string {
 	for _, k := range keys {
 		qualifiers = append(qualifiers, k, qualifiersMap[k])
 	}
-	return PkgToPurl(currentPkg.Type, *currentPkg.Namespace, currentPkg.Name, *currentPkg.Version, *currentPkg.Subpath, qualifiers)
+
+	var ns, ver, subpath string
+
+	if currentPkg.Namespace != nil {
+		ns = *currentPkg.Namespace
+	}
+
+	if currentPkg.Version != nil {
+		ver = *currentPkg.Version
+	}
+
+	if currentPkg.Subpath != nil {
+		subpath = *currentPkg.Subpath
+	}
+	return PkgToPurl(currentPkg.Type, ns, currentPkg.Name, ver, subpath, qualifiers)
 }
 
 func PkgToPurl(purlType, namespace, name, version, subpath string, qualifiersList []string) string {
@@ -111,7 +125,10 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 		//
 		// Ref: https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst#oci
 		qs := p.Qualifiers.Map()
-		var ns string
+
+		// Not technically part of the spec but some PURLs still include the namespace
+		// as part of the PURL
+		var ns string = p.Namespace
 		for k, v := range qs {
 			if k == "repository_url" {
 				ns = v

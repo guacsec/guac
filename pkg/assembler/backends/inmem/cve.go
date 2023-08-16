@@ -101,6 +101,19 @@ func (n *cveNode) setVexLinks(id uint32) {
 }
 
 // Ingest CVE
+
+func (c *demoClient) IngestCVEs(ctx context.Context, cves []*model.CVEInputSpec) ([]*model.Cve, error) {
+	var modelCVEs []*model.Cve
+	for _, cve := range cves {
+		modelCVE, err := c.IngestCve(ctx, cve)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestCve failed with err: %v", err)
+		}
+		modelCVEs = append(modelCVEs, modelCVE)
+	}
+	return modelCVEs, nil
+}
+
 func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (*model.Cve, error) {
 	return c.ingestCve(ctx, input, true)
 }

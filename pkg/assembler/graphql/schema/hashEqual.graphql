@@ -56,10 +56,12 @@ input HashEqualInputSpec {
 
 extend type Query {
   "Returns all artifact equality statements matching a filter."
-  HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
+  HashEqual(hashEqualSpec: HashEqualSpec!): [HashEqual!]!
 }
 
 extend type Mutation {
-  "Adds a certification that two artifacts are similar."
+ "Adds a certification that two artifacts are equal."
   ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
+  "Bulk ingest certifications that two artifacts are equal."
+  ingestHashEquals(artifacts: [ArtifactInputSpec!]!, otherArtifacts: [ArtifactInputSpec!]!, hashEquals: [HashEqualInputSpec!]!): [HashEqual!]!
 }

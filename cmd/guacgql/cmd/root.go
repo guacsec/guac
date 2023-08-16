@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/version"
@@ -49,6 +50,13 @@ var flags = struct {
 	arangoAddr string
 	arangoUser string
 	arangoPass string
+
+	// Needed only if using neptune backend
+	neptuneEndpoint string
+	neptunePort     int
+	neptuneRegion   string
+	neptuneUser     string
+	neptuneRealm    string
 }{}
 
 var rootCmd = &cobra.Command{
@@ -77,6 +85,12 @@ var rootCmd = &cobra.Command{
 		flags.arangoPass = viper.GetString("arango-pass")
 		flags.arangoAddr = viper.GetString("arango-addr")
 
+		flags.neptuneEndpoint = viper.GetString("neptune-endpoint")
+		flags.neptunePort = viper.GetInt("neptune-port")
+		flags.neptuneRegion = viper.GetString("neptune-region")
+		flags.neptuneUser = viper.GetString("neptune-user")
+		flags.neptuneRealm = viper.GetString("neptune-realm")
+
 		startServer(cmd)
 	},
 }
@@ -87,6 +101,7 @@ func init() {
 	set, err := cli.BuildFlags([]string{
 		"arango-addr", "arango-user", "arango-pass",
 		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm",
+		"neptune-endpoint", "neptune-port", "neptune-region", "neptune-user", "neptune-realm",
 		"gql-test-data", "gql-listen-port", "gql-debug", "gql-backend", "gql-trace",
 		"db-address", "db-driver", "db-debug", "db-migrate",
 	})
@@ -99,6 +114,10 @@ func init() {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}
+
+	viper.SetEnvPrefix("GUAC")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.AutomaticEnv()
 }
 
 func Execute() {

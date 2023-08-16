@@ -202,7 +202,7 @@ func Test_GuessDocument(t *testing.T) {
 	}, {
 		name: "valid CSAF Document",
 		document: &processor.Document{
-			Blob:              []byte(testdata.CsafExampleRedHat),
+			Blob:              testdata.CsafExampleRedHat,
 			Type:              processor.DocumentUnknown,
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},

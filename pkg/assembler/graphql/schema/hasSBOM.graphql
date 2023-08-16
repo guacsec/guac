@@ -63,10 +63,12 @@ input HasSBOMInputSpec {
 
 extend type Query {
   "Returns all SBOM certifications."
-  HasSBOM(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
+  HasSBOM(hasSBOMSpec: HasSBOMSpec!): [HasSBOM!]!
 }
 
 extend type Mutation {
   "Certifies that a package or artifact has an SBOM."
   ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
+  "Bulk ingest that package or artifact has an SBOM."
+  ingestHasSBOMs(subjects: PackageOrArtifactInputs!, hasSBOMs: [HasSBOMInputSpec!]!): [HasSBOM!]!
 }

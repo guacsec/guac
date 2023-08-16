@@ -26,6 +26,40 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+type dbPkgVersion struct {
+	TypeID        string   `json:"type_id"`
+	PkgType       string   `json:"type"`
+	NamespaceID   string   `json:"namespace_id"`
+	Namespace     string   `json:"namespace"`
+	NameID        string   `json:"name_id"`
+	Name          string   `json:"name"`
+	VersionID     string   `json:"version_id"`
+	Version       string   `json:"version"`
+	Subpath       string   `json:"subpath"`
+	QualifierList []string `json:"qualifier_list"`
+}
+
+type dbPkgName struct {
+	TypeID      string `json:"type_id"`
+	PkgType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
+	NameID      string `json:"name_id"`
+	Name        string `json:"name"`
+}
+
+type dbPkgNamespace struct {
+	TypeID      string `json:"type_id"`
+	PkgType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
+}
+
+type dbPkgType struct {
+	TypeID  string `json:"type_id"`
+	PkgType string `json:"type"`
+}
+
 type PkgIds struct {
 	TypeId      string
 	NamespaceId string
@@ -70,7 +104,7 @@ func guacPkgId(pkg model.PkgInputSpec) PkgIds {
 	ids.VersionId = fmt.Sprintf("%s::%s::%s?", ids.NameId, version, subpath)
 
 	qualifiersMap := map[string]string{}
-	keys := []string{}
+	var keys []string
 	for _, kv := range pkg.Qualifiers {
 		qualifiersMap[kv.Key] = kv.Value
 		keys = append(keys, kv.Key)
@@ -87,15 +121,12 @@ func getPackageQueryValues(c *arangoClient, pkg *model.PkgInputSpec) map[string]
 	values := map[string]any{}
 
 	// add guac keys
-	values["typeID"] = c.pkgTypeMap[pkg.Type].Id
-	values["typeKey"] = c.pkgTypeMap[pkg.Type].Key
-	values["typeValue"] = c.pkgTypeMap[pkg.Type].PkgType
-
 	guacIds := guacPkgId(*pkg)
 	values["guacNsKey"] = guacIds.NamespaceId
 	values["guacNameKey"] = guacIds.NameId
 	values["guacVersionKey"] = guacIds.VersionId
 
+	values["pkgType"] = pkg.Type
 	values["name"] = pkg.Name
 	if pkg.Namespace != nil {
 		values["namespace"] = *pkg.Namespace
@@ -115,13 +146,13 @@ func getPackageQueryValues(c *arangoClient, pkg *model.PkgInputSpec) map[string]
 
 	// To ensure consistency, always sort the qualifiers by key
 	qualifiersMap := map[string]string{}
-	keys := []string{}
+	var keys []string
 	for _, kv := range pkg.Qualifiers {
 		qualifiersMap[kv.Key] = kv.Value
 		keys = append(keys, kv.Key)
 	}
 	sort.Strings(keys)
-	qualifiers := []string{}
+	var qualifiers []string
 	for _, k := range keys {
 		qualifiers = append(qualifiers, k, qualifiersMap[k])
 	}
@@ -130,7 +161,7 @@ func getPackageQueryValues(c *arangoClient, pkg *model.PkgInputSpec) map[string]
 }
 
 func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
-	listOfValues := []map[string]any{}
+	var listOfValues []map[string]any
 	for i := range pkgs {
 		listOfValues = append(listOfValues, getPackageQueryValues(c, pkgs[i]))
 	}
@@ -157,10 +188,18 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 	}
 	sb.WriteString("]")
 
-	query := `	  
+	query := `
+	LET type = FIRST(
+		UPSERT { type: doc.pkgType}
+		INSERT { type: doc.pkgType}
+		UPDATE {}
+		IN pkgTypes OPTIONS { indexHint: "byPkgType" }
+		RETURN NEW
+	)
+
 	LET ns = FIRST(
-	  UPSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
-	  INSERT { namespace: doc.namespace, _parent: doc.typeID , guacKey: doc.guacNsKey}
+	  UPSERT { namespace: doc.namespace, _parent: type._id , guacKey: doc.guacNsKey}
+	  INSERT { namespace: doc.namespace, _parent: type._id , guacKey: doc.guacNsKey}
 	  UPDATE {}
 	  IN pkgNamespaces OPTIONS { indexHint: "byNsGuacKey" }
 	  RETURN NEW
@@ -183,20 +222,20 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 	)
   
 	LET pkgHasNamespaceCollection = (
-	  INSERT { _key: CONCAT("pkgHasNamespace", doc.typeKey, ns._key), _from: doc.typeID, _to: ns._id, label : "pkgHasNamespace"} INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("pkgHasNamespace", type._key, ns._key), _from: type._id, _to: ns._id } INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET pkgHasNameCollection = (
-	  INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "pkgHasName"} INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
+ 	  INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id } INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
 	)
 	
 	LET pkgHasVersionCollection = (
-	  INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "pkgHasVersion"} INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id } INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
 	)
 	  
   RETURN {
-	"type_id": doc.typeID,
-	"type": doc.typeValue,
+	"type_id": type._id,
+	"type": type.type,
 	"namespace_id": ns._id,
 	"namespace": ns.namespace,
 	"name_id": name._id,
@@ -218,10 +257,18 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 }
 
 func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
-	query := `	  
+	query := `
+	  LET type = FIRST(
+		UPSERT { type: @pkgType }
+		INSERT { type: @pkgType }
+		UPDATE {}
+		IN pkgTypes OPTIONS { indexHint: "byPkgType" }
+		RETURN NEW
+	  )
+
 	  LET ns = FIRST(
-		UPSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
-		INSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
+		UPSERT { namespace: @namespace, _parent: type._id , guacKey: @guacNsKey}
+		INSERT { namespace: @namespace, _parent: type._id , guacKey: @guacNsKey}
 		UPDATE {}
 		IN pkgNamespaces OPTIONS { indexHint: "byNsGuacKey" }
 		RETURN NEW
@@ -244,20 +291,20 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	  )
 	
 	  LET pkgHasNamespaceCollection = (
-		INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "pkgHasNamespace"} INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasNamespace", type._key, ns._key), _from: type._id, _to: ns._id} INTO pkgHasNamespace OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  LET pkgHasNameCollection = (
-		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "pkgHasName"} INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id} INTO pkgHasName OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  LET pkgHasVersionCollection = (
-		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "pkgHasVersion"} INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id } INTO pkgHasVersion OPTIONS { overwriteMode: "ignore" }
 	  )
 		
 	RETURN {
-	  "type_id": @typeID,
-	  "type": @typeValue,
+	  "type_id": type._id,
+	  "type": type.type,
 	  "namespace_id": ns._id,
 	  "namespace": ns.namespace,
 	  "name_id": name._id,
@@ -282,6 +329,86 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	} else {
 		return nil, fmt.Errorf("number of packages ingested is greater than one")
 	}
+}
+
+func setPkgNameMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *arangoQueryBuilder {
+	var arangoQueryBuilder *arangoQueryBuilder
+	if pkgSpec != nil {
+		arangoQueryBuilder = newForQuery(pkgTypesStr, "pType")
+		if pkgSpec.Type != nil {
+			arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
+			queryValues["pkgType"] = *pkgSpec.Type
+		}
+		arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		if pkgSpec.Namespace != nil {
+			arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
+			queryValues["namespace"] = *pkgSpec.Namespace
+		}
+		arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
+		if pkgSpec.Name != nil {
+			arangoQueryBuilder.filter("pName", "name", "==", "@name")
+			queryValues["name"] = *pkgSpec.Name
+		}
+	} else {
+		arangoQueryBuilder = newForQuery(pkgTypesStr, "pType")
+		arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
+	}
+	return arangoQueryBuilder
+}
+
+func setPkgVersionMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *arangoQueryBuilder {
+	var arangoQueryBuilder *arangoQueryBuilder
+	if pkgSpec != nil {
+		arangoQueryBuilder = newForQuery(pkgTypesStr, "pType")
+		if pkgSpec.Type != nil {
+			arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
+			queryValues["pkgType"] = *pkgSpec.Type
+		}
+		arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		if pkgSpec.Namespace != nil {
+			arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
+			queryValues["namespace"] = *pkgSpec.Namespace
+		}
+		arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
+		if pkgSpec.Name != nil {
+			arangoQueryBuilder.filter("pName", "name", "==", "@name")
+			queryValues["name"] = *pkgSpec.Name
+		}
+		arangoQueryBuilder.forOutBound(pkgHasVersionStr, "pVersion", "pName")
+		if pkgSpec.ID != nil {
+			arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+			queryValues["id"] = *pkgSpec.ID
+		}
+		if pkgSpec.Version != nil {
+			arangoQueryBuilder.filter("pVersion", "version", "==", "@version")
+			queryValues["version"] = *pkgSpec.Version
+		}
+		if pkgSpec.Subpath != nil {
+			arangoQueryBuilder.filter("pVersion", "subpath", "==", "@subpath")
+			queryValues["subpath"] = *pkgSpec.Subpath
+		}
+		if len(pkgSpec.Qualifiers) > 0 {
+			arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
+			queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
+		}
+		if !*pkgSpec.MatchOnlyEmptyQualifiers {
+			if len(pkgSpec.Qualifiers) > 0 {
+				arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
+				queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
+			}
+		} else {
+			arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
+			queryValues["objPkgQualifierList"] = []string{}
+		}
+
+	} else {
+		arangoQueryBuilder = newForQuery(pkgTypesStr, "pType")
+		arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
+		arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
+		arangoQueryBuilder.forOutBound(pkgHasVersionStr, "pVersion", "pName")
+	}
+	return arangoQueryBuilder
 }
 
 func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -315,37 +442,7 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
-	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
-	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
-	if pkgSpec.Type != nil {
-		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
-		values["pkgType"] = *pkgSpec.Type
-	}
-	arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
-	if pkgSpec.Namespace != nil {
-		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
-		values["namespace"] = *pkgSpec.Namespace
-	}
-	arangoQueryBuilder.ForOutBound(pkgHasNameStr, "pName", "pNs")
-	if pkgSpec.Name != nil {
-		arangoQueryBuilder.filter("pName", "name", "==", "@name")
-		values["name"] = *pkgSpec.Name
-	}
-	arangoQueryBuilder.ForOutBound(pkgHasVersionStr, "pVersion", "pName")
-	if pkgSpec.Version != nil {
-		arangoQueryBuilder.filter("pVersion", "version", "==", "@version")
-		values["version"] = *pkgSpec.Version
-	}
-	if pkgSpec.Subpath != nil {
-		arangoQueryBuilder.filter("pVersion", "subpath", "==", "@subpath")
-		values["subpath"] = *pkgSpec.Subpath
-	}
-	if len(pkgSpec.Qualifiers) > 0 {
-		arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
-		values["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
-	}
+	arangoQueryBuilder := setPkgVersionMatchValues(pkgSpec, values)
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		"type_id": pType._id,
@@ -375,10 +472,7 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
-	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
-	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
+	arangoQueryBuilder := newForQuery(pkgTypesStr, "pType")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
@@ -397,14 +491,9 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID  string `json:"type_id"`
-		PkgType string `json:"type"`
-	}
-
 	var packages []*model.Package
 	for {
-		var doc collectedData
+		var doc dbPkgType
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -428,15 +517,12 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
-	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
-	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
+	arangoQueryBuilder := newForQuery(pkgTypesStr, "pType")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
 	}
-	arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
+	arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
 	if pkgSpec.Namespace != nil {
 		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
@@ -457,16 +543,9 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID      string `json:"type_id"`
-		PkgType     string `json:"type"`
-		NamespaceID string `json:"namespace_id"`
-		Namespace   string `json:"namespace"`
-	}
-
 	pkgTypes := map[string][]*model.PackageNamespace{}
 	for {
-		var doc collectedData
+		var doc dbPkgNamespace
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -503,20 +582,17 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	values := map[string]any{}
 
-	arangoQueryBuilder := newForQuery(pkgRootsStr, "pRoot")
-	arangoQueryBuilder.filter("pRoot", "root", "==", "@pkg")
-	values["pkg"] = "pkg"
-	arangoQueryBuilder.ForOutBound(pkgHasTypeStr, "pType", "pRoot")
+	arangoQueryBuilder := newForQuery(pkgTypesStr, "pType")
 	if pkgSpec.Type != nil {
 		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
 	}
-	arangoQueryBuilder.ForOutBound(pkgHasNamespaceStr, "pNs", "pType")
+	arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
 	if pkgSpec.Namespace != nil {
 		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
 	}
-	arangoQueryBuilder.ForOutBound(pkgHasNameStr, "pName", "pNs")
+	arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
 	if pkgSpec.Name != nil {
 		arangoQueryBuilder.filter("pName", "name", "==", "@name")
 		values["name"] = *pkgSpec.Name
@@ -539,18 +615,9 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 	}
 	defer cursor.Close()
 
-	type collectedData struct {
-		TypeID      string `json:"type_id"`
-		PkgType     string `json:"type"`
-		NamespaceID string `json:"namespace_id"`
-		Namespace   string `json:"namespace"`
-		NameID      string `json:"name_id"`
-		Name        string `json:"name"`
-	}
-
 	pkgTypes := map[string]map[string][]*model.PackageName{}
 	for {
-		var doc collectedData
+		var doc dbPkgName
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
@@ -578,9 +645,9 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 			}
 		}
 	}
-	packages := []*model.Package{}
+	var packages []*model.Package
 	for pkgType, pkgNamespaces := range pkgTypes {
-		collectedPkgNamespaces := []*model.PackageNamespace{}
+		var collectedPkgNamespaces []*model.PackageNamespace
 		for namespace, pkgNames := range pkgNamespaces {
 			namespaceValues := strings.Split(namespace, ",")
 			pkgNamespace := &model.PackageNamespace{
@@ -603,21 +670,9 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 }
 
 func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, error) {
-	type collectedData struct {
-		TypeID        string        `json:"type_id"`
-		PkgType       string        `json:"type"`
-		NamespaceID   string        `json:"namespace_id"`
-		Namespace     string        `json:"namespace"`
-		NameID        string        `json:"name_id"`
-		Name          string        `json:"name"`
-		VersionID     string        `json:"version_id"`
-		Version       string        `json:"version"`
-		Subpath       string        `json:"subpath"`
-		QualifierList []interface{} `json:"qualifier_list"`
-	}
 
 	pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
-	var doc collectedData
+	var doc dbPkgVersion
 	for {
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
@@ -629,10 +684,7 @@ func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, e
 		} else {
 			var pkgQualifiers []*model.PackageQualifier
 			if doc.QualifierList != nil {
-				pkgQualifiers, err = getCollectedPackageQualifiers(doc.QualifierList)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get package qualifiers with error: %w", err)
-				}
+				pkgQualifiers = getCollectedPackageQualifiers(doc.QualifierList)
 			}
 
 			subPathString := doc.Subpath
@@ -670,7 +722,7 @@ func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, e
 	for pkgType, pkgNamespaces := range pkgTypes {
 		collectedPkgNamespaces := []*model.PackageNamespace{}
 		for namespace, pkgNames := range pkgNamespaces {
-			collectedPkgNames := []*model.PackageName{}
+			var collectedPkgNames []*model.PackageName
 			for name, versions := range pkgNames {
 				nameValues := strings.Split(name, ",")
 				pkgName := &model.PackageName{
@@ -699,18 +751,12 @@ func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, e
 	return packages, nil
 }
 
-func getCollectedPackageQualifiers(qualifierList []interface{}) ([]*model.PackageQualifier, error) {
-	qualifiers := []*model.PackageQualifier{}
+func getCollectedPackageQualifiers(qualifierList []string) []*model.PackageQualifier {
+	var qualifiers []*model.PackageQualifier
 	for i := range qualifierList {
 		if i%2 == 0 {
-			key, ok := qualifierList[i].(string)
-			if !ok {
-				return nil, fmt.Errorf("failed to assert string value for pkg qualifier's key")
-			}
-			value, ok := qualifierList[i+1].(string)
-			if !ok {
-				return nil, fmt.Errorf("failed to assert string value for pkg qualifier's value")
-			}
+			key := qualifierList[i]
+			value := qualifierList[i+1]
 			qualifier := &model.PackageQualifier{
 				Key:   key,
 				Value: value,
@@ -718,20 +764,13 @@ func getCollectedPackageQualifiers(qualifierList []interface{}) ([]*model.Packag
 			qualifiers = append(qualifiers, qualifier)
 		}
 	}
-	return qualifiers, nil
+	return qualifiers
 }
 
-func generateModelPackage(pkgTypeID, pkgType, namespaceID, namespaceStr, nameID, nameStr string, versionID, versionValue, subPathValue *string, qualifiersValue interface{}) (*model.Package, error) {
+func generateModelPackage(pkgTypeID, pkgType, namespaceID, namespaceStr, nameID, nameStr string, versionID, versionValue, subPathValue *string, qualifiersValue []string) *model.Package {
 	var version *model.PackageVersion = nil
 	if versionValue != nil && subPathValue != nil && qualifiersValue != nil {
-		qualifiersList, ok := qualifiersValue.([]interface{})
-		if !ok {
-			return nil, fmt.Errorf("failed to assert slice for pkg qualifiers")
-		}
-		qualifiers, err := getCollectedPackageQualifiers(qualifiersList)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get qualifiers with error: %w", err)
-		}
+		qualifiers := getCollectedPackageQualifiers(qualifiersValue)
 		version = &model.PackageVersion{
 			ID:         *versionID,
 			Version:    *versionValue,
@@ -740,7 +779,7 @@ func generateModelPackage(pkgTypeID, pkgType, namespaceID, namespaceStr, nameID,
 		}
 	}
 
-	versions := []*model.PackageVersion{}
+	var versions []*model.PackageVersion
 	if version != nil {
 		versions = append(versions, version)
 	}
@@ -759,19 +798,19 @@ func generateModelPackage(pkgTypeID, pkgType, namespaceID, namespaceStr, nameID,
 		Type:       pkgType,
 		Namespaces: []*model.PackageNamespace{namespace},
 	}
-	return &pkg, nil
+	return &pkg
 }
 
 func getQualifiers(qualifiersSpec []*model.PackageQualifierSpec) []string {
 	qualifiersMap := map[string]string{}
-	keys := []string{}
+	var keys []string
 	for _, kv := range qualifiersSpec {
 		key := removeInvalidCharFromProperty(kv.Key)
 		qualifiersMap[key] = *kv.Value
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
-	qualifiers := []string{}
+	var qualifiers []string
 	for _, k := range keys {
 		qualifiers = append(qualifiers, k, qualifiersMap[k])
 	}

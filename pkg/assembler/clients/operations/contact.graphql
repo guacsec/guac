@@ -17,20 +17,20 @@
 
 # Defines the GraphQL operations to ingest a PointOfContact into GUAC
 
-mutation PointOfContactPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $pointOfContact: PointOfContactInputSpec!) {
+mutation PointOfContactPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $pointOfContact: PointOfContactInputSpec!) {
   ingestPointOfContact(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, pointOfContact: $pointOfContact) {
-    ...allPointOfContact
+    ...AllPointOfContact
   }
 }
 
 mutation PointOfContactSrc($source: SourceInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
-  ingestPointOfContact(subject: {source: $source}, pointOfContact: $pointOfContact) {
-    ...allPointOfContact
+  ingestPointOfContact(subject: {source: $source}, pkgMatchType: {pkg: ALL_VERSIONS}, pointOfContact: $pointOfContact) {
+    ...AllPointOfContact
   }
 }
 
 mutation PointOfContactArtifact($artifact: ArtifactInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
-  ingestPointOfContact(subject: {artifact: $artifact}, pointOfContact: $pointOfContact) {
-    ...allPointOfContact
+  ingestPointOfContact(subject: {artifact: $artifact}, pkgMatchType: {pkg: ALL_VERSIONS}, pointOfContact: $pointOfContact) {
+    ...AllPointOfContact
   }
 }

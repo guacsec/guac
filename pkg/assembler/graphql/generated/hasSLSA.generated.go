@@ -1210,6 +1210,11 @@ func (ec *executionContext) marshalNHasSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋp
 	return ec._HasSLSA(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx context.Context, v interface{}) (model.HasSLSASpec, error) {
+	res, err := ec.unmarshalInputHasSLSASpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa(ctx context.Context, sel ast.SelectionSet, v *model.Slsa) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -1223,6 +1228,28 @@ func (ec *executionContext) marshalNSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkg�
 func (ec *executionContext) unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx context.Context, v interface{}) (model.SLSAInputSpec, error) {
 	res, err := ec.unmarshalInputSLSAInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNSLSAInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.SLSAInputSpec, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.SLSAInputSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNSLSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNSLSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx context.Context, v interface{}) (*model.SLSAInputSpec, error) {
+	res, err := ec.unmarshalInputSLSAInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNSLSAPredicate2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SLSAPredicate) graphql.Marshaler {
@@ -1303,14 +1330,6 @@ func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚖgithubᚗcomᚋg
 
 func (ec *executionContext) unmarshalNSLSAPredicateSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateSpec(ctx context.Context, v interface{}) (*model.SLSAPredicateSpec, error) {
 	res, err := ec.unmarshalInputSLSAPredicateSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOHasSLSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx context.Context, v interface{}) (*model.HasSLSASpec, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputHasSLSASpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

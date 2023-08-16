@@ -74,6 +74,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 
 // Subscribe is used by NATS JetStream to stream the documents received from the processor
 // and parse them via ParseDocumentTree
+// The context contains the jetstream.
 func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredicates, []*common.IdentifierStrings) error) error {
 	logger := logging.FromContext(ctx)
 
@@ -90,12 +91,12 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredica
 	// should still continue if there are errors since problem is with individual documents
 	parserFunc := func(d []byte) error {
 		docNode := processor.DocumentNode{}
-		err := json.Unmarshal(d, &docNode)
+		err = json.Unmarshal(d, &docNode)
 		if err != nil {
 			logger.Error("[ingestor: %s] failed unmarshal the document tree bytes: %v", uuidString, err)
 			return nil
 		}
-		assemblerInputs, idStrings, err := ParseDocumentTree(ctx, processor.DocumentTree(&docNode))
+		assemblerInputs, idStrings, err := ParseDocumentTree(ctx, &docNode)
 		if err != nil {
 			logger.Error("[ingestor: %s] failed parse document: %v", uuidString, err)
 			return nil

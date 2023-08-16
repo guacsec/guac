@@ -68,10 +68,12 @@ input CertifyGoodInputSpec {
 
 extend type Query {
   "Returns all CertifyGood attestations matching a filter."
-  CertifyGood(certifyGoodSpec: CertifyGoodSpec): [CertifyGood!]!
+  CertifyGood(certifyGoodSpec: CertifyGoodSpec!): [CertifyGood!]!
 }
 
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered good."
-  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyGood: CertifyGoodInputSpec!): CertifyGood!
+  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyGood: CertifyGoodInputSpec!): CertifyGood!
+  "Adds bulk certifications that a package, source or artifact is considered good."
+  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyGoods: [CertifyGoodInputSpec!]!): [CertifyGood!]!
 }

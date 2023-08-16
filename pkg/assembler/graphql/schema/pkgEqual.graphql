@@ -54,7 +54,7 @@ input PkgEqualInputSpec {
 
 extend type Query {
   "Returns all package equality statements matching a filter."
-  PkgEqual(pkgEqualSpec: PkgEqualSpec): [PkgEqual!]!
+  PkgEqual(pkgEqualSpec: PkgEqualSpec!): [PkgEqual!]!
 }
 
 extend type Mutation {

@@ -17,6 +17,8 @@ package assembler
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -377,6 +379,10 @@ func TestIngestPredicates(t *testing.T) {
 			CertifyBad: []CertifyBadIngest{
 				{
 					Pkg: topLevelPack,
+					PkgMatchFlag: generated.MatchFlags{
+						Pkg: generated.PkgMatchTypeSpecificVersion,
+					},
+					//generated.PkgMatchTypeSpecificVersion,
 					CertifyBad: &generated.CertifyBadInputSpec{
 						Justification: "bad package",
 					},
@@ -400,6 +406,9 @@ func TestIngestPredicates(t *testing.T) {
 			CertifyGood: []CertifyGoodIngest{
 				{
 					Pkg: topLevelPack,
+					PkgMatchFlag: generated.MatchFlags{
+						Pkg: generated.PkgMatchTypeSpecificVersion,
+					},
 					CertifyGood: &generated.CertifyGoodInputSpec{
 						Justification: "good package",
 					},
@@ -423,6 +432,9 @@ func TestIngestPredicates(t *testing.T) {
 			HasSourceAt: []HasSourceAtIngest{
 				{
 					Pkg: topLevelPack,
+					PkgMatchFlag: generated.MatchFlags{
+						Pkg: generated.PkgMatchTypeSpecificVersion,
+					},
 					Src: k8sSource,
 					HasSourceAt: &generated.HasSourceAtInputSpec{
 						Justification: "package at this source",
@@ -607,6 +619,8 @@ func TestIngestPredicates(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			i := tt.field
+			s, _ := json.Marshal(tt.field)
+			fmt.Printf("%s\n", s)
 			gotPkgs := i.GetPackages(ctx)
 			pkgSort := func(a, b *generated.PkgInputSpec) bool { return a.Name < b.Name }
 			if diff := cmp.Diff(tt.wantPkg, gotPkgs, cmpopts.SortSlices(pkgSort)); diff != "" {

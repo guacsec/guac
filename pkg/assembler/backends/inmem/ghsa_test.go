@@ -153,3 +153,35 @@ func TestGHSA(t *testing.T) {
 		})
 	}
 }
+
+func TestIngestGHSAs(t *testing.T) {
+	tests := []struct {
+		name    string
+		ingests []*model.GHSAInputSpec
+		exp     []*model.Ghsa
+	}{{
+		name:    "Multiple",
+		ingests: []*model.GHSAInputSpec{g1, g2, g3},
+		exp:     []*model.Ghsa{g1out, g2out, g3out},
+	}}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	ctx := context.Background()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			b, err := inmem.GetBackend(nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			got, err := b.IngestGHSAs(ctx, test.ingests)
+			if err != nil {
+				t.Fatalf("ingest error: %v", err)
+				return
+			}
+			if diff := cmp.Diff(test.exp, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

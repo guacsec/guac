@@ -45,10 +45,12 @@ input OSVInputSpec {
 
 extend type Query {
   "Returns all OSV vulnerabilities matching a filter."
-  osv(osvSpec: OSVSpec): [OSV!]!
+  osv(osvSpec: OSVSpec!): [OSV!]!
 }
 
 extend type Mutation {
   "Ingests a new OSV vulnerability and returns it."
   ingestOSV(osv: OSVInputSpec): OSV!
+  "Bulk ingests new OSVs and returns a list of them."
+  ingestOSVs(osvs: [OSVInputSpec!]!): [OSV!]!
 }

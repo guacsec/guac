@@ -114,7 +114,7 @@ build_local_container:
 # Build and package a guac container for local testing
 # Separate build_container as its own target to ensure (workaround) goreleaser finish writing dist/artifacts.json
 .PHONY: container
-container: check-docker-tool-check check-goreleaser-tool-check build_local_container
+container: check-docker-tool-check check-docker-buildx-tool-check check-goreleaser-tool-check build_local_container
     # tag/name the image according to current docs to avoid changes
 	@$(CONTAINER) tag \
 	"$(shell cat dist/artifacts.json | jq --raw-output '.[] | select( .type =="Docker Image" ) | select( .goarch =="$(CPUTYPE)" ).name')" \
@@ -140,6 +140,14 @@ stop-service:
 check-docker-tool-check:
 	@if ! command -v $(CONTAINER) >/dev/null 2>&1; then \
 		echo "'$(CONTAINER)' is not installed. Please install '$(CONTAINER)' and try again. Or set the CONTAINER variable to a different container runtime engine."; \
+		exit 1; \
+	fi
+
+# Check that docker buildx is installed.
+.PHONY: check-docker-buildx-tool-check
+check-docker-buildx-tool-check:
+	@if ! command -v docker buildx >/dev/null 2>&1; then \
+		echo "'$(CONTAINER)' builx is not installed. Please install '$(CONTAINER)' buildx and try again."; \
 		exit 1; \
 	fi
 
@@ -176,4 +184,4 @@ check-goreleaser-tool-check:
 
 # Check that all the tools are installed.
 .PHONY: check-tools
-check-tools: check-docker-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check check-goreleaser-tool-check
+check-tools: check-docker-tool-check check-docker-buildx-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check check-goreleaser-tool-check

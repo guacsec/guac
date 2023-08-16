@@ -29,7 +29,7 @@ var NotFound = errors.New("Flag not found")
 func init() {
 	set := &pflag.FlagSet{}
 
-	// Set of all flags used across GUAC clis and subcommands. Use consistant
+	// Set of all flags used across GUAC clis and subcommands. Use consistent
 	// names for config file.
 	set.String("nats-addr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	set.String("csub-addr", "localhost:2782", "address to connect to collect-sub service")
@@ -47,6 +47,12 @@ func init() {
 	set.String("neo4j-user", "", "neo4j user credential to connect to graph db")
 	set.String("neo4j-pass", "", "neo4j password credential to connect to graph db")
 	set.String("neo4j-realm", "neo4j", "realm to connect to graph db")
+
+	set.String("neptune-endpoint", "localhost", "address to neptune db")
+	set.Int("neptune-port", 8182, "port used for neptune db connection")
+	set.String("neptune-region", "us-east-1", "region to connect to neptune db")
+	set.String("neptune-user", "", "neptune user credential to connect to graph db")
+	set.String("neptune-realm", "neptune", "realm to connect to graph db")
 
 	set.String("db-address", "postgres://localhost/guac_dev", "Full URL of database to connect to")
 	set.String("db-driver", "postgres", "database driver to use, one of [postgres | sqlite3 | mysql] or anything supported by sql.DB")
@@ -73,6 +79,10 @@ func init() {
 
 	set.StringP("vuln-id", "v", "", "CVE, GHSA or OSV ID to check")
 	set.Int("num-path", 0, "number of paths to return, 0 means all paths")
+	set.String("start-purl", "", "string input of purl with package to start search from")
+	set.String("stop-purl", "", "string input of purl with package to stop search at")
+	set.Bool("is-pkg-version-start", false, "for query path are you inputting a packageVersion to start the search from (if false then packageName)")
+	set.Bool("is-pkg-version-stop", false, "for query path are you inputting a packageVersion to stop the search at (if false then packageName)")
 
 	// Google Cloud platform flags
 	set.String("gcp-credentials-path", "", "Path to the Google Cloud service account credentials json file.\nAlternatively you can set GOOGLE_APPLICATION_CREDENTIALS=<path> in your environment.")

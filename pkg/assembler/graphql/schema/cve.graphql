@@ -50,10 +50,12 @@ input CVEInputSpec {
 
 extend type Query {
   "Returns all CVEs matching a filter."
-  cve(cveSpec: CVESpec): [CVE!]!
+  cve(cveSpec: CVESpec!): [CVE!]!
 }
 
 extend type Mutation {
   "Ingests new CVE and returns it."
   ingestCVE(cve: CVEInputSpec): CVE!
+  "Bulk ingests new CVEs and returns a list of them."
+  ingestCVEs(cves: [CVEInputSpec!]!): [CVE!]!
 }

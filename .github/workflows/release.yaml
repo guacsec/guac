@@ -47,7 +47,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Go
-        uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
       - name: Install cosign
         uses:  sigstore/cosign-installer@6e04d228eb30da1757ee4e1dd75a0ec73a653e06 # main
       - name: Install syft
@@ -56,7 +56,7 @@ jobs:
       - name: Run GoReleaser Snapshot
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         id: run-goreleaser-snapshot
-        uses: goreleaser/goreleaser-action@336e29918d653399e599bfca99fadc1d7ffbc9f7 # v4.3.0
+        uses: goreleaser/goreleaser-action@3fa32b8bb5620a2c1afe798654bbad59f9da4906 # v4.4.0
         with:
           distribution: goreleaser
           version: latest
@@ -68,7 +68,7 @@ jobs:
       - name: Run GoReleaser Release
         if: startsWith(github.ref, 'refs/tags/')
         id: run-goreleaser-release
-        uses: goreleaser/goreleaser-action@336e29918d653399e599bfca99fadc1d7ffbc9f7 # v4.3.0
+        uses: goreleaser/goreleaser-action@3fa32b8bb5620a2c1afe798654bbad59f9da4906 # v4.4.0
         with:
           distribution: goreleaser
           version: latest
@@ -134,7 +134,7 @@ jobs:
     name: generate provenance for binaries
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0 # must use semver here
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.8.0 # must use semver here
     with:
       base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
       upload-assets: true
@@ -143,10 +143,35 @@ jobs:
     name: generate provenance for container
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.7.0 # must use semver here
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.8.0 # must use semver here
     with:
       image: ${{ needs.goreleaser.outputs.image }}
       digest: ${{ needs.goreleaser.outputs.digest }}
       registry-username: ${{ github.actor }}
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+  compose-tarball:
+    runs-on: ubuntu-latest
+    name: generate compose tarball
+    needs: [goreleaser]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # tag=v3
+      - name: Create and publish compose tarball
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          mkdir guac-compose
+          cp .env guac-compose/
+          cp docker-compose.yml guac-compose/
+          cp -r container_files guac-compose/
+          sed -i s/local-organic-guac/ghcr.io\\/${{ github.repository_owner }}\\/guac:${{ github.ref_name }}/ guac-compose/.env
+          tar -zcvf guac-compose-${{ github.ref_name }}.tar.gz guac-compose/
+          rm -rf guac-compose/
+          gh release upload ${{ github.ref_name }} guac-compose-${{ github.ref_name }}.tar.gz
+          rm guac-compose-${{ github.ref_name }}.tar.gz
+        shell: bash
