@@ -557,3 +557,7 @@ func (c *neo4jClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputS
 	// }
 	return nil, fmt.Errorf("not implemented - IngestCertifyVuln")
 }
+
+func (c *neo4jClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
+	return nil, fmt.Errorf("not implemented - IngestCertifyVulns")
+}

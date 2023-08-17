@@ -19,6 +19,20 @@ func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgI
 		certifyVuln)
 }
 
+// IngestCertifyVulns is the resolver for the ingestCertifyVulns field.
+func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
+	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
+	for _, v := range vulnerabilities {
+		lowercaseVulnInput := model.VulnerabilityInputSpec{
+			Type:            strings.ToLower(v.Type),
+			VulnerabilityID: strings.ToLower(v.VulnerabilityID),
+		}
+		lowercaseVulnInputList = append(lowercaseVulnInputList, &lowercaseVulnInput)
+	}
+	return r.Backend.IngestCertifyVulns(ctx, pkgs, lowercaseVulnInputList, certifyVulns)
+}
+
 // CertifyVuln is the resolver for the CertifyVuln field.
 func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase

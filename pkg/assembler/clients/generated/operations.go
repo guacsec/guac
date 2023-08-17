@@ -7372,6 +7372,100 @@ func (v *CertifyVulnPkgResponse) GetIngestCertifyVuln() CertifyVulnPkgIngestCert
 	return v.IngestCertifyVuln
 }
 
+// CertifyVulnPkgsIngestCertifyVulnsCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
+// The GraphQL type's documentation follows.
+//
+// CertifyVuln is an attestation to attach vulnerability information to a package.
+//
+// This information is obtained via a scanner. If there is no vulnerability
+// detected, we attach the a vulnerability with "NoVuln" type and an empty string
+// for the vulnerability ID.
+type CertifyVulnPkgsIngestCertifyVulnsCertifyVuln struct {
+	AllCertifyVuln `json:"-"`
+}
+
+// GetId returns CertifyVulnPkgsIngestCertifyVulnsCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVulnPkgsIngestCertifyVulnsCertifyVuln) GetId() string { return v.AllCertifyVuln.Id }
+
+// GetPackage returns CertifyVulnPkgsIngestCertifyVulnsCertifyVuln.Package, and is useful for accessing the field via an interface.
+func (v *CertifyVulnPkgsIngestCertifyVulnsCertifyVuln) GetPackage() AllCertifyVulnPackage {
+	return v.AllCertifyVuln.Package
+}
+
+// GetVulnerability returns CertifyVulnPkgsIngestCertifyVulnsCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVulnPkgsIngestCertifyVulnsCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
+	return v.AllCertifyVuln.Vulnerability
+}
+
+// GetMetadata returns CertifyVulnPkgsIngestCertifyVulnsCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *CertifyVulnPkgsIngestCertifyVulnsCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
+	return v.AllCertifyVuln.Metadata
+}
+
+func (v *CertifyVulnPkgsIngestCertifyVulnsCertifyVuln) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyVulnPkgsIngestCertifyVulnsCertifyVuln
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyVulnPkgsIngestCertifyVulnsCertifyVuln = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVuln)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyVulnPkgsIngestCertifyVulnsCertifyVuln struct {
+	Id string `json:"id"`
+
+	Package AllCertifyVulnPackage `json:"package"`
+
+	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
+
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
+}
+
+func (v *CertifyVulnPkgsIngestCertifyVulnsCertifyVuln) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyVulnPkgsIngestCertifyVulnsCertifyVuln) __premarshalJSON() (*__premarshalCertifyVulnPkgsIngestCertifyVulnsCertifyVuln, error) {
+	var retval __premarshalCertifyVulnPkgsIngestCertifyVulnsCertifyVuln
+
+	retval.Id = v.AllCertifyVuln.Id
+	retval.Package = v.AllCertifyVuln.Package
+	retval.Vulnerability = v.AllCertifyVuln.Vulnerability
+	retval.Metadata = v.AllCertifyVuln.Metadata
+	return &retval, nil
+}
+
+// CertifyVulnPkgsResponse is returned by CertifyVulnPkgs on success.
+type CertifyVulnPkgsResponse struct {
+	// Bulk add certifications that a package has been scanned for vulnerabilities.
+	IngestCertifyVulns []CertifyVulnPkgsIngestCertifyVulnsCertifyVuln `json:"ingestCertifyVulns"`
+}
+
+// GetIngestCertifyVulns returns CertifyVulnPkgsResponse.IngestCertifyVulns, and is useful for accessing the field via an interface.
+func (v *CertifyVulnPkgsResponse) GetIngestCertifyVulns() []CertifyVulnPkgsIngestCertifyVulnsCertifyVuln {
+	return v.IngestCertifyVulns
+}
+
 // DependencyType determines the type of the dependency.
 type DependencyType string
 
@@ -22785,6 +22879,24 @@ func (v *__CertifyVulnPkgInput) GetVulnerability() VulnerabilityInputSpec { retu
 // GetCertifyVuln returns __CertifyVulnPkgInput.CertifyVuln, and is useful for accessing the field via an interface.
 func (v *__CertifyVulnPkgInput) GetCertifyVuln() ScanMetadataInput { return v.CertifyVuln }
 
+// __CertifyVulnPkgsInput is used internally by genqlient
+type __CertifyVulnPkgsInput struct {
+	Pkgs            []PkgInputSpec           `json:"pkgs"`
+	Vulnerabilities []VulnerabilityInputSpec `json:"vulnerabilities"`
+	CertifyVulns    []ScanMetadataInput      `json:"certifyVulns"`
+}
+
+// GetPkgs returns __CertifyVulnPkgsInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetVulnerabilities returns __CertifyVulnPkgsInput.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnPkgsInput) GetVulnerabilities() []VulnerabilityInputSpec {
+	return v.Vulnerabilities
+}
+
+// GetCertifyVulns returns __CertifyVulnPkgsInput.CertifyVulns, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnPkgsInput) GetCertifyVulns() []ScanMetadataInput { return v.CertifyVulns }
+
 // __FindSoftwareInput is used internally by genqlient
 type __FindSoftwareInput struct {
 	SearchText string `json:"searchText"`
@@ -25017,6 +25129,92 @@ func CertifyVulnPkg(
 	var err error
 
 	var data CertifyVulnPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyVulnPkgs.
+const CertifyVulnPkgs_Operation = `
+mutation CertifyVulnPkgs ($pkgs: [PkgInputSpec!]!, $vulnerabilities: [VulnerabilityInputSpec!]!, $certifyVulns: [ScanMetadataInput!]!) {
+	ingestCertifyVulns(pkgs: $pkgs, vulnerabilities: $vulnerabilities, certifyVulns: $certifyVulns) {
+		... AllCertifyVuln
+	}
+}
+fragment AllCertifyVuln on CertifyVuln {
+	id
+	package {
+		... AllPkgTree
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func CertifyVulnPkgs(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	vulnerabilities []VulnerabilityInputSpec,
+	certifyVulns []ScanMetadataInput,
+) (*CertifyVulnPkgsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyVulnPkgs",
+		Query:  CertifyVulnPkgs_Operation,
+		Variables: &__CertifyVulnPkgsInput{
+			Pkgs:            pkgs,
+			Vulnerabilities: vulnerabilities,
+			CertifyVulns:    certifyVulns,
+		},
+	}
+	var err error
+
+	var data CertifyVulnPkgsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
