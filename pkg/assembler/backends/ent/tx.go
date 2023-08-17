@@ -48,14 +48,14 @@ type Tx struct {
 	SLSAAttestation *SLSAAttestationClient
 	// Scorecard is the client for interacting with the Scorecard builders.
 	Scorecard *ScorecardClient
-	// SecurityAdvisory is the client for interacting with the SecurityAdvisory builders.
-	SecurityAdvisory *SecurityAdvisoryClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// SourceNamespace is the client for interacting with the SourceNamespace builders.
 	SourceNamespace *SourceNamespaceClient
 	// SourceType is the client for interacting with the SourceType builders.
 	SourceType *SourceTypeClient
+	// Vulnerability is the client for interacting with the Vulnerability builders.
+	Vulnerability *VulnerabilityClient
 
 	// lazily loaded.
 	client     *Client
@@ -205,10 +205,10 @@ func (tx *Tx) init() {
 	tx.PkgEqual = NewPkgEqualClient(tx.config)
 	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
 	tx.Scorecard = NewScorecardClient(tx.config)
-	tx.SecurityAdvisory = NewSecurityAdvisoryClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)
 	tx.SourceType = NewSourceTypeClient(tx.config)
+	tx.Vulnerability = NewVulnerabilityClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

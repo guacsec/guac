@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
 )
 
 // CertifyVuln is the model entity for the CertifyVuln schema.
@@ -46,7 +46,7 @@ type CertifyVuln struct {
 // CertifyVulnEdges holds the relations/edges for other nodes in the graph.
 type CertifyVulnEdges struct {
 	// Vulnerability is one of OSV, GHSA, or CVE
-	Vulnerability *SecurityAdvisory `json:"vulnerability,omitempty"`
+	Vulnerability *Vulnerability `json:"vulnerability,omitempty"`
 	// Package holds the value of the package edge.
 	Package *PackageVersion `json:"package,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -58,11 +58,11 @@ type CertifyVulnEdges struct {
 
 // VulnerabilityOrErr returns the Vulnerability value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e CertifyVulnEdges) VulnerabilityOrErr() (*SecurityAdvisory, error) {
+func (e CertifyVulnEdges) VulnerabilityOrErr() (*Vulnerability, error) {
 	if e.loadedTypes[0] {
 		if e.Vulnerability == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: securityadvisory.Label}
+			return nil, &NotFoundError{label: vulnerability.Label}
 		}
 		return e.Vulnerability, nil
 	}
@@ -183,7 +183,7 @@ func (cv *CertifyVuln) Value(name string) (ent.Value, error) {
 }
 
 // QueryVulnerability queries the "vulnerability" edge of the CertifyVuln entity.
-func (cv *CertifyVuln) QueryVulnerability() *SecurityAdvisoryQuery {
+func (cv *CertifyVuln) QueryVulnerability() *VulnerabilityQuery {
 	return NewCertifyVulnClient(cv.config).QueryVulnerability(cv)
 }
 

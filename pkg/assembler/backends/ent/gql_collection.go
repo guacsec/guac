@@ -24,11 +24,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
 )
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
@@ -628,7 +628,7 @@ func (cv *CertifyVulnQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = (&SecurityAdvisoryClient{config: cv.config}).Query()
+				query = (&VulnerabilityClient{config: cv.config}).Query()
 			)
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
@@ -1104,7 +1104,7 @@ func (iv *IsVulnerabilityQuery) collectField(ctx context.Context, opCtx *graphql
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = (&SecurityAdvisoryClient{config: iv.config}).Query()
+				query = (&VulnerabilityClient{config: iv.config}).Query()
 			)
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
@@ -1118,7 +1118,7 @@ func (iv *IsVulnerabilityQuery) collectField(ctx context.Context, opCtx *graphql
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = (&SecurityAdvisoryClient{config: iv.config}).Query()
+				query = (&VulnerabilityClient{config: iv.config}).Query()
 			)
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
@@ -2069,85 +2069,6 @@ func newScorecardPaginateArgs(rv map[string]any) *scorecardPaginateArgs {
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (sa *SecurityAdvisoryQuery) CollectFields(ctx context.Context, satisfies ...string) (*SecurityAdvisoryQuery, error) {
-	fc := graphql.GetFieldContext(ctx)
-	if fc == nil {
-		return sa, nil
-	}
-	if err := sa.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
-		return nil, err
-	}
-	return sa, nil
-}
-
-func (sa *SecurityAdvisoryQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
-	path = append([]string(nil), path...)
-	var (
-		unknownSeen    bool
-		fieldSeen      = make(map[string]struct{}, len(securityadvisory.Columns))
-		selectedFields = []string{securityadvisory.FieldID}
-	)
-	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
-		switch field.Name {
-		case "ghsaID":
-			if _, ok := fieldSeen[securityadvisory.FieldGhsaID]; !ok {
-				selectedFields = append(selectedFields, securityadvisory.FieldGhsaID)
-				fieldSeen[securityadvisory.FieldGhsaID] = struct{}{}
-			}
-		case "cveID":
-			if _, ok := fieldSeen[securityadvisory.FieldCveID]; !ok {
-				selectedFields = append(selectedFields, securityadvisory.FieldCveID)
-				fieldSeen[securityadvisory.FieldCveID] = struct{}{}
-			}
-		case "cveYear":
-			if _, ok := fieldSeen[securityadvisory.FieldCveYear]; !ok {
-				selectedFields = append(selectedFields, securityadvisory.FieldCveYear)
-				fieldSeen[securityadvisory.FieldCveYear] = struct{}{}
-			}
-		case "osvID":
-			if _, ok := fieldSeen[securityadvisory.FieldOsvID]; !ok {
-				selectedFields = append(selectedFields, securityadvisory.FieldOsvID)
-				fieldSeen[securityadvisory.FieldOsvID] = struct{}{}
-			}
-		case "id":
-		case "__typename":
-		default:
-			unknownSeen = true
-		}
-	}
-	if !unknownSeen {
-		sa.Select(selectedFields...)
-	}
-	return nil
-}
-
-type securityadvisoryPaginateArgs struct {
-	first, last   *int
-	after, before *Cursor
-	opts          []SecurityAdvisoryPaginateOption
-}
-
-func newSecurityAdvisoryPaginateArgs(rv map[string]any) *securityadvisoryPaginateArgs {
-	args := &securityadvisoryPaginateArgs{}
-	if rv == nil {
-		return args
-	}
-	if v := rv[firstField]; v != nil {
-		args.first = v.(*int)
-	}
-	if v := rv[lastField]; v != nil {
-		args.last = v.(*int)
-	}
-	if v := rv[afterField]; v != nil {
-		args.after = v.(*Cursor)
-	}
-	if v := rv[beforeField]; v != nil {
-		args.before = v.(*Cursor)
-	}
-	return args
-}
-
-// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
 func (sn *SourceNameQuery) CollectFields(ctx context.Context, satisfies ...string) (*SourceNameQuery, error) {
 	fc := graphql.GetFieldContext(ctx)
 	if fc == nil {
@@ -2405,6 +2326,85 @@ type sourcetypePaginateArgs struct {
 
 func newSourceTypePaginateArgs(rv map[string]any) *sourcetypePaginateArgs {
 	args := &sourcetypePaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (v *VulnerabilityQuery) CollectFields(ctx context.Context, satisfies ...string) (*VulnerabilityQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return v, nil
+	}
+	if err := v.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+func (v *VulnerabilityQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(vulnerability.Columns))
+		selectedFields = []string{vulnerability.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "ghsaID":
+			if _, ok := fieldSeen[vulnerability.FieldGhsaID]; !ok {
+				selectedFields = append(selectedFields, vulnerability.FieldGhsaID)
+				fieldSeen[vulnerability.FieldGhsaID] = struct{}{}
+			}
+		case "cveID":
+			if _, ok := fieldSeen[vulnerability.FieldCveID]; !ok {
+				selectedFields = append(selectedFields, vulnerability.FieldCveID)
+				fieldSeen[vulnerability.FieldCveID] = struct{}{}
+			}
+		case "cveYear":
+			if _, ok := fieldSeen[vulnerability.FieldCveYear]; !ok {
+				selectedFields = append(selectedFields, vulnerability.FieldCveYear)
+				fieldSeen[vulnerability.FieldCveYear] = struct{}{}
+			}
+		case "osvID":
+			if _, ok := fieldSeen[vulnerability.FieldOsvID]; !ok {
+				selectedFields = append(selectedFields, vulnerability.FieldOsvID)
+				fieldSeen[vulnerability.FieldOsvID] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		v.Select(selectedFields...)
+	}
+	return nil
+}
+
+type vulnerabilityPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []VulnerabilityPaginateOption
+}
+
+func newVulnerabilityPaginateArgs(rv map[string]any) *vulnerabilityPaginateArgs {
+	args := &vulnerabilityPaginateArgs{}
 	if rv == nil {
 		return args
 	}

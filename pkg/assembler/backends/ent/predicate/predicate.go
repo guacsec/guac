@@ -60,9 +60,6 @@ type SLSAAttestation func(*sql.Selector)
 // Scorecard is the predicate function for scorecard builders.
 type Scorecard func(*sql.Selector)
 
-// SecurityAdvisory is the predicate function for securityadvisory builders.
-type SecurityAdvisory func(*sql.Selector)
-
 // SourceName is the predicate function for sourcename builders.
 type SourceName func(*sql.Selector)
 
@@ -71,3 +68,6 @@ type SourceNamespace func(*sql.Selector)
 
 // SourceType is the predicate function for sourcetype builders.
 type SourceType func(*sql.Selector)
+
+// Vulnerability is the predicate function for vulnerability builders.
+type Vulnerability func(*sql.Selector)

@@ -13,7 +13,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
 )
 
 // CertifyVulnQuery is the builder for querying CertifyVuln entities.
@@ -23,7 +23,7 @@ type CertifyVulnQuery struct {
 	order             []certifyvuln.OrderOption
 	inters            []Interceptor
 	predicates        []predicate.CertifyVuln
-	withVulnerability *SecurityAdvisoryQuery
+	withVulnerability *VulnerabilityQuery
 	withPackage       *PackageVersionQuery
 	modifiers         []func(*sql.Selector)
 	loadTotal         []func(context.Context, []*CertifyVuln) error
@@ -64,8 +64,8 @@ func (cvq *CertifyVulnQuery) Order(o ...certifyvuln.OrderOption) *CertifyVulnQue
 }
 
 // QueryVulnerability chains the current query on the "vulnerability" edge.
-func (cvq *CertifyVulnQuery) QueryVulnerability() *SecurityAdvisoryQuery {
-	query := (&SecurityAdvisoryClient{config: cvq.config}).Query()
+func (cvq *CertifyVulnQuery) QueryVulnerability() *VulnerabilityQuery {
+	query := (&VulnerabilityClient{config: cvq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cvq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,7 +76,7 @@ func (cvq *CertifyVulnQuery) QueryVulnerability() *SecurityAdvisoryQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvuln.Table, certifyvuln.FieldID, selector),
-			sqlgraph.To(securityadvisory.Table, securityadvisory.FieldID),
+			sqlgraph.To(vulnerability.Table, vulnerability.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvuln.VulnerabilityTable, certifyvuln.VulnerabilityColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cvq.driver.Dialect(), step)
@@ -309,8 +309,8 @@ func (cvq *CertifyVulnQuery) Clone() *CertifyVulnQuery {
 
 // WithVulnerability tells the query-builder to eager-load the nodes that are connected to
 // the "vulnerability" edge. The optional arguments are used to configure the query builder of the edge.
-func (cvq *CertifyVulnQuery) WithVulnerability(opts ...func(*SecurityAdvisoryQuery)) *CertifyVulnQuery {
-	query := (&SecurityAdvisoryClient{config: cvq.config}).Query()
+func (cvq *CertifyVulnQuery) WithVulnerability(opts ...func(*VulnerabilityQuery)) *CertifyVulnQuery {
+	query := (&VulnerabilityClient{config: cvq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -435,7 +435,7 @@ func (cvq *CertifyVulnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	}
 	if query := cvq.withVulnerability; query != nil {
 		if err := cvq.loadVulnerability(ctx, query, nodes, nil,
-			func(n *CertifyVuln, e *SecurityAdvisory) { n.Edges.Vulnerability = e }); err != nil {
+			func(n *CertifyVuln, e *Vulnerability) { n.Edges.Vulnerability = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -453,7 +453,7 @@ func (cvq *CertifyVulnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	return nodes, nil
 }
 
-func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *SecurityAdvisoryQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *SecurityAdvisory)) error {
+func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *VulnerabilityQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *Vulnerability)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*CertifyVuln)
 	for i := range nodes {
@@ -469,7 +469,7 @@ func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *Secur
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(securityadvisory.IDIn(ids...))
+	query.Where(vulnerability.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

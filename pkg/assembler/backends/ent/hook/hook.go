@@ -225,18 +225,6 @@ func (f ScorecardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ScorecardMutation", m)
 }
 
-// The SecurityAdvisoryFunc type is an adapter to allow the use of ordinary
-// function as SecurityAdvisory mutator.
-type SecurityAdvisoryFunc func(context.Context, *ent.SecurityAdvisoryMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f SecurityAdvisoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.SecurityAdvisoryMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SecurityAdvisoryMutation", m)
-}
-
 // The SourceNameFunc type is an adapter to allow the use of ordinary
 // function as SourceName mutator.
 type SourceNameFunc func(context.Context, *ent.SourceNameMutation) (ent.Value, error)
@@ -271,6 +259,18 @@ func (f SourceTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SourceTypeMutation", m)
+}
+
+// The VulnerabilityFunc type is an adapter to allow the use of ordinary
+// function as Vulnerability mutator.
+type VulnerabilityFunc func(context.Context, *ent.VulnerabilityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VulnerabilityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VulnerabilityMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VulnerabilityMutation", m)
 }
 
 // Condition is a hook condition function.

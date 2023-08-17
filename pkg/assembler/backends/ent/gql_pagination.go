@@ -28,11 +28,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -4544,252 +4544,6 @@ func (s *Scorecard) ToEdge(order *ScorecardOrder) *ScorecardEdge {
 	}
 }
 
-// SecurityAdvisoryEdge is the edge representation of SecurityAdvisory.
-type SecurityAdvisoryEdge struct {
-	Node   *SecurityAdvisory `json:"node"`
-	Cursor Cursor            `json:"cursor"`
-}
-
-// SecurityAdvisoryConnection is the connection containing edges to SecurityAdvisory.
-type SecurityAdvisoryConnection struct {
-	Edges      []*SecurityAdvisoryEdge `json:"edges"`
-	PageInfo   PageInfo                `json:"pageInfo"`
-	TotalCount int                     `json:"totalCount"`
-}
-
-func (c *SecurityAdvisoryConnection) build(nodes []*SecurityAdvisory, pager *securityadvisoryPager, after *Cursor, first *int, before *Cursor, last *int) {
-	c.PageInfo.HasNextPage = before != nil
-	c.PageInfo.HasPreviousPage = after != nil
-	if first != nil && *first+1 == len(nodes) {
-		c.PageInfo.HasNextPage = true
-		nodes = nodes[:len(nodes)-1]
-	} else if last != nil && *last+1 == len(nodes) {
-		c.PageInfo.HasPreviousPage = true
-		nodes = nodes[:len(nodes)-1]
-	}
-	var nodeAt func(int) *SecurityAdvisory
-	if last != nil {
-		n := len(nodes) - 1
-		nodeAt = func(i int) *SecurityAdvisory {
-			return nodes[n-i]
-		}
-	} else {
-		nodeAt = func(i int) *SecurityAdvisory {
-			return nodes[i]
-		}
-	}
-	c.Edges = make([]*SecurityAdvisoryEdge, len(nodes))
-	for i := range nodes {
-		node := nodeAt(i)
-		c.Edges[i] = &SecurityAdvisoryEdge{
-			Node:   node,
-			Cursor: pager.toCursor(node),
-		}
-	}
-	if l := len(c.Edges); l > 0 {
-		c.PageInfo.StartCursor = &c.Edges[0].Cursor
-		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
-	}
-	if c.TotalCount == 0 {
-		c.TotalCount = len(nodes)
-	}
-}
-
-// SecurityAdvisoryPaginateOption enables pagination customization.
-type SecurityAdvisoryPaginateOption func(*securityadvisoryPager) error
-
-// WithSecurityAdvisoryOrder configures pagination ordering.
-func WithSecurityAdvisoryOrder(order *SecurityAdvisoryOrder) SecurityAdvisoryPaginateOption {
-	if order == nil {
-		order = DefaultSecurityAdvisoryOrder
-	}
-	o := *order
-	return func(pager *securityadvisoryPager) error {
-		if err := o.Direction.Validate(); err != nil {
-			return err
-		}
-		if o.Field == nil {
-			o.Field = DefaultSecurityAdvisoryOrder.Field
-		}
-		pager.order = &o
-		return nil
-	}
-}
-
-// WithSecurityAdvisoryFilter configures pagination filter.
-func WithSecurityAdvisoryFilter(filter func(*SecurityAdvisoryQuery) (*SecurityAdvisoryQuery, error)) SecurityAdvisoryPaginateOption {
-	return func(pager *securityadvisoryPager) error {
-		if filter == nil {
-			return errors.New("SecurityAdvisoryQuery filter cannot be nil")
-		}
-		pager.filter = filter
-		return nil
-	}
-}
-
-type securityadvisoryPager struct {
-	reverse bool
-	order   *SecurityAdvisoryOrder
-	filter  func(*SecurityAdvisoryQuery) (*SecurityAdvisoryQuery, error)
-}
-
-func newSecurityAdvisoryPager(opts []SecurityAdvisoryPaginateOption, reverse bool) (*securityadvisoryPager, error) {
-	pager := &securityadvisoryPager{reverse: reverse}
-	for _, opt := range opts {
-		if err := opt(pager); err != nil {
-			return nil, err
-		}
-	}
-	if pager.order == nil {
-		pager.order = DefaultSecurityAdvisoryOrder
-	}
-	return pager, nil
-}
-
-func (p *securityadvisoryPager) applyFilter(query *SecurityAdvisoryQuery) (*SecurityAdvisoryQuery, error) {
-	if p.filter != nil {
-		return p.filter(query)
-	}
-	return query, nil
-}
-
-func (p *securityadvisoryPager) toCursor(sa *SecurityAdvisory) Cursor {
-	return p.order.Field.toCursor(sa)
-}
-
-func (p *securityadvisoryPager) applyCursors(query *SecurityAdvisoryQuery, after, before *Cursor) (*SecurityAdvisoryQuery, error) {
-	direction := p.order.Direction
-	if p.reverse {
-		direction = direction.Reverse()
-	}
-	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultSecurityAdvisoryOrder.Field.column, p.order.Field.column, direction) {
-		query = query.Where(predicate)
-	}
-	return query, nil
-}
-
-func (p *securityadvisoryPager) applyOrder(query *SecurityAdvisoryQuery) *SecurityAdvisoryQuery {
-	direction := p.order.Direction
-	if p.reverse {
-		direction = direction.Reverse()
-	}
-	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
-	if p.order.Field != DefaultSecurityAdvisoryOrder.Field {
-		query = query.Order(DefaultSecurityAdvisoryOrder.Field.toTerm(direction.OrderTermOption()))
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(p.order.Field.column)
-	}
-	return query
-}
-
-func (p *securityadvisoryPager) orderExpr(query *SecurityAdvisoryQuery) sql.Querier {
-	direction := p.order.Direction
-	if p.reverse {
-		direction = direction.Reverse()
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(p.order.Field.column)
-	}
-	return sql.ExprFunc(func(b *sql.Builder) {
-		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
-		if p.order.Field != DefaultSecurityAdvisoryOrder.Field {
-			b.Comma().Ident(DefaultSecurityAdvisoryOrder.Field.column).Pad().WriteString(string(direction))
-		}
-	})
-}
-
-// Paginate executes the query and returns a relay based cursor connection to SecurityAdvisory.
-func (sa *SecurityAdvisoryQuery) Paginate(
-	ctx context.Context, after *Cursor, first *int,
-	before *Cursor, last *int, opts ...SecurityAdvisoryPaginateOption,
-) (*SecurityAdvisoryConnection, error) {
-	if err := validateFirstLast(first, last); err != nil {
-		return nil, err
-	}
-	pager, err := newSecurityAdvisoryPager(opts, last != nil)
-	if err != nil {
-		return nil, err
-	}
-	if sa, err = pager.applyFilter(sa); err != nil {
-		return nil, err
-	}
-	conn := &SecurityAdvisoryConnection{Edges: []*SecurityAdvisoryEdge{}}
-	ignoredEdges := !hasCollectedField(ctx, edgesField)
-	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
-		hasPagination := after != nil || first != nil || before != nil || last != nil
-		if hasPagination || ignoredEdges {
-			if conn.TotalCount, err = sa.Clone().Count(ctx); err != nil {
-				return nil, err
-			}
-			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
-			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
-		}
-	}
-	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
-		return conn, nil
-	}
-	if sa, err = pager.applyCursors(sa, after, before); err != nil {
-		return nil, err
-	}
-	if limit := paginateLimit(first, last); limit != 0 {
-		sa.Limit(limit)
-	}
-	if field := collectedField(ctx, edgesField, nodeField); field != nil {
-		if err := sa.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
-			return nil, err
-		}
-	}
-	sa = pager.applyOrder(sa)
-	nodes, err := sa.All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	conn.build(nodes, pager, after, first, before, last)
-	return conn, nil
-}
-
-// SecurityAdvisoryOrderField defines the ordering field of SecurityAdvisory.
-type SecurityAdvisoryOrderField struct {
-	// Value extracts the ordering value from the given SecurityAdvisory.
-	Value    func(*SecurityAdvisory) (ent.Value, error)
-	column   string // field or computed.
-	toTerm   func(...sql.OrderTermOption) securityadvisory.OrderOption
-	toCursor func(*SecurityAdvisory) Cursor
-}
-
-// SecurityAdvisoryOrder defines the ordering of SecurityAdvisory.
-type SecurityAdvisoryOrder struct {
-	Direction OrderDirection              `json:"direction"`
-	Field     *SecurityAdvisoryOrderField `json:"field"`
-}
-
-// DefaultSecurityAdvisoryOrder is the default ordering of SecurityAdvisory.
-var DefaultSecurityAdvisoryOrder = &SecurityAdvisoryOrder{
-	Direction: entgql.OrderDirectionAsc,
-	Field: &SecurityAdvisoryOrderField{
-		Value: func(sa *SecurityAdvisory) (ent.Value, error) {
-			return sa.ID, nil
-		},
-		column: securityadvisory.FieldID,
-		toTerm: securityadvisory.ByID,
-		toCursor: func(sa *SecurityAdvisory) Cursor {
-			return Cursor{ID: sa.ID}
-		},
-	},
-}
-
-// ToEdge converts SecurityAdvisory into SecurityAdvisoryEdge.
-func (sa *SecurityAdvisory) ToEdge(order *SecurityAdvisoryOrder) *SecurityAdvisoryEdge {
-	if order == nil {
-		order = DefaultSecurityAdvisoryOrder
-	}
-	return &SecurityAdvisoryEdge{
-		Node:   sa,
-		Cursor: order.Field.toCursor(sa),
-	}
-}
-
 // SourceNameEdge is the edge representation of SourceName.
 type SourceNameEdge struct {
 	Node   *SourceName `json:"node"`
@@ -5525,5 +5279,251 @@ func (st *SourceType) ToEdge(order *SourceTypeOrder) *SourceTypeEdge {
 	return &SourceTypeEdge{
 		Node:   st,
 		Cursor: order.Field.toCursor(st),
+	}
+}
+
+// VulnerabilityEdge is the edge representation of Vulnerability.
+type VulnerabilityEdge struct {
+	Node   *Vulnerability `json:"node"`
+	Cursor Cursor         `json:"cursor"`
+}
+
+// VulnerabilityConnection is the connection containing edges to Vulnerability.
+type VulnerabilityConnection struct {
+	Edges      []*VulnerabilityEdge `json:"edges"`
+	PageInfo   PageInfo             `json:"pageInfo"`
+	TotalCount int                  `json:"totalCount"`
+}
+
+func (c *VulnerabilityConnection) build(nodes []*Vulnerability, pager *vulnerabilityPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *Vulnerability
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *Vulnerability {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *Vulnerability {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*VulnerabilityEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &VulnerabilityEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// VulnerabilityPaginateOption enables pagination customization.
+type VulnerabilityPaginateOption func(*vulnerabilityPager) error
+
+// WithVulnerabilityOrder configures pagination ordering.
+func WithVulnerabilityOrder(order *VulnerabilityOrder) VulnerabilityPaginateOption {
+	if order == nil {
+		order = DefaultVulnerabilityOrder
+	}
+	o := *order
+	return func(pager *vulnerabilityPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultVulnerabilityOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithVulnerabilityFilter configures pagination filter.
+func WithVulnerabilityFilter(filter func(*VulnerabilityQuery) (*VulnerabilityQuery, error)) VulnerabilityPaginateOption {
+	return func(pager *vulnerabilityPager) error {
+		if filter == nil {
+			return errors.New("VulnerabilityQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type vulnerabilityPager struct {
+	reverse bool
+	order   *VulnerabilityOrder
+	filter  func(*VulnerabilityQuery) (*VulnerabilityQuery, error)
+}
+
+func newVulnerabilityPager(opts []VulnerabilityPaginateOption, reverse bool) (*vulnerabilityPager, error) {
+	pager := &vulnerabilityPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultVulnerabilityOrder
+	}
+	return pager, nil
+}
+
+func (p *vulnerabilityPager) applyFilter(query *VulnerabilityQuery) (*VulnerabilityQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *vulnerabilityPager) toCursor(v *Vulnerability) Cursor {
+	return p.order.Field.toCursor(v)
+}
+
+func (p *vulnerabilityPager) applyCursors(query *VulnerabilityQuery, after, before *Cursor) (*VulnerabilityQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultVulnerabilityOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *vulnerabilityPager) applyOrder(query *VulnerabilityQuery) *VulnerabilityQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultVulnerabilityOrder.Field {
+		query = query.Order(DefaultVulnerabilityOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *vulnerabilityPager) orderExpr(query *VulnerabilityQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultVulnerabilityOrder.Field {
+			b.Comma().Ident(DefaultVulnerabilityOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to Vulnerability.
+func (v *VulnerabilityQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...VulnerabilityPaginateOption,
+) (*VulnerabilityConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newVulnerabilityPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if v, err = pager.applyFilter(v); err != nil {
+		return nil, err
+	}
+	conn := &VulnerabilityConnection{Edges: []*VulnerabilityEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = v.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if v, err = pager.applyCursors(v, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		v.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := v.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	v = pager.applyOrder(v)
+	nodes, err := v.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// VulnerabilityOrderField defines the ordering field of Vulnerability.
+type VulnerabilityOrderField struct {
+	// Value extracts the ordering value from the given Vulnerability.
+	Value    func(*Vulnerability) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) vulnerability.OrderOption
+	toCursor func(*Vulnerability) Cursor
+}
+
+// VulnerabilityOrder defines the ordering of Vulnerability.
+type VulnerabilityOrder struct {
+	Direction OrderDirection           `json:"direction"`
+	Field     *VulnerabilityOrderField `json:"field"`
+}
+
+// DefaultVulnerabilityOrder is the default ordering of Vulnerability.
+var DefaultVulnerabilityOrder = &VulnerabilityOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &VulnerabilityOrderField{
+		Value: func(v *Vulnerability) (ent.Value, error) {
+			return v.ID, nil
+		},
+		column: vulnerability.FieldID,
+		toTerm: vulnerability.ByID,
+		toCursor: func(v *Vulnerability) Cursor {
+			return Cursor{ID: v.ID}
+		},
+	},
+}
+
+// ToEdge converts Vulnerability into VulnerabilityEdge.
+func (v *Vulnerability) ToEdge(order *VulnerabilityOrder) *VulnerabilityEdge {
+	if order == nil {
+		order = DefaultVulnerabilityOrder
+	}
+	return &VulnerabilityEdge{
+		Node:   v,
+		Cursor: order.Field.toCursor(v),
 	}
 }

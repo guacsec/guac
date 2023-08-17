@@ -30,11 +30,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/securityadvisory"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/semaphore"
 )
@@ -99,9 +99,6 @@ func (n *SLSAAttestation) IsNode() {}
 func (n *Scorecard) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *SecurityAdvisory) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
 func (n *SourceName) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
@@ -109,6 +106,9 @@ func (n *SourceNamespace) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *SourceType) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Vulnerability) IsNode() {}
 
 var errNodeInvalidID = &NotFoundError{"node"}
 
@@ -384,18 +384,6 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			return nil, err
 		}
 		return n, nil
-	case securityadvisory.Table:
-		query := c.SecurityAdvisory.Query().
-			Where(securityadvisory.ID(id))
-		query, err := query.CollectFields(ctx, "SecurityAdvisory")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
 	case sourcename.Table:
 		query := c.SourceName.Query().
 			Where(sourcename.ID(id))
@@ -424,6 +412,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.SourceType.Query().
 			Where(sourcetype.ID(id))
 		query, err := query.CollectFields(ctx, "SourceType")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case vulnerability.Table:
+		query := c.Vulnerability.Query().
+			Where(vulnerability.ID(id))
+		query, err := query.CollectFields(ctx, "Vulnerability")
 		if err != nil {
 			return nil, err
 		}
@@ -793,22 +793,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
-	case securityadvisory.Table:
-		query := c.SecurityAdvisory.Query().
-			Where(securityadvisory.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "SecurityAdvisory")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	case sourcename.Table:
 		query := c.SourceName.Query().
 			Where(sourcename.IDIn(ids...))
@@ -845,6 +829,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.SourceType.Query().
 			Where(sourcetype.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "SourceType")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case vulnerability.Table:
+		query := c.Vulnerability.Query().
+			Where(vulnerability.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Vulnerability")
 		if err != nil {
 			return nil, err
 		}

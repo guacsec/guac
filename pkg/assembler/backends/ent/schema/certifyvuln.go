@@ -31,7 +31,7 @@ func (CertifyVuln) Fields() []ent.Field {
 // Edges of the Vulnerability.
 func (CertifyVuln) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("vulnerability", SecurityAdvisory.Type).Unique().Field("vulnerability_id").Comment("Vulnerability is one of OSV, GHSA, or CVE"),
+		edge.To("vulnerability", Vulnerability.Type).Unique().Field("vulnerability_id").Comment("Vulnerability is one of OSV, GHSA, or CVE"),
 		edge.To("package", PackageVersion.Type).Unique().Field("package_id").Required(),
 	}
 }

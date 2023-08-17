@@ -132,7 +132,7 @@ func (cs *CertifyScorecard) Source(ctx context.Context) (*SourceName, error) {
 	return result, err
 }
 
-func (cv *CertifyVuln) Vulnerability(ctx context.Context) (*SecurityAdvisory, error) {
+func (cv *CertifyVuln) Vulnerability(ctx context.Context) (*Vulnerability, error) {
 	result, err := cv.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
 		result, err = cv.QueryVulnerability().Only(ctx)
@@ -200,7 +200,7 @@ func (he *HashEqual) Artifacts(ctx context.Context) (result []*Artifact, err err
 	return result, err
 }
 
-func (iv *IsVulnerability) Osv(ctx context.Context) (*SecurityAdvisory, error) {
+func (iv *IsVulnerability) Osv(ctx context.Context) (*Vulnerability, error) {
 	result, err := iv.Edges.OsvOrErr()
 	if IsNotLoaded(err) {
 		result, err = iv.QueryOsv().Only(ctx)
@@ -208,7 +208,7 @@ func (iv *IsVulnerability) Osv(ctx context.Context) (*SecurityAdvisory, error) {
 	return result, err
 }
 
-func (iv *IsVulnerability) Vulnerability(ctx context.Context) (*SecurityAdvisory, error) {
+func (iv *IsVulnerability) Vulnerability(ctx context.Context) (*Vulnerability, error) {
 	result, err := iv.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
 		result, err = iv.QueryVulnerability().Only(ctx)
