@@ -357,12 +357,25 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		},
 		{
 			Name:   "Query No Vuln - with novuln boolen",
-			InVuln: []*model.VulnerabilityInputSpec{noVulnInput},
-			InPkg:  []*model.PkgInputSpec{p2},
+			InVuln: []*model.VulnerabilityInputSpec{noVulnInput, c1},
+			InPkg:  []*model.PkgInputSpec{p2, p1},
 			Calls: []call{
 				{
 					Pkg:  p2,
 					Vuln: noVulnInput,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+				{
+					Pkg:  p1,
+					Vuln: c1,
 					CertifyVuln: &model.ScanMetadataInput{
 						Collector:      "test collector",
 						Origin:         "test origin",
@@ -437,6 +450,122 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					Metadata: vmd1,
 				},
 			},
+		},
+		{
+			Name:   "Query all vulns - with novuln boolean omitted",
+			InVuln: []*model.VulnerabilityInputSpec{noVulnInput, c1, g1},
+			InPkg:  []*model.PkgInputSpec{p2, p1, p1},
+			Calls: []call{
+				{
+					Pkg:  p2,
+					Vuln: noVulnInput,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+				{
+					Pkg:  p1,
+					Vuln: c1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+				{
+					Pkg:  p1,
+					Vuln: g1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{},
+			},
+			ExpVuln: []*model.CertifyVuln{
+				{
+					Package: p2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "novuln",
+						VulnerabilityIDs: []*model.VulnerabilityID{noVulnOut},
+					},
+					Metadata: vmd1,
+				},
+				{
+					Package: p1out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
+					},
+					Metadata: vmd1,
+				},
+				{
+					Package: p1out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "ghsa",
+						VulnerabilityIDs: []*model.VulnerabilityID{g1out},
+					},
+					Metadata: vmd1,
+				},
+			},
+		},
+		{
+			Name:   "Query No Vuln - with novuln boolen false but type set to novuln",
+			InVuln: []*model.VulnerabilityInputSpec{noVulnInput, c1},
+			InPkg:  []*model.PkgInputSpec{p2, p1},
+			Calls: []call{
+				{
+					Pkg:  p2,
+					Vuln: noVulnInput,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+				{
+					Pkg:  p1,
+					Vuln: c1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					NoVuln: ptrfrom.Bool(false),
+					Type:   ptrfrom.String("novuln"),
+				},
+			},
+			ExpVuln:     []*model.CertifyVuln{},
+			ExpQueryErr: true,
 		},
 		{
 			Name:  "Ingest without vuln",

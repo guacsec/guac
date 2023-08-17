@@ -227,8 +227,14 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			search = append(search, exactVuln.certifyVulnLinks...)
 			foundOne = true
 		}
-	}
-	if !foundOne && filter != nil && filter.Vulnerability != nil {
+	} else if !foundOne && filter != nil && filter.Vulnerability != nil {
+
+		if filter.Vulnerability.NoVuln != nil && !*filter.Vulnerability.NoVuln {
+			if filter.Vulnerability.Type != nil && *filter.Vulnerability.Type == noVulnType {
+				return []*model.CertifyVuln{}, gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")
+			}
+		}
+
 		exactVuln, err := c.exactVulnerability(filter.Vulnerability)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
