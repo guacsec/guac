@@ -24,8 +24,10 @@ func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXState
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	if certifyVEXStatementSpec.Vulnerability != nil {
 		lowercaseVulnFilter := model.VulnerabilitySpec{
+			ID:              certifyVEXStatementSpec.Vulnerability.ID,
 			Type:            toLower(certifyVEXStatementSpec.Vulnerability.Type),
 			VulnerabilityID: toLower(certifyVEXStatementSpec.Vulnerability.VulnerabilityID),
+			NoVuln:          certifyVEXStatementSpec.Vulnerability.NoVuln,
 		}
 
 		lowercaseCertifyVexFilter := model.CertifyVEXStatementSpec{

@@ -38,8 +38,10 @@ func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec model.C
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	if certifyVulnSpec.Vulnerability != nil {
 		lowercaseVulnFilter := model.VulnerabilitySpec{
+			ID:              certifyVulnSpec.Vulnerability.ID,
 			Type:            toLower(certifyVulnSpec.Vulnerability.Type),
 			VulnerabilityID: toLower(certifyVulnSpec.Vulnerability.VulnerabilityID),
+			NoVuln:          certifyVulnSpec.Vulnerability.NoVuln,
 		}
 
 		lowercaseCertifyVulnFilter := model.CertifyVulnSpec{
