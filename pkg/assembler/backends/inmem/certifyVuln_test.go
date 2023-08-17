@@ -356,6 +356,89 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 			},
 		},
 		{
+			Name:   "Query No Vuln - with novuln boolen",
+			InVuln: []*model.VulnerabilityInputSpec{noVulnInput},
+			InPkg:  []*model.PkgInputSpec{p2},
+			Calls: []call{
+				{
+					Pkg:  p2,
+					Vuln: noVulnInput,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					NoVuln: ptrfrom.Bool(true),
+				},
+			},
+			ExpVuln: []*model.CertifyVuln{
+				{
+					Package: p2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "novuln",
+						VulnerabilityIDs: []*model.VulnerabilityID{noVulnOut},
+					},
+					Metadata: vmd1,
+				},
+			},
+		},
+		{
+			Name:   "Query only cve (exclude novuln) - with novuln boolen",
+			InVuln: []*model.VulnerabilityInputSpec{noVulnInput, c1},
+			InPkg:  []*model.PkgInputSpec{p2, p1},
+			Calls: []call{
+				{
+					Pkg:  p2,
+					Vuln: noVulnInput,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+				{
+					Pkg:  p1,
+					Vuln: c1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    t1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					NoVuln: ptrfrom.Bool(false),
+				},
+			},
+			ExpVuln: []*model.CertifyVuln{
+				{
+					Package: p1out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
+					},
+					Metadata: vmd1,
+				},
+			},
+		},
+		{
 			Name:  "Ingest without vuln",
 			InPkg: []*model.PkgInputSpec{p2},
 			Calls: []call{
