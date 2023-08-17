@@ -77,9 +77,9 @@ cat "$queries" | gql-cli http://localhost:8080/query -o CertifyVulnQ1 | jq 'del(
 diff -u "${SCRIPT_DIR}/expectCertifyVulnQ1.json" "${GUAC_DIR}/gotCertifyVulnQ1.json"
 
 id3=$(cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ7 | jq -r ' .packages[0].namespaces[0].names[0].id ')
-id4=$(cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ8 | jq -r ' .packages[0].namespaces[0].names[0].id ')
+id4=$(cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ8 | jq -r ' .packages[0].namespaces[0].names[0].versions[0].id ')
 
-"${GUAC_DIR}/demo/graphql/path.py" $id3 $id4 | tail -n +2 | jq 'del(.. | .id?) | del(.. | .origin?)' > "${GUAC_DIR}/gotPathPy.json"
+"${GUAC_DIR}/demo/graphql/path.py" $id3 $id4 | tail -n +2 | jq 'del(.. | .id?) | del(.. | .origin?) | del(.. | .qualifiers?)' > "${GUAC_DIR}/gotPathPy.json"
 diff -u "${SCRIPT_DIR}/expectPathPy.json" "${GUAC_DIR}/gotPathPy.json"
 
 # Note: graphql_playground is left running, CI will clean it up

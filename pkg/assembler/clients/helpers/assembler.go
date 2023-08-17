@@ -209,7 +209,7 @@ func ingestCertifyScorecard(ctx context.Context, client graphql.Client, v assemb
 }
 
 func ingestIsDependency(ctx context.Context, client graphql.Client, v assembler.IsDependencyIngest) error {
-	_, err := model.IsDependency(ctx, client, *v.Pkg, *v.DepPkg, *v.IsDependency)
+	_, err := model.IsDependency(ctx, client, *v.Pkg, *v.DepPkg, v.DepPkgMatchFlag, *v.IsDependency)
 	return err
 }
 

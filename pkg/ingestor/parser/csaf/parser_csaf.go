@@ -58,6 +58,13 @@ type csafParser struct {
 	csaf *csaf.CSAF
 }
 
+type visitedProductRef struct {
+	productName string
+	productID   string
+	name        string
+	category    string
+}
+
 func NewCsafParser() common.DocumentParser {
 	return &csafParser{
 		identifierStrings: &common.IdentifierStrings{},
@@ -101,6 +108,15 @@ func findPurl(ctx context.Context, tree csaf.ProductBranch, product_ref string) 
 }
 
 func findProductRef(ctx context.Context, tree csaf.ProductBranch, product_id string) *string {
+	return findProductRefSearch(ctx, tree, product_id, make(map[visitedProductRef]bool))
+}
+
+func findProductRefSearch(ctx context.Context, tree csaf.ProductBranch, product_id string, visited map[visitedProductRef]bool) *string {
+	if visited[visitedProductRef{tree.Product.Name, tree.Product.ID, tree.Name, tree.Category}] {
+		return nil
+	}
+	visited[visitedProductRef{tree.Product.Name, tree.Product.ID, tree.Name, tree.Category}] = true
+
 	for _, r := range tree.Relationships {
 		if r.FullProductName.ID == product_id {
 			return &r.ProductRef
@@ -108,7 +124,7 @@ func findProductRef(ctx context.Context, tree csaf.ProductBranch, product_id str
 	}
 
 	for _, b := range tree.Branches {
-		pref := findProductRef(ctx, b, product_id)
+		pref := findProductRefSearch(ctx, b, product_id, visited)
 		if pref != nil {
 			return pref
 		}

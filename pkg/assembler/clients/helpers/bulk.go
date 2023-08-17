@@ -112,12 +112,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestHasSLSAs failed with error: %w", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for CertifyVuln
 			logger.Infof("assembling CertifyVuln: %v", len(p.CertifyVuln))
-			for _, cv := range p.CertifyVuln {
-				if err := ingestCertifyVuln(ctx, gqlclient, cv); err != nil {
-					return fmt.Errorf("ingestCertifyVuln failed with error: %w", err)
-				}
+			if err := ingestCertifyVulns(ctx, gqlclient, p.CertifyVuln); err != nil {
+				return fmt.Errorf("ingestCertifyVulns failed with error: %w", err)
 			}
 
 			// TODO(pxp928): add bulk ingestion for IsVuln
@@ -231,6 +228,24 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client, v []model
 	return nil
 }
 
+func ingestCertifyVulns(ctx context.Context, client graphql.Client, cv []assembler.CertifyVulnIngest) error {
+	var pkgs []model.PkgInputSpec
+	var vulnerabilities []model.VulnerabilityInputSpec
+	var scanMetadataList []model.ScanMetadataInput
+	for _, ingest := range cv {
+		pkgs = append(pkgs, *ingest.Pkg)
+		vulnerabilities = append(vulnerabilities, *ingest.Vulnerability)
+		scanMetadataList = append(scanMetadataList, *ingest.VulnData)
+	}
+	if len(cv) > 0 {
+		_, err := model.CertifyVulnPkgs(ctx, client, pkgs, vulnerabilities, scanMetadataList)
+		if err != nil {
+			return fmt.Errorf("CertifyVulnPkgs failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
 func ingestHasSLSAs(ctx context.Context, client graphql.Client, v []assembler.HasSlsaIngest) error {
 	var subjects []model.ArtifactInputSpec
 	var slsaAttestations []model.SLSAInputSpec
@@ -268,20 +283,42 @@ func ingestCertifyScorecards(ctx context.Context, client graphql.Client, v []ass
 }
 
 func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assembler.IsDependencyIngest) error {
-	var pkgs []model.PkgInputSpec
-	var depPkgs []model.PkgInputSpec
-	var dependencies []model.IsDependencyInputSpec
-	for _, ingest := range v {
-		pkgs = append(pkgs, *ingest.Pkg)
-		depPkgs = append(depPkgs, *ingest.DepPkg)
-		dependencies = append(dependencies, *ingest.IsDependency)
+
+	var depToVersion, depToName struct {
+		pkgs            []model.PkgInputSpec
+		depPkgs         []model.PkgInputSpec
+		depPkgMatchFlag model.MatchFlags
+		dependencies    []model.IsDependencyInputSpec
 	}
-	if len(v) > 0 {
-		_, err := model.IsDependencies(ctx, client, pkgs, depPkgs, dependencies)
+
+	depToVersion.depPkgMatchFlag = model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
+	depToName.depPkgMatchFlag = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
+
+	for _, ingest := range v {
+		if ingest.DepPkgMatchFlag.Pkg == model.PkgMatchTypeSpecificVersion {
+			depToVersion.pkgs = append(depToVersion.pkgs, *ingest.Pkg)
+			depToVersion.depPkgs = append(depToVersion.depPkgs, *ingest.DepPkg)
+			depToVersion.dependencies = append(depToVersion.dependencies, *ingest.IsDependency)
+		} else if ingest.DepPkgMatchFlag.Pkg == model.PkgMatchTypeAllVersions {
+			depToName.pkgs = append(depToName.pkgs, *ingest.Pkg)
+			depToName.depPkgs = append(depToName.depPkgs, *ingest.DepPkg)
+			depToName.dependencies = append(depToName.dependencies, *ingest.IsDependency)
+		}
+	}
+
+	if len(depToVersion.pkgs) > 0 {
+		_, err := model.IsDependencies(ctx, client, depToVersion.pkgs, depToVersion.depPkgs, depToVersion.depPkgMatchFlag, depToVersion.dependencies)
 		if err != nil {
 			return fmt.Errorf("isDependencies failed with error: %w", err)
 		}
 	}
+	if len(depToName.pkgs) > 0 {
+		_, err := model.IsDependencies(ctx, client, depToName.pkgs, depToName.depPkgs, depToName.depPkgMatchFlag, depToName.dependencies)
+		if err != nil {
+			return fmt.Errorf("isDependencies failed with error: %w", err)
+		}
+	}
+
 	return nil
 }
 

@@ -41,6 +41,13 @@ def deepID(node):
             pass
     return node['id']
 
+def isPackageVersion(node):
+    try:
+        retrieve = (node['namespaces'][0]['names'][0]['versions'][0])
+        return True
+    except:
+        return False
+
 # guacID returns the ID of a GUAC node. For nouns, the deepest ID is the ID,
 # for verbs, it is the top level ID.
 def guacID(node):
@@ -71,9 +78,9 @@ def containsID(node, id):
 # bfs finds the shortest path fron start to target, while applying filter() to
 # only search in certian ways.
 def bfs(startID, targetID):
-    visited = []
+    visited = set([])
     queue = []
-    visited.append(startID)
+    visited.add(startID)
     queue.append({'id': startID, 'path': [ startID ], 'pathNodes': [ nodeQuery(startID) ]})
     while queue:
         node = queue.pop(0)
@@ -90,7 +97,7 @@ def bfs(startID, targetID):
             newNodePath.append(n)
             if nodeID == targetID:
                 return (newPath, newNodePath)
-            visited.append(nodeID)
+            visited.add(nodeID)
             queue.append({'id': nodeID, 'path': newPath, 'pathNodes': newNodePath})
     return [], []
 
@@ -100,6 +107,7 @@ def filter(fromID, fromNode, neighbor):
     if neighbor['__typename'] == 'Package':
         # From Package -> Package, only search downwards
         if fromNode['__typename'] == 'Package':
+            return isPackageVersion(neighbor)
             return containsID(neighbor, fromID)
         # From other node type -> Package is ok.
         return True

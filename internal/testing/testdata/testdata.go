@@ -486,8 +486,9 @@ var (
 
 	SpdxDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:    topLevelPack,
-			DepPkg: baselayoutPack,
+			Pkg:             topLevelPack,
+			DepPkg:          baselayoutPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "3.2.0-r22",
@@ -495,8 +496,9 @@ var (
 			},
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: baselayoutdataPack,
+			Pkg:             topLevelPack,
+			DepPkg:          baselayoutdataPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "3.2.0-r22",
@@ -504,8 +506,9 @@ var (
 			},
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: keysPack,
+			Pkg:             topLevelPack,
+			DepPkg:          keysPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.4-r1",
@@ -513,8 +516,9 @@ var (
 			},
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: worldFilePack,
+			Pkg:             topLevelPack,
+			DepPkg:          worldFilePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -522,8 +526,9 @@ var (
 			},
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: rootFilePack,
+			Pkg:             topLevelPack,
+			DepPkg:          rootFilePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -531,8 +536,9 @@ var (
 			},
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: triggersFilePack,
+			Pkg:             topLevelPack,
+			DepPkg:          triggersFilePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -540,8 +546,9 @@ var (
 			},
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: rsaPubFilePack,
+			Pkg:             topLevelPack,
+			DepPkg:          rsaPubFilePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -549,8 +556,9 @@ var (
 			},
 		},
 		{
-			Pkg:    baselayoutPack,
-			DepPkg: keysPack,
+			Pkg:             baselayoutPack,
+			DepPkg:          keysPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.4-r1",
@@ -558,8 +566,9 @@ var (
 			},
 		},
 		{
-			Pkg:    rootFilePack,
-			DepPkg: rsaPubFilePack,
+			Pkg:             rootFilePack,
+			DepPkg:          rsaPubFilePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -567,8 +576,9 @@ var (
 			},
 		},
 		{
-			Pkg:    baselayoutPack,
-			DepPkg: rootFilePack,
+			Pkg:             baselayoutPack,
+			DepPkg:          rootFilePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -576,8 +586,9 @@ var (
 			},
 		},
 		{
-			Pkg:    keysPack,
-			DepPkg: rsaPubFilePack,
+			Pkg:             keysPack,
+			DepPkg:          rsaPubFilePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -638,8 +649,9 @@ var (
 
 	CdxDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:    cdxTopLevelPack,
-			DepPkg: cdxBasefilesPack,
+			Pkg:             cdxTopLevelPack,
+			DepPkg:          cdxBasefilesPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "11.1+deb11u5",
@@ -647,8 +659,9 @@ var (
 			},
 		},
 		{
-			Pkg:    cdxTopLevelPack,
-			DepPkg: cdxNetbasePack,
+			Pkg:             cdxTopLevelPack,
+			DepPkg:          cdxNetbasePack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "6.3",
@@ -656,8 +669,9 @@ var (
 			},
 		},
 		{
-			Pkg:    cdxTopLevelPack,
-			DepPkg: cdxTzdataPack,
+			Pkg:             cdxTopLevelPack,
+			DepPkg:          cdxTzdataPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2021a-1+deb11u6",
@@ -691,8 +705,9 @@ var (
 
 	CdxQuarkusDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:    cdxTopQuarkusPack,
-			DepPkg: cdxResteasyPack,
+			Pkg:             cdxTopQuarkusPack,
+			DepPkg:          cdxResteasyPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.13.4.Final",
@@ -700,8 +715,9 @@ var (
 			},
 		},
 		{
-			Pkg:    cdxTopQuarkusPack,
-			DepPkg: cdxReactiveCommonPack,
+			Pkg:             cdxTopQuarkusPack,
+			DepPkg:          cdxReactiveCommonPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.13.4.Final",
@@ -709,8 +725,9 @@ var (
 			},
 		},
 		{
-			Pkg:    cdxResteasyPack,
-			DepPkg: cdxReactiveCommonPack,
+			Pkg:             cdxResteasyPack,
+			DepPkg:          cdxReactiveCommonPack,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.13.4.Final",
@@ -777,8 +794,9 @@ var (
 
 	CdxNpmDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:    cdxWebAppPackage,
-			DepPkg: cdxBootstrapPackage,
+			Pkg:             cdxWebAppPackage,
+			DepPkg:          cdxBootstrapPackage,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "4.0.0-beta.2",
@@ -1970,8 +1988,9 @@ For the update to take effect, all services linked to the OpenSSL library must b
 		},
 		IsDependency: []assembler.IsDependencyIngest{
 			{
-				Pkg:    topLevelPack,
-				DepPkg: baselayoutPack,
+				Pkg:             topLevelPack,
+				DepPkg:          baselayoutPack,
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 				IsDependency: &generated.IsDependencyInputSpec{
 					DependencyType: generated.DependencyTypeUnknown,
 					VersionRange:   "3.2.0-r22",
@@ -1979,8 +1998,9 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				},
 			},
 			{
-				Pkg:    topLevelPack,
-				DepPkg: baselayoutdataPack,
+				Pkg:             topLevelPack,
+				DepPkg:          baselayoutdataPack,
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 				IsDependency: &generated.IsDependencyInputSpec{
 					DependencyType: generated.DependencyTypeUnknown,
 					VersionRange:   "3.2.0-r22",

@@ -33,9 +33,9 @@ type dbPkgVersion struct {
 	Namespace     string   `json:"namespace"`
 	NameID        string   `json:"name_id"`
 	Name          string   `json:"name"`
-	VersionID     string   `json:"version_id"`
-	Version       string   `json:"version"`
-	Subpath       string   `json:"subpath"`
+	VersionID     *string  `json:"version_id"`
+	Version       *string  `json:"version"`
+	Subpath       *string  `json:"subpath"`
 	QualifierList []string `json:"qualifier_list"`
 }
 
@@ -388,20 +388,21 @@ func setPkgVersionMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any
 			arangoQueryBuilder.filter("pVersion", "subpath", "==", "@subpath")
 			queryValues["subpath"] = *pkgSpec.Subpath
 		}
-		if len(pkgSpec.Qualifiers) > 0 {
-			arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
-			queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
-		}
-		if !*pkgSpec.MatchOnlyEmptyQualifiers {
+		if pkgSpec.MatchOnlyEmptyQualifiers != nil {
+			if !*pkgSpec.MatchOnlyEmptyQualifiers {
+				if len(pkgSpec.Qualifiers) > 0 {
+					arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
+					queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
+				}
+			} else {
+				arangoQueryBuilder.filterLength("pVersion", "qualifier_list", "==", 0)
+			}
+		} else {
 			if len(pkgSpec.Qualifiers) > 0 {
 				arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
 				queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
 			}
-		} else {
-			arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
-			queryValues["objPkgQualifierList"] = []string{}
 		}
-
 	} else {
 		arangoQueryBuilder = newForQuery(pkgTypesStr, "pType")
 		arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
@@ -694,9 +695,9 @@ func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, e
 			typeString := doc.PkgType + "," + doc.TypeID
 
 			pkgVersion := &model.PackageVersion{
-				ID:         doc.VersionID,
-				Version:    versionString,
-				Subpath:    subPathString,
+				ID:         *doc.VersionID,
+				Version:    *versionString,
+				Subpath:    *subPathString,
 				Qualifiers: pkgQualifiers,
 			}
 

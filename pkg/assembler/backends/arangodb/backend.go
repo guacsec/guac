@@ -74,9 +74,10 @@ const (
 
 	// isDependency collections
 
-	isDependencyDepPkgEdgesStr     string = "isDependencyDepPkgEdges"
-	isDependencySubjectPkgEdgesStr string = "isDependencySubjectPkgEdges"
-	isDependenciesStr              string = "isDependencies"
+	isDependencyDepPkgVersionEdgesStr string = "isDependencyDepPkgVersionEdges"
+	isDependencyDepPkgNameEdgesStr    string = "isDependencyDepPkgNameEdges"
+	isDependencySubjectPkgEdgesStr    string = "isDependencySubjectPkgEdges"
+	isDependenciesStr                 string = "isDependencies"
 
 	//isOccurrences collections
 
@@ -105,9 +106,9 @@ const (
 	hasSBOMsStr        string = "hasSBOMs"
 
 	// certifyVuln collection
-	// TODO (pxp928): update collections based on edge collections
-	certifyVulnEdgesStr string = "certifyVulnEdges"
-	certifyVulnsStr     string = "certifyVulns"
+	certifyVulnPkgEdgesStr string = "certifyVulnPkgEdges"
+	certifyVulnEdgesStr    string = "certifyVulnEdges"
+	certifyVulnsStr        string = "certifyVulns"
 
 	// certifyScorecard collection
 
@@ -244,15 +245,20 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		vulnHasVulnerabilityID.To = []string{vulnerabilitiesStr}
 
 		// setup isDependency collections
-		var isDependencyDepPkgEdges driver.EdgeDefinition
-		isDependencyDepPkgEdges.Collection = isDependencyDepPkgEdgesStr
-		isDependencyDepPkgEdges.From = []string{isDependenciesStr}
-		isDependencyDepPkgEdges.To = []string{pkgNamesStr}
-
 		var isDependencySubjectPkgEdges driver.EdgeDefinition
 		isDependencySubjectPkgEdges.Collection = isDependencySubjectPkgEdgesStr
 		isDependencySubjectPkgEdges.From = []string{pkgVersionsStr}
 		isDependencySubjectPkgEdges.To = []string{isDependenciesStr}
+
+		var isDependencyDepPkgVersionEdges driver.EdgeDefinition
+		isDependencyDepPkgVersionEdges.Collection = isDependencyDepPkgVersionEdgesStr
+		isDependencyDepPkgVersionEdges.From = []string{isDependenciesStr}
+		isDependencyDepPkgVersionEdges.To = []string{pkgVersionsStr}
+
+		var isDependencyDepPkgNameEdges driver.EdgeDefinition
+		isDependencyDepPkgNameEdges.Collection = isDependencyDepPkgNameEdgesStr
+		isDependencyDepPkgNameEdges.From = []string{isDependenciesStr}
+		isDependencyDepPkgNameEdges.To = []string{pkgNamesStr}
 
 		// setup isOccurrence collections
 		var isOccurrenceArtEdges driver.EdgeDefinition
@@ -309,10 +315,16 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		hasSBOMArtEdges.To = []string{hasSBOMsStr}
 
 		// setup certifyVuln collections
+		var certifyVulnPkgEdges driver.EdgeDefinition
+		certifyVulnPkgEdges.Collection = certifyVulnPkgEdgesStr
+		certifyVulnPkgEdges.From = []string{pkgVersionsStr}
+		certifyVulnPkgEdges.To = []string{certifyVulnsStr}
+
+		// setup certifyVuln collections
 		var certifyVulnEdges driver.EdgeDefinition
 		certifyVulnEdges.Collection = certifyVulnEdgesStr
-		certifyVulnEdges.From = []string{pkgVersionsStr, certifyVulnsStr}
-		certifyVulnEdges.To = []string{certifyVulnsStr, vulnerabilitiesStr}
+		certifyVulnEdges.From = []string{certifyVulnsStr}
+		certifyVulnEdges.To = []string{vulnerabilitiesStr}
 
 		// setup certifyScorecard collections
 		var certifyScorecardSrcEdges driver.EdgeDefinition
@@ -365,10 +377,10 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
 		options.EdgeDefinitions = []driver.EdgeDefinition{pkgHasNamespace, pkgHasName,
-			pkgHasVersion, srcHasNamespace, srcHasName, vulnHasVulnerabilityID, isDependencyDepPkgEdges, isDependencySubjectPkgEdges,
+			pkgHasVersion, srcHasNamespace, srcHasName, vulnHasVulnerabilityID, isDependencyDepPkgVersionEdges, isDependencyDepPkgNameEdges, isDependencySubjectPkgEdges,
 			isOccurrenceArtEdges, isOccurrenceSubjectPkgEdges, isOccurrenceSubjectSrcEdges, hasSLSASubjectArtEdges,
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
-			hasSBOMArtEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
+			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges}
 
 		// create a graph
@@ -636,6 +648,14 @@ func (aqb *arangoQueryBuilder) filter(counterName string, fieldName string, cond
 	return newArangoQueryFilter(aqb)
 }
 
+func (aqb *arangoQueryBuilder) filterLength(counterName string, fieldName string, condition string, value int) *arangoQueryFilter {
+	aqb.query.WriteString(" ")
+
+	aqb.query.WriteString(fmt.Sprintf("FILTER LENGTH(%s.%s) %s %d", counterName, fieldName, condition, value))
+
+	return newArangoQueryFilter(aqb)
+}
+
 func (aqb *arangoQueryBuilder) string() string {
 	return aqb.query.String()
 }
@@ -716,9 +736,6 @@ func getPreloadString(prefix, name string) string {
 func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	panic(fmt.Errorf("not implemented: CertifyVEXStatement - CertifyVEXStatement"))
 }
-func (c *arangoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	panic(fmt.Errorf("not implemented: CertifyVuln - CertifyVuln"))
-}
 
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
@@ -744,9 +761,6 @@ func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpe
 }
 func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))
-}
-func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyVuln"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type

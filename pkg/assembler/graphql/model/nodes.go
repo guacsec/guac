@@ -496,9 +496,9 @@ type IsDependency struct {
 	ID string `json:"id"`
 	// Package that has the dependency
 	Package *Package `json:"package"`
-	// Package for the dependency; MUST BE PackageName, not PackageVersion
+	// Package for the dependency; MUST be PackageName or PackageVersion
 	DependentPackage *Package `json:"dependentPackage"`
-	// Version range for the dependency link
+	// Version range for the dependency link, required if depedentPackage points to PackageName
 	VersionRange string `json:"versionRange"`
 	// Type of dependency
 	DependencyType DependencyType `json:"dependencyType"`
@@ -514,6 +514,7 @@ func (IsDependency) IsNode() {}
 
 // IsDependencyInputSpec is the input to record a new dependency.
 type IsDependencyInputSpec struct {
+	// versionRange should be specified for depedentPackages that point to PackageName
 	VersionRange   string         `json:"versionRange"`
 	DependencyType DependencyType `json:"dependencyType"`
 	Justification  string         `json:"justification"`
@@ -530,7 +531,7 @@ type IsDependencyInputSpec struct {
 type IsDependencySpec struct {
 	ID               *string         `json:"id,omitempty"`
 	Package          *PkgSpec        `json:"package,omitempty"`
-	DependentPackage *PkgNameSpec    `json:"dependentPackage,omitempty"`
+	DependentPackage *PkgSpec        `json:"dependentPackage,omitempty"`
 	VersionRange     *string         `json:"versionRange,omitempty"`
 	DependencyType   *DependencyType `json:"dependencyType,omitempty"`
 	Justification    *string         `json:"justification,omitempty"`
@@ -818,19 +819,6 @@ type PkgInputSpec struct {
 	Version    *string                      `json:"version,omitempty"`
 	Qualifiers []*PackageQualifierInputSpec `json:"qualifiers,omitempty"`
 	Subpath    *string                      `json:"subpath,omitempty"`
-}
-
-// PkgNameSpec is used to query for dependent packages.
-//
-// This is different from PkgSpec as the IsDependency attestation should only be
-// allowed to be made to the packageName node and not the packageVersion node.
-// Versions will be handled by the version_range in the IsDependency attestation
-// node.
-type PkgNameSpec struct {
-	ID        *string `json:"id,omitempty"`
-	Type      *string `json:"type,omitempty"`
-	Namespace *string `json:"namespace,omitempty"`
-	Name      *string `json:"name,omitempty"`
 }
 
 // PkgSpec allows filtering the list of sources to return in a query.
