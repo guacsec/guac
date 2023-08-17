@@ -43,13 +43,12 @@ import (
 )
 
 const (
-	arango  = "arango"
-	neo4js  = "neo4j"
-	inmems  = "inmem"
-	neptune = "neptune"
-
-	neptuneServiceName = "neptune-db"
+	arango             = "arango"
+	neo4js             = "neo4j"
+	inmems             = "inmem"
 	ent                = "ent"
+	neptune            = "neptune"
+	neptuneServiceName = "neptune-db"
 )
 
 func startServer(cmd *cobra.Command) {
