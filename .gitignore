@@ -16,5 +16,3 @@ go.work
 container_files/pg/
 
 dist/
-
-dist/
