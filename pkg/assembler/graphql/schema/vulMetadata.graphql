@@ -1,0 +1,89 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the HasMetadata
+
+"""
+HasMetadata is an attestation that a package, source, or artifact has a certain
+attested property (key) with value (value). For example, a source may have
+metadata "SourceRepo2FAEnabled=true".
+
+The intent of this evidence tree predicate is to allow extensibility of metadata
+expressible within the GUAC ontology. Metadata that is commonly used will then
+be promoted to a predicate on its own.
+
+Justification indicates how the metadata was determined.
+
+The metadata applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
+"""
+type VulnerabilityMetadata {
+  id: ID!
+  vulnerability: Vulnerability!
+  timestamp: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+HasMetadataSpec allows filtering the list of HasMetadata evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
+
+since specified indicates filtering timestamps after the specified time
+"""
+input HasMetadataSpec {
+  id: ID
+  subject: PackageSourceOrArtifactSpec
+  since: Time
+  key: String
+  value: String
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
+"""
+input HasMetadataInputSpec {
+  key: String!
+  value: String!
+  timestamp: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all HasMetdata attestations matching a filter."
+  HasMetadata(hasMetadataSpec: HasMetadataSpec!): [HasMetadata!]!
+}
+
+extend type Mutation {
+  "Adds metadata about a package, source or artifact."
+  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, hasMetadata: HasMetadataInputSpec!): HasMetadata!
+}
