@@ -169,8 +169,8 @@ type ComplexityRoot struct {
 		IngestCertifyGoods    func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
 		IngestCertifyVuln     func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) int
 		IngestCertifyVulns    func(childComplexity int, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) int
-		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, dependencies []*model.IsDependencyInputSpec) int
-		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
+		IngestDependencies    func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) int
+		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) int
 		IngestHasMetadata     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
 		IngestHasSBOMs        func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
@@ -1037,7 +1037,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestDependencies(childComplexity, args["pkgs"].([]*model.PkgInputSpec), args["depPkgs"].([]*model.PkgInputSpec), args["dependencies"].([]*model.IsDependencyInputSpec)), true
+		return e.complexity.Mutation.IngestDependencies(childComplexity, args["pkgs"].([]*model.PkgInputSpec), args["depPkgs"].([]*model.PkgInputSpec), args["depPkgMatchType"].(model.MatchFlags), args["dependencies"].([]*model.IsDependencyInputSpec)), true
 
 	case "Mutation.ingestDependency":
 		if e.complexity.Mutation.IngestDependency == nil {
@@ -1049,7 +1049,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["dependency"].(model.IsDependencyInputSpec)), true
+		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["depPkgMatchType"].(model.MatchFlags), args["dependency"].(model.IsDependencyInputSpec)), true
 
 	case "Mutation.ingestHasMetadata":
 		if e.complexity.Mutation.IngestHasMetadata == nil {
@@ -2187,7 +2187,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPkgEqualInputSpec,
 		ec.unmarshalInputPkgEqualSpec,
 		ec.unmarshalInputPkgInputSpec,
-		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
 		ec.unmarshalInputPointOfContactInputSpec,
 		ec.unmarshalInputPointOfContactSpec,
@@ -3494,9 +3493,9 @@ type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST BE PackageName, not PackageVersion"
+  "Package for the dependency; MUST be PackageName or PackageVersion"
   dependentPackage: Package!
-  "Version range for the dependency link"
+  "Version range for the dependency link, required if depedentPackage points to PackageName"
   versionRange: String!
   "Type of dependency"
   dependencyType: DependencyType!
@@ -3519,7 +3518,7 @@ Dependent packages must be defined at PackageName, not PackageVersion.
 input IsDependencySpec {
   id: ID
   package: PkgSpec
-  dependentPackage: PkgNameSpec
+  dependentPackage: PkgSpec
   versionRange: String
   dependencyType: DependencyType
   justification: String
@@ -3527,23 +3526,9 @@ input IsDependencySpec {
   collector: String
 }
 
-"""
-PkgNameSpec is used to query for dependent packages.
-
-This is different from PkgSpec as the IsDependency attestation should only be
-allowed to be made to the packageName node and not the packageVersion node.
-Versions will be handled by the version_range in the IsDependency attestation
-node.
-"""
-input PkgNameSpec {
-  id: ID
-  type: String
-  namespace: String
-  name: String
-}
-
 "IsDependencyInputSpec is the input to record a new dependency."
 input IsDependencyInputSpec {
+  "versionRange should be specified for depedentPackages that point to PackageName"
   versionRange: String!
   dependencyType: DependencyType!
   justification: String!
@@ -3558,9 +3543,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a dependency between two packages"
-  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
+  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, depPkgMatchType: MatchFlags!, dependency: IsDependencyInputSpec!): IsDependency!
   "Bulk adds a dependency between two packages"
-  ingestDependencies(pkgs: [PkgInputSpec!]!, depPkgs: [PkgInputSpec!]!, dependencies: [IsDependencyInputSpec!]!): [IsDependency!]!
+  ingestDependencies(pkgs: [PkgInputSpec!]!, depPkgs: [PkgInputSpec!]!, depPkgMatchType: MatchFlags!, dependencies: [IsDependencyInputSpec!]!): [IsDependency!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isOccurrence.graphql", Input: `#

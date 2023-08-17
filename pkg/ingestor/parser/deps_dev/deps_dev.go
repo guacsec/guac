@@ -67,9 +67,10 @@ func (d *depsDevParser) GetPredicates(ctx context.Context) *assembler.IngestPred
 
 	for _, isDepComp := range d.packComponent.IsDepPackages {
 		preds.IsDependency = append(preds.IsDependency, assembler.IsDependencyIngest{
-			Pkg:          isDepComp.CurrentPackageInput,
-			DepPkg:       isDepComp.DepPackageInput,
-			IsDependency: isDepComp.IsDependency,
+			Pkg:             isDepComp.CurrentPackageInput,
+			DepPkg:          isDepComp.DepPackageInput,
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			IsDependency:    isDepComp.IsDependency,
 		})
 	}
 

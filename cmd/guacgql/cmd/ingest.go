@@ -186,12 +186,14 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 	ns := "ubuntu"
 	version := "1.19.0.4"
 	depns := "openssl.org"
+	opensslVersion := "3.0.3"
 	smartentryNs := "smartentry"
 	ingestDependencies := []struct {
-		name       string
-		pkg        model.PkgInputSpec
-		depPkg     model.PkgInputSpec
-		dependency model.IsDependencyInputSpec
+		name             string
+		pkg              model.PkgInputSpec
+		depPkg           model.PkgInputSpec
+		depPkgMatchFlags model.MatchFlags
+		dependency       model.IsDependencyInputSpec
 	}{
 		{
 			name: "deb: part of SBOM - openssl",
@@ -209,6 +211,7 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 				Namespace: &depns,
 				Name:      "openssl",
 			},
+			depPkgMatchFlags: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 			dependency: model.IsDependencyInputSpec{
 				VersionRange:   "3.0.3",
 				DependencyType: model.DependencyTypeDirect,
@@ -228,7 +231,13 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 				Type:      "conan",
 				Namespace: &depns,
 				Name:      "openssl",
+				Version:   &opensslVersion,
+				Qualifiers: []model.PackageQualifierInputSpec{
+					{Key: "user", Value: "bincrafters"},
+					{Key: "channel", Value: "stable"},
+				},
 			},
+			depPkgMatchFlags: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			dependency: model.IsDependencyInputSpec{
 				VersionRange:   "3.0.3",
 				DependencyType: model.DependencyTypeIndirect,
@@ -238,7 +247,7 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 			},
 		},
 		{
-			name: "deb: part of SBOM - openssl (duplicate)",
+			name: "deb: part of SBOM - openssl (indirect)",
 			pkg: model.PkgInputSpec{
 				Type:      "deb",
 				Namespace: &ns,
@@ -252,7 +261,13 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 				Type:      "conan",
 				Namespace: &depns,
 				Name:      "openssl",
+				Version:   &opensslVersion,
+				Qualifiers: []model.PackageQualifierInputSpec{
+					{Key: "user", Value: "bincrafters"},
+					{Key: "channel", Value: "stable"},
+				},
 			},
+			depPkgMatchFlags: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			dependency: model.IsDependencyInputSpec{
 				VersionRange:   "3.0.3",
 				DependencyType: model.DependencyTypeDirect,
@@ -269,7 +284,7 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestPackage(ctx, client, ingest.depPkg); err != nil {
 			logger.Errorf("Error in ingesting dependency package: %v\n", err)
 		}
-		if _, err := model.IsDependency(ctx, client, ingest.pkg, ingest.depPkg, ingest.dependency); err != nil {
+		if _, err := model.IsDependency(ctx, client, ingest.pkg, ingest.depPkg, ingest.depPkgMatchFlags, ingest.dependency); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}
@@ -2306,6 +2321,7 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 		depPkg            model.PkgInputSpec
 		dependency        model.IsDependencyInputSpec
 		depPkgWithVersion model.PkgInputSpec
+		depPkgMatchFlags  model.MatchFlags
 		art               model.ArtifactInputSpec
 		occurrence        model.IsOccurrenceInputSpec
 		source            model.SourceInputSpec
@@ -2331,6 +2347,7 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 				Namespace: &depns,
 				Name:      "openssl",
 			},
+			depPkgMatchFlags: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 			dependency: model.IsDependencyInputSpec{
 				VersionRange:   "3.0.3",
 				DependencyType: model.DependencyTypeDirect,
@@ -2411,7 +2428,7 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestVulnerability(ctx, client, *ingest.vuln); err != nil {
 			logger.Errorf("Error in ingesting vuln: %v\n", err)
 		}
-		if _, err := model.IsDependency(ctx, client, ingest.pkg, ingest.depPkg, ingest.dependency); err != nil {
+		if _, err := model.IsDependency(ctx, client, ingest.pkg, ingest.depPkg, ingest.depPkgMatchFlags, ingest.dependency); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 		if _, err := model.IsOccurrencePkg(ctx, client, ingest.depPkgWithVersion, ingest.art, ingest.occurrence); err != nil {

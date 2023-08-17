@@ -75,6 +75,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("1.4.0"),
 						Subpath:   ptrfrom.String(""),
 					},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),
@@ -97,6 +98,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("17.0.0"),
 						Subpath:   ptrfrom.String(""),
 					},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),
@@ -126,6 +128,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("4.1.1"),
 						Subpath:   ptrfrom.String(""),
 					},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
 						VersionRange:   "^4.1.1",
@@ -292,6 +295,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("0.1.1"),
 						Subpath:   ptrfrom.String(""),
 					},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
 						VersionRange:   "^0.1",
@@ -368,6 +372,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("4.2.1"),
 						Subpath:   ptrfrom.String(""),
 					},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),

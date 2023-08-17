@@ -53,6 +53,7 @@ var (
 					Name:      "openssl",
 					Version:   ptrfrom.String("3.0.3"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -74,6 +75,7 @@ var (
 					Name:      "dpkg",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -95,6 +97,7 @@ var (
 					Name:      "bottompkg",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeIndirect,
@@ -244,6 +247,7 @@ var (
 					Name:      "pkgName3",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -327,6 +331,7 @@ var (
 					Name:      "extraName",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   "=3.0.3",
 					DependencyType: model.DependencyTypeDirect,
@@ -423,6 +428,7 @@ var (
 					Name:      "pkgNameB",
 					Version:   ptrfrom.String("1.19.0"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -554,6 +560,7 @@ var (
 					Name:      "pkgNameE",
 					Version:   ptrfrom.String("3.0.3"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   "=>2.0.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -654,6 +661,7 @@ var (
 					Name:      "pkgNameI",
 					Version:   ptrfrom.String("3.0.3"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   ">=2.0.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -714,6 +722,7 @@ var (
 					Name:      "bName",
 					Version:   ptrfrom.String("1.19.1"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				Pkg: &model.PkgInputSpec{
 					Type:      "dType",
 					Namespace: ptrfrom.String("dNamespace"),
@@ -851,6 +860,7 @@ var (
 					Name:      "pkgNameM",
 					Version:   ptrfrom.String("3.0.3"),
 				},
+				DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   "=>1.0.0",
 					DependencyType: model.DependencyTypeDirect,
@@ -944,7 +954,7 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, graph assemb
 		if err != nil {
 			return fmt.Errorf("error in ingesting dependent package: %s\n", err)
 		}
-		_, err = model.IsDependency(ctx, client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
+		_, err = model.IsDependency(ctx, client, *ingest.Pkg, *ingest.DepPkg, ingest.DepPkgMatchFlag, *ingest.IsDependency)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting isDependency: %s\n", err)

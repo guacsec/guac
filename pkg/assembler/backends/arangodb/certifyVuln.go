@@ -437,7 +437,7 @@ func geCertifyVuln(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyV
 	var certifyVulnList []*model.CertifyVuln
 	for _, createdValue := range createdValues {
 		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
-			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+			createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
 
 		vuln := &model.Vulnerability{
 			ID:   createdValue.Vulnerability.VulnID,

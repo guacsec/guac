@@ -3105,11 +3105,11 @@ type AllIsDependencyTree struct {
 	Justification string `json:"justification"`
 	// Package that has the dependency
 	Package AllIsDependencyTreePackage `json:"package"`
-	// Package for the dependency; MUST BE PackageName, not PackageVersion
+	// Package for the dependency; MUST be PackageName or PackageVersion
 	DependentPackage AllIsDependencyTreeDependentPackage `json:"dependentPackage"`
 	// Type of dependency
 	DependencyType DependencyType `json:"dependencyType"`
-	// Version range for the dependency link
+	// Version range for the dependency link, required if depedentPackage points to PackageName
 	VersionRange string `json:"versionRange"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
@@ -10322,6 +10322,7 @@ func (v *IsDependencyIngestDependencyIsDependency) __premarshalJSON() (*__premar
 
 // IsDependencyInputSpec is the input to record a new dependency.
 type IsDependencyInputSpec struct {
+	// versionRange should be specified for depedentPackages that point to PackageName
 	VersionRange   string         `json:"versionRange"`
 	DependencyType DependencyType `json:"dependencyType"`
 	Justification  string         `json:"justification"`
@@ -23127,9 +23128,10 @@ func (v *__IngestVulnerabilityInput) GetVuln() VulnerabilityInputSpec { return v
 
 // __IsDependenciesInput is used internally by genqlient
 type __IsDependenciesInput struct {
-	Pkgs         []PkgInputSpec          `json:"pkgs"`
-	DepPkgs      []PkgInputSpec          `json:"depPkgs"`
-	Dependencies []IsDependencyInputSpec `json:"dependencies"`
+	Pkgs            []PkgInputSpec          `json:"pkgs"`
+	DepPkgs         []PkgInputSpec          `json:"depPkgs"`
+	DepPkgMatchType MatchFlags              `json:"depPkgMatchType"`
+	Dependencies    []IsDependencyInputSpec `json:"dependencies"`
 }
 
 // GetPkgs returns __IsDependenciesInput.Pkgs, and is useful for accessing the field via an interface.
@@ -23138,14 +23140,18 @@ func (v *__IsDependenciesInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
 // GetDepPkgs returns __IsDependenciesInput.DepPkgs, and is useful for accessing the field via an interface.
 func (v *__IsDependenciesInput) GetDepPkgs() []PkgInputSpec { return v.DepPkgs }
 
+// GetDepPkgMatchType returns __IsDependenciesInput.DepPkgMatchType, and is useful for accessing the field via an interface.
+func (v *__IsDependenciesInput) GetDepPkgMatchType() MatchFlags { return v.DepPkgMatchType }
+
 // GetDependencies returns __IsDependenciesInput.Dependencies, and is useful for accessing the field via an interface.
 func (v *__IsDependenciesInput) GetDependencies() []IsDependencyInputSpec { return v.Dependencies }
 
 // __IsDependencyInput is used internally by genqlient
 type __IsDependencyInput struct {
-	Pkg        PkgInputSpec          `json:"pkg"`
-	DepPkg     PkgInputSpec          `json:"depPkg"`
-	Dependency IsDependencyInputSpec `json:"dependency"`
+	Pkg             PkgInputSpec          `json:"pkg"`
+	DepPkg          PkgInputSpec          `json:"depPkg"`
+	DepPkgMatchType MatchFlags            `json:"depPkgMatchType"`
+	Dependency      IsDependencyInputSpec `json:"dependency"`
 }
 
 // GetPkg returns __IsDependencyInput.Pkg, and is useful for accessing the field via an interface.
@@ -23153,6 +23159,9 @@ func (v *__IsDependencyInput) GetPkg() PkgInputSpec { return v.Pkg }
 
 // GetDepPkg returns __IsDependencyInput.DepPkg, and is useful for accessing the field via an interface.
 func (v *__IsDependencyInput) GetDepPkg() PkgInputSpec { return v.DepPkg }
+
+// GetDepPkgMatchType returns __IsDependencyInput.DepPkgMatchType, and is useful for accessing the field via an interface.
+func (v *__IsDependencyInput) GetDepPkgMatchType() MatchFlags { return v.DepPkgMatchType }
 
 // GetDependency returns __IsDependencyInput.Dependency, and is useful for accessing the field via an interface.
 func (v *__IsDependencyInput) GetDependency() IsDependencyInputSpec { return v.Dependency }
@@ -26573,8 +26582,8 @@ func IngestVulnerability(
 
 // The query or mutation executed by IsDependencies.
 const IsDependencies_Operation = `
-mutation IsDependencies ($pkgs: [PkgInputSpec!]!, $depPkgs: [PkgInputSpec!]!, $dependencies: [IsDependencyInputSpec!]!) {
-	ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, dependencies: $dependencies) {
+mutation IsDependencies ($pkgs: [PkgInputSpec!]!, $depPkgs: [PkgInputSpec!]!, $depPkgMatchType: MatchFlags!, $dependencies: [IsDependencyInputSpec!]!) {
+	ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, depPkgMatchType: $depPkgMatchType, dependencies: $dependencies) {
 		... AllIsDependencyTree
 	}
 }
@@ -26620,15 +26629,17 @@ func IsDependencies(
 	client graphql.Client,
 	pkgs []PkgInputSpec,
 	depPkgs []PkgInputSpec,
+	depPkgMatchType MatchFlags,
 	dependencies []IsDependencyInputSpec,
 ) (*IsDependenciesResponse, error) {
 	req := &graphql.Request{
 		OpName: "IsDependencies",
 		Query:  IsDependencies_Operation,
 		Variables: &__IsDependenciesInput{
-			Pkgs:         pkgs,
-			DepPkgs:      depPkgs,
-			Dependencies: dependencies,
+			Pkgs:            pkgs,
+			DepPkgs:         depPkgs,
+			DepPkgMatchType: depPkgMatchType,
+			Dependencies:    dependencies,
 		},
 	}
 	var err error
@@ -26647,8 +26658,8 @@ func IsDependencies(
 
 // The query or mutation executed by IsDependency.
 const IsDependency_Operation = `
-mutation IsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
-	ingestDependency(pkg: $pkg, depPkg: $depPkg, dependency: $dependency) {
+mutation IsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $depPkgMatchType: MatchFlags!, $dependency: IsDependencyInputSpec!) {
+	ingestDependency(pkg: $pkg, depPkg: $depPkg, depPkgMatchType: $depPkgMatchType, dependency: $dependency) {
 		... AllIsDependencyTree
 	}
 }
@@ -26694,15 +26705,17 @@ func IsDependency(
 	client graphql.Client,
 	pkg PkgInputSpec,
 	depPkg PkgInputSpec,
+	depPkgMatchType MatchFlags,
 	dependency IsDependencyInputSpec,
 ) (*IsDependencyResponse, error) {
 	req := &graphql.Request{
 		OpName: "IsDependency",
 		Query:  IsDependency_Operation,
 		Variables: &__IsDependencyInput{
-			Pkg:        pkg,
-			DepPkg:     depPkg,
-			Dependency: dependency,
+			Pkg:             pkg,
+			DepPkg:          depPkg,
+			DepPkgMatchType: depPkgMatchType,
+			Dependency:      dependency,
 		},
 	}
 	var err error

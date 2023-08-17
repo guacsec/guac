@@ -53,9 +53,10 @@ type CertifyScorecardIngest struct {
 }
 
 type IsDependencyIngest struct {
-	Pkg          *generated.PkgInputSpec          `json:"pkg,omitempty"`
-	DepPkg       *generated.PkgInputSpec          `json:"depPkg,omitempty"`
-	IsDependency *generated.IsDependencyInputSpec `json:"isDependency,omitempty"`
+	Pkg             *generated.PkgInputSpec          `json:"pkg,omitempty"`
+	DepPkg          *generated.PkgInputSpec          `json:"depPkg,omitempty"`
+	DepPkgMatchFlag generated.MatchFlags             `json:"depPkgMatchFlag,omitempty"`
+	IsDependency    *generated.IsDependencyInputSpec `json:"isDependency,omitempty"`
 }
 
 type IsOccurrenceIngest struct {

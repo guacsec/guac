@@ -29,10 +29,12 @@ import (
 func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputSpec, relatedFileNodes []*model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
 	if len(relatedFileNodes) > 0 {
 		for _, rfileNode := range relatedFileNodes {
+
 			// TODO: Check is this always just expected to be one?
 			return &assembler.IsDependencyIngest{
-				Pkg:    foundNode,
-				DepPkg: rfileNode,
+				Pkg:             foundNode,
+				DepPkg:          rfileNode,
+				DepPkgMatchFlag: getMatchFlagsFromPkgInput(rfileNode),
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: model.DependencyTypeUnknown,
 					Justification:  justification,
@@ -43,8 +45,9 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 	} else if len(relatedPackNodes) > 0 {
 		for _, rpackNode := range relatedPackNodes {
 			return &assembler.IsDependencyIngest{
-				Pkg:    foundNode,
-				DepPkg: rpackNode,
+				Pkg:             foundNode,
+				DepPkg:          rpackNode,
+				DepPkgMatchFlag: getMatchFlagsFromPkgInput(rpackNode),
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: model.DependencyTypeUnknown,
 					Justification:  justification,
@@ -64,8 +67,9 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 		for _, packNode := range packNodes {
 			if !reflect.DeepEqual(packNode, topLevel) {
 				p := assembler.IsDependencyIngest{
-					Pkg:    topLevel,
-					DepPkg: packNode,
+					Pkg:             topLevel,
+					DepPkg:          packNode,
+					DepPkgMatchFlag: getMatchFlagsFromPkgInput(packNode),
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeUnknown,
 						Justification:  justification,
@@ -80,8 +84,9 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 	for _, fileNodes := range files {
 		for _, fileNode := range fileNodes {
 			p := assembler.IsDependencyIngest{
-				Pkg:    topLevel,
-				DepPkg: fileNode,
+				Pkg:             topLevel,
+				DepPkg:          fileNode,
+				DepPkgMatchFlag: getMatchFlagsFromPkgInput(fileNode),
 				IsDependency: &model.IsDependencyInputSpec{
 					DependencyType: model.DependencyTypeUnknown,
 					Justification:  justification,
@@ -107,4 +112,12 @@ func CreateTopLevelHasSBOM(topLevel *model.PkgInputSpec, sbomDoc *processor.Docu
 			DownloadLocation: sbomDoc.SourceInformation.Source,
 		},
 	}
+}
+
+func getMatchFlagsFromPkgInput(p *model.PkgInputSpec) model.MatchFlags {
+	matchFlags := model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
+	if p.Version != nil && *p.Version != "" {
+		matchFlags = model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
+	}
+	return matchFlags
 }

@@ -548,7 +548,7 @@ func getPkgHasSBOM(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom,
 	var hasSBOMList []*model.HasSbom
 	for _, createdValue := range createdValues {
 		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
-			createdValue.PkgVersion.Name, &createdValue.PkgVersion.VersionID, &createdValue.PkgVersion.Version, &createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+			createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
 
 		hasSBOM := &model.HasSbom{
 			ID:               createdValue.HasSBOMId,

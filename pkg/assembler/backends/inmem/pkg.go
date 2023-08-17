@@ -778,7 +778,7 @@ func (c *demoClient) exactPackageVersion(filter *model.PkgSpec) (*pkgVersionNode
 	return nil, nil
 }
 
-func (c *demoClient) exactPackageName(filter *model.PkgNameSpec) (*pkgVersionStruct, error) {
+func (c *demoClient) exactPackageName(filter *model.PkgSpec) (*pkgVersionStruct, error) {
 	if filter == nil {
 		return nil, nil
 	}
