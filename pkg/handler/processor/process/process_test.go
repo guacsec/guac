@@ -22,6 +22,7 @@ import (
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/simpledoc"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/guacsec/guac/pkg/logging"
@@ -540,6 +541,61 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 					}
 				}
 			*/
+		})
+	}
+}
+
+func Test_validateFormat(t *testing.T) {
+	tests := []struct {
+		name    string
+		doc     processor.Document
+		wantErr bool
+	}{
+		{
+			name: "valid XML format document",
+			doc: processor.Document{
+				Blob:   []byte(testdata.CycloneDXExampleLaravelXML),
+				Type:   processor.DocumentCycloneDX,
+				Format: processor.FormatXML,
+				SourceInformation: processor.SourceInformation{
+					Collector: "a-collector",
+					Source:    "a-source",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid XML format document",
+			doc: processor.Document{
+				Blob:   []byte(testdata.CycloneDXInvalidExampleXML),
+				Type:   processor.DocumentCycloneDX,
+				Format: processor.FormatXML,
+				SourceInformation: processor.SourceInformation{
+					Collector: "a-collector",
+					Source:    "a-source",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "valid JSON document",
+			doc: processor.Document{
+				Blob:   []byte(testdata.SpdxExampleSmall),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: "a-collector",
+					Source:    "a-source",
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := validateFormat(&tt.doc); (err != nil) != tt.wantErr {
+				t.Errorf("validateFormat() error = %v, wantErr %v", err, tt.wantErr)
+			}
 		})
 	}
 }
