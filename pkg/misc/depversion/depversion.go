@@ -159,9 +159,6 @@ var exactSvR = regexp.MustCompile(`^v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<min
 // check for 1.x or 1.0.x cases
 var exactSvRWithWildcard = regexp.MustCompile(`^v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<minor>x|0|[1-9]\d*))?(\.(?P<patch>0|x|[1-9]\d*))?(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
 
-// check for ~1.x or ~1.0.x cases
-var exactSvRWithWildcardAndTidle = regexp.MustCompile(`~.*[.]x`)
-
 // for bad semvers like v1.0.0rc8 that don't include prerelease dashes
 var almostExactSvR = regexp.MustCompile(`^v?(?P<beforerel>(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*))(?P<afterrel>(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
 
@@ -191,7 +188,7 @@ func isSemver(s string) bool {
 }
 
 func isSemVerWildcard(s string) bool {
-	return !exactSvR.Match([]byte(s)) && (exactSvRWithWildcardAndTidle.Match([]byte(s)) || exactSvRWithWildcard.Match([]byte(s)))
+	return !exactSvR.Match([]byte(s)) && exactSvRWithWildcard.Match([]byte(s))
 }
 
 func isValidConstraint(s string) bool {
@@ -333,9 +330,12 @@ func getConstraint(s string) (string, error) {
 		}
 		return "=" + s, nil
 	}
+
+	// ignoring the tilde for the wildcard check
+	wildcardVersion := strings.TrimPrefix(s, "~")
 	// check for 1.x minor and patch versions
-	if isSemVerWildcard(s) {
-		_, major, minor, _, _, _, err := parseWildcardSemver(strings.TrimPrefix(s, "~"))
+	if isSemVerWildcard(wildcardVersion) {
+		_, major, minor, _, _, _, err := parseWildcardSemver(wildcardVersion)
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver with wildcard: %v", err)
 		}
