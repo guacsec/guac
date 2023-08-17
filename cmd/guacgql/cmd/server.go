@@ -115,11 +115,10 @@ func validateFlags() error {
 	switch flags.backend {
 	case inmems, neo4js, arango, ent, neptune:
 		// Valid
+		return nil
 	default:
 		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
 	}
-
-	return nil
 }
 
 func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
