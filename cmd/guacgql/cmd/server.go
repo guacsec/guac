@@ -112,8 +112,10 @@ func startServer(cmd *cobra.Command) {
 }
 
 func validateFlags() error {
-	if flags.backend != neo4js &&
-		flags.backend != inmems && flags.backend != arango {
+	switch flags.backend {
+	case inmems, neo4js, arango, ent, neptune:
+		// Valid
+	default:
 		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
 	}
 
