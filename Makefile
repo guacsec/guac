@@ -92,7 +92,7 @@ generate:
 # build bins for goos/goarch of current host
 .PHONY: build_bins
 build_bins:
-	goreleaser build --clean --snapshot --single-target 
+	goreleaser build --clean --snapshot --single-target
 
 # Build bins and copy to ./bin to align with docs
 # Separate build_bins as its own target to ensure (workaround) goreleaser finish writing dist/artifacts.json
@@ -146,8 +146,8 @@ check-docker-tool-check:
 # Check that docker buildx is installed.
 .PHONY: check-docker-buildx-tool-check
 check-docker-buildx-tool-check:
-	@if ! command -v docker buildx >/dev/null 2>&1; then \
-		echo "'$(CONTAINER)' builx is not installed. Please install '$(CONTAINER)' buildx and try again."; \
+	@if ! docker buildx >/dev/null 2>&1; then \
+		echo "'$(CONTAINER)' buildx is not installed. Please install '$(CONTAINER)' buildx and try again."; \
 		exit 1; \
 	fi
 
