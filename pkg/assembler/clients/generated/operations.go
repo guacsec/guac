@@ -22617,10 +22617,17 @@ func (v *VulnerabilityInputSpec) GetVulnerabilityID() string { return v.Vulnerab
 // Use null to match on all values at that level.
 // For example, to get all vulnerabilities in GUAC backend, use a VulnSpec
 // where every field is null.
+//
+// Setting the noVuln boolean true will ignore the other inputs for type and vulnerabilityID.
+// Setting noVuln to true means retrieving only nodes where the type of the vulnerability is "novuln"
+// and the it has an empty string for vulnerabilityID. Setting it to false filters out all results that are "novuln".
+// Setting one of the other fields and omitting the noVuln means retrieving vulnerabilities for the corresponding
+// type and vulnerabilityID. Omission of noVuln field will return all vulnerabilities and novuln.
 type VulnerabilitySpec struct {
 	Id              *string `json:"id"`
 	Type            *string `json:"type"`
 	VulnerabilityID *string `json:"vulnerabilityID"`
+	NoVuln          *bool   `json:"noVuln"`
 }
 
 // GetId returns VulnerabilitySpec.Id, and is useful for accessing the field via an interface.
@@ -22631,6 +22638,9 @@ func (v *VulnerabilitySpec) GetType() *string { return v.Type }
 
 // GetVulnerabilityID returns VulnerabilitySpec.VulnerabilityID, and is useful for accessing the field via an interface.
 func (v *VulnerabilitySpec) GetVulnerabilityID() *string { return v.VulnerabilityID }
+
+// GetNoVuln returns VulnerabilitySpec.NoVuln, and is useful for accessing the field via an interface.
+func (v *VulnerabilitySpec) GetNoVuln() *bool { return v.NoVuln }
 
 // __ArtifactsInput is used internally by genqlient
 type __ArtifactsInput struct {

@@ -33,8 +33,10 @@ func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnE
 		var lowercaseVulnFilterList []*model.VulnerabilitySpec
 		for _, v := range vulnEqualSpec.Vulnerabilities {
 			lowercaseVulnFilter := model.VulnerabilitySpec{
+				ID:              v.ID,
 				Type:            toLower(v.Type),
 				VulnerabilityID: toLower(v.VulnerabilityID),
+				NoVuln:          v.NoVuln,
 			}
 			lowercaseVulnFilterList = append(lowercaseVulnFilterList, &lowercaseVulnFilter)
 		}
