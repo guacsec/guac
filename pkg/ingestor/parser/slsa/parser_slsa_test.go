@@ -20,16 +20,14 @@ import (
 	"testing"
 	"time"
 
-	slsa01 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.1"
-
-	"github.com/in-toto/in-toto-golang/in_toto"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/in-toto/in-toto-golang/in_toto"
+	slsa01 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.1"
 )
 
 func Test_slsaParser(t *testing.T) {
@@ -52,6 +50,12 @@ func Test_slsaParser(t *testing.T) {
 			wantPredicates: &testdata.SlsaPreds1,
 			wantErr:        false,
 		},
+		{
+			name:           "testing v0.1 with nil document",
+			doc:            nil,
+			wantPredicates: &testdata.SlsaPreds1,
+			wantErr:        true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -66,7 +70,6 @@ func Test_slsaParser(t *testing.T) {
 			}
 
 			preds := s.GetPredicates(ctx)
-			//fmt.Println(preds.HasSlsa[0].HasSlsa.SlsaPredicate)
 			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
 				t.Errorf("slsa.GetPredicate mismatch values (+got, -expected): %s", d)
 			}

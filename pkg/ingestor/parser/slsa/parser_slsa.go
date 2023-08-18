@@ -22,18 +22,17 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	scommon "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
 	slsa01 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.1"
 	slsa02 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
 	slsa1 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v1"
 	"github.com/jeremywohl/flatten"
-
-	"github.com/guacsec/guac/pkg/assembler"
-	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
 
 // each subject or object is made of:
@@ -73,18 +72,21 @@ func NewSLSAParser() common.DocumentParser {
 }
 
 // Parse breaks out the document into the graph components
-func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
+func (s *slsaParser) Parse(_ context.Context, doc *processor.Document) error {
+	if doc == nil {
+		return fmt.Errorf("nil document")
+	}
 	if err := s.parseSlsaPredicate(doc.Blob); err != nil {
-		return err
+		return fmt.Errorf("could not parse SLSA predicate: %w", err)
 	}
 	if err := s.getSubject(); err != nil {
-		return err
+		return fmt.Errorf("could not get SLSA subjects: %w", err)
 	}
 	if err := s.getMaterials(); err != nil {
-		return err
+		return fmt.Errorf("could not get SLSA materials: %w", err)
 	}
 	if err := s.getSLSA(); err != nil {
-		return err
+		return fmt.Errorf("could not get SLSA attestation: %w", err)
 	}
 	s.getBuilder()
 	return nil
