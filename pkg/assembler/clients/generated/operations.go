@@ -22489,6 +22489,28 @@ func (v *VulnEqualVulnVulnerability) __premarshalJSON() (*__premarshalVulnEqualV
 	return &retval, nil
 }
 
+// VulnHasMetadataResponse is returned by VulnHasMetadata on success.
+type VulnHasMetadataResponse struct {
+	// Adds metadata about a vulnerability.
+	IngestVulnerabilityMetadata string `json:"ingestVulnerabilityMetadata"`
+}
+
+// GetIngestVulnerabilityMetadata returns VulnHasMetadataResponse.IngestVulnerabilityMetadata, and is useful for accessing the field via an interface.
+func (v *VulnHasMetadataResponse) GetIngestVulnerabilityMetadata() string {
+	return v.IngestVulnerabilityMetadata
+}
+
+// VulnHasMetadatasResponse is returned by VulnHasMetadatas on success.
+type VulnHasMetadatasResponse struct {
+	// Bulk add certifications that vulnerability has a specific score.
+	IngestVulnerabilityMetadatas []string `json:"ingestVulnerabilityMetadatas"`
+}
+
+// GetIngestVulnerabilityMetadatas returns VulnHasMetadatasResponse.IngestVulnerabilityMetadatas, and is useful for accessing the field via an interface.
+func (v *VulnHasMetadatasResponse) GetIngestVulnerabilityMetadatas() []string {
+	return v.IngestVulnerabilityMetadatas
+}
+
 // VulnerabilitiesResponse is returned by Vulnerabilities on success.
 type VulnerabilitiesResponse struct {
 	// Returns all vulnerabilities matching a filter.
@@ -22611,6 +22633,44 @@ func (v *VulnerabilityInputSpec) GetType() string { return v.Type }
 
 // GetVulnerabilityID returns VulnerabilityInputSpec.VulnerabilityID, and is useful for accessing the field via an interface.
 func (v *VulnerabilityInputSpec) GetVulnerabilityID() string { return v.VulnerabilityID }
+
+// VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
+type VulnerabilityMetadataInputSpec struct {
+	Timestamp time.Time `json:"timestamp"`
+	Origin    string    `json:"origin"`
+	Collector string    `json:"collector"`
+}
+
+// GetTimestamp returns VulnerabilityMetadataInputSpec.Timestamp, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataInputSpec) GetTimestamp() time.Time { return v.Timestamp }
+
+// GetOrigin returns VulnerabilityMetadataInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns VulnerabilityMetadataInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataInputSpec) GetCollector() string { return v.Collector }
+
+// VulnerabilityScoreInputSpec represents the mutation input to ingest a vulnerability score.
+type VulnerabilityScoreInputSpec struct {
+	Type  VulnerabilityScoreType `json:"type"`
+	Value float64                `json:"value"`
+}
+
+// GetType returns VulnerabilityScoreInputSpec.Type, and is useful for accessing the field via an interface.
+func (v *VulnerabilityScoreInputSpec) GetType() VulnerabilityScoreType { return v.Type }
+
+// GetValue returns VulnerabilityScoreInputSpec.Value, and is useful for accessing the field via an interface.
+func (v *VulnerabilityScoreInputSpec) GetValue() float64 { return v.Value }
+
+// Records the type of the score being captured by the score node
+type VulnerabilityScoreType string
+
+const (
+	VulnerabilityScoreTypeCvssv2 VulnerabilityScoreType = "CVSSv2"
+	VulnerabilityScoreTypeCvssv3 VulnerabilityScoreType = "CVSSv3"
+	VulnerabilityScoreTypeEpssv1 VulnerabilityScoreType = "EPSSv1"
+	VulnerabilityScoreTypeEpssv2 VulnerabilityScoreType = "EPSSv2"
+)
 
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
 //
@@ -23455,6 +23515,44 @@ func (v *__VulnEqualInput) GetOtherVulnerability() VulnerabilityInputSpec {
 
 // GetVulnEqual returns __VulnEqualInput.VulnEqual, and is useful for accessing the field via an interface.
 func (v *__VulnEqualInput) GetVulnEqual() VulnEqualInputSpec { return v.VulnEqual }
+
+// __VulnHasMetadataInput is used internally by genqlient
+type __VulnHasMetadataInput struct {
+	Vulnerability VulnerabilityInputSpec         `json:"vulnerability"`
+	Score         VulnerabilityScoreInputSpec    `json:"score"`
+	VulnMetadata  VulnerabilityMetadataInputSpec `json:"vulnMetadata"`
+}
+
+// GetVulnerability returns __VulnHasMetadataInput.Vulnerability, and is useful for accessing the field via an interface.
+func (v *__VulnHasMetadataInput) GetVulnerability() VulnerabilityInputSpec { return v.Vulnerability }
+
+// GetScore returns __VulnHasMetadataInput.Score, and is useful for accessing the field via an interface.
+func (v *__VulnHasMetadataInput) GetScore() VulnerabilityScoreInputSpec { return v.Score }
+
+// GetVulnMetadata returns __VulnHasMetadataInput.VulnMetadata, and is useful for accessing the field via an interface.
+func (v *__VulnHasMetadataInput) GetVulnMetadata() VulnerabilityMetadataInputSpec {
+	return v.VulnMetadata
+}
+
+// __VulnHasMetadatasInput is used internally by genqlient
+type __VulnHasMetadatasInput struct {
+	Vulnerabilities []VulnerabilityInputSpec         `json:"vulnerabilities"`
+	Scores          []VulnerabilityScoreInputSpec    `json:"scores"`
+	VulnMetadatas   []VulnerabilityMetadataInputSpec `json:"vulnMetadatas"`
+}
+
+// GetVulnerabilities returns __VulnHasMetadatasInput.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *__VulnHasMetadatasInput) GetVulnerabilities() []VulnerabilityInputSpec {
+	return v.Vulnerabilities
+}
+
+// GetScores returns __VulnHasMetadatasInput.Scores, and is useful for accessing the field via an interface.
+func (v *__VulnHasMetadatasInput) GetScores() []VulnerabilityScoreInputSpec { return v.Scores }
+
+// GetVulnMetadatas returns __VulnHasMetadatasInput.VulnMetadatas, and is useful for accessing the field via an interface.
+func (v *__VulnHasMetadatasInput) GetVulnMetadatas() []VulnerabilityMetadataInputSpec {
+	return v.VulnMetadatas
+}
 
 // __VulnerabilitiesInput is used internally by genqlient
 type __VulnerabilitiesInput struct {
@@ -29488,6 +29586,80 @@ func VulnEqual(
 	var err error
 
 	var data VulnEqualResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by VulnHasMetadata.
+const VulnHasMetadata_Operation = `
+mutation VulnHasMetadata ($vulnerability: VulnerabilityInputSpec!, $score: VulnerabilityScoreInputSpec!, $vulnMetadata: VulnerabilityMetadataInputSpec!) {
+	ingestVulnerabilityMetadata(vulnerability: $vulnerability, score: $score, vulnerabilityMetadata: $vulnMetadata)
+}
+`
+
+func VulnHasMetadata(
+	ctx context.Context,
+	client graphql.Client,
+	vulnerability VulnerabilityInputSpec,
+	score VulnerabilityScoreInputSpec,
+	vulnMetadata VulnerabilityMetadataInputSpec,
+) (*VulnHasMetadataResponse, error) {
+	req := &graphql.Request{
+		OpName: "VulnHasMetadata",
+		Query:  VulnHasMetadata_Operation,
+		Variables: &__VulnHasMetadataInput{
+			Vulnerability: vulnerability,
+			Score:         score,
+			VulnMetadata:  vulnMetadata,
+		},
+	}
+	var err error
+
+	var data VulnHasMetadataResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by VulnHasMetadatas.
+const VulnHasMetadatas_Operation = `
+mutation VulnHasMetadatas ($vulnerabilities: [VulnerabilityInputSpec!]!, $scores: [VulnerabilityScoreInputSpec!]!, $vulnMetadatas: [VulnerabilityMetadataInputSpec!]!) {
+	ingestVulnerabilityMetadatas(vulnerabilities: $vulnerabilities, scores: $scores, vulnerabilityMetadatas: $vulnMetadatas)
+}
+`
+
+func VulnHasMetadatas(
+	ctx context.Context,
+	client graphql.Client,
+	vulnerabilities []VulnerabilityInputSpec,
+	scores []VulnerabilityScoreInputSpec,
+	vulnMetadatas []VulnerabilityMetadataInputSpec,
+) (*VulnHasMetadatasResponse, error) {
+	req := &graphql.Request{
+		OpName: "VulnHasMetadatas",
+		Query:  VulnHasMetadatas_Operation,
+		Variables: &__VulnHasMetadatasInput{
+			Vulnerabilities: vulnerabilities,
+			Scores:          scores,
+			VulnMetadatas:   vulnMetadatas,
+		},
+	}
+	var err error
+
+	var data VulnHasMetadatasResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
