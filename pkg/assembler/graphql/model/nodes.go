@@ -1314,29 +1314,32 @@ type VulnerabilityMetadataSpec struct {
 // Examples:
 //
 // type: EPSSv1
-// value: "0.960760000"
+// value: 0.960760000
 //
 // type: CVSSv2
-// value: "5.0"
+// value: 5.0
 //
 // type: CVSSv3
-// value: "7.5"
+// value: 7.5
 type VulnerabilityScore struct {
 	ID    string                 `json:"id"`
 	Type  VulnerabilityScoreType `json:"type"`
-	Value string                 `json:"value"`
+	Value float64                `json:"value"`
 }
 
 // VulnerabilityScoreInputSpec represents the mutation input to ingest a vulnerability score.
 type VulnerabilityScoreInputSpec struct {
 	Type  VulnerabilityScoreType `json:"type"`
-	Value string                 `json:"value"`
+	Value float64                `json:"value"`
 }
 
 // VulnerabilityScoreSpec allows for filtering a vulnerability score.
+// Comparator field is an enum that be set to filter the score and return a
+// range that matches.
 type VulnerabilityScoreSpec struct {
-	Type  *VulnerabilityScoreType `json:"type,omitempty"`
-	Value *string                 `json:"value,omitempty"`
+	Type       *VulnerabilityScoreType `json:"type,omitempty"`
+	Comparator *Comparator             `json:"comparator,omitempty"`
+	Value      *float64                `json:"value,omitempty"`
 }
 
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
@@ -1348,6 +1351,54 @@ type VulnerabilitySpec struct {
 	ID              *string `json:"id,omitempty"`
 	Type            *string `json:"type,omitempty"`
 	VulnerabilityID *string `json:"vulnerabilityID,omitempty"`
+}
+
+// The Comparator is used by the vulnerability score filter on ranges
+type Comparator string
+
+const (
+	ComparatorGreater      Comparator = "GREATER"
+	ComparatorEqual        Comparator = "EQUAL"
+	ComparatorLess         Comparator = "LESS"
+	ComparatorGreaterEqual Comparator = "GREATER_EQUAL"
+	ComparatorLessEqual    Comparator = "LESS_EQUAL"
+)
+
+var AllComparator = []Comparator{
+	ComparatorGreater,
+	ComparatorEqual,
+	ComparatorLess,
+	ComparatorGreaterEqual,
+	ComparatorLessEqual,
+}
+
+func (e Comparator) IsValid() bool {
+	switch e {
+	case ComparatorGreater, ComparatorEqual, ComparatorLess, ComparatorGreaterEqual, ComparatorLessEqual:
+		return true
+	}
+	return false
+}
+
+func (e Comparator) String() string {
+	return string(e)
+}
+
+func (e *Comparator) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Comparator(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Comparator", str)
+	}
+	return nil
+}
+
+func (e Comparator) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 // DependencyType determines the type of the dependency.

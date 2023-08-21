@@ -22653,14 +22653,14 @@ func (v *VulnerabilityMetadataInputSpec) GetCollector() string { return v.Collec
 // VulnerabilityScoreInputSpec represents the mutation input to ingest a vulnerability score.
 type VulnerabilityScoreInputSpec struct {
 	Type  VulnerabilityScoreType `json:"type"`
-	Value string                 `json:"value"`
+	Value float64                `json:"value"`
 }
 
 // GetType returns VulnerabilityScoreInputSpec.Type, and is useful for accessing the field via an interface.
 func (v *VulnerabilityScoreInputSpec) GetType() VulnerabilityScoreType { return v.Type }
 
 // GetValue returns VulnerabilityScoreInputSpec.Value, and is useful for accessing the field via an interface.
-func (v *VulnerabilityScoreInputSpec) GetValue() string { return v.Value }
+func (v *VulnerabilityScoreInputSpec) GetValue() float64 { return v.Value }
 
 // Records the type of the score being captured by the score node
 type VulnerabilityScoreType string

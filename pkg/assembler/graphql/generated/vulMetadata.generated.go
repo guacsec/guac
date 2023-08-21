@@ -424,9 +424,9 @@ func (ec *executionContext) _VulnerabilityScore_value(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_VulnerabilityScore_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -436,7 +436,7 @@ func (ec *executionContext) fieldContext_VulnerabilityScore_value(ctx context.Co
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -594,7 +594,7 @@ func (ec *executionContext) unmarshalInputVulnerabilityScoreInputSpec(ctx contex
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNFloat2float64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -612,7 +612,7 @@ func (ec *executionContext) unmarshalInputVulnerabilityScoreSpec(ctx context.Con
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"type", "value"}
+	fieldsInOrder := [...]string{"type", "comparator", "value"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -628,11 +628,20 @@ func (ec *executionContext) unmarshalInputVulnerabilityScoreSpec(ctx context.Con
 				return it, err
 			}
 			it.Type = data
+		case "comparator":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comparator"))
+			data, err := ec.unmarshalOComparator2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐComparator(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Comparator = data
 		case "value":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -898,6 +907,22 @@ func (ec *executionContext) unmarshalNVulnerabilityScoreType2githubᚗcomᚋguac
 }
 
 func (ec *executionContext) marshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx context.Context, sel ast.SelectionSet, v model.VulnerabilityScoreType) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalOComparator2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐComparator(ctx context.Context, v interface{}) (*model.Comparator, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.Comparator)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOComparator2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐComparator(ctx context.Context, sel ast.SelectionSet, v *model.Comparator) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	return v
 }
 

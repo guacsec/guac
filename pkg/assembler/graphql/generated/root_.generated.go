@@ -4461,6 +4461,15 @@ enum VulnerabilityScoreType {
   EPSSv2
 }
 
+"The Comparator is used by the vulnerability score filter on ranges"
+enum Comparator {
+  GREATER
+  EQUAL
+  LESS
+  GREATER_EQUAL
+  LESS_EQUAL
+}
+
 """
 VulnerabilityScore node captures the score type and its corresponding value. There is a
 one-to-one relationship between the VulnerabilityMetadata and the score.
@@ -4468,18 +4477,18 @@ one-to-one relationship between the VulnerabilityMetadata and the score.
 Examples:
 
 type: EPSSv1
-value: "0.960760000"
+value: 0.960760000
 
 type: CVSSv2
-value: "5.0"
+value: 5.0
 
 type: CVSSv3
-value: "7.5"
+value: 7.5
 """
 type VulnerabilityScore {
   id: ID!
   type: VulnerabilityScoreType!
-  value: String!
+  value: Float!
 }
 
 """
@@ -4487,15 +4496,18 @@ VulnerabilityScoreInputSpec represents the mutation input to ingest a vulnerabil
 """
 input VulnerabilityScoreInputSpec {
   type: VulnerabilityScoreType!
-  value: String!
+  value: Float!
 }
 
 """
 VulnerabilityScoreSpec allows for filtering a vulnerability score.
+Comparator field is an enum that be set to filter the score and return a
+range that matches.
 """
 input VulnerabilityScoreSpec {
   type: VulnerabilityScoreType
-  value: String
+  comparator: Comparator
+  value: Float
 }
 
 """
