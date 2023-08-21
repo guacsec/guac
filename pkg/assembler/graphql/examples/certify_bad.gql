@@ -55,32 +55,48 @@ query CertifactBadQ1 {
 }
 
 query CertifactBadQ2 {
-  CertifyBad(certifyBadSpec: {origin: "testing backend"}) {
+  CertifyBad(certifyBadSpec: { origin: "testing backend" }) {
     ...allCertifyBadTree
   }
 }
 
 query CertifactBadQ3 {
-  CertifyBad(certifyBadSpec: {subject: {package: {name: "openssl"}}}) {
+  CertifyBad(certifyBadSpec: { subject: { package: { name: "openssl" } } }) {
     ...allCertifyBadTree
   }
 }
 
 query CertifactBadQ4 {
-  CertifyBad(certifyBadSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
+  CertifyBad(
+    certifyBadSpec: { subject: { source: { name: "github.com/guacsec/guac" } } }
+  ) {
     ...allCertifyBadTree
   }
 }
 
 query CertifactBadQ5 {
-  CertifyBad(certifyBadSpec: {subject: {artifact: {digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf", algorithm: "sha256"}}}) {
+  CertifyBad(
+    certifyBadSpec: {
+      subject: {
+        artifact: {
+          digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
+          algorithm: "sha256"
+        }
+      }
+    }
+  ) {
     ...allCertifyBadTree
   }
 }
 
 query CertifactBadQ6 {
   CertifyBad(
-    certifyBadSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}
+    certifyBadSpec: {
+      subject: {
+        package: { name: "openssl" }
+        source: { name: "github.com/guacsec/guac" }
+      }
+    }
   ) {
     ...allCertifyBadTree
   }

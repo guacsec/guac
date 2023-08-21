@@ -23,7 +23,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
         }
       }
     }
-   ...on Source {
+    ... on Source {
       id
       type
       namespaces {
@@ -55,32 +55,47 @@ query IsOccurrenceQ1 {
 }
 
 query IsOccurrenceQ2 {
-  IsOccurrence(isOccurrenceSpec: {origin: "testing backend"}) {
+  IsOccurrence(isOccurrenceSpec: { origin: "testing backend" }) {
     ...allIsOccurrencesTree
   }
 }
 
 query IsOccurrenceQ3 {
-  IsOccurrence(isOccurrenceSpec: {subject: {package: {name: "openssl"}}}) {
+  IsOccurrence(
+    isOccurrenceSpec: { subject: { package: { name: "openssl" } } }
+  ) {
     ...allIsOccurrencesTree
   }
 }
 
 query IsOccurrenceQ4 {
-  IsOccurrence(isOccurrenceSpec: {subject: {package: {name: "openssl", version: "3.0.3"}}}) {
+  IsOccurrence(
+    isOccurrenceSpec: {
+      subject: { package: { name: "openssl", version: "3.0.3" } }
+    }
+  ) {
     ...allIsOccurrencesTree
   }
 }
 
 query IsOccurrenceQ5 {
-  IsOccurrence(isOccurrenceSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
+  IsOccurrence(
+    isOccurrenceSpec: {
+      subject: { source: { name: "github.com/guacsec/guac" } }
+    }
+  ) {
     ...allIsOccurrencesTree
   }
 }
 
 query IsOccurrenceQ6 {
   IsOccurrence(
-    isOccurrenceSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}
+    isOccurrenceSpec: {
+      subject: {
+        package: { name: "openssl" }
+        source: { name: "github.com/guacsec/guac" }
+      }
+    }
   ) {
     ...allIsOccurrencesTree
   }

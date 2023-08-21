@@ -17,12 +17,18 @@
 
 # Defines the GraphQL operations to ingest a Scorecard certification into GUAC
 
-mutation CertifyScorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
+mutation CertifyScorecard(
+  $source: SourceInputSpec!
+  $scorecard: ScorecardInputSpec!
+) {
   ingestScorecard(source: $source, scorecard: $scorecard)
 }
 
 # Defines the GraphQL operations to bulk ingest Scorecard certifications into GUAC
 
-mutation CertifyScorecards($sources: [SourceInputSpec!]!, $scorecards: [ScorecardInputSpec!]!) {
+mutation CertifyScorecards(
+  $sources: [SourceInputSpec!]!
+  $scorecards: [ScorecardInputSpec!]!
+) {
   ingestScorecards(sources: $sources, scorecards: $scorecards)
 }

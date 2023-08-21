@@ -21,7 +21,7 @@
 CertifyVuln is an attestation to attach vulnerability information to a package.
 
 This information is obtained via a scanner. If there is no vulnerability
-detected, we attach the a vulnerability with "NoVuln" type and an empty string 
+detected, we attach the a vulnerability with "NoVuln" type and an empty string
 for the vulnerability ID.
 """
 type CertifyVuln {
@@ -100,7 +100,15 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): ID!
+  ingestCertifyVuln(
+    pkg: PkgInputSpec!
+    vulnerability: VulnerabilityInputSpec!
+    certifyVuln: ScanMetadataInput!
+  ): ID!
   "Bulk add certifications that a package has been scanned for vulnerabilities."
-  ingestCertifyVulns(pkgs: [PkgInputSpec!]!, vulnerabilities: [VulnerabilityInputSpec!]!, certifyVulns: [ScanMetadataInput!]!): [ID!]!
+  ingestCertifyVulns(
+    pkgs: [PkgInputSpec!]!
+    vulnerabilities: [VulnerabilityInputSpec!]!
+    certifyVulns: [ScanMetadataInput!]!
+  ): [ID!]!
 }

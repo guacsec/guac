@@ -127,7 +127,15 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered bad."
-  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyBad: CertifyBadInputSpec!): ID!
+  ingestCertifyBad(
+    subject: PackageSourceOrArtifactInput!
+    pkgMatchType: MatchFlags!
+    certifyBad: CertifyBadInputSpec!
+  ): ID!
   "Adds bulk certifications that a package, source or artifact is considered bad."
-  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyBads: [CertifyBadInputSpec!]!): [ID!]!
+  ingestCertifyBads(
+    subjects: PackageSourceOrArtifactInputs!
+    pkgMatchType: MatchFlags!
+    certifyBads: [CertifyBadInputSpec!]!
+  ): [ID!]!
 }

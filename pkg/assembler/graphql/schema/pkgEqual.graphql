@@ -59,5 +59,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that two packages are similar."
-  ingestPkgEqual(pkg: PkgInputSpec!, otherPackage: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): ID!
+  ingestPkgEqual(
+    pkg: PkgInputSpec!
+    otherPackage: PkgInputSpec!
+    pkgEqual: PkgEqualInputSpec!
+  ): ID!
 }

@@ -48,7 +48,6 @@ fragment allCertifyGoodTree on CertifyGood {
   collector
 }
 
-
 query CertifactGoodQ1 {
   CertifyGood(certifyGoodSpec: {}) {
     ...allCertifyGoodTree
@@ -56,32 +55,45 @@ query CertifactGoodQ1 {
 }
 
 query CertifactGoodQ2 {
-  CertifyGood(certifyGoodSpec: {origin: "testing backend"}) {
+  CertifyGood(certifyGoodSpec: { origin: "testing backend" }) {
     ...allCertifyGoodTree
   }
 }
 
 query CertifactGoodQ3 {
-  CertifyGood(certifyGoodSpec: {subject: {package: {name: "openssl"}}}) {
+  CertifyGood(certifyGoodSpec: { subject: { package: { name: "openssl" } } }) {
     ...allCertifyGoodTree
   }
 }
 
 query CertifactGoodQ4 {
-  CertifyGood(certifyGoodSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
+  CertifyGood(
+    certifyGoodSpec: {
+      subject: { source: { name: "github.com/guacsec/guac" } }
+    }
+  ) {
     ...allCertifyGoodTree
   }
 }
 
 query CertifactGoodQ5 {
-  CertifyGood(certifyGoodSpec: {subject: {artifact: {digest: "2b00042f7481c7b056c4b410d28f33cf"}}}) {
+  CertifyGood(
+    certifyGoodSpec: {
+      subject: { artifact: { digest: "2b00042f7481c7b056c4b410d28f33cf" } }
+    }
+  ) {
     ...allCertifyGoodTree
   }
 }
 
 query CertifactGoodQ6 {
   CertifyGood(
-    certifyGoodSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}
+    certifyGoodSpec: {
+      subject: {
+        package: { name: "openssl" }
+        source: { name: "github.com/guacsec/guac" }
+      }
+    }
   ) {
     ...allCertifyGoodTree
   }
@@ -89,28 +101,28 @@ query CertifactGoodQ6 {
 
 mutation CertifyGoodM1 {
   ingestCertifyGood(
-    subject: {artifact: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"}},
-    pkgMatchType: {pkg: ALL_VERSIONS}
+    subject: {
+      artifact: { algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf" }
+    }
+    pkgMatchType: { pkg: ALL_VERSIONS }
     certifyGood: {
-      justification: "why",
-      origin: "testing backend",
+      justification: "why"
+      origin: "testing backend"
       collector: "there"
     }
-  ) {
-    ...allCertifyGoodTree
-  }
+  )
 }
 
 mutation CertifyGoodM2 {
   ingestCertifyGood(
-    subject: {artifact: {algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0"}},
-    pkgMatchType: {pkg: ALL_VERSIONS}
+    subject: {
+      artifact: { algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0" }
+    }
+    pkgMatchType: { pkg: ALL_VERSIONS }
     certifyGood: {
-      justification: "why2",
-      origin: "testing backend",
+      justification: "why2"
+      origin: "testing backend"
       collector: "there"
     }
-  ) {
-    ...allCertifyGoodTree
-  }
+  )
 }

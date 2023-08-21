@@ -15,12 +15,12 @@
 
 query FindSoftware($searchText: String!) {
   findSoftware(searchText: $searchText) {
-     __typename
+    __typename
     ... on Package {
-      ... AllPkgTree
+      ...AllPkgTree
     }
     ... on Source {
-      ... AllSourceTree
+      ...AllSourceTree
     }
     ... on Artifact {
       ...AllArtifactTree

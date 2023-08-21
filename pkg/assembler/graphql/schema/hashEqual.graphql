@@ -45,7 +45,6 @@ input HashEqualSpec {
   collector: String
 }
 
-
 "HashEqualInputSpec represents the input to certify that packages are similar."
 input HashEqualInputSpec {
   justification: String!
@@ -53,15 +52,22 @@ input HashEqualInputSpec {
   collector: String!
 }
 
-
 extend type Query {
   "Returns all artifact equality statements matching a filter."
   HashEqual(hashEqualSpec: HashEqualSpec!): [HashEqual!]!
 }
 
 extend type Mutation {
- "Adds a certification that two artifacts are equal."
-  ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): ID!
+  "Adds a certification that two artifacts are equal."
+  ingestHashEqual(
+    artifact: ArtifactInputSpec!
+    otherArtifact: ArtifactInputSpec!
+    hashEqual: HashEqualInputSpec!
+  ): ID!
   "Bulk ingest certifications that two artifacts are equal."
-  ingestHashEquals(artifacts: [ArtifactInputSpec!]!, otherArtifacts: [ArtifactInputSpec!]!, hashEquals: [HashEqualInputSpec!]!): [ID!]!
+  ingestHashEquals(
+    artifacts: [ArtifactInputSpec!]!
+    otherArtifacts: [ArtifactInputSpec!]!
+    hashEquals: [HashEqualInputSpec!]!
+  ): [ID!]!
 }

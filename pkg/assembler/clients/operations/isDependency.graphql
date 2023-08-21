@@ -17,12 +17,32 @@
 
 # Defines the GraphQL operations to ingest dependency information into GUAC
 
-mutation IsDependency($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $depPkgMatchType: MatchFlags!, $dependency: IsDependencyInputSpec!) {
-  ingestDependency(pkg: $pkg, depPkg: $depPkg, depPkgMatchType: $depPkgMatchType, dependency: $dependency)
+mutation IsDependency(
+  $pkg: PkgInputSpec!
+  $depPkg: PkgInputSpec!
+  $depPkgMatchType: MatchFlags!
+  $dependency: IsDependencyInputSpec!
+) {
+  ingestDependency(
+    pkg: $pkg
+    depPkg: $depPkg
+    depPkgMatchType: $depPkgMatchType
+    dependency: $dependency
+  )
 }
 
 # Defines the GraphQL operations to bulk ingest dependencies information into GUAC
 
-mutation IsDependencies($pkgs: [PkgInputSpec!]!, $depPkgs: [PkgInputSpec!]!, $depPkgMatchType: MatchFlags!, $dependencies: [IsDependencyInputSpec!]!) {
-  ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, depPkgMatchType: $depPkgMatchType, dependencies: $dependencies)
+mutation IsDependencies(
+  $pkgs: [PkgInputSpec!]!
+  $depPkgs: [PkgInputSpec!]!
+  $depPkgMatchType: MatchFlags!
+  $dependencies: [IsDependencyInputSpec!]!
+) {
+  ingestDependencies(
+    pkgs: $pkgs
+    depPkgs: $depPkgs
+    depPkgMatchType: $depPkgMatchType
+    dependencies: $dependencies
+  )
 }

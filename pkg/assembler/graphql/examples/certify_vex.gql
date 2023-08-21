@@ -53,14 +53,14 @@ query CertifyVEXStatementQ1 {
 }
 
 query CertifyVEXStatementQ2 {
-  CertifyVEXStatement(certifyVEXStatementSpec: {origin: "testing backend"}) {
+  CertifyVEXStatement(certifyVEXStatementSpec: { origin: "testing backend" }) {
     ...allCertifyVEXStatementTree
   }
 }
 
 query CertifyVEXStatementQ3 {
   CertifyVEXStatement(
-    certifyVEXStatementSpec: {subject: {package: {name: "openssl"}}}
+    certifyVEXStatementSpec: { subject: { package: { name: "openssl" } } }
   ) {
     ...allCertifyVEXStatementTree
   }
@@ -68,7 +68,14 @@ query CertifyVEXStatementQ3 {
 
 query CertifyVEXStatementQ4 {
   CertifyVEXStatement(
-    certifyVEXStatementSpec: {subject: {artifact: {algorithm: "sha256", digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}}}
+    certifyVEXStatementSpec: {
+      subject: {
+        artifact: {
+          algorithm: "sha256"
+          digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
+        }
+      }
+    }
   ) {
     ...allCertifyVEXStatementTree
   }
@@ -76,7 +83,9 @@ query CertifyVEXStatementQ4 {
 
 query CertifyVEXStatementQ5 {
   CertifyVEXStatement(
-    certifyVEXStatementSpec: {vulnerability: {vulnerabilityID: "CVE-2019-13110"}}
+    certifyVEXStatementSpec: {
+      vulnerability: { vulnerabilityID: "CVE-2019-13110" }
+    }
   ) {
     ...allCertifyVEXStatementTree
   }
@@ -84,7 +93,9 @@ query CertifyVEXStatementQ5 {
 
 query CertifyVEXStatementQ6 {
   CertifyVEXStatement(
-    certifyVEXStatementSpec: {vulnerability: {vulnerabilityID: "GHSA-h45f-rjvw-2rv2"}}
+    certifyVEXStatementSpec: {
+      vulnerability: { vulnerabilityID: "GHSA-h45f-rjvw-2rv2" }
+    }
   ) {
     ...allCertifyVEXStatementTree
   }
@@ -92,7 +103,9 @@ query CertifyVEXStatementQ6 {
 
 query CertifyVEXStatementQ7 {
   CertifyVEXStatement(
-    certifyVEXStatementSpec: {vulnerability: {vulnerabilityID: "CVE-2018-43610"}}
+    certifyVEXStatementSpec: {
+      vulnerability: { vulnerabilityID: "CVE-2018-43610" }
+    }
   ) {
     ...allCertifyVEXStatementTree
   }
@@ -100,7 +113,9 @@ query CertifyVEXStatementQ7 {
 
 query CertifyVEXStatementQ8 {
   CertifyVEXStatement(
-    certifyVEXStatementSpec: {vulnerability: {vulnerabilityID: "GHSA-hj5f-4gvw-4rv2"}}
+    certifyVEXStatementSpec: {
+      vulnerability: { vulnerabilityID: "GHSA-hj5f-4gvw-4rv2" }
+    }
   ) {
     ...allCertifyVEXStatementTree
   }
@@ -108,7 +123,9 @@ query CertifyVEXStatementQ8 {
 
 query CertifyVEXStatementQ9 {
   CertifyVEXStatement(
-    certifyVEXStatementSpec: {vulnerability: {vulnerabilityID: "cve-2019-14750"}}
+    certifyVEXStatementSpec: {
+      vulnerability: { vulnerabilityID: "cve-2019-14750" }
+    }
   ) {
     ...allCertifyVEXStatementTree
   }
@@ -116,7 +133,9 @@ query CertifyVEXStatementQ9 {
 
 query CertifyVEXStatementQ10 {
   CertifyVEXStatement(
-    certifyVEXStatementSpec: {vulnerability: {vulnerabilityID: "cve-2018-15710"}}
+    certifyVEXStatementSpec: {
+      vulnerability: { vulnerabilityID: "cve-2018-15710" }
+    }
   ) {
     ...allCertifyVEXStatementTree
   }

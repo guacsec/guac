@@ -82,7 +82,17 @@ extend type Query {
 
 extend type Mutation {
   "Adds a dependency between two packages"
-  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, depPkgMatchType: MatchFlags!, dependency: IsDependencyInputSpec!): ID!
+  ingestDependency(
+    pkg: PkgInputSpec!
+    depPkg: PkgInputSpec!
+    depPkgMatchType: MatchFlags!
+    dependency: IsDependencyInputSpec!
+  ): ID!
   "Bulk adds a dependency between two packages"
-  ingestDependencies(pkgs: [PkgInputSpec!]!, depPkgs: [PkgInputSpec!]!, depPkgMatchType: MatchFlags!, dependencies: [IsDependencyInputSpec!]!): [ID!]!
+  ingestDependencies(
+    pkgs: [PkgInputSpec!]!
+    depPkgs: [PkgInputSpec!]!
+    depPkgMatchType: MatchFlags!
+    dependencies: [IsDependencyInputSpec!]!
+  ): [ID!]!
 }

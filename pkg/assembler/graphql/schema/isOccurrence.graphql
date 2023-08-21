@@ -49,7 +49,6 @@ input PackageOrSourceInputs {
   sources: [SourceInputSpec!]
 }
 
-
 """
 IsOccurrence is an attestation to link an artifact to a package or source.
 
@@ -96,7 +95,15 @@ extend type Query {
 
 extend type Mutation {
   "Ingest that an artifact is produced from a package or source."
-  ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): ID!
+  ingestOccurrence(
+    subject: PackageOrSourceInput!
+    artifact: ArtifactInputSpec!
+    occurrence: IsOccurrenceInputSpec!
+  ): ID!
   "Bulk ingest that an artifact is produced from a package or source."
-  ingestOccurrences(subjects: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [ID!]!
+  ingestOccurrences(
+    subjects: PackageOrSourceInputs!
+    artifacts: [ArtifactInputSpec!]!
+    occurrences: [IsOccurrenceInputSpec!]!
+  ): [ID!]!
 }

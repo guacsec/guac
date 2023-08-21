@@ -17,7 +17,11 @@
 
 # Defines the GraphQL operations to certify that two packages are identical
 
-mutation PkgEqual($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual: PkgEqualInputSpec!) {
+mutation PkgEqual(
+  $pkg: PkgInputSpec!
+  $otherPackage: PkgInputSpec!
+  $pkgEqual: PkgEqualInputSpec!
+) {
   pkg: ingestPackage(pkg: $pkg)
   otherPackage: ingestPackage(pkg: $otherPackage)
   ingestPkgEqual(pkg: $pkg, otherPackage: $otherPackage, pkgEqual: $pkgEqual)

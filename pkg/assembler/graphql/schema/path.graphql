@@ -24,8 +24,8 @@ It encapsulates the software tree nodes along with the evidence nodes. In a
 path query, all connecting evidence nodes along with their intermediate subject
 nodes need to be returned in order to create a complete graph.
 """
-union Node
-  = Package
+union Node =
+    Package
   | Source
   | Artifact
   | Builder
@@ -138,7 +138,12 @@ extend type Query {
   Specifying any Edge value in `usingOnly` will make the path only contain the
   corresponding GUAC evidence trees (GUAC verbs).
   """
-  path(subject: ID!, target: ID!, maxPathLength: Int!, usingOnly: [Edge!]!): [Node!]!
+  path(
+    subject: ID!
+    target: ID!
+    maxPathLength: Int!
+    usingOnly: [Edge!]!
+  ): [Node!]!
 
   """
   neighbors returns all the direct neighbors of a node.

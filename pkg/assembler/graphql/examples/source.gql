@@ -31,100 +31,113 @@ query SrcQ2 {
 
 # Return only sources with neither tag nor commit
 query SrcQ3 {
-  sources(sourceSpec: {tag:"", commit:""}) {
+  sources(sourceSpec: { tag: "", commit: "" }) {
     ...allSrcTree
   }
 }
 
 query SrcQ4 {
-  sources(sourceSpec: {name: "github.com/guacsec/guac"}) {
+  sources(sourceSpec: { name: "github.com/guacsec/guac" }) {
     ...allSrcTree
   }
 }
 
 query SrcQ5 {
-  sources(sourceSpec: {tag: "v0.0.1"}) {
+  sources(sourceSpec: { tag: "v0.0.1" }) {
     ...allSrcTree
   }
 }
 
 query SrcQ6 {
-  sources(
-    sourceSpec: {commit: "fcba958b73e27cad8b5c8655d46439984d27853b"}
-  ) {
+  sources(sourceSpec: { commit: "fcba958b73e27cad8b5c8655d46439984d27853b" }) {
     ...allSrcTree
   }
 }
 
 query SrcQ7 {
-  sources(sourceSpec: {type: "svn"}) {
+  sources(sourceSpec: { type: "svn" }) {
     ...allSrcTree
   }
 }
 
 query SrcQ8 {
-  sources(sourceSpec: {namespace: "gitlab"}) {
+  sources(sourceSpec: { namespace: "gitlab" }) {
     ...allSrcTree
   }
 }
 
 # this should error as both `tag` and `commit` are specified and not empty
 query SrcQ9 {
-  sources(sourceSpec: {tag: "asd", commit: "sad"}) {
+  sources(sourceSpec: { tag: "asd", commit: "sad" }) {
     ...allSrcTree
   }
 }
 
 mutation SrcM1 {
   ingestSource(
-    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow"}
-  ) {
-    ...allSrcTree
-  }
+    source: {
+      type: "git"
+      namespace: "github"
+      name: "github.com/tensorflow/tensorflow"
+    }
+  )
 }
 
 mutation SrcM2 {
   ingestSource(
-    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", commit: "4fd637ad9d674c88c50d56a5d47cd77f6032e609"}
-  ) {
-    ...allSrcTree
-  }
+    source: {
+      type: "git"
+      namespace: "github"
+      name: "github.com/tensorflow/tensorflow"
+      commit: "4fd637ad9d674c88c50d56a5d47cd77f6032e609"
+    }
+  )
 }
 
 mutation SrcM3 {
   ingestSource(
-    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", tag: "v2.12.0"}
-  ) {
-    ...allSrcTree
-  }
+    source: {
+      type: "git"
+      namespace: "github"
+      name: "github.com/tensorflow/tensorflow"
+      tag: "v2.12.0"
+    }
+  )
 }
 
 # this should error as both `tag` and `commit` are specified and not empty
 mutation SrcM4 {
   ingestSource(
-    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", commit: "4fd637ad9d674c88c50d56a5d47cd77f6032e609", tag: "2.12.0"}
-  ) {
-    ...allSrcTree
-  }
+    source: {
+      type: "git"
+      namespace: "github"
+      name: "github.com/tensorflow/tensorflow"
+      commit: "4fd637ad9d674c88c50d56a5d47cd77f6032e609"
+      tag: "2.12.0"
+    }
+  )
 }
 
 mutation SrcM5 {
   ingestSource(
-    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", tag: "v2.12.0"}
-  ) {
-    namespaces {
-      names {
-        name
-      }
+    source: {
+      type: "git"
+      namespace: "github"
+      name: "github.com/tensorflow/tensorflow"
+      tag: "v2.12.0"
     }
-  }
+  )
 }
 
 # this should be ok, since we're setting default value
 mutation SrcM6 {
   ingestSource(
-    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", commit: "", tag: "v2.12.0"}
-  ) {
-    ...allSrcTree
-  }
+    source: {
+      type: "git"
+      namespace: "github"
+      name: "github.com/tensorflow/tensorflow"
+      commit: ""
+      tag: "v2.12.0"
+    }
+  )
 }
