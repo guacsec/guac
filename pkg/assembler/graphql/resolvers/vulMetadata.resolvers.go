@@ -6,22 +6,21 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // IngestVulnerabilityMetadata is the resolver for the ingestVulnerabilityMetadata field.
 func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, score model.VulnerabilityScoreInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
-	panic(fmt.Errorf("not implemented: IngestVulnerabilityMetadata - ingestVulnerabilityMetadata"))
+	return r.Backend.IngestVulnerabilityMetadata(ctx, vulnerability, score, vulnerabilityMetadata)
 }
 
 // IngestVulnerabilityMetadatas is the resolver for the ingestVulnerabilityMetadatas field.
 func (r *mutationResolver) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, scores []*model.VulnerabilityScoreInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
-	panic(fmt.Errorf("not implemented: IngestVulnerabilityMetadatas - ingestVulnerabilityMetadatas"))
+	return r.Backend.IngestVulnerabilityMetadatas(ctx, vulnerabilities, scores, vulnerabilityMetadatas)
 }
 
 // VulnerabilityMetadata is the resolver for the vulnerabilityMetadata field.
 func (r *queryResolver) VulnerabilityMetadata(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
-	panic(fmt.Errorf("not implemented: VulnerabilityMetadata - vulnerabilityMetadata"))
+	return r.Backend.VulnerabilityMetadata(ctx, vulnerabilityMetadataSpec)
 }
