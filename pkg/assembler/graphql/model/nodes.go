@@ -1269,6 +1269,76 @@ type VulnerabilityInputSpec struct {
 	VulnerabilityID string `json:"vulnerabilityID"`
 }
 
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// scores (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type VulnerabilityMetadata struct {
+	ID            string              `json:"id"`
+	Vulnerability *Vulnerability      `json:"vulnerability"`
+	Score         *VulnerabilityScore `json:"score"`
+	Timestamp     time.Time           `json:"timestamp"`
+	Origin        string              `json:"origin"`
+	Collector     string              `json:"collector"`
+}
+
+// VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
+type VulnerabilityMetadataInputSpec struct {
+	Timestamp time.Time `json:"timestamp"`
+	Origin    string    `json:"origin"`
+	Collector string    `json:"collector"`
+}
+
+// VulnerabilityMetadataSpec allows filtering the list of VulnerabilityMetadata evidence
+// to return in a query.
+//
+// Timestamp specified indicates filtering timestamps after the specified time
+type VulnerabilityMetadataSpec struct {
+	ID            *string                 `json:"id,omitempty"`
+	Vulnerability *VulnerabilitySpec      `json:"vulnerability,omitempty"`
+	Score         *VulnerabilityScoreSpec `json:"score,omitempty"`
+	Timestamp     *time.Time              `json:"timestamp,omitempty"`
+	Origin        *string                 `json:"origin,omitempty"`
+	Collector     *string                 `json:"collector,omitempty"`
+}
+
+// VulnerabilityScore node captures the score type and its corresponding value. There is a
+// one-to-one relationship between the VulnerabilityMetadata and the score.
+//
+// Examples:
+//
+// type: EPSSv1
+// value: "0.960760000"
+//
+// type: CVSSv2
+// value: "5.0"
+//
+// type: CVSSv3
+// value: "7.5"
+type VulnerabilityScore struct {
+	ID    string                 `json:"id"`
+	Type  VulnerabilityScoreType `json:"type"`
+	Value string                 `json:"value"`
+}
+
+// VulnerabilityScoreInputSpec represents the mutation input to ingest a vulnerability score.
+type VulnerabilityScoreInputSpec struct {
+	Type  VulnerabilityScoreType `json:"type"`
+	Value string                 `json:"value"`
+}
+
+// VulnerabilityScoreSpec allows for filtering a vulnerability score.
+type VulnerabilityScoreSpec struct {
+	Type  *VulnerabilityScoreType `json:"type,omitempty"`
+	Value *string                 `json:"value,omitempty"`
+}
+
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
 //
 // Use null to match on all values at that level.
@@ -1636,5 +1706,51 @@ func (e *VexStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e VexStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Records the type of the score being captured by the score node
+type VulnerabilityScoreType string
+
+const (
+	VulnerabilityScoreTypeCVSSv2 VulnerabilityScoreType = "CVSSv2"
+	VulnerabilityScoreTypeCVSSv3 VulnerabilityScoreType = "CVSSv3"
+	VulnerabilityScoreTypeEPSSv1 VulnerabilityScoreType = "EPSSv1"
+	VulnerabilityScoreTypeEPSSv2 VulnerabilityScoreType = "EPSSv2"
+)
+
+var AllVulnerabilityScoreType = []VulnerabilityScoreType{
+	VulnerabilityScoreTypeCVSSv2,
+	VulnerabilityScoreTypeCVSSv3,
+	VulnerabilityScoreTypeEPSSv1,
+	VulnerabilityScoreTypeEPSSv2,
+}
+
+func (e VulnerabilityScoreType) IsValid() bool {
+	switch e {
+	case VulnerabilityScoreTypeCVSSv2, VulnerabilityScoreTypeCVSSv3, VulnerabilityScoreTypeEPSSv1, VulnerabilityScoreTypeEPSSv2:
+		return true
+	}
+	return false
+}
+
+func (e VulnerabilityScoreType) String() string {
+	return string(e)
+}
+
+func (e *VulnerabilityScoreType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VulnerabilityScoreType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VulnerabilityScoreType", str)
+	}
+	return nil
+}
+
+func (e VulnerabilityScoreType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

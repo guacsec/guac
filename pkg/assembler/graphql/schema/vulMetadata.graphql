@@ -18,7 +18,7 @@
 # Defines a GraphQL schema for the Vulnerability Metadata
 
 "Records the type of the score being captured by the score node"
-enum ScoreType {
+enum VulnerabilityScoreType {
   CVSSv2
   CVSSv3
   EPSSv1
@@ -26,7 +26,7 @@ enum ScoreType {
 }
 
 """
-Score node captures the score type and its corresponding value. There is a
+VulnerabilityScore node captures the score type and its corresponding value. There is a
 one-to-one relationship between the VulnerabilityMetadata and the score.
 
 Examples:
@@ -40,25 +40,25 @@ value: "5.0"
 type: CVSSv3
 value: "7.5"
 """
-type Score {
+type VulnerabilityScore {
   id: ID!
-  type: ScoreType!
+  type: VulnerabilityScoreType!
   value: String!
 }
 
 """
-ScoreInputSpec represents the mutation input to ingest a vulnerability score.
+VulnerabilityScoreInputSpec represents the mutation input to ingest a vulnerability score.
 """
-input ScoreInputSpec {
-  type: ScoreType!
+input VulnerabilityScoreInputSpec {
+  type: VulnerabilityScoreType!
   value: String!
 }
 
 """
-ScoreSpec allows for filtering a vulnerability score.
+VulnerabilityScoreSpec allows for filtering a vulnerability score.
 """
-input ScoreSpec {
-  type: ScoreType
+input VulnerabilityScoreSpec {
+  type: VulnerabilityScoreType
   value: String
 }
 
@@ -77,7 +77,7 @@ The timestamp is used to determine when the score was evaluated for the specific
 type VulnerabilityMetadata {
   id: ID!
   vulnerability: Vulnerability!
-  score: Score!
+  score: VulnerabilityScore!
   timestamp: Time!
   origin: String!
   collector: String!
@@ -92,7 +92,7 @@ Timestamp specified indicates filtering timestamps after the specified time
 input VulnerabilityMetadataSpec {
   id: ID
   vulnerability: VulnerabilitySpec
-  score: ScoreSpec
+  score: VulnerabilityScoreSpec
   timestamp: Time
   origin: String
   collector: String
@@ -114,5 +114,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds metadata about a vulnerability."
-  ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, score: ScoreInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
+  ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, score: VulnerabilityScoreInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
+  "Bulk add certifications that vulnerability has a specific score."
+  ingestVulnerabilityMetadatas(vulnerabilities: [VulnerabilityInputSpec!]!, scores: [VulnerabilityScoreInputSpec!]!, vulnerabilityMetadatas: [VulnerabilityMetadataInputSpec!]!): [ID!]!
 }
