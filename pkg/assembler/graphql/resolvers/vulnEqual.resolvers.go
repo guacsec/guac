@@ -13,12 +13,16 @@ import (
 )
 
 // IngestVulnEqual is the resolver for the ingestVulnEqual field.
-func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
+func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	return r.Backend.IngestVulnEqual(ctx,
+	ingestedVulnEqual, err := r.Backend.IngestVulnEqual(ctx,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
 		model.VulnerabilityInputSpec{Type: strings.ToLower(otherVulnerability.Type), VulnerabilityID: strings.ToLower(otherVulnerability.VulnerabilityID)},
 		vulnEqual)
+	if err != nil {
+		return "", err
+	}
+	return ingestedVulnEqual.ID, err
 }
 
 // VulnEqual is the resolver for the vulnEqual field.

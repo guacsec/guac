@@ -96,7 +96,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingest that an artifact is produced from a package or source."
-  ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
+  ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): ID!
   "Bulk ingest that an artifact is produced from a package or source."
-  ingestOccurrences(subjects: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [IsOccurrence!]!
+  ingestOccurrences(subjects: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [ID!]!
 }

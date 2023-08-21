@@ -92,5 +92,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds a PointOfContact attestation to a package, source or artifact."
-  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): PointOfContact!
+  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): ID!
 }

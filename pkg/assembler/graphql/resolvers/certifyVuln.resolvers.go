@@ -13,15 +13,19 @@ import (
 )
 
 // IngestCertifyVuln is the resolver for the ingestCertifyVuln field.
-func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
+func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	return r.Backend.IngestCertifyVuln(ctx, pkg,
+	ingestedCertifyVuln, err := r.Backend.IngestCertifyVuln(ctx, pkg,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
 		certifyVuln)
+	if err != nil {
+		return "", err
+	}
+	return ingestedCertifyVuln.ID, err
 }
 
 // IngestCertifyVulns is the resolver for the ingestCertifyVulns field.
-func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
+func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
 	for _, v := range vulnerabilities {
@@ -31,7 +35,14 @@ func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model
 		}
 		lowercaseVulnInputList = append(lowercaseVulnInputList, &lowercaseVulnInput)
 	}
-	return r.Backend.IngestCertifyVulns(ctx, pkgs, lowercaseVulnInputList, certifyVulns)
+	ingestedCertifyVulns, err := r.Backend.IngestCertifyVulns(ctx, pkgs, lowercaseVulnInputList, certifyVulns)
+	ingestedCertifyVulnsIDS := []string{}
+	if err == nil {
+		for _, certifyVuln := range ingestedCertifyVulns {
+			ingestedCertifyVulnsIDS = append(ingestedCertifyVulnsIDS, certifyVuln.ID)
+		}
+	}
+	return ingestedCertifyVulnsIDS, err
 }
 
 // CertifyVuln is the resolver for the CertifyVuln field.

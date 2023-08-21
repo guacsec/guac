@@ -654,10 +654,6 @@ func (ec *executionContext) marshalNDependencyType2githubᚗcomᚋguacsecᚋguac
 	return v
 }
 
-func (ec *executionContext) marshalNIsDependency2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependency(ctx context.Context, sel ast.SelectionSet, v model.IsDependency) graphql.Marshaler {
-	return ec._IsDependency(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.IsDependency) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

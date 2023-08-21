@@ -2463,9 +2463,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new artifact and returns it."
-  ingestArtifact(artifact: ArtifactInputSpec): Artifact!
+  ingestArtifact(artifact: ArtifactInputSpec): ID!
   "Bulk ingests new artifacts and returns a list of them."
-  ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [Artifact!]!
+  ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/builder.graphql", Input: `#
@@ -2515,9 +2515,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new builder and returns it."
-  ingestBuilder(builder: BuilderInputSpec): Builder!
+  ingestBuilder(builder: BuilderInputSpec): ID!
   "Bulk ingests new builders and returns a list of them."
-  ingestBuilders(builders: [BuilderInputSpec!]!): [Builder!]!
+  ingestBuilders(builders: [BuilderInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyBad.graphql", Input: `#
@@ -2649,9 +2649,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered bad."
-  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyBad: CertifyBadInputSpec!): CertifyBad!
+  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyBad: CertifyBadInputSpec!): ID!
   "Adds bulk certifications that a package, source or artifact is considered bad."
-  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
+  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyBads: [CertifyBadInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyGood.graphql", Input: `#
@@ -2729,9 +2729,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package, source or artifact is considered good."
-  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyGood: CertifyGoodInputSpec!): CertifyGood!
+  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyGood: CertifyGoodInputSpec!): ID!
   "Adds bulk certifications that a package, source or artifact is considered good."
-  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyGoods: [CertifyGoodInputSpec!]!): [CertifyGood!]!
+  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyGoods: [CertifyGoodInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
@@ -2862,9 +2862,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a source repository has a Scorecard."
-  ingestScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
+  ingestScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): ID!
   "Adds bulk certifications that a source repository has a Scorecard."
-  ingestScorecards(sources: [SourceInputSpec!]!, scorecards: [ScorecardInputSpec!]!): [CertifyScorecard!]!
+  ingestScorecards(sources: [SourceInputSpec!]!, scorecards: [ScorecardInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVEXStatement.graphql", Input: `#
@@ -3003,7 +3003,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a VEX certification for a package."
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInputSpec!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInputSpec!, vexStatement: VexStatementInputSpec!): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#
@@ -3108,9 +3108,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): CertifyVuln!
+  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): ID!
   "Bulk add certifications that a package has been scanned for vulnerabilities."
-  ingestCertifyVulns(pkgs: [PkgInputSpec!]!, vulnerabilities: [VulnerabilityInputSpec!]!, certifyVulns: [ScanMetadataInput!]!): [CertifyVuln!]!
+  ingestCertifyVulns(pkgs: [PkgInputSpec!]!, vulnerabilities: [VulnerabilityInputSpec!]!, certifyVulns: [ScanMetadataInput!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/contact.graphql", Input: `#
@@ -3207,7 +3207,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a PointOfContact attestation to a package, source or artifact."
-  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): PointOfContact!
+  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
@@ -3280,9 +3280,9 @@ extend type Query {
 
 extend type Mutation {
   "Certifies that a package or artifact has an SBOM."
-  ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
+  ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): ID!
   "Bulk ingest that package or artifact has an SBOM."
-  ingestHasSBOMs(subjects: PackageOrArtifactInputs!, hasSBOMs: [HasSBOMInputSpec!]!): [HasSBOM!]!
+  ingestHasSBOMs(subjects: PackageOrArtifactInputs!, hasSBOMs: [HasSBOMInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSLSA.graphql", Input: `#
@@ -3421,9 +3421,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a SLSA attestation"
-  ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
+  ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): ID!
   "Bulk Ingest SLSA attestations"
-  ingestSLSAs(subjects: [ArtifactInputSpec!]!, builtFromList: [[ArtifactInputSpec!]!]!, builtByList: [BuilderInputSpec!]!, slsaList: [SLSAInputSpec!]!): [HasSLSA!]!
+  ingestSLSAs(subjects: [ArtifactInputSpec!]!, builtFromList: [[ArtifactInputSpec!]!]!, builtByList: [BuilderInputSpec!]!, slsaList: [SLSAInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSourceAt.graphql", Input: `#
@@ -3488,7 +3488,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package (PackageName or PackageVersion) is built from the source."
-  ingestHasSourceAt(pkg: PkgInputSpec!, pkgMatchType: MatchFlags!, source: SourceInputSpec!, hasSourceAt: HasSourceAtInputSpec!): HasSourceAt!
+  ingestHasSourceAt(pkg: PkgInputSpec!, pkgMatchType: MatchFlags!, source: SourceInputSpec!, hasSourceAt: HasSourceAtInputSpec!): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hashEqual.graphql", Input: `#
@@ -3554,9 +3554,9 @@ extend type Query {
 
 extend type Mutation {
  "Adds a certification that two artifacts are equal."
-  ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
+  ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): ID!
   "Bulk ingest certifications that two artifacts are equal."
-  ingestHashEquals(artifacts: [ArtifactInputSpec!]!, otherArtifacts: [ArtifactInputSpec!]!, hashEquals: [HashEqualInputSpec!]!): [HashEqual!]!
+  ingestHashEquals(artifacts: [ArtifactInputSpec!]!, otherArtifacts: [ArtifactInputSpec!]!, hashEquals: [HashEqualInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isDependency.graphql", Input: `#
@@ -3643,9 +3643,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a dependency between two packages"
-  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, depPkgMatchType: MatchFlags!, dependency: IsDependencyInputSpec!): IsDependency!
+  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, depPkgMatchType: MatchFlags!, dependency: IsDependencyInputSpec!): ID!
   "Bulk adds a dependency between two packages"
-  ingestDependencies(pkgs: [PkgInputSpec!]!, depPkgs: [PkgInputSpec!]!, depPkgMatchType: MatchFlags!, dependencies: [IsDependencyInputSpec!]!): [IsDependency!]!
+  ingestDependencies(pkgs: [PkgInputSpec!]!, depPkgs: [PkgInputSpec!]!, depPkgMatchType: MatchFlags!, dependencies: [IsDependencyInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isOccurrence.graphql", Input: `#
@@ -3746,9 +3746,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingest that an artifact is produced from a package or source."
-  ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
+  ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): ID!
   "Bulk ingest that an artifact is produced from a package or source."
-  ingestOccurrences(subjects: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [IsOccurrence!]!
+  ingestOccurrences(subjects: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/metadata.graphql", Input: `#
@@ -3840,7 +3840,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds metadata about a package, source or artifact."
-  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, hasMetadata: HasMetadataInputSpec!): HasMetadata!
+  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, hasMetadata: HasMetadataInputSpec!): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/package.graphql", Input: `#
@@ -4027,9 +4027,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new package and returns the corresponding package trie path."
-  ingestPackage(pkg: PkgInputSpec!): Package!
+  ingestPackage(pkg: PkgInputSpec!): ID!
   "Bulk ingests packages and returns the list of corresponding package trie path."
-  ingestPackages(pkgs: [PkgInputSpec!]!): [Package!]!
+  ingestPackages(pkgs: [PkgInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/path.graphql", Input: `#
@@ -4260,7 +4260,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that two packages are similar."
-  ingestPkgEqual(pkg: PkgInputSpec!, otherPackage: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): PkgEqual!
+  ingestPkgEqual(pkg: PkgInputSpec!, otherPackage: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/search.graphql", Input: `#
@@ -4411,9 +4411,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new source and returns the corresponding source trie path."
-  ingestSource(source: SourceInputSpec!): Source!
+  ingestSource(source: SourceInputSpec!): ID!
   "Bulk ingests sources and returns the list of corresponding source trie path."
-  ingestSources(sources: [SourceInputSpec!]!): [Source!]!
+  ingestSources(sources: [SourceInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnEqual.graphql", Input: `#
@@ -4479,7 +4479,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingest a mapping between vulnerabilities."
-  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqual: VulnEqualInputSpec!): VulnEqual!
+  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqual: VulnEqualInputSpec!): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnMetadata.graphql", Input: `#
@@ -4698,9 +4698,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new vulnerability and returns the corresponding vulnerability trie path."
-  ingestVulnerability(vuln: VulnerabilityInputSpec!): Vulnerability!
+  ingestVulnerability(vuln: VulnerabilityInputSpec!): ID!
   "Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path."
-  ingestVulnerabilities(vulns: [VulnerabilityInputSpec!]!): [Vulnerability!]!
+  ingestVulnerabilities(vulns: [VulnerabilityInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 }

@@ -11,13 +11,24 @@ import (
 )
 
 // IngestScorecard is the resolver for the ingestScorecard field.
-func (r *mutationResolver) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
-	return r.Backend.IngestScorecard(ctx, source, scorecard)
+func (r *mutationResolver) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+	ingestedScorecard, err := r.Backend.IngestScorecard(ctx, source, scorecard)
+	if err != nil {
+		return "", err
+	}
+	return ingestedScorecard.ID, err
 }
 
 // IngestScorecards is the resolver for the ingestScorecards field.
-func (r *mutationResolver) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
-	return r.Backend.IngestScorecards(ctx, sources, scorecards)
+func (r *mutationResolver) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+	ingestedScorecards, err := r.Backend.IngestScorecards(ctx, sources, scorecards)
+	ingestedScorecardsIDS := []string{}
+	if err == nil {
+		for _, scorecard := range ingestedScorecards {
+			ingestedScorecardsIDS = append(ingestedScorecardsIDS, scorecard.ID)
+		}
+	}
+	return ingestedScorecardsIDS, err
 }
 
 // Scorecards is the resolver for the scorecards field.

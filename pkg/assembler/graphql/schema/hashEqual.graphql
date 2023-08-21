@@ -61,7 +61,7 @@ extend type Query {
 
 extend type Mutation {
  "Adds a certification that two artifacts are equal."
-  ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
+  ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): ID!
   "Bulk ingest certifications that two artifacts are equal."
-  ingestHashEquals(artifacts: [ArtifactInputSpec!]!, otherArtifacts: [ArtifactInputSpec!]!, hashEquals: [HashEqualInputSpec!]!): [HashEqual!]!
+  ingestHashEquals(artifacts: [ArtifactInputSpec!]!, otherArtifacts: [ArtifactInputSpec!]!, hashEquals: [HashEqualInputSpec!]!): [ID!]!
 }

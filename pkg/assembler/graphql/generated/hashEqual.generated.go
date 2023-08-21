@@ -444,10 +444,6 @@ func (ec *executionContext) _HashEqual(ctx context.Context, sel ast.SelectionSet
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNHashEqual2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqual(ctx context.Context, sel ast.SelectionSet, v model.HashEqual) graphql.Marshaler {
-	return ec._HashEqual(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNHashEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HashEqual) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

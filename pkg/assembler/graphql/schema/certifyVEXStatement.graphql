@@ -134,5 +134,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds a VEX certification for a package."
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInputSpec!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInputSpec!, vexStatement: VexStatementInputSpec!): ID!
 }

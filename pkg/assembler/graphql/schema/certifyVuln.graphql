@@ -100,7 +100,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): CertifyVuln!
+  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): ID!
   "Bulk add certifications that a package has been scanned for vulnerabilities."
-  ingestCertifyVulns(pkgs: [PkgInputSpec!]!, vulnerabilities: [VulnerabilityInputSpec!]!, certifyVulns: [ScanMetadataInput!]!): [CertifyVuln!]!
+  ingestCertifyVulns(pkgs: [PkgInputSpec!]!, vulnerabilities: [VulnerabilityInputSpec!]!, certifyVulns: [ScanMetadataInput!]!): [ID!]!
 }

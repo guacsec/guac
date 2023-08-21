@@ -1152,10 +1152,6 @@ func (ec *executionContext) _SLSAPredicate(ctx context.Context, sel ast.Selectio
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNHasSLSA2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSlsa(ctx context.Context, sel ast.SelectionSet, v model.HasSlsa) graphql.Marshaler {
-	return ec._HasSLSA(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNHasSLSA2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSlsaᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HasSlsa) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

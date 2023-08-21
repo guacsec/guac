@@ -18,17 +18,13 @@
 # Ingest Package
 
 mutation IngestPackage($pkg: PkgInputSpec!) {
-  ingestPackage(pkg: $pkg) {
-    ...AllPkgTree
-  }
+  ingestPackage(pkg: $pkg)
 }
 
 # Bulk Ingest Packages
 
 mutation IngestPackages($pkgs: [PkgInputSpec!]!) {
-  ingestPackages(pkgs: $pkgs) {
-    ...AllPkgTree
-  }
+  ingestPackages(pkgs: $pkgs)
 }
 
 # Exposes GraphQL queries to retrieve GUAC packages

@@ -13,15 +13,18 @@ import (
 )
 
 // IngestVEXStatement is the resolver for the ingestVEXStatement field.
-func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
 	if strings.ToLower(vulnerability.Type) == "novuln" {
-		return nil, gqlerror.Errorf("novuln type cannot be used for VEX")
+		return "", gqlerror.Errorf("novuln type cannot be used for VEX")
 	}
-
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	return r.Backend.IngestVEXStatement(ctx, subject,
+	ingestedVEXStatement, err := r.Backend.IngestVEXStatement(ctx, subject,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
 		vexStatement)
+	if err == nil {
+		return "", err
+	}
+	return ingestedVEXStatement.ID, err
 }
 
 // CertifyVEXStatement is the resolver for the CertifyVEXStatement field.

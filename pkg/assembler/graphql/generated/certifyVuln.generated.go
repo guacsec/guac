@@ -878,10 +878,6 @@ func (ec *executionContext) _ScanMetadata(ctx context.Context, sel ast.Selection
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNCertifyVuln2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVuln(ctx context.Context, sel ast.SelectionSet, v model.CertifyVuln) graphql.Marshaler {
-	return ec._CertifyVuln(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNCertifyVuln2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyVuln) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
