@@ -146,7 +146,7 @@ check-docker-tool-check:
 # Check that docker buildx is installed.
 .PHONY: check-docker-buildx-tool-check
 check-docker-buildx-tool-check:
-	@if ! docker buildx >/dev/null 2>&1; then \
+	@if ! $(CONTAINER) buildx >/dev/null 2>&1; then \
 		echo "'$(CONTAINER)' buildx is not installed. Please install '$(CONTAINER)' buildx and try again."; \
 		exit 1; \
 	fi
@@ -154,7 +154,7 @@ check-docker-buildx-tool-check:
 # Check that docker compose is installed.
 .PHONY: check-docker-compose-tool-check
 check-docker-compose-tool-check:
-	@if ! docker compose >/dev/null 2>&1; then \
+	@if ! $(CONTAINER) compose >/dev/null 2>&1; then \
 		echo "'$(CONTAINER)' compose is not installed or not correctly linked to. Please install '$(CONTAINER)' compose or link it as a plugin and try again."; \
 		exit 1; \
 	fi
