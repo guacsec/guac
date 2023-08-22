@@ -193,8 +193,8 @@ type ComplexityRoot struct {
 		IngestVulnEqual              func(childComplexity int, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) int
 		IngestVulnerabilities        func(childComplexity int, vulns []*model.VulnerabilityInputSpec) int
 		IngestVulnerability          func(childComplexity int, vuln model.VulnerabilityInputSpec) int
-		IngestVulnerabilityMetadata  func(childComplexity int, vulnerability model.VulnerabilityInputSpec, score model.VulnerabilityScoreInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) int
-		IngestVulnerabilityMetadatas func(childComplexity int, vulnerabilities []*model.VulnerabilityInputSpec, scores []*model.VulnerabilityScoreInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) int
+		IngestVulnerabilityMetadata  func(childComplexity int, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) int
+		IngestVulnerabilityMetadatas func(childComplexity int, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) int
 	}
 
 	Package struct {
@@ -359,15 +359,10 @@ type ComplexityRoot struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Origin        func(childComplexity int) int
-		Score         func(childComplexity int) int
+		ScoreType     func(childComplexity int) int
+		ScoreValue    func(childComplexity int) int
 		Timestamp     func(childComplexity int) int
 		Vulnerability func(childComplexity int) int
-	}
-
-	VulnerabilityScore struct {
-		ID    func(childComplexity int) int
-		Type  func(childComplexity int) int
-		Value func(childComplexity int) int
 	}
 }
 
@@ -1343,7 +1338,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerabilityMetadata(childComplexity, args["vulnerability"].(model.VulnerabilityInputSpec), args["score"].(model.VulnerabilityScoreInputSpec), args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec)), true
+		return e.complexity.Mutation.IngestVulnerabilityMetadata(childComplexity, args["vulnerability"].(model.VulnerabilityInputSpec), args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec)), true
 
 	case "Mutation.ingestVulnerabilityMetadatas":
 		if e.complexity.Mutation.IngestVulnerabilityMetadatas == nil {
@@ -1355,7 +1350,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerabilityMetadatas(childComplexity, args["vulnerabilities"].([]*model.VulnerabilityInputSpec), args["scores"].([]*model.VulnerabilityScoreInputSpec), args["vulnerabilityMetadatas"].([]*model.VulnerabilityMetadataInputSpec)), true
+		return e.complexity.Mutation.IngestVulnerabilityMetadatas(childComplexity, args["vulnerabilities"].([]*model.VulnerabilityInputSpec), args["vulnerabilityMetadatas"].([]*model.VulnerabilityMetadataInputSpec)), true
 
 	case "Package.id":
 		if e.complexity.Package.ID == nil {
@@ -2215,12 +2210,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.VulnerabilityMetadata.Origin(childComplexity), true
 
-	case "VulnerabilityMetadata.score":
-		if e.complexity.VulnerabilityMetadata.Score == nil {
+	case "VulnerabilityMetadata.scoreType":
+		if e.complexity.VulnerabilityMetadata.ScoreType == nil {
 			break
 		}
 
-		return e.complexity.VulnerabilityMetadata.Score(childComplexity), true
+		return e.complexity.VulnerabilityMetadata.ScoreType(childComplexity), true
+
+	case "VulnerabilityMetadata.scoreValue":
+		if e.complexity.VulnerabilityMetadata.ScoreValue == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetadata.ScoreValue(childComplexity), true
 
 	case "VulnerabilityMetadata.timestamp":
 		if e.complexity.VulnerabilityMetadata.Timestamp == nil {
@@ -2235,27 +2237,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.VulnerabilityMetadata.Vulnerability(childComplexity), true
-
-	case "VulnerabilityScore.id":
-		if e.complexity.VulnerabilityScore.ID == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityScore.ID(childComplexity), true
-
-	case "VulnerabilityScore.type":
-		if e.complexity.VulnerabilityScore.Type == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityScore.Type(childComplexity), true
-
-	case "VulnerabilityScore.value":
-		if e.complexity.VulnerabilityScore.Value == nil {
-			break
-		}
-
-		return e.complexity.VulnerabilityScore.Value(childComplexity), true
 
 	}
 	return 0, false
@@ -2322,8 +2303,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputVulnerabilityInputSpec,
 		ec.unmarshalInputVulnerabilityMetadataInputSpec,
 		ec.unmarshalInputVulnerabilityMetadataSpec,
-		ec.unmarshalInputVulnerabilityScoreInputSpec,
-		ec.unmarshalInputVulnerabilityScoreSpec,
 		ec.unmarshalInputVulnerabilitySpec,
 	)
 	first := true
@@ -4100,6 +4079,7 @@ union Node
   | HasSLSA
   | HasMetadata
   | PointOfContact
+  | VulnerabilityMetadata
 
 """
 Edge allows filtering path/neighbors output to only contain a subset of all
@@ -4127,6 +4107,7 @@ enum Edge {
   VULNERABILITY_CERTIFY_VEX_STATEMENT
   VULNERABILITY_CERTIFY_VULN
   VULNERABILITY_VULN_EQUAL
+  VULNERABILITY_VULN_METADATA
   PACKAGE_CERTIFY_BAD
   PACKAGE_CERTIFY_GOOD
   PACKAGE_CERTIFY_VEX_STATEMENT
@@ -4178,6 +4159,7 @@ enum Edge {
   POINT_OF_CONTACT_PACKAGE
   POINT_OF_CONTACT_ARTIFACT
   POINT_OF_CONTACT_SOURCE
+  VULN_METADATA_VULNERABILITY
 }
 
 extend type Query {
@@ -4471,61 +4453,33 @@ enum Comparator {
 }
 
 """
-VulnerabilityScore node captures the score type and its corresponding value. There is a
-one-to-one relationship between the VulnerabilityMetadata and the score.
-
-Examples:
-
-type: EPSSv1
-value: 0.960760000
-
-type: CVSSv2
-value: 5.0
-
-type: CVSSv3
-value: 7.5
-"""
-type VulnerabilityScore {
-  id: ID!
-  type: VulnerabilityScoreType!
-  value: Float!
-}
-
-"""
-VulnerabilityScoreInputSpec represents the mutation input to ingest a vulnerability score.
-"""
-input VulnerabilityScoreInputSpec {
-  type: VulnerabilityScoreType!
-  value: Float!
-}
-
-"""
-VulnerabilityScoreSpec allows for filtering a vulnerability score.
-Comparator field is an enum that be set to filter the score and return a
-range that matches.
-"""
-input VulnerabilityScoreSpec {
-  type: VulnerabilityScoreType
-  comparator: Comparator
-  value: Float
-}
-
-"""
 VulnerabilityMetadata is an attestation that a vulnerability has a related score
 associated with it.
 
 The intent of this evidence tree predicate is to allow extensibility of vulnerability
-scores (one-to-one mapping) with a specific vulnerability ID.
+score (one-to-one mapping) with a specific vulnerability ID.
 
 A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
 node as a vulnerability ID can have multiple scores (in various frameworks).
+
+Examples:
+
+scoreType: EPSSv1
+scoreValue: 0.960760000
+
+scoreType: CVSSv2
+scoreValue: 5.0
+
+scoreType: CVSSv3
+scoreValue: 7.5
 
 The timestamp is used to determine when the score was evaluated for the specific vulnerability.
 """
 type VulnerabilityMetadata {
   id: ID!
   vulnerability: Vulnerability!
-  score: VulnerabilityScore!
+  scoreType: VulnerabilityScoreType!
+  scoreValue: Float!
   timestamp: Time!
   origin: String!
   collector: String!
@@ -4535,12 +4489,17 @@ type VulnerabilityMetadata {
 VulnerabilityMetadataSpec allows filtering the list of VulnerabilityMetadata evidence 
 to return in a query.
 
+Comparator field is an enum that be set to filter the score and return a
+range that matches.
+
 Timestamp specified indicates filtering timestamps after the specified time
 """
 input VulnerabilityMetadataSpec {
   id: ID
   vulnerability: VulnerabilitySpec
-  score: VulnerabilityScoreSpec
+  scoreType: VulnerabilityScoreType
+  scoreValue: Float
+  comparator: Comparator
   timestamp: Time
   origin: String
   collector: String
@@ -4550,6 +4509,8 @@ input VulnerabilityMetadataSpec {
 VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
 """
 input VulnerabilityMetadataInputSpec {
+  scoreType: VulnerabilityScoreType!
+  scoreValue: Float!
   timestamp: Time!
   origin: String!
   collector: String!
@@ -4562,9 +4523,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds metadata about a vulnerability."
-  ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, score: VulnerabilityScoreInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
+  ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
   "Bulk add certifications that vulnerability has a specific score."
-  ingestVulnerabilityMetadatas(vulnerabilities: [VulnerabilityInputSpec!]!, scores: [VulnerabilityScoreInputSpec!]!, vulnerabilityMetadatas: [VulnerabilityMetadataInputSpec!]!): [ID!]!
+  ingestVulnerabilityMetadatas(vulnerabilities: [VulnerabilityInputSpec!]!, vulnerabilityMetadatas: [VulnerabilityMetadataInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnEqual.graphql", Input: `#

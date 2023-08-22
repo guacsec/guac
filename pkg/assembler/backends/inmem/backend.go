@@ -82,6 +82,7 @@ type demoClient struct {
 	pkgEquals              pkgEqualList
 	vulnerabilities        vulnTypeMap
 	vulnerabilityEquals    vulnerabilityEqualList
+	vulnerabilityMetadatas vulnerabilityMetadataList
 	hasMetadatas           hasMetadataList
 	pointOfContacts        pointOfContactList
 	hasSBOMs               hasSBOMList
@@ -107,6 +108,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		pkgEquals:              pkgEqualList{},
 		vulnerabilities:        vulnTypeMap{},
 		vulnerabilityEquals:    vulnerabilityEqualList{},
+		vulnerabilityMetadatas: vulnerabilityMetadataList{},
 		hasSBOMs:               hasSBOMList{},
 		hasSLSAs:               hasSLSAList{},
 		hasSources:             hasSrcList{},

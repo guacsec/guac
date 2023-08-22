@@ -11,16 +11,16 @@ import (
 )
 
 // IngestVulnerabilityMetadata is the resolver for the ingestVulnerabilityMetadata field.
-func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, score model.VulnerabilityScoreInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
-	return r.Backend.IngestVulnerabilityMetadata(ctx, vulnerability, score, vulnerabilityMetadata)
+func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
+	return r.Backend.IngestVulnerabilityMetadata(ctx, vulnerability, vulnerabilityMetadata)
 }
 
 // IngestVulnerabilityMetadatas is the resolver for the ingestVulnerabilityMetadatas field.
-func (r *mutationResolver) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, scores []*model.VulnerabilityScoreInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
-	return r.Backend.IngestVulnerabilityMetadatas(ctx, vulnerabilities, scores, vulnerabilityMetadatas)
+func (r *mutationResolver) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+	return r.Backend.IngestVulnerabilityMetadatas(ctx, vulnerabilities, vulnerabilityMetadatas)
 }
 
 // VulnerabilityMetadata is the resolver for the vulnerabilityMetadata field.
 func (r *queryResolver) VulnerabilityMetadata(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
-	return r.Backend.VulnerabilityMetadata(ctx, vulnerabilityMetadataSpec)
+	return r.Backend.VulnerabilityMetadata(ctx, &vulnerabilityMetadataSpec)
 }

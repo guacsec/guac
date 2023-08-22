@@ -1273,73 +1273,60 @@ type VulnerabilityInputSpec struct {
 // associated with it.
 //
 // The intent of this evidence tree predicate is to allow extensibility of vulnerability
-// scores (one-to-one mapping) with a specific vulnerability ID.
+// score (one-to-one mapping) with a specific vulnerability ID.
 //
 // A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
 // node as a vulnerability ID can have multiple scores (in various frameworks).
 //
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
 // The timestamp is used to determine when the score was evaluated for the specific vulnerability.
 type VulnerabilityMetadata struct {
-	ID            string              `json:"id"`
-	Vulnerability *Vulnerability      `json:"vulnerability"`
-	Score         *VulnerabilityScore `json:"score"`
-	Timestamp     time.Time           `json:"timestamp"`
-	Origin        string              `json:"origin"`
-	Collector     string              `json:"collector"`
+	ID            string                 `json:"id"`
+	Vulnerability *Vulnerability         `json:"vulnerability"`
+	ScoreType     VulnerabilityScoreType `json:"scoreType"`
+	ScoreValue    float64                `json:"scoreValue"`
+	Timestamp     time.Time              `json:"timestamp"`
+	Origin        string                 `json:"origin"`
+	Collector     string                 `json:"collector"`
 }
+
+func (VulnerabilityMetadata) IsNode() {}
 
 // VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
 type VulnerabilityMetadataInputSpec struct {
-	Timestamp time.Time `json:"timestamp"`
-	Origin    string    `json:"origin"`
-	Collector string    `json:"collector"`
+	ScoreType  VulnerabilityScoreType `json:"scoreType"`
+	ScoreValue float64                `json:"scoreValue"`
+	Timestamp  time.Time              `json:"timestamp"`
+	Origin     string                 `json:"origin"`
+	Collector  string                 `json:"collector"`
 }
 
 // VulnerabilityMetadataSpec allows filtering the list of VulnerabilityMetadata evidence
 // to return in a query.
 //
+// Comparator field is an enum that be set to filter the score and return a
+// range that matches.
+//
 // Timestamp specified indicates filtering timestamps after the specified time
 type VulnerabilityMetadataSpec struct {
 	ID            *string                 `json:"id,omitempty"`
 	Vulnerability *VulnerabilitySpec      `json:"vulnerability,omitempty"`
-	Score         *VulnerabilityScoreSpec `json:"score,omitempty"`
+	ScoreType     *VulnerabilityScoreType `json:"scoreType,omitempty"`
+	ScoreValue    *float64                `json:"scoreValue,omitempty"`
+	Comparator    *Comparator             `json:"comparator,omitempty"`
 	Timestamp     *time.Time              `json:"timestamp,omitempty"`
 	Origin        *string                 `json:"origin,omitempty"`
 	Collector     *string                 `json:"collector,omitempty"`
-}
-
-// VulnerabilityScore node captures the score type and its corresponding value. There is a
-// one-to-one relationship between the VulnerabilityMetadata and the score.
-//
-// Examples:
-//
-// type: EPSSv1
-// value: 0.960760000
-//
-// type: CVSSv2
-// value: 5.0
-//
-// type: CVSSv3
-// value: 7.5
-type VulnerabilityScore struct {
-	ID    string                 `json:"id"`
-	Type  VulnerabilityScoreType `json:"type"`
-	Value float64                `json:"value"`
-}
-
-// VulnerabilityScoreInputSpec represents the mutation input to ingest a vulnerability score.
-type VulnerabilityScoreInputSpec struct {
-	Type  VulnerabilityScoreType `json:"type"`
-	Value float64                `json:"value"`
-}
-
-// VulnerabilityScoreSpec allows for filtering a vulnerability score.
-// Comparator field is an enum that be set to filter the score and return a
-// range that matches.
-type VulnerabilityScoreSpec struct {
-	Type       *VulnerabilityScoreType `json:"type,omitempty"`
-	Comparator *Comparator             `json:"comparator,omitempty"`
-	Value      *float64                `json:"value,omitempty"`
 }
 
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
@@ -1481,6 +1468,7 @@ const (
 	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
 	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
 	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
+	EdgeVulnerabilityVulnMetadata        Edge = "VULNERABILITY_VULN_METADATA"
 	EdgePackageCertifyBad                Edge = "PACKAGE_CERTIFY_BAD"
 	EdgePackageCertifyGood               Edge = "PACKAGE_CERTIFY_GOOD"
 	EdgePackageCertifyVexStatement       Edge = "PACKAGE_CERTIFY_VEX_STATEMENT"
@@ -1531,6 +1519,7 @@ const (
 	EdgePointOfContactPackage            Edge = "POINT_OF_CONTACT_PACKAGE"
 	EdgePointOfContactArtifact           Edge = "POINT_OF_CONTACT_ARTIFACT"
 	EdgePointOfContactSource             Edge = "POINT_OF_CONTACT_SOURCE"
+	EdgeVulnMetadataVulnerability        Edge = "VULN_METADATA_VULNERABILITY"
 )
 
 var AllEdge = []Edge{
@@ -1547,6 +1536,7 @@ var AllEdge = []Edge{
 	EdgeVulnerabilityCertifyVexStatement,
 	EdgeVulnerabilityCertifyVuln,
 	EdgeVulnerabilityVulnEqual,
+	EdgeVulnerabilityVulnMetadata,
 	EdgePackageCertifyBad,
 	EdgePackageCertifyGood,
 	EdgePackageCertifyVexStatement,
@@ -1597,11 +1587,12 @@ var AllEdge = []Edge{
 	EdgePointOfContactPackage,
 	EdgePointOfContactArtifact,
 	EdgePointOfContactSource,
+	EdgeVulnMetadataVulnerability,
 }
 
 func (e Edge) IsValid() bool {
 	switch e {
-	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeSourcePointOfContact, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementVulnerability, EdgeCertifyVexStatementPackage, EdgeCertifyVulnVulnerability, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeVulnEqualVulnerability, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource, EdgePointOfContactPackage, EdgePointOfContactArtifact, EdgePointOfContactSource:
+	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgeVulnerabilityVulnMetadata, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeSourcePointOfContact, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementVulnerability, EdgeCertifyVexStatementPackage, EdgeCertifyVulnVulnerability, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeVulnEqualVulnerability, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource, EdgePointOfContactPackage, EdgePointOfContactArtifact, EdgePointOfContactSource, EdgeVulnMetadataVulnerability:
 		return true
 	}
 	return false

@@ -126,8 +126,8 @@ func (ec *executionContext) fieldContext_VulnerabilityMetadata_vulnerability(ctx
 	return fc, nil
 }
 
-func (ec *executionContext) _VulnerabilityMetadata_score(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetadata) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityMetadata_score(ctx, field)
+func (ec *executionContext) _VulnerabilityMetadata_scoreType(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetadata_scoreType(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -140,7 +140,7 @@ func (ec *executionContext) _VulnerabilityMetadata_score(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Score, nil
+		return obj.ScoreType, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -152,27 +152,63 @@ func (ec *executionContext) _VulnerabilityMetadata_score(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.VulnerabilityScore)
+	res := resTmp.(model.VulnerabilityScoreType)
 	fc.Result = res
-	return ec.marshalNVulnerabilityScore2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScore(ctx, field.Selections, res)
+	return ec.marshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VulnerabilityMetadata_score(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_scoreType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VulnerabilityMetadata",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_VulnerabilityScore_id(ctx, field)
-			case "type":
-				return ec.fieldContext_VulnerabilityScore_type(ctx, field)
-			case "value":
-				return ec.fieldContext_VulnerabilityScore_value(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityScore", field.Name)
+			return nil, errors.New("field of type VulnerabilityScoreType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VulnerabilityMetadata_scoreValue(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetadata_scoreValue(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ScoreValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_scoreValue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VulnerabilityMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -310,138 +346,6 @@ func (ec *executionContext) fieldContext_VulnerabilityMetadata_collector(ctx con
 	return fc, nil
 }
 
-func (ec *executionContext) _VulnerabilityScore_id(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityScore) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityScore_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_VulnerabilityScore_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityScore",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _VulnerabilityScore_type(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityScore) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityScore_type(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Type, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.VulnerabilityScoreType)
-	fc.Result = res
-	return ec.marshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_VulnerabilityScore_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityScore",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type VulnerabilityScoreType does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _VulnerabilityScore_value(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityScore) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_VulnerabilityScore_value(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Value, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_VulnerabilityScore_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "VulnerabilityScore",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Float does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -453,13 +357,31 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx con
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"timestamp", "origin", "collector"}
+	fieldsInOrder := [...]string{"scoreType", "scoreValue", "timestamp", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "scoreType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scoreType"))
+			data, err := ec.unmarshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScoreType = data
+		case "scoreValue":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scoreValue"))
+			data, err := ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScoreValue = data
 		case "timestamp":
 			var err error
 
@@ -500,7 +422,7 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "vulnerability", "score", "timestamp", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "vulnerability", "scoreType", "scoreValue", "comparator", "timestamp", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -525,15 +447,33 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 				return it, err
 			}
 			it.Vulnerability = data
-		case "score":
+		case "scoreType":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("score"))
-			data, err := ec.unmarshalOVulnerabilityScoreSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreSpec(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scoreType"))
+			data, err := ec.unmarshalOVulnerabilityScoreType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Score = data
+			it.ScoreType = data
+		case "scoreValue":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scoreValue"))
+			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScoreValue = data
+		case "comparator":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comparator"))
+			data, err := ec.unmarshalOComparator2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐComparator(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Comparator = data
 		case "timestamp":
 			var err error
 
@@ -567,91 +507,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputVulnerabilityScoreInputSpec(ctx context.Context, obj interface{}) (model.VulnerabilityScoreInputSpec, error) {
-	var it model.VulnerabilityScoreInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"type", "value"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "type":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Type = data
-		case "value":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-			data, err := ec.unmarshalNFloat2float64(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Value = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputVulnerabilityScoreSpec(ctx context.Context, obj interface{}) (model.VulnerabilityScoreSpec, error) {
-	var it model.VulnerabilityScoreSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"type", "comparator", "value"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "type":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalOVulnerabilityScoreType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Type = data
-		case "comparator":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comparator"))
-			data, err := ec.unmarshalOComparator2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐComparator(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Comparator = data
-		case "value":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Value = data
-		}
-	}
-
-	return it, nil
-}
-
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -660,7 +515,7 @@ func (ec *executionContext) unmarshalInputVulnerabilityScoreSpec(ctx context.Con
 
 // region    **************************** object.gotpl ****************************
 
-var vulnerabilityMetadataImplementors = []string{"VulnerabilityMetadata"}
+var vulnerabilityMetadataImplementors = []string{"VulnerabilityMetadata", "Node"}
 
 func (ec *executionContext) _VulnerabilityMetadata(ctx context.Context, sel ast.SelectionSet, obj *model.VulnerabilityMetadata) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, vulnerabilityMetadataImplementors)
@@ -681,8 +536,13 @@ func (ec *executionContext) _VulnerabilityMetadata(ctx context.Context, sel ast.
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "score":
-			out.Values[i] = ec._VulnerabilityMetadata_score(ctx, field, obj)
+		case "scoreType":
+			out.Values[i] = ec._VulnerabilityMetadata_scoreType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "scoreValue":
+			out.Values[i] = ec._VulnerabilityMetadata_scoreValue(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -698,55 +558,6 @@ func (ec *executionContext) _VulnerabilityMetadata(ctx context.Context, sel ast.
 			}
 		case "collector":
 			out.Values[i] = ec._VulnerabilityMetadata_collector(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var vulnerabilityScoreImplementors = []string{"VulnerabilityScore"}
-
-func (ec *executionContext) _VulnerabilityScore(ctx context.Context, sel ast.SelectionSet, obj *model.VulnerabilityScore) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, vulnerabilityScoreImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("VulnerabilityScore")
-		case "id":
-			out.Values[i] = ec._VulnerabilityScore_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "type":
-			out.Values[i] = ec._VulnerabilityScore_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "value":
-			out.Values[i] = ec._VulnerabilityScore_value(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -863,43 +674,6 @@ func (ec *executionContext) unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋg
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNVulnerabilityScore2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScore(ctx context.Context, sel ast.SelectionSet, v *model.VulnerabilityScore) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._VulnerabilityScore(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNVulnerabilityScoreInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreInputSpec(ctx context.Context, v interface{}) (model.VulnerabilityScoreInputSpec, error) {
-	res, err := ec.unmarshalInputVulnerabilityScoreInputSpec(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNVulnerabilityScoreInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.VulnerabilityScoreInputSpec, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]*model.VulnerabilityScoreInputSpec, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNVulnerabilityScoreInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreInputSpec(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) unmarshalNVulnerabilityScoreInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreInputSpec(ctx context.Context, v interface{}) (*model.VulnerabilityScoreInputSpec, error) {
-	res, err := ec.unmarshalInputVulnerabilityScoreInputSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx context.Context, v interface{}) (model.VulnerabilityScoreType, error) {
 	var res model.VulnerabilityScoreType
 	err := res.UnmarshalGQL(v)
@@ -924,14 +698,6 @@ func (ec *executionContext) marshalOComparator2ᚖgithubᚗcomᚋguacsecᚋguac�
 		return graphql.Null
 	}
 	return v
-}
-
-func (ec *executionContext) unmarshalOVulnerabilityScoreSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreSpec(ctx context.Context, v interface{}) (*model.VulnerabilityScoreSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputVulnerabilityScoreSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOVulnerabilityScoreType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx context.Context, v interface{}) (*model.VulnerabilityScoreType, error) {

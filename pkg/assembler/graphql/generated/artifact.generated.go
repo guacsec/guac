@@ -50,8 +50,8 @@ type MutationResolver interface {
 	IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error)
 	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error)
 	IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error)
-	IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, score model.VulnerabilityScoreInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error)
-	IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, scores []*model.VulnerabilityScoreInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error)
+	IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error)
+	IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error)
 	IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error)
 	IngestVulnerability(ctx context.Context, vuln model.VulnerabilityInputSpec) (*model.Vulnerability, error)
 	IngestVulnerabilities(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]*model.Vulnerability, error)
@@ -1037,24 +1037,15 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_args(ctx 
 		}
 	}
 	args["vulnerability"] = arg0
-	var arg1 model.VulnerabilityScoreInputSpec
-	if tmp, ok := rawArgs["score"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("score"))
-		arg1, err = ec.unmarshalNVulnerabilityScoreInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["score"] = arg1
-	var arg2 model.VulnerabilityMetadataInputSpec
+	var arg1 model.VulnerabilityMetadataInputSpec
 	if tmp, ok := rawArgs["vulnerabilityMetadata"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadata"))
-		arg2, err = ec.unmarshalNVulnerabilityMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec(ctx, tmp)
+		arg1, err = ec.unmarshalNVulnerabilityMetadataInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["vulnerabilityMetadata"] = arg2
+	args["vulnerabilityMetadata"] = arg1
 	return args, nil
 }
 
@@ -1070,24 +1061,15 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadatas_args(ctx
 		}
 	}
 	args["vulnerabilities"] = arg0
-	var arg1 []*model.VulnerabilityScoreInputSpec
-	if tmp, ok := rawArgs["scores"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scores"))
-		arg1, err = ec.unmarshalNVulnerabilityScoreInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreInputSpecᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["scores"] = arg1
-	var arg2 []*model.VulnerabilityMetadataInputSpec
+	var arg1 []*model.VulnerabilityMetadataInputSpec
 	if tmp, ok := rawArgs["vulnerabilityMetadatas"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadatas"))
-		arg2, err = ec.unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNVulnerabilityMetadataInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataInputSpecᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["vulnerabilityMetadatas"] = arg2
+	args["vulnerabilityMetadatas"] = arg1
 	return args, nil
 }
 
@@ -3776,7 +3758,7 @@ func (ec *executionContext) _Mutation_ingestVulnerabilityMetadata(ctx context.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnerabilityMetadata(rctx, fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["score"].(model.VulnerabilityScoreInputSpec), fc.Args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec))
+		return ec.resolvers.Mutation().IngestVulnerabilityMetadata(rctx, fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3831,7 +3813,7 @@ func (ec *executionContext) _Mutation_ingestVulnerabilityMetadatas(ctx context.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnerabilityMetadatas(rctx, fc.Args["vulnerabilities"].([]*model.VulnerabilityInputSpec), fc.Args["scores"].([]*model.VulnerabilityScoreInputSpec), fc.Args["vulnerabilityMetadatas"].([]*model.VulnerabilityMetadataInputSpec))
+		return ec.resolvers.Mutation().IngestVulnerabilityMetadatas(rctx, fc.Args["vulnerabilities"].([]*model.VulnerabilityInputSpec), fc.Args["vulnerabilityMetadatas"].([]*model.VulnerabilityMetadataInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5601,8 +5583,10 @@ func (ec *executionContext) fieldContext_Query_vulnerabilityMetadata(ctx context
 				return ec.fieldContext_VulnerabilityMetadata_id(ctx, field)
 			case "vulnerability":
 				return ec.fieldContext_VulnerabilityMetadata_vulnerability(ctx, field)
-			case "score":
-				return ec.fieldContext_VulnerabilityMetadata_score(ctx, field)
+			case "scoreType":
+				return ec.fieldContext_VulnerabilityMetadata_scoreType(ctx, field)
+			case "scoreValue":
+				return ec.fieldContext_VulnerabilityMetadata_scoreValue(ctx, field)
 			case "timestamp":
 				return ec.fieldContext_VulnerabilityMetadata_timestamp(ctx, field)
 			case "origin":

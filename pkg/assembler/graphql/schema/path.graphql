@@ -45,6 +45,7 @@ union Node
   | HasSLSA
   | HasMetadata
   | PointOfContact
+  | VulnerabilityMetadata
 
 """
 Edge allows filtering path/neighbors output to only contain a subset of all
@@ -72,6 +73,7 @@ enum Edge {
   VULNERABILITY_CERTIFY_VEX_STATEMENT
   VULNERABILITY_CERTIFY_VULN
   VULNERABILITY_VULN_EQUAL
+  VULNERABILITY_VULN_METADATA
   PACKAGE_CERTIFY_BAD
   PACKAGE_CERTIFY_GOOD
   PACKAGE_CERTIFY_VEX_STATEMENT
@@ -123,6 +125,7 @@ enum Edge {
   POINT_OF_CONTACT_PACKAGE
   POINT_OF_CONTACT_ARTIFACT
   POINT_OF_CONTACT_SOURCE
+  VULN_METADATA_VULNERABILITY
 }
 
 extend type Query {
