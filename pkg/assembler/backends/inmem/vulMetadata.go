@@ -18,6 +18,7 @@ package inmem
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -87,7 +88,7 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	vulnerabilityLinks = foundVulnNode.certifyVulnLinks
+	vulnerabilityLinks = foundVulnNode.vulnMetadataLinks
 
 	var searchIDs []uint32 = vulnerabilityLinks
 
@@ -133,7 +134,6 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 		c.index[collectedVulnMetadataLink.id] = &collectedVulnMetadataLink
 		c.vulnerabilityMetadatas = append(c.vulnerabilityMetadatas, &collectedVulnMetadataLink)
 		// set the backlinks
-
 		foundVulnNode.setVulnMetadataLinks(collectedVulnMetadataLink.id)
 	}
 
@@ -237,47 +237,18 @@ func (c *demoClient) addVulnMetadataMatch(out []*model.VulnerabilityMetadata,
 		}
 		switch *filter.Comparator {
 		case model.ComparatorEqual:
-			if *filter.ScoreValue == link.scoreValue {
-				foundVulnMetadata, err := c.buildVulnerabilityMetadata(link, filter, false)
-				if err != nil {
-					return nil, fmt.Errorf("failed to build vuln metadata node from link")
-				}
-				return append(out, foundVulnMetadata), nil
+			if link.scoreValue != *filter.ScoreValue {
+				return out, nil
 			}
-		case model.ComparatorGreater:
-			if *filter.ScoreValue > link.scoreValue {
-				foundVulnMetadata, err := c.buildVulnerabilityMetadata(link, filter, false)
-				if err != nil {
-					return nil, fmt.Errorf("failed to build vuln metadata node from link")
-				}
-				return append(out, foundVulnMetadata), nil
+		case model.ComparatorGreater, model.ComparatorGreaterEqual:
+			if link.scoreValue < *filter.ScoreValue {
+				return out, nil
 			}
-		case model.ComparatorGreaterEqual:
-			if *filter.ScoreValue >= link.scoreValue {
-				foundVulnMetadata, err := c.buildVulnerabilityMetadata(link, filter, false)
-				if err != nil {
-					return nil, fmt.Errorf("failed to build vuln metadata node from link")
-				}
-				return append(out, foundVulnMetadata), nil
-			}
-		case model.ComparatorLess:
-			if *filter.ScoreValue < link.scoreValue {
-				foundVulnMetadata, err := c.buildVulnerabilityMetadata(link, filter, false)
-				if err != nil {
-					return nil, fmt.Errorf("failed to build vuln metadata node from link")
-				}
-				return append(out, foundVulnMetadata), nil
-			}
-		case model.ComparatorLessEqual:
-			if *filter.ScoreValue <= link.scoreValue {
-				foundVulnMetadata, err := c.buildVulnerabilityMetadata(link, filter, false)
-				if err != nil {
-					return nil, fmt.Errorf("failed to build vuln metadata node from link")
-				}
-				return append(out, foundVulnMetadata), nil
+		case model.ComparatorLess, model.ComparatorLessEqual:
+			if link.scoreValue > *filter.ScoreValue {
+				return out, nil
 			}
 		}
-
 	} else {
 		if filter != nil && filter.ScoreValue != nil && *filter.ScoreValue != link.scoreValue {
 			return out, nil
@@ -297,7 +268,9 @@ func (c *demoClient) addVulnMetadataMatch(out []*model.VulnerabilityMetadata,
 	if err != nil {
 		return nil, fmt.Errorf("failed to build vuln metadata node from link")
 	}
-
+	if foundVulnMetadata == nil || reflect.ValueOf(foundVulnMetadata.Vulnerability).IsNil() {
+		return out, nil
+	}
 	return append(out, foundVulnMetadata), nil
 }
 
@@ -339,6 +312,7 @@ func (c *demoClient) buildVulnerabilityMetadata(link *vulnerabilityMetadataLink,
 	vulnMetadata := &model.VulnerabilityMetadata{
 		ID:            nodeID(link.id),
 		Vulnerability: vuln,
+		Timestamp:     link.timestamp,
 		ScoreType:     model.VulnerabilityScoreType(link.scoreType),
 		ScoreValue:    link.scoreValue,
 		Origin:        link.origin,

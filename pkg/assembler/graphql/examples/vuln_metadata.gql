@@ -1,0 +1,113 @@
+fragment allVulnMetadataTree on VulnerabilityMetadata {
+  id
+  vulnerability {
+    id
+    type
+    vulnerabilityIDs {
+      id
+      vulnerabilityID
+    }
+  }
+  scoreType
+  scoreValue
+  timestamp
+  origin
+  collector
+}
+
+query VulnMetadataQ1 {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataQ2 {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {origin: "testing backend"}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataQ3 {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {vulnerability: {vulnerabilityID: "CVE-2019-13110"}}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataQ4 {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {vulnerability: {vulnerabilityID: "GHSA-h45f-rjvw-2rv2"}}
+  ) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataQ5 {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {vulnerability: {type: "osv", vulnerabilityID: "CVE-2019-13110"}}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataQ6 {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {vulnerability: {vulnerabilityID: "CVE-2018-12310"}}) {
+    ...allVulnMetadataTree
+  }
+}
+
+# Error case: comparator set without a score value being specified
+query VulnMetadataGreaterError {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {comparator: GREATER}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataGreater {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {comparator: GREATER, scoreValue: 0.967}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataGreaterWithType {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {comparator: GREATER,scoreType: EPSSv1, scoreValue: 0.967}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataGreaterEqual {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {comparator: GREATER_EQUAL, scoreValue: 5.6}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataLess {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {comparator: LESS, scoreValue: 0.967}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataLessEqual {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {comparator: LESS_EQUAL, scoreValue: 0.768}) {
+    ...allVulnMetadataTree
+  }
+}
+
+query VulnMetadataEqual {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {comparator: EQUAL, scoreValue: 0.768}) {
+    ...allVulnMetadataTree
+  }
+}
+
+# defaults to equal if no comparator is sepcified
+query VulnMetadataNoComparator {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {scoreValue: 0.768}) {
+    ...allVulnMetadataTree
+  }
+}
+
+# Setting noVuln to true return all packages that have no vulnerabilities
+# Setting noVuln to false return all packages with vulnerabilities
+query VulnMetadataNoVuln {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {
+    vulnerability: {noVuln: true}
+  }) {
+    ...allVulnMetadataTree
+  }
+}
