@@ -34,6 +34,18 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 
 	query.Where(
 		optionalPredicate(pkgSpec.Type, packagetype.TypeEQ),
+		packagetype.HasNamespacesWith(
+			optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ),
+			packagenamespace.HasNamesWith(
+				optionalPredicate(pkgSpec.Name, packagename.NameEQ),
+				packagename.HasVersionsWith(
+					optionalPredicate(pkgSpec.ID, IDEQ),
+					optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
+					packageversion.SubpathEQ(ptrWithDefault(pkgSpec.Subpath, "")),
+					packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
+				),
+			),
+		),
 	)
 
 	if PathContains(paths, "namespaces") || !isGQL {
