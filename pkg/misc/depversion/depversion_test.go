@@ -144,6 +144,30 @@ func Test_VersionRangeParse(t *testing.T) {
 			},
 		},
 		{
+			input: "^1.0.x",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=1.0.0,<2.0.0"},
+				},
+			},
+		},
+		{
+			input: "^1.x",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=1.0.0,<2.0.0"},
+				},
+			},
+		},
+		{
+			input: "^1.3.x",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=1.0.0,<2.0.0"},
+				},
+			},
+		},
+		{
 			input: "v0.0.0-20190603091049-60506f45cf65",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{

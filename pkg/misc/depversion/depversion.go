@@ -333,8 +333,18 @@ func getConstraint(s string) (string, error) {
 
 	// ignoring the tilde for the wildcard check
 	wildcardVersion := strings.TrimPrefix(s, "~")
+	// ignoring the ^ for the wildcard check, but using it during the parsing
+	wildcardVersion = strings.TrimPrefix(wildcardVersion, "^")
+
 	// check for 1.x minor and patch versions
 	if isSemVerWildcard(wildcardVersion) {
+		if strings.HasPrefix(s, "^") {
+			split := strings.Split(wildcardVersion, ".")
+			if len(split) == 3 {
+				wildcardVersion = fmt.Sprintf("%s.%s", split[0], split[2])
+			}
+		}
+
 		_, major, minor, _, _, _, err := parseWildcardSemver(wildcardVersion)
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver with wildcard: %v", err)
