@@ -33,7 +33,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -94,28 +95,29 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			artifact.Table:         artifact.ValidColumn,
-			billofmaterials.Table:  billofmaterials.ValidColumn,
-			builder.Table:          builder.ValidColumn,
-			certification.Table:    certification.ValidColumn,
-			certifyscorecard.Table: certifyscorecard.ValidColumn,
-			certifyvuln.Table:      certifyvuln.ValidColumn,
-			dependency.Table:       dependency.ValidColumn,
-			hassourceat.Table:      hassourceat.ValidColumn,
-			hashequal.Table:        hashequal.ValidColumn,
-			isvulnerability.Table:  isvulnerability.ValidColumn,
-			occurrence.Table:       occurrence.ValidColumn,
-			packagename.Table:      packagename.ValidColumn,
-			packagenamespace.Table: packagenamespace.ValidColumn,
-			packagetype.Table:      packagetype.ValidColumn,
-			packageversion.Table:   packageversion.ValidColumn,
-			pkgequal.Table:         pkgequal.ValidColumn,
-			slsaattestation.Table:  slsaattestation.ValidColumn,
-			scorecard.Table:        scorecard.ValidColumn,
-			sourcename.Table:       sourcename.ValidColumn,
-			sourcenamespace.Table:  sourcenamespace.ValidColumn,
-			sourcetype.Table:       sourcetype.ValidColumn,
-			vulnerability.Table:    vulnerability.ValidColumn,
+			artifact.Table:          artifact.ValidColumn,
+			billofmaterials.Table:   billofmaterials.ValidColumn,
+			builder.Table:           builder.ValidColumn,
+			certification.Table:     certification.ValidColumn,
+			certifyscorecard.Table:  certifyscorecard.ValidColumn,
+			certifyvuln.Table:       certifyvuln.ValidColumn,
+			dependency.Table:        dependency.ValidColumn,
+			hassourceat.Table:       hassourceat.ValidColumn,
+			hashequal.Table:         hashequal.ValidColumn,
+			isvulnerability.Table:   isvulnerability.ValidColumn,
+			occurrence.Table:        occurrence.ValidColumn,
+			packagename.Table:       packagename.ValidColumn,
+			packagenamespace.Table:  packagenamespace.ValidColumn,
+			packagetype.Table:       packagetype.ValidColumn,
+			packageversion.Table:    packageversion.ValidColumn,
+			pkgequal.Table:          pkgequal.ValidColumn,
+			slsaattestation.Table:   slsaattestation.ValidColumn,
+			scorecard.Table:         scorecard.ValidColumn,
+			sourcename.Table:        sourcename.ValidColumn,
+			sourcenamespace.Table:   sourcenamespace.ValidColumn,
+			sourcetype.Table:        sourcetype.ValidColumn,
+			vulnerabilityid.Table:   vulnerabilityid.ValidColumn,
+			vulnerabilitytype.Table: vulnerabilitytype.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

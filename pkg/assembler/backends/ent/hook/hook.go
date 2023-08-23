@@ -261,16 +261,28 @@ func (f SourceTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SourceTypeMutation", m)
 }
 
-// The VulnerabilityFunc type is an adapter to allow the use of ordinary
-// function as Vulnerability mutator.
-type VulnerabilityFunc func(context.Context, *ent.VulnerabilityMutation) (ent.Value, error)
+// The VulnerabilityIDFunc type is an adapter to allow the use of ordinary
+// function as VulnerabilityID mutator.
+type VulnerabilityIDFunc func(context.Context, *ent.VulnerabilityIDMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f VulnerabilityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.VulnerabilityMutation); ok {
+func (f VulnerabilityIDFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VulnerabilityIDMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VulnerabilityMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VulnerabilityIDMutation", m)
+}
+
+// The VulnerabilityTypeFunc type is an adapter to allow the use of ordinary
+// function as VulnerabilityType mutator.
+type VulnerabilityTypeFunc func(context.Context, *ent.VulnerabilityTypeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VulnerabilityTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VulnerabilityTypeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VulnerabilityTypeMutation", m)
 }
 
 // Condition is a hook condition function.

@@ -34,7 +34,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/semaphore"
 )
@@ -108,7 +109,10 @@ func (n *SourceNamespace) IsNode() {}
 func (n *SourceType) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *Vulnerability) IsNode() {}
+func (n *VulnerabilityID) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *VulnerabilityType) IsNode() {}
 
 var errNodeInvalidID = &NotFoundError{"node"}
 
@@ -420,10 +424,22 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			return nil, err
 		}
 		return n, nil
-	case vulnerability.Table:
-		query := c.Vulnerability.Query().
-			Where(vulnerability.ID(id))
-		query, err := query.CollectFields(ctx, "Vulnerability")
+	case vulnerabilityid.Table:
+		query := c.VulnerabilityID.Query().
+			Where(vulnerabilityid.ID(id))
+		query, err := query.CollectFields(ctx, "VulnerabilityID")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case vulnerabilitytype.Table:
+		query := c.VulnerabilityType.Query().
+			Where(vulnerabilitytype.ID(id))
+		query, err := query.CollectFields(ctx, "VulnerabilityType")
 		if err != nil {
 			return nil, err
 		}
@@ -841,10 +857,26 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
-	case vulnerability.Table:
-		query := c.Vulnerability.Query().
-			Where(vulnerability.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "Vulnerability")
+	case vulnerabilityid.Table:
+		query := c.VulnerabilityID.Query().
+			Where(vulnerabilityid.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "VulnerabilityID")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case vulnerabilitytype.Table:
+		query := c.VulnerabilityType.Query().
+			Where(vulnerabilitytype.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "VulnerabilityType")
 		if err != nil {
 			return nil, err
 		}

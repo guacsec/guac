@@ -232,9 +232,9 @@ var (
 		PrimaryKey: []*schema.Column{CertifyVulnsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "certify_vulns_vulnerabilities_vulnerability",
+				Symbol:     "certify_vulns_vulnerability_types_vulnerability",
 				Columns:    []*schema.Column{CertifyVulnsColumns[8]},
-				RefColumns: []*schema.Column{VulnerabilitiesColumns[0]},
+				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
@@ -390,15 +390,15 @@ var (
 		PrimaryKey: []*schema.Column{IsVulnerabilitiesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "is_vulnerabilities_vulnerabilities_osv",
+				Symbol:     "is_vulnerabilities_vulnerability_types_osv",
 				Columns:    []*schema.Column{IsVulnerabilitiesColumns[4]},
-				RefColumns: []*schema.Column{VulnerabilitiesColumns[0]},
+				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "is_vulnerabilities_vulnerabilities_vulnerability",
+				Symbol:     "is_vulnerabilities_vulnerability_types_vulnerability",
 				Columns:    []*schema.Column{IsVulnerabilitiesColumns[5]},
-				RefColumns: []*schema.Column{VulnerabilitiesColumns[0]},
+				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -732,43 +732,48 @@ var (
 		Columns:    SourceTypesColumns,
 		PrimaryKey: []*schema.Column{SourceTypesColumns[0]},
 	}
-	// VulnerabilitiesColumns holds the columns for the "vulnerabilities" table.
-	VulnerabilitiesColumns = []*schema.Column{
+	// VulnerabilityIdsColumns holds the columns for the "vulnerability_ids" table.
+	VulnerabilityIdsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "ghsa_id", Type: field.TypeString, Nullable: true},
-		{Name: "cve_id", Type: field.TypeString, Nullable: true},
-		{Name: "cve_year", Type: field.TypeInt, Nullable: true},
-		{Name: "osv_id", Type: field.TypeString, Nullable: true},
+		{Name: "vulnerability_id", Type: field.TypeString},
+		{Name: "vulnerability_type_id", Type: field.TypeInt},
 	}
-	// VulnerabilitiesTable holds the schema information for the "vulnerabilities" table.
-	VulnerabilitiesTable = &schema.Table{
-		Name:       "vulnerabilities",
-		Columns:    VulnerabilitiesColumns,
-		PrimaryKey: []*schema.Column{VulnerabilitiesColumns[0]},
+	// VulnerabilityIdsTable holds the schema information for the "vulnerability_ids" table.
+	VulnerabilityIdsTable = &schema.Table{
+		Name:       "vulnerability_ids",
+		Columns:    VulnerabilityIdsColumns,
+		PrimaryKey: []*schema.Column{VulnerabilityIdsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vulnerability_ids_vulnerability_types_vulnerability_ids",
+				Columns:    []*schema.Column{VulnerabilityIdsColumns[2]},
+				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "vulnerability_ghsa_id",
+				Name:    "vulnerabilityid_vulnerability_id_vulnerability_type_id",
 				Unique:  true,
-				Columns: []*schema.Column{VulnerabilitiesColumns[1]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "osv_id IS NULL AND cve_id IS NULL AND ghsa_id IS NOT NULL",
-				},
+				Columns: []*schema.Column{VulnerabilityIdsColumns[1], VulnerabilityIdsColumns[2]},
 			},
+		},
+	}
+	// VulnerabilityTypesColumns holds the columns for the "vulnerability_types" table.
+	VulnerabilityTypesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "type", Type: field.TypeString},
+	}
+	// VulnerabilityTypesTable holds the schema information for the "vulnerability_types" table.
+	VulnerabilityTypesTable = &schema.Table{
+		Name:       "vulnerability_types",
+		Columns:    VulnerabilityTypesColumns,
+		PrimaryKey: []*schema.Column{VulnerabilityTypesColumns[0]},
+		Indexes: []*schema.Index{
 			{
-				Name:    "vulnerability_cve_id",
+				Name:    "vulnerabilitytype_type",
 				Unique:  true,
-				Columns: []*schema.Column{VulnerabilitiesColumns[2]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "osv_id IS NULL AND cve_id IS NOT NULL AND ghsa_id IS NULL",
-				},
-			},
-			{
-				Name:    "vulnerability_osv_id",
-				Unique:  true,
-				Columns: []*schema.Column{VulnerabilitiesColumns[4]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "osv_id IS NOT NULL AND cve_id IS NULL AND ghsa_id IS NULL",
-				},
+				Columns: []*schema.Column{VulnerabilityTypesColumns[1]},
 			},
 		},
 	}
@@ -870,7 +875,8 @@ var (
 		SourceNamesTable,
 		SourceNamespacesTable,
 		SourceTypesTable,
-		VulnerabilitiesTable,
+		VulnerabilityIdsTable,
+		VulnerabilityTypesTable,
 		HashEqualArtifactsTable,
 		PkgEqualPackagesTable,
 		SlsaAttestationBuiltFromTable,
@@ -886,15 +892,15 @@ func init() {
 	CertificationsTable.ForeignKeys[3].RefTable = ArtifactsTable
 	CertifyScorecardsTable.ForeignKeys[0].RefTable = SourceNamesTable
 	CertifyScorecardsTable.ForeignKeys[1].RefTable = ScorecardsTable
-	CertifyVulnsTable.ForeignKeys[0].RefTable = VulnerabilitiesTable
+	CertifyVulnsTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
 	HasSourceAtsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	HasSourceAtsTable.ForeignKeys[1].RefTable = PackageNamesTable
 	HasSourceAtsTable.ForeignKeys[2].RefTable = SourceNamesTable
-	IsVulnerabilitiesTable.ForeignKeys[0].RefTable = VulnerabilitiesTable
-	IsVulnerabilitiesTable.ForeignKeys[1].RefTable = VulnerabilitiesTable
+	IsVulnerabilitiesTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
+	IsVulnerabilitiesTable.ForeignKeys[1].RefTable = VulnerabilityTypesTable
 	OccurrencesTable.ForeignKeys[0].RefTable = ArtifactsTable
 	OccurrencesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	OccurrencesTable.ForeignKeys[2].RefTable = SourceNamesTable
@@ -908,6 +914,7 @@ func init() {
 	}
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
+	VulnerabilityIdsTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
 	HashEqualArtifactsTable.ForeignKeys[0].RefTable = HashEqualsTable
 	HashEqualArtifactsTable.ForeignKeys[1].RefTable = ArtifactsTable
 	PkgEqualPackagesTable.ForeignKeys[0].RefTable = PkgEqualsTable

@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
 // CertifyVulnCreate is the builder for creating a CertifyVuln entity.
@@ -86,8 +86,8 @@ func (cvc *CertifyVulnCreate) SetCollector(s string) *CertifyVulnCreate {
 	return cvc
 }
 
-// SetVulnerability sets the "vulnerability" edge to the Vulnerability entity.
-func (cvc *CertifyVulnCreate) SetVulnerability(v *Vulnerability) *CertifyVulnCreate {
+// SetVulnerability sets the "vulnerability" edge to the VulnerabilityType entity.
+func (cvc *CertifyVulnCreate) SetVulnerability(v *VulnerabilityType) *CertifyVulnCreate {
 	return cvc.SetVulnerabilityID(v.ID)
 }
 
@@ -220,7 +220,7 @@ func (cvc *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) 
 			Columns: []string{certifyvuln.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerability.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -132,7 +132,7 @@ func (cs *CertifyScorecard) Source(ctx context.Context) (*SourceName, error) {
 	return result, err
 }
 
-func (cv *CertifyVuln) Vulnerability(ctx context.Context) (*Vulnerability, error) {
+func (cv *CertifyVuln) Vulnerability(ctx context.Context) (*VulnerabilityType, error) {
 	result, err := cv.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
 		result, err = cv.QueryVulnerability().Only(ctx)
@@ -200,7 +200,7 @@ func (he *HashEqual) Artifacts(ctx context.Context) (result []*Artifact, err err
 	return result, err
 }
 
-func (iv *IsVulnerability) Osv(ctx context.Context) (*Vulnerability, error) {
+func (iv *IsVulnerability) Osv(ctx context.Context) (*VulnerabilityType, error) {
 	result, err := iv.Edges.OsvOrErr()
 	if IsNotLoaded(err) {
 		result, err = iv.QueryOsv().Only(ctx)
@@ -208,7 +208,7 @@ func (iv *IsVulnerability) Osv(ctx context.Context) (*Vulnerability, error) {
 	return result, err
 }
 
-func (iv *IsVulnerability) Vulnerability(ctx context.Context) (*Vulnerability, error) {
+func (iv *IsVulnerability) Vulnerability(ctx context.Context) (*VulnerabilityType, error) {
 	result, err := iv.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
 		result, err = iv.QueryVulnerability().Only(ctx)
@@ -436,6 +436,26 @@ func (st *SourceType) Namespaces(ctx context.Context) (result []*SourceNamespace
 	}
 	if IsNotLoaded(err) {
 		result, err = st.QueryNamespaces().All(ctx)
+	}
+	return result, err
+}
+
+func (vi *VulnerabilityID) VulnerabilityType(ctx context.Context) (*VulnerabilityType, error) {
+	result, err := vi.Edges.VulnerabilityTypeOrErr()
+	if IsNotLoaded(err) {
+		result, err = vi.QueryVulnerabilityType().Only(ctx)
+	}
+	return result, err
+}
+
+func (vt *VulnerabilityType) VulnerabilityIds(ctx context.Context) (result []*VulnerabilityID, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = vt.NamedVulnerabilityIds(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = vt.Edges.VulnerabilityIdsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = vt.QueryVulnerabilityIds().All(ctx)
 	}
 	return result, err
 }

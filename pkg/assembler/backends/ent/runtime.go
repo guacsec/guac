@@ -10,6 +10,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/schema"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -50,4 +52,16 @@ func init() {
 	scorecardDescTimeScanned := scorecardFields[2].Descriptor()
 	// scorecard.DefaultTimeScanned holds the default value on creation for the time_scanned field.
 	scorecard.DefaultTimeScanned = scorecardDescTimeScanned.Default.(func() time.Time)
+	vulnerabilityidFields := schema.VulnerabilityID{}.Fields()
+	_ = vulnerabilityidFields
+	// vulnerabilityidDescVulnerabilityID is the schema descriptor for vulnerability_id field.
+	vulnerabilityidDescVulnerabilityID := vulnerabilityidFields[0].Descriptor()
+	// vulnerabilityid.VulnerabilityIDValidator is a validator for the "vulnerability_id" field. It is called by the builders before save.
+	vulnerabilityid.VulnerabilityIDValidator = vulnerabilityidDescVulnerabilityID.Validators[0].(func(string) error)
+	vulnerabilitytypeFields := schema.VulnerabilityType{}.Fields()
+	_ = vulnerabilitytypeFields
+	// vulnerabilitytypeDescType is the schema descriptor for type field.
+	vulnerabilitytypeDescType := vulnerabilitytypeFields[0].Descriptor()
+	// vulnerabilitytype.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	vulnerabilitytype.TypeValidator = vulnerabilitytypeDescType.Validators[0].(func(string) error)
 }

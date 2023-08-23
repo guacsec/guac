@@ -592,7 +592,7 @@ func HasVulnerability() predicate.CertifyVuln {
 }
 
 // HasVulnerabilityWith applies the HasEdge predicate on the "vulnerability" edge with a given conditions (other predicates).
-func HasVulnerabilityWith(preds ...predicate.Vulnerability) predicate.CertifyVuln {
+func HasVulnerabilityWith(preds ...predicate.VulnerabilityType) predicate.CertifyVuln {
 	return predicate.CertifyVuln(func(s *sql.Selector) {
 		step := newVulnerabilityStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

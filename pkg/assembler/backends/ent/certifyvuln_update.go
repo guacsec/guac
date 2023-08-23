@@ -14,7 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
 // CertifyVulnUpdate is the builder for updating CertifyVuln entities.
@@ -98,8 +98,8 @@ func (cvu *CertifyVulnUpdate) SetCollector(s string) *CertifyVulnUpdate {
 	return cvu
 }
 
-// SetVulnerability sets the "vulnerability" edge to the Vulnerability entity.
-func (cvu *CertifyVulnUpdate) SetVulnerability(v *Vulnerability) *CertifyVulnUpdate {
+// SetVulnerability sets the "vulnerability" edge to the VulnerabilityType entity.
+func (cvu *CertifyVulnUpdate) SetVulnerability(v *VulnerabilityType) *CertifyVulnUpdate {
 	return cvu.SetVulnerabilityID(v.ID)
 }
 
@@ -113,7 +113,7 @@ func (cvu *CertifyVulnUpdate) Mutation() *CertifyVulnMutation {
 	return cvu.mutation
 }
 
-// ClearVulnerability clears the "vulnerability" edge to the Vulnerability entity.
+// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityType entity.
 func (cvu *CertifyVulnUpdate) ClearVulnerability() *CertifyVulnUpdate {
 	cvu.mutation.ClearVulnerability()
 	return cvu
@@ -201,7 +201,7 @@ func (cvu *CertifyVulnUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvuln.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerability.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -214,7 +214,7 @@ func (cvu *CertifyVulnUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvuln.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerability.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -339,8 +339,8 @@ func (cvuo *CertifyVulnUpdateOne) SetCollector(s string) *CertifyVulnUpdateOne {
 	return cvuo
 }
 
-// SetVulnerability sets the "vulnerability" edge to the Vulnerability entity.
-func (cvuo *CertifyVulnUpdateOne) SetVulnerability(v *Vulnerability) *CertifyVulnUpdateOne {
+// SetVulnerability sets the "vulnerability" edge to the VulnerabilityType entity.
+func (cvuo *CertifyVulnUpdateOne) SetVulnerability(v *VulnerabilityType) *CertifyVulnUpdateOne {
 	return cvuo.SetVulnerabilityID(v.ID)
 }
 
@@ -354,7 +354,7 @@ func (cvuo *CertifyVulnUpdateOne) Mutation() *CertifyVulnMutation {
 	return cvuo.mutation
 }
 
-// ClearVulnerability clears the "vulnerability" edge to the Vulnerability entity.
+// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityType entity.
 func (cvuo *CertifyVulnUpdateOne) ClearVulnerability() *CertifyVulnUpdateOne {
 	cvuo.mutation.ClearVulnerability()
 	return cvuo
@@ -472,7 +472,7 @@ func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVu
 			Columns: []string{certifyvuln.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerability.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -485,7 +485,7 @@ func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVu
 			Columns: []string{certifyvuln.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerability.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

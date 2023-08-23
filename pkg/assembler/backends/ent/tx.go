@@ -54,8 +54,10 @@ type Tx struct {
 	SourceNamespace *SourceNamespaceClient
 	// SourceType is the client for interacting with the SourceType builders.
 	SourceType *SourceTypeClient
-	// Vulnerability is the client for interacting with the Vulnerability builders.
-	Vulnerability *VulnerabilityClient
+	// VulnerabilityID is the client for interacting with the VulnerabilityID builders.
+	VulnerabilityID *VulnerabilityIDClient
+	// VulnerabilityType is the client for interacting with the VulnerabilityType builders.
+	VulnerabilityType *VulnerabilityTypeClient
 
 	// lazily loaded.
 	client     *Client
@@ -208,7 +210,8 @@ func (tx *Tx) init() {
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)
 	tx.SourceType = NewSourceTypeClient(tx.config)
-	tx.Vulnerability = NewVulnerabilityClient(tx.config)
+	tx.VulnerabilityID = NewVulnerabilityIDClient(tx.config)
+	tx.VulnerabilityType = NewVulnerabilityTypeClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
