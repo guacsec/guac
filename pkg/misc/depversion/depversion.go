@@ -255,7 +255,7 @@ func parseSemverHelper(re *regexp.Regexp, s string) (semver, major, minor, patch
 	matches := re.FindStringSubmatch(s)
 
 	if len(matches) == 0 {
-		err = fmt.Errorf("Did not match regex: %q %s", s, re)
+		err = fmt.Errorf("did not match regex: %q %s", s, re)
 		return
 	}
 	semverIdx := re.SubexpIndex("semver")
@@ -330,9 +330,22 @@ func getConstraint(s string) (string, error) {
 		}
 		return "=" + s, nil
 	}
+
+	// ignoring the tilde for the wildcard check
+	wildcardVersion := strings.TrimPrefix(s, "~")
+	// ignoring the ^ for the wildcard check, but using it during the parsing
+	wildcardVersion = strings.TrimPrefix(wildcardVersion, "^")
+
 	// check for 1.x minor and patch versions
-	if isSemVerWildcard(s) {
-		_, major, minor, _, _, _, err := parseWildcardSemver(s)
+	if isSemVerWildcard(wildcardVersion) {
+		if strings.HasPrefix(s, "^") {
+			split := strings.Split(wildcardVersion, ".")
+			if len(split) == 3 {
+				wildcardVersion = fmt.Sprintf("%s.%s", split[0], split[2])
+			}
+		}
+
+		_, major, minor, _, _, _, err := parseWildcardSemver(wildcardVersion)
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver with wildcard: %v", err)
 		}
@@ -353,7 +366,7 @@ func getConstraint(s string) (string, error) {
 
 	// NPM ^ for major versions
 	if strings.HasPrefix(s, "^") {
-		version := strings.TrimPrefix(s, ("^"))
+		version := strings.TrimPrefix(s, "^")
 		semver, major, _, _, _, _, err := parseSemver(version)
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver %v", err)
@@ -365,7 +378,7 @@ func getConstraint(s string) (string, error) {
 
 	// NPM ~ for minor version
 	if strings.HasPrefix(s, "~") {
-		version := strings.TrimPrefix(s, ("~"))
+		version := strings.TrimPrefix(s, "~")
 		semver, major, minor, _, _, _, err := parseSemver(version)
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver %v", err)
