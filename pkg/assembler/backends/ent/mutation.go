@@ -14388,16 +14388,16 @@ func (m *SourceTypeMutation) ResetEdge(name string) error {
 // VulnerabilityIDMutation represents an operation that mutates the VulnerabilityID nodes in the graph.
 type VulnerabilityIDMutation struct {
 	config
-	op                        Op
-	typ                       string
-	id                        *int
-	vulnerability_id          *string
-	clearedFields             map[string]struct{}
-	vulnerability_type        *int
-	clearedvulnerability_type bool
-	done                      bool
-	oldValue                  func(context.Context) (*VulnerabilityID, error)
-	predicates                []predicate.VulnerabilityID
+	op               Op
+	typ              string
+	id               *int
+	vulnerability_id *string
+	clearedFields    map[string]struct{}
+	_type            *int
+	cleared_type     bool
+	done             bool
+	oldValue         func(context.Context) (*VulnerabilityID, error)
+	predicates       []predicate.VulnerabilityID
 }
 
 var _ ent.Mutation = (*VulnerabilityIDMutation)(nil)
@@ -14534,66 +14534,66 @@ func (m *VulnerabilityIDMutation) ResetVulnerabilityID() {
 	m.vulnerability_id = nil
 }
 
-// SetVulnerabilityTypeID sets the "vulnerability_type_id" field.
-func (m *VulnerabilityIDMutation) SetVulnerabilityTypeID(i int) {
-	m.vulnerability_type = &i
+// SetTypeID sets the "type_id" field.
+func (m *VulnerabilityIDMutation) SetTypeID(i int) {
+	m._type = &i
 }
 
-// VulnerabilityTypeID returns the value of the "vulnerability_type_id" field in the mutation.
-func (m *VulnerabilityIDMutation) VulnerabilityTypeID() (r int, exists bool) {
-	v := m.vulnerability_type
+// TypeID returns the value of the "type_id" field in the mutation.
+func (m *VulnerabilityIDMutation) TypeID() (r int, exists bool) {
+	v := m._type
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldVulnerabilityTypeID returns the old "vulnerability_type_id" field's value of the VulnerabilityID entity.
+// OldTypeID returns the old "type_id" field's value of the VulnerabilityID entity.
 // If the VulnerabilityID object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *VulnerabilityIDMutation) OldVulnerabilityTypeID(ctx context.Context) (v int, err error) {
+func (m *VulnerabilityIDMutation) OldTypeID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldVulnerabilityTypeID is only allowed on UpdateOne operations")
+		return v, errors.New("OldTypeID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldVulnerabilityTypeID requires an ID field in the mutation")
+		return v, errors.New("OldTypeID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVulnerabilityTypeID: %w", err)
+		return v, fmt.Errorf("querying old value for OldTypeID: %w", err)
 	}
-	return oldValue.VulnerabilityTypeID, nil
+	return oldValue.TypeID, nil
 }
 
-// ResetVulnerabilityTypeID resets all changes to the "vulnerability_type_id" field.
-func (m *VulnerabilityIDMutation) ResetVulnerabilityTypeID() {
-	m.vulnerability_type = nil
+// ResetTypeID resets all changes to the "type_id" field.
+func (m *VulnerabilityIDMutation) ResetTypeID() {
+	m._type = nil
 }
 
-// ClearVulnerabilityType clears the "vulnerability_type" edge to the VulnerabilityType entity.
-func (m *VulnerabilityIDMutation) ClearVulnerabilityType() {
-	m.clearedvulnerability_type = true
+// ClearType clears the "type" edge to the VulnerabilityType entity.
+func (m *VulnerabilityIDMutation) ClearType() {
+	m.cleared_type = true
 }
 
-// VulnerabilityTypeCleared reports if the "vulnerability_type" edge to the VulnerabilityType entity was cleared.
-func (m *VulnerabilityIDMutation) VulnerabilityTypeCleared() bool {
-	return m.clearedvulnerability_type
+// TypeCleared reports if the "type" edge to the VulnerabilityType entity was cleared.
+func (m *VulnerabilityIDMutation) TypeCleared() bool {
+	return m.cleared_type
 }
 
-// VulnerabilityTypeIDs returns the "vulnerability_type" edge IDs in the mutation.
+// TypeIDs returns the "type" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// VulnerabilityTypeID instead. It exists only for internal usage by the builders.
-func (m *VulnerabilityIDMutation) VulnerabilityTypeIDs() (ids []int) {
-	if id := m.vulnerability_type; id != nil {
+// TypeID instead. It exists only for internal usage by the builders.
+func (m *VulnerabilityIDMutation) TypeIDs() (ids []int) {
+	if id := m._type; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetVulnerabilityType resets all changes to the "vulnerability_type" edge.
-func (m *VulnerabilityIDMutation) ResetVulnerabilityType() {
-	m.vulnerability_type = nil
-	m.clearedvulnerability_type = false
+// ResetType resets all changes to the "type" edge.
+func (m *VulnerabilityIDMutation) ResetType() {
+	m._type = nil
+	m.cleared_type = false
 }
 
 // Where appends a list predicates to the VulnerabilityIDMutation builder.
@@ -14634,8 +14634,8 @@ func (m *VulnerabilityIDMutation) Fields() []string {
 	if m.vulnerability_id != nil {
 		fields = append(fields, vulnerabilityid.FieldVulnerabilityID)
 	}
-	if m.vulnerability_type != nil {
-		fields = append(fields, vulnerabilityid.FieldVulnerabilityTypeID)
+	if m._type != nil {
+		fields = append(fields, vulnerabilityid.FieldTypeID)
 	}
 	return fields
 }
@@ -14647,8 +14647,8 @@ func (m *VulnerabilityIDMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case vulnerabilityid.FieldVulnerabilityID:
 		return m.VulnerabilityID()
-	case vulnerabilityid.FieldVulnerabilityTypeID:
-		return m.VulnerabilityTypeID()
+	case vulnerabilityid.FieldTypeID:
+		return m.TypeID()
 	}
 	return nil, false
 }
@@ -14660,8 +14660,8 @@ func (m *VulnerabilityIDMutation) OldField(ctx context.Context, name string) (en
 	switch name {
 	case vulnerabilityid.FieldVulnerabilityID:
 		return m.OldVulnerabilityID(ctx)
-	case vulnerabilityid.FieldVulnerabilityTypeID:
-		return m.OldVulnerabilityTypeID(ctx)
+	case vulnerabilityid.FieldTypeID:
+		return m.OldTypeID(ctx)
 	}
 	return nil, fmt.Errorf("unknown VulnerabilityID field %s", name)
 }
@@ -14678,12 +14678,12 @@ func (m *VulnerabilityIDMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetVulnerabilityID(v)
 		return nil
-	case vulnerabilityid.FieldVulnerabilityTypeID:
+	case vulnerabilityid.FieldTypeID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetVulnerabilityTypeID(v)
+		m.SetTypeID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown VulnerabilityID field %s", name)
@@ -14740,8 +14740,8 @@ func (m *VulnerabilityIDMutation) ResetField(name string) error {
 	case vulnerabilityid.FieldVulnerabilityID:
 		m.ResetVulnerabilityID()
 		return nil
-	case vulnerabilityid.FieldVulnerabilityTypeID:
-		m.ResetVulnerabilityTypeID()
+	case vulnerabilityid.FieldTypeID:
+		m.ResetTypeID()
 		return nil
 	}
 	return fmt.Errorf("unknown VulnerabilityID field %s", name)
@@ -14750,8 +14750,8 @@ func (m *VulnerabilityIDMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *VulnerabilityIDMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.vulnerability_type != nil {
-		edges = append(edges, vulnerabilityid.EdgeVulnerabilityType)
+	if m._type != nil {
+		edges = append(edges, vulnerabilityid.EdgeType)
 	}
 	return edges
 }
@@ -14760,8 +14760,8 @@ func (m *VulnerabilityIDMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *VulnerabilityIDMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case vulnerabilityid.EdgeVulnerabilityType:
-		if id := m.vulnerability_type; id != nil {
+	case vulnerabilityid.EdgeType:
+		if id := m._type; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -14783,8 +14783,8 @@ func (m *VulnerabilityIDMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *VulnerabilityIDMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedvulnerability_type {
-		edges = append(edges, vulnerabilityid.EdgeVulnerabilityType)
+	if m.cleared_type {
+		edges = append(edges, vulnerabilityid.EdgeType)
 	}
 	return edges
 }
@@ -14793,8 +14793,8 @@ func (m *VulnerabilityIDMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *VulnerabilityIDMutation) EdgeCleared(name string) bool {
 	switch name {
-	case vulnerabilityid.EdgeVulnerabilityType:
-		return m.clearedvulnerability_type
+	case vulnerabilityid.EdgeType:
+		return m.cleared_type
 	}
 	return false
 }
@@ -14803,8 +14803,8 @@ func (m *VulnerabilityIDMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *VulnerabilityIDMutation) ClearEdge(name string) error {
 	switch name {
-	case vulnerabilityid.EdgeVulnerabilityType:
-		m.ClearVulnerabilityType()
+	case vulnerabilityid.EdgeType:
+		m.ClearType()
 		return nil
 	}
 	return fmt.Errorf("unknown VulnerabilityID unique edge %s", name)
@@ -14814,8 +14814,8 @@ func (m *VulnerabilityIDMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *VulnerabilityIDMutation) ResetEdge(name string) error {
 	switch name {
-	case vulnerabilityid.EdgeVulnerabilityType:
-		m.ResetVulnerabilityType()
+	case vulnerabilityid.EdgeType:
+		m.ResetType()
 		return nil
 	}
 	return fmt.Errorf("unknown VulnerabilityID edge %s", name)

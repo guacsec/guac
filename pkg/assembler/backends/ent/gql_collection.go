@@ -2366,7 +2366,7 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
-		case "vulnerabilityType":
+		case "type":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -2375,20 +2375,20 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			vi.withVulnerabilityType = query
-			if _, ok := fieldSeen[vulnerabilityid.FieldVulnerabilityTypeID]; !ok {
-				selectedFields = append(selectedFields, vulnerabilityid.FieldVulnerabilityTypeID)
-				fieldSeen[vulnerabilityid.FieldVulnerabilityTypeID] = struct{}{}
+			vi.withType = query
+			if _, ok := fieldSeen[vulnerabilityid.FieldTypeID]; !ok {
+				selectedFields = append(selectedFields, vulnerabilityid.FieldTypeID)
+				fieldSeen[vulnerabilityid.FieldTypeID] = struct{}{}
 			}
 		case "vulnerabilityID":
 			if _, ok := fieldSeen[vulnerabilityid.FieldVulnerabilityID]; !ok {
 				selectedFields = append(selectedFields, vulnerabilityid.FieldVulnerabilityID)
 				fieldSeen[vulnerabilityid.FieldVulnerabilityID] = struct{}{}
 			}
-		case "vulnerabilityTypeID":
-			if _, ok := fieldSeen[vulnerabilityid.FieldVulnerabilityTypeID]; !ok {
-				selectedFields = append(selectedFields, vulnerabilityid.FieldVulnerabilityTypeID)
-				fieldSeen[vulnerabilityid.FieldVulnerabilityTypeID] = struct{}{}
+		case "typeID":
+			if _, ok := fieldSeen[vulnerabilityid.FieldTypeID]; !ok {
+				selectedFields = append(selectedFields, vulnerabilityid.FieldTypeID)
+				fieldSeen[vulnerabilityid.FieldTypeID] = struct{}{}
 			}
 		case "id":
 		case "__typename":

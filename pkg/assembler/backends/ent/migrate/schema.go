@@ -736,7 +736,7 @@ var (
 	VulnerabilityIdsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "vulnerability_id", Type: field.TypeString},
-		{Name: "vulnerability_type_id", Type: field.TypeInt},
+		{Name: "type_id", Type: field.TypeInt},
 	}
 	// VulnerabilityIdsTable holds the schema information for the "vulnerability_ids" table.
 	VulnerabilityIdsTable = &schema.Table{
@@ -753,7 +753,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "vulnerabilityid_vulnerability_id_vulnerability_type_id",
+				Name:    "vulnerabilityid_vulnerability_id_type_id",
 				Unique:  true,
 				Columns: []*schema.Column{VulnerabilityIdsColumns[1], VulnerabilityIdsColumns[2]},
 			},

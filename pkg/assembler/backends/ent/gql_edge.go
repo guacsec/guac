@@ -440,10 +440,10 @@ func (st *SourceType) Namespaces(ctx context.Context) (result []*SourceNamespace
 	return result, err
 }
 
-func (vi *VulnerabilityID) VulnerabilityType(ctx context.Context) (*VulnerabilityType, error) {
-	result, err := vi.Edges.VulnerabilityTypeOrErr()
+func (vi *VulnerabilityID) Type(ctx context.Context) (*VulnerabilityType, error) {
+	result, err := vi.Edges.TypeOrErr()
 	if IsNotLoaded(err) {
-		result, err = vi.QueryVulnerabilityType().Only(ctx)
+		result, err = vi.QueryType().Only(ctx)
 	}
 	return result, err
 }

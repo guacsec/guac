@@ -3673,15 +3673,15 @@ func (c *VulnerabilityIDClient) GetX(ctx context.Context, id int) *Vulnerability
 	return obj
 }
 
-// QueryVulnerabilityType queries the vulnerability_type edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryVulnerabilityType(vi *VulnerabilityID) *VulnerabilityTypeQuery {
+// QueryType queries the type edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryType(vi *VulnerabilityID) *VulnerabilityTypeQuery {
 	query := (&VulnerabilityTypeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := vi.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, vulnerabilityid.VulnerabilityTypeTable, vulnerabilityid.VulnerabilityTypeColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, vulnerabilityid.TypeTable, vulnerabilityid.TypeColumn),
 		)
 		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
 		return fromV, nil

@@ -3,7 +3,6 @@ package backend
 import (
 	"context"
 
-	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -58,7 +57,7 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgIn
 
 	var modelIsDependencies []*model.IsDependency
 	for i := range dependencies {
-		isDependency, err := b.IngestDependency(ctx, *pkgs[i], *depPkgs[i], *dependencies[i])
+		isDependency, err := b.IngestDependency(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
 		if err != nil {
 			return nil, Errorf("IngestDependency failed with err: %v", err)
 		}
@@ -68,61 +67,61 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgIn
 }
 
 // func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, spec model.IsDependencyInputSpec) (*model.IsDependency, error) {
-func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
-	funcName := "IngestDependency"
+// func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+// 	funcName := "IngestDependency"
 
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		client := ent.TxFromContext(ctx)
-		p, err := getPkgVersion(ctx, client.Client(), pkg)
-		if err != nil {
-			return nil, err
-		}
-		dp, err := getPkgName(ctx, client.Client(), depPkg)
-		if err != nil {
-			return nil, err
-		}
-		id, err := client.Dependency.Create().
-			SetPackage(p).
-			SetDependentPackage(dp).
-			SetVersionRange(spec.VersionRange).
-			SetDependencyType(dependencyTypeToEnum(spec.DependencyType)).
-			SetJustification(spec.Justification).
-			SetOrigin(spec.Origin).
-			SetCollector(spec.Collector).
-			OnConflict(
-				sql.ConflictColumns(
-					dependency.FieldPackageID,
-					dependency.FieldDependentPackageID,
-					dependency.FieldVersionRange,
-					dependency.FieldDependencyType,
-					dependency.FieldJustification,
-					dependency.FieldOrigin,
-					dependency.FieldCollector,
-				),
-			).
-			Ignore().
-			ID(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return &id, nil
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, funcName)
-	}
+// 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+// 		client := ent.TxFromContext(ctx)
+// 		p, err := getPkgVersion(ctx, client.Client(), pkg)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		dp, err := getPkgName(ctx, client.Client(), depPkg)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		id, err := client.Dependency.Create().
+// 			SetPackage(p).
+// 			SetDependentPackage(dp).
+// 			SetVersionRange(spec.VersionRange).
+// 			SetDependencyType(dependencyTypeToEnum(spec.DependencyType)).
+// 			SetJustification(spec.Justification).
+// 			SetOrigin(spec.Origin).
+// 			SetCollector(spec.Collector).
+// 			OnConflict(
+// 				sql.ConflictColumns(
+// 					dependency.FieldPackageID,
+// 					dependency.FieldDependentPackageID,
+// 					dependency.FieldVersionRange,
+// 					dependency.FieldDependencyType,
+// 					dependency.FieldJustification,
+// 					dependency.FieldOrigin,
+// 					dependency.FieldCollector,
+// 				),
+// 			).
+// 			Ignore().
+// 			ID(ctx)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		return &id, nil
+// 	})
+// 	if err != nil {
+// 		return nil, errors.Wrap(err, funcName)
+// 	}
 
-	// Upsert only gets ID, so need to query the object
-	record, err := b.client.Dependency.Query().
-		Where(dependency.ID(*recordID)).
-		WithPackage(withPackageVersionTree()).
-		WithDependentPackage(withPackageNameTree()).
-		Only(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, funcName)
-	}
+// 	// Upsert only gets ID, so need to query the object
+// 	record, err := b.client.Dependency.Query().
+// 		Where(dependency.ID(*recordID)).
+// 		WithPackage(withPackageVersionTree()).
+// 		WithDependentPackage(withPackageNameTree()).
+// 		Only(ctx)
+// 	if err != nil {
+// 		return nil, errors.Wrap(err, funcName)
+// 	}
 
-	return toModelIsDependencyWithBackrefs(record), nil
-}
+// 	return toModelIsDependencyWithBackrefs(record), nil
+// }
 
 func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
 	switch t {
