@@ -411,7 +411,7 @@ func (s *Suite) TestCertifyScorecard() {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.CertifyScorecard(ctx, *o.Src, *o.SC)
+				_, err := b.IngestScorecard(ctx, *o.Src, *o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
