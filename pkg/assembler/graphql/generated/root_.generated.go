@@ -4490,7 +4490,7 @@ VulnerabilityMetadataSpec allows filtering the list of VulnerabilityMetadata evi
 to return in a query.
 
 Comparator field is an enum that be set to filter the score and return a
-range that matches.
+range that matches. If the comparator is not specified, it will default to equal operation.
 
 Timestamp specified indicates filtering timestamps after the specified time
 """
