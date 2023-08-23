@@ -59,7 +59,7 @@ func (cvc *CertifyVexCreate) SetVulnerabilityID(i int) *CertifyVexCreate {
 	return cvc
 }
 
-// SetKnownSince sets the "knownSince" field.
+// SetKnownSince sets the "known_since" field.
 func (cvc *CertifyVexCreate) SetKnownSince(t time.Time) *CertifyVexCreate {
 	cvc.mutation.SetKnownSince(t)
 	return cvc
@@ -77,7 +77,7 @@ func (cvc *CertifyVexCreate) SetStatement(s string) *CertifyVexCreate {
 	return cvc
 }
 
-// SetStatusNotes sets the "statusNotes" field.
+// SetStatusNotes sets the "status_notes" field.
 func (cvc *CertifyVexCreate) SetStatusNotes(s string) *CertifyVexCreate {
 	cvc.mutation.SetStatusNotes(s)
 	return cvc
@@ -154,7 +154,7 @@ func (cvc *CertifyVexCreate) check() error {
 		return &ValidationError{Name: "vulnerability_id", err: errors.New(`ent: missing required field "CertifyVex.vulnerability_id"`)}
 	}
 	if _, ok := cvc.mutation.KnownSince(); !ok {
-		return &ValidationError{Name: "knownSince", err: errors.New(`ent: missing required field "CertifyVex.knownSince"`)}
+		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "CertifyVex.known_since"`)}
 	}
 	if _, ok := cvc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "CertifyVex.status"`)}
@@ -163,7 +163,7 @@ func (cvc *CertifyVexCreate) check() error {
 		return &ValidationError{Name: "statement", err: errors.New(`ent: missing required field "CertifyVex.statement"`)}
 	}
 	if _, ok := cvc.mutation.StatusNotes(); !ok {
-		return &ValidationError{Name: "statusNotes", err: errors.New(`ent: missing required field "CertifyVex.statusNotes"`)}
+		return &ValidationError{Name: "status_notes", err: errors.New(`ent: missing required field "CertifyVex.status_notes"`)}
 	}
 	if _, ok := cvc.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "CertifyVex.justification"`)}
@@ -383,13 +383,13 @@ func (u *CertifyVexUpsert) UpdateVulnerabilityID() *CertifyVexUpsert {
 	return u
 }
 
-// SetKnownSince sets the "knownSince" field.
+// SetKnownSince sets the "known_since" field.
 func (u *CertifyVexUpsert) SetKnownSince(v time.Time) *CertifyVexUpsert {
 	u.Set(certifyvex.FieldKnownSince, v)
 	return u
 }
 
-// UpdateKnownSince sets the "knownSince" field to the value that was provided on create.
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
 func (u *CertifyVexUpsert) UpdateKnownSince() *CertifyVexUpsert {
 	u.SetExcluded(certifyvex.FieldKnownSince)
 	return u
@@ -419,13 +419,13 @@ func (u *CertifyVexUpsert) UpdateStatement() *CertifyVexUpsert {
 	return u
 }
 
-// SetStatusNotes sets the "statusNotes" field.
+// SetStatusNotes sets the "status_notes" field.
 func (u *CertifyVexUpsert) SetStatusNotes(v string) *CertifyVexUpsert {
 	u.Set(certifyvex.FieldStatusNotes, v)
 	return u
 }
 
-// UpdateStatusNotes sets the "statusNotes" field to the value that was provided on create.
+// UpdateStatusNotes sets the "status_notes" field to the value that was provided on create.
 func (u *CertifyVexUpsert) UpdateStatusNotes() *CertifyVexUpsert {
 	u.SetExcluded(certifyvex.FieldStatusNotes)
 	return u
@@ -563,14 +563,14 @@ func (u *CertifyVexUpsertOne) UpdateVulnerabilityID() *CertifyVexUpsertOne {
 	})
 }
 
-// SetKnownSince sets the "knownSince" field.
+// SetKnownSince sets the "known_since" field.
 func (u *CertifyVexUpsertOne) SetKnownSince(v time.Time) *CertifyVexUpsertOne {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetKnownSince(v)
 	})
 }
 
-// UpdateKnownSince sets the "knownSince" field to the value that was provided on create.
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
 func (u *CertifyVexUpsertOne) UpdateKnownSince() *CertifyVexUpsertOne {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.UpdateKnownSince()
@@ -605,14 +605,14 @@ func (u *CertifyVexUpsertOne) UpdateStatement() *CertifyVexUpsertOne {
 	})
 }
 
-// SetStatusNotes sets the "statusNotes" field.
+// SetStatusNotes sets the "status_notes" field.
 func (u *CertifyVexUpsertOne) SetStatusNotes(v string) *CertifyVexUpsertOne {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetStatusNotes(v)
 	})
 }
 
-// UpdateStatusNotes sets the "statusNotes" field to the value that was provided on create.
+// UpdateStatusNotes sets the "status_notes" field to the value that was provided on create.
 func (u *CertifyVexUpsertOne) UpdateStatusNotes() *CertifyVexUpsertOne {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.UpdateStatusNotes()
@@ -916,14 +916,14 @@ func (u *CertifyVexUpsertBulk) UpdateVulnerabilityID() *CertifyVexUpsertBulk {
 	})
 }
 
-// SetKnownSince sets the "knownSince" field.
+// SetKnownSince sets the "known_since" field.
 func (u *CertifyVexUpsertBulk) SetKnownSince(v time.Time) *CertifyVexUpsertBulk {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetKnownSince(v)
 	})
 }
 
-// UpdateKnownSince sets the "knownSince" field to the value that was provided on create.
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
 func (u *CertifyVexUpsertBulk) UpdateKnownSince() *CertifyVexUpsertBulk {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.UpdateKnownSince()
@@ -958,14 +958,14 @@ func (u *CertifyVexUpsertBulk) UpdateStatement() *CertifyVexUpsertBulk {
 	})
 }
 
-// SetStatusNotes sets the "statusNotes" field.
+// SetStatusNotes sets the "status_notes" field.
 func (u *CertifyVexUpsertBulk) SetStatusNotes(v string) *CertifyVexUpsertBulk {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetStatusNotes(v)
 	})
 }
 
-// UpdateStatusNotes sets the "statusNotes" field to the value that was provided on create.
+// UpdateStatusNotes sets the "status_notes" field to the value that was provided on create.
 func (u *CertifyVexUpsertBulk) UpdateStatusNotes() *CertifyVexUpsertBulk {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.UpdateStatusNotes()

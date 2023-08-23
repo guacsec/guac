@@ -3535,10 +3535,10 @@ type CertifyVexMutation struct {
 	op                   Op
 	typ                  string
 	id                   *int
-	knownSince           *time.Time
+	known_since          *time.Time
 	status               *string
 	statement            *string
-	statusNotes          *string
+	status_notes         *string
 	justification        *string
 	origin               *string
 	collector            *string
@@ -3786,21 +3786,21 @@ func (m *CertifyVexMutation) ResetVulnerabilityID() {
 	m.vulnerability = nil
 }
 
-// SetKnownSince sets the "knownSince" field.
+// SetKnownSince sets the "known_since" field.
 func (m *CertifyVexMutation) SetKnownSince(t time.Time) {
-	m.knownSince = &t
+	m.known_since = &t
 }
 
-// KnownSince returns the value of the "knownSince" field in the mutation.
+// KnownSince returns the value of the "known_since" field in the mutation.
 func (m *CertifyVexMutation) KnownSince() (r time.Time, exists bool) {
-	v := m.knownSince
+	v := m.known_since
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldKnownSince returns the old "knownSince" field's value of the CertifyVex entity.
+// OldKnownSince returns the old "known_since" field's value of the CertifyVex entity.
 // If the CertifyVex object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *CertifyVexMutation) OldKnownSince(ctx context.Context) (v time.Time, err error) {
@@ -3817,9 +3817,9 @@ func (m *CertifyVexMutation) OldKnownSince(ctx context.Context) (v time.Time, er
 	return oldValue.KnownSince, nil
 }
 
-// ResetKnownSince resets all changes to the "knownSince" field.
+// ResetKnownSince resets all changes to the "known_since" field.
 func (m *CertifyVexMutation) ResetKnownSince() {
-	m.knownSince = nil
+	m.known_since = nil
 }
 
 // SetStatus sets the "status" field.
@@ -3894,21 +3894,21 @@ func (m *CertifyVexMutation) ResetStatement() {
 	m.statement = nil
 }
 
-// SetStatusNotes sets the "statusNotes" field.
+// SetStatusNotes sets the "status_notes" field.
 func (m *CertifyVexMutation) SetStatusNotes(s string) {
-	m.statusNotes = &s
+	m.status_notes = &s
 }
 
-// StatusNotes returns the value of the "statusNotes" field in the mutation.
+// StatusNotes returns the value of the "status_notes" field in the mutation.
 func (m *CertifyVexMutation) StatusNotes() (r string, exists bool) {
-	v := m.statusNotes
+	v := m.status_notes
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldStatusNotes returns the old "statusNotes" field's value of the CertifyVex entity.
+// OldStatusNotes returns the old "status_notes" field's value of the CertifyVex entity.
 // If the CertifyVex object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *CertifyVexMutation) OldStatusNotes(ctx context.Context) (v string, err error) {
@@ -3925,9 +3925,9 @@ func (m *CertifyVexMutation) OldStatusNotes(ctx context.Context) (v string, err 
 	return oldValue.StatusNotes, nil
 }
 
-// ResetStatusNotes resets all changes to the "statusNotes" field.
+// ResetStatusNotes resets all changes to the "status_notes" field.
 func (m *CertifyVexMutation) ResetStatusNotes() {
-	m.statusNotes = nil
+	m.status_notes = nil
 }
 
 // SetJustification sets the "justification" field.
@@ -4160,7 +4160,7 @@ func (m *CertifyVexMutation) Fields() []string {
 	if m.vulnerability != nil {
 		fields = append(fields, certifyvex.FieldVulnerabilityID)
 	}
-	if m.knownSince != nil {
+	if m.known_since != nil {
 		fields = append(fields, certifyvex.FieldKnownSince)
 	}
 	if m.status != nil {
@@ -4169,7 +4169,7 @@ func (m *CertifyVexMutation) Fields() []string {
 	if m.statement != nil {
 		fields = append(fields, certifyvex.FieldStatement)
 	}
-	if m.statusNotes != nil {
+	if m.status_notes != nil {
 		fields = append(fields, certifyvex.FieldStatusNotes)
 	}
 	if m.justification != nil {

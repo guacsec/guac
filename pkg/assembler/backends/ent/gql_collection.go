@@ -683,7 +683,7 @@ func (cv *CertifyVexQuery) collectField(ctx context.Context, opCtx *graphql.Oper
 				selectedFields = append(selectedFields, certifyvex.FieldVulnerabilityID)
 				fieldSeen[certifyvex.FieldVulnerabilityID] = struct{}{}
 			}
-		case "knownsince":
+		case "knownSince":
 			if _, ok := fieldSeen[certifyvex.FieldKnownSince]; !ok {
 				selectedFields = append(selectedFields, certifyvex.FieldKnownSince)
 				fieldSeen[certifyvex.FieldKnownSince] = struct{}{}
@@ -698,7 +698,7 @@ func (cv *CertifyVexQuery) collectField(ctx context.Context, opCtx *graphql.Oper
 				selectedFields = append(selectedFields, certifyvex.FieldStatement)
 				fieldSeen[certifyvex.FieldStatement] = struct{}{}
 			}
-		case "statusnotes":
+		case "statusNotes":
 			if _, ok := fieldSeen[certifyvex.FieldStatusNotes]; !ok {
 				selectedFields = append(selectedFields, certifyvex.FieldStatusNotes)
 				fieldSeen[certifyvex.FieldStatusNotes] = struct{}{}

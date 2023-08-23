@@ -77,7 +77,7 @@ func (cvu *CertifyVexUpdate) SetVulnerabilityID(i int) *CertifyVexUpdate {
 	return cvu
 }
 
-// SetKnownSince sets the "knownSince" field.
+// SetKnownSince sets the "known_since" field.
 func (cvu *CertifyVexUpdate) SetKnownSince(t time.Time) *CertifyVexUpdate {
 	cvu.mutation.SetKnownSince(t)
 	return cvu
@@ -95,7 +95,7 @@ func (cvu *CertifyVexUpdate) SetStatement(s string) *CertifyVexUpdate {
 	return cvu
 }
 
-// SetStatusNotes sets the "statusNotes" field.
+// SetStatusNotes sets the "status_notes" field.
 func (cvu *CertifyVexUpdate) SetStatusNotes(s string) *CertifyVexUpdate {
 	cvu.mutation.SetStatusNotes(s)
 	return cvu
@@ -378,7 +378,7 @@ func (cvuo *CertifyVexUpdateOne) SetVulnerabilityID(i int) *CertifyVexUpdateOne 
 	return cvuo
 }
 
-// SetKnownSince sets the "knownSince" field.
+// SetKnownSince sets the "known_since" field.
 func (cvuo *CertifyVexUpdateOne) SetKnownSince(t time.Time) *CertifyVexUpdateOne {
 	cvuo.mutation.SetKnownSince(t)
 	return cvuo
@@ -396,7 +396,7 @@ func (cvuo *CertifyVexUpdateOne) SetStatement(s string) *CertifyVexUpdateOne {
 	return cvuo
 }
 
-// SetStatusNotes sets the "statusNotes" field.
+// SetStatusNotes sets the "status_notes" field.
 func (cvuo *CertifyVexUpdateOne) SetStatusNotes(s string) *CertifyVexUpdateOne {
 	cvuo.mutation.SetStatusNotes(s)
 	return cvuo

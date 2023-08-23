@@ -70,7 +70,7 @@ func VulnerabilityID(v int) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldVulnerabilityID, v))
 }
 
-// KnownSince applies equality check predicate on the "knownSince" field. It's identical to KnownSinceEQ.
+// KnownSince applies equality check predicate on the "known_since" field. It's identical to KnownSinceEQ.
 func KnownSince(v time.Time) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldKnownSince, v))
 }
@@ -85,7 +85,7 @@ func Statement(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldStatement, v))
 }
 
-// StatusNotes applies equality check predicate on the "statusNotes" field. It's identical to StatusNotesEQ.
+// StatusNotes applies equality check predicate on the "status_notes" field. It's identical to StatusNotesEQ.
 func StatusNotes(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldStatusNotes, v))
 }
@@ -185,42 +185,42 @@ func VulnerabilityIDNotIn(vs ...int) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNotIn(FieldVulnerabilityID, vs...))
 }
 
-// KnownSinceEQ applies the EQ predicate on the "knownSince" field.
+// KnownSinceEQ applies the EQ predicate on the "known_since" field.
 func KnownSinceEQ(v time.Time) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldKnownSince, v))
 }
 
-// KnownSinceNEQ applies the NEQ predicate on the "knownSince" field.
+// KnownSinceNEQ applies the NEQ predicate on the "known_since" field.
 func KnownSinceNEQ(v time.Time) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNEQ(FieldKnownSince, v))
 }
 
-// KnownSinceIn applies the In predicate on the "knownSince" field.
+// KnownSinceIn applies the In predicate on the "known_since" field.
 func KnownSinceIn(vs ...time.Time) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldIn(FieldKnownSince, vs...))
 }
 
-// KnownSinceNotIn applies the NotIn predicate on the "knownSince" field.
+// KnownSinceNotIn applies the NotIn predicate on the "known_since" field.
 func KnownSinceNotIn(vs ...time.Time) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNotIn(FieldKnownSince, vs...))
 }
 
-// KnownSinceGT applies the GT predicate on the "knownSince" field.
+// KnownSinceGT applies the GT predicate on the "known_since" field.
 func KnownSinceGT(v time.Time) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldGT(FieldKnownSince, v))
 }
 
-// KnownSinceGTE applies the GTE predicate on the "knownSince" field.
+// KnownSinceGTE applies the GTE predicate on the "known_since" field.
 func KnownSinceGTE(v time.Time) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldGTE(FieldKnownSince, v))
 }
 
-// KnownSinceLT applies the LT predicate on the "knownSince" field.
+// KnownSinceLT applies the LT predicate on the "known_since" field.
 func KnownSinceLT(v time.Time) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldLT(FieldKnownSince, v))
 }
 
-// KnownSinceLTE applies the LTE predicate on the "knownSince" field.
+// KnownSinceLTE applies the LTE predicate on the "known_since" field.
 func KnownSinceLTE(v time.Time) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldLTE(FieldKnownSince, v))
 }
@@ -355,67 +355,67 @@ func StatementContainsFold(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldContainsFold(FieldStatement, v))
 }
 
-// StatusNotesEQ applies the EQ predicate on the "statusNotes" field.
+// StatusNotesEQ applies the EQ predicate on the "status_notes" field.
 func StatusNotesEQ(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldStatusNotes, v))
 }
 
-// StatusNotesNEQ applies the NEQ predicate on the "statusNotes" field.
+// StatusNotesNEQ applies the NEQ predicate on the "status_notes" field.
 func StatusNotesNEQ(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNEQ(FieldStatusNotes, v))
 }
 
-// StatusNotesIn applies the In predicate on the "statusNotes" field.
+// StatusNotesIn applies the In predicate on the "status_notes" field.
 func StatusNotesIn(vs ...string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldIn(FieldStatusNotes, vs...))
 }
 
-// StatusNotesNotIn applies the NotIn predicate on the "statusNotes" field.
+// StatusNotesNotIn applies the NotIn predicate on the "status_notes" field.
 func StatusNotesNotIn(vs ...string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNotIn(FieldStatusNotes, vs...))
 }
 
-// StatusNotesGT applies the GT predicate on the "statusNotes" field.
+// StatusNotesGT applies the GT predicate on the "status_notes" field.
 func StatusNotesGT(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldGT(FieldStatusNotes, v))
 }
 
-// StatusNotesGTE applies the GTE predicate on the "statusNotes" field.
+// StatusNotesGTE applies the GTE predicate on the "status_notes" field.
 func StatusNotesGTE(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldGTE(FieldStatusNotes, v))
 }
 
-// StatusNotesLT applies the LT predicate on the "statusNotes" field.
+// StatusNotesLT applies the LT predicate on the "status_notes" field.
 func StatusNotesLT(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldLT(FieldStatusNotes, v))
 }
 
-// StatusNotesLTE applies the LTE predicate on the "statusNotes" field.
+// StatusNotesLTE applies the LTE predicate on the "status_notes" field.
 func StatusNotesLTE(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldLTE(FieldStatusNotes, v))
 }
 
-// StatusNotesContains applies the Contains predicate on the "statusNotes" field.
+// StatusNotesContains applies the Contains predicate on the "status_notes" field.
 func StatusNotesContains(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldContains(FieldStatusNotes, v))
 }
 
-// StatusNotesHasPrefix applies the HasPrefix predicate on the "statusNotes" field.
+// StatusNotesHasPrefix applies the HasPrefix predicate on the "status_notes" field.
 func StatusNotesHasPrefix(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldHasPrefix(FieldStatusNotes, v))
 }
 
-// StatusNotesHasSuffix applies the HasSuffix predicate on the "statusNotes" field.
+// StatusNotesHasSuffix applies the HasSuffix predicate on the "status_notes" field.
 func StatusNotesHasSuffix(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldHasSuffix(FieldStatusNotes, v))
 }
 
-// StatusNotesEqualFold applies the EqualFold predicate on the "statusNotes" field.
+// StatusNotesEqualFold applies the EqualFold predicate on the "status_notes" field.
 func StatusNotesEqualFold(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEqualFold(FieldStatusNotes, v))
 }
 
-// StatusNotesContainsFold applies the ContainsFold predicate on the "statusNotes" field.
+// StatusNotesContainsFold applies the ContainsFold predicate on the "status_notes" field.
 func StatusNotesContainsFold(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldContainsFold(FieldStatusNotes, v))
 }

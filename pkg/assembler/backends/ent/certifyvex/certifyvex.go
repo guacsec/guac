@@ -18,13 +18,13 @@ const (
 	FieldArtifactID = "artifact_id"
 	// FieldVulnerabilityID holds the string denoting the vulnerability_id field in the database.
 	FieldVulnerabilityID = "vulnerability_id"
-	// FieldKnownSince holds the string denoting the knownsince field in the database.
+	// FieldKnownSince holds the string denoting the known_since field in the database.
 	FieldKnownSince = "known_since"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldStatement holds the string denoting the statement field in the database.
 	FieldStatement = "statement"
-	// FieldStatusNotes holds the string denoting the statusnotes field in the database.
+	// FieldStatusNotes holds the string denoting the status_notes field in the database.
 	FieldStatusNotes = "status_notes"
 	// FieldJustification holds the string denoting the justification field in the database.
 	FieldJustification = "justification"
@@ -111,7 +111,7 @@ func ByVulnerabilityID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVulnerabilityID, opts...).ToFunc()
 }
 
-// ByKnownSince orders the results by the knownSince field.
+// ByKnownSince orders the results by the known_since field.
 func ByKnownSince(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldKnownSince, opts...).ToFunc()
 }
@@ -126,7 +126,7 @@ func ByStatement(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatement, opts...).ToFunc()
 }
 
-// ByStatusNotes orders the results by the statusNotes field.
+// ByStatusNotes orders the results by the status_notes field.
 func ByStatusNotes(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatusNotes, opts...).ToFunc()
 }

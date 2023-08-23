@@ -26,14 +26,14 @@ type CertifyVex struct {
 	ArtifactID *int `json:"artifact_id,omitempty"`
 	// Vulnerability is one of OSV, GHSA, or CVE, or nil if not vulnerable
 	VulnerabilityID int `json:"vulnerability_id,omitempty"`
-	// KnownSince holds the value of the "knownSince" field.
-	KnownSince time.Time `json:"knownSince,omitempty"`
+	// KnownSince holds the value of the "known_since" field.
+	KnownSince time.Time `json:"known_since,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
 	// Statement holds the value of the "statement" field.
 	Statement string `json:"statement,omitempty"`
-	// StatusNotes holds the value of the "statusNotes" field.
-	StatusNotes string `json:"statusNotes,omitempty"`
+	// StatusNotes holds the value of the "status_notes" field.
+	StatusNotes string `json:"status_notes,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
 	// Origin holds the value of the "origin" field.
@@ -154,7 +154,7 @@ func (cv *CertifyVex) assignValues(columns []string, values []any) error {
 			}
 		case certifyvex.FieldKnownSince:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field knownSince", values[i])
+				return fmt.Errorf("unexpected type %T for field known_since", values[i])
 			} else if value.Valid {
 				cv.KnownSince = value.Time
 			}
@@ -172,7 +172,7 @@ func (cv *CertifyVex) assignValues(columns []string, values []any) error {
 			}
 		case certifyvex.FieldStatusNotes:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field statusNotes", values[i])
+				return fmt.Errorf("unexpected type %T for field status_notes", values[i])
 			} else if value.Valid {
 				cv.StatusNotes = value.String
 			}
@@ -258,7 +258,7 @@ func (cv *CertifyVex) String() string {
 	builder.WriteString("vulnerability_id=")
 	builder.WriteString(fmt.Sprintf("%v", cv.VulnerabilityID))
 	builder.WriteString(", ")
-	builder.WriteString("knownSince=")
+	builder.WriteString("known_since=")
 	builder.WriteString(cv.KnownSince.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
@@ -267,7 +267,7 @@ func (cv *CertifyVex) String() string {
 	builder.WriteString("statement=")
 	builder.WriteString(cv.Statement)
 	builder.WriteString(", ")
-	builder.WriteString("statusNotes=")
+	builder.WriteString("status_notes=")
 	builder.WriteString(cv.StatusNotes)
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
