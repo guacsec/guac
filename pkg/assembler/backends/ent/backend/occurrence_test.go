@@ -45,6 +45,7 @@ var p1 = &model.PkgInputSpec{
 var p1out = &model.Package{
 	Type: "pypi",
 	Namespaces: []*model.PackageNamespace{{
+		Namespace: "aaa",
 		Names: []*model.PackageName{{
 			Name: "tensorflow",
 			Versions: []*model.PackageVersion{{
@@ -141,6 +142,13 @@ var p4outName = &model.Package{
 	}},
 }
 
+var p4outNamespace = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+	}},
+}
+
 var s1 = &model.SourceInputSpec{
 	Type:      "git",
 	Namespace: "github.com/jeff",
@@ -155,6 +163,13 @@ var s1out = &model.Source{
 			Tag:    ptrfrom.String(""),
 			Commit: ptrfrom.String(""),
 		}},
+	}},
+}
+
+var s1outNamespace = &model.Source{
+	Type: "git",
+	Namespaces: []*model.SourceNamespace{{
+		Namespace: "github.com/jeff",
 	}},
 }
 

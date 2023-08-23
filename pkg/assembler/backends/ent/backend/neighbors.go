@@ -72,11 +72,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 	case *ent.PackageType:
 		pt, err := b.client.PackageType.Query().
 			Where(packagetype.ID(v.ID)).
-			WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-				q.WithNames(func(q *ent.PackageNameQuery) {
-					q.WithVersions()
-				})
-			}).
+			WithNamespaces().
 			Only(ctx)
 		if err != nil {
 			return nil, err
@@ -85,9 +81,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 	case *ent.SourceType:
 		s, err := b.client.SourceType.Query().
 			Where(sourcetype.ID(v.ID)).
-			WithNamespaces(func(q *ent.SourceNamespaceQuery) {
-				q.WithNames()
-			}).
+			WithNamespaces().
 			Only(ctx)
 		if err != nil {
 			return nil, err
