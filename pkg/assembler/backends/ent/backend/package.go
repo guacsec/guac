@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	stdsql "database/sql"
 	"fmt"
 	"sort"
 
@@ -307,7 +308,7 @@ func packageNameInputQuery(spec model.PkgInputSpec) predicate.PackageName {
 	return packagename.And(rv...)
 }
 
-func packageNameQuery(spec *model.PkgNameSpec) predicate.PackageName {
+func packageNameQuery(spec *model.PkgSpec) predicate.PackageName {
 	if spec == nil {
 		return NoOpSelector()
 	}
@@ -325,12 +326,12 @@ func packageNameQuery(spec *model.PkgNameSpec) predicate.PackageName {
 	return packagename.And(query...)
 }
 
-func pkgNameQueryFromPkgSpec(filter *model.PkgSpec) *model.PkgNameSpec {
+func pkgNameQueryFromPkgSpec(filter *model.PkgSpec) *model.PkgSpec {
 	if filter == nil {
 		return nil
 	}
 
-	return &model.PkgNameSpec{
+	return &model.PkgSpec{
 		Name:      filter.Name,
 		Namespace: filter.Namespace,
 		Type:      filter.Type,
