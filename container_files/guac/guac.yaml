@@ -1,4 +1,4 @@
-# arangodb 
+# arangodb
 arango-user: root
 arango-pass: test123
 arango-addr: http://arangodb:8529
@@ -17,7 +17,7 @@ csub-addr: guac-collectsub:2782
 csub-listen-port: 2782
 
 # graphql
-gql-backend: ent # ent|neo4j|inmem
+gql-backend: inmem
 gql-listen-port: 8080
 gql-debug: true
 gql-test-data: false
