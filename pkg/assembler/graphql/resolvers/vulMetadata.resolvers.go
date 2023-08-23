@@ -14,6 +14,10 @@ import (
 
 // IngestVulnerabilityMetadata is the resolver for the ingestVulnerabilityMetadata field.
 func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
+	if strings.ToLower(vulnerability.Type) == "novuln" {
+		return "", gqlerror.Errorf("novuln type cannot be used for vulnerability metadata")
+	}
+
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	return r.Backend.IngestVulnerabilityMetadata(ctx,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)}, vulnerabilityMetadata)
@@ -24,6 +28,9 @@ func (r *mutationResolver) IngestVulnerabilityMetadatas(ctx context.Context, vul
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
 	for _, v := range vulnerabilities {
+		if strings.ToLower(v.Type) == "novuln" {
+			return []string{}, gqlerror.Errorf("novuln type cannot be used for vulnerability metadata")
+		}
 		lowercaseVulnInput := model.VulnerabilityInputSpec{
 			Type:            strings.ToLower(v.Type),
 			VulnerabilityID: strings.ToLower(v.VulnerabilityID),
@@ -43,16 +50,27 @@ func (r *queryResolver) VulnerabilityMetadata(ctx context.Context, vulnerability
 
 	if vulnerabilityMetadataSpec.Vulnerability != nil {
 
+		var typeLowerCase *string = nil
+		var vulnIDLowerCase *string = nil
+		if vulnerabilityMetadataSpec.Vulnerability.Type != nil {
+			lower := strings.ToLower(*vulnerabilityMetadataSpec.Vulnerability.Type)
+			typeLowerCase = &lower
+		}
+		if vulnerabilityMetadataSpec.Vulnerability.VulnerabilityID != nil {
+			lower := strings.ToLower(*vulnerabilityMetadataSpec.Vulnerability.VulnerabilityID)
+			vulnIDLowerCase = &lower
+		}
+
 		if vulnerabilityMetadataSpec.Vulnerability.NoVuln != nil && !*vulnerabilityMetadataSpec.Vulnerability.NoVuln {
-			if vulnerabilityMetadataSpec.Vulnerability.Type != nil && *vulnerabilityMetadataSpec.Vulnerability.Type == "novuln" {
+			if vulnerabilityMetadataSpec.Vulnerability.Type != nil && *typeLowerCase == "novuln" {
 				return []*model.VulnerabilityMetadata{}, gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")
 			}
 		}
 
 		lowercaseVulnFilter := model.VulnerabilitySpec{
 			ID:              vulnerabilityMetadataSpec.Vulnerability.ID,
-			Type:            toLower(vulnerabilityMetadataSpec.Vulnerability.Type),
-			VulnerabilityID: toLower(vulnerabilityMetadataSpec.Vulnerability.VulnerabilityID),
+			Type:            typeLowerCase,
+			VulnerabilityID: vulnIDLowerCase,
 			NoVuln:          vulnerabilityMetadataSpec.Vulnerability.NoVuln,
 		}
 

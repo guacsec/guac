@@ -40,16 +40,27 @@ func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec model.C
 
 	if certifyVulnSpec.Vulnerability != nil {
 
+		var typeLowerCase *string = nil
+		var vulnIDLowerCase *string = nil
+		if certifyVulnSpec.Vulnerability.Type != nil {
+			lower := strings.ToLower(*certifyVulnSpec.Vulnerability.Type)
+			typeLowerCase = &lower
+		}
+		if certifyVulnSpec.Vulnerability.VulnerabilityID != nil {
+			lower := strings.ToLower(*certifyVulnSpec.Vulnerability.VulnerabilityID)
+			vulnIDLowerCase = &lower
+		}
+
 		if certifyVulnSpec.Vulnerability.NoVuln != nil && !*certifyVulnSpec.Vulnerability.NoVuln {
-			if certifyVulnSpec.Vulnerability.Type != nil && *certifyVulnSpec.Vulnerability.Type == "novuln" {
+			if certifyVulnSpec.Vulnerability.Type != nil && *typeLowerCase == "novuln" {
 				return []*model.CertifyVuln{}, gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")
 			}
 		}
 
 		lowercaseVulnFilter := model.VulnerabilitySpec{
 			ID:              certifyVulnSpec.Vulnerability.ID,
-			Type:            toLower(certifyVulnSpec.Vulnerability.Type),
-			VulnerabilityID: toLower(certifyVulnSpec.Vulnerability.VulnerabilityID),
+			Type:            typeLowerCase,
+			VulnerabilityID: vulnIDLowerCase,
 			NoVuln:          certifyVulnSpec.Vulnerability.NoVuln,
 		}
 

@@ -22,7 +22,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -49,7 +48,7 @@ func (n *vulnerabilityMetadataLink) Neighbors(allowedEdges edgeMap) []uint32 {
 }
 
 func (n *vulnerabilityMetadataLink) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.buildVulnResponse(n.id, nil)
+	return c.buildVulnerabilityMetadata(n, nil, true)
 }
 
 // Ingest CertifyVuln
@@ -167,27 +166,7 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 
 	var search []uint32
 	foundOne := false
-	if !foundOne && filter != nil && filter.Vulnerability != nil &&
-		filter.Vulnerability.NoVuln != nil && *filter.Vulnerability.NoVuln {
-
-		exactVuln, err := c.exactVulnerability(&model.VulnerabilitySpec{
-			Type:            ptrfrom.String(noVulnType),
-			VulnerabilityID: ptrfrom.String(""),
-		})
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-		if exactVuln != nil {
-			search = append(search, exactVuln.vulnMetadataLinks...)
-			foundOne = true
-		}
-	} else if !foundOne && filter != nil && filter.Vulnerability != nil {
-
-		if filter.Vulnerability.NoVuln != nil && !*filter.Vulnerability.NoVuln {
-			if filter.Vulnerability.Type != nil && *filter.Vulnerability.Type == noVulnType {
-				return []*model.VulnerabilityMetadata{}, gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")
-			}
-		}
+	if !foundOne && filter != nil && filter.Vulnerability != nil {
 
 		exactVuln, err := c.exactVulnerability(filter.Vulnerability)
 		if err != nil {

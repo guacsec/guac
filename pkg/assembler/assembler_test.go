@@ -529,6 +529,34 @@ func TestIngestPredicates(t *testing.T) {
 					},
 				},
 			},
+			VulnMetadata: []VulnMetadataIngest{
+				{
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "ghsa",
+						VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
+					},
+					VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+						ScoreType:  generated.VulnerabilityScoreTypeCvssv2,
+						ScoreValue: 6.8,
+						Timestamp:  tm,
+						Origin:     "Demo ingestion",
+						Collector:  "Demo ingestion",
+					},
+				},
+				{
+					Vulnerability: &generated.VulnerabilityInputSpec{
+						Type:            "osv",
+						VulnerabilityID: "cve-2018-15710",
+					},
+					VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+						ScoreType:  generated.VulnerabilityScoreTypeCvssv3,
+						ScoreValue: 7.8,
+						Timestamp:  tm,
+						Origin:     "Demo ingestion",
+						Collector:  "Demo ingestion",
+					},
+				},
+			},
 		},
 		wantPkg:    []*generated.PkgInputSpec{rootFilePack, maven, openSSL, openSSLWithQualifier, topLevelPack, baselayoutPack, baselayoutdataPack, worldFilePack},
 		wantSource: []*generated.SourceInputSpec{k8sSource},
