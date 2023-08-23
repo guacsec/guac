@@ -108,7 +108,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			UpdateNewValues().
+			Ignore().
 			ID(ctx)
 		if err != nil {
 			return nil, err
