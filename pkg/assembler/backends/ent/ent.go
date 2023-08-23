@@ -17,6 +17,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -100,6 +101,7 @@ func checkColumn(table, column string) error {
 			builder.Table:           builder.ValidColumn,
 			certification.Table:     certification.ValidColumn,
 			certifyscorecard.Table:  certifyscorecard.ValidColumn,
+			certifyvex.Table:        certifyvex.ValidColumn,
 			certifyvuln.Table:       certifyvuln.ValidColumn,
 			dependency.Table:        dependency.ValidColumn,
 			hassourceat.Table:       hassourceat.ValidColumn,

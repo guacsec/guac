@@ -19,6 +19,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -54,6 +55,8 @@ type Client struct {
 	Certification *CertificationClient
 	// CertifyScorecard is the client for interacting with the CertifyScorecard builders.
 	CertifyScorecard *CertifyScorecardClient
+	// CertifyVex is the client for interacting with the CertifyVex builders.
+	CertifyVex *CertifyVexClient
 	// CertifyVuln is the client for interacting with the CertifyVuln builders.
 	CertifyVuln *CertifyVulnClient
 	// Dependency is the client for interacting with the Dependency builders.
@@ -110,6 +113,7 @@ func (c *Client) init() {
 	c.Builder = NewBuilderClient(c.config)
 	c.Certification = NewCertificationClient(c.config)
 	c.CertifyScorecard = NewCertifyScorecardClient(c.config)
+	c.CertifyVex = NewCertifyVexClient(c.config)
 	c.CertifyVuln = NewCertifyVulnClient(c.config)
 	c.Dependency = NewDependencyClient(c.config)
 	c.HasSourceAt = NewHasSourceAtClient(c.config)
@@ -215,6 +219,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Builder:           NewBuilderClient(cfg),
 		Certification:     NewCertificationClient(cfg),
 		CertifyScorecard:  NewCertifyScorecardClient(cfg),
+		CertifyVex:        NewCertifyVexClient(cfg),
 		CertifyVuln:       NewCertifyVulnClient(cfg),
 		Dependency:        NewDependencyClient(cfg),
 		HasSourceAt:       NewHasSourceAtClient(cfg),
@@ -257,6 +262,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Builder:           NewBuilderClient(cfg),
 		Certification:     NewCertificationClient(cfg),
 		CertifyScorecard:  NewCertifyScorecardClient(cfg),
+		CertifyVex:        NewCertifyVexClient(cfg),
 		CertifyVuln:       NewCertifyVulnClient(cfg),
 		Dependency:        NewDependencyClient(cfg),
 		HasSourceAt:       NewHasSourceAtClient(cfg),
@@ -305,10 +311,11 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyScorecard,
-		c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual, c.IsVulnerability,
-		c.Occurrence, c.PackageName, c.PackageNamespace, c.PackageType,
-		c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard, c.SourceName,
-		c.SourceNamespace, c.SourceType, c.VulnerabilityID, c.VulnerabilityType,
+		c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual,
+		c.IsVulnerability, c.Occurrence, c.PackageName, c.PackageNamespace,
+		c.PackageType, c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard,
+		c.SourceName, c.SourceNamespace, c.SourceType, c.VulnerabilityID,
+		c.VulnerabilityType,
 	} {
 		n.Use(hooks...)
 	}
@@ -319,10 +326,11 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyScorecard,
-		c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual, c.IsVulnerability,
-		c.Occurrence, c.PackageName, c.PackageNamespace, c.PackageType,
-		c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard, c.SourceName,
-		c.SourceNamespace, c.SourceType, c.VulnerabilityID, c.VulnerabilityType,
+		c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual,
+		c.IsVulnerability, c.Occurrence, c.PackageName, c.PackageNamespace,
+		c.PackageType, c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard,
+		c.SourceName, c.SourceNamespace, c.SourceType, c.VulnerabilityID,
+		c.VulnerabilityType,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -341,6 +349,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Certification.mutate(ctx, m)
 	case *CertifyScorecardMutation:
 		return c.CertifyScorecard.mutate(ctx, m)
+	case *CertifyVexMutation:
+		return c.CertifyVex.mutate(ctx, m)
 	case *CertifyVulnMutation:
 		return c.CertifyVuln.mutate(ctx, m)
 	case *DependencyMutation:
@@ -1177,6 +1187,172 @@ func (c *CertifyScorecardClient) mutate(ctx context.Context, m *CertifyScorecard
 		return (&CertifyScorecardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown CertifyScorecard mutation op: %q", m.Op())
+	}
+}
+
+// CertifyVexClient is a client for the CertifyVex schema.
+type CertifyVexClient struct {
+	config
+}
+
+// NewCertifyVexClient returns a client for the CertifyVex from the given config.
+func NewCertifyVexClient(c config) *CertifyVexClient {
+	return &CertifyVexClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `certifyvex.Hooks(f(g(h())))`.
+func (c *CertifyVexClient) Use(hooks ...Hook) {
+	c.hooks.CertifyVex = append(c.hooks.CertifyVex, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `certifyvex.Intercept(f(g(h())))`.
+func (c *CertifyVexClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CertifyVex = append(c.inters.CertifyVex, interceptors...)
+}
+
+// Create returns a builder for creating a CertifyVex entity.
+func (c *CertifyVexClient) Create() *CertifyVexCreate {
+	mutation := newCertifyVexMutation(c.config, OpCreate)
+	return &CertifyVexCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CertifyVex entities.
+func (c *CertifyVexClient) CreateBulk(builders ...*CertifyVexCreate) *CertifyVexCreateBulk {
+	return &CertifyVexCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CertifyVex.
+func (c *CertifyVexClient) Update() *CertifyVexUpdate {
+	mutation := newCertifyVexMutation(c.config, OpUpdate)
+	return &CertifyVexUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CertifyVexClient) UpdateOne(cv *CertifyVex) *CertifyVexUpdateOne {
+	mutation := newCertifyVexMutation(c.config, OpUpdateOne, withCertifyVex(cv))
+	return &CertifyVexUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CertifyVexClient) UpdateOneID(id int) *CertifyVexUpdateOne {
+	mutation := newCertifyVexMutation(c.config, OpUpdateOne, withCertifyVexID(id))
+	return &CertifyVexUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CertifyVex.
+func (c *CertifyVexClient) Delete() *CertifyVexDelete {
+	mutation := newCertifyVexMutation(c.config, OpDelete)
+	return &CertifyVexDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CertifyVexClient) DeleteOne(cv *CertifyVex) *CertifyVexDeleteOne {
+	return c.DeleteOneID(cv.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CertifyVexClient) DeleteOneID(id int) *CertifyVexDeleteOne {
+	builder := c.Delete().Where(certifyvex.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CertifyVexDeleteOne{builder}
+}
+
+// Query returns a query builder for CertifyVex.
+func (c *CertifyVexClient) Query() *CertifyVexQuery {
+	return &CertifyVexQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCertifyVex},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CertifyVex entity by its id.
+func (c *CertifyVexClient) Get(ctx context.Context, id int) (*CertifyVex, error) {
+	return c.Query().Where(certifyvex.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CertifyVexClient) GetX(ctx context.Context, id int) *CertifyVex {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPackage queries the package edge of a CertifyVex.
+func (c *CertifyVexClient) QueryPackage(cv *CertifyVex) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifyvex.Table, certifyvex.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.PackageTable, certifyvex.PackageColumn),
+		)
+		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryArtifact queries the artifact edge of a CertifyVex.
+func (c *CertifyVexClient) QueryArtifact(cv *CertifyVex) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifyvex.Table, certifyvex.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.ArtifactTable, certifyvex.ArtifactColumn),
+		)
+		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVulnerability queries the vulnerability edge of a CertifyVex.
+func (c *CertifyVexClient) QueryVulnerability(cv *CertifyVex) *VulnerabilityTypeQuery {
+	query := (&VulnerabilityTypeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifyvex.Table, certifyvex.FieldID, id),
+			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.VulnerabilityTable, certifyvex.VulnerabilityColumn),
+		)
+		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CertifyVexClient) Hooks() []Hook {
+	return c.hooks.CertifyVex
+}
+
+// Interceptors returns the client interceptors.
+func (c *CertifyVexClient) Interceptors() []Interceptor {
+	return c.inters.CertifyVex
+}
+
+func (c *CertifyVexClient) mutate(ctx context.Context, m *CertifyVexMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CertifyVexCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CertifyVexUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CertifyVexUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CertifyVexDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CertifyVex mutation op: %q", m.Op())
 	}
 }
 
@@ -3851,14 +4027,14 @@ func (c *VulnerabilityTypeClient) mutate(ctx context.Context, m *VulnerabilityTy
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard,
+		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard, CertifyVex,
 		CertifyVuln, Dependency, HasSourceAt, HashEqual, IsVulnerability, Occurrence,
 		PackageName, PackageNamespace, PackageType, PackageVersion, PkgEqual,
 		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType,
 		VulnerabilityID, VulnerabilityType []ent.Hook
 	}
 	inters struct {
-		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard,
+		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard, CertifyVex,
 		CertifyVuln, Dependency, HasSourceAt, HashEqual, IsVulnerability, Occurrence,
 		PackageName, PackageNamespace, PackageType, PackageVersion, PkgEqual,
 		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType,

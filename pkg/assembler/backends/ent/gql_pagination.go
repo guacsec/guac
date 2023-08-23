@@ -16,6 +16,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -1344,6 +1345,252 @@ func (cs *CertifyScorecard) ToEdge(order *CertifyScorecardOrder) *CertifyScoreca
 	return &CertifyScorecardEdge{
 		Node:   cs,
 		Cursor: order.Field.toCursor(cs),
+	}
+}
+
+// CertifyVexEdge is the edge representation of CertifyVex.
+type CertifyVexEdge struct {
+	Node   *CertifyVex `json:"node"`
+	Cursor Cursor      `json:"cursor"`
+}
+
+// CertifyVexConnection is the connection containing edges to CertifyVex.
+type CertifyVexConnection struct {
+	Edges      []*CertifyVexEdge `json:"edges"`
+	PageInfo   PageInfo          `json:"pageInfo"`
+	TotalCount int               `json:"totalCount"`
+}
+
+func (c *CertifyVexConnection) build(nodes []*CertifyVex, pager *certifyvexPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *CertifyVex
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *CertifyVex {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *CertifyVex {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*CertifyVexEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &CertifyVexEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// CertifyVexPaginateOption enables pagination customization.
+type CertifyVexPaginateOption func(*certifyvexPager) error
+
+// WithCertifyVexOrder configures pagination ordering.
+func WithCertifyVexOrder(order *CertifyVexOrder) CertifyVexPaginateOption {
+	if order == nil {
+		order = DefaultCertifyVexOrder
+	}
+	o := *order
+	return func(pager *certifyvexPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultCertifyVexOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithCertifyVexFilter configures pagination filter.
+func WithCertifyVexFilter(filter func(*CertifyVexQuery) (*CertifyVexQuery, error)) CertifyVexPaginateOption {
+	return func(pager *certifyvexPager) error {
+		if filter == nil {
+			return errors.New("CertifyVexQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type certifyvexPager struct {
+	reverse bool
+	order   *CertifyVexOrder
+	filter  func(*CertifyVexQuery) (*CertifyVexQuery, error)
+}
+
+func newCertifyVexPager(opts []CertifyVexPaginateOption, reverse bool) (*certifyvexPager, error) {
+	pager := &certifyvexPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultCertifyVexOrder
+	}
+	return pager, nil
+}
+
+func (p *certifyvexPager) applyFilter(query *CertifyVexQuery) (*CertifyVexQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *certifyvexPager) toCursor(cv *CertifyVex) Cursor {
+	return p.order.Field.toCursor(cv)
+}
+
+func (p *certifyvexPager) applyCursors(query *CertifyVexQuery, after, before *Cursor) (*CertifyVexQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultCertifyVexOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *certifyvexPager) applyOrder(query *CertifyVexQuery) *CertifyVexQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultCertifyVexOrder.Field {
+		query = query.Order(DefaultCertifyVexOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *certifyvexPager) orderExpr(query *CertifyVexQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultCertifyVexOrder.Field {
+			b.Comma().Ident(DefaultCertifyVexOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to CertifyVex.
+func (cv *CertifyVexQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...CertifyVexPaginateOption,
+) (*CertifyVexConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newCertifyVexPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if cv, err = pager.applyFilter(cv); err != nil {
+		return nil, err
+	}
+	conn := &CertifyVexConnection{Edges: []*CertifyVexEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = cv.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if cv, err = pager.applyCursors(cv, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		cv.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := cv.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	cv = pager.applyOrder(cv)
+	nodes, err := cv.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// CertifyVexOrderField defines the ordering field of CertifyVex.
+type CertifyVexOrderField struct {
+	// Value extracts the ordering value from the given CertifyVex.
+	Value    func(*CertifyVex) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) certifyvex.OrderOption
+	toCursor func(*CertifyVex) Cursor
+}
+
+// CertifyVexOrder defines the ordering of CertifyVex.
+type CertifyVexOrder struct {
+	Direction OrderDirection        `json:"direction"`
+	Field     *CertifyVexOrderField `json:"field"`
+}
+
+// DefaultCertifyVexOrder is the default ordering of CertifyVex.
+var DefaultCertifyVexOrder = &CertifyVexOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &CertifyVexOrderField{
+		Value: func(cv *CertifyVex) (ent.Value, error) {
+			return cv.ID, nil
+		},
+		column: certifyvex.FieldID,
+		toTerm: certifyvex.ByID,
+		toCursor: func(cv *CertifyVex) Cursor {
+			return Cursor{ID: cv.ID}
+		},
+	},
+}
+
+// ToEdge converts CertifyVex into CertifyVexEdge.
+func (cv *CertifyVex) ToEdge(order *CertifyVexOrder) *CertifyVexEdge {
+	if order == nil {
+		order = DefaultCertifyVexOrder
+	}
+	return &CertifyVexEdge{
+		Node:   cv,
+		Cursor: order.Field.toCursor(cv),
 	}
 }
 
