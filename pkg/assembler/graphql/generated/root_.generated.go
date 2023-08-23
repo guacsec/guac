@@ -4416,7 +4416,73 @@ extend type Mutation {
   ingestSources(sources: [SourceInputSpec!]!): [Source!]!
 }
 `, BuiltIn: false},
-	{Name: "../schema/vulMetadata.graphql", Input: `#
+	{Name: "../schema/vulnEqual.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema to link vulnerabilities together
+
+"""
+VulnEqual is an attestation to link two vulnerabilities together as being equal"
+
+Note that setting noVuln vulnerability type is invalid for VulnEqual!
+
+"""
+type VulnEqual {
+  id: ID!
+  "Collection of vulnerabilities that are similar"
+  vulnerabilities: [Vulnerability!]!
+  "Justification for the attested relationship"
+  justification: String!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
+}
+
+"""
+VulnEqualSpec allows filtering the list of vulnerability links to return
+in a query.
+"""
+input VulnEqualSpec {
+  id: ID
+  vulnerabilities: [VulnerabilitySpec]
+  justification: String
+  origin: String
+  collector: String
+}
+
+"VulnEqualInputSpec represents the input to link vulnerabilities to each other."
+input VulnEqualInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all equal vulnerability mappings that match a filter."
+  vulnEqual(vulnEqualSpec: VulnEqualSpec!): [VulnEqual!]!
+}
+
+extend type Mutation {
+  "Ingest a mapping between vulnerabilities."
+  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqual: VulnEqualInputSpec!): VulnEqual!
+}
+`, BuiltIn: false},
+	{Name: "../schema/vulnMetadata.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -4526,72 +4592,6 @@ extend type Mutation {
   ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
   "Bulk add certifications that vulnerability has a specific score."
   ingestVulnerabilityMetadatas(vulnerabilities: [VulnerabilityInputSpec!]!, vulnerabilityMetadatas: [VulnerabilityMetadataInputSpec!]!): [ID!]!
-}
-`, BuiltIn: false},
-	{Name: "../schema/vulnEqual.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-# Defines a GraphQL schema to link vulnerabilities together
-
-"""
-VulnEqual is an attestation to link two vulnerabilities together as being equal"
-
-Note that setting noVuln vulnerability type is invalid for VulnEqual!
-
-"""
-type VulnEqual {
-  id: ID!
-  "Collection of vulnerabilities that are similar"
-  vulnerabilities: [Vulnerability!]!
-  "Justification for the attested relationship"
-  justification: String!
-  "Document from which this attestation is generated from"
-  origin: String!
-  "GUAC collector for the document"
-  collector: String!
-}
-
-"""
-VulnEqualSpec allows filtering the list of vulnerability links to return
-in a query.
-"""
-input VulnEqualSpec {
-  id: ID
-  vulnerabilities: [VulnerabilitySpec]
-  justification: String
-  origin: String
-  collector: String
-}
-
-"VulnEqualInputSpec represents the input to link vulnerabilities to each other."
-input VulnEqualInputSpec {
-  justification: String!
-  origin: String!
-  collector: String!
-}
-
-extend type Query {
-  "Returns all equal vulnerability mappings that match a filter."
-  vulnEqual(vulnEqualSpec: VulnEqualSpec!): [VulnEqual!]!
-}
-
-extend type Mutation {
-  "Ingest a mapping between vulnerabilities."
-  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqual: VulnEqualInputSpec!): VulnEqual!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnerability.graphql", Input: `#
