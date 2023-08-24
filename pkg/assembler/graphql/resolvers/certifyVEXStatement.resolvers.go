@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -25,6 +26,11 @@ func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model
 		return "", err
 	}
 	return ingestedVEXStatement.ID, err
+}
+
+// IngestVEXStatements is the resolver for the ingestVEXStatements field.
+func (r *mutationResolver) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+	panic(fmt.Errorf("not implemented: IngestVEXStatements - ingestVEXStatements"))
 }
 
 // CertifyVEXStatement is the resolver for the CertifyVEXStatement field.

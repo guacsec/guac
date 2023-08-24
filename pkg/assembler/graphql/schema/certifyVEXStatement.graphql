@@ -141,4 +141,10 @@ extend type Mutation {
     vulnerability: VulnerabilityInputSpec!
     vexStatement: VexStatementInputSpec!
   ): ID!
+  "Bulk add VEX certifications for a package and vulnerability."
+  ingestVEXStatements(
+    subjects: PackageOrArtifactInputs!, 
+    vulnerabilities: [VulnerabilityInputSpec!]!, 
+    vexStatements: [VexStatementInputSpec!]!
+  ): [ID!]!
 }
