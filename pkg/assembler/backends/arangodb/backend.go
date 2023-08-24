@@ -733,10 +733,6 @@ func getPreloadString(prefix, name string) string {
 
 // Retrieval read-only queries for evidence trees
 
-func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
-	panic(fmt.Errorf("not implemented: CertifyVEXStatement - CertifyVEXStatement"))
-}
-
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
@@ -758,9 +754,6 @@ func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.
 }
 func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
-}
-func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
-	panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type

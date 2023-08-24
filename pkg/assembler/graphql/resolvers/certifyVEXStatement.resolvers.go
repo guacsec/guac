@@ -30,6 +30,26 @@ func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model
 // IngestVEXStatements is the resolver for the ingestVEXStatements field.
 func (r *mutationResolver) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+	valuesDefined := 0
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(vexStatements) {
+			return []string{}, gqlerror.Errorf("uneven packages and vexStatements for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Artifacts) > 0 {
+		if len(subjects.Artifacts) != len(vexStatements) {
+			return []string{}, gqlerror.Errorf("uneven artifact and vexStatements for ingestion")
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(vulnerabilities) != len(vexStatements) {
+		return []string{}, gqlerror.Errorf("uneven vulnerabilities and vexStatements for ingestion")
+	}
+	if valuesDefined != 1 {
+		return []string{}, gqlerror.Errorf("must specify at most packages or artifacts for %v", "IngestVEXStatements")
+	}
+
 	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
 	for _, v := range vulnerabilities {
 		if strings.ToLower(v.Type) == "novuln" {
@@ -60,17 +80,17 @@ func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXState
 			vulnIDLowerCase = &lower
 		}
 
-		lowercaseVulnFilter := model.VulnerabilitySpec{
+		lowercaseVulnFilter := &model.VulnerabilitySpec{
 			ID:              certifyVEXStatementSpec.Vulnerability.ID,
 			Type:            typeLowerCase,
 			VulnerabilityID: vulnIDLowerCase,
 			NoVuln:          certifyVEXStatementSpec.Vulnerability.NoVuln,
 		}
 
-		lowercaseCertifyVexFilter := model.CertifyVEXStatementSpec{
+		lowercaseCertifyVexFilter := &model.CertifyVEXStatementSpec{
 			ID:               certifyVEXStatementSpec.ID,
 			Subject:          certifyVEXStatementSpec.Subject,
-			Vulnerability:    &lowercaseVulnFilter,
+			Vulnerability:    lowercaseVulnFilter,
 			Status:           certifyVEXStatementSpec.Status,
 			VexJustification: certifyVEXStatementSpec.VexJustification,
 			Statement:        certifyVEXStatementSpec.Statement,
@@ -79,7 +99,7 @@ func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXState
 			Origin:           certifyVEXStatementSpec.Origin,
 			Collector:        certifyVEXStatementSpec.Collector,
 		}
-		return r.Backend.CertifyVEXStatement(ctx, &lowercaseCertifyVexFilter)
+		return r.Backend.CertifyVEXStatement(ctx, lowercaseCertifyVexFilter)
 	} else {
 		return r.Backend.CertifyVEXStatement(ctx, &certifyVEXStatementSpec)
 	}
