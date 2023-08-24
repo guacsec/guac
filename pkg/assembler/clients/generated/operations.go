@@ -5036,6 +5036,129 @@ func (v *AllVulnEqualVulnerabilitiesVulnerability) __premarshalJSON() (*__premar
 	return &retval, nil
 }
 
+// AllVulnMetadataTree includes the GraphQL fields of VulnerabilityMetadata requested by the fragment AllVulnMetadataTree.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type AllVulnMetadataTree struct {
+	Id            string                           `json:"id"`
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+	ScoreType     VulnerabilityScoreType           `json:"scoreType"`
+	ScoreValue    float64                          `json:"scoreValue"`
+	Timestamp     time.Time                        `json:"timestamp"`
+	Origin        string                           `json:"origin"`
+	Collector     string                           `json:"collector"`
+}
+
+// GetId returns AllVulnMetadataTree.Id, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetId() string { return v.Id }
+
+// GetVulnerability returns AllVulnMetadataTree.Vulnerability, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.Vulnerability
+}
+
+// GetScoreType returns AllVulnMetadataTree.ScoreType, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetScoreType() VulnerabilityScoreType { return v.ScoreType }
+
+// GetScoreValue returns AllVulnMetadataTree.ScoreValue, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetScoreValue() float64 { return v.ScoreValue }
+
+// GetTimestamp returns AllVulnMetadataTree.Timestamp, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetTimestamp() time.Time { return v.Timestamp }
+
+// GetOrigin returns AllVulnMetadataTree.Origin, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetOrigin() string { return v.Origin }
+
+// GetCollector returns AllVulnMetadataTree.Collector, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetCollector() string { return v.Collector }
+
+// AllVulnMetadataTreeVulnerability includes the requested fields of the GraphQL type Vulnerability.
+// The GraphQL type's documentation follows.
+//
+// Vulnerability represents the root of the vulnerability trie/tree.
+//
+// We map vulnerability information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type and a vulnerability ID. This allows for generic
+// representation of the various vulnerabilities and does not limit to just cve, ghsa or osv.
+// This would be in the general format: vuln://<general-type>/<vuln-id>
+//
+// Examples:
+//
+// CVE, using path separator: vuln://cve/cve-2023-20753
+// OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
+// Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
+//
+// This node represents the type part of the trie path. It is used to represent
+// the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
+//
+// Since this node is at the root of the vulnerability trie, it is named Vulnerability, not
+// VulnerabilityType.
+//
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
+// for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
+type AllVulnMetadataTreeVulnerability struct {
+	Id               string                                                            `json:"id"`
+	Type             string                                                            `json:"type"`
+	VulnerabilityIDs []AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID `json:"vulnerabilityIDs"`
+}
+
+// GetId returns AllVulnMetadataTreeVulnerability.Id, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerability) GetId() string { return v.Id }
+
+// GetType returns AllVulnMetadataTreeVulnerability.Type, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerability) GetType() string { return v.Type }
+
+// GetVulnerabilityIDs returns AllVulnMetadataTreeVulnerability.VulnerabilityIDs, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerability) GetVulnerabilityIDs() []AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID {
+	return v.VulnerabilityIDs
+}
+
+// AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID includes the requested fields of the GraphQL type VulnerabilityID.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityID is a specific vulnerability ID associated with the type of the vulnerability.
+//
+// This will be enforced to be all lowercase.
+//
+// The namespace field is mandatory.
+type AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID struct {
+	Id              string `json:"id"`
+	VulnerabilityID string `json:"vulnerabilityID"`
+}
+
+// GetId returns AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID.Id, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID) GetId() string { return v.Id }
+
+// GetVulnerabilityID returns AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID.VulnerabilityID, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID) GetVulnerabilityID() string {
+	return v.VulnerabilityID
+}
+
 // AllVulnerabilityTree includes the GraphQL fields of Vulnerability requested by the fragment AllVulnerabilityTree.
 // The GraphQL type's documentation follows.
 //
@@ -12581,10 +12704,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 	case *NeighborsNeighborsVulnerabilityMetadata:
 		typename = "VulnerabilityMetadata"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NeighborsNeighborsVulnerabilityMetadata
-		}{typename, v}
+			*__premarshalNeighborsNeighborsVulnerabilityMetadata
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
@@ -13213,11 +13340,110 @@ func (v *NeighborsNeighborsVulnerability) __premarshalJSON() (*__premarshalNeigh
 //
 // The timestamp is used to determine when the score was evaluated for the specific vulnerability.
 type NeighborsNeighborsVulnerabilityMetadata struct {
-	Typename *string `json:"__typename"`
+	Typename            *string `json:"__typename"`
+	AllVulnMetadataTree `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsVulnerabilityMetadata.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsVulnerabilityMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns NeighborsNeighborsVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns NeighborsNeighborsVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns NeighborsNeighborsVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns NeighborsNeighborsVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns NeighborsNeighborsVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetOrigin() string {
+	return v.AllVulnMetadataTree.Origin
+}
+
+// GetCollector returns NeighborsNeighborsVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetCollector() string {
+	return v.AllVulnMetadataTree.Collector
+}
+
+func (v *NeighborsNeighborsVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsVulnerabilityMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsVulnerabilityMetadata) __premarshalJSON() (*__premarshalNeighborsNeighborsVulnerabilityMetadata, error) {
+	var retval __premarshalNeighborsNeighborsVulnerabilityMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
 
 // NeighborsResponse is returned by Neighbors on success.
 type NeighborsResponse struct {
@@ -13696,10 +13922,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 	case *NodeNodeVulnerabilityMetadata:
 		typename = "VulnerabilityMetadata"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NodeNodeVulnerabilityMetadata
-		}{typename, v}
+			*__premarshalNodeNodeVulnerabilityMetadata
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
@@ -15616,11 +15846,106 @@ func (v *NodeNodeVulnerability) __premarshalJSON() (*__premarshalNodeNodeVulnera
 //
 // The timestamp is used to determine when the score was evaluated for the specific vulnerability.
 type NodeNodeVulnerabilityMetadata struct {
-	Typename *string `json:"__typename"`
+	Typename            *string `json:"__typename"`
+	AllVulnMetadataTree `json:"-"`
 }
 
 // GetTypename returns NodeNodeVulnerabilityMetadata.Typename, and is useful for accessing the field via an interface.
 func (v *NodeNodeVulnerabilityMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns NodeNodeVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns NodeNodeVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns NodeNodeVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns NodeNodeVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns NodeNodeVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns NodeNodeVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetOrigin() string { return v.AllVulnMetadataTree.Origin }
+
+// GetCollector returns NodeNodeVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetCollector() string { return v.AllVulnMetadataTree.Collector }
+
+func (v *NodeNodeVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NodeNodeVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NodeNodeVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNodeNodeVulnerabilityMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NodeNodeVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NodeNodeVulnerabilityMetadata) __premarshalJSON() (*__premarshalNodeNodeVulnerabilityMetadata, error) {
+	var retval __premarshalNodeNodeVulnerabilityMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
 
 // NodeResponse is returned by Node on success.
 type NodeResponse struct {
@@ -17382,10 +17707,14 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 	case *NodesNodesVulnerabilityMetadata:
 		typename = "VulnerabilityMetadata"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NodesNodesVulnerabilityMetadata
-		}{typename, v}
+			*__premarshalNodesNodesVulnerabilityMetadata
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
@@ -18012,11 +18341,108 @@ func (v *NodesNodesVulnerability) __premarshalJSON() (*__premarshalNodesNodesVul
 //
 // The timestamp is used to determine when the score was evaluated for the specific vulnerability.
 type NodesNodesVulnerabilityMetadata struct {
-	Typename *string `json:"__typename"`
+	Typename            *string `json:"__typename"`
+	AllVulnMetadataTree `json:"-"`
 }
 
 // GetTypename returns NodesNodesVulnerabilityMetadata.Typename, and is useful for accessing the field via an interface.
 func (v *NodesNodesVulnerabilityMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns NodesNodesVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns NodesNodesVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns NodesNodesVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns NodesNodesVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns NodesNodesVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns NodesNodesVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetOrigin() string { return v.AllVulnMetadataTree.Origin }
+
+// GetCollector returns NodesNodesVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetCollector() string {
+	return v.AllVulnMetadataTree.Collector
+}
+
+func (v *NodesNodesVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NodesNodesVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NodesNodesVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNodesNodesVulnerabilityMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NodesNodesVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NodesNodesVulnerabilityMetadata) __premarshalJSON() (*__premarshalNodesNodesVulnerabilityMetadata, error) {
+	var retval __premarshalNodesNodesVulnerabilityMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
 
 // NodesResponse is returned by Nodes on success.
 type NodesResponse struct {
@@ -20311,10 +20737,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 	case *PathPathVulnerabilityMetadata:
 		typename = "VulnerabilityMetadata"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*PathPathVulnerabilityMetadata
-		}{typename, v}
+			*__premarshalPathPathVulnerabilityMetadata
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
@@ -20937,11 +21367,106 @@ func (v *PathPathVulnerability) __premarshalJSON() (*__premarshalPathPathVulnera
 //
 // The timestamp is used to determine when the score was evaluated for the specific vulnerability.
 type PathPathVulnerabilityMetadata struct {
-	Typename *string `json:"__typename"`
+	Typename            *string `json:"__typename"`
+	AllVulnMetadataTree `json:"-"`
 }
 
 // GetTypename returns PathPathVulnerabilityMetadata.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathVulnerabilityMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns PathPathVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns PathPathVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns PathPathVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns PathPathVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns PathPathVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetOrigin() string { return v.AllVulnMetadataTree.Origin }
+
+// GetCollector returns PathPathVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetCollector() string { return v.AllVulnMetadataTree.Collector }
+
+func (v *PathPathVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathVulnerabilityMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathVulnerabilityMetadata) __premarshalJSON() (*__premarshalPathPathVulnerabilityMetadata, error) {
+	var retval __premarshalPathPathVulnerabilityMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
 
 // PathResponse is returned by Path on success.
 type PathResponse struct {
@@ -27460,6 +27985,9 @@ query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
 		... on Builder {
 			... AllBuilderTree
 		}
+		... on VulnerabilityMetadata {
+			... AllVulnMetadataTree
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -27741,6 +28269,22 @@ fragment AllCertifyVEXStatement on CertifyVEXStatement {
 	statement
 	statusNotes
 	knownSince
+	origin
+	collector
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
 	origin
 	collector
 }
@@ -27839,6 +28383,9 @@ query Node ($node: ID!) {
 		... on Builder {
 			... AllBuilderTree
 		}
+		... on VulnerabilityMetadata {
+			... AllVulnMetadataTree
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -28120,6 +28667,22 @@ fragment AllCertifyVEXStatement on CertifyVEXStatement {
 	statement
 	statusNotes
 	knownSince
+	origin
+	collector
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
 	origin
 	collector
 }
@@ -28216,6 +28779,9 @@ query Nodes ($nodes: [ID!]!) {
 		... on Builder {
 			... AllBuilderTree
 		}
+		... on VulnerabilityMetadata {
+			... AllVulnMetadataTree
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -28497,6 +29063,22 @@ fragment AllCertifyVEXStatement on CertifyVEXStatement {
 	statement
 	statusNotes
 	knownSince
+	origin
+	collector
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
 	origin
 	collector
 }
@@ -28822,6 +29404,9 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge
 		... on Builder {
 			... AllBuilderTree
 		}
+		... on VulnerabilityMetadata {
+			... AllVulnMetadataTree
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -29103,6 +29688,22 @@ fragment AllCertifyVEXStatement on CertifyVEXStatement {
 	statement
 	statusNotes
 	knownSince
+	origin
+	collector
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
 	origin
 	collector
 }
