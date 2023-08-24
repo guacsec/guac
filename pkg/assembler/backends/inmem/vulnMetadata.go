@@ -51,7 +51,7 @@ func (n *vulnerabilityMetadataLink) BuildModelNode(c *demoClient) (model.Node, e
 	return c.buildVulnerabilityMetadata(n, nil, true)
 }
 
-// Ingest CertifyVuln
+// Ingest VulnerabilityMetadata
 func (c *demoClient) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	// TODO (pxp928): move checks to resolver so all backends don't have to implement
 	if len(vulnerabilities) != len(vulnerabilityMetadatas) {
@@ -89,11 +89,11 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 	}
 	vulnerabilityLinks = foundVulnNode.vulnMetadataLinks
 
-	var searchIDs []uint32 = vulnerabilityLinks
+	searchIDs := vulnerabilityLinks
 
 	// Don't insert duplicates
 	duplicate := false
-	collectedVulnMetadataLink := vulnerabilityMetadataLink{}
+	var collectedVulnMetadataLink *vulnerabilityMetadataLink
 	for _, id := range searchIDs {
 		v, err := byID[*vulnerabilityMetadataLink](id, c)
 		if err != nil {
@@ -107,7 +107,7 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 			vulnerabilityMetadata.ScoreValue == float64(v.scoreValue) &&
 			vulnerabilityMetadata.Origin == v.origin && vulnerabilityMetadata.Collector == v.collector {
 
-			collectedVulnMetadataLink = *v
+			collectedVulnMetadataLink = v
 			duplicate = true
 			break
 		}
@@ -121,7 +121,7 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 			return cv, err
 		}
 		// store the link
-		collectedVulnMetadataLink = vulnerabilityMetadataLink{
+		collectedVulnMetadataLink = &vulnerabilityMetadataLink{
 			id:              c.getNextID(),
 			vulnerabilityID: vulnID,
 			timestamp:       vulnerabilityMetadata.Timestamp,
@@ -130,8 +130,8 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 			origin:          vulnerabilityMetadata.Origin,
 			collector:       vulnerabilityMetadata.Collector,
 		}
-		c.index[collectedVulnMetadataLink.id] = &collectedVulnMetadataLink
-		c.vulnerabilityMetadatas = append(c.vulnerabilityMetadatas, &collectedVulnMetadataLink)
+		c.index[collectedVulnMetadataLink.id] = collectedVulnMetadataLink
+		c.vulnerabilityMetadatas = append(c.vulnerabilityMetadatas, collectedVulnMetadataLink)
 		// set the backlinks
 		foundVulnNode.setVulnMetadataLinks(collectedVulnMetadataLink.id)
 	}
@@ -139,11 +139,11 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 	return nodeID(collectedVulnMetadataLink.id), nil
 }
 
-// Query CertifyVuln
+// Query VulnerabilityMetadata
 func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
-	funcName := "CertifyVuln"
+	funcName := "VulnerabilityMetadata"
 
 	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)

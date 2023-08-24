@@ -504,7 +504,6 @@ func ingestVulnerabilityMetadata(ctx context.Context, client graphql.Client) {
 		if _, err := model.VulnHasMetadata(ctx, client, *ingest.vuln, ingest.vulnMetadata); err != nil {
 			logger.Errorf("Error in ingesting VulnHasMetadata: %v\n", err)
 		}
-
 	}
 }
 
@@ -608,7 +607,6 @@ func ingestVulnerabilityMetadatas(ctx context.Context, client graphql.Client) {
 		if _, err := model.VulnHasMetadatas(ctx, client, ingest.vulns, ingest.vulnerabilityMetadataList); err != nil {
 			logger.Errorf("Error in ingesting VulnHasMetadatas: %v\n", err)
 		}
-
 	}
 }
 
