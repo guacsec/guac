@@ -78,7 +78,7 @@ query VulnMetadataGreaterEqual {
 }
 
 query VulnMetadataLess {
-  vulnerabilityMetadata(vulnerabilityMetadataSpec: {comparator: LESS, scoreValue: 0.967}) {
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: {comparator: LESS, scoreValue: 0.970}) {
     ...allVulnMetadataTree
   }
 }
@@ -95,7 +95,7 @@ query VulnMetadataEqual {
   }
 }
 
-# defaults to equal if no comparator is sepcified
+# defaults to equal if no comparator is specified
 query VulnMetadataNoComparator {
   vulnerabilityMetadata(vulnerabilityMetadataSpec: {scoreValue: 0.768}) {
     ...allVulnMetadataTree

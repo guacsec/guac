@@ -104,7 +104,7 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 			vulnMatch = true
 		}
 		if vulnMatch && vulnerabilityMetadata.Timestamp.Equal(v.timestamp) && vulnerabilityMetadata.ScoreType == v.scoreType &&
-			vulnerabilityMetadata.ScoreValue == float64(v.scoreValue) &&
+			floatEqual(vulnerabilityMetadata.ScoreValue, v.scoreValue) &&
 			vulnerabilityMetadata.Origin == v.origin && vulnerabilityMetadata.Collector == v.collector {
 
 			collectedVulnMetadataLink = v
@@ -229,7 +229,7 @@ func (c *demoClient) addVulnMetadataMatch(out []*model.VulnerabilityMetadata,
 			}
 		}
 	} else {
-		if filter != nil && filter.ScoreValue != nil && *filter.ScoreValue != link.scoreValue {
+		if filter != nil && noMatchFloat(filter.ScoreValue, link.scoreValue) {
 			return out, nil
 		}
 	}
