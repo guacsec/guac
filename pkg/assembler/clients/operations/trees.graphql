@@ -76,6 +76,23 @@ fragment AllVulnerabilityTree on Vulnerability {
   }
 }
 
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+  id
+  vulnerability {
+    id
+    type
+    vulnerabilityIDs {
+      id
+      vulnerabilityID
+    }
+  }
+  scoreType
+  scoreValue
+  timestamp
+  origin
+  collector
+}
+
 fragment AllCertifyScorecard on CertifyScorecard {
   id
   source {

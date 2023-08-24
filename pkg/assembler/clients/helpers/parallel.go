@@ -150,6 +150,15 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 				verbs.Go(func() error { return ingestCertifyVuln(errGroupVerbCtx, gqlclient, cv) })
 			}
 
+			logger.Infof("assembling VulnMetadata: %v", len(p.VulnMetadata))
+			for _, vm := range p.VulnMetadata {
+				if errGroupVerbCtx.Err() != nil {
+					break
+				}
+				vm := vm
+				verbs.Go(func() error { return ingestVulnMetadata(errGroupVerbCtx, gqlclient, vm) })
+			}
+
 			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
 			for _, iv := range p.VulnEqual {
 				if errGroupVerbCtx.Err() != nil {

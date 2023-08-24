@@ -80,6 +80,9 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
     ... on Builder {
       ...AllBuilderTree
     }
+    ... on VulnerabilityMetadata {
+      ...AllVulnMetadataTree
+    }
   }
 }
 
@@ -145,6 +148,9 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
     }
     ... on Builder {
       ...AllBuilderTree
+    }
+    ... on VulnerabilityMetadata {
+      ...AllVulnMetadataTree
     }
   }
 }
@@ -212,6 +218,9 @@ query Node($node: ID!) {
     ... on Builder {
       ...AllBuilderTree
     }
+    ... on VulnerabilityMetadata {
+      ...AllVulnMetadataTree
+    }
   }
 }
 
@@ -277,6 +286,9 @@ query Nodes($nodes: [ID!]!) {
     }
     ... on Builder {
       ...AllBuilderTree
+    }
+    ... on VulnerabilityMetadata {
+      ...AllVulnMetadataTree
     }
   }
 }

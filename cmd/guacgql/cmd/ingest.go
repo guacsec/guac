@@ -48,6 +48,8 @@ func ingestData(port int) {
 	ingestOccurrence(ctx, gqlclient)
 	ingestVulnerability(ctx, gqlclient)
 	ingestVulnerabilities(ctx, gqlclient)
+	ingestVulnerabilityMetadata(ctx, gqlclient)
+	ingestVulnerabilityMetadatas(ctx, gqlclient)
 	ingestPkgEqual(ctx, gqlclient)
 	ingestCertifyBad(ctx, gqlclient)
 	ingestCertifyBads(ctx, gqlclient)
@@ -384,6 +386,226 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 			}
 		} else {
 			fmt.Printf("input missing for pkg or src")
+		}
+	}
+}
+
+func ingestVulnerabilityMetadata(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
+	ingestVulnerabilityMetadata := []struct {
+		name         string
+		vuln         *model.VulnerabilityInputSpec
+		vulnMetadata model.VulnerabilityMetadataInputSpec
+	}{
+		{
+			name: "cve openssl",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2019-13110",
+			},
+			vulnMetadata: model.VulnerabilityMetadataInputSpec{
+				Timestamp:  tm,
+				ScoreType:  model.VulnerabilityScoreTypeCvssv2,
+				ScoreValue: 5.6,
+				Origin:     "Demo ingestion",
+				Collector:  "Demo ingestion",
+			},
+		},
+		{
+			name: "osv openssl",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2019-13110",
+			},
+			vulnMetadata: model.VulnerabilityMetadataInputSpec{
+				Timestamp:  tm,
+				ScoreType:  model.VulnerabilityScoreTypeCvssv3,
+				ScoreValue: 6.6,
+				Origin:     "Demo ingestion",
+				Collector:  "Demo ingestion",
+			},
+		},
+		{
+			name: "ghsa openssl",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+			},
+			vulnMetadata: model.VulnerabilityMetadataInputSpec{
+				Timestamp:  tm,
+				ScoreType:  model.VulnerabilityScoreTypeEpssv1,
+				ScoreValue: 0.968,
+				Origin:     "Demo ingestion",
+				Collector:  "Demo ingestion",
+			},
+		},
+		{
+			name: "cve django",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2018-12310",
+			},
+			vulnMetadata: model.VulnerabilityMetadataInputSpec{
+				Timestamp:  tm,
+				ScoreType:  model.VulnerabilityScoreTypeEpssv2,
+				ScoreValue: 0.768,
+				Origin:     "Demo ingestion",
+				Collector:  "Demo ingestion",
+			},
+		},
+		{
+			name: "cve (duplicate)",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "CVE-2019-13110",
+			},
+			vulnMetadata: model.VulnerabilityMetadataInputSpec{
+				Timestamp:  tm,
+				ScoreType:  model.VulnerabilityScoreTypeCvssv2,
+				ScoreValue: 5.6,
+				Origin:     "Demo ingestion",
+				Collector:  "Demo ingestion",
+			},
+		},
+		{
+			name: "ghsa (duplicate)",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "ghsa",
+				VulnerabilityID: "GHSA-f45f-jj4w-2rv2",
+			},
+			vulnMetadata: model.VulnerabilityMetadataInputSpec{
+				Timestamp:  tm,
+				ScoreType:  model.VulnerabilityScoreTypeEpssv1,
+				ScoreValue: 0.968,
+				Origin:     "Demo ingestion",
+				Collector:  "Demo ingestion",
+			},
+		},
+		{
+			name: "osv (duplicate)",
+			vuln: &model.VulnerabilityInputSpec{
+				Type:            "osv",
+				VulnerabilityID: "CVE-2019-13110",
+			},
+			vulnMetadata: model.VulnerabilityMetadataInputSpec{
+				Timestamp:  tm,
+				ScoreType:  model.VulnerabilityScoreTypeCvssv3,
+				ScoreValue: 6.6,
+				Origin:     "Demo ingestion",
+				Collector:  "Demo ingestion",
+			},
+		},
+	}
+	for _, ingest := range ingestVulnerabilityMetadata {
+		if _, err := model.IngestVulnerability(ctx, client, *ingest.vuln); err != nil {
+			logger.Errorf("Error in ingesting vulnerability: %v\n", err)
+		}
+		if _, err := model.VulnHasMetadata(ctx, client, *ingest.vuln, ingest.vulnMetadata); err != nil {
+			logger.Errorf("Error in ingesting VulnHasMetadata: %v\n", err)
+		}
+	}
+}
+
+func ingestVulnerabilityMetadatas(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
+	ingestVulnerabilityMetadatas := []struct {
+		name                      string
+		vulns                     []model.VulnerabilityInputSpec
+		vulnerabilityMetadataList []model.VulnerabilityMetadataInputSpec
+	}{
+		{
+			name: "bulk ingest",
+			vulns: []model.VulnerabilityInputSpec{
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+				},
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2018-12310",
+				},
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-f45f-jj4w-2rv2",
+				},
+			},
+			vulnerabilityMetadataList: []model.VulnerabilityMetadataInputSpec{
+				{
+					Timestamp:  tm,
+					ScoreType:  model.VulnerabilityScoreTypeCvssv2,
+					ScoreValue: 5.6,
+					Origin:     "Demo ingestion",
+					Collector:  "Demo ingestion",
+				},
+				{
+					Timestamp:  tm,
+					ScoreType:  model.VulnerabilityScoreTypeCvssv3,
+					ScoreValue: 6.6,
+					Origin:     "Demo ingestion",
+					Collector:  "Demo ingestion",
+				},
+				{
+					Timestamp:  tm,
+					ScoreType:  model.VulnerabilityScoreTypeEpssv1,
+					ScoreValue: 0.968,
+					Origin:     "Demo ingestion",
+					Collector:  "Demo ingestion",
+				},
+				{
+					Timestamp:  tm,
+					ScoreType:  model.VulnerabilityScoreTypeEpssv2,
+					ScoreValue: 0.768,
+					Origin:     "Demo ingestion",
+					Collector:  "Demo ingestion",
+				},
+				{
+					Timestamp:  tm,
+					ScoreType:  model.VulnerabilityScoreTypeCvssv2,
+					ScoreValue: 5.6,
+					Origin:     "Demo ingestion",
+					Collector:  "Demo ingestion",
+				},
+				{
+					Timestamp:  tm,
+					ScoreType:  model.VulnerabilityScoreTypeCvssv3,
+					ScoreValue: 6.6,
+					Origin:     "Demo ingestion",
+					Collector:  "Demo ingestion",
+				},
+				{
+					Timestamp:  tm,
+					ScoreType:  model.VulnerabilityScoreTypeEpssv1,
+					ScoreValue: 0.968,
+					Origin:     "Demo ingestion",
+					Collector:  "Demo ingestion",
+				},
+			},
+		},
+	}
+	for _, ingest := range ingestVulnerabilityMetadatas {
+		if _, err := model.IngestVulnerabilities(ctx, client, ingest.vulns); err != nil {
+			logger.Errorf("Error in ingesting vulnerabilities: %v\n", err)
+		}
+		if _, err := model.VulnHasMetadatas(ctx, client, ingest.vulns, ingest.vulnerabilityMetadataList); err != nil {
+			logger.Errorf("Error in ingesting VulnHasMetadatas: %v\n", err)
 		}
 	}
 }
