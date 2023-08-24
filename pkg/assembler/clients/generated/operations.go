@@ -5658,6 +5658,15 @@ type CertifyVexArtifactResponse struct {
 // GetIngestVEXStatement returns CertifyVexArtifactResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
 func (v *CertifyVexArtifactResponse) GetIngestVEXStatement() string { return v.IngestVEXStatement }
 
+// CertifyVexArtifactsResponse is returned by CertifyVexArtifacts on success.
+type CertifyVexArtifactsResponse struct {
+	// Bulk add VEX certifications for a package and vulnerability.
+	IngestVEXStatements []string `json:"ingestVEXStatements"`
+}
+
+// GetIngestVEXStatements returns CertifyVexArtifactsResponse.IngestVEXStatements, and is useful for accessing the field via an interface.
+func (v *CertifyVexArtifactsResponse) GetIngestVEXStatements() []string { return v.IngestVEXStatements }
+
 // CertifyVexPkgResponse is returned by CertifyVexPkg on success.
 type CertifyVexPkgResponse struct {
 	// Adds a VEX certification for a package. The returned ID can be empty string.
@@ -5666,6 +5675,15 @@ type CertifyVexPkgResponse struct {
 
 // GetIngestVEXStatement returns CertifyVexPkgResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
 func (v *CertifyVexPkgResponse) GetIngestVEXStatement() string { return v.IngestVEXStatement }
+
+// CertifyVexPkgsResponse is returned by CertifyVexPkgs on success.
+type CertifyVexPkgsResponse struct {
+	// Bulk add VEX certifications for a package and vulnerability.
+	IngestVEXStatements []string `json:"ingestVEXStatements"`
+}
+
+// GetIngestVEXStatements returns CertifyVexPkgsResponse.IngestVEXStatements, and is useful for accessing the field via an interface.
+func (v *CertifyVexPkgsResponse) GetIngestVEXStatements() []string { return v.IngestVEXStatements }
 
 // CertifyVulnPkgResponse is returned by CertifyVulnPkg on success.
 type CertifyVulnPkgResponse struct {
@@ -6447,7 +6465,7 @@ func (v *IngestBuilderResponse) GetIngestBuilder() string { return v.IngestBuild
 
 // IngestBuildersResponse is returned by IngestBuilders on success.
 type IngestBuildersResponse struct {
-	// Bulk ingests new builders and returns a list of them.
+	// Bulk ingests new builders and returns a list of them. The returned array of IDs can be a an array of empty string.
 	IngestBuilders []string `json:"ingestBuilders"`
 }
 
@@ -18610,6 +18628,26 @@ func (v *__CertifyVexArtifactInput) GetVulnerability() VulnerabilityInputSpec { 
 // GetVexStatement returns __CertifyVexArtifactInput.VexStatement, and is useful for accessing the field via an interface.
 func (v *__CertifyVexArtifactInput) GetVexStatement() VexStatementInputSpec { return v.VexStatement }
 
+// __CertifyVexArtifactsInput is used internally by genqlient
+type __CertifyVexArtifactsInput struct {
+	Artifacts       []ArtifactInputSpec      `json:"artifacts"`
+	Vulnerabilities []VulnerabilityInputSpec `json:"vulnerabilities"`
+	VexStatements   []VexStatementInputSpec  `json:"vexStatements"`
+}
+
+// GetArtifacts returns __CertifyVexArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__CertifyVexArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetVulnerabilities returns __CertifyVexArtifactsInput.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *__CertifyVexArtifactsInput) GetVulnerabilities() []VulnerabilityInputSpec {
+	return v.Vulnerabilities
+}
+
+// GetVexStatements returns __CertifyVexArtifactsInput.VexStatements, and is useful for accessing the field via an interface.
+func (v *__CertifyVexArtifactsInput) GetVexStatements() []VexStatementInputSpec {
+	return v.VexStatements
+}
+
 // __CertifyVexPkgInput is used internally by genqlient
 type __CertifyVexPkgInput struct {
 	Pkg           PkgInputSpec           `json:"pkg"`
@@ -18625,6 +18663,24 @@ func (v *__CertifyVexPkgInput) GetVulnerability() VulnerabilityInputSpec { retur
 
 // GetVexStatement returns __CertifyVexPkgInput.VexStatement, and is useful for accessing the field via an interface.
 func (v *__CertifyVexPkgInput) GetVexStatement() VexStatementInputSpec { return v.VexStatement }
+
+// __CertifyVexPkgsInput is used internally by genqlient
+type __CertifyVexPkgsInput struct {
+	Pkgs            []PkgInputSpec           `json:"pkgs"`
+	Vulnerabilities []VulnerabilityInputSpec `json:"vulnerabilities"`
+	VexStatements   []VexStatementInputSpec  `json:"vexStatements"`
+}
+
+// GetPkgs returns __CertifyVexPkgsInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__CertifyVexPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetVulnerabilities returns __CertifyVexPkgsInput.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *__CertifyVexPkgsInput) GetVulnerabilities() []VulnerabilityInputSpec {
+	return v.Vulnerabilities
+}
+
+// GetVexStatements returns __CertifyVexPkgsInput.VexStatements, and is useful for accessing the field via an interface.
+func (v *__CertifyVexPkgsInput) GetVexStatements() []VexStatementInputSpec { return v.VexStatements }
 
 // __CertifyVulnPkgInput is used internally by genqlient
 type __CertifyVulnPkgInput struct {
@@ -19914,6 +19970,43 @@ func CertifyVexArtifact(
 	return &data, err
 }
 
+// The query or mutation executed by CertifyVexArtifacts.
+const CertifyVexArtifacts_Operation = `
+mutation CertifyVexArtifacts ($artifacts: [ArtifactInputSpec!]!, $vulnerabilities: [VulnerabilityInputSpec!]!, $vexStatements: [VexStatementInputSpec!]!) {
+	ingestVEXStatements(subjects: {artifacts:$artifacts}, vulnerabilities: $vulnerabilities, vexStatements: $vexStatements)
+}
+`
+
+func CertifyVexArtifacts(
+	ctx context.Context,
+	client graphql.Client,
+	artifacts []ArtifactInputSpec,
+	vulnerabilities []VulnerabilityInputSpec,
+	vexStatements []VexStatementInputSpec,
+) (*CertifyVexArtifactsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyVexArtifacts",
+		Query:  CertifyVexArtifacts_Operation,
+		Variables: &__CertifyVexArtifactsInput{
+			Artifacts:       artifacts,
+			Vulnerabilities: vulnerabilities,
+			VexStatements:   vexStatements,
+		},
+	}
+	var err error
+
+	var data CertifyVexArtifactsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by CertifyVexPkg.
 const CertifyVexPkg_Operation = `
 mutation CertifyVexPkg ($pkg: PkgInputSpec!, $vulnerability: VulnerabilityInputSpec!, $vexStatement: VexStatementInputSpec!) {
@@ -19940,6 +20033,43 @@ func CertifyVexPkg(
 	var err error
 
 	var data CertifyVexPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyVexPkgs.
+const CertifyVexPkgs_Operation = `
+mutation CertifyVexPkgs ($pkgs: [PkgInputSpec!]!, $vulnerabilities: [VulnerabilityInputSpec!]!, $vexStatements: [VexStatementInputSpec!]!) {
+	ingestVEXStatements(subjects: {packages:$pkgs}, vulnerabilities: $vulnerabilities, vexStatements: $vexStatements)
+}
+`
+
+func CertifyVexPkgs(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	vulnerabilities []VulnerabilityInputSpec,
+	vexStatements []VexStatementInputSpec,
+) (*CertifyVexPkgsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyVexPkgs",
+		Query:  CertifyVexPkgs_Operation,
+		Variables: &__CertifyVexPkgsInput{
+			Pkgs:            pkgs,
+			Vulnerabilities: vulnerabilities,
+			VexStatements:   vexStatements,
+		},
+	}
+	var err error
+
+	var data CertifyVexPkgsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
