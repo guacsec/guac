@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
@@ -29,7 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
-	"strings"
 )
 
 var vexStatusMap = map[cdx.ImpactAnalysisState]generated.VexStatus{
