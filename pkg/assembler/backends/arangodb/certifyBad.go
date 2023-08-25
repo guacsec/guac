@@ -169,7 +169,7 @@ func getSrcCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryB
 	}
 	defer cursor.Close()
 
-	return getSourceCertifyBad(ctx, cursor)
+	return getCertifyBadFromCursor(ctx, cursor)
 }
 
 func getArtCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.CertifyBad, error) {
@@ -194,7 +194,7 @@ func getArtCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryB
 	}
 	defer cursor.Close()
 
-	return getArtifactCertifyBad(ctx, cursor)
+	return getCertifyBadFromCursor(ctx, cursor)
 }
 
 func getPkgCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any, includeDepPkgVersion bool) ([]*model.CertifyBad, error) {
@@ -244,7 +244,7 @@ func getPkgCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryB
 	}
 	defer cursor.Close()
 
-	return getPkgCertifyBad(ctx, cursor)
+	return getCertifyBadFromCursor(ctx, cursor)
 }
 
 func setCertifyBadMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyBadSpec *model.CertifyBadSpec, queryValues map[string]any) {
@@ -356,7 +356,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 			}
 			defer cursor.Close()
 
-			certifyBadList, err := getPkgCertifyBad(ctx, cursor)
+			certifyBadList, err := getCertifyBadFromCursor(ctx, cursor)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
 			}
@@ -419,7 +419,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 			}
 			defer cursor.Close()
 
-			certifyBadList, err := getPkgCertifyBad(ctx, cursor)
+			certifyBadList, err := getCertifyBadFromCursor(ctx, cursor)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
 			}
@@ -462,7 +462,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 			return nil, fmt.Errorf("failed to ingest artifact certifyBad: %w", err)
 		}
 		defer cursor.Close()
-		certifyBadList, err := getArtifactCertifyBad(ctx, cursor)
+		certifyBadList, err := getCertifyBadFromCursor(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
 		}
@@ -529,7 +529,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 			return nil, fmt.Errorf("failed to ingest source certifyBad: %w", err)
 		}
 		defer cursor.Close()
-		certifyBadList, err := getSourceCertifyBad(ctx, cursor)
+		certifyBadList, err := getCertifyBadFromCursor(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
 		}
@@ -644,7 +644,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 			}
 			defer cursor.Close()
 
-			certifyBadList, err := getPkgCertifyBad(ctx, cursor)
+			certifyBadList, err := getCertifyBadFromCursor(ctx, cursor)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
 			}
@@ -705,7 +705,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 			}
 			defer cursor.Close()
 
-			certifyBadList, err := getPkgCertifyBad(ctx, cursor)
+			certifyBadList, err := getCertifyBadFromCursor(ctx, cursor)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
 			}
@@ -779,7 +779,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 			return nil, fmt.Errorf("failed to ingest artifact certifyBad: %w", err)
 		}
 		defer cursor.Close()
-		certifyBadList, err := getArtifactCertifyBad(ctx, cursor)
+		certifyBadList, err := getCertifyBadFromCursor(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
 		}
@@ -877,7 +877,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 			return nil, fmt.Errorf("failed to ingest source certifyBad: %w", err)
 		}
 		defer cursor.Close()
-		certifyBadList, err := getSourceCertifyBad(ctx, cursor)
+		certifyBadList, err := getCertifyBadFromCursor(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get certifyBads from arango cursor: %w", err)
 		}
@@ -889,50 +889,11 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 	}
 }
 
-func getPkgCertifyBad(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyBad, error) {
+func getCertifyBadFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyBad, error) {
 	type collectedData struct {
-		PkgVersion    *dbPkgVersion `json:"pkgVersion"`
-		CertifyBadID  string        `json:"certifyBad_id"`
-		Justification string        `json:"justification"`
-		Collector     string        `json:"collector"`
-		Origin        string        `json:"origin"`
-	}
-
-	var createdValues []collectedData
-	for {
-		var doc collectedData
-		_, err := cursor.ReadDocument(ctx, &doc)
-		if err != nil {
-			if driver.IsNoMoreDocuments(err) {
-				break
-			} else {
-				return nil, fmt.Errorf("failed to package certifyBad from cursor: %w", err)
-			}
-		} else {
-			createdValues = append(createdValues, doc)
-		}
-	}
-
-	var certifyBadList []*model.CertifyBad
-	for _, createdValue := range createdValues {
-		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
-			createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-
-		certifyBad := &model.CertifyBad{
-			ID:            createdValue.CertifyBadID,
-			Subject:       pkg,
-			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
-		}
-		certifyBadList = append(certifyBadList, certifyBad)
-	}
-	return certifyBadList, nil
-}
-
-func getArtifactCertifyBad(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyBad, error) {
-	type collectedData struct {
+		PkgVersion    *dbPkgVersion   `json:"pkgVersion"`
 		Artifact      *model.Artifact `json:"artifact"`
+		SrcName       *dbSrcName      `json:"srcName"`
 		CertifyBadID  string          `json:"certifyBad_id"`
 		Justification string          `json:"justification"`
 		Collector     string          `json:"collector"`
@@ -947,7 +908,7 @@ func getArtifactCertifyBad(ctx context.Context, cursor driver.Cursor) ([]*model.
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to artifact certifyBad from cursor: %w", err)
+				return nil, fmt.Errorf("failed to certifyBad from cursor: %w", err)
 			}
 		} else {
 			createdValues = append(createdValues, doc)
@@ -956,54 +917,29 @@ func getArtifactCertifyBad(ctx context.Context, cursor driver.Cursor) ([]*model.
 
 	var certifyBadList []*model.CertifyBad
 	for _, createdValue := range createdValues {
+		var pkg *model.Package = nil
+		var src *model.Source = nil
+		if createdValue.PkgVersion != nil {
+			pkg = generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+				createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+		} else if createdValue.SrcName != nil {
+			src = generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
+				createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
+		}
+
 		certifyBad := &model.CertifyBad{
 			ID:            createdValue.CertifyBadID,
-			Subject:       createdValue.Artifact,
 			Justification: createdValue.Justification,
 			Origin:        createdValue.Collector,
 			Collector:     createdValue.Origin,
 		}
-		certifyBadList = append(certifyBadList, certifyBad)
-	}
-	return certifyBadList, nil
-}
 
-func getSourceCertifyBad(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyBad, error) {
-	type collectedData struct {
-		SrcName       *dbSrcName `json:"srcName"`
-		CertifyBadID  string     `json:"certifyBad_id"`
-		Justification string     `json:"justification"`
-		Collector     string     `json:"collector"`
-		Origin        string     `json:"origin"`
-	}
-
-	var createdValues []collectedData
-	for {
-		var doc collectedData
-		_, err := cursor.ReadDocument(ctx, &doc)
-		if err != nil {
-			if driver.IsNoMoreDocuments(err) {
-				break
-			} else {
-				return nil, fmt.Errorf("failed to source certifyBad from cursor: %w", err)
-			}
+		if pkg != nil {
+			certifyBad.Subject = pkg
+		} else if src != nil {
+			certifyBad.Subject = src
 		} else {
-			createdValues = append(createdValues, doc)
-		}
-	}
-
-	var certifyBadList []*model.CertifyBad
-	for _, createdValue := range createdValues {
-
-		src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
-			createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
-
-		certifyBad := &model.CertifyBad{
-			ID:            createdValue.CertifyBadID,
-			Subject:       src,
-			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			certifyBad.Subject = createdValue.Artifact
 		}
 		certifyBadList = append(certifyBadList, certifyBad)
 	}

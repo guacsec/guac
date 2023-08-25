@@ -127,7 +127,7 @@ func getSrcOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return getSrcIsOccurrence(ctx, cursor)
+	return getIsOccurrenceFromCursor(ctx, cursor)
 }
 
 func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.IsOccurrence, error) {
@@ -164,7 +164,7 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return getPkgIsOccurrence(ctx, cursor)
+	return getIsOccurrenceFromCursor(ctx, cursor)
 }
 
 func setIsOccurrenceMatchValues(arangoQueryBuilder *arangoQueryBuilder, isOccurrenceSpec *model.IsOccurrenceSpec, queryValues map[string]any) {
@@ -329,7 +329,7 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		}
 		defer cursor.Close()
 
-		isOccurrenceList, err := getPkgIsOccurrence(ctx, cursor)
+		isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
 		}
@@ -434,7 +434,7 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 			return nil, fmt.Errorf("failed to ingest source occurrence: %w", err)
 		}
 		defer cursor.Close()
-		isOccurrenceList, err := getSrcIsOccurrence(ctx, cursor)
+		isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
 		}
@@ -516,7 +516,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		}
 		defer cursor.Close()
 
-		isOccurrenceList, err := getPkgIsOccurrence(ctx, cursor)
+		isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
 		}
@@ -590,7 +590,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		}
 		defer cursor.Close()
 
-		isOccurrenceList, err := getSrcIsOccurrence(ctx, cursor)
+		isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
 		}
@@ -606,9 +606,10 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 	}
 }
 
-func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
+func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
 	type collectedData struct {
 		PkgVersion     *dbPkgVersion   `json:"pkgVersion"`
+		SrcName        *dbSrcName      `json:"srcName"`
 		Artifact       *model.Artifact `json:"artifact"`
 		IsOccurrenceID string          `json:"isOccurrence_id"`
 		Justification  string          `json:"justification"`
@@ -633,57 +634,26 @@ func getPkgIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsO
 
 	var isOccurrenceList []*model.IsOccurrence
 	for _, createdValue := range createdValues {
-		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
-			createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-
-		isOccurrence := &model.IsOccurrence{
-			ID:        createdValue.IsOccurrenceID,
-			Subject:   pkg,
-			Artifact:  createdValue.Artifact,
-			Origin:    createdValue.Collector,
-			Collector: createdValue.Origin,
-		}
-		isOccurrenceList = append(isOccurrenceList, isOccurrence)
-	}
-	return isOccurrenceList, nil
-}
-
-func getSrcIsOccurrence(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
-	type collectedData struct {
-		SrcName        *dbSrcName      `json:"srcName"`
-		Artifact       *model.Artifact `json:"artifact"`
-		IsOccurrenceID string          `json:"isOccurrence_id"`
-		Justification  string          `json:"justification"`
-		Collector      string          `json:"collector"`
-		Origin         string          `json:"origin"`
-	}
-
-	var createdValues []collectedData
-	for {
-		var doc collectedData
-		_, err := cursor.ReadDocument(ctx, &doc)
-		if err != nil {
-			if driver.IsNoMoreDocuments(err) {
-				break
-			} else {
-				return nil, fmt.Errorf("failed to get source occurrence from cursor: %w", err)
-			}
+		var pkg *model.Package = nil
+		var src *model.Source = nil
+		if createdValue.PkgVersion != nil {
+			pkg = generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+				createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
 		} else {
-			createdValues = append(createdValues, doc)
+			src = generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
+				createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
 		}
-	}
-
-	var isOccurrenceList []*model.IsOccurrence
-	for _, createdValue := range createdValues {
-		src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
-			createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
 
 		isOccurrence := &model.IsOccurrence{
 			ID:        createdValue.IsOccurrenceID,
-			Subject:   src,
 			Artifact:  createdValue.Artifact,
 			Origin:    createdValue.Collector,
 			Collector: createdValue.Origin,
+		}
+		if pkg != nil {
+			isOccurrence.Subject = pkg
+		} else {
+			isOccurrence.Subject = src
 		}
 		isOccurrenceList = append(isOccurrenceList, isOccurrence)
 	}

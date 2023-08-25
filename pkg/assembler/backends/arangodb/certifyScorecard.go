@@ -81,7 +81,7 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 	}
 	defer cursor.Close()
 
-	return getCertifyScorecard(ctx, cursor)
+	return getCertifyScorecardFromCursor(ctx, cursor)
 }
 
 func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyScorecardSpec *model.CertifyScorecardSpec, queryValues map[string]any) {
@@ -266,7 +266,7 @@ func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.So
 		return nil, fmt.Errorf("failed to ingest scorecard: %w", err)
 	}
 	defer cursor.Close()
-	scorecardList, err := getCertifyScorecard(ctx, cursor)
+	scorecardList, err := getCertifyScorecardFromCursor(ctx, cursor)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get scorecard from arango cursor: %w", err)
 	}
@@ -338,7 +338,7 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 	}
 	defer cursor.Close()
 
-	scorecardList, err := getCertifyScorecard(ctx, cursor)
+	scorecardList, err := getCertifyScorecardFromCursor(ctx, cursor)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get scorecard from arango cursor: %w", err)
 	}
@@ -369,7 +369,7 @@ func getCollectedScorecardChecks(checksList []string) ([]*model.ScorecardCheck, 
 	return scorecardChecks, nil
 }
 
-func getCertifyScorecard(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyScorecard, error) {
+func getCertifyScorecardFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyScorecard, error) {
 	type collectedData struct {
 		SrcName          *dbSrcName `json:"srcName"`
 		ScorecardID      string     `json:"scorecard_id"`
