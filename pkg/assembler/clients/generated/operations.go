@@ -5660,7 +5660,7 @@ func (v *CertifyVexArtifactResponse) GetIngestVEXStatement() string { return v.I
 
 // CertifyVexArtifactsResponse is returned by CertifyVexArtifacts on success.
 type CertifyVexArtifactsResponse struct {
-	// Bulk add VEX certifications for a package and vulnerability.
+	// Bulk add VEX certifications for a package and vulnerability. The returned array of IDs can be a an array of empty string.
 	IngestVEXStatements []string `json:"ingestVEXStatements"`
 }
 
@@ -5678,7 +5678,7 @@ func (v *CertifyVexPkgResponse) GetIngestVEXStatement() string { return v.Ingest
 
 // CertifyVexPkgsResponse is returned by CertifyVexPkgs on success.
 type CertifyVexPkgsResponse struct {
-	// Bulk add VEX certifications for a package and vulnerability.
+	// Bulk add VEX certifications for a package and vulnerability. The returned array of IDs can be a an array of empty string.
 	IngestVEXStatements []string `json:"ingestVEXStatements"`
 }
 
