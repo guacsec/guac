@@ -98,6 +98,9 @@ var (
 	//go:embed exampledata/cyclonedx-no-top-level.json
 	CycloneDXExampleNoTopLevelComp []byte
 
+	//go:embed exampledata/sample-cyclonedx-vex.json
+	CycloneDXExampleVEX []byte
+
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
 

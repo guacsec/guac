@@ -33,24 +33,15 @@ import (
 )
 
 var vexStatusMap = map[cdx.ImpactAnalysisState]generated.VexStatus{
-	"resolved":               generated.VexStatusFixed,
-	"exploitable":            generated.VexStatusAffected,
-	"in_triage":              generated.VexStatusUnderInvestigation,
-	"not_affected":           generated.VexStatusNotAffected,
-	"resolved_with_pedigree": generated.VexStatusResolvedWithPedigree,
-	"false_positive":         generated.VexStatusFalsePositive,
+	"resolved":     generated.VexStatusFixed,
+	"exploitable":  generated.VexStatusAffected,
+	"in_triage":    generated.VexStatusUnderInvestigation,
+	"not_affected": generated.VexStatusNotAffected,
 }
 
 var justificationsMap = map[cdx.ImpactAnalysisJustification]generated.VexJustification{
-	"code_not_present":                generated.VexJustificationVulnerableCodeNotPresent,
-	"code_not_reachable":              generated.VexJustificationVulnerableCodeNotInExecutePath,
-	"requires_configuration":          generated.VexJustificationRequiresConfiguration,
-	"requires_dependency":             generated.VexJustificationRequiresDependency,
-	"requires_environment":            generated.VexJustificationRequiresEnvironment,
-	"protected_by_compiler":           generated.VexJustificationProtectedByCompiler,
-	"protected_at_runtime":            generated.VexJustificationProtectedAtRuntime,
-	"protected_at_perimeter":          generated.VexJustificationProtectedAtPerimeter,
-	"protected_by_mitigating_control": generated.VexJustificationProtectedByMitigatingControl,
+	"code_not_present":   generated.VexJustificationVulnerableCodeNotPresent,
+	"code_not_reachable": generated.VexJustificationVulnerableCodeNotInExecutePath,
 }
 
 type cdxVexParser struct {
@@ -182,6 +173,7 @@ func (c *cdxVexParser) GetPredicates(ctx context.Context) *assembler.IngestPredi
 			VexJustification: justification,
 			KnownSince:       publishedTime,
 			Statement:        vulnerability.Analysis.Detail,
+			StatusNotes:      fmt.Sprintf("%s:%s", string(vulnerability.Analysis.State), string(vulnerability.Analysis.Justification)),
 		}
 
 		for _, affect := range *vulnerability.Affects {

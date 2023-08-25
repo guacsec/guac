@@ -1672,13 +1672,6 @@ const (
 	VexJustificationVulnerableCodeCannotBeControlledByAdversary VexJustification = "VULNERABLE_CODE_CANNOT_BE_CONTROLLED_BY_ADVERSARY"
 	VexJustificationInlineMitigationsAlreadyExist               VexJustification = "INLINE_MITIGATIONS_ALREADY_EXIST"
 	VexJustificationNotProvided                                 VexJustification = "NOT_PROVIDED"
-	VexJustificationRequiresConfiguration                       VexJustification = "REQUIRES_CONFIGURATION"
-	VexJustificationRequiresDependency                          VexJustification = "REQUIRES_DEPENDENCY"
-	VexJustificationRequiresEnvironment                         VexJustification = "REQUIRES_ENVIRONMENT"
-	VexJustificationProtectedByCompiler                         VexJustification = "PROTECTED_BY_COMPILER"
-	VexJustificationProtectedAtRuntime                          VexJustification = "PROTECTED_AT_RUNTIME"
-	VexJustificationProtectedAtPerimeter                        VexJustification = "PROTECTED_AT_PERIMETER"
-	VexJustificationProtectedByMitigatingControl                VexJustification = "PROTECTED_BY_MITIGATING_CONTROL"
 )
 
 var AllVexJustification = []VexJustification{
@@ -1688,18 +1681,11 @@ var AllVexJustification = []VexJustification{
 	VexJustificationVulnerableCodeCannotBeControlledByAdversary,
 	VexJustificationInlineMitigationsAlreadyExist,
 	VexJustificationNotProvided,
-	VexJustificationRequiresConfiguration,
-	VexJustificationRequiresDependency,
-	VexJustificationRequiresEnvironment,
-	VexJustificationProtectedByCompiler,
-	VexJustificationProtectedAtRuntime,
-	VexJustificationProtectedAtPerimeter,
-	VexJustificationProtectedByMitigatingControl,
 }
 
 func (e VexJustification) IsValid() bool {
 	switch e {
-	case VexJustificationComponentNotPresent, VexJustificationVulnerableCodeNotPresent, VexJustificationVulnerableCodeNotInExecutePath, VexJustificationVulnerableCodeCannotBeControlledByAdversary, VexJustificationInlineMitigationsAlreadyExist, VexJustificationNotProvided, VexJustificationRequiresConfiguration, VexJustificationRequiresDependency, VexJustificationRequiresEnvironment, VexJustificationProtectedByCompiler, VexJustificationProtectedAtRuntime, VexJustificationProtectedAtPerimeter, VexJustificationProtectedByMitigatingControl:
+	case VexJustificationComponentNotPresent, VexJustificationVulnerableCodeNotPresent, VexJustificationVulnerableCodeNotInExecutePath, VexJustificationVulnerableCodeCannotBeControlledByAdversary, VexJustificationInlineMitigationsAlreadyExist, VexJustificationNotProvided:
 		return true
 	}
 	return false
@@ -1730,12 +1716,10 @@ func (e VexJustification) MarshalGQL(w io.Writer) {
 type VexStatus string
 
 const (
-	VexStatusNotAffected          VexStatus = "NOT_AFFECTED"
-	VexStatusAffected             VexStatus = "AFFECTED"
-	VexStatusFixed                VexStatus = "FIXED"
-	VexStatusUnderInvestigation   VexStatus = "UNDER_INVESTIGATION"
-	VexStatusResolvedWithPedigree VexStatus = "RESOLVED_WITH_PEDIGREE"
-	VexStatusFalsePositive        VexStatus = "FALSE_POSITIVE"
+	VexStatusNotAffected        VexStatus = "NOT_AFFECTED"
+	VexStatusAffected           VexStatus = "AFFECTED"
+	VexStatusFixed              VexStatus = "FIXED"
+	VexStatusUnderInvestigation VexStatus = "UNDER_INVESTIGATION"
 )
 
 var AllVexStatus = []VexStatus{
@@ -1743,13 +1727,11 @@ var AllVexStatus = []VexStatus{
 	VexStatusAffected,
 	VexStatusFixed,
 	VexStatusUnderInvestigation,
-	VexStatusResolvedWithPedigree,
-	VexStatusFalsePositive,
 }
 
 func (e VexStatus) IsValid() bool {
 	switch e {
-	case VexStatusNotAffected, VexStatusAffected, VexStatusFixed, VexStatusUnderInvestigation, VexStatusResolvedWithPedigree, VexStatusFalsePositive:
+	case VexStatusNotAffected, VexStatusAffected, VexStatusFixed, VexStatusUnderInvestigation:
 		return true
 	}
 	return false
