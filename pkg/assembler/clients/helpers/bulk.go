@@ -117,6 +117,11 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestCertifyVulns failed with error: %w", err)
 			}
 
+			logger.Infof("assembling VulnMetadata: %v", len(p.VulnMetadata))
+			if err := ingestVulnMetadatas(ctx, gqlclient, p.VulnMetadata); err != nil {
+				return fmt.Errorf("ingestVulnMetadatas failed with error: %w", err)
+			}
+
 			// TODO(pxp928): add bulk ingestion for IsVuln
 			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
 			for _, iv := range p.VulnEqual {
@@ -241,6 +246,22 @@ func ingestCertifyVulns(ctx context.Context, client graphql.Client, cv []assembl
 		_, err := model.CertifyVulnPkgs(ctx, client, pkgs, vulnerabilities, scanMetadataList)
 		if err != nil {
 			return fmt.Errorf("CertifyVulnPkgs failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestVulnMetadatas(ctx context.Context, client graphql.Client, vm []assembler.VulnMetadataIngest) error {
+	var vulnerabilities []model.VulnerabilityInputSpec
+	var vulnMetadataList []model.VulnerabilityMetadataInputSpec
+	for _, ingest := range vm {
+		vulnerabilities = append(vulnerabilities, *ingest.Vulnerability)
+		vulnMetadataList = append(vulnMetadataList, *ingest.VulnMetadata)
+	}
+	if len(vm) > 0 {
+		_, err := model.VulnHasMetadatas(ctx, client, vulnerabilities, vulnMetadataList)
+		if err != nil {
+			return fmt.Errorf("VulnHasMetadatas failed with error: %w", err)
 		}
 	}
 	return nil

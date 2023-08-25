@@ -45,6 +45,7 @@ type IngestPredicates struct {
 	PkgEqual         []PkgEqualIngest         `json:"pkgEqual,omitempty"`
 	Vex              []VexIngest              `json:"vex,omitempty"`
 	PointOfContact   []PointOfContactIngest   `json:"contact,omitempty"`
+	VulnMetadata     []VulnMetadataIngest     `json:"vulnMetadata,omitempty"`
 }
 
 type CertifyScorecardIngest struct {
@@ -97,6 +98,12 @@ type VulnEqualIngest struct {
 	Vulnerability      *generated.VulnerabilityInputSpec `json:"vulnerability,omitempty"`
 	EqualVulnerability *generated.VulnerabilityInputSpec `json:"equalVulnerability,omitempty"`
 	VulnEqual          *generated.VulnEqualInputSpec     `json:"vulnEqual,omitempty"`
+}
+
+type VulnMetadataIngest struct {
+	// vulnerability (cannot be set to noVuln)
+	Vulnerability *generated.VulnerabilityInputSpec         `json:"vulnerability,omitempty"`
+	VulnMetadata  *generated.VulnerabilityMetadataInputSpec `json:"vulnData,omitempty"`
 }
 
 type HasSourceAtIngest struct {
@@ -446,6 +453,12 @@ func (i IngestPredicates) GetBuilders(ctx context.Context) []*generated.BuilderI
 func (i IngestPredicates) GetVulnerabilities(ctx context.Context) []*generated.VulnerabilityInputSpec {
 	vulnMap := make(map[string]*generated.VulnerabilityInputSpec)
 	for _, v := range i.CertifyVuln {
+		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
+		if _, ok := vulnMap[equalVURI]; !ok {
+			vulnMap[equalVURI] = v.Vulnerability
+		}
+	}
+	for _, v := range i.VulnMetadata {
 		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
 		if _, ok := vulnMap[equalVURI]; !ok {
 			vulnMap[equalVURI] = v.Vulnerability

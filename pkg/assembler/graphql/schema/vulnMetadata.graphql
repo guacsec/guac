@@ -1,0 +1,111 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the Vulnerability Metadata
+
+"Records the type of the score being captured by the score node"
+enum VulnerabilityScoreType {
+  CVSSv2
+  CVSSv3
+  EPSSv1
+  EPSSv2
+}
+
+"The Comparator is used by the vulnerability score filter on ranges"
+enum Comparator {
+  GREATER
+  EQUAL
+  LESS
+  GREATER_EQUAL
+  LESS_EQUAL
+}
+
+"""
+VulnerabilityMetadata is an attestation that a vulnerability has a related score
+associated with it.
+
+The intent of this evidence tree predicate is to allow extensibility of vulnerability
+score (one-to-one mapping) with a specific vulnerability ID.
+
+A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+node as a vulnerability ID can have multiple scores (in various frameworks).
+
+Examples:
+
+scoreType: EPSSv1
+scoreValue: 0.960760000
+
+scoreType: CVSSv2
+scoreValue: 5.0
+
+scoreType: CVSSv3
+scoreValue: 7.5
+
+The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+"""
+type VulnerabilityMetadata {
+  id: ID!
+  vulnerability: Vulnerability!
+  scoreType: VulnerabilityScoreType!
+  scoreValue: Float!
+  timestamp: Time!
+  origin: String!
+  collector: String!
+}
+
+"""
+VulnerabilityMetadataSpec allows filtering the list of VulnerabilityMetadata evidence 
+to return in a query.
+
+Comparator field is an enum that be set to filter the score and return a
+range that matches. If the comparator is not specified, it will default to equal operation.
+
+Timestamp specified indicates filtering timestamps after the specified time
+"""
+input VulnerabilityMetadataSpec {
+  id: ID
+  vulnerability: VulnerabilitySpec
+  scoreType: VulnerabilityScoreType
+  scoreValue: Float
+  comparator: Comparator
+  timestamp: Time
+  origin: String
+  collector: String
+}
+
+"""
+VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
+"""
+input VulnerabilityMetadataInputSpec {
+  scoreType: VulnerabilityScoreType!
+  scoreValue: Float!
+  timestamp: Time!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all vulnerabilityMetadata attestations matching a filter."
+  vulnerabilityMetadata(vulnerabilityMetadataSpec: VulnerabilityMetadataSpec!): [VulnerabilityMetadata!]!
+}
+
+extend type Mutation {
+  "Adds metadata about a vulnerability."
+  ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
+  "Bulk add certifications that vulnerability has a specific score."
+  ingestVulnerabilityMetadatas(vulnerabilities: [VulnerabilityInputSpec!]!, vulnerabilityMetadatas: [VulnerabilityMetadataInputSpec!]!): [ID!]!
+}

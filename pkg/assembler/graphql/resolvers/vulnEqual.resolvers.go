@@ -32,9 +32,23 @@ func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnE
 	if len(vulnEqualSpec.Vulnerabilities) > 0 {
 		var lowercaseVulnFilterList []*model.VulnerabilitySpec
 		for _, v := range vulnEqualSpec.Vulnerabilities {
+
+			var typeLowerCase *string = nil
+			var vulnIDLowerCase *string = nil
+			if v.Type != nil {
+				lower := strings.ToLower(*v.Type)
+				typeLowerCase = &lower
+			}
+			if v.VulnerabilityID != nil {
+				lower := strings.ToLower(*v.VulnerabilityID)
+				vulnIDLowerCase = &lower
+			}
+
 			lowercaseVulnFilter := model.VulnerabilitySpec{
-				Type:            toLower(v.Type),
-				VulnerabilityID: toLower(v.VulnerabilityID),
+				ID:              v.ID,
+				Type:            typeLowerCase,
+				VulnerabilityID: vulnIDLowerCase,
+				NoVuln:          v.NoVuln,
 			}
 			lowercaseVulnFilterList = append(lowercaseVulnFilterList, &lowercaseVulnFilter)
 		}

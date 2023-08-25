@@ -9,10 +9,15 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestVEXStatement is the resolver for the ingestVEXStatement field.
 func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+	if strings.ToLower(vulnerability.Type) == "novuln" {
+		return nil, gqlerror.Errorf("novuln type cannot be used for VEX")
+	}
+
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	return r.Backend.IngestVEXStatement(ctx, subject,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
@@ -22,10 +27,24 @@ func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model
 // CertifyVEXStatement is the resolver for the CertifyVEXStatement field.
 func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+
 	if certifyVEXStatementSpec.Vulnerability != nil {
+		var typeLowerCase *string = nil
+		var vulnIDLowerCase *string = nil
+		if certifyVEXStatementSpec.Vulnerability.Type != nil {
+			lower := strings.ToLower(*certifyVEXStatementSpec.Vulnerability.Type)
+			typeLowerCase = &lower
+		}
+		if certifyVEXStatementSpec.Vulnerability.VulnerabilityID != nil {
+			lower := strings.ToLower(*certifyVEXStatementSpec.Vulnerability.VulnerabilityID)
+			vulnIDLowerCase = &lower
+		}
+
 		lowercaseVulnFilter := model.VulnerabilitySpec{
-			Type:            toLower(certifyVEXStatementSpec.Vulnerability.Type),
-			VulnerabilityID: toLower(certifyVEXStatementSpec.Vulnerability.VulnerabilityID),
+			ID:              certifyVEXStatementSpec.Vulnerability.ID,
+			Type:            typeLowerCase,
+			VulnerabilityID: vulnIDLowerCase,
+			NoVuln:          certifyVEXStatementSpec.Vulnerability.NoVuln,
 		}
 
 		lowercaseCertifyVexFilter := model.CertifyVEXStatementSpec{
@@ -44,18 +63,4 @@ func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXState
 	} else {
 		return r.Backend.CertifyVEXStatement(ctx, &certifyVEXStatementSpec)
 	}
-}
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func toLower(filter *string) *string {
-	if filter != nil {
-		lower := strings.ToLower(*filter)
-		return &lower
-	}
-	return nil
 }

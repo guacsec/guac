@@ -144,6 +144,30 @@ func Test_VersionRangeParse(t *testing.T) {
 			},
 		},
 		{
+			input: "^1.0.x",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=1.0.0,<2.0.0"},
+				},
+			},
+		},
+		{
+			input: "^1.x",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=1.0.0,<2.0.0"},
+				},
+			},
+		},
+		{
+			input: "^1.3.x",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=1.0.0,<2.0.0"},
+				},
+			},
+		},
+		{
 			input: "v0.0.0-20190603091049-60506f45cf65",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
@@ -243,6 +267,14 @@ func Test_VersionRangeParse(t *testing.T) {
 			},
 		},
 		{
+			input: "~0.10.x",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=0.10.0,<0.11.0"},
+				},
+			},
+		},
+		{
 			// special case latest set to no constraint
 			input: "latest",
 			expect: VersionMatchObject{
@@ -262,7 +294,7 @@ func Test_VersionRangeParse(t *testing.T) {
 
 			got, err := ParseVersionRange(tt.input)
 			if err != nil {
-				t.Errorf("got unexpected err: %v", err)
+				t.Errorf("got unexpected err from ParseVersionRange: %v", err)
 				return
 			}
 

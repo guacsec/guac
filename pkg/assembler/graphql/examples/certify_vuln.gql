@@ -83,3 +83,13 @@ query CertifyVulnQ7 {
     ...allCertifyVulnTree
   }
 }
+
+# Setting noVuln to true return all packages that have no vulnerabilities
+# Setting noVuln to false return all packages with vulnerabilities
+query CertifyNoVuln {
+  CertifyVuln(certifyVulnSpec: {
+    vulnerability: {noVuln: true}
+  }) {
+    ...allCertifyVulnTree
+  }
+}

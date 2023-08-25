@@ -1269,15 +1269,130 @@ type VulnerabilityInputSpec struct {
 	VulnerabilityID string `json:"vulnerabilityID"`
 }
 
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type VulnerabilityMetadata struct {
+	ID            string                 `json:"id"`
+	Vulnerability *Vulnerability         `json:"vulnerability"`
+	ScoreType     VulnerabilityScoreType `json:"scoreType"`
+	ScoreValue    float64                `json:"scoreValue"`
+	Timestamp     time.Time              `json:"timestamp"`
+	Origin        string                 `json:"origin"`
+	Collector     string                 `json:"collector"`
+}
+
+func (VulnerabilityMetadata) IsNode() {}
+
+// VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
+type VulnerabilityMetadataInputSpec struct {
+	ScoreType  VulnerabilityScoreType `json:"scoreType"`
+	ScoreValue float64                `json:"scoreValue"`
+	Timestamp  time.Time              `json:"timestamp"`
+	Origin     string                 `json:"origin"`
+	Collector  string                 `json:"collector"`
+}
+
+// VulnerabilityMetadataSpec allows filtering the list of VulnerabilityMetadata evidence
+// to return in a query.
+//
+// Comparator field is an enum that be set to filter the score and return a
+// range that matches. If the comparator is not specified, it will default to equal operation.
+//
+// Timestamp specified indicates filtering timestamps after the specified time
+type VulnerabilityMetadataSpec struct {
+	ID            *string                 `json:"id,omitempty"`
+	Vulnerability *VulnerabilitySpec      `json:"vulnerability,omitempty"`
+	ScoreType     *VulnerabilityScoreType `json:"scoreType,omitempty"`
+	ScoreValue    *float64                `json:"scoreValue,omitempty"`
+	Comparator    *Comparator             `json:"comparator,omitempty"`
+	Timestamp     *time.Time              `json:"timestamp,omitempty"`
+	Origin        *string                 `json:"origin,omitempty"`
+	Collector     *string                 `json:"collector,omitempty"`
+}
+
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
 //
 // Use null to match on all values at that level.
 // For example, to get all vulnerabilities in GUAC backend, use a VulnSpec
 // where every field is null.
+//
+// Setting the noVuln boolean true will ignore the other inputs for type and vulnerabilityID.
+// Setting noVuln to true means retrieving only nodes where the type of the vulnerability is "novuln"
+// and the it has an empty string for vulnerabilityID. Setting it to false filters out all results that are "novuln".
+// Setting one of the other fields and omitting the noVuln means retrieving vulnerabilities for the corresponding
+// type and vulnerabilityID. Omission of noVuln field will return all vulnerabilities and novuln.
 type VulnerabilitySpec struct {
 	ID              *string `json:"id,omitempty"`
 	Type            *string `json:"type,omitempty"`
 	VulnerabilityID *string `json:"vulnerabilityID,omitempty"`
+	NoVuln          *bool   `json:"noVuln,omitempty"`
+}
+
+// The Comparator is used by the vulnerability score filter on ranges
+type Comparator string
+
+const (
+	ComparatorGreater      Comparator = "GREATER"
+	ComparatorEqual        Comparator = "EQUAL"
+	ComparatorLess         Comparator = "LESS"
+	ComparatorGreaterEqual Comparator = "GREATER_EQUAL"
+	ComparatorLessEqual    Comparator = "LESS_EQUAL"
+)
+
+var AllComparator = []Comparator{
+	ComparatorGreater,
+	ComparatorEqual,
+	ComparatorLess,
+	ComparatorGreaterEqual,
+	ComparatorLessEqual,
+}
+
+func (e Comparator) IsValid() bool {
+	switch e {
+	case ComparatorGreater, ComparatorEqual, ComparatorLess, ComparatorGreaterEqual, ComparatorLessEqual:
+		return true
+	}
+	return false
+}
+
+func (e Comparator) String() string {
+	return string(e)
+}
+
+func (e *Comparator) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Comparator(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Comparator", str)
+	}
+	return nil
+}
+
+func (e Comparator) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 // DependencyType determines the type of the dependency.
@@ -1353,6 +1468,7 @@ const (
 	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
 	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
 	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
+	EdgeVulnerabilityVulnMetadata        Edge = "VULNERABILITY_VULN_METADATA"
 	EdgePackageCertifyBad                Edge = "PACKAGE_CERTIFY_BAD"
 	EdgePackageCertifyGood               Edge = "PACKAGE_CERTIFY_GOOD"
 	EdgePackageCertifyVexStatement       Edge = "PACKAGE_CERTIFY_VEX_STATEMENT"
@@ -1403,6 +1519,7 @@ const (
 	EdgePointOfContactPackage            Edge = "POINT_OF_CONTACT_PACKAGE"
 	EdgePointOfContactArtifact           Edge = "POINT_OF_CONTACT_ARTIFACT"
 	EdgePointOfContactSource             Edge = "POINT_OF_CONTACT_SOURCE"
+	EdgeVulnMetadataVulnerability        Edge = "VULN_METADATA_VULNERABILITY"
 )
 
 var AllEdge = []Edge{
@@ -1419,6 +1536,7 @@ var AllEdge = []Edge{
 	EdgeVulnerabilityCertifyVexStatement,
 	EdgeVulnerabilityCertifyVuln,
 	EdgeVulnerabilityVulnEqual,
+	EdgeVulnerabilityVulnMetadata,
 	EdgePackageCertifyBad,
 	EdgePackageCertifyGood,
 	EdgePackageCertifyVexStatement,
@@ -1469,11 +1587,12 @@ var AllEdge = []Edge{
 	EdgePointOfContactPackage,
 	EdgePointOfContactArtifact,
 	EdgePointOfContactSource,
+	EdgeVulnMetadataVulnerability,
 }
 
 func (e Edge) IsValid() bool {
 	switch e {
-	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeSourcePointOfContact, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementVulnerability, EdgeCertifyVexStatementPackage, EdgeCertifyVulnVulnerability, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeVulnEqualVulnerability, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource, EdgePointOfContactPackage, EdgePointOfContactArtifact, EdgePointOfContactSource:
+	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgeVulnerabilityVulnMetadata, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeSourcePointOfContact, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementVulnerability, EdgeCertifyVexStatementPackage, EdgeCertifyVulnVulnerability, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeVulnEqualVulnerability, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource, EdgePointOfContactPackage, EdgePointOfContactArtifact, EdgePointOfContactSource, EdgeVulnMetadataVulnerability:
 		return true
 	}
 	return false
@@ -1636,5 +1755,51 @@ func (e *VexStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e VexStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Records the type of the score being captured by the score node
+type VulnerabilityScoreType string
+
+const (
+	VulnerabilityScoreTypeCVSSv2 VulnerabilityScoreType = "CVSSv2"
+	VulnerabilityScoreTypeCVSSv3 VulnerabilityScoreType = "CVSSv3"
+	VulnerabilityScoreTypeEPSSv1 VulnerabilityScoreType = "EPSSv1"
+	VulnerabilityScoreTypeEPSSv2 VulnerabilityScoreType = "EPSSv2"
+)
+
+var AllVulnerabilityScoreType = []VulnerabilityScoreType{
+	VulnerabilityScoreTypeCVSSv2,
+	VulnerabilityScoreTypeCVSSv3,
+	VulnerabilityScoreTypeEPSSv1,
+	VulnerabilityScoreTypeEPSSv2,
+}
+
+func (e VulnerabilityScoreType) IsValid() bool {
+	switch e {
+	case VulnerabilityScoreTypeCVSSv2, VulnerabilityScoreTypeCVSSv3, VulnerabilityScoreTypeEPSSv1, VulnerabilityScoreTypeEPSSv2:
+		return true
+	}
+	return false
+}
+
+func (e VulnerabilityScoreType) String() string {
+	return string(e)
+}
+
+func (e *VulnerabilityScoreType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VulnerabilityScoreType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VulnerabilityScoreType", str)
+	}
+	return nil
+}
+
+func (e VulnerabilityScoreType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

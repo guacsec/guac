@@ -55,5 +55,7 @@
 ./pkg/assembler/graphql/generated/vulnerability.generated.go
 ./pkg/assembler/graphql/resolvers/vulnEqual.resolvers.go
 ./pkg/assembler/graphql/resolvers/vulnerability.resolvers.go
+./pkg/assembler/graphql/generated/vulnMetadata.generated.go 
+./pkg/assembler/graphql/resolvers/vulnMetadata.resolvers.go
 ./internal/testing/mocks/scorecard.go
 ./internal/testing/mocks/documentparser.go

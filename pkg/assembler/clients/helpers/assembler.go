@@ -111,6 +111,13 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			logger.Infof("assembling VulnMetadata: %v", len(p.VulnMetadata))
+			for _, vm := range p.VulnMetadata {
+				if err := ingestVulnMetadata(ctx, gqlclient, vm); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
 			for _, ve := range p.VulnEqual {
 				if err := ingestVulnEqual(ctx, gqlclient, ve); err != nil {
@@ -321,6 +328,14 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasS
 	}
 	_, err := model.HasSBOMArtifact(ctx, client, *hb.Artifact, *hb.HasSBOM)
 	return err
+}
+
+func ingestVulnMetadata(ctx context.Context, client graphql.Client, vi assembler.VulnMetadataIngest) error {
+	_, err := model.VulnHasMetadata(ctx, client, *vi.Vulnerability, *vi.VulnMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func ingestVex(ctx context.Context, client graphql.Client, vi assembler.VexIngest) error {

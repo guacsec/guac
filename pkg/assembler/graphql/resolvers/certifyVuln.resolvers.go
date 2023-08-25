@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestCertifyVuln is the resolver for the ingestCertifyVuln field.
@@ -36,10 +37,31 @@ func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model
 // CertifyVuln is the resolver for the CertifyVuln field.
 func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+
 	if certifyVulnSpec.Vulnerability != nil {
+
+		var typeLowerCase *string = nil
+		var vulnIDLowerCase *string = nil
+		if certifyVulnSpec.Vulnerability.Type != nil {
+			lower := strings.ToLower(*certifyVulnSpec.Vulnerability.Type)
+			typeLowerCase = &lower
+		}
+		if certifyVulnSpec.Vulnerability.VulnerabilityID != nil {
+			lower := strings.ToLower(*certifyVulnSpec.Vulnerability.VulnerabilityID)
+			vulnIDLowerCase = &lower
+		}
+
+		if certifyVulnSpec.Vulnerability.NoVuln != nil && !*certifyVulnSpec.Vulnerability.NoVuln {
+			if certifyVulnSpec.Vulnerability.Type != nil && *typeLowerCase == "novuln" {
+				return []*model.CertifyVuln{}, gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")
+			}
+		}
+
 		lowercaseVulnFilter := model.VulnerabilitySpec{
-			Type:            toLower(certifyVulnSpec.Vulnerability.Type),
-			VulnerabilityID: toLower(certifyVulnSpec.Vulnerability.VulnerabilityID),
+			ID:              certifyVulnSpec.Vulnerability.ID,
+			Type:            typeLowerCase,
+			VulnerabilityID: vulnIDLowerCase,
+			NoVuln:          certifyVulnSpec.Vulnerability.NoVuln,
 		}
 
 		lowercaseCertifyVulnFilter := model.CertifyVulnSpec{
