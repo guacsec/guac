@@ -22,6 +22,7 @@ import (
 	"time"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
+
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
@@ -32,15 +33,24 @@ import (
 )
 
 var vexStatusMap = map[cdx.ImpactAnalysisState]generated.VexStatus{
-	"resolved":     generated.VexStatusFixed,
-	"exploitable":  generated.VexStatusAffected,
-	"in_triage":    generated.VexStatusUnderInvestigation,
-	"not_affected": generated.VexStatusNotAffected,
+	"resolved":               generated.VexStatusFixed,
+	"exploitable":            generated.VexStatusAffected,
+	"in_triage":              generated.VexStatusUnderInvestigation,
+	"not_affected":           generated.VexStatusNotAffected,
+	"resolved_with_pedigree": generated.VexStatusResolvedWithPedigree,
+	"false_positive":         generated.VexStatusFalsePositive,
 }
 
 var justificationsMap = map[cdx.ImpactAnalysisJustification]generated.VexJustification{
-	"code_not_present":   generated.VexJustificationVulnerableCodeNotPresent,
-	"code_not_reachable": generated.VexJustificationVulnerableCodeNotInExecutePath,
+	"code_not_present":                generated.VexJustificationVulnerableCodeNotPresent,
+	"code_not_reachable":              generated.VexJustificationVulnerableCodeNotInExecutePath,
+	"requires_configuration":          generated.VexJustificationRequiresConfiguration,
+	"requires_dependency":             generated.VexJustificationRequiresDependency,
+	"requires_environment":            generated.VexJustificationRequiresEnvironment,
+	"protected_by_compiler":           generated.VexJustificationProtectedByCompiler,
+	"protected_at_runtime":            generated.VexJustificationProtectedAtRuntime,
+	"protected_at_perimeter":          generated.VexJustificationProtectedAtPerimeter,
+	"protected_by_mitigating_control": generated.VexJustificationProtectedByMitigatingControl,
 }
 
 type cdxVexParser struct {
@@ -73,10 +83,6 @@ func (c *cdxVexParser) GetIdentities(ctx context.Context) []common.TrustInformat
 
 func (c *cdxVexParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
-}
-
-func generateVexIngest(ctx context.Context) *assembler.VexIngest {
-	return nil
 }
 
 // Get package name and range versions to create package input spec for the affected packages.
@@ -146,6 +152,7 @@ func (c *cdxVexParser) GetPredicates(ctx context.Context) *assembler.IngestPredi
 	pred := &assembler.IngestPredicates{}
 
 	var vex []assembler.VexIngest
+	var vulnMetadata []assembler.VulnMetadataIngest
 	var certifyVuln []assembler.CertifyVulnIngest
 	var status generated.VexStatus
 	var justification generated.VexJustification
@@ -171,8 +178,6 @@ func (c *cdxVexParser) GetPredicates(ctx context.Context) *assembler.IngestPredi
 		}
 
 		vd := generated.VexStatementInputSpec{
-			// is origin the same as vulnerability.ID?
-			Origin:           vulnerability.ID,
 			Status:           status,
 			VexJustification: justification,
 			KnownSince:       publishedTime,
@@ -199,9 +204,22 @@ func (c *cdxVexParser) GetPredicates(ctx context.Context) *assembler.IngestPredi
 				}
 			}
 		}
+
+		for _, vulnRating := range *vulnerability.Ratings {
+			vm := assembler.VulnMetadataIngest{
+				Vulnerability: vuln,
+				VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+					ScoreType:  generated.VulnerabilityScoreType(vulnRating.Method),
+					ScoreValue: *vulnRating.Score,
+					Timestamp:  publishedTime,
+				},
+			}
+			vulnMetadata = append(vulnMetadata, vm)
+		}
 	}
 
 	pred.Vex = vex
 	pred.CertifyVuln = certifyVuln
+	pred.VulnMetadata = vulnMetadata
 	return pred
 }

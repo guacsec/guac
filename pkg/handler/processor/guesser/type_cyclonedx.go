@@ -37,6 +37,9 @@ func (_ *cycloneDXTypeGuesser) GuessDocumentType(blob []byte, format processor.F
 		bom := new(cdx.BOM)
 		decoder := cdx.NewBOMDecoder(reader, cdx.BOMFileFormatJSON)
 		err := decoder.Decode(bom)
+		if err == nil && bom.Vulnerabilities != nil {
+			return processor.DocumentUnknown
+		}
 		if err == nil && bom.BOMFormat == cycloneDXFormat {
 			return processor.DocumentCycloneDX
 		}

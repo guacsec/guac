@@ -1672,6 +1672,13 @@ const (
 	VexJustificationVulnerableCodeCannotBeControlledByAdversary VexJustification = "VULNERABLE_CODE_CANNOT_BE_CONTROLLED_BY_ADVERSARY"
 	VexJustificationInlineMitigationsAlreadyExist               VexJustification = "INLINE_MITIGATIONS_ALREADY_EXIST"
 	VexJustificationNotProvided                                 VexJustification = "NOT_PROVIDED"
+	VexJustificationRequiresConfiguration                       VexJustification = "REQUIRES_CONFIGURATION"
+	VexJustificationRequiresDependency                          VexJustification = "REQUIRES_DEPENDENCY"
+	VexJustificationRequiresEnvironment                         VexJustification = "REQUIRES_ENVIRONMENT"
+	VexJustificationProtectedByCompiler                         VexJustification = "PROTECTED_BY_COMPILER"
+	VexJustificationProtectedAtRuntime                          VexJustification = "PROTECTED_AT_RUNTIME"
+	VexJustificationProtectedAtPerimeter                        VexJustification = "PROTECTED_AT_PERIMETER"
+	VexJustificationProtectedByMitigatingControl                VexJustification = "PROTECTED_BY_MITIGATING_CONTROL"
 )
 
 var AllVexJustification = []VexJustification{
@@ -1681,11 +1688,18 @@ var AllVexJustification = []VexJustification{
 	VexJustificationVulnerableCodeCannotBeControlledByAdversary,
 	VexJustificationInlineMitigationsAlreadyExist,
 	VexJustificationNotProvided,
+	VexJustificationRequiresConfiguration,
+	VexJustificationRequiresDependency,
+	VexJustificationRequiresEnvironment,
+	VexJustificationProtectedByCompiler,
+	VexJustificationProtectedAtRuntime,
+	VexJustificationProtectedAtPerimeter,
+	VexJustificationProtectedByMitigatingControl,
 }
 
 func (e VexJustification) IsValid() bool {
 	switch e {
-	case VexJustificationComponentNotPresent, VexJustificationVulnerableCodeNotPresent, VexJustificationVulnerableCodeNotInExecutePath, VexJustificationVulnerableCodeCannotBeControlledByAdversary, VexJustificationInlineMitigationsAlreadyExist, VexJustificationNotProvided:
+	case VexJustificationComponentNotPresent, VexJustificationVulnerableCodeNotPresent, VexJustificationVulnerableCodeNotInExecutePath, VexJustificationVulnerableCodeCannotBeControlledByAdversary, VexJustificationInlineMitigationsAlreadyExist, VexJustificationNotProvided, VexJustificationRequiresConfiguration, VexJustificationRequiresDependency, VexJustificationRequiresEnvironment, VexJustificationProtectedByCompiler, VexJustificationProtectedAtRuntime, VexJustificationProtectedAtPerimeter, VexJustificationProtectedByMitigatingControl:
 		return true
 	}
 	return false
@@ -1716,10 +1730,12 @@ func (e VexJustification) MarshalGQL(w io.Writer) {
 type VexStatus string
 
 const (
-	VexStatusNotAffected        VexStatus = "NOT_AFFECTED"
-	VexStatusAffected           VexStatus = "AFFECTED"
-	VexStatusFixed              VexStatus = "FIXED"
-	VexStatusUnderInvestigation VexStatus = "UNDER_INVESTIGATION"
+	VexStatusNotAffected          VexStatus = "NOT_AFFECTED"
+	VexStatusAffected             VexStatus = "AFFECTED"
+	VexStatusFixed                VexStatus = "FIXED"
+	VexStatusUnderInvestigation   VexStatus = "UNDER_INVESTIGATION"
+	VexStatusResolvedWithPedigree VexStatus = "RESOLVED_WITH_PEDIGREE"
+	VexStatusFalsePositive        VexStatus = "FALSE_POSITIVE"
 )
 
 var AllVexStatus = []VexStatus{
@@ -1727,11 +1743,13 @@ var AllVexStatus = []VexStatus{
 	VexStatusAffected,
 	VexStatusFixed,
 	VexStatusUnderInvestigation,
+	VexStatusResolvedWithPedigree,
+	VexStatusFalsePositive,
 }
 
 func (e VexStatus) IsValid() bool {
 	switch e {
-	case VexStatusNotAffected, VexStatusAffected, VexStatusFixed, VexStatusUnderInvestigation:
+	case VexStatusNotAffected, VexStatusAffected, VexStatusFixed, VexStatusUnderInvestigation, VexStatusResolvedWithPedigree, VexStatusFalsePositive:
 		return true
 	}
 	return false
@@ -1762,10 +1780,14 @@ func (e VexStatus) MarshalGQL(w io.Writer) {
 type VulnerabilityScoreType string
 
 const (
-	VulnerabilityScoreTypeCVSSv2 VulnerabilityScoreType = "CVSSv2"
-	VulnerabilityScoreTypeCVSSv3 VulnerabilityScoreType = "CVSSv3"
-	VulnerabilityScoreTypeEPSSv1 VulnerabilityScoreType = "EPSSv1"
-	VulnerabilityScoreTypeEPSSv2 VulnerabilityScoreType = "EPSSv2"
+	VulnerabilityScoreTypeCVSSv2  VulnerabilityScoreType = "CVSSv2"
+	VulnerabilityScoreTypeCVSSv3  VulnerabilityScoreType = "CVSSv3"
+	VulnerabilityScoreTypeEPSSv1  VulnerabilityScoreType = "EPSSv1"
+	VulnerabilityScoreTypeEPSSv2  VulnerabilityScoreType = "EPSSv2"
+	VulnerabilityScoreTypeCVSSv31 VulnerabilityScoreType = "CVSSv31"
+	VulnerabilityScoreTypeCVSSv4  VulnerabilityScoreType = "CVSSv4"
+	VulnerabilityScoreTypeOwasp   VulnerabilityScoreType = "OWASP"
+	VulnerabilityScoreTypeSsvc    VulnerabilityScoreType = "SSVC"
 )
 
 var AllVulnerabilityScoreType = []VulnerabilityScoreType{
@@ -1773,11 +1795,15 @@ var AllVulnerabilityScoreType = []VulnerabilityScoreType{
 	VulnerabilityScoreTypeCVSSv3,
 	VulnerabilityScoreTypeEPSSv1,
 	VulnerabilityScoreTypeEPSSv2,
+	VulnerabilityScoreTypeCVSSv31,
+	VulnerabilityScoreTypeCVSSv4,
+	VulnerabilityScoreTypeOwasp,
+	VulnerabilityScoreTypeSsvc,
 }
 
 func (e VulnerabilityScoreType) IsValid() bool {
 	switch e {
-	case VulnerabilityScoreTypeCVSSv2, VulnerabilityScoreTypeCVSSv3, VulnerabilityScoreTypeEPSSv1, VulnerabilityScoreTypeEPSSv2:
+	case VulnerabilityScoreTypeCVSSv2, VulnerabilityScoreTypeCVSSv3, VulnerabilityScoreTypeEPSSv1, VulnerabilityScoreTypeEPSSv2, VulnerabilityScoreTypeCVSSv31, VulnerabilityScoreTypeCVSSv4, VulnerabilityScoreTypeOwasp, VulnerabilityScoreTypeSsvc:
 		return true
 	}
 	return false

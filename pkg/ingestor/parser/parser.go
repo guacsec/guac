@@ -47,7 +47,7 @@ func init() {
 	_ = RegisterDocumentParser(scorecard.NewScorecardParser, processor.DocumentScorecard)
 	_ = RegisterDocumentParser(deps_dev.NewDepsDevParser, processor.DocumentDepsDev)
 	_ = RegisterDocumentParser(csaf.NewCsafParser, processor.DocumentCsaf)
-	_ = RegisterDocumentParser(cdxVex.NewCdxVexParser, processor.DocumentCycloneDX)
+	_ = RegisterDocumentParser(cdxVex.NewCdxVexParser, processor.DocumentCdxVex)
 }
 
 var (

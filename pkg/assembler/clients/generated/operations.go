@@ -22845,6 +22845,13 @@ const (
 	VexJustificationVulnerableCodeCannotBeControlledByAdversary VexJustification = "VULNERABLE_CODE_CANNOT_BE_CONTROLLED_BY_ADVERSARY"
 	VexJustificationInlineMitigationsAlreadyExist               VexJustification = "INLINE_MITIGATIONS_ALREADY_EXIST"
 	VexJustificationNotProvided                                 VexJustification = "NOT_PROVIDED"
+	VexJustificationRequiresConfiguration                       VexJustification = "REQUIRES_CONFIGURATION"
+	VexJustificationRequiresDependency                          VexJustification = "REQUIRES_DEPENDENCY"
+	VexJustificationRequiresEnvironment                         VexJustification = "REQUIRES_ENVIRONMENT"
+	VexJustificationProtectedByCompiler                         VexJustification = "PROTECTED_BY_COMPILER"
+	VexJustificationProtectedAtRuntime                          VexJustification = "PROTECTED_AT_RUNTIME"
+	VexJustificationProtectedAtPerimeter                        VexJustification = "PROTECTED_AT_PERIMETER"
+	VexJustificationProtectedByMitigatingControl                VexJustification = "PROTECTED_BY_MITIGATING_CONTROL"
 )
 
 // VexStatementInputSpec represents the input to ingest VEX statements.
@@ -22883,10 +22890,12 @@ func (v *VexStatementInputSpec) GetCollector() string { return v.Collector }
 type VexStatus string
 
 const (
-	VexStatusNotAffected        VexStatus = "NOT_AFFECTED"
-	VexStatusAffected           VexStatus = "AFFECTED"
-	VexStatusFixed              VexStatus = "FIXED"
-	VexStatusUnderInvestigation VexStatus = "UNDER_INVESTIGATION"
+	VexStatusNotAffected          VexStatus = "NOT_AFFECTED"
+	VexStatusAffected             VexStatus = "AFFECTED"
+	VexStatusFixed                VexStatus = "FIXED"
+	VexStatusUnderInvestigation   VexStatus = "UNDER_INVESTIGATION"
+	VexStatusResolvedWithPedigree VexStatus = "RESOLVED_WITH_PEDIGREE"
+	VexStatusFalsePositive        VexStatus = "FALSE_POSITIVE"
 )
 
 // VulnEqualIngestVulnEqual includes the requested fields of the GraphQL type VulnEqual.
@@ -23366,10 +23375,14 @@ func (v *VulnerabilityMetadataInputSpec) GetCollector() string { return v.Collec
 type VulnerabilityScoreType string
 
 const (
-	VulnerabilityScoreTypeCvssv2 VulnerabilityScoreType = "CVSSv2"
-	VulnerabilityScoreTypeCvssv3 VulnerabilityScoreType = "CVSSv3"
-	VulnerabilityScoreTypeEpssv1 VulnerabilityScoreType = "EPSSv1"
-	VulnerabilityScoreTypeEpssv2 VulnerabilityScoreType = "EPSSv2"
+	VulnerabilityScoreTypeCvssv2  VulnerabilityScoreType = "CVSSv2"
+	VulnerabilityScoreTypeCvssv3  VulnerabilityScoreType = "CVSSv3"
+	VulnerabilityScoreTypeEpssv1  VulnerabilityScoreType = "EPSSv1"
+	VulnerabilityScoreTypeEpssv2  VulnerabilityScoreType = "EPSSv2"
+	VulnerabilityScoreTypeCvssv31 VulnerabilityScoreType = "CVSSv31"
+	VulnerabilityScoreTypeCvssv4  VulnerabilityScoreType = "CVSSv4"
+	VulnerabilityScoreTypeOwasp   VulnerabilityScoreType = "OWASP"
+	VulnerabilityScoreTypeSsvc    VulnerabilityScoreType = "SSVC"
 )
 
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
