@@ -7,41 +7,13 @@ import (
 )
 
 func (s *Suite) TestNode() {
-	be, err := GetBackend(s.Client)
-	s.Require().NoError(err)
-
-	v, err := be.IngestArtifact(s.Ctx, a1)
-	check(s, be, v.ID, err, a1out)
-
-	p, err := be.IngestPackage(s.Ctx, *p4)
-	check(s, be, p.ID, err, p4outNamespace)
-	check(s, be, p.Namespaces[0].ID, err, p4out)
-	check(s, be, p.Namespaces[0].Names[0].ID, err, p4out)
-	check(s, be, p.Namespaces[0].Names[0].Versions[0].ID, err, p4out)
-
-	sc, err := be.IngestSource(s.Ctx, *s1)
-	check(s, be, sc.ID, err, s1outNamespace)
-
-	bu, err := be.IngestBuilder(s.Ctx, b1)
-	check(s, be, bu.ID, err, b1out)
-
-	osv, err := be.IngestOsv(s.Ctx, o1)
-	check(s, be, osv.ID, err, o1out)
-
-	c, err := be.IngestCve(s.Ctx, c1)
-	check(s, be, c.ID, err, c1out)
-
-	g, err := be.IngestGhsa(s.Ctx, g1)
-	check(s, be, g.ID, err, g1out)
-}
-
-func (s *Suite) TestNodeNew() {
 	ctx := s.Ctx
 	tests := []struct {
 		Name     string
 		InArt    []*model.ArtifactInputSpec
 		InPkg    []*model.PkgInputSpec
 		InSrc    []*model.SourceInputSpec
+		InBld    []*model.BuilderInputSpec
 		Expected []interface{}
 		Only     bool
 	}{
@@ -50,10 +22,12 @@ func (s *Suite) TestNodeNew() {
 			InArt: []*model.ArtifactInputSpec{a1},
 			InPkg: []*model.PkgInputSpec{p4},
 			InSrc: []*model.SourceInputSpec{s1},
+			InBld: []*model.BuilderInputSpec{b1},
 			Expected: []interface{}{
 				a1out,
 				p4outNamespace,
 				s1outNamespace,
+				b1out,
 			},
 		},
 	}
@@ -96,6 +70,14 @@ func (s *Suite) TestNodeNew() {
 					s.T().Fatalf("Could not ingest source: %v", err)
 				} else {
 					ids = append(ids, src.ID)
+				}
+			}
+
+			for _, inBLD := range test.InBld {
+				if bld, err := b.IngestBuilder(ctx, inBLD); err != nil {
+					s.T().Fatalf("Could not ingest builder: %v", err)
+				} else {
+					ids = append(ids, bld.ID)
 				}
 			}
 
