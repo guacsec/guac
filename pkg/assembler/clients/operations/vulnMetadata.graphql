@@ -19,12 +19,10 @@
 
 mutation VulnHasMetadata(
   $vulnerability: VulnerabilityInputSpec!, 
-  $score: VulnerabilityScoreInputSpec!, 
   $vulnMetadata: VulnerabilityMetadataInputSpec!
   ) {
   ingestVulnerabilityMetadata(
     vulnerability: $vulnerability, 
-    score: $score, 
     vulnerabilityMetadata: $vulnMetadata
   )
 }
@@ -33,12 +31,10 @@ mutation VulnHasMetadata(
 
 mutation VulnHasMetadatas(
   $vulnerabilities: [VulnerabilityInputSpec!]!, 
-  $scores: [VulnerabilityScoreInputSpec!]!, 
   $vulnMetadatas: [VulnerabilityMetadataInputSpec!]!
   ) {
   ingestVulnerabilityMetadatas(
     vulnerabilities: $vulnerabilities, 
-    scores: $scores, 
     vulnerabilityMetadatas: $vulnMetadatas
   )
 }

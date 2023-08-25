@@ -5036,6 +5036,129 @@ func (v *AllVulnEqualVulnerabilitiesVulnerability) __premarshalJSON() (*__premar
 	return &retval, nil
 }
 
+// AllVulnMetadataTree includes the GraphQL fields of VulnerabilityMetadata requested by the fragment AllVulnMetadataTree.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type AllVulnMetadataTree struct {
+	Id            string                           `json:"id"`
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+	ScoreType     VulnerabilityScoreType           `json:"scoreType"`
+	ScoreValue    float64                          `json:"scoreValue"`
+	Timestamp     time.Time                        `json:"timestamp"`
+	Origin        string                           `json:"origin"`
+	Collector     string                           `json:"collector"`
+}
+
+// GetId returns AllVulnMetadataTree.Id, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetId() string { return v.Id }
+
+// GetVulnerability returns AllVulnMetadataTree.Vulnerability, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.Vulnerability
+}
+
+// GetScoreType returns AllVulnMetadataTree.ScoreType, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetScoreType() VulnerabilityScoreType { return v.ScoreType }
+
+// GetScoreValue returns AllVulnMetadataTree.ScoreValue, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetScoreValue() float64 { return v.ScoreValue }
+
+// GetTimestamp returns AllVulnMetadataTree.Timestamp, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetTimestamp() time.Time { return v.Timestamp }
+
+// GetOrigin returns AllVulnMetadataTree.Origin, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetOrigin() string { return v.Origin }
+
+// GetCollector returns AllVulnMetadataTree.Collector, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTree) GetCollector() string { return v.Collector }
+
+// AllVulnMetadataTreeVulnerability includes the requested fields of the GraphQL type Vulnerability.
+// The GraphQL type's documentation follows.
+//
+// Vulnerability represents the root of the vulnerability trie/tree.
+//
+// We map vulnerability information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type and a vulnerability ID. This allows for generic
+// representation of the various vulnerabilities and does not limit to just cve, ghsa or osv.
+// This would be in the general format: vuln://<general-type>/<vuln-id>
+//
+// Examples:
+//
+// CVE, using path separator: vuln://cve/cve-2023-20753
+// OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
+// Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
+//
+// This node represents the type part of the trie path. It is used to represent
+// the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
+//
+// Since this node is at the root of the vulnerability trie, it is named Vulnerability, not
+// VulnerabilityType.
+//
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
+// for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
+type AllVulnMetadataTreeVulnerability struct {
+	Id               string                                                            `json:"id"`
+	Type             string                                                            `json:"type"`
+	VulnerabilityIDs []AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID `json:"vulnerabilityIDs"`
+}
+
+// GetId returns AllVulnMetadataTreeVulnerability.Id, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerability) GetId() string { return v.Id }
+
+// GetType returns AllVulnMetadataTreeVulnerability.Type, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerability) GetType() string { return v.Type }
+
+// GetVulnerabilityIDs returns AllVulnMetadataTreeVulnerability.VulnerabilityIDs, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerability) GetVulnerabilityIDs() []AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID {
+	return v.VulnerabilityIDs
+}
+
+// AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID includes the requested fields of the GraphQL type VulnerabilityID.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityID is a specific vulnerability ID associated with the type of the vulnerability.
+//
+// This will be enforced to be all lowercase.
+//
+// The namespace field is mandatory.
+type AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID struct {
+	Id              string `json:"id"`
+	VulnerabilityID string `json:"vulnerabilityID"`
+}
+
+// GetId returns AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID.Id, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID) GetId() string { return v.Id }
+
+// GetVulnerabilityID returns AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID.VulnerabilityID, and is useful for accessing the field via an interface.
+func (v *AllVulnMetadataTreeVulnerabilityVulnerabilityIDsVulnerabilityID) GetVulnerabilityID() string {
+	return v.VulnerabilityID
+}
+
 // AllVulnerabilityTree includes the GraphQL fields of Vulnerability requested by the fragment AllVulnerabilityTree.
 // The GraphQL type's documentation follows.
 //
@@ -7504,6 +7627,7 @@ const (
 	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
 	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
 	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
+	EdgeVulnerabilityVulnMetadata        Edge = "VULNERABILITY_VULN_METADATA"
 	EdgePackageCertifyBad                Edge = "PACKAGE_CERTIFY_BAD"
 	EdgePackageCertifyGood               Edge = "PACKAGE_CERTIFY_GOOD"
 	EdgePackageCertifyVexStatement       Edge = "PACKAGE_CERTIFY_VEX_STATEMENT"
@@ -7554,6 +7678,7 @@ const (
 	EdgePointOfContactPackage            Edge = "POINT_OF_CONTACT_PACKAGE"
 	EdgePointOfContactArtifact           Edge = "POINT_OF_CONTACT_ARTIFACT"
 	EdgePointOfContactSource             Edge = "POINT_OF_CONTACT_SOURCE"
+	EdgeVulnMetadataVulnerability        Edge = "VULN_METADATA_VULNERABILITY"
 )
 
 // FindSoftwareFindSoftwareArtifact includes the requested fields of the GraphQL type Artifact.
@@ -12213,6 +12338,7 @@ func (v *NeighborsNeighborsIsOccurrence) __premarshalJSON() (*__premarshalNeighb
 // NeighborsNeighborsSource
 // NeighborsNeighborsVulnEqual
 // NeighborsNeighborsVulnerability
+// NeighborsNeighborsVulnerabilityMetadata
 // The GraphQL type's documentation follows.
 //
 // Node is a union type of all the possible nodes.
@@ -12246,6 +12372,8 @@ func (v *NeighborsNeighborsPointOfContact) implementsGraphQLInterfaceNeighborsNe
 func (v *NeighborsNeighborsSource) implementsGraphQLInterfaceNeighborsNeighborsNode()              {}
 func (v *NeighborsNeighborsVulnEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()           {}
 func (v *NeighborsNeighborsVulnerability) implementsGraphQLInterfaceNeighborsNeighborsNode()       {}
+func (v *NeighborsNeighborsVulnerabilityMetadata) implementsGraphQLInterfaceNeighborsNeighborsNode() {
+}
 
 func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) error {
 	if string(b) == "null" {
@@ -12320,6 +12448,9 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 		return json.Unmarshal(b, *v)
 	case "Vulnerability":
 		*v = new(NeighborsNeighborsVulnerability)
+		return json.Unmarshal(b, *v)
+	case "VulnerabilityMetadata":
+		*v = new(NeighborsNeighborsVulnerabilityMetadata)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -12568,6 +12699,18 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsVulnerabilityMetadata:
+		typename = "VulnerabilityMetadata"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsVulnerabilityMetadata
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -13172,6 +13315,136 @@ func (v *NeighborsNeighborsVulnerability) __premarshalJSON() (*__premarshalNeigh
 	return &retval, nil
 }
 
+// NeighborsNeighborsVulnerabilityMetadata includes the requested fields of the GraphQL type VulnerabilityMetadata.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type NeighborsNeighborsVulnerabilityMetadata struct {
+	Typename            *string `json:"__typename"`
+	AllVulnMetadataTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsVulnerabilityMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns NeighborsNeighborsVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns NeighborsNeighborsVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns NeighborsNeighborsVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns NeighborsNeighborsVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns NeighborsNeighborsVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetOrigin() string {
+	return v.AllVulnMetadataTree.Origin
+}
+
+// GetCollector returns NeighborsNeighborsVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsVulnerabilityMetadata) GetCollector() string {
+	return v.AllVulnMetadataTree.Collector
+}
+
+func (v *NeighborsNeighborsVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsVulnerabilityMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsVulnerabilityMetadata) __premarshalJSON() (*__premarshalNeighborsNeighborsVulnerabilityMetadata, error) {
+	var retval __premarshalNeighborsNeighborsVulnerabilityMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
+
 // NeighborsResponse is returned by Neighbors on success.
 type NeighborsResponse struct {
 	// neighbors returns all the direct neighbors of a node.
@@ -13284,6 +13557,7 @@ func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, 
 // NodeNodeSource
 // NodeNodeVulnEqual
 // NodeNodeVulnerability
+// NodeNodeVulnerabilityMetadata
 // The GraphQL type's documentation follows.
 //
 // Node is a union type of all the possible nodes.
@@ -13297,26 +13571,27 @@ type NodeNode interface {
 	GetTypename() *string
 }
 
-func (v *NodeNodeArtifact) implementsGraphQLInterfaceNodeNode()            {}
-func (v *NodeNodeBuilder) implementsGraphQLInterfaceNodeNode()             {}
-func (v *NodeNodeCertifyBad) implementsGraphQLInterfaceNodeNode()          {}
-func (v *NodeNodeCertifyGood) implementsGraphQLInterfaceNodeNode()         {}
-func (v *NodeNodeCertifyScorecard) implementsGraphQLInterfaceNodeNode()    {}
-func (v *NodeNodeCertifyVEXStatement) implementsGraphQLInterfaceNodeNode() {}
-func (v *NodeNodeCertifyVuln) implementsGraphQLInterfaceNodeNode()         {}
-func (v *NodeNodeHasMetadata) implementsGraphQLInterfaceNodeNode()         {}
-func (v *NodeNodeHasSBOM) implementsGraphQLInterfaceNodeNode()             {}
-func (v *NodeNodeHasSLSA) implementsGraphQLInterfaceNodeNode()             {}
-func (v *NodeNodeHasSourceAt) implementsGraphQLInterfaceNodeNode()         {}
-func (v *NodeNodeHashEqual) implementsGraphQLInterfaceNodeNode()           {}
-func (v *NodeNodeIsDependency) implementsGraphQLInterfaceNodeNode()        {}
-func (v *NodeNodeIsOccurrence) implementsGraphQLInterfaceNodeNode()        {}
-func (v *NodeNodePackage) implementsGraphQLInterfaceNodeNode()             {}
-func (v *NodeNodePkgEqual) implementsGraphQLInterfaceNodeNode()            {}
-func (v *NodeNodePointOfContact) implementsGraphQLInterfaceNodeNode()      {}
-func (v *NodeNodeSource) implementsGraphQLInterfaceNodeNode()              {}
-func (v *NodeNodeVulnEqual) implementsGraphQLInterfaceNodeNode()           {}
-func (v *NodeNodeVulnerability) implementsGraphQLInterfaceNodeNode()       {}
+func (v *NodeNodeArtifact) implementsGraphQLInterfaceNodeNode()              {}
+func (v *NodeNodeBuilder) implementsGraphQLInterfaceNodeNode()               {}
+func (v *NodeNodeCertifyBad) implementsGraphQLInterfaceNodeNode()            {}
+func (v *NodeNodeCertifyGood) implementsGraphQLInterfaceNodeNode()           {}
+func (v *NodeNodeCertifyScorecard) implementsGraphQLInterfaceNodeNode()      {}
+func (v *NodeNodeCertifyVEXStatement) implementsGraphQLInterfaceNodeNode()   {}
+func (v *NodeNodeCertifyVuln) implementsGraphQLInterfaceNodeNode()           {}
+func (v *NodeNodeHasMetadata) implementsGraphQLInterfaceNodeNode()           {}
+func (v *NodeNodeHasSBOM) implementsGraphQLInterfaceNodeNode()               {}
+func (v *NodeNodeHasSLSA) implementsGraphQLInterfaceNodeNode()               {}
+func (v *NodeNodeHasSourceAt) implementsGraphQLInterfaceNodeNode()           {}
+func (v *NodeNodeHashEqual) implementsGraphQLInterfaceNodeNode()             {}
+func (v *NodeNodeIsDependency) implementsGraphQLInterfaceNodeNode()          {}
+func (v *NodeNodeIsOccurrence) implementsGraphQLInterfaceNodeNode()          {}
+func (v *NodeNodePackage) implementsGraphQLInterfaceNodeNode()               {}
+func (v *NodeNodePkgEqual) implementsGraphQLInterfaceNodeNode()              {}
+func (v *NodeNodePointOfContact) implementsGraphQLInterfaceNodeNode()        {}
+func (v *NodeNodeSource) implementsGraphQLInterfaceNodeNode()                {}
+func (v *NodeNodeVulnEqual) implementsGraphQLInterfaceNodeNode()             {}
+func (v *NodeNodeVulnerability) implementsGraphQLInterfaceNodeNode()         {}
+func (v *NodeNodeVulnerabilityMetadata) implementsGraphQLInterfaceNodeNode() {}
 
 func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 	if string(b) == "null" {
@@ -13391,6 +13666,9 @@ func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 		return json.Unmarshal(b, *v)
 	case "Vulnerability":
 		*v = new(NodeNodeVulnerability)
+		return json.Unmarshal(b, *v)
+	case "VulnerabilityMetadata":
+		*v = new(NodeNodeVulnerabilityMetadata)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -13639,6 +13917,18 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodeVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeVulnerabilityMetadata:
+		typename = "VulnerabilityMetadata"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodeVulnerabilityMetadata
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -15531,6 +15821,132 @@ func (v *NodeNodeVulnerability) __premarshalJSON() (*__premarshalNodeNodeVulnera
 	return &retval, nil
 }
 
+// NodeNodeVulnerabilityMetadata includes the requested fields of the GraphQL type VulnerabilityMetadata.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type NodeNodeVulnerabilityMetadata struct {
+	Typename            *string `json:"__typename"`
+	AllVulnMetadataTree `json:"-"`
+}
+
+// GetTypename returns NodeNodeVulnerabilityMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns NodeNodeVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns NodeNodeVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns NodeNodeVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns NodeNodeVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns NodeNodeVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns NodeNodeVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetOrigin() string { return v.AllVulnMetadataTree.Origin }
+
+// GetCollector returns NodeNodeVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *NodeNodeVulnerabilityMetadata) GetCollector() string { return v.AllVulnMetadataTree.Collector }
+
+func (v *NodeNodeVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NodeNodeVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NodeNodeVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNodeNodeVulnerabilityMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NodeNodeVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NodeNodeVulnerabilityMetadata) __premarshalJSON() (*__premarshalNodeNodeVulnerabilityMetadata, error) {
+	var retval __premarshalNodeNodeVulnerabilityMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
+
 // NodeResponse is returned by Node on success.
 type NodeResponse struct {
 	// node returns a single node, regardless of type.
@@ -16926,6 +17342,7 @@ func (v *NodesNodesIsOccurrence) __premarshalJSON() (*__premarshalNodesNodesIsOc
 // NodesNodesSource
 // NodesNodesVulnEqual
 // NodesNodesVulnerability
+// NodesNodesVulnerabilityMetadata
 // The GraphQL type's documentation follows.
 //
 // Node is a union type of all the possible nodes.
@@ -16939,26 +17356,27 @@ type NodesNodesNode interface {
 	GetTypename() *string
 }
 
-func (v *NodesNodesArtifact) implementsGraphQLInterfaceNodesNodesNode()            {}
-func (v *NodesNodesBuilder) implementsGraphQLInterfaceNodesNodesNode()             {}
-func (v *NodesNodesCertifyBad) implementsGraphQLInterfaceNodesNodesNode()          {}
-func (v *NodesNodesCertifyGood) implementsGraphQLInterfaceNodesNodesNode()         {}
-func (v *NodesNodesCertifyScorecard) implementsGraphQLInterfaceNodesNodesNode()    {}
-func (v *NodesNodesCertifyVEXStatement) implementsGraphQLInterfaceNodesNodesNode() {}
-func (v *NodesNodesCertifyVuln) implementsGraphQLInterfaceNodesNodesNode()         {}
-func (v *NodesNodesHasMetadata) implementsGraphQLInterfaceNodesNodesNode()         {}
-func (v *NodesNodesHasSBOM) implementsGraphQLInterfaceNodesNodesNode()             {}
-func (v *NodesNodesHasSLSA) implementsGraphQLInterfaceNodesNodesNode()             {}
-func (v *NodesNodesHasSourceAt) implementsGraphQLInterfaceNodesNodesNode()         {}
-func (v *NodesNodesHashEqual) implementsGraphQLInterfaceNodesNodesNode()           {}
-func (v *NodesNodesIsDependency) implementsGraphQLInterfaceNodesNodesNode()        {}
-func (v *NodesNodesIsOccurrence) implementsGraphQLInterfaceNodesNodesNode()        {}
-func (v *NodesNodesPackage) implementsGraphQLInterfaceNodesNodesNode()             {}
-func (v *NodesNodesPkgEqual) implementsGraphQLInterfaceNodesNodesNode()            {}
-func (v *NodesNodesPointOfContact) implementsGraphQLInterfaceNodesNodesNode()      {}
-func (v *NodesNodesSource) implementsGraphQLInterfaceNodesNodesNode()              {}
-func (v *NodesNodesVulnEqual) implementsGraphQLInterfaceNodesNodesNode()           {}
-func (v *NodesNodesVulnerability) implementsGraphQLInterfaceNodesNodesNode()       {}
+func (v *NodesNodesArtifact) implementsGraphQLInterfaceNodesNodesNode()              {}
+func (v *NodesNodesBuilder) implementsGraphQLInterfaceNodesNodesNode()               {}
+func (v *NodesNodesCertifyBad) implementsGraphQLInterfaceNodesNodesNode()            {}
+func (v *NodesNodesCertifyGood) implementsGraphQLInterfaceNodesNodesNode()           {}
+func (v *NodesNodesCertifyScorecard) implementsGraphQLInterfaceNodesNodesNode()      {}
+func (v *NodesNodesCertifyVEXStatement) implementsGraphQLInterfaceNodesNodesNode()   {}
+func (v *NodesNodesCertifyVuln) implementsGraphQLInterfaceNodesNodesNode()           {}
+func (v *NodesNodesHasMetadata) implementsGraphQLInterfaceNodesNodesNode()           {}
+func (v *NodesNodesHasSBOM) implementsGraphQLInterfaceNodesNodesNode()               {}
+func (v *NodesNodesHasSLSA) implementsGraphQLInterfaceNodesNodesNode()               {}
+func (v *NodesNodesHasSourceAt) implementsGraphQLInterfaceNodesNodesNode()           {}
+func (v *NodesNodesHashEqual) implementsGraphQLInterfaceNodesNodesNode()             {}
+func (v *NodesNodesIsDependency) implementsGraphQLInterfaceNodesNodesNode()          {}
+func (v *NodesNodesIsOccurrence) implementsGraphQLInterfaceNodesNodesNode()          {}
+func (v *NodesNodesPackage) implementsGraphQLInterfaceNodesNodesNode()               {}
+func (v *NodesNodesPkgEqual) implementsGraphQLInterfaceNodesNodesNode()              {}
+func (v *NodesNodesPointOfContact) implementsGraphQLInterfaceNodesNodesNode()        {}
+func (v *NodesNodesSource) implementsGraphQLInterfaceNodesNodesNode()                {}
+func (v *NodesNodesVulnEqual) implementsGraphQLInterfaceNodesNodesNode()             {}
+func (v *NodesNodesVulnerability) implementsGraphQLInterfaceNodesNodesNode()         {}
+func (v *NodesNodesVulnerabilityMetadata) implementsGraphQLInterfaceNodesNodesNode() {}
 
 func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 	if string(b) == "null" {
@@ -17033,6 +17451,9 @@ func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 		return json.Unmarshal(b, *v)
 	case "Vulnerability":
 		*v = new(NodesNodesVulnerability)
+		return json.Unmarshal(b, *v)
+	case "VulnerabilityMetadata":
+		*v = new(NodesNodesVulnerabilityMetadata)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -17281,6 +17702,18 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesVulnerabilityMetadata:
+		typename = "VulnerabilityMetadata"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesVulnerabilityMetadata
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -17880,6 +18313,134 @@ func (v *NodesNodesVulnerability) __premarshalJSON() (*__premarshalNodesNodesVul
 	retval.Id = v.AllVulnerabilityTree.Id
 	retval.Type = v.AllVulnerabilityTree.Type
 	retval.VulnerabilityIDs = v.AllVulnerabilityTree.VulnerabilityIDs
+	return &retval, nil
+}
+
+// NodesNodesVulnerabilityMetadata includes the requested fields of the GraphQL type VulnerabilityMetadata.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type NodesNodesVulnerabilityMetadata struct {
+	Typename            *string `json:"__typename"`
+	AllVulnMetadataTree `json:"-"`
+}
+
+// GetTypename returns NodesNodesVulnerabilityMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns NodesNodesVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns NodesNodesVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns NodesNodesVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns NodesNodesVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns NodesNodesVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns NodesNodesVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetOrigin() string { return v.AllVulnMetadataTree.Origin }
+
+// GetCollector returns NodesNodesVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *NodesNodesVulnerabilityMetadata) GetCollector() string {
+	return v.AllVulnMetadataTree.Collector
+}
+
+func (v *NodesNodesVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NodesNodesVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NodesNodesVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNodesNodesVulnerabilityMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NodesNodesVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NodesNodesVulnerabilityMetadata) __premarshalJSON() (*__premarshalNodesNodesVulnerabilityMetadata, error) {
+	var retval __premarshalNodesNodesVulnerabilityMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
 	return &retval, nil
 }
 
@@ -19811,6 +20372,7 @@ func (v *PathPathIsOccurrence) __premarshalJSON() (*__premarshalPathPathIsOccurr
 // PathPathSource
 // PathPathVulnEqual
 // PathPathVulnerability
+// PathPathVulnerabilityMetadata
 // The GraphQL type's documentation follows.
 //
 // Node is a union type of all the possible nodes.
@@ -19824,26 +20386,27 @@ type PathPathNode interface {
 	GetTypename() *string
 }
 
-func (v *PathPathArtifact) implementsGraphQLInterfacePathPathNode()            {}
-func (v *PathPathBuilder) implementsGraphQLInterfacePathPathNode()             {}
-func (v *PathPathCertifyBad) implementsGraphQLInterfacePathPathNode()          {}
-func (v *PathPathCertifyGood) implementsGraphQLInterfacePathPathNode()         {}
-func (v *PathPathCertifyScorecard) implementsGraphQLInterfacePathPathNode()    {}
-func (v *PathPathCertifyVEXStatement) implementsGraphQLInterfacePathPathNode() {}
-func (v *PathPathCertifyVuln) implementsGraphQLInterfacePathPathNode()         {}
-func (v *PathPathHasMetadata) implementsGraphQLInterfacePathPathNode()         {}
-func (v *PathPathHasSBOM) implementsGraphQLInterfacePathPathNode()             {}
-func (v *PathPathHasSLSA) implementsGraphQLInterfacePathPathNode()             {}
-func (v *PathPathHasSourceAt) implementsGraphQLInterfacePathPathNode()         {}
-func (v *PathPathHashEqual) implementsGraphQLInterfacePathPathNode()           {}
-func (v *PathPathIsDependency) implementsGraphQLInterfacePathPathNode()        {}
-func (v *PathPathIsOccurrence) implementsGraphQLInterfacePathPathNode()        {}
-func (v *PathPathPackage) implementsGraphQLInterfacePathPathNode()             {}
-func (v *PathPathPkgEqual) implementsGraphQLInterfacePathPathNode()            {}
-func (v *PathPathPointOfContact) implementsGraphQLInterfacePathPathNode()      {}
-func (v *PathPathSource) implementsGraphQLInterfacePathPathNode()              {}
-func (v *PathPathVulnEqual) implementsGraphQLInterfacePathPathNode()           {}
-func (v *PathPathVulnerability) implementsGraphQLInterfacePathPathNode()       {}
+func (v *PathPathArtifact) implementsGraphQLInterfacePathPathNode()              {}
+func (v *PathPathBuilder) implementsGraphQLInterfacePathPathNode()               {}
+func (v *PathPathCertifyBad) implementsGraphQLInterfacePathPathNode()            {}
+func (v *PathPathCertifyGood) implementsGraphQLInterfacePathPathNode()           {}
+func (v *PathPathCertifyScorecard) implementsGraphQLInterfacePathPathNode()      {}
+func (v *PathPathCertifyVEXStatement) implementsGraphQLInterfacePathPathNode()   {}
+func (v *PathPathCertifyVuln) implementsGraphQLInterfacePathPathNode()           {}
+func (v *PathPathHasMetadata) implementsGraphQLInterfacePathPathNode()           {}
+func (v *PathPathHasSBOM) implementsGraphQLInterfacePathPathNode()               {}
+func (v *PathPathHasSLSA) implementsGraphQLInterfacePathPathNode()               {}
+func (v *PathPathHasSourceAt) implementsGraphQLInterfacePathPathNode()           {}
+func (v *PathPathHashEqual) implementsGraphQLInterfacePathPathNode()             {}
+func (v *PathPathIsDependency) implementsGraphQLInterfacePathPathNode()          {}
+func (v *PathPathIsOccurrence) implementsGraphQLInterfacePathPathNode()          {}
+func (v *PathPathPackage) implementsGraphQLInterfacePathPathNode()               {}
+func (v *PathPathPkgEqual) implementsGraphQLInterfacePathPathNode()              {}
+func (v *PathPathPointOfContact) implementsGraphQLInterfacePathPathNode()        {}
+func (v *PathPathSource) implementsGraphQLInterfacePathPathNode()                {}
+func (v *PathPathVulnEqual) implementsGraphQLInterfacePathPathNode()             {}
+func (v *PathPathVulnerability) implementsGraphQLInterfacePathPathNode()         {}
+func (v *PathPathVulnerabilityMetadata) implementsGraphQLInterfacePathPathNode() {}
 
 func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 	if string(b) == "null" {
@@ -19918,6 +20481,9 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 		return json.Unmarshal(b, *v)
 	case "Vulnerability":
 		*v = new(PathPathVulnerability)
+		return json.Unmarshal(b, *v)
+	case "VulnerabilityMetadata":
+		*v = new(PathPathVulnerabilityMetadata)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -20166,6 +20732,18 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathVulnerabilityMetadata:
+		typename = "VulnerabilityMetadata"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathVulnerabilityMetadata
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -20761,6 +21339,132 @@ func (v *PathPathVulnerability) __premarshalJSON() (*__premarshalPathPathVulnera
 	retval.Id = v.AllVulnerabilityTree.Id
 	retval.Type = v.AllVulnerabilityTree.Type
 	retval.VulnerabilityIDs = v.AllVulnerabilityTree.VulnerabilityIDs
+	return &retval, nil
+}
+
+// PathPathVulnerabilityMetadata includes the requested fields of the GraphQL type VulnerabilityMetadata.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type PathPathVulnerabilityMetadata struct {
+	Typename            *string `json:"__typename"`
+	AllVulnMetadataTree `json:"-"`
+}
+
+// GetTypename returns PathPathVulnerabilityMetadata.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns PathPathVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns PathPathVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns PathPathVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns PathPathVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns PathPathVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetOrigin() string { return v.AllVulnMetadataTree.Origin }
+
+// GetCollector returns PathPathVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathVulnerabilityMetadata) GetCollector() string { return v.AllVulnMetadataTree.Collector }
+
+func (v *PathPathVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathVulnerabilityMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathVulnerabilityMetadata) __premarshalJSON() (*__premarshalPathPathVulnerabilityMetadata, error) {
+	var retval __premarshalPathPathVulnerabilityMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
 	return &retval, nil
 }
 
@@ -22636,10 +23340,18 @@ func (v *VulnerabilityInputSpec) GetVulnerabilityID() string { return v.Vulnerab
 
 // VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
 type VulnerabilityMetadataInputSpec struct {
-	Timestamp time.Time `json:"timestamp"`
-	Origin    string    `json:"origin"`
-	Collector string    `json:"collector"`
+	ScoreType  VulnerabilityScoreType `json:"scoreType"`
+	ScoreValue float64                `json:"scoreValue"`
+	Timestamp  time.Time              `json:"timestamp"`
+	Origin     string                 `json:"origin"`
+	Collector  string                 `json:"collector"`
 }
+
+// GetScoreType returns VulnerabilityMetadataInputSpec.ScoreType, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataInputSpec) GetScoreType() VulnerabilityScoreType { return v.ScoreType }
+
+// GetScoreValue returns VulnerabilityMetadataInputSpec.ScoreValue, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataInputSpec) GetScoreValue() float64 { return v.ScoreValue }
 
 // GetTimestamp returns VulnerabilityMetadataInputSpec.Timestamp, and is useful for accessing the field via an interface.
 func (v *VulnerabilityMetadataInputSpec) GetTimestamp() time.Time { return v.Timestamp }
@@ -22649,18 +23361,6 @@ func (v *VulnerabilityMetadataInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns VulnerabilityMetadataInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *VulnerabilityMetadataInputSpec) GetCollector() string { return v.Collector }
-
-// VulnerabilityScoreInputSpec represents the mutation input to ingest a vulnerability score.
-type VulnerabilityScoreInputSpec struct {
-	Type  VulnerabilityScoreType `json:"type"`
-	Value float64                `json:"value"`
-}
-
-// GetType returns VulnerabilityScoreInputSpec.Type, and is useful for accessing the field via an interface.
-func (v *VulnerabilityScoreInputSpec) GetType() VulnerabilityScoreType { return v.Type }
-
-// GetValue returns VulnerabilityScoreInputSpec.Value, and is useful for accessing the field via an interface.
-func (v *VulnerabilityScoreInputSpec) GetValue() float64 { return v.Value }
 
 // Records the type of the score being captured by the score node
 type VulnerabilityScoreType string
@@ -23519,15 +24219,11 @@ func (v *__VulnEqualInput) GetVulnEqual() VulnEqualInputSpec { return v.VulnEqua
 // __VulnHasMetadataInput is used internally by genqlient
 type __VulnHasMetadataInput struct {
 	Vulnerability VulnerabilityInputSpec         `json:"vulnerability"`
-	Score         VulnerabilityScoreInputSpec    `json:"score"`
 	VulnMetadata  VulnerabilityMetadataInputSpec `json:"vulnMetadata"`
 }
 
 // GetVulnerability returns __VulnHasMetadataInput.Vulnerability, and is useful for accessing the field via an interface.
 func (v *__VulnHasMetadataInput) GetVulnerability() VulnerabilityInputSpec { return v.Vulnerability }
-
-// GetScore returns __VulnHasMetadataInput.Score, and is useful for accessing the field via an interface.
-func (v *__VulnHasMetadataInput) GetScore() VulnerabilityScoreInputSpec { return v.Score }
 
 // GetVulnMetadata returns __VulnHasMetadataInput.VulnMetadata, and is useful for accessing the field via an interface.
 func (v *__VulnHasMetadataInput) GetVulnMetadata() VulnerabilityMetadataInputSpec {
@@ -23537,7 +24233,6 @@ func (v *__VulnHasMetadataInput) GetVulnMetadata() VulnerabilityMetadataInputSpe
 // __VulnHasMetadatasInput is used internally by genqlient
 type __VulnHasMetadatasInput struct {
 	Vulnerabilities []VulnerabilityInputSpec         `json:"vulnerabilities"`
-	Scores          []VulnerabilityScoreInputSpec    `json:"scores"`
 	VulnMetadatas   []VulnerabilityMetadataInputSpec `json:"vulnMetadatas"`
 }
 
@@ -23545,9 +24240,6 @@ type __VulnHasMetadatasInput struct {
 func (v *__VulnHasMetadatasInput) GetVulnerabilities() []VulnerabilityInputSpec {
 	return v.Vulnerabilities
 }
-
-// GetScores returns __VulnHasMetadatasInput.Scores, and is useful for accessing the field via an interface.
-func (v *__VulnHasMetadatasInput) GetScores() []VulnerabilityScoreInputSpec { return v.Scores }
 
 // GetVulnMetadatas returns __VulnHasMetadatasInput.VulnMetadatas, and is useful for accessing the field via an interface.
 func (v *__VulnHasMetadatasInput) GetVulnMetadatas() []VulnerabilityMetadataInputSpec {
@@ -27293,6 +27985,9 @@ query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
 		... on Builder {
 			... AllBuilderTree
 		}
+		... on VulnerabilityMetadata {
+			... AllVulnMetadataTree
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -27574,6 +28269,22 @@ fragment AllCertifyVEXStatement on CertifyVEXStatement {
 	statement
 	statusNotes
 	knownSince
+	origin
+	collector
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
 	origin
 	collector
 }
@@ -27672,6 +28383,9 @@ query Node ($node: ID!) {
 		... on Builder {
 			... AllBuilderTree
 		}
+		... on VulnerabilityMetadata {
+			... AllVulnMetadataTree
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -27953,6 +28667,22 @@ fragment AllCertifyVEXStatement on CertifyVEXStatement {
 	statement
 	statusNotes
 	knownSince
+	origin
+	collector
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
 	origin
 	collector
 }
@@ -28049,6 +28779,9 @@ query Nodes ($nodes: [ID!]!) {
 		... on Builder {
 			... AllBuilderTree
 		}
+		... on VulnerabilityMetadata {
+			... AllVulnMetadataTree
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -28330,6 +29063,22 @@ fragment AllCertifyVEXStatement on CertifyVEXStatement {
 	statement
 	statusNotes
 	knownSince
+	origin
+	collector
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
 	origin
 	collector
 }
@@ -28655,6 +29404,9 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge
 		... on Builder {
 			... AllBuilderTree
 		}
+		... on VulnerabilityMetadata {
+			... AllVulnMetadataTree
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -28936,6 +29688,22 @@ fragment AllCertifyVEXStatement on CertifyVEXStatement {
 	statement
 	statusNotes
 	knownSince
+	origin
+	collector
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
 	origin
 	collector
 }
@@ -29599,8 +30367,8 @@ func VulnEqual(
 
 // The query or mutation executed by VulnHasMetadata.
 const VulnHasMetadata_Operation = `
-mutation VulnHasMetadata ($vulnerability: VulnerabilityInputSpec!, $score: VulnerabilityScoreInputSpec!, $vulnMetadata: VulnerabilityMetadataInputSpec!) {
-	ingestVulnerabilityMetadata(vulnerability: $vulnerability, score: $score, vulnerabilityMetadata: $vulnMetadata)
+mutation VulnHasMetadata ($vulnerability: VulnerabilityInputSpec!, $vulnMetadata: VulnerabilityMetadataInputSpec!) {
+	ingestVulnerabilityMetadata(vulnerability: $vulnerability, vulnerabilityMetadata: $vulnMetadata)
 }
 `
 
@@ -29608,7 +30376,6 @@ func VulnHasMetadata(
 	ctx context.Context,
 	client graphql.Client,
 	vulnerability VulnerabilityInputSpec,
-	score VulnerabilityScoreInputSpec,
 	vulnMetadata VulnerabilityMetadataInputSpec,
 ) (*VulnHasMetadataResponse, error) {
 	req := &graphql.Request{
@@ -29616,7 +30383,6 @@ func VulnHasMetadata(
 		Query:  VulnHasMetadata_Operation,
 		Variables: &__VulnHasMetadataInput{
 			Vulnerability: vulnerability,
-			Score:         score,
 			VulnMetadata:  vulnMetadata,
 		},
 	}
@@ -29636,8 +30402,8 @@ func VulnHasMetadata(
 
 // The query or mutation executed by VulnHasMetadatas.
 const VulnHasMetadatas_Operation = `
-mutation VulnHasMetadatas ($vulnerabilities: [VulnerabilityInputSpec!]!, $scores: [VulnerabilityScoreInputSpec!]!, $vulnMetadatas: [VulnerabilityMetadataInputSpec!]!) {
-	ingestVulnerabilityMetadatas(vulnerabilities: $vulnerabilities, scores: $scores, vulnerabilityMetadatas: $vulnMetadatas)
+mutation VulnHasMetadatas ($vulnerabilities: [VulnerabilityInputSpec!]!, $vulnMetadatas: [VulnerabilityMetadataInputSpec!]!) {
+	ingestVulnerabilityMetadatas(vulnerabilities: $vulnerabilities, vulnerabilityMetadatas: $vulnMetadatas)
 }
 `
 
@@ -29645,7 +30411,6 @@ func VulnHasMetadatas(
 	ctx context.Context,
 	client graphql.Client,
 	vulnerabilities []VulnerabilityInputSpec,
-	scores []VulnerabilityScoreInputSpec,
 	vulnMetadatas []VulnerabilityMetadataInputSpec,
 ) (*VulnHasMetadatasResponse, error) {
 	req := &graphql.Request{
@@ -29653,7 +30418,6 @@ func VulnHasMetadatas(
 		Query:  VulnHasMetadatas_Operation,
 		Variables: &__VulnHasMetadatasInput{
 			Vulnerabilities: vulnerabilities,
-			Scores:          scores,
 			VulnMetadatas:   vulnMetadatas,
 		},
 	}
