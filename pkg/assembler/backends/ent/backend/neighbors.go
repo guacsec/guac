@@ -89,14 +89,8 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		return toModelSource(s), nil
 	case *ent.Builder:
 		return toModelBuilder(v), nil
-	case *ent.SecurityAdvisory:
-		if v.OsvID != nil {
-			return toModelOSV(v), nil
-		} else if v.CveID != nil {
-			return toModelCVE(v), nil
-		} else if v.GhsaID != nil {
-			return toModelGHSA(v), nil
-		}
+	case *ent.VulnerabilityType:
+		return toModelVulnerability(v), nil
 	default:
 		log.Printf("Unknown node type: %T", v)
 	}
