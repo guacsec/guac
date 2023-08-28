@@ -547,10 +547,6 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 
 func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
 	if len(subjects.Packages) > 0 {
-		if len(subjects.Packages) != len(certifyBads) {
-			return nil, fmt.Errorf("uneven packages and certifyBads for ingestion")
-		}
-
 		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
@@ -714,11 +710,6 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		}
 
 	} else if len(subjects.Artifacts) > 0 {
-
-		if len(subjects.Artifacts) != len(certifyBads) {
-			return nil, fmt.Errorf("uneven artifacts and certifyBads for ingestion")
-		}
-
 		var listOfValues []map[string]any
 
 		for i := range subjects.Artifacts {
@@ -787,11 +778,6 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		return certifyBadList, nil
 
 	} else if len(subjects.Sources) > 0 {
-
-		if len(subjects.Sources) != len(certifyBads) {
-			return nil, fmt.Errorf("uneven sources and certifyBads for ingestion")
-		}
-
 		var listOfValues []map[string]any
 
 		for i := range subjects.Sources {

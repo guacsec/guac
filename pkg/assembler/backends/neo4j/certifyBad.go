@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -265,11 +264,6 @@ func generateModelCertifyBad(subject model.PackageSourceOrArtifact, justificatio
 // ingest certifyBad
 
 func (c *neo4jClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-
-	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "IngestCertifyBad")
-	if err != nil {
-		return nil, err
-	}
 	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
 }
 
