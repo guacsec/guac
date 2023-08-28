@@ -63,6 +63,19 @@ jobs:
   test-unit:
     runs-on: ubuntu-latest
     name: CI for unit tests
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: guac
+          POSTGRES_PASSWORD: guac
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # tag=v3
@@ -77,6 +90,8 @@ jobs:
       - name: Setup the project
         run: go mod download
       - name: Run tests
+        env:
+          ENT_TEST_DATABASE_URL: 'postgresql://guac:guac@localhost/guac?sslmode=disable'
         run: make test
 
   static-analysis:
