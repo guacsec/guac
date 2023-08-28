@@ -87,10 +87,14 @@ input PointOfContactInputSpec {
 
 extend type Query {
   "Returns all PointOfContact attestations matching a filter."
-  PointOfContact (pointOfContactSpec: PointOfContactSpec!): [PointOfContact!]!
+  PointOfContact(pointOfContactSpec: PointOfContactSpec!): [PointOfContact!]!
 }
 
 extend type Mutation {
-  "Adds a PointOfContact attestation to a package, source or artifact."
-  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): PointOfContact!
+  "Adds a PointOfContact attestation to a package, source or artifact. The returned ID can be empty string."
+  ingestPointOfContact(
+    subject: PackageSourceOrArtifactInput!
+    pkgMatchType: MatchFlags!
+    pointOfContact: PointOfContactInputSpec!
+  ): ID!
 }

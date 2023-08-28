@@ -11,13 +11,24 @@ import (
 )
 
 // IngestHashEqual is the resolver for the ingestHashEqual field.
-func (r *mutationResolver) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
-	return r.Backend.IngestHashEqual(ctx, artifact, otherArtifact, hashEqual)
+func (r *mutationResolver) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
+	ingestedHashEqual, err := r.Backend.IngestHashEqual(ctx, artifact, otherArtifact, hashEqual)
+	if err != nil {
+		return "", err
+	}
+	return ingestedHashEqual.ID, err
 }
 
 // IngestHashEquals is the resolver for the ingestHashEquals field.
-func (r *mutationResolver) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
-	return r.Backend.IngestHashEquals(ctx, artifacts, otherArtifacts, hashEquals)
+func (r *mutationResolver) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
+	ingestedHashEquals, err := r.Backend.IngestHashEquals(ctx, artifacts, otherArtifacts, hashEquals)
+	ingestedHashEqualsIDS := []string{}
+	if err == nil {
+		for _, hashEqual := range ingestedHashEquals {
+			ingestedHashEqualsIDS = append(ingestedHashEqualsIDS, hashEqual.ID)
+		}
+	}
+	return ingestedHashEqualsIDS, err
 }
 
 // HashEqual is the resolver for the HashEqual field.

@@ -181,8 +181,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new package and returns the corresponding package trie path."
-  ingestPackage(pkg: PkgInputSpec!): Package!
-  "Bulk ingests packages and returns the list of corresponding package trie path."
-  ingestPackages(pkgs: [PkgInputSpec!]!): [Package!]!
+  "Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string."
+  ingestPackage(pkg: PkgInputSpec!): ID!
+  "Bulk ingests packages and returns the list of corresponding package trie path. The returned array of IDs can be a an array of empty string."
+  ingestPackages(pkgs: [PkgInputSpec!]!): [ID!]!
 }

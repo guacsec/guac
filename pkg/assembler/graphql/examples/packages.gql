@@ -41,136 +41,159 @@ query PkgQ2 {
 
 # only PyPI packages
 query PkgQ3 {
-  packages(pkgSpec: {type: "pypi"}) {
+  packages(pkgSpec: { type: "pypi" }) {
     ...allPkgTree
   }
 }
 
 # PyPI packages in "debian" namespace (empty)
 query PkgQ4 {
-  packages(pkgSpec: {type: "pypi", namespace: "debian"}) {
+  packages(pkgSpec: { type: "pypi", namespace: "debian" }) {
     ...allPkgTree
   }
 }
 
 # debian packages in "debian" namespace
 query PkgQ5 {
-  packages(pkgSpec: {type: "deb", namespace: "debian"}) {
+  packages(pkgSpec: { type: "deb", namespace: "debian" }) {
     ...allPkgTree
   }
 }
 
 # "dpkg" package from Ubuntu ("ubuntu" namespace on "deb" type)
 query PkgQ6 {
-  packages(pkgSpec: {type: "deb", namespace: "ubuntu", name: "dpkg"}) {
+  packages(pkgSpec: { type: "deb", namespace: "ubuntu", name: "dpkg" }) {
     ...allPkgTree
   }
 }
 
 # All "deb" type packages named "dpkg"
 query PkgQ7 {
-  packages(pkgSpec: {type: "deb", name:"dpkg"}) {
+  packages(pkgSpec: { type: "deb", name: "dpkg" }) {
     ...allPkgTree
   }
 }
 
 # All occurrences of openssl-3.0.3
 query PkgQ8 {
-  packages(pkgSpec: {name:"openssl", version:"3.0.3"}) {
+  packages(pkgSpec: { name: "openssl", version: "3.0.3" }) {
     ...allPkgTree
   }
 }
 
 # All occurrences of openssl
 query PkgQ9 {
-  packages(pkgSpec: {name:"openssl"}) {
+  packages(pkgSpec: { name: "openssl" }) {
     ...allPkgTree
   }
 }
 
 query PkgQA {
-  packages(pkgSpec: {qualifiers: [{key: "arch", value: "amd64"}]}) {
+  packages(pkgSpec: { qualifiers: [{ key: "arch", value: "amd64" }] }) {
     ...allPkgTree
   }
 }
 
 query PkgQB {
   packages(
-    pkgSpec: {qualifiers: [{key: "arch", value: "amd64"}, {key: "distro", value: "stretch"}]}
+    pkgSpec: {
+      qualifiers: [
+        { key: "arch", value: "amd64" }
+        { key: "distro", value: "stretch" }
+      ]
+    }
   ) {
     ...allPkgTree
   }
 }
 
 query PkgQC {
-  packages(pkgSpec: {subpath: "subpath"}) {
+  packages(pkgSpec: { subpath: "subpath" }) {
     ...allPkgTree
   }
 }
 
 query PkgQD {
-  packages(pkgSpec: {matchOnlyEmptyQualifiers: true}) {
+  packages(pkgSpec: { matchOnlyEmptyQualifiers: true }) {
     ...allPkgTree
   }
 }
 
 mutation PkgM1 {
-  ingestPackage(pkg: {type: "pypi", name: "tensorflow"}) {
-    ...allPkgTree
-  }
+  ingestPackage(pkg: { type: "pypi", name: "tensorflow" })
 }
 
 mutation PkgM2 {
   ingestPackage(
-    pkg: {type: "pypi", name: "tensorflow", qualifiers: [{key: "arch", value: "amd64"}, {key: "distro", value: "stretch"}]}
-  ) {
-    ...allPkgTree
-  }
+    pkg: {
+      type: "pypi"
+      name: "tensorflow"
+      qualifiers: [
+        { key: "arch", value: "amd64" }
+        { key: "distro", value: "stretch" }
+      ]
+    }
+  )
 }
 
 mutation PkgM3 {
-  ingestPackage(pkg: {type: "pypi", name: "tensorflow", version: "2.12.0"}) {
-    ...allPkgTree
-  }
+  ingestPackage(pkg: { type: "pypi", name: "tensorflow", version: "2.12.0" })
 }
 
 mutation PkgM4 {
   ingestPackage(
-    pkg: {type: "pypi", name: "tensorflow", version: "2.12.0", qualifiers: [{key: "arch", value: "amd64"}, {key: "distro", value: "stretch"}]}
-  ) {
-    ...allPkgTree
-  }
+    pkg: {
+      type: "pypi"
+      name: "tensorflow"
+      version: "2.12.0"
+      qualifiers: [
+        { key: "arch", value: "amd64" }
+        { key: "distro", value: "stretch" }
+      ]
+    }
+  )
 }
 
 mutation PkgM5 {
   ingestPackage(
-    pkg: {type: "pypi", name: "tensorflow", version: "2.12.0", qualifiers: [{key: "distro", value: "stretch"}, {key: "arch", value: "amd64"}]}
-  ) {
-    ...allPkgTree
-  }
+    pkg: {
+      type: "pypi"
+      name: "tensorflow"
+      version: "2.12.0"
+      qualifiers: [
+        { key: "distro", value: "stretch" }
+        { key: "arch", value: "amd64" }
+      ]
+    }
+  )
 }
 
 mutation PkgM6 {
   ingestPackage(
-    pkg: {type: "pypi", name: "tensorflow", version: "2.12.0", subpath: "foo", qualifiers: [{key: "distro", value: "stretch"}, {key: "arch", value: "amd64"}]}
-  ) {
-    ...allPkgTree
-  }
+    pkg: {
+      type: "pypi"
+      name: "tensorflow"
+      version: "2.12.0"
+      subpath: "foo"
+      qualifiers: [
+        { key: "distro", value: "stretch" }
+        { key: "arch", value: "amd64" }
+      ]
+    }
+  )
 }
 
 mutation PkgM7 {
   ingestPackage(
-    pkg: {type: "pypi", name: "tensorflow", version: "2.12.0", subpath: "foo", qualifiers: [{key: "distro", value: "stretch"}, {key: "arch", value: "amd64"}]}
-  ) {
-    namespaces {
-      names {
-        versions {
-          qualifiers {
-            key
-            value
-          }
-        }
-      }
+    pkg: {
+      type: "pypi"
+      name: "tensorflow"
+      version: "2.12.0"
+      subpath: "foo"
+      qualifiers: [
+        { key: "distro", value: "stretch" }
+        { key: "arch", value: "amd64" }
+      ]
     }
-  }
+  )
 }

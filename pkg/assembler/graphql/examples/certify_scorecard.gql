@@ -39,30 +39,26 @@ query ScorecardQ1 {
 }
 
 query ScorecardQ2 {
-  scorecards(scorecardSpec: {origin: "testing backend"}) {
+  scorecards(scorecardSpec: { origin: "testing backend" }) {
     ...allCertifyScorecardTree
   }
 }
 
 query ScorecardQ3 {
-  scorecards(scorecardSpec: {source: {name: "github.com/tensorflow/tensorflow"}}) {
-    ...allCertifyScorecardTree
-  }
-}
-
-query ScorecardQ4 {
   scorecards(
-    scorecardSpec: {aggregateScore: 2.9}
+    scorecardSpec: { source: { name: "github.com/tensorflow/tensorflow" } }
   ) {
     ...allCertifyScorecardTree
   }
 }
 
-mutation Scorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
-  ingestSource(source: $source) {
-    ...allSrcTree
-  }
-  ingestScorecard(source: $source, scorecard: $scorecard) {
+query ScorecardQ4 {
+  scorecards(scorecardSpec: { aggregateScore: 2.9 }) {
     ...allCertifyScorecardTree
   }
+}
+
+mutation Scorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
+  ingestSource(source: $source)
+  ingestScorecard(source: $source, scorecard: $scorecard)
 }

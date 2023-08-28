@@ -11,13 +11,24 @@ import (
 )
 
 // IngestSlsa is the resolver for the ingestSLSA field.
-func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	return r.Backend.IngestSLSA(ctx, subject, builtFrom, builtBy, slsa)
+func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
+	ingestedSLSA, err := r.Backend.IngestSLSA(ctx, subject, builtFrom, builtBy, slsa)
+	if err != nil {
+		return "", err
+	}
+	return ingestedSLSA.ID, err
 }
 
 // IngestSLSAs is the resolver for the ingestSLSAs field.
-func (r *mutationResolver) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
-	return r.Backend.IngestSLSAs(ctx, subjects, builtFromList, builtByList, slsaList)
+func (r *mutationResolver) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+	ingestedSLSAs, err := r.Backend.IngestSLSAs(ctx, subjects, builtFromList, builtByList, slsaList)
+	ingestedSLSAIDS := []string{}
+	if err == nil {
+		for _, SLSA := range ingestedSLSAs {
+			ingestedSLSAIDS = append(ingestedSLSAIDS, SLSA.ID)
+		}
+	}
+	return ingestedSLSAIDS, err
 }
 
 // HasSlsa is the resolver for the HasSLSA field.

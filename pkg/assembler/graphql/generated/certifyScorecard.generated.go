@@ -1030,10 +1030,6 @@ func (ec *executionContext) _ScorecardCheck(ctx context.Context, sel ast.Selecti
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNCertifyScorecard2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecard(ctx context.Context, sel ast.SelectionSet, v model.CertifyScorecard) graphql.Marshaler {
-	return ec._CertifyScorecard(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNCertifyScorecard2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyScorecard) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

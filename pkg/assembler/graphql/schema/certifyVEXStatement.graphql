@@ -129,10 +129,16 @@ input VexStatementInputSpec {
 
 extend type Query {
   "Returns all VEX certifications matching the input filter."
-  CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec!): [CertifyVEXStatement!]!
+  CertifyVEXStatement(
+    certifyVEXStatementSpec: CertifyVEXStatementSpec!
+  ): [CertifyVEXStatement!]!
 }
 
 extend type Mutation {
-  "Adds a VEX certification for a package."
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInputSpec!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  "Adds a VEX certification for a package. The returned ID can be empty string."
+  ingestVEXStatement(
+    subject: PackageOrArtifactInput!
+    vulnerability: VulnerabilityInputSpec!
+    vexStatement: VexStatementInputSpec!
+  ): ID!
 }

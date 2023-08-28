@@ -636,10 +636,6 @@ func (ec *executionContext) _HasSBOM(ctx context.Context, sel ast.SelectionSet, 
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNHasSBOM2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbom(ctx context.Context, sel ast.SelectionSet, v model.HasSbom) graphql.Marshaler {
-	return ec._HasSBOM(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNHasSBOM2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbomᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HasSbom) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

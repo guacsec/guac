@@ -11,13 +11,24 @@ import (
 )
 
 // IngestCertifyBad is the resolver for the ingestCertifyBad field.
-func (r *mutationResolver) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	return r.Backend.IngestCertifyBad(ctx, subject, &pkgMatchType, certifyBad)
+func (r *mutationResolver) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error) {
+	ingestedCertifyBad, err := r.Backend.IngestCertifyBad(ctx, subject, &pkgMatchType, certifyBad)
+	if err != nil {
+		return "", err
+	}
+	return ingestedCertifyBad.ID, err
 }
 
 // IngestCertifyBads is the resolver for the ingestCertifyBads field.
-func (r *mutationResolver) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
-	return r.Backend.IngestCertifyBads(ctx, subjects, &pkgMatchType, certifyBads)
+func (r *mutationResolver) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
+	ingestedCertifyBads, err := r.Backend.IngestCertifyBads(ctx, subjects, &pkgMatchType, certifyBads)
+	ingestedCertifyBadsIDS := []string{}
+	if err == nil {
+		for _, certifybad := range ingestedCertifyBads {
+			ingestedCertifyBadsIDS = append(ingestedCertifyBadsIDS, certifybad.ID)
+		}
+	}
+	return ingestedCertifyBadsIDS, err
 }
 
 // CertifyBad is the resolver for the CertifyBad field.

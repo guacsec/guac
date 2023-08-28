@@ -20,19 +20,25 @@ query IsVulnerabilityQ1 {
 }
 
 query IsVulnerabilityQ2 {
-  vulnEqual(vulnEqualSpec: {origin: "testing backend"}) {
+  vulnEqual(vulnEqualSpec: { origin: "testing backend" }) {
     ...allVulnEqualTree
   }
 }
 
 query IsVulnerabilityQ3 {
-  vulnEqual(vulnEqualSpec: {vulnerabilities: {vulnerabilityID: "GHSA-h45f-rjvw-2rv2"}}) {
+  vulnEqual(
+    vulnEqualSpec: {
+      vulnerabilities: { vulnerabilityID: "GHSA-h45f-rjvw-2rv2" }
+    }
+  ) {
     ...allVulnEqualTree
   }
 }
 
 query IsVulnerabilityQ4 {
-  vulnEqual(vulnEqualSpec: {vulnerabilities: {vulnerabilityID: "CVE-2019-13110"}}) {
+  vulnEqual(
+    vulnEqualSpec: { vulnerabilities: { vulnerabilityID: "CVE-2019-13110" } }
+  ) {
     ...allVulnEqualTree
   }
 }

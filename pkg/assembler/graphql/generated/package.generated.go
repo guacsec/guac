@@ -1244,10 +1244,6 @@ func (ec *executionContext) _PackageVersion(ctx context.Context, sel ast.Selecti
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNPackage2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage(ctx context.Context, sel ast.SelectionSet, v model.Package) graphql.Marshaler {
-	return ec._Package(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNPackage2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Package) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

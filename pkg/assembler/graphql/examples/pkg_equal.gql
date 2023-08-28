@@ -33,14 +33,22 @@ query PkgEqualQ1 {
 }
 
 query PkgEqualQ2 {
-  PkgEqual(pkgEqualSpec: {origin: "Demo ingestion"}) {
+  PkgEqual(pkgEqualSpec: { origin: "Demo ingestion" }) {
     ...allPkgEqualTree
   }
 }
 
 query PkgEqualQ3 {
   PkgEqual(
-    pkgEqualSpec: {packages: {type: "conan", namespace: "openssl.org", name: "openssl", version: "3.0.3", subpath: ""}}
+    pkgEqualSpec: {
+      packages: {
+        type: "conan"
+        namespace: "openssl.org"
+        name: "openssl"
+        version: "3.0.3"
+        subpath: ""
+      }
+    }
   ) {
     ...allPkgEqualTree
   }
@@ -48,16 +56,22 @@ query PkgEqualQ3 {
 
 query PkgEqualQ4 {
   PkgEqual(
-    pkgEqualSpec: {packages: {type: "pypi", namespace: "", name: "django", version: "1.11.1", subpath: "subpath"}}
+    pkgEqualSpec: {
+      packages: {
+        type: "pypi"
+        namespace: ""
+        name: "django"
+        version: "1.11.1"
+        subpath: "subpath"
+      }
+    }
   ) {
     ...allPkgEqualTree
   }
 }
 
 query PkgEqualQ5 {
-  PkgEqual(
-    pkgEqualSpec: {packages: {type: "deb", namespace: "debian"}}
-  ) {
+  PkgEqual(pkgEqualSpec: { packages: { type: "deb", namespace: "debian" } }) {
     ...allPkgEqualTree
   }
 }

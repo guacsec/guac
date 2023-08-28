@@ -11,13 +11,24 @@ import (
 )
 
 // IngestOccurrence is the resolver for the ingestOccurrence field.
-func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
-	return r.Backend.IngestOccurrence(ctx, subject, artifact, occurrence)
+func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+	ingestedOccurrence, err := r.Backend.IngestOccurrence(ctx, subject, artifact, occurrence)
+	if err != nil {
+		return "", err
+	}
+	return ingestedOccurrence.ID, err
 }
 
 // IngestOccurrences is the resolver for the ingestOccurrences field.
-func (r *mutationResolver) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	return r.Backend.IngestOccurrences(ctx, subjects, artifacts, occurrences)
+func (r *mutationResolver) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+	ingestedOccurences, err := r.Backend.IngestOccurrences(ctx, subjects, artifacts, occurrences)
+	ingestedOccurencesIDs := []string{}
+	if err == nil {
+		for _, occurence := range ingestedOccurences {
+			ingestedOccurencesIDs = append(ingestedOccurencesIDs, occurence.ID)
+		}
+	}
+	return ingestedOccurencesIDs, err
 }
 
 // IsOccurrence is the resolver for the IsOccurrence field.

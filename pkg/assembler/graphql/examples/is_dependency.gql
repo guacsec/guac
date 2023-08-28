@@ -22,7 +22,7 @@ fragment allIsDependencyTree on IsDependency {
       }
     }
   }
-dependentPackage {
+  dependentPackage {
     id
     type
     namespaces {
@@ -43,10 +43,10 @@ dependentPackage {
       }
     }
   }
-dependencyType  
-versionRange
-origin
-collector
+  dependencyType
+  versionRange
+  origin
+  collector
 }
 
 query IsDependencyQ1 {
@@ -56,31 +56,33 @@ query IsDependencyQ1 {
 }
 
 query IsDependencyQ2 {
-  IsDependency(isDependencySpec: {origin: "testing backend"}) {
+  IsDependency(isDependencySpec: { origin: "testing backend" }) {
     ...allIsDependencyTree
   }
 }
 
 query IsDependencyQ3 {
-  IsDependency(isDependencySpec: {package: {name: "debian"}}) {
+  IsDependency(isDependencySpec: { package: { name: "debian" } }) {
     ...allIsDependencyTree
   }
 }
 
 query IsDependencyQ4 {
-  IsDependency(isDependencySpec: {package: {name: "dpkg"}}) {
+  IsDependency(isDependencySpec: { package: { name: "dpkg" } }) {
     ...allIsDependencyTree
   }
 }
 # returns nothing as there is no package with openSSL. It is a dependent package
 query IsDependencyQ5 {
-  IsDependency(isDependencySpec: {package: {name: "openssl", version: "3.0.3"}}) {
+  IsDependency(
+    isDependencySpec: { package: { name: "openssl", version: "3.0.3" } }
+  ) {
     ...allIsDependencyTree
   }
 }
 
 query IsDependencyQ6 {
-  IsDependency(isDependencySpec: {dependentPackage: {name: "openssl"}}) {
+  IsDependency(isDependencySpec: { dependentPackage: { name: "openssl" } }) {
     ...allIsDependencyTree
   }
 }

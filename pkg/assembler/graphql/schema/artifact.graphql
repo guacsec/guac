@@ -59,8 +59,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new artifact and returns it."
-  ingestArtifact(artifact: ArtifactInputSpec): Artifact!
-  "Bulk ingests new artifacts and returns a list of them."
-  ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [Artifact!]!
+  "Ingests a new artifact and returns it. The returned ID can be empty string."
+  ingestArtifact(artifact: ArtifactInputSpec): ID!
+  "Bulk ingests new artifacts and returns a list of them. The returned array of IDs can be a an array of empty string."
+  ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [ID!]!
 }

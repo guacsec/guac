@@ -444,10 +444,6 @@ func (ec *executionContext) _VulnEqual(ctx context.Context, sel ast.SelectionSet
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNVulnEqual2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqual(ctx context.Context, sel ast.SelectionSet, v model.VulnEqual) graphql.Marshaler {
-	return ec._VulnEqual(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNVulnEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.VulnEqual) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

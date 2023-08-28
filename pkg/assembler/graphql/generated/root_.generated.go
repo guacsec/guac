@@ -2462,10 +2462,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new artifact and returns it."
-  ingestArtifact(artifact: ArtifactInputSpec): Artifact!
-  "Bulk ingests new artifacts and returns a list of them."
-  ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [Artifact!]!
+  "Ingests a new artifact and returns it. The returned ID can be empty string."
+  ingestArtifact(artifact: ArtifactInputSpec): ID!
+  "Bulk ingests new artifacts and returns a list of them. The returned array of IDs can be a an array of empty string."
+  ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/builder.graphql", Input: `#
@@ -2514,10 +2514,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new builder and returns it."
-  ingestBuilder(builder: BuilderInputSpec): Builder!
+  "Ingests a new builder and returns it. The returned ID can be empty string."
+  ingestBuilder(builder: BuilderInputSpec): ID!
   "Bulk ingests new builders and returns a list of them."
-  ingestBuilders(builders: [BuilderInputSpec!]!): [Builder!]!
+  ingestBuilders(builders: [BuilderInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyBad.graphql", Input: `#
@@ -2648,10 +2648,18 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package, source or artifact is considered bad."
-  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyBad: CertifyBadInputSpec!): CertifyBad!
-  "Adds bulk certifications that a package, source or artifact is considered bad."
-  ingestCertifyBads(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyBads: [CertifyBadInputSpec!]!): [CertifyBad!]!
+  "Adds a certification that a package, source or artifact is considered bad. The returned ID can be empty string."
+  ingestCertifyBad(
+    subject: PackageSourceOrArtifactInput!
+    pkgMatchType: MatchFlags!
+    certifyBad: CertifyBadInputSpec!
+  ): ID!
+  "Adds bulk certifications that a package, source or artifact is considered bad. The returned array of IDs can be a an array of empty string."
+  ingestCertifyBads(
+    subjects: PackageSourceOrArtifactInputs!
+    pkgMatchType: MatchFlags!
+    certifyBads: [CertifyBadInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyGood.graphql", Input: `#
@@ -2728,10 +2736,18 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package, source or artifact is considered good."
-  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyGood: CertifyGoodInputSpec!): CertifyGood!
-  "Adds bulk certifications that a package, source or artifact is considered good."
-  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyGoods: [CertifyGoodInputSpec!]!): [CertifyGood!]!
+  "Adds a certification that a package, source or artifact is considered good. The returned ID can be empty string."
+  ingestCertifyGood(
+    subject: PackageSourceOrArtifactInput!
+    pkgMatchType: MatchFlags!
+    certifyGood: CertifyGoodInputSpec!
+  ): ID!
+  "Adds bulk certifications that a package, source or artifact is considered good. The returned array of IDs can be a an array of empty string."
+  ingestCertifyGoods(
+    subjects: PackageSourceOrArtifactInputs!
+    pkgMatchType: MatchFlags!
+    certifyGoods: [CertifyGoodInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
@@ -2861,10 +2877,13 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a source repository has a Scorecard."
-  ingestScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
-  "Adds bulk certifications that a source repository has a Scorecard."
-  ingestScorecards(sources: [SourceInputSpec!]!, scorecards: [ScorecardInputSpec!]!): [CertifyScorecard!]!
+  "Adds a certification that a source repository has a Scorecard. The returned ID can be empty string."
+  ingestScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): ID!
+  "Adds bulk certifications that a source repository has a Scorecard. The returned array of IDs can be a an array of empty string."
+  ingestScorecards(
+    sources: [SourceInputSpec!]!
+    scorecards: [ScorecardInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVEXStatement.graphql", Input: `#
@@ -2998,12 +3017,18 @@ input VexStatementInputSpec {
 
 extend type Query {
   "Returns all VEX certifications matching the input filter."
-  CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec!): [CertifyVEXStatement!]!
+  CertifyVEXStatement(
+    certifyVEXStatementSpec: CertifyVEXStatementSpec!
+  ): [CertifyVEXStatement!]!
 }
 
 extend type Mutation {
-  "Adds a VEX certification for a package."
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInputSpec!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  "Adds a VEX certification for a package. The returned ID can be empty string."
+  ingestVEXStatement(
+    subject: PackageOrArtifactInput!
+    vulnerability: VulnerabilityInputSpec!
+    vexStatement: VexStatementInputSpec!
+  ): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#
@@ -3029,7 +3054,7 @@ extend type Mutation {
 CertifyVuln is an attestation to attach vulnerability information to a package.
 
 This information is obtained via a scanner. If there is no vulnerability
-detected, we attach the a vulnerability with "NoVuln" type and an empty string 
+detected, we attach the a vulnerability with "NoVuln" type and an empty string
 for the vulnerability ID.
 """
 type CertifyVuln {
@@ -3107,10 +3132,18 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package has been scanned for vulnerabilities."
-  ingestCertifyVuln(pkg: PkgInputSpec!, vulnerability: VulnerabilityInputSpec!, certifyVuln: ScanMetadataInput!): CertifyVuln!
-  "Bulk add certifications that a package has been scanned for vulnerabilities."
-  ingestCertifyVulns(pkgs: [PkgInputSpec!]!, vulnerabilities: [VulnerabilityInputSpec!]!, certifyVulns: [ScanMetadataInput!]!): [CertifyVuln!]!
+  "Adds a certification that a package has been scanned for vulnerabilities. The returned ID can be empty string."
+  ingestCertifyVuln(
+    pkg: PkgInputSpec!
+    vulnerability: VulnerabilityInputSpec!
+    certifyVuln: ScanMetadataInput!
+  ): ID!
+  "Bulk add certifications that a package has been scanned for vulnerabilities. The returned array of IDs can be a an array of empty string."
+  ingestCertifyVulns(
+    pkgs: [PkgInputSpec!]!
+    vulnerabilities: [VulnerabilityInputSpec!]!
+    certifyVulns: [ScanMetadataInput!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/contact.graphql", Input: `#
@@ -3202,12 +3235,16 @@ input PointOfContactInputSpec {
 
 extend type Query {
   "Returns all PointOfContact attestations matching a filter."
-  PointOfContact (pointOfContactSpec: PointOfContactSpec!): [PointOfContact!]!
+  PointOfContact(pointOfContactSpec: PointOfContactSpec!): [PointOfContact!]!
 }
 
 extend type Mutation {
-  "Adds a PointOfContact attestation to a package, source or artifact."
-  ingestPointOfContact(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, pointOfContact: PointOfContactInputSpec!): PointOfContact!
+  "Adds a PointOfContact attestation to a package, source or artifact. The returned ID can be empty string."
+  ingestPointOfContact(
+    subject: PackageSourceOrArtifactInput!
+    pkgMatchType: MatchFlags!
+    pointOfContact: PointOfContactInputSpec!
+  ): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
@@ -3279,10 +3316,16 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Certifies that a package or artifact has an SBOM."
-  ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
-  "Bulk ingest that package or artifact has an SBOM."
-  ingestHasSBOMs(subjects: PackageOrArtifactInputs!, hasSBOMs: [HasSBOMInputSpec!]!): [HasSBOM!]!
+  "Certifies that a package or artifact has an SBOM. The returned ID can be empty string."
+  ingestHasSBOM(
+    subject: PackageOrArtifactInput!
+    hasSBOM: HasSBOMInputSpec!
+  ): ID!
+  "Bulk ingest that package or artifact has an SBOM. The returned array of IDs can be a an array of empty string."
+  ingestHasSBOMs(
+    subjects: PackageOrArtifactInputs!
+    hasSBOMs: [HasSBOMInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSLSA.graphql", Input: `#
@@ -3420,10 +3463,20 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a SLSA attestation"
-  ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
-  "Bulk Ingest SLSA attestations"
-  ingestSLSAs(subjects: [ArtifactInputSpec!]!, builtFromList: [[ArtifactInputSpec!]!]!, builtByList: [BuilderInputSpec!]!, slsaList: [SLSAInputSpec!]!): [HasSLSA!]!
+  "Ingests a SLSA attestation. The returned ID can be empty string."
+  ingestSLSA(
+    subject: ArtifactInputSpec!
+    builtFrom: [ArtifactInputSpec!]!
+    builtBy: BuilderInputSpec!
+    slsa: SLSAInputSpec!
+  ): ID!
+  "Bulk Ingest SLSA attestations. The returned array of IDs can be a an array of empty string."
+  ingestSLSAs(
+    subjects: [ArtifactInputSpec!]!
+    builtFromList: [[ArtifactInputSpec!]!]!
+    builtByList: [BuilderInputSpec!]!
+    slsaList: [SLSAInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSourceAt.graphql", Input: `#
@@ -3487,8 +3540,13 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package (PackageName or PackageVersion) is built from the source."
-  ingestHasSourceAt(pkg: PkgInputSpec!, pkgMatchType: MatchFlags!, source: SourceInputSpec!, hasSourceAt: HasSourceAtInputSpec!): HasSourceAt!
+  "Adds a certification that a package (PackageName or PackageVersion) is built from the source. The returned ID can be empty string."
+  ingestHasSourceAt(
+    pkg: PkgInputSpec!
+    pkgMatchType: MatchFlags!
+    source: SourceInputSpec!
+    hasSourceAt: HasSourceAtInputSpec!
+  ): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hashEqual.graphql", Input: `#
@@ -3538,7 +3596,6 @@ input HashEqualSpec {
   collector: String
 }
 
-
 "HashEqualInputSpec represents the input to certify that packages are similar."
 input HashEqualInputSpec {
   justification: String!
@@ -3546,17 +3603,24 @@ input HashEqualInputSpec {
   collector: String!
 }
 
-
 extend type Query {
   "Returns all artifact equality statements matching a filter."
   HashEqual(hashEqualSpec: HashEqualSpec!): [HashEqual!]!
 }
 
 extend type Mutation {
- "Adds a certification that two artifacts are equal."
-  ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
-  "Bulk ingest certifications that two artifacts are equal."
-  ingestHashEquals(artifacts: [ArtifactInputSpec!]!, otherArtifacts: [ArtifactInputSpec!]!, hashEquals: [HashEqualInputSpec!]!): [HashEqual!]!
+  "Adds a certification that two artifacts are equal. The returned ID can be empty string."
+  ingestHashEqual(
+    artifact: ArtifactInputSpec!
+    otherArtifact: ArtifactInputSpec!
+    hashEqual: HashEqualInputSpec!
+  ): ID!
+  "Bulk ingest certifications that two artifacts are equal. The returned array of IDs can be a an array of empty string."
+  ingestHashEquals(
+    artifacts: [ArtifactInputSpec!]!
+    otherArtifacts: [ArtifactInputSpec!]!
+    hashEquals: [HashEqualInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isDependency.graphql", Input: `#
@@ -3642,10 +3706,20 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a dependency between two packages"
-  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, depPkgMatchType: MatchFlags!, dependency: IsDependencyInputSpec!): IsDependency!
-  "Bulk adds a dependency between two packages"
-  ingestDependencies(pkgs: [PkgInputSpec!]!, depPkgs: [PkgInputSpec!]!, depPkgMatchType: MatchFlags!, dependencies: [IsDependencyInputSpec!]!): [IsDependency!]!
+  "Adds a dependency between two packages. The returned ID can be empty string."
+  ingestDependency(
+    pkg: PkgInputSpec!
+    depPkg: PkgInputSpec!
+    depPkgMatchType: MatchFlags!
+    dependency: IsDependencyInputSpec!
+  ): ID!
+  "Bulk adds a dependency between two packages. The returned array of IDs can be a an array of empty string."
+  ingestDependencies(
+    pkgs: [PkgInputSpec!]!
+    depPkgs: [PkgInputSpec!]!
+    depPkgMatchType: MatchFlags!
+    dependencies: [IsDependencyInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isOccurrence.graphql", Input: `#
@@ -3699,7 +3773,6 @@ input PackageOrSourceInputs {
   sources: [SourceInputSpec!]
 }
 
-
 """
 IsOccurrence is an attestation to link an artifact to a package or source.
 
@@ -3745,10 +3818,18 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingest that an artifact is produced from a package or source."
-  ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
-  "Bulk ingest that an artifact is produced from a package or source."
-  ingestOccurrences(subjects: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [IsOccurrence!]!
+  "Ingest that an artifact is produced from a package or source. The returned ID can be empty string."
+  ingestOccurrence(
+    subject: PackageOrSourceInput!
+    artifact: ArtifactInputSpec!
+    occurrence: IsOccurrenceInputSpec!
+  ): ID!
+  "Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string."
+  ingestOccurrences(
+    subjects: PackageOrSourceInputs!
+    artifacts: [ArtifactInputSpec!]!
+    occurrences: [IsOccurrenceInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/metadata.graphql", Input: `#
@@ -3839,8 +3920,12 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds metadata about a package, source or artifact."
-  ingestHasMetadata(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, hasMetadata: HasMetadataInputSpec!): HasMetadata!
+  "Adds metadata about a package, source or artifact. The returned ID can be empty string."
+  ingestHasMetadata(
+    subject: PackageSourceOrArtifactInput!
+    pkgMatchType: MatchFlags!
+    hasMetadata: HasMetadataInputSpec!
+  ): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/package.graphql", Input: `#
@@ -4026,10 +4111,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new package and returns the corresponding package trie path."
-  ingestPackage(pkg: PkgInputSpec!): Package!
-  "Bulk ingests packages and returns the list of corresponding package trie path."
-  ingestPackages(pkgs: [PkgInputSpec!]!): [Package!]!
+  "Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string."
+  ingestPackage(pkg: PkgInputSpec!): ID!
+  "Bulk ingests packages and returns the list of corresponding package trie path. The returned array of IDs can be a an array of empty string."
+  ingestPackages(pkgs: [PkgInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/path.graphql", Input: `#
@@ -4058,8 +4143,8 @@ It encapsulates the software tree nodes along with the evidence nodes. In a
 path query, all connecting evidence nodes along with their intermediate subject
 nodes need to be returned in order to create a complete graph.
 """
-union Node
-  = Package
+union Node =
+    Package
   | Source
   | Artifact
   | Builder
@@ -4172,7 +4257,12 @@ extend type Query {
   Specifying any Edge value in ` + "`" + `usingOnly` + "`" + ` will make the path only contain the
   corresponding GUAC evidence trees (GUAC verbs).
   """
-  path(subject: ID!, target: ID!, maxPathLength: Int!, usingOnly: [Edge!]!): [Node!]!
+  path(
+    subject: ID!
+    target: ID!
+    maxPathLength: Int!
+    usingOnly: [Edge!]!
+  ): [Node!]!
 
   """
   neighbors returns all the direct neighbors of a node.
@@ -4259,8 +4349,12 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that two packages are similar."
-  ingestPkgEqual(pkg: PkgInputSpec!, otherPackage: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): PkgEqual!
+  "Adds a certification that two packages are similar. The returned ID can be empty string."
+  ingestPkgEqual(
+    pkg: PkgInputSpec!
+    otherPackage: PkgInputSpec!
+    pkgEqual: PkgEqualInputSpec!
+  ): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/search.graphql", Input: `#
@@ -4410,10 +4504,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new source and returns the corresponding source trie path."
-  ingestSource(source: SourceInputSpec!): Source!
-  "Bulk ingests sources and returns the list of corresponding source trie path."
-  ingestSources(sources: [SourceInputSpec!]!): [Source!]!
+  "Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string."
+  ingestSource(source: SourceInputSpec!): ID!
+  "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string."
+  ingestSources(sources: [SourceInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnEqual.graphql", Input: `#
@@ -4439,7 +4533,6 @@ extend type Mutation {
 VulnEqual is an attestation to link two vulnerabilities together as being equal"
 
 Note that setting noVuln vulnerability type is invalid for VulnEqual!
-
 """
 type VulnEqual {
   id: ID!
@@ -4478,8 +4571,12 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingest a mapping between vulnerabilities."
-  ingestVulnEqual(vulnerability: VulnerabilityInputSpec!, otherVulnerability: VulnerabilityInputSpec!, vulnEqual: VulnEqualInputSpec!): VulnEqual!
+  "Ingest a mapping between vulnerabilities. The returned ID can be empty string."
+  ingestVulnEqual(
+    vulnerability: VulnerabilityInputSpec!
+    otherVulnerability: VulnerabilityInputSpec!
+    vulnEqual: VulnEqualInputSpec!
+  ): ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnMetadata.graphql", Input: `#
@@ -4588,9 +4685,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds metadata about a vulnerability."
+  "Adds metadata about a vulnerability. The returned ID can be empty string."
   ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
-  "Bulk add certifications that vulnerability has a specific score."
+  "Bulk add certifications that vulnerability has a specific score. The returned array of IDs can be a an array of empty string."
   ingestVulnerabilityMetadatas(vulnerabilities: [VulnerabilityInputSpec!]!, vulnerabilityMetadatas: [VulnerabilityMetadataInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
@@ -4618,7 +4715,7 @@ Vulnerability represents the root of the vulnerability trie/tree.
 
 We map vulnerability information to a trie, as a derivative of the pURL specification:
 each path in the trie represents a type and a vulnerability ID. This allows for generic
-representation of the various vulnerabilities and does not limit to just cve, ghsa or osv. 
+representation of the various vulnerabilities and does not limit to just cve, ghsa or osv.
 This would be in the general format: vuln://<general-type>/<vuln-id>
 
 Examples:
@@ -4636,7 +4733,7 @@ Since this node is at the root of the vulnerability trie, it is named Vulnerabil
 VulnerabilityType.
 
 NoVuln is a special vulnerability node to attest that no vulnerability has been
-found during a vulnerability scan. It will have the type "novuln" and contain an empty string 
+found during a vulnerability scan. It will have the type "novuln" and contain an empty string
 for vulnerabilityID
 
 The resolvers will enforce that both the type and vulnerability IDs are lower case.
@@ -4662,16 +4759,15 @@ type VulnerabilityID {
 """
 VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
 
-Use null to match on all values at that level. 
+Use null to match on all values at that level.
 For example, to get all vulnerabilities in GUAC backend, use a VulnSpec
 where every field is null.
 
 Setting the noVuln boolean true will ignore the other inputs for type and vulnerabilityID.
-Setting noVuln to true means retrieving only nodes where the type of the vulnerability is "novuln" 
+Setting noVuln to true means retrieving only nodes where the type of the vulnerability is "novuln"
 and the it has an empty string for vulnerabilityID. Setting it to false filters out all results that are "novuln".
-Setting one of the other fields and omitting the noVuln means retrieving vulnerabilities for the corresponding 
+Setting one of the other fields and omitting the noVuln means retrieving vulnerabilities for the corresponding
 type and vulnerabilityID. Omission of noVuln field will return all vulnerabilities and novuln.
-
 """
 input VulnerabilitySpec {
   id: ID
@@ -4697,10 +4793,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new vulnerability and returns the corresponding vulnerability trie path."
-  ingestVulnerability(vuln: VulnerabilityInputSpec!): Vulnerability!
-  "Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path."
-  ingestVulnerabilities(vulns: [VulnerabilityInputSpec!]!): [Vulnerability!]!
+  "Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string."
+  ingestVulnerability(vuln: VulnerabilityInputSpec!): ID!
+  "Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs can be a an array of empty string."
+  ingestVulnerabilities(vulns: [VulnerabilityInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 }

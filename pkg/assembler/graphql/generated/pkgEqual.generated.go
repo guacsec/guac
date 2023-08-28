@@ -444,10 +444,6 @@ func (ec *executionContext) _PkgEqual(ctx context.Context, sel ast.SelectionSet,
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNPkgEqual2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqual(ctx context.Context, sel ast.SelectionSet, v model.PkgEqual) graphql.Marshaler {
-	return ec._PkgEqual(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNPkgEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PkgEqual) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

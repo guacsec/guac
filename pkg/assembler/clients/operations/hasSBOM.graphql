@@ -18,28 +18,25 @@
 # Defines the GraphQL operations to ingest that a package or source has an SBOM (specified by a URI) into GUAC
 
 mutation HasSBOMPkg($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-  ingestHasSBOM(subject: {package: $pkg}, hasSBOM: $hasSBOM) {
-    ...AllHasSBOMTree
-  }
+  ingestHasSBOM(subject: { package: $pkg }, hasSBOM: $hasSBOM)
 }
 
-mutation HasSBOMArtifact($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-  ingestHasSBOM(subject: {artifact: $artifact}, hasSBOM: $hasSBOM) {
-    ...AllHasSBOMTree
-  }
+mutation HasSBOMArtifact(
+  $artifact: ArtifactInputSpec!
+  $hasSBOM: HasSBOMInputSpec!
+) {
+  ingestHasSBOM(subject: { artifact: $artifact }, hasSBOM: $hasSBOM)
 }
 
 # Defines the GraphQL operations to bulk ingest hasSBOM information into GUAC
 
 mutation HasSBOMPkgs($pkgs: [PkgInputSpec!]!, $hasSBOMs: [HasSBOMInputSpec!]!) {
-  ingestHasSBOMs(subjects: {packages: $pkgs}, hasSBOMs: $hasSBOMs) {
-    ...AllHasSBOMTree
-  }
+  ingestHasSBOMs(subjects: { packages: $pkgs }, hasSBOMs: $hasSBOMs)
 }
 
-mutation HasSBOMArtifacts($artifacts: [ArtifactInputSpec!]!, $hasSBOMs: [HasSBOMInputSpec!]!) {
-  ingestHasSBOMs(subjects: {artifacts: $artifacts}, hasSBOMs: $hasSBOMs) {
-    ...AllHasSBOMTree
-  }
+mutation HasSBOMArtifacts(
+  $artifacts: [ArtifactInputSpec!]!
+  $hasSBOMs: [HasSBOMInputSpec!]!
+) {
+  ingestHasSBOMs(subjects: { artifacts: $artifacts }, hasSBOMs: $hasSBOMs)
 }
-

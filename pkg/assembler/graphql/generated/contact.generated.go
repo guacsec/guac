@@ -637,10 +637,6 @@ func (ec *executionContext) _PointOfContact(ctx context.Context, sel ast.Selecti
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNPointOfContact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContact(ctx context.Context, sel ast.SelectionSet, v model.PointOfContact) graphql.Marshaler {
-	return ec._PointOfContact(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNPointOfContact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PointOfContact) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

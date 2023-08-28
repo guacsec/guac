@@ -72,8 +72,16 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package, source or artifact is considered good."
-  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags!, certifyGood: CertifyGoodInputSpec!): CertifyGood!
-  "Adds bulk certifications that a package, source or artifact is considered good."
-  ingestCertifyGoods(subjects: PackageSourceOrArtifactInputs!, pkgMatchType: MatchFlags!, certifyGoods: [CertifyGoodInputSpec!]!): [CertifyGood!]!
+  "Adds a certification that a package, source or artifact is considered good. The returned ID can be empty string."
+  ingestCertifyGood(
+    subject: PackageSourceOrArtifactInput!
+    pkgMatchType: MatchFlags!
+    certifyGood: CertifyGoodInputSpec!
+  ): ID!
+  "Adds bulk certifications that a package, source or artifact is considered good. The returned array of IDs can be a an array of empty string."
+  ingestCertifyGoods(
+    subjects: PackageSourceOrArtifactInputs!
+    pkgMatchType: MatchFlags!
+    certifyGoods: [CertifyGoodInputSpec!]!
+  ): [ID!]!
 }

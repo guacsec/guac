@@ -639,10 +639,6 @@ func (ec *executionContext) _IsOccurrence(ctx context.Context, sel ast.Selection
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNIsOccurrence2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrence(ctx context.Context, sel ast.SelectionSet, v model.IsOccurrence) graphql.Marshaler {
-	return ec._IsOccurrence(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.IsOccurrence) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

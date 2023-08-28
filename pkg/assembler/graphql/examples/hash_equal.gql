@@ -17,14 +17,21 @@ query HashEqualQ1 {
 }
 
 query HashEqualQ2 {
-  HashEqual(hashEqualSpec: {origin: "testing backend"}) {
+  HashEqual(hashEqualSpec: { origin: "testing backend" }) {
     ...allHashEqualTree
   }
 }
 
 query HashEqualQ3 {
   HashEqual(
-    hashEqualSpec: {artifacts: [{algorithm: "sha1", digest: "7a8f47318e4676dacb0142afa0b83029cd7befd9"}]}
+    hashEqualSpec: {
+      artifacts: [
+        {
+          algorithm: "sha1"
+          digest: "7a8f47318e4676dacb0142afa0b83029cd7befd9"
+        }
+      ]
+    }
   ) {
     ...allHashEqualTree
   }
@@ -32,7 +39,14 @@ query HashEqualQ3 {
 
 query HashEqualQ4 {
   HashEqual(
-    hashEqualSpec: {artifacts: [{algorithm: "sha256", digest: "89bb0da1891646e58eb3e6ed24f3a6fc3c8eb5a0d44824cba581dfa34a0450cf"}]}
+    hashEqualSpec: {
+      artifacts: [
+        {
+          algorithm: "sha256"
+          digest: "89bb0da1891646e58eb3e6ed24f3a6fc3c8eb5a0d44824cba581dfa34a0450cf"
+        }
+      ]
+    }
   ) {
     ...allHashEqualTree
   }
@@ -40,7 +54,14 @@ query HashEqualQ4 {
 
 query HashEqualQ5 {
   HashEqual(
-    hashEqualSpec: {artifacts: [{algorithm: "sha256", digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}]}
+    hashEqualSpec: {
+      artifacts: [
+        {
+          algorithm: "sha256"
+          digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
+        }
+      ]
+    }
   ) {
     ...allHashEqualTree
   }
@@ -48,7 +69,14 @@ query HashEqualQ5 {
 
 query HashEqualQ6 {
   HashEqual(
-    hashEqualSpec: {artifacts: [{algorithm: "sha512", digest: "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7"}]}
+    hashEqualSpec: {
+      artifacts: [
+        {
+          algorithm: "sha512"
+          digest: "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7"
+        }
+      ]
+    }
   ) {
     ...allHashEqualTree
   }

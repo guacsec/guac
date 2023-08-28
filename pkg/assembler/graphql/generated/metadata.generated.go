@@ -637,10 +637,6 @@ func (ec *executionContext) _HasMetadata(ctx context.Context, sel ast.SelectionS
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNHasMetadata2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadata(ctx context.Context, sel ast.SelectionSet, v model.HasMetadata) graphql.Marshaler {
-	return ec._HasMetadata(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNHasMetadata2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HasMetadata) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
