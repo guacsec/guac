@@ -81,14 +81,14 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a dependency between two packages"
+  "Adds a dependency between two packages. The returned ID can be empty string."
   ingestDependency(
     pkg: PkgInputSpec!
     depPkg: PkgInputSpec!
     depPkgMatchType: MatchFlags!
     dependency: IsDependencyInputSpec!
   ): ID!
-  "Bulk adds a dependency between two packages"
+  "Bulk adds a dependency between two packages. The returned array of IDs can be a an array of empty string."
   ingestDependencies(
     pkgs: [PkgInputSpec!]!
     depPkgs: [PkgInputSpec!]!

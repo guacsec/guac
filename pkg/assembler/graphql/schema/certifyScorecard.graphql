@@ -125,9 +125,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a source repository has a Scorecard."
+  "Adds a certification that a source repository has a Scorecard. The returned ID can be empty string."
   ingestScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): ID!
-  "Adds bulk certifications that a source repository has a Scorecard."
+  "Adds bulk certifications that a source repository has a Scorecard. The returned array of IDs can be a an array of empty string."
   ingestScorecards(
     sources: [SourceInputSpec!]!
     scorecards: [ScorecardInputSpec!]!

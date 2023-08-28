@@ -86,7 +86,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds metadata about a package, source or artifact."
+  "Adds metadata about a package, source or artifact. The returned ID can be empty string."
   ingestHasMetadata(
     subject: PackageSourceOrArtifactInput!
     pkgMatchType: MatchFlags!

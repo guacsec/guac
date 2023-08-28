@@ -5349,7 +5349,7 @@ func (v *BuilderInputSpec) GetUri() string { return v.Uri }
 
 // CertifyBadArtifactResponse is returned by CertifyBadArtifact on success.
 type CertifyBadArtifactResponse struct {
-	// Adds a certification that a package, source or artifact is considered bad.
+	// Adds a certification that a package, source or artifact is considered bad. The returned ID can be empty string.
 	IngestCertifyBad string `json:"ingestCertifyBad"`
 }
 
@@ -5358,7 +5358,7 @@ func (v *CertifyBadArtifactResponse) GetIngestCertifyBad() string { return v.Ing
 
 // CertifyBadArtifactsResponse is returned by CertifyBadArtifacts on success.
 type CertifyBadArtifactsResponse struct {
-	// Adds bulk certifications that a package, source or artifact is considered bad.
+	// Adds bulk certifications that a package, source or artifact is considered bad. The returned array of IDs can be a an array of empty string.
 	IngestCertifyBads []string `json:"ingestCertifyBads"`
 }
 
@@ -5384,7 +5384,7 @@ func (v *CertifyBadInputSpec) GetCollector() string { return v.Collector }
 
 // CertifyBadPkgResponse is returned by CertifyBadPkg on success.
 type CertifyBadPkgResponse struct {
-	// Adds a certification that a package, source or artifact is considered bad.
+	// Adds a certification that a package, source or artifact is considered bad. The returned ID can be empty string.
 	IngestCertifyBad string `json:"ingestCertifyBad"`
 }
 
@@ -5393,7 +5393,7 @@ func (v *CertifyBadPkgResponse) GetIngestCertifyBad() string { return v.IngestCe
 
 // CertifyBadPkgsResponse is returned by CertifyBadPkgs on success.
 type CertifyBadPkgsResponse struct {
-	// Adds bulk certifications that a package, source or artifact is considered bad.
+	// Adds bulk certifications that a package, source or artifact is considered bad. The returned array of IDs can be a an array of empty string.
 	IngestCertifyBads []string `json:"ingestCertifyBads"`
 }
 
@@ -5434,7 +5434,7 @@ func (v *CertifyBadSpec) GetCollector() *string { return v.Collector }
 
 // CertifyBadSrcResponse is returned by CertifyBadSrc on success.
 type CertifyBadSrcResponse struct {
-	// Adds a certification that a package, source or artifact is considered bad.
+	// Adds a certification that a package, source or artifact is considered bad. The returned ID can be empty string.
 	IngestCertifyBad string `json:"ingestCertifyBad"`
 }
 
@@ -5443,7 +5443,7 @@ func (v *CertifyBadSrcResponse) GetIngestCertifyBad() string { return v.IngestCe
 
 // CertifyBadSrcsResponse is returned by CertifyBadSrcs on success.
 type CertifyBadSrcsResponse struct {
-	// Adds bulk certifications that a package, source or artifact is considered bad.
+	// Adds bulk certifications that a package, source or artifact is considered bad. The returned array of IDs can be a an array of empty string.
 	IngestCertifyBads []string `json:"ingestCertifyBads"`
 }
 
@@ -5563,7 +5563,7 @@ func (v *CertifyBadsResponse) GetCertifyBad() []CertifyBadsCertifyBad { return v
 
 // CertifyGoodArtifactResponse is returned by CertifyGoodArtifact on success.
 type CertifyGoodArtifactResponse struct {
-	// Adds a certification that a package, source or artifact is considered good.
+	// Adds a certification that a package, source or artifact is considered good. The returned ID can be empty string.
 	IngestCertifyGood string `json:"ingestCertifyGood"`
 }
 
@@ -5572,7 +5572,7 @@ func (v *CertifyGoodArtifactResponse) GetIngestCertifyGood() string { return v.I
 
 // CertifyGoodArtifactsResponse is returned by CertifyGoodArtifacts on success.
 type CertifyGoodArtifactsResponse struct {
-	// Adds bulk certifications that a package, source or artifact is considered good.
+	// Adds bulk certifications that a package, source or artifact is considered good. The returned array of IDs can be a an array of empty string.
 	IngestCertifyGoods []string `json:"ingestCertifyGoods"`
 }
 
@@ -5597,7 +5597,7 @@ func (v *CertifyGoodInputSpec) GetCollector() string { return v.Collector }
 
 // CertifyGoodPkgResponse is returned by CertifyGoodPkg on success.
 type CertifyGoodPkgResponse struct {
-	// Adds a certification that a package, source or artifact is considered good.
+	// Adds a certification that a package, source or artifact is considered good. The returned ID can be empty string.
 	IngestCertifyGood string `json:"ingestCertifyGood"`
 }
 
@@ -5606,7 +5606,7 @@ func (v *CertifyGoodPkgResponse) GetIngestCertifyGood() string { return v.Ingest
 
 // CertifyGoodPkgsResponse is returned by CertifyGoodPkgs on success.
 type CertifyGoodPkgsResponse struct {
-	// Adds bulk certifications that a package, source or artifact is considered good.
+	// Adds bulk certifications that a package, source or artifact is considered good. The returned array of IDs can be a an array of empty string.
 	IngestCertifyGoods []string `json:"ingestCertifyGoods"`
 }
 
@@ -5615,7 +5615,7 @@ func (v *CertifyGoodPkgsResponse) GetIngestCertifyGoods() []string { return v.In
 
 // CertifyGoodSrcResponse is returned by CertifyGoodSrc on success.
 type CertifyGoodSrcResponse struct {
-	// Adds a certification that a package, source or artifact is considered good.
+	// Adds a certification that a package, source or artifact is considered good. The returned ID can be empty string.
 	IngestCertifyGood string `json:"ingestCertifyGood"`
 }
 
@@ -5624,7 +5624,7 @@ func (v *CertifyGoodSrcResponse) GetIngestCertifyGood() string { return v.Ingest
 
 // CertifyGoodSrcsResponse is returned by CertifyGoodSrcs on success.
 type CertifyGoodSrcsResponse struct {
-	// Adds bulk certifications that a package, source or artifact is considered good.
+	// Adds bulk certifications that a package, source or artifact is considered good. The returned array of IDs can be a an array of empty string.
 	IngestCertifyGoods []string `json:"ingestCertifyGoods"`
 }
 
@@ -5633,7 +5633,7 @@ func (v *CertifyGoodSrcsResponse) GetIngestCertifyGoods() []string { return v.In
 
 // CertifyScorecardResponse is returned by CertifyScorecard on success.
 type CertifyScorecardResponse struct {
-	// Adds a certification that a source repository has a Scorecard.
+	// Adds a certification that a source repository has a Scorecard. The returned ID can be empty string.
 	IngestScorecard string `json:"ingestScorecard"`
 }
 
@@ -5642,7 +5642,7 @@ func (v *CertifyScorecardResponse) GetIngestScorecard() string { return v.Ingest
 
 // CertifyScorecardsResponse is returned by CertifyScorecards on success.
 type CertifyScorecardsResponse struct {
-	// Adds bulk certifications that a source repository has a Scorecard.
+	// Adds bulk certifications that a source repository has a Scorecard. The returned array of IDs can be a an array of empty string.
 	IngestScorecards []string `json:"ingestScorecards"`
 }
 
@@ -5651,7 +5651,7 @@ func (v *CertifyScorecardsResponse) GetIngestScorecards() []string { return v.In
 
 // CertifyVexArtifactResponse is returned by CertifyVexArtifact on success.
 type CertifyVexArtifactResponse struct {
-	// Adds a VEX certification for a package.
+	// Adds a VEX certification for a package. The returned ID can be empty string.
 	IngestVEXStatement string `json:"ingestVEXStatement"`
 }
 
@@ -5660,7 +5660,7 @@ func (v *CertifyVexArtifactResponse) GetIngestVEXStatement() string { return v.I
 
 // CertifyVexPkgResponse is returned by CertifyVexPkg on success.
 type CertifyVexPkgResponse struct {
-	// Adds a VEX certification for a package.
+	// Adds a VEX certification for a package. The returned ID can be empty string.
 	IngestVEXStatement string `json:"ingestVEXStatement"`
 }
 
@@ -5669,7 +5669,7 @@ func (v *CertifyVexPkgResponse) GetIngestVEXStatement() string { return v.Ingest
 
 // CertifyVulnPkgResponse is returned by CertifyVulnPkg on success.
 type CertifyVulnPkgResponse struct {
-	// Adds a certification that a package has been scanned for vulnerabilities.
+	// Adds a certification that a package has been scanned for vulnerabilities. The returned ID can be empty string.
 	IngestCertifyVuln string `json:"ingestCertifyVuln"`
 }
 
@@ -5678,7 +5678,7 @@ func (v *CertifyVulnPkgResponse) GetIngestCertifyVuln() string { return v.Ingest
 
 // CertifyVulnPkgsResponse is returned by CertifyVulnPkgs on success.
 type CertifyVulnPkgsResponse struct {
-	// Bulk add certifications that a package has been scanned for vulnerabilities.
+	// Bulk add certifications that a package has been scanned for vulnerabilities. The returned array of IDs can be a an array of empty string.
 	IngestCertifyVulns []string `json:"ingestCertifyVulns"`
 }
 
@@ -6238,7 +6238,7 @@ func (v *FindSoftwareResponse) __premarshalJSON() (*__premarshalFindSoftwareResp
 
 // HasMetadataArtifactResponse is returned by HasMetadataArtifact on success.
 type HasMetadataArtifactResponse struct {
-	// Adds metadata about a package, source or artifact.
+	// Adds metadata about a package, source or artifact. The returned ID can be empty string.
 	IngestHasMetadata string `json:"ingestHasMetadata"`
 }
 
@@ -6275,7 +6275,7 @@ func (v *HasMetadataInputSpec) GetCollector() string { return v.Collector }
 
 // HasMetadataPkgResponse is returned by HasMetadataPkg on success.
 type HasMetadataPkgResponse struct {
-	// Adds metadata about a package, source or artifact.
+	// Adds metadata about a package, source or artifact. The returned ID can be empty string.
 	IngestHasMetadata string `json:"ingestHasMetadata"`
 }
 
@@ -6284,7 +6284,7 @@ func (v *HasMetadataPkgResponse) GetIngestHasMetadata() string { return v.Ingest
 
 // HasMetadataSrcResponse is returned by HasMetadataSrc on success.
 type HasMetadataSrcResponse struct {
-	// Adds metadata about a package, source or artifact.
+	// Adds metadata about a package, source or artifact. The returned ID can be empty string.
 	IngestHasMetadata string `json:"ingestHasMetadata"`
 }
 
@@ -6293,7 +6293,7 @@ func (v *HasMetadataSrcResponse) GetIngestHasMetadata() string { return v.Ingest
 
 // HasSBOMArtifactResponse is returned by HasSBOMArtifact on success.
 type HasSBOMArtifactResponse struct {
-	// Certifies that a package or artifact has an SBOM.
+	// Certifies that a package or artifact has an SBOM. The returned ID can be empty string.
 	IngestHasSBOM string `json:"ingestHasSBOM"`
 }
 
@@ -6302,7 +6302,7 @@ func (v *HasSBOMArtifactResponse) GetIngestHasSBOM() string { return v.IngestHas
 
 // HasSBOMArtifactsResponse is returned by HasSBOMArtifacts on success.
 type HasSBOMArtifactsResponse struct {
-	// Bulk ingest that package or artifact has an SBOM.
+	// Bulk ingest that package or artifact has an SBOM. The returned array of IDs can be a an array of empty string.
 	IngestHasSBOMs []string `json:"ingestHasSBOMs"`
 }
 
@@ -6339,7 +6339,7 @@ func (v *HasSBOMInputSpec) GetCollector() string { return v.Collector }
 
 // HasSBOMPkgResponse is returned by HasSBOMPkg on success.
 type HasSBOMPkgResponse struct {
-	// Certifies that a package or artifact has an SBOM.
+	// Certifies that a package or artifact has an SBOM. The returned ID can be empty string.
 	IngestHasSBOM string `json:"ingestHasSBOM"`
 }
 
@@ -6348,7 +6348,7 @@ func (v *HasSBOMPkgResponse) GetIngestHasSBOM() string { return v.IngestHasSBOM 
 
 // HasSBOMPkgsResponse is returned by HasSBOMPkgs on success.
 type HasSBOMPkgsResponse struct {
-	// Bulk ingest that package or artifact has an SBOM.
+	// Bulk ingest that package or artifact has an SBOM. The returned array of IDs can be a an array of empty string.
 	IngestHasSBOMs []string `json:"ingestHasSBOMs"`
 }
 
@@ -6377,7 +6377,7 @@ func (v *HasSourceAtInputSpec) GetCollector() string { return v.Collector }
 
 // HasSourceAtResponse is returned by HasSourceAt on success.
 type HasSourceAtResponse struct {
-	// Adds a certification that a package (PackageName or PackageVersion) is built from the source.
+	// Adds a certification that a package (PackageName or PackageVersion) is built from the source. The returned ID can be empty string.
 	IngestHasSourceAt string `json:"ingestHasSourceAt"`
 }
 
@@ -6402,7 +6402,7 @@ func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 
 // HashEqualResponse is returned by HashEqual on success.
 type HashEqualResponse struct {
-	// Adds a certification that two artifacts are equal.
+	// Adds a certification that two artifacts are equal. The returned ID can be empty string.
 	IngestHashEqual string `json:"ingestHashEqual"`
 }
 
@@ -6411,7 +6411,7 @@ func (v *HashEqualResponse) GetIngestHashEqual() string { return v.IngestHashEqu
 
 // HashEqualsResponse is returned by HashEquals on success.
 type HashEqualsResponse struct {
-	// Bulk ingest certifications that two artifacts are equal.
+	// Bulk ingest certifications that two artifacts are equal. The returned array of IDs can be a an array of empty string.
 	IngestHashEquals []string `json:"ingestHashEquals"`
 }
 
@@ -6420,7 +6420,7 @@ func (v *HashEqualsResponse) GetIngestHashEquals() []string { return v.IngestHas
 
 // IngestArtifactResponse is returned by IngestArtifact on success.
 type IngestArtifactResponse struct {
-	// Ingests a new artifact and returns it.
+	// Ingests a new artifact and returns it. The returned ID can be empty string.
 	IngestArtifact string `json:"ingestArtifact"`
 }
 
@@ -6429,7 +6429,7 @@ func (v *IngestArtifactResponse) GetIngestArtifact() string { return v.IngestArt
 
 // IngestArtifactsResponse is returned by IngestArtifacts on success.
 type IngestArtifactsResponse struct {
-	// Bulk ingests new artifacts and returns a list of them.
+	// Bulk ingests new artifacts and returns a list of them. The returned array of IDs can be a an array of empty string.
 	IngestArtifacts []string `json:"ingestArtifacts"`
 }
 
@@ -6438,7 +6438,7 @@ func (v *IngestArtifactsResponse) GetIngestArtifacts() []string { return v.Inges
 
 // IngestBuilderResponse is returned by IngestBuilder on success.
 type IngestBuilderResponse struct {
-	// Ingests a new builder and returns it.
+	// Ingests a new builder and returns it. The returned ID can be empty string.
 	IngestBuilder string `json:"ingestBuilder"`
 }
 
@@ -6456,7 +6456,7 @@ func (v *IngestBuildersResponse) GetIngestBuilders() []string { return v.IngestB
 
 // IngestPackageResponse is returned by IngestPackage on success.
 type IngestPackageResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
+	// Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string.
 	IngestPackage string `json:"ingestPackage"`
 }
 
@@ -6465,7 +6465,7 @@ func (v *IngestPackageResponse) GetIngestPackage() string { return v.IngestPacka
 
 // IngestPackagesResponse is returned by IngestPackages on success.
 type IngestPackagesResponse struct {
-	// Bulk ingests packages and returns the list of corresponding package trie path.
+	// Bulk ingests packages and returns the list of corresponding package trie path. The returned array of IDs can be a an array of empty string.
 	IngestPackages []string `json:"ingestPackages"`
 }
 
@@ -6474,7 +6474,7 @@ func (v *IngestPackagesResponse) GetIngestPackages() []string { return v.IngestP
 
 // IngestSourceResponse is returned by IngestSource on success.
 type IngestSourceResponse struct {
-	// Ingests a new source and returns the corresponding source trie path.
+	// Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string.
 	IngestSource string `json:"ingestSource"`
 }
 
@@ -6483,7 +6483,7 @@ func (v *IngestSourceResponse) GetIngestSource() string { return v.IngestSource 
 
 // IngestSourcesResponse is returned by IngestSources on success.
 type IngestSourcesResponse struct {
-	// Bulk ingests sources and returns the list of corresponding source trie path.
+	// Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string.
 	IngestSources []string `json:"ingestSources"`
 }
 
@@ -6492,7 +6492,7 @@ func (v *IngestSourcesResponse) GetIngestSources() []string { return v.IngestSou
 
 // IngestVulnerabilitiesResponse is returned by IngestVulnerabilities on success.
 type IngestVulnerabilitiesResponse struct {
-	// Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path.
+	// Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs can be a an array of empty string.
 	IngestVulnerabilities []string `json:"ingestVulnerabilities"`
 }
 
@@ -6503,7 +6503,7 @@ func (v *IngestVulnerabilitiesResponse) GetIngestVulnerabilities() []string {
 
 // IngestVulnerabilityResponse is returned by IngestVulnerability on success.
 type IngestVulnerabilityResponse struct {
-	// Ingests a new vulnerability and returns the corresponding vulnerability trie path.
+	// Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string.
 	IngestVulnerability string `json:"ingestVulnerability"`
 }
 
@@ -6512,7 +6512,7 @@ func (v *IngestVulnerabilityResponse) GetIngestVulnerability() string { return v
 
 // IsDependenciesResponse is returned by IsDependencies on success.
 type IsDependenciesResponse struct {
-	// Bulk adds a dependency between two packages
+	// Bulk adds a dependency between two packages. The returned array of IDs can be a an array of empty string.
 	IngestDependencies []string `json:"ingestDependencies"`
 }
 
@@ -6546,7 +6546,7 @@ func (v *IsDependencyInputSpec) GetCollector() string { return v.Collector }
 
 // IsDependencyResponse is returned by IsDependency on success.
 type IsDependencyResponse struct {
-	// Adds a dependency between two packages
+	// Adds a dependency between two packages. The returned ID can be empty string.
 	IngestDependency string `json:"ingestDependency"`
 }
 
@@ -6571,7 +6571,7 @@ func (v *IsOccurrenceInputSpec) GetCollector() string { return v.Collector }
 
 // IsOccurrencePkgResponse is returned by IsOccurrencePkg on success.
 type IsOccurrencePkgResponse struct {
-	// Ingest that an artifact is produced from a package or source.
+	// Ingest that an artifact is produced from a package or source. The returned ID can be empty string.
 	IngestOccurrence string `json:"ingestOccurrence"`
 }
 
@@ -6580,7 +6580,7 @@ func (v *IsOccurrencePkgResponse) GetIngestOccurrence() string { return v.Ingest
 
 // IsOccurrenceSrcResponse is returned by IsOccurrenceSrc on success.
 type IsOccurrenceSrcResponse struct {
-	// Ingest that an artifact is produced from a package or source.
+	// Ingest that an artifact is produced from a package or source. The returned ID can be empty string.
 	IngestOccurrence string `json:"ingestOccurrence"`
 }
 
@@ -6589,7 +6589,7 @@ func (v *IsOccurrenceSrcResponse) GetIngestOccurrence() string { return v.Ingest
 
 // IsOccurrencesPkgResponse is returned by IsOccurrencesPkg on success.
 type IsOccurrencesPkgResponse struct {
-	// Bulk ingest that an artifact is produced from a package or source.
+	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string.
 	IngestOccurrences []string `json:"ingestOccurrences"`
 }
 
@@ -6598,7 +6598,7 @@ func (v *IsOccurrencesPkgResponse) GetIngestOccurrences() []string { return v.In
 
 // IsOccurrencesSrcResponse is returned by IsOccurrencesSrc on success.
 type IsOccurrencesSrcResponse struct {
-	// Bulk ingest that an artifact is produced from a package or source.
+	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string.
 	IngestOccurrences []string `json:"ingestOccurrences"`
 }
 
@@ -17642,11 +17642,11 @@ func (v *PkgEqualInputSpec) GetCollector() string { return v.Collector }
 
 // PkgEqualResponse is returned by PkgEqual on success.
 type PkgEqualResponse struct {
-	// Ingests a new package and returns the corresponding package trie path.
+	// Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string.
 	Pkg string `json:"pkg"`
-	// Ingests a new package and returns the corresponding package trie path.
+	// Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string.
 	OtherPackage string `json:"otherPackage"`
-	// Adds a certification that two packages are similar.
+	// Adds a certification that two packages are similar. The returned ID can be empty string.
 	IngestPkgEqual string `json:"ingestPkgEqual"`
 }
 
@@ -17748,7 +17748,7 @@ func (v *PkgSpec) GetSubpath() *string { return v.Subpath }
 
 // PointOfContactArtifactResponse is returned by PointOfContactArtifact on success.
 type PointOfContactArtifactResponse struct {
-	// Adds a PointOfContact attestation to a package, source or artifact.
+	// Adds a PointOfContact attestation to a package, source or artifact. The returned ID can be empty string.
 	IngestPointOfContact string `json:"ingestPointOfContact"`
 }
 
@@ -17787,7 +17787,7 @@ func (v *PointOfContactInputSpec) GetCollector() string { return v.Collector }
 
 // PointOfContactPkgResponse is returned by PointOfContactPkg on success.
 type PointOfContactPkgResponse struct {
-	// Adds a PointOfContact attestation to a package, source or artifact.
+	// Adds a PointOfContact attestation to a package, source or artifact. The returned ID can be empty string.
 	IngestPointOfContact string `json:"ingestPointOfContact"`
 }
 
@@ -17796,7 +17796,7 @@ func (v *PointOfContactPkgResponse) GetIngestPointOfContact() string { return v.
 
 // PointOfContactSrcResponse is returned by PointOfContactSrc on success.
 type PointOfContactSrcResponse struct {
-	// Adds a PointOfContact attestation to a package, source or artifact.
+	// Adds a PointOfContact attestation to a package, source or artifact. The returned ID can be empty string.
 	IngestPointOfContact string `json:"ingestPointOfContact"`
 }
 
@@ -17805,7 +17805,7 @@ func (v *PointOfContactSrcResponse) GetIngestPointOfContact() string { return v.
 
 // SLSAForArtifactResponse is returned by SLSAForArtifact on success.
 type SLSAForArtifactResponse struct {
-	// Ingests a SLSA attestation
+	// Ingests a SLSA attestation. The returned ID can be empty string.
 	IngestSLSA string `json:"ingestSLSA"`
 }
 
@@ -17814,7 +17814,7 @@ func (v *SLSAForArtifactResponse) GetIngestSLSA() string { return v.IngestSLSA }
 
 // SLSAForArtifactsResponse is returned by SLSAForArtifacts on success.
 type SLSAForArtifactsResponse struct {
-	// Bulk Ingest SLSA attestations
+	// Bulk Ingest SLSA attestations. The returned array of IDs can be a an array of empty string.
 	IngestSLSAs []string `json:"ingestSLSAs"`
 }
 
@@ -18168,11 +18168,11 @@ func (v *VulnEqualInputSpec) GetCollector() string { return v.Collector }
 
 // VulnEqualResponse is returned by VulnEqual on success.
 type VulnEqualResponse struct {
-	// Ingests a new vulnerability and returns the corresponding vulnerability trie path.
+	// Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string.
 	Vuln string `json:"vuln"`
-	// Ingests a new vulnerability and returns the corresponding vulnerability trie path.
+	// Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string.
 	OtherVuln string `json:"otherVuln"`
-	// Ingest a mapping between vulnerabilities.
+	// Ingest a mapping between vulnerabilities. The returned ID can be empty string.
 	IngestVulnEqual string `json:"ingestVulnEqual"`
 }
 
@@ -18187,7 +18187,7 @@ func (v *VulnEqualResponse) GetIngestVulnEqual() string { return v.IngestVulnEqu
 
 // VulnHasMetadataResponse is returned by VulnHasMetadata on success.
 type VulnHasMetadataResponse struct {
-	// Adds metadata about a vulnerability.
+	// Adds metadata about a vulnerability. The returned ID can be empty string.
 	IngestVulnerabilityMetadata string `json:"ingestVulnerabilityMetadata"`
 }
 
@@ -18198,7 +18198,7 @@ func (v *VulnHasMetadataResponse) GetIngestVulnerabilityMetadata() string {
 
 // VulnHasMetadatasResponse is returned by VulnHasMetadatas on success.
 type VulnHasMetadatasResponse struct {
-	// Bulk add certifications that vulnerability has a specific score.
+	// Bulk add certifications that vulnerability has a specific score. The returned array of IDs can be a an array of empty string.
 	IngestVulnerabilityMetadatas []string `json:"ingestVulnerabilityMetadatas"`
 }
 

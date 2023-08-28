@@ -91,7 +91,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a PointOfContact attestation to a package, source or artifact."
+  "Adds a PointOfContact attestation to a package, source or artifact. The returned ID can be empty string."
   ingestPointOfContact(
     subject: PackageSourceOrArtifactInput!
     pkgMatchType: MatchFlags!

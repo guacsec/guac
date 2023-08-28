@@ -2462,9 +2462,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new artifact and returns it."
+  "Ingests a new artifact and returns it. The returned ID can be empty string."
   ingestArtifact(artifact: ArtifactInputSpec): ID!
-  "Bulk ingests new artifacts and returns a list of them."
+  "Bulk ingests new artifacts and returns a list of them. The returned array of IDs can be a an array of empty string."
   ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
@@ -2514,7 +2514,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new builder and returns it."
+  "Ingests a new builder and returns it. The returned ID can be empty string."
   ingestBuilder(builder: BuilderInputSpec): ID!
   "Bulk ingests new builders and returns a list of them."
   ingestBuilders(builders: [BuilderInputSpec!]!): [ID!]!
@@ -2648,13 +2648,13 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package, source or artifact is considered bad."
+  "Adds a certification that a package, source or artifact is considered bad. The returned ID can be empty string."
   ingestCertifyBad(
     subject: PackageSourceOrArtifactInput!
     pkgMatchType: MatchFlags!
     certifyBad: CertifyBadInputSpec!
   ): ID!
-  "Adds bulk certifications that a package, source or artifact is considered bad."
+  "Adds bulk certifications that a package, source or artifact is considered bad. The returned array of IDs can be a an array of empty string."
   ingestCertifyBads(
     subjects: PackageSourceOrArtifactInputs!
     pkgMatchType: MatchFlags!
@@ -2736,13 +2736,13 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package, source or artifact is considered good."
+  "Adds a certification that a package, source or artifact is considered good. The returned ID can be empty string."
   ingestCertifyGood(
     subject: PackageSourceOrArtifactInput!
     pkgMatchType: MatchFlags!
     certifyGood: CertifyGoodInputSpec!
   ): ID!
-  "Adds bulk certifications that a package, source or artifact is considered good."
+  "Adds bulk certifications that a package, source or artifact is considered good. The returned array of IDs can be a an array of empty string."
   ingestCertifyGoods(
     subjects: PackageSourceOrArtifactInputs!
     pkgMatchType: MatchFlags!
@@ -2877,9 +2877,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a source repository has a Scorecard."
+  "Adds a certification that a source repository has a Scorecard. The returned ID can be empty string."
   ingestScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): ID!
-  "Adds bulk certifications that a source repository has a Scorecard."
+  "Adds bulk certifications that a source repository has a Scorecard. The returned array of IDs can be a an array of empty string."
   ingestScorecards(
     sources: [SourceInputSpec!]!
     scorecards: [ScorecardInputSpec!]!
@@ -3023,7 +3023,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a VEX certification for a package."
+  "Adds a VEX certification for a package. The returned ID can be empty string."
   ingestVEXStatement(
     subject: PackageOrArtifactInput!
     vulnerability: VulnerabilityInputSpec!
@@ -3132,13 +3132,13 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package has been scanned for vulnerabilities."
+  "Adds a certification that a package has been scanned for vulnerabilities. The returned ID can be empty string."
   ingestCertifyVuln(
     pkg: PkgInputSpec!
     vulnerability: VulnerabilityInputSpec!
     certifyVuln: ScanMetadataInput!
   ): ID!
-  "Bulk add certifications that a package has been scanned for vulnerabilities."
+  "Bulk add certifications that a package has been scanned for vulnerabilities. The returned array of IDs can be a an array of empty string."
   ingestCertifyVulns(
     pkgs: [PkgInputSpec!]!
     vulnerabilities: [VulnerabilityInputSpec!]!
@@ -3239,7 +3239,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a PointOfContact attestation to a package, source or artifact."
+  "Adds a PointOfContact attestation to a package, source or artifact. The returned ID can be empty string."
   ingestPointOfContact(
     subject: PackageSourceOrArtifactInput!
     pkgMatchType: MatchFlags!
@@ -3316,12 +3316,12 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Certifies that a package or artifact has an SBOM."
+  "Certifies that a package or artifact has an SBOM. The returned ID can be empty string."
   ingestHasSBOM(
     subject: PackageOrArtifactInput!
     hasSBOM: HasSBOMInputSpec!
   ): ID!
-  "Bulk ingest that package or artifact has an SBOM."
+  "Bulk ingest that package or artifact has an SBOM. The returned array of IDs can be a an array of empty string."
   ingestHasSBOMs(
     subjects: PackageOrArtifactInputs!
     hasSBOMs: [HasSBOMInputSpec!]!
@@ -3463,14 +3463,14 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a SLSA attestation"
+  "Ingests a SLSA attestation. The returned ID can be empty string."
   ingestSLSA(
     subject: ArtifactInputSpec!
     builtFrom: [ArtifactInputSpec!]!
     builtBy: BuilderInputSpec!
     slsa: SLSAInputSpec!
   ): ID!
-  "Bulk Ingest SLSA attestations"
+  "Bulk Ingest SLSA attestations. The returned array of IDs can be a an array of empty string."
   ingestSLSAs(
     subjects: [ArtifactInputSpec!]!
     builtFromList: [[ArtifactInputSpec!]!]!
@@ -3540,7 +3540,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package (PackageName or PackageVersion) is built from the source."
+  "Adds a certification that a package (PackageName or PackageVersion) is built from the source. The returned ID can be empty string."
   ingestHasSourceAt(
     pkg: PkgInputSpec!
     pkgMatchType: MatchFlags!
@@ -3609,13 +3609,13 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that two artifacts are equal."
+  "Adds a certification that two artifacts are equal. The returned ID can be empty string."
   ingestHashEqual(
     artifact: ArtifactInputSpec!
     otherArtifact: ArtifactInputSpec!
     hashEqual: HashEqualInputSpec!
   ): ID!
-  "Bulk ingest certifications that two artifacts are equal."
+  "Bulk ingest certifications that two artifacts are equal. The returned array of IDs can be a an array of empty string."
   ingestHashEquals(
     artifacts: [ArtifactInputSpec!]!
     otherArtifacts: [ArtifactInputSpec!]!
@@ -3706,14 +3706,14 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a dependency between two packages"
+  "Adds a dependency between two packages. The returned ID can be empty string."
   ingestDependency(
     pkg: PkgInputSpec!
     depPkg: PkgInputSpec!
     depPkgMatchType: MatchFlags!
     dependency: IsDependencyInputSpec!
   ): ID!
-  "Bulk adds a dependency between two packages"
+  "Bulk adds a dependency between two packages. The returned array of IDs can be a an array of empty string."
   ingestDependencies(
     pkgs: [PkgInputSpec!]!
     depPkgs: [PkgInputSpec!]!
@@ -3818,13 +3818,13 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingest that an artifact is produced from a package or source."
+  "Ingest that an artifact is produced from a package or source. The returned ID can be empty string."
   ingestOccurrence(
     subject: PackageOrSourceInput!
     artifact: ArtifactInputSpec!
     occurrence: IsOccurrenceInputSpec!
   ): ID!
-  "Bulk ingest that an artifact is produced from a package or source."
+  "Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string."
   ingestOccurrences(
     subjects: PackageOrSourceInputs!
     artifacts: [ArtifactInputSpec!]!
@@ -3920,7 +3920,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds metadata about a package, source or artifact."
+  "Adds metadata about a package, source or artifact. The returned ID can be empty string."
   ingestHasMetadata(
     subject: PackageSourceOrArtifactInput!
     pkgMatchType: MatchFlags!
@@ -4111,9 +4111,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new package and returns the corresponding package trie path."
+  "Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string."
   ingestPackage(pkg: PkgInputSpec!): ID!
-  "Bulk ingests packages and returns the list of corresponding package trie path."
+  "Bulk ingests packages and returns the list of corresponding package trie path. The returned array of IDs can be a an array of empty string."
   ingestPackages(pkgs: [PkgInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
@@ -4349,7 +4349,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that two packages are similar."
+  "Adds a certification that two packages are similar. The returned ID can be empty string."
   ingestPkgEqual(
     pkg: PkgInputSpec!
     otherPackage: PkgInputSpec!
@@ -4504,9 +4504,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new source and returns the corresponding source trie path."
+  "Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string."
   ingestSource(source: SourceInputSpec!): ID!
-  "Bulk ingests sources and returns the list of corresponding source trie path."
+  "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string."
   ingestSources(sources: [SourceInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
@@ -4571,7 +4571,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingest a mapping between vulnerabilities."
+  "Ingest a mapping between vulnerabilities. The returned ID can be empty string."
   ingestVulnEqual(
     vulnerability: VulnerabilityInputSpec!
     otherVulnerability: VulnerabilityInputSpec!
@@ -4685,9 +4685,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds metadata about a vulnerability."
+  "Adds metadata about a vulnerability. The returned ID can be empty string."
   ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
-  "Bulk add certifications that vulnerability has a specific score."
+  "Bulk add certifications that vulnerability has a specific score. The returned array of IDs can be a an array of empty string."
   ingestVulnerabilityMetadatas(vulnerabilities: [VulnerabilityInputSpec!]!, vulnerabilityMetadatas: [VulnerabilityMetadataInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
@@ -4793,9 +4793,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new vulnerability and returns the corresponding vulnerability trie path."
+  "Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string."
   ingestVulnerability(vuln: VulnerabilityInputSpec!): ID!
-  "Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path."
+  "Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs can be a an array of empty string."
   ingestVulnerabilities(vulns: [VulnerabilityInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},

@@ -59,7 +59,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that a package (PackageName or PackageVersion) is built from the source."
+  "Adds a certification that a package (PackageName or PackageVersion) is built from the source. The returned ID can be empty string."
   ingestHasSourceAt(
     pkg: PkgInputSpec!
     pkgMatchType: MatchFlags!
