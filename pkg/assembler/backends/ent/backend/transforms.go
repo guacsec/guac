@@ -108,16 +108,16 @@ func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
 	}
 }
 
-func toModelIsOccurrence(o *ent.Occurrence, sub model.PackageOrSource) *model.IsOccurrence {
-	return &model.IsOccurrence{
-		ID:            nodeID(o.ID),
-		Subject:       sub,
-		Artifact:      toModelArtifact(o.Edges.Artifact),
-		Justification: o.Justification,
-		Origin:        o.Origin,
-		Collector:     o.Collector,
-	}
-}
+//func toModelIsOccurrence(o *ent.Occurrence, sub model.PackageOrSource) *model.IsOccurrence {
+//	return &model.IsOccurrence{
+//		ID:            nodeID(o.ID),
+//		Subject:       sub,
+//		Artifact:      toModelArtifact(o.Edges.Artifact),
+//		Justification: o.Justification,
+//		Origin:        o.Origin,
+//		Collector:     o.Collector,
+//	}
+//}
 
 func toOccurrenceSubject(oc *ent.Occurrence) model.PackageOrSource {
 	if oc.Edges.Package != nil {
@@ -138,27 +138,27 @@ func toOccurrenceSubject(oc *ent.Occurrence) model.PackageOrSource {
 	return nil
 }
 
-func pkgQualifierInputSpecToQuerySpec(input []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
-	if input == nil {
-		return nil
-	}
-	out := make([]*model.PackageQualifierSpec, len(input))
-	for i, in := range input {
-		out[i] = &model.PackageQualifierSpec{
-			Key:   in.Key,
-			Value: &in.Value,
-		}
-	}
-	return out
-}
+//func pkgQualifierInputSpecToQuerySpec(input []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
+//	if input == nil {
+//		return nil
+//	}
+//	out := make([]*model.PackageQualifierSpec, len(input))
+//	for i, in := range input {
+//		out[i] = &model.PackageQualifierSpec{
+//			Key:   in.Key,
+//			Value: &in.Value,
+//		}
+//	}
+//	return out
+//}
 
 func toModelIsDependencyWithBackrefs(id *ent.Dependency) *model.IsDependency {
 	return toModelIsDependency(id, true)
 }
 
-func toModelIsDependencyWithoutBackrefs(id *ent.Dependency) *model.IsDependency {
-	return toModelIsDependency(id, false)
-}
+//func toModelIsDependencyWithoutBackrefs(id *ent.Dependency) *model.IsDependency {
+//	return toModelIsDependency(id, false)
+//}
 
 func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency {
 	var pkg *model.Package

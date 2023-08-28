@@ -4,18 +4,16 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func getArtifact(ctx context.Context, client *ent.Client, artin *model.ArtifactInputSpec) (*ent.Artifact, error) {
-	return client.Artifact.Query().
-		Where(artifact.Algorithm(artin.Algorithm), artifact.Digest(artin.Digest)).
-		Only(ctx)
-}
+//func getArtifact(ctx context.Context, client *ent.Client, artin *model.ArtifactInputSpec) (*ent.Artifact, error) {
+//	return client.Artifact.Query().
+//		Where(artifact.Algorithm(artin.Algorithm), artifact.Digest(artin.Digest)).
+//		Only(ctx)
+//}
 
 // When verb nodes point to a PackageName/Version or SourceName we need to
 // rebuild the full top level tree object with just the nested objects that are
@@ -68,17 +66,17 @@ func buildPackageTreeQuery(q *ent.PackageTypeQuery, ns, packageName string, pv *
 	})
 }
 
-func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageType, error) {
-	ns, err := pn.QueryNamespace().Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return ns.QueryPackage().
-		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-			q.Where(packagenamespace.Namespace(ns.Namespace))
-			q.WithNames(func(q *ent.PackageNameQuery) {
-				q.Where(packagename.Name(pn.Name))
-			})
-		}).
-		Only(ctx)
-}
+//func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageType, error) {
+//	ns, err := pn.QueryNamespace().Only(ctx)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return ns.QueryPackage().
+//		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
+//			q.Where(packagenamespace.Namespace(ns.Namespace))
+//			q.WithNames(func(q *ent.PackageNameQuery) {
+//				q.Where(packagename.Name(pn.Name))
+//			})
+//		}).
+//		Only(ctx)
+//}

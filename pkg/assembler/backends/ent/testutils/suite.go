@@ -46,7 +46,12 @@ func (s *Suite) Run(testName string, tf func()) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer s.db.Exec("ROLLBACK TO SAVEPOINT savepoint1")
+	defer func(db *sql.DB, query string, args ...any) {
+		_, err := db.Exec(query, args)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(s.db, "ROLLBACK TO SAVEPOINT savepoint1")
 	s.Suite.Run(testName, tf)
 }
 

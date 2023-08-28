@@ -2,7 +2,6 @@ package backend
 
 import (
 	"github.com/google/go-cmp/cmp"
-	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -111,15 +110,6 @@ func (s *Suite) TestNodes() {
 		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 	}
 	if diff := cmp.Diff(p4out, nodes[2], ignoreID, ignoreEmptySlices); diff != "" {
-		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
-	}
-}
-
-func check(s *Suite, be backends.Backend, id string, err error, expected interface{}) {
-	s.Require().NoError(err)
-	n, err := be.Node(s.Ctx, id)
-	s.Require().NoError(err)
-	if diff := cmp.Diff(expected, n, ignoreID, ignoreEmptySlices); diff != "" {
 		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 	}
 }

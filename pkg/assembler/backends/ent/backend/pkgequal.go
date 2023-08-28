@@ -114,13 +114,13 @@ func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {
 	return pkgequal.And(predicates...)
 }
 
-func pkgEqualInputQueryPredicates(spec model.PkgEqualInputSpec) predicate.PkgEqual {
-	return pkgequal.And(
-		pkgequal.OriginEQ(spec.Origin),
-		pkgequal.CollectorEQ(spec.Collector),
-		pkgequal.JustificationEQ(spec.Justification),
-	)
-}
+//func pkgEqualInputQueryPredicates(spec model.PkgEqualInputSpec) predicate.PkgEqual {
+//	return pkgequal.And(
+//		pkgequal.OriginEQ(spec.Origin),
+//		pkgequal.CollectorEQ(spec.Collector),
+//		pkgequal.JustificationEQ(spec.Justification),
+//	)
+//}
 
 func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 	packages := collect(record.Edges.Packages, backReferencePackageVersion)

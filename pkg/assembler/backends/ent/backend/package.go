@@ -230,16 +230,16 @@ func normalizeInputQualifiers(inputs []*model.PackageQualifierInputSpec) []model
 	return qualifiers
 }
 
-func qualifiersToSpecQualifiers(q []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
-	results := make([]*model.PackageQualifierSpec, len(q))
-	for i, s := range q {
-		results[i] = &model.PackageQualifierSpec{
-			Key:   s.Key,
-			Value: &s.Value,
-		}
-	}
-	return results
-}
+//func qualifiersToSpecQualifiers(q []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
+//	results := make([]*model.PackageQualifierSpec, len(q))
+//	for i, s := range q {
+//		results[i] = &model.PackageQualifierSpec{
+//			Key:   s.Key,
+//			Value: &s.Value,
+//		}
+//	}
+//	return results
+//}
 
 func packageVersionInputQuery(spec model.PkgInputSpec) predicate.PackageVersion {
 	return packageVersionQuery(helper.ConvertPkgInputSpecToPkgSpec(&spec))
@@ -262,13 +262,13 @@ func packageVersionInputQuery(spec model.PkgInputSpec) predicate.PackageVersion 
 	// return packageversion.And(rv...)
 }
 
-func isPackageVersionQuery(filter *model.PkgSpec) bool {
-	if filter == nil {
-		return false
-	}
-
-	return filter.Version != nil || filter.Subpath != nil || filter.Qualifiers != nil
-}
+//func isPackageVersionQuery(filter *model.PkgSpec) bool {
+//	if filter == nil {
+//		return false
+//	}
+//
+//	return filter.Version != nil || filter.Subpath != nil || filter.Qualifiers != nil
+//}
 
 func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 	if filter == nil {
