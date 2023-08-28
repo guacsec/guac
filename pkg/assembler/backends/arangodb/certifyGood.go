@@ -936,8 +936,10 @@ func getCertifyGoodFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 			certifyGood.Subject = pkg
 		} else if src != nil {
 			certifyGood.Subject = src
-		} else {
+		} else if createdValue.Artifact != nil {
 			certifyGood.Subject = createdValue.Artifact
+		} else {
+			return nil, fmt.Errorf("failed to get subject from cursor for certifyGood")
 		}
 		certifyGoodList = append(certifyGoodList, certifyGood)
 	}

@@ -634,6 +634,9 @@ func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mo
 
 	var isOccurrenceList []*model.IsOccurrence
 	for _, createdValue := range createdValues {
+		if createdValue.Artifact == nil {
+			return nil, fmt.Errorf("failed to get artifact from cursor for isOccurrence")
+		}
 		var pkg *model.Package = nil
 		var src *model.Source = nil
 		if createdValue.PkgVersion != nil {
@@ -652,8 +655,10 @@ func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mo
 		}
 		if pkg != nil {
 			isOccurrence.Subject = pkg
-		} else {
+		} else if src != nil {
 			isOccurrence.Subject = src
+		} else {
+			return nil, fmt.Errorf("failed to get subject from cursor for isOccurrence")
 		}
 		isOccurrenceList = append(isOccurrenceList, isOccurrence)
 	}

@@ -565,8 +565,10 @@ func getHasSBOMFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.H
 		}
 		if pkg != nil {
 			hasSBOM.Subject = pkg
-		} else {
+		} else if createdValue.Artifact != nil {
 			hasSBOM.Subject = createdValue.Artifact
+		} else {
+			return nil, fmt.Errorf("failed to get subject from cursor for hasSBOM")
 		}
 		hasSBOMList = append(hasSBOMList, hasSBOM)
 	}

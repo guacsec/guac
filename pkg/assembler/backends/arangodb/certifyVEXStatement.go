@@ -714,8 +714,10 @@ func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 		}
 		if pkg != nil {
 			certifyVex.Subject = pkg
-		} else {
+		} else if createdValue.Artifact != nil {
 			certifyVex.Subject = createdValue.Artifact
+		} else {
+			return nil, fmt.Errorf("failed to get subject from cursor for certifyVex")
 		}
 
 		certifyVexList = append(certifyVexList, certifyVex)

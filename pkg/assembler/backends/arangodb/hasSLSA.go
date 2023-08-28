@@ -378,7 +378,9 @@ func getHasSLSAFromCursor(c *arangoClient, ctx context.Context, cursor driver.Cu
 
 	var hasSLSAList []*model.HasSlsa
 	for _, createdValue := range createdValues {
-
+		if createdValue.BuiltBy == nil || createdValue.Subject == nil {
+			return nil, fmt.Errorf("failed to get subject or builtBy from cursor for hasSLSA")
+		}
 		var builtFromArtifacts []*model.Artifact
 		if val, ok := builtFromMap[artifactKey(createdValue.Subject.Algorithm, createdValue.Subject.Digest)]; ok {
 			builtFromArtifacts = val
