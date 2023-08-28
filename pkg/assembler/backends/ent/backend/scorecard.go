@@ -57,10 +57,18 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 			),
 		)
 		if filter.Source.Namespace != nil {
-			sourcename.HasNamespaceWith(sourcenamespace.NamespaceEQ(*filter.Source.Namespace))
+			query.Where(
+				certifyscorecard.HasSourceWith(
+					sourcename.HasNamespaceWith(sourcenamespace.NamespaceEQ(*filter.Source.Namespace)),
+				),
+			)
 		}
 		if filter.Source.Type != nil {
-			sourcename.HasNamespaceWith(sourcenamespace.HasSourceTypeWith(sourcetype.TypeEQ(*filter.Source.Type)))
+			query.Where(
+				certifyscorecard.HasSourceWith(
+					sourcename.HasNamespaceWith(sourcenamespace.HasSourceTypeWith(sourcetype.TypeEQ(*filter.Source.Type))),
+				),
+			)
 		}
 	}
 
