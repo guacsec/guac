@@ -20,13 +20,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
-	"github.com/guacsec/guac/pkg/assembler/helpers/expected"
-
 	"github.com/google/go-cmp/cmp"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 )
 
 func TestCertifyBad(t *testing.T) {
@@ -48,13 +47,13 @@ func TestCertifyBad(t *testing.T) {
 	}{
 		{
 			Name:  "Ingest with two subjects",
-			InSrc: []*model.SourceInputSpec{expected.S1},
-			InArt: []*model.ArtifactInputSpec{expected.A1},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source:   expected.S1,
-						Artifact: expected.A1,
+						Source:   testdata.S1,
+						Artifact: testdata.A1,
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -65,11 +64,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query with two subjects",
-			InSrc: []*model.SourceInputSpec{expected.S1},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: expected.S1,
+						Source: testdata.S1,
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -159,11 +158,11 @@ func TestIngestCertifyBads(t *testing.T) {
 	}{
 		{
 			Name:  "Ingest with two packages and one CertifyBad",
-			InPkg: []*model.PkgInputSpec{expected.P1, expected.P2},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{expected.P1, expected.P2},
+						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 					},
 					Match: model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -179,11 +178,11 @@ func TestIngestCertifyBads(t *testing.T) {
 		},
 		{
 			Name:  "Ingest with two sources and one CertifyBad",
-			InSrc: []*model.SourceInputSpec{expected.S1, expected.S2},
+			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Sources: []*model.SourceInputSpec{expected.S1, expected.S2},
+						Sources: []*model.SourceInputSpec{testdata.S1, testdata.S2},
 					},
 					CB: []*model.CertifyBadInputSpec{
 						{
@@ -196,11 +195,11 @@ func TestIngestCertifyBads(t *testing.T) {
 		},
 		{
 			Name:  "Ingest with two artifacts and one CertifyBad",
-			InArt: []*model.ArtifactInputSpec{expected.A1, expected.A2},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Artifacts: []*model.ArtifactInputSpec{expected.A1, expected.A2},
+						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 					},
 					CB: []*model.CertifyBadInputSpec{
 						{
@@ -213,15 +212,15 @@ func TestIngestCertifyBads(t *testing.T) {
 		},
 		{
 			Name:  "Ingest with one package, one source, one artifact and one CertifyBad",
-			InPkg: []*model.PkgInputSpec{expected.P1},
-			InSrc: []*model.SourceInputSpec{expected.S1},
-			InArt: []*model.ArtifactInputSpec{expected.A1},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages:  []*model.PkgInputSpec{expected.P1},
-						Sources:   []*model.SourceInputSpec{expected.S1},
-						Artifacts: []*model.ArtifactInputSpec{expected.A1},
+						Packages:  []*model.PkgInputSpec{testdata.P1},
+						Sources:   []*model.SourceInputSpec{testdata.S1},
+						Artifacts: []*model.ArtifactInputSpec{testdata.A1},
 					},
 					CB: []*model.CertifyBadInputSpec{
 						{
@@ -234,11 +233,11 @@ func TestIngestCertifyBads(t *testing.T) {
 		},
 		{
 			Name:  "HappyPath All Version",
-			InPkg: []*model.PkgInputSpec{expected.P1},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				call{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{expected.P1},
+						Packages: []*model.PkgInputSpec{testdata.P1},
 					},
 					Match: model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
@@ -255,7 +254,7 @@ func TestIngestCertifyBads(t *testing.T) {
 			},
 			ExpCB: []*model.CertifyBad{
 				&model.CertifyBad{
-					Subject:       expected.P1outName,
+					Subject:       testdata.P1outName,
 					Justification: "test justification",
 				},
 			},
