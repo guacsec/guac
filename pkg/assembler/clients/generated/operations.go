@@ -1916,6 +1916,499 @@ func (v *AllCertifyVulnVulnerability) __premarshalJSON() (*__premarshalAllCertif
 	return &retval, nil
 }
 
+// AllHasMetadata includes the GraphQL fields of HasMetadata requested by the fragment AllHasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type AllHasMetadata struct {
+	Id            string                                       `json:"id"`
+	Subject       AllHasMetadataSubjectPackageSourceOrArtifact `json:"-"`
+	Key           string                                       `json:"key"`
+	Value         string                                       `json:"value"`
+	Timestamp     time.Time                                    `json:"timestamp"`
+	Justification string                                       `json:"justification"`
+	Origin        string                                       `json:"origin"`
+	Collector     string                                       `json:"collector"`
+}
+
+// GetId returns AllHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *AllHasMetadata) GetId() string { return v.Id }
+
+// GetSubject returns AllHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *AllHasMetadata) GetSubject() AllHasMetadataSubjectPackageSourceOrArtifact { return v.Subject }
+
+// GetKey returns AllHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *AllHasMetadata) GetKey() string { return v.Key }
+
+// GetValue returns AllHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *AllHasMetadata) GetValue() string { return v.Value }
+
+// GetTimestamp returns AllHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *AllHasMetadata) GetTimestamp() time.Time { return v.Timestamp }
+
+// GetJustification returns AllHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *AllHasMetadata) GetJustification() string { return v.Justification }
+
+// GetOrigin returns AllHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *AllHasMetadata) GetOrigin() string { return v.Origin }
+
+// GetCollector returns AllHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *AllHasMetadata) GetCollector() string { return v.Collector }
+
+func (v *AllHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasMetadata
+		Subject json.RawMessage `json:"subject"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Subject
+		src := firstPass.Subject
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalAllHasMetadataSubjectPackageSourceOrArtifact(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal AllHasMetadata.Subject: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalAllHasMetadata struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *AllHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasMetadata) __premarshalJSON() (*__premarshalAllHasMetadata, error) {
+	var retval __premarshalAllHasMetadata
+
+	retval.Id = v.Id
+	{
+
+		dst := &retval.Subject
+		src := v.Subject
+		var err error
+		*dst, err = __marshalAllHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal AllHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.Key
+	retval.Value = v.Value
+	retval.Timestamp = v.Timestamp
+	retval.Justification = v.Justification
+	retval.Origin = v.Origin
+	retval.Collector = v.Collector
+	return &retval, nil
+}
+
+// AllHasMetadataSubjectArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type AllHasMetadataSubjectArtifact struct {
+	Typename        *string `json:"__typename"`
+	AllArtifactTree `json:"-"`
+}
+
+// GetTypename returns AllHasMetadataSubjectArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns AllHasMetadataSubjectArtifact.Id, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns AllHasMetadataSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+
+// GetDigest returns AllHasMetadataSubjectArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *AllHasMetadataSubjectArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasMetadataSubjectArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasMetadataSubjectArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasMetadataSubjectArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *AllHasMetadataSubjectArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasMetadataSubjectArtifact) __premarshalJSON() (*__premarshalAllHasMetadataSubjectArtifact, error) {
+	var retval __premarshalAllHasMetadataSubjectArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// AllHasMetadataSubjectPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type AllHasMetadataSubjectPackage struct {
+	Typename   *string `json:"__typename"`
+	AllPkgTree `json:"-"`
+}
+
+// GetTypename returns AllHasMetadataSubjectPackage.Typename, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectPackage) GetTypename() *string { return v.Typename }
+
+// GetId returns AllHasMetadataSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns AllHasMetadataSubjectPackage.Type, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns AllHasMetadataSubjectPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *AllHasMetadataSubjectPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasMetadataSubjectPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasMetadataSubjectPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasMetadataSubjectPackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *AllHasMetadataSubjectPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasMetadataSubjectPackage) __premarshalJSON() (*__premarshalAllHasMetadataSubjectPackage, error) {
+	var retval __premarshalAllHasMetadataSubjectPackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// AllHasMetadataSubjectPackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
+//
+// AllHasMetadataSubjectPackageSourceOrArtifact is implemented by the following types:
+// AllHasMetadataSubjectArtifact
+// AllHasMetadataSubjectPackage
+// AllHasMetadataSubjectSource
+// The GraphQL type's documentation follows.
+//
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
+type AllHasMetadataSubjectPackageSourceOrArtifact interface {
+	implementsGraphQLInterfaceAllHasMetadataSubjectPackageSourceOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *AllHasMetadataSubjectArtifact) implementsGraphQLInterfaceAllHasMetadataSubjectPackageSourceOrArtifact() {
+}
+func (v *AllHasMetadataSubjectPackage) implementsGraphQLInterfaceAllHasMetadataSubjectPackageSourceOrArtifact() {
+}
+func (v *AllHasMetadataSubjectSource) implementsGraphQLInterfaceAllHasMetadataSubjectPackageSourceOrArtifact() {
+}
+
+func __unmarshalAllHasMetadataSubjectPackageSourceOrArtifact(b []byte, v *AllHasMetadataSubjectPackageSourceOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Artifact":
+		*v = new(AllHasMetadataSubjectArtifact)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(AllHasMetadataSubjectPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(AllHasMetadataSubjectSource)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageSourceOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for AllHasMetadataSubjectPackageSourceOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalAllHasMetadataSubjectPackageSourceOrArtifact(v *AllHasMetadataSubjectPackageSourceOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *AllHasMetadataSubjectArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllHasMetadataSubjectArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *AllHasMetadataSubjectPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllHasMetadataSubjectPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *AllHasMetadataSubjectSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllHasMetadataSubjectSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for AllHasMetadataSubjectPackageSourceOrArtifact: "%T"`, v)
+	}
+}
+
+// AllHasMetadataSubjectSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type AllHasMetadataSubjectSource struct {
+	Typename      *string `json:"__typename"`
+	AllSourceTree `json:"-"`
+}
+
+// GetTypename returns AllHasMetadataSubjectSource.Typename, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectSource) GetTypename() *string { return v.Typename }
+
+// GetId returns AllHasMetadataSubjectSource.Id, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns AllHasMetadataSubjectSource.Type, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns AllHasMetadataSubjectSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *AllHasMetadataSubjectSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *AllHasMetadataSubjectSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasMetadataSubjectSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasMetadataSubjectSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasMetadataSubjectSource struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *AllHasMetadataSubjectSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasMetadataSubjectSource) __premarshalJSON() (*__premarshalAllHasMetadataSubjectSource, error) {
+	var retval __premarshalAllHasMetadataSubjectSource
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
 // AllHasSBOMTree includes the GraphQL fields of HasSBOM requested by the fragment AllHasSBOMTree.
 type AllHasSBOMTree struct {
 	Id string `json:"id"`
@@ -6825,11 +7318,119 @@ func (v *NeighborsNeighborsCertifyVuln) __premarshalJSON() (*__premarshalNeighbo
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type NeighborsNeighborsHasMetadata struct {
-	Typename *string `json:"__typename"`
+	Typename       *string `json:"__typename"`
+	AllHasMetadata `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsHasMetadata.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetId() string { return v.AllHasMetadata.Id }
+
+// GetSubject returns NeighborsNeighborsHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetSubject() AllHasMetadataSubjectPackageSourceOrArtifact {
+	return v.AllHasMetadata.Subject
+}
+
+// GetKey returns NeighborsNeighborsHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetKey() string { return v.AllHasMetadata.Key }
+
+// GetValue returns NeighborsNeighborsHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetValue() string { return v.AllHasMetadata.Value }
+
+// GetTimestamp returns NeighborsNeighborsHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetTimestamp() time.Time { return v.AllHasMetadata.Timestamp }
+
+// GetJustification returns NeighborsNeighborsHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetJustification() string {
+	return v.AllHasMetadata.Justification
+}
+
+// GetOrigin returns NeighborsNeighborsHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetOrigin() string { return v.AllHasMetadata.Origin }
+
+// GetCollector returns NeighborsNeighborsHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasMetadata) GetCollector() string { return v.AllHasMetadata.Collector }
+
+func (v *NeighborsNeighborsHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsHasMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsHasMetadata) __premarshalJSON() (*__premarshalNeighborsNeighborsHasMetadata, error) {
+	var retval __premarshalNeighborsNeighborsHasMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasMetadata.Subject
+		var err error
+		*dst, err = __marshalAllHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal NeighborsNeighborsHasMetadata.AllHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.AllHasMetadata.Key
+	retval.Value = v.AllHasMetadata.Value
+	retval.Timestamp = v.AllHasMetadata.Timestamp
+	retval.Justification = v.AllHasMetadata.Justification
+	retval.Origin = v.AllHasMetadata.Origin
+	retval.Collector = v.AllHasMetadata.Collector
+	return &retval, nil
+}
 
 // NeighborsNeighborsHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type NeighborsNeighborsHasSBOM struct {
@@ -7683,10 +8284,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 	case *NeighborsNeighborsHasMetadata:
 		typename = "HasMetadata"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NeighborsNeighborsHasMetadata
-		}{typename, v}
+			*__premarshalNeighborsNeighborsHasMetadata
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NeighborsNeighborsHasSBOM:
 		typename = "HasSBOM"
@@ -8901,10 +9506,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 	case *NodeNodeHasMetadata:
 		typename = "HasMetadata"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NodeNodeHasMetadata
-		}{typename, v}
+			*__premarshalNodeNodeHasMetadata
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodeNodeHasSBOM:
 		typename = "HasSBOM"
@@ -9765,11 +10374,117 @@ func (v *NodeNodeCertifyVuln) __premarshalJSON() (*__premarshalNodeNodeCertifyVu
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type NodeNodeHasMetadata struct {
-	Typename *string `json:"__typename"`
+	Typename       *string `json:"__typename"`
+	AllHasMetadata `json:"-"`
 }
 
 // GetTypename returns NodeNodeHasMetadata.Typename, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns NodeNodeHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetId() string { return v.AllHasMetadata.Id }
+
+// GetSubject returns NodeNodeHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetSubject() AllHasMetadataSubjectPackageSourceOrArtifact {
+	return v.AllHasMetadata.Subject
+}
+
+// GetKey returns NodeNodeHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetKey() string { return v.AllHasMetadata.Key }
+
+// GetValue returns NodeNodeHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetValue() string { return v.AllHasMetadata.Value }
+
+// GetTimestamp returns NodeNodeHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetTimestamp() time.Time { return v.AllHasMetadata.Timestamp }
+
+// GetJustification returns NodeNodeHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetJustification() string { return v.AllHasMetadata.Justification }
+
+// GetOrigin returns NodeNodeHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetOrigin() string { return v.AllHasMetadata.Origin }
+
+// GetCollector returns NodeNodeHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasMetadata) GetCollector() string { return v.AllHasMetadata.Collector }
+
+func (v *NodeNodeHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NodeNodeHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NodeNodeHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNodeNodeHasMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NodeNodeHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NodeNodeHasMetadata) __premarshalJSON() (*__premarshalNodeNodeHasMetadata, error) {
+	var retval __premarshalNodeNodeHasMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasMetadata.Subject
+		var err error
+		*dst, err = __marshalAllHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal NodeNodeHasMetadata.AllHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.AllHasMetadata.Key
+	retval.Value = v.AllHasMetadata.Value
+	retval.Timestamp = v.AllHasMetadata.Timestamp
+	retval.Justification = v.AllHasMetadata.Justification
+	retval.Origin = v.AllHasMetadata.Origin
+	retval.Collector = v.AllHasMetadata.Collector
+	return &retval, nil
+}
 
 // NodeNodeHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type NodeNodeHasSBOM struct {
@@ -11847,11 +12562,117 @@ func (v *NodesNodesCertifyVuln) __premarshalJSON() (*__premarshalNodesNodesCerti
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type NodesNodesHasMetadata struct {
-	Typename *string `json:"__typename"`
+	Typename       *string `json:"__typename"`
+	AllHasMetadata `json:"-"`
 }
 
 // GetTypename returns NodesNodesHasMetadata.Typename, and is useful for accessing the field via an interface.
 func (v *NodesNodesHasMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns NodesNodesHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetId() string { return v.AllHasMetadata.Id }
+
+// GetSubject returns NodesNodesHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetSubject() AllHasMetadataSubjectPackageSourceOrArtifact {
+	return v.AllHasMetadata.Subject
+}
+
+// GetKey returns NodesNodesHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetKey() string { return v.AllHasMetadata.Key }
+
+// GetValue returns NodesNodesHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetValue() string { return v.AllHasMetadata.Value }
+
+// GetTimestamp returns NodesNodesHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetTimestamp() time.Time { return v.AllHasMetadata.Timestamp }
+
+// GetJustification returns NodesNodesHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetJustification() string { return v.AllHasMetadata.Justification }
+
+// GetOrigin returns NodesNodesHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetOrigin() string { return v.AllHasMetadata.Origin }
+
+// GetCollector returns NodesNodesHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasMetadata) GetCollector() string { return v.AllHasMetadata.Collector }
+
+func (v *NodesNodesHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NodesNodesHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NodesNodesHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNodesNodesHasMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NodesNodesHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NodesNodesHasMetadata) __premarshalJSON() (*__premarshalNodesNodesHasMetadata, error) {
+	var retval __premarshalNodesNodesHasMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasMetadata.Subject
+		var err error
+		*dst, err = __marshalAllHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal NodesNodesHasMetadata.AllHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.AllHasMetadata.Key
+	retval.Value = v.AllHasMetadata.Value
+	retval.Timestamp = v.AllHasMetadata.Timestamp
+	retval.Justification = v.AllHasMetadata.Justification
+	retval.Origin = v.AllHasMetadata.Origin
+	retval.Collector = v.AllHasMetadata.Collector
+	return &retval, nil
+}
 
 // NodesNodesHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type NodesNodesHasSBOM struct {
@@ -12686,10 +13507,14 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 	case *NodesNodesHasMetadata:
 		typename = "HasMetadata"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NodesNodesHasMetadata
-		}{typename, v}
+			*__premarshalNodesNodesHasMetadata
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodesNodesHasSBOM:
 		typename = "HasSBOM"
@@ -14881,11 +15706,117 @@ func (v *PathPathCertifyVuln) __premarshalJSON() (*__premarshalPathPathCertifyVu
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type PathPathHasMetadata struct {
-	Typename *string `json:"__typename"`
+	Typename       *string `json:"__typename"`
+	AllHasMetadata `json:"-"`
 }
 
 // GetTypename returns PathPathHasMetadata.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathHasMetadata) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetId() string { return v.AllHasMetadata.Id }
+
+// GetSubject returns PathPathHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetSubject() AllHasMetadataSubjectPackageSourceOrArtifact {
+	return v.AllHasMetadata.Subject
+}
+
+// GetKey returns PathPathHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetKey() string { return v.AllHasMetadata.Key }
+
+// GetValue returns PathPathHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetValue() string { return v.AllHasMetadata.Value }
+
+// GetTimestamp returns PathPathHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetTimestamp() time.Time { return v.AllHasMetadata.Timestamp }
+
+// GetJustification returns PathPathHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetJustification() string { return v.AllHasMetadata.Justification }
+
+// GetOrigin returns PathPathHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetOrigin() string { return v.AllHasMetadata.Origin }
+
+// GetCollector returns PathPathHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathHasMetadata) GetCollector() string { return v.AllHasMetadata.Collector }
+
+func (v *PathPathHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathHasMetadata struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathHasMetadata) __premarshalJSON() (*__premarshalPathPathHasMetadata, error) {
+	var retval __premarshalPathPathHasMetadata
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasMetadata.Subject
+		var err error
+		*dst, err = __marshalAllHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PathPathHasMetadata.AllHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.AllHasMetadata.Key
+	retval.Value = v.AllHasMetadata.Value
+	retval.Timestamp = v.AllHasMetadata.Timestamp
+	retval.Justification = v.AllHasMetadata.Justification
+	retval.Origin = v.AllHasMetadata.Origin
+	retval.Collector = v.AllHasMetadata.Collector
+	return &retval, nil
+}
 
 // PathPathHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type PathPathHasSBOM struct {
@@ -15716,10 +16647,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 	case *PathPathHasMetadata:
 		typename = "HasMetadata"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*PathPathHasMetadata
-		}{typename, v}
+			*__premarshalPathPathHasMetadata
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *PathPathHasSBOM:
 		typename = "HasSBOM"
@@ -20158,6 +21093,9 @@ query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
 		... on VulnerabilityMetadata {
 			... AllVulnMetadataTree
 		}
+		... on HasMetadata {
+			... AllHasMetadata
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -20455,6 +21393,27 @@ fragment AllVulnMetadataTree on VulnerabilityMetadata {
 	scoreType
 	scoreValue
 	timestamp
+	origin
+	collector
+}
+fragment AllHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
 	origin
 	collector
 }
@@ -20556,6 +21515,9 @@ query Node ($node: ID!) {
 		... on VulnerabilityMetadata {
 			... AllVulnMetadataTree
 		}
+		... on HasMetadata {
+			... AllHasMetadata
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -20853,6 +21815,27 @@ fragment AllVulnMetadataTree on VulnerabilityMetadata {
 	scoreType
 	scoreValue
 	timestamp
+	origin
+	collector
+}
+fragment AllHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
 	origin
 	collector
 }
@@ -20952,6 +21935,9 @@ query Nodes ($nodes: [ID!]!) {
 		... on VulnerabilityMetadata {
 			... AllVulnMetadataTree
 		}
+		... on HasMetadata {
+			... AllHasMetadata
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -21249,6 +22235,27 @@ fragment AllVulnMetadataTree on VulnerabilityMetadata {
 	scoreType
 	scoreValue
 	timestamp
+	origin
+	collector
+}
+fragment AllHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
 	origin
 	collector
 }
@@ -21577,6 +22584,9 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge
 		... on VulnerabilityMetadata {
 			... AllVulnMetadataTree
 		}
+		... on HasMetadata {
+			... AllHasMetadata
+		}
 	}
 }
 fragment AllPkgTree on Package {
@@ -21874,6 +22884,27 @@ fragment AllVulnMetadataTree on VulnerabilityMetadata {
 	scoreType
 	scoreValue
 	timestamp
+	origin
+	collector
+}
+fragment AllHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
 	origin
 	collector
 }

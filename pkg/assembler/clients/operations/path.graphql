@@ -93,6 +93,9 @@ query Path(
     ... on VulnerabilityMetadata {
       ...AllVulnMetadataTree
     }
+    ... on HasMetadata {
+      ...AllHasMetadata
+    }
   }
 }
 
@@ -161,6 +164,9 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
     }
     ... on VulnerabilityMetadata {
       ...AllVulnMetadataTree
+    }
+    ... on HasMetadata {
+      ...AllHasMetadata
     }
   }
 }
@@ -231,6 +237,9 @@ query Node($node: ID!) {
     ... on VulnerabilityMetadata {
       ...AllVulnMetadataTree
     }
+    ... on HasMetadata {
+      ...AllHasMetadata
+    }
   }
 }
 
@@ -299,6 +308,9 @@ query Nodes($nodes: [ID!]!) {
     }
     ... on VulnerabilityMetadata {
       ...AllVulnMetadataTree
+    }
+    ... on HasMetadata {
+      ...AllHasMetadata
     }
   }
 }
