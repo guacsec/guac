@@ -60,7 +60,6 @@ var p1 = &model.PkgInputSpec{
 var p1out = &model.Package{
 	Type: "pypi",
 	Namespaces: []*model.PackageNamespace{{
-		Namespace: "aaa",
 		Names: []*model.PackageName{{
 			Name: "tensorflow",
 			Versions: []*model.PackageVersion{{
