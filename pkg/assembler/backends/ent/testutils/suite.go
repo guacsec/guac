@@ -62,7 +62,7 @@ func (s *Suite) Run(testName string, tf func()) {
 		log.Fatal(err)
 	}
 	defer func(db *sql.DB, query string, args ...any) {
-		_, err := db.Exec(query, args)
+		_, err := db.Exec(query, args...)
 		if err != nil {
 			log.Fatal(err)
 		}
