@@ -20,10 +20,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
+	"github.com/guacsec/guac/internal/testing/mocks"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
-	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 )
@@ -92,31 +93,49 @@ func TestCertifyBad(t *testing.T) {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
+	ctrl := gomock.NewController(t)
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := inmem.GetBackend(nil)
-			if err != nil {
-				t.Fatalf("Could not instantiate testing backend: %v", err)
-			}
+			b := mocks.NewMockBackend(ctrl)
 			r := resolvers.Resolver{Backend: b}
 			m := r.Mutation()
 			q := r.Query()
 			for _, p := range test.InPkg {
+				b.
+					EXPECT().
+					IngestPackage(ctx, *p).
+					Return(testdata.P1out, nil).
+					AnyTimes()
 				if _, err := m.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
+				b.
+					EXPECT().
+					IngestSource(ctx, *s).
+					Return(testdata.S1out, nil).
+					AnyTimes()
 				if _, err := m.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
+				b.
+					EXPECT().
+					IngestArtifact(ctx, a).
+					Return(testdata.A2out, nil).
+					AnyTimes()
 				if _, err := m.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
+				b.
+					EXPECT().
+					IngestCertifyBad(ctx, o.Sub, &o.Match, *o.CB).
+					Return(testdata.CB1out, nil).
+					AnyTimes()
 				_, err := m.IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
@@ -260,35 +279,50 @@ func TestIngestCertifyBads(t *testing.T) {
 			},
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	ctx := context.Background()
+	ctrl := gomock.NewController(t)
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := inmem.GetBackend(nil)
-			if err != nil {
-				t.Fatalf("Could not instantiate testing backend: %v", err)
-			}
+			b := mocks.NewMockBackend(ctrl)
 			r := resolvers.Resolver{Backend: b}
 			m := r.Mutation()
 			q := r.Query()
 			for _, p := range test.InPkg {
+				b.
+					EXPECT().
+					IngestPackage(ctx, *p).
+					Return(testdata.P1out, nil).
+					AnyTimes()
 				if _, err := m.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
+				b.
+					EXPECT().
+					IngestSource(ctx, *s).
+					Return(testdata.S1out, nil).
+					AnyTimes()
 				if _, err := m.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
+				b.
+					EXPECT().
+					IngestArtifact(ctx, a).
+					Return(testdata.A2out, nil).
+					AnyTimes()
 				if _, err := m.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
+				b.
+					EXPECT().
+					IngestCertifyBads(ctx, o.Sub, &o.Match, o.CB).
+					Return([]*model.CertifyBad{testdata.CB1out}, nil).
+					AnyTimes()
 				_, err := m.IngestCertifyBads(ctx, o.Sub, o.Match, o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
@@ -297,15 +331,17 @@ func TestIngestCertifyBads(t *testing.T) {
 					return
 				}
 			}
-			got, err := q.CertifyBad(ctx, *test.Query)
+			b.
+				EXPECT().
+				CertifyBad(ctx, test.Query).
+				Return(test.ExpCB, nil).
+				AnyTimes()
+			_, err := q.CertifyBad(ctx, *test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
-			}
-			if diff := cmp.Diff(test.ExpCB, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}

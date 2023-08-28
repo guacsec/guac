@@ -41,6 +41,17 @@ var S1 = &model.SourceInputSpec{
 	Name:      "myrepo",
 }
 
+var S1out = &model.Source{
+	Type: "git",
+	Namespaces: []*model.SourceNamespace{{
+		Namespace: "github.com/jeff",
+		Names: []*model.SourceName{{
+			Name:   "myrepo",
+			Tag:    ptrfrom.String(""),
+			Commit: ptrfrom.String(""),
+		}},
+	}},
+}
 var S2 = &model.SourceInputSpec{
 	Type:      "git",
 	Namespace: "github.com/bob",
@@ -103,4 +114,9 @@ var P2out = &model.Package{
 			}},
 		}},
 	}},
+}
+
+var CB1out = &model.CertifyBad{
+	Subject:       S2out,
+	Justification: "test justification",
 }
