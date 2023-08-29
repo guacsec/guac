@@ -1,0 +1,10 @@
+FROM docker.io/library/golang:1.19 as builder
+WORKDIR /go/src/github.com/guacsec/guac/
+ADD . /go/src/github.com/guacsec/guac/
+RUN --mount=type=cache,target=/go/pkg/mod make build
+
+FROM docker.io/library/ubuntu:22.04
+RUN apt update
+RUN apt install -y ca-certificates
+WORKDIR /root
+COPY --from=builder /go/src/github.com/guacsec/guac/bin/ /opt/guac/

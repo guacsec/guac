@@ -37,21 +37,21 @@ dockers:
       - "--builder={{ .Env.DOCKER_CONTEXT }}"
 
 docker_manifests:
-- name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}"
-  image_templates:
-    - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
-    - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-arm64"
+  - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-arm64"
 
 docker_signs:
   - cmd: cosign
     artifacts: all
     output: true
     args:
-    - "sign"
-    - "--a"
-    - "git_sha={{.FullCommit}}"
-    - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}@${digest}"
-    - "--yes"
+      - "sign"
+      - "--a"
+      - "git_sha={{.FullCommit}}"
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}@${digest}"
+      - "--yes"
 
 before:
   hooks:
@@ -143,54 +143,53 @@ builds:
         goarch: arm
 
 universal_binaries:
-- replace: true
-  name_template: guacone
-  id: guacone
-  ids:
-  - guacone
-- replace: true
-  name_template: guacingest
-  id: guacingest
-  ids:
-  - guacingest
-- replace: true
-  name_template: guaccsub
-  id: guaccsub
-  ids:
-  - guaccsub
-- replace: true
-  name_template: guaccollect
-  id: guaccollect
-  ids:
-  - guaccollect
-- replace: true
-  name_template: guacgql
-  id: guacgql
-  ids:
-  - guacgql
-
+  - replace: true
+    name_template: guacone
+    id: guacone
+    ids:
+      - guacone
+  - replace: true
+    name_template: guacingest
+    id: guacingest
+    ids:
+      - guacingest
+  - replace: true
+    name_template: guaccsub
+    id: guaccsub
+    ids:
+      - guaccsub
+  - replace: true
+    name_template: guaccollect
+    id: guaccollect
+    ids:
+      - guaccollect
+  - replace: true
+    name_template: guacgql
+    id: guacgql
+    ids:
+      - guacgql
 
 sboms:
-  - id: bins 
+  - id: bins
     artifacts: binary
     documents:
       - "${artifact}.spdx.sbom.json"
 
 signs:
- - id: guac-cosign-keyless
-   artifacts: checksum
-   signature: "${artifact}-keyless.sig"
-   certificate: "${artifact}-keyless.pem"
-   cmd: cosign
-   args: 
-   - "sign-blob"
-   - "--yes"
-   - "--output-signature"
-   - "${artifact}-keyless.sig"
-   - "--output-certificate"
-   - "${artifact}-keyless.pem"
-   - "${artifact}"
-   output: true
+  - id: guac-cosign-keyless
+    artifacts: checksum
+    signature: "${artifact}-keyless.sig"
+    certificate: "${artifact}-keyless.pem"
+    cmd: cosign
+    args:
+      - "sign-blob"
+      - "--yes"
+      - "--output-signature"
+      - "${artifact}-keyless.sig"
+      - "--output-certificate"
+      - "${artifact}-keyless.pem"
+      - "${artifact}"
+    output: true
 
 archives:
   - format: binary
@@ -207,14 +206,13 @@ changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
 
 release:
   prerelease: auto
   draft: false
   replace_existing_draft: true
-
 # The lines beneath this are called `modelines`. See `:help modeline`
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj

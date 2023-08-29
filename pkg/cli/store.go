@@ -37,7 +37,7 @@ func init() {
 
 	set.Int("csub-listen-port", 2782, "port to listen to on collect-sub service")
 
-	set.String("gql-backend", "inmem", "backend used for graphql api server: [inmem | arango (experimental) | neo4j (unmaintained)]")
+	set.String("gql-backend", "inmem", "backend used for graphql api server: [inmem | arango (experimental) | ent (experimental) | neo4j (unmaintained)]")
 	set.Int("gql-listen-port", 8080, "port used for graphql api server")
 	set.Bool("gql-debug", false, "debug flag which enables the graphQL playground")
 	set.Bool("gql-trace", false, "flag which enables tracing of graphQL requests and responses on the console")
@@ -53,6 +53,11 @@ func init() {
 	set.String("neptune-region", "us-east-1", "region to connect to neptune db")
 	set.String("neptune-user", "", "neptune user credential to connect to graph db")
 	set.String("neptune-realm", "neptune", "realm to connect to graph db")
+
+	set.String("db-address", "postgres://localhost/guac_dev", "Full URL of database to connect to")
+	set.String("db-driver", "postgres", "database driver to use, one of [postgres | sqlite3 | mysql] or anything supported by sql.DB")
+	set.Bool("db-debug", false, "enable debug logging for database queries")
+	set.Bool("db-migrate", true, "automatically run database migrations on start")
 
 	set.String("arango-addr", "http://localhost:8529", "address to arango db")
 	set.String("arango-user", "", "arango user to connect to graph db")

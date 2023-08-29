@@ -40,6 +40,12 @@ var flags = struct {
 	nPass  string
 	nRealm string
 
+	// Needed only if using ent backend
+	dbAddress string
+	dbDriver  string
+	dbDebug   bool
+	dbMigrate bool
+
 	// Needed only if using arangodb backend
 	arangoAddr string
 	arangoUser string
@@ -69,6 +75,12 @@ var rootCmd = &cobra.Command{
 		flags.nAddr = viper.GetString("neo4j-addr")
 		flags.nRealm = viper.GetString("neo4j-realm")
 
+		// Needed only if using ent backend
+		flags.dbAddress = viper.GetString("db-address")
+		flags.dbDriver = viper.GetString("db-driver")
+		flags.dbDebug = viper.GetBool("db-debug")
+		flags.dbMigrate = viper.GetBool("db-migrate")
+
 		flags.arangoUser = viper.GetString("arango-user")
 		flags.arangoPass = viper.GetString("arango-pass")
 		flags.arangoAddr = viper.GetString("arango-addr")
@@ -90,7 +102,9 @@ func init() {
 		"arango-addr", "arango-user", "arango-pass",
 		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm",
 		"neptune-endpoint", "neptune-port", "neptune-region", "neptune-user", "neptune-realm",
-		"gql-test-data", "gql-listen-port", "gql-debug", "gql-backend", "gql-trace"})
+		"gql-test-data", "gql-listen-port", "gql-debug", "gql-backend", "gql-trace",
+		"db-address", "db-driver", "db-debug", "db-migrate",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
