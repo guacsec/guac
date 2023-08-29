@@ -59,3 +59,4 @@
 ./pkg/assembler/graphql/resolvers/vulnMetadata.resolvers.go
 ./internal/testing/mocks/scorecard.go
 ./internal/testing/mocks/documentparser.go
+./internal/testing/mocks/backend.go
