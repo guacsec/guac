@@ -109,18 +109,6 @@ var filesCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		processorTransportFunc := func(d processor.DocumentTree) error {
-			docTreeBytes, err := json.Marshal(d)
-			if err != nil {
-				return fmt.Errorf("failed marshal of document: %w", err)
-			}
-			err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
-			if err != nil {
-				return err
-			}
-			return nil
-		}
-
 		// for pubsub_test we ignore identifier strings as we don't connect to a collectsub service
 		ingestorTransportFunc := func(d []assembler.IngestPredicates, i []*common.IdentifierStrings) error {
 			err := assemblerFunc(d)
@@ -130,11 +118,6 @@ var filesCmd = &cobra.Command{
 			return nil
 		}
 
-		processorFunc, err := getProcessor(ctx, processorTransportFunc)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
 		ingestorFunc, err := getIngestor(ctx, ingestorTransportFunc)
 		if err != nil {
 			logger.Errorf("error: %v", err)
@@ -161,12 +144,33 @@ var filesCmd = &cobra.Command{
 			return false
 		}
 
+		ingest := func(d *processor.Document) error {
+			docTree, err := process.Process(ctx, d)
+			if err != nil {
+				logger.Error("[processor] failed process document: %v", err)
+				return nil
+			}
+
+			docTreeBytes, err := json.Marshal(d)
+			if err != nil {
+				return fmt.Errorf("failed marshal of document: %w", err)
+			}
+			err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
+			if err != nil {
+				logger.Error("[processor] failed transportFunc: %v", err)
+				return nil
+			}
+
+			logger.Infof("[processor] docTree Processed: %+v", docTree.Document.SourceInformation)
+			return nil
+		}
+
 		// Assuming that publisher and consumer are different processes.
 		var wg sync.WaitGroup
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			err := processorFunc()
+			err := process.Subscribe(ctx, ingest)
 			if err != nil {
 				logger.Errorf("processor ended with error: %v", err)
 			}
@@ -209,12 +213,6 @@ func validateFlags(user string, pass string, dbAddr string, realm string, natsAd
 func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
 		return collector.Publish(ctx, d)
-	}, nil
-}
-
-func getProcessor(ctx context.Context, transportFunc func(processor.DocumentTree) error) (func() error, error) {
-	return func() error {
-		return process.Subscribe(ctx, transportFunc)
 	}, nil
 }
 

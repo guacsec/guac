@@ -28,6 +28,7 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
+	"github.com/guacsec/guac/pkg/ingestor"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/scorecard"
@@ -111,43 +112,17 @@ var scorecardCmd = &cobra.Command{
 		if err := certify.RegisterCertifier(scCertifier, certifier.CertifierScorecard); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
-		processorFunc := getProcessor(ctx)
-		collectSubEmitFunc := getCollectSubEmit(ctx, csubClient)
-		ingestorFunc := getIngestor(ctx)
-		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
 
 		totalNum := 0
 		gotErr := false
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			start := time.Now()
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
 
-			docTree, err := processorFunc(d)
 			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to process doc: %v, format: %v, document: %v", err, d.Format, d.Type)
+				return fmt.Errorf("unable to ingest document: %v", err)
 			}
-
-			predicates, idstrings, err := ingestorFunc(docTree)
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to ingest doc tree: %v", err)
-			}
-
-			err = collectSubEmitFunc(idstrings)
-			if err != nil {
-				logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
-			}
-
-			err = assemblerFunc(predicates)
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to assemble graphs: %v", err)
-			}
-			t := time.Now()
-			elapsed := t.Sub(start)
-			logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
 			return nil
 		}
 

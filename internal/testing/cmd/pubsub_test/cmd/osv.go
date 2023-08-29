@@ -32,6 +32,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/process"
 	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
@@ -97,15 +98,24 @@ var osvCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		processorTransportFunc := func(d processor.DocumentTree) error {
+		ingest := func(d *processor.Document) error {
+			docTree, err := process.Process(ctx, d)
+			if err != nil {
+				logger.Error("[processor] failed process document: %v", err)
+				return nil
+			}
+
 			docTreeBytes, err := json.Marshal(d)
 			if err != nil {
 				return fmt.Errorf("failed marshal of document: %w", err)
 			}
 			err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
 			if err != nil {
-				return err
+				logger.Error("[processor] failed transportFunc: %v", err)
+				return nil
 			}
+
+			logger.Infof("[processor] docTree Processed: %+v", docTree.Document.SourceInformation)
 			return nil
 		}
 
@@ -118,11 +128,6 @@ var osvCmd = &cobra.Command{
 			return nil
 		}
 
-		processorFunc, err := getProcessor(ctx, processorTransportFunc)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
 		ingestorFunc, err := getIngestor(ctx, ingestorTransportFunc)
 		if err != nil {
 			logger.Errorf("error: %v", err)
@@ -160,7 +165,7 @@ var osvCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			err := processorFunc()
+			err := process.Subscribe(ctx, ingest)
 			if err != nil {
 				logger.Errorf("processor ended with error: %v", err)
 			}

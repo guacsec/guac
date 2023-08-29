@@ -19,20 +19,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
-	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/clients/helpers"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
-	"github.com/guacsec/guac/pkg/collectsub/collectsub/input"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
+	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
@@ -44,6 +41,7 @@ type options struct {
 	natsAddr        string
 	csubAddr        string
 	graphqlEndpoint string
+	async           bool
 }
 
 func ingest(cmd *cobra.Command, args []string) {
@@ -52,6 +50,7 @@ func ingest(cmd *cobra.Command, args []string) {
 		viper.GetString("nats-addr"),
 		viper.GetString("csub-addr"),
 		viper.GetString("gql-addr"),
+		viper.GetBool("async-ingest"),
 		args)
 	if err != nil {
 		fmt.Printf("unable to validate flags: %v\n", err)
@@ -80,50 +79,29 @@ func ingest(cmd *cobra.Command, args []string) {
 	}
 	defer csubClient.Close()
 
-	assemblerFunc, err := getAssembler(ctx, opts)
-	if err != nil {
-		logger.Errorf("error: %v", err)
-		os.Exit(1)
-	}
-
-	processorTransportFunc := func(d processor.DocumentTree) error {
-		docTreeBytes, err := json.Marshal(d)
-		if err != nil {
-			return fmt.Errorf("failed marshal of document: %w", err)
-		}
-		err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-
-	ingestorTransportFunc := func(d []assembler.IngestPredicates, i []*parser_common.IdentifierStrings) error {
-		err := assemblerFunc(d)
-		if err != nil {
-			return err
-		}
-
-		entries := input.IdentifierStringsSliceToCollectEntries(i)
-		if len(entries) > 0 {
-			logger.Infof("got collect entries to add: %v", len(entries))
-			if err := csubClient.AddCollectEntries(ctx, entries); err != nil {
-				logger.Errorf("unable to add collect entries: %v", err)
+	emit := func(d *processor.Document) error {
+		if opts.async {
+			docTree, err := process.Process(ctx, d)
+			if err != nil {
+				logger.Error("[processor] failed process document: %v", err)
+				return nil
 			}
+
+			docTreeBytes, err := json.Marshal(docTree)
+			if err != nil {
+				return fmt.Errorf("failed marshal of document: %w", err)
+			}
+			err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
+			if err != nil {
+				logger.Error("[processor] failed transportFunc: %v", err)
+				return nil
+			}
+
+			logger.Infof("[processor] docTree Processed: %+v", docTree.Document.SourceInformation)
+			return nil
+		} else {
+			return ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
 		}
-		return nil
-	}
-
-	processorFunc, err := getProcessor(ctx, processorTransportFunc)
-	if err != nil {
-		logger.Errorf("error: %v", err)
-		os.Exit(1)
-	}
-
-	ingestorFunc, err := getIngestor(ctx, ingestorTransportFunc)
-	if err != nil {
-		logger.Errorf("error: %v", err)
-		os.Exit(1)
 	}
 
 	// Assuming that publisher and consumer are different processes.
@@ -131,18 +109,35 @@ func ingest(cmd *cobra.Command, args []string) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := processorFunc(); err != nil {
+		if err := process.Subscribe(ctx, emit); err != nil {
 			logger.Errorf("processor ended with error: %v", err)
 		}
 	}()
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if err := ingestorFunc(); err != nil {
-			logger.Errorf("parser ended with error: %v", err)
+	if opts.async {
+		ingestorFunc := func(predicates []assembler.IngestPredicates, idstrings []*parser_common.IdentifierStrings) error {
+			collectSubEmitFunc := ingestor.GetCollectSubEmit(ctx, csubClient)
+			assemblerFunc := ingestor.GetAssembler(ctx, opts.graphqlEndpoint)
+
+			err := collectSubEmitFunc(idstrings)
+			if err != nil {
+				logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
+			}
+			err = assemblerFunc(predicates)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
-	}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := parser.Subscribe(ctx, ingestorFunc); err != nil {
+				logger.Errorf("parser ended with error: %v", err)
+			}
+		}()
+	}
 
 	logger.Infof("starting processor and parser")
 	sigs := make(chan os.Signal, 1)
@@ -154,34 +149,12 @@ func ingest(cmd *cobra.Command, args []string) {
 	wg.Wait()
 }
 
-func validateFlags(natsAddr string, csubAddr string, graphqlEndpoint string, args []string) (options, error) {
+func validateFlags(natsAddr string, csubAddr string, graphqlEndpoint string, async bool, args []string) (options, error) {
 	var opts options
 	opts.natsAddr = natsAddr
 	opts.csubAddr = csubAddr
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.async = async
 
 	return opts, nil
-}
-
-func getProcessor(ctx context.Context, transportFunc func(processor.DocumentTree) error) (func() error, error) {
-	return func() error {
-		return process.Subscribe(ctx, transportFunc)
-	}, nil
-}
-
-func getIngestor(ctx context.Context, transportFunc func([]assembler.IngestPredicates, []*parser_common.IdentifierStrings) error) (func() error, error) {
-	return func() error {
-		err := parser.Subscribe(ctx, transportFunc)
-		if err != nil {
-			return err
-		}
-		return nil
-	}, nil
-}
-
-func getAssembler(ctx context.Context, opts options) (func([]assembler.IngestPredicates) error, error) {
-	httpClient := http.Client{}
-	gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-	f := helpers.GetAssembler(ctx, gqlclient)
-	return f, nil
 }

@@ -88,7 +88,7 @@ services:
   guac-ingestor:
     networks: [frontend]
     image: $GUAC_IMAGE
-    command: "/opt/guac/guacingest"
+    command: "/opt/guac/guacingest --async-ingest=false"
     working_dir: /guac
     restart: on-failure
     depends_on:

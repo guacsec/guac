@@ -19,26 +19,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/Khan/genqlient/graphql"
-	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/clients/helpers"
 	"github.com/guacsec/guac/pkg/cli"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
-	"github.com/guacsec/guac/pkg/collectsub/collectsub/input"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/handler/processor/process"
+	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/ingestor/key"
 	"github.com/guacsec/guac/pkg/ingestor/key/inmemory"
-	"github.com/guacsec/guac/pkg/ingestor/parser"
-	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/guacsec/guac/pkg/ingestor/verifier/sigstore_verifier"
 	"github.com/guacsec/guac/pkg/logging"
@@ -126,12 +119,6 @@ var filesCmd = &cobra.Command{
 
 		files, filesCtx := errgroup.WithContext(ctx)
 
-		// Get pipeline of components
-		processorFunc := getProcessor(filesCtx)
-		ingestorFunc := getIngestor(filesCtx)
-		collectSubEmitFunc := getCollectSubEmit(filesCtx, csubClient)
-		assemblerFunc := getAssembler(filesCtx, opts.graphqlEndpoint)
-
 		totalNum := 0
 		totalSuccess := 0
 		var filesWithErrors []string
@@ -152,43 +139,12 @@ var filesCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			start := time.Now()
-			files.Go(func() error {
+			err := ingestor.Ingest(filesCtx, d, opts.graphqlEndpoint, csubClient)
 
-				if filesCtx.Err() != nil {
-					return fmt.Errorf("context error")
-				}
-				fmt.Println(d.SourceInformation.Source)
-				docTree, err := processorFunc(d)
-				if err != nil {
-					gotErr = true
-					filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
-					return fmt.Errorf("unable to process doc: %v, format: %v, document: %v", err, d.Format, d.Type)
-				}
-
-				predicates, idstrings, err := ingestorFunc(docTree)
-				if err != nil {
-					gotErr = true
-					filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
-					return fmt.Errorf("unable to ingest doc tree: %v", err)
-				}
-
-				err = collectSubEmitFunc(idstrings)
-				if err != nil {
-					logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
-				}
-				err = assemblerFunc(predicates)
-				if err != nil {
-					gotErr = true
-					filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
-					return fmt.Errorf("unable to assemble graphs: %v", err)
-				}
-				t := time.Now()
-				elapsed := t.Sub(start)
-				totalSuccess += 1
-				logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
-				return nil
-			})
+			if err != nil {
+				gotErr = true
+				return fmt.Errorf("unable to ingest document: %v", err)
+			}
 			return nil
 		}
 
@@ -242,39 +198,6 @@ func validateFilesFlags(keyPath string, keyID string, graphqlEndpoint string, cs
 	opts.path = args[0]
 
 	return opts, nil
-}
-
-func getProcessor(ctx context.Context) func(*processor.Document) (processor.DocumentTree, error) {
-	return func(d *processor.Document) (processor.DocumentTree, error) {
-		return process.Process(ctx, d)
-	}
-}
-
-func getIngestor(ctx context.Context) func(processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
-	return func(doc processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
-		return parser.ParseDocumentTree(ctx, doc)
-	}
-}
-
-func getAssembler(ctx context.Context, graphqlEndpoint string) func([]assembler.IngestPredicates) error {
-	httpClient := http.Client{}
-	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
-	f := helpers.GetBulkAssembler(ctx, gqlclient)
-	return f
-}
-
-func getCollectSubEmit(ctx context.Context, csubClient csub_client.Client) func([]*parser_common.IdentifierStrings) error {
-	return func(idstrings []*parser_common.IdentifierStrings) error {
-		if csubClient != nil {
-			entries := input.IdentifierStringsSliceToCollectEntries(idstrings)
-			if len(entries) > 0 {
-				if err := csubClient.AddCollectEntries(ctx, entries); err != nil {
-					return fmt.Errorf("unable to add collect entries: %v", err)
-				}
-			}
-		}
-		return nil
-	}
 }
 
 func printErrors(filesWithErrors []string) string {
