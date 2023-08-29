@@ -1,4 +1,4 @@
-# arangodb 
+# arangodb
 arango-user: root
 arango-pass: test123
 arango-addr: http://arangodb:8529
@@ -30,3 +30,8 @@ use-csub: true
 # certifier polling
 poll: true
 interval: 5m
+
+# Ent config
+db-driver: postgres
+db-address: postgres://guac:guac@postgres:5432/guac?sslmode=disable
+db-migrate: true

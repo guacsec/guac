@@ -42,3 +42,6 @@ func String(v string) *string { return &v }
 
 // Time helps get time pointers for test literals
 func Time(v time.Time) *time.Time { return &v }
+
+// Any helps get pointers from any type for test literals
+func Any[T any](v T) *T { return &v }
