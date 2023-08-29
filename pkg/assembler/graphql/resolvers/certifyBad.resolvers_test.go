@@ -17,11 +17,9 @@ package resolvers_test
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/mocks"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -29,7 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 )
 
-func TestCertifyBad(t *testing.T) {
+func TestIngestCertifyBad(t *testing.T) {
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match model.MatchFlags
@@ -37,19 +35,11 @@ func TestCertifyBad(t *testing.T) {
 	}
 	tests := []struct {
 		Name         string
-		InPkg        []*model.PkgInputSpec
-		InSrc        []*model.SourceInputSpec
-		InArt        []*model.ArtifactInputSpec
 		Calls        []call
-		Query        *model.CertifyBadSpec
-		ExpCB        []*model.CertifyBad
 		ExpIngestErr bool
-		ExpQueryErr  bool
 	}{
 		{
-			Name:  "Ingest with two subjects",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
-			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Name: "Ingest with two subjects",
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
@@ -64,95 +54,42 @@ func TestCertifyBad(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Query with two subjects",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Name: "Happy path",
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Package: testdata.P1,
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
-				Subject: &model.PackageSourceOrArtifactSpec{
-					Package: &model.PkgSpec{
-						Version: ptrfrom.String("2.11.1"),
-					},
-					Artifact: &model.ArtifactSpec{
-						Algorithm: ptrfrom.String("asdf"),
-					},
-				},
-			},
-			ExpQueryErr: true,
+			ExpIngestErr: false,
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			b := mocks.NewMockBackend(ctrl)
 			r := resolvers.Resolver{Backend: b}
-			m := r.Mutation()
-			q := r.Query()
-			for _, p := range test.InPkg {
-				b.
-					EXPECT().
-					IngestPackage(ctx, *p).
-					Return(testdata.P1out, nil).
-					AnyTimes()
-				if _, err := m.IngestPackage(ctx, *p); err != nil {
-					t.Fatalf("Could not ingest package: %v", err)
-				}
-			}
-			for _, s := range test.InSrc {
-				b.
-					EXPECT().
-					IngestSource(ctx, *s).
-					Return(testdata.S1out, nil).
-					AnyTimes()
-				if _, err := m.IngestSource(ctx, *s); err != nil {
-					t.Fatalf("Could not ingest source: %v", err)
-				}
-			}
-			for _, a := range test.InArt {
-				b.
-					EXPECT().
-					IngestArtifact(ctx, a).
-					Return(testdata.A2out, nil).
-					AnyTimes()
-				if _, err := m.IngestArtifact(ctx, a); err != nil {
-					t.Fatalf("Could not ingest artifact: %v", err)
-				}
-			}
 			for _, o := range test.Calls {
+				times := 1
+				if test.ExpIngestErr {
+					times = 0
+				}
 				b.
 					EXPECT().
 					IngestCertifyBad(ctx, o.Sub, &o.Match, *o.CB).
-					Return(testdata.CB1out, nil).
-					AnyTimes()
-				_, err := m.IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB)
+					Times(times)
+				_, err := r.Mutation().IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-			}
-			got, err := q.CertifyBad(ctx, *test.Query)
-			if (err != nil) != test.ExpQueryErr {
-				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
-			}
-			if err != nil {
-				return
-			}
-			if diff := cmp.Diff(test.ExpCB, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -166,18 +103,11 @@ func TestIngestCertifyBads(t *testing.T) {
 	}
 	tests := []struct {
 		Name         string
-		InPkg        []*model.PkgInputSpec
-		InSrc        []*model.SourceInputSpec
-		InArt        []*model.ArtifactInputSpec
 		Calls        []call
-		Query        *model.CertifyBadSpec
-		ExpCB        []*model.CertifyBad
 		ExpIngestErr bool
-		ExpQueryErr  bool
 	}{
 		{
-			Name:  "Ingest with two packages and one CertifyBad",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Name: "Ingest with two packages and one CertifyBad",
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
@@ -196,8 +126,7 @@ func TestIngestCertifyBads(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Ingest with two sources and one CertifyBad",
-			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+			Name: "Ingest with two sources and one CertifyBad",
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
@@ -213,8 +142,7 @@ func TestIngestCertifyBads(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Ingest with two artifacts and one CertifyBad",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			Name: "Ingest with two artifacts and one CertifyBad",
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
@@ -230,10 +158,7 @@ func TestIngestCertifyBads(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Ingest with one package, one source, one artifact and one CertifyBad",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
-			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Name: "Ingest with one package, one source, one artifact and one CertifyBad",
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
@@ -251,10 +176,9 @@ func TestIngestCertifyBads(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "HappyPath All Version",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Name: "HappyPath All Version",
 			Calls: []call{
-				call{
+				{
 					Sub: model.PackageSourceOrArtifactInputs{
 						Packages: []*model.PkgInputSpec{testdata.P1},
 					},
@@ -268,15 +192,6 @@ func TestIngestCertifyBads(t *testing.T) {
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
-				Justification: ptrfrom.String("test justification"),
-			},
-			ExpCB: []*model.CertifyBad{
-				&model.CertifyBad{
-					Subject:       testdata.P1outName,
-					Justification: "test justification",
-				},
-			},
 		},
 	}
 	ctx := context.Background()
@@ -285,45 +200,16 @@ func TestIngestCertifyBads(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			b := mocks.NewMockBackend(ctrl)
 			r := resolvers.Resolver{Backend: b}
-			m := r.Mutation()
-			q := r.Query()
-			for _, p := range test.InPkg {
-				b.
-					EXPECT().
-					IngestPackage(ctx, *p).
-					Return(testdata.P1out, nil).
-					AnyTimes()
-				if _, err := m.IngestPackage(ctx, *p); err != nil {
-					t.Fatalf("Could not ingest package: %v", err)
-				}
-			}
-			for _, s := range test.InSrc {
-				b.
-					EXPECT().
-					IngestSource(ctx, *s).
-					Return(testdata.S1out, nil).
-					AnyTimes()
-				if _, err := m.IngestSource(ctx, *s); err != nil {
-					t.Fatalf("Could not ingest source: %v", err)
-				}
-			}
-			for _, a := range test.InArt {
-				b.
-					EXPECT().
-					IngestArtifact(ctx, a).
-					Return(testdata.A2out, nil).
-					AnyTimes()
-				if _, err := m.IngestArtifact(ctx, a); err != nil {
-					t.Fatalf("Could not ingest artifact: %v", err)
-				}
-			}
 			for _, o := range test.Calls {
+				times := 1
+				if test.ExpIngestErr {
+					times = 0
+				}
 				b.
 					EXPECT().
 					IngestCertifyBads(ctx, o.Sub, &o.Match, o.CB).
-					Return([]*model.CertifyBad{testdata.CB1out}, nil).
-					AnyTimes()
-				_, err := m.IngestCertifyBads(ctx, o.Sub, o.Match, o.CB)
+					Times(times)
+				_, err := r.Mutation().IngestCertifyBads(ctx, o.Sub, o.Match, o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -331,12 +217,53 @@ func TestIngestCertifyBads(t *testing.T) {
 					return
 				}
 			}
+		})
+	}
+}
+
+func TestCertifyBad(t *testing.T) {
+	tests := []struct {
+		Name        string
+		Query       *model.CertifyBadSpec
+		ExpQueryErr bool
+	}{
+		{
+			Name: "Query with two subjects",
+			Query: &model.CertifyBadSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String("2.11.1"),
+					},
+					Artifact: &model.ArtifactSpec{
+						Algorithm: ptrfrom.String("asdf"),
+					},
+				},
+			},
+			ExpQueryErr: true,
+		},
+		{
+			Name: "Happy path",
+			Query: &model.CertifyBadSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpQueryErr: false,
+		},
+	}
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			b := mocks.NewMockBackend(ctrl)
+			r := resolvers.Resolver{Backend: b}
+			times := 1
+			if test.ExpQueryErr {
+				times = 0
+			}
 			b.
 				EXPECT().
 				CertifyBad(ctx, test.Query).
-				Return(test.ExpCB, nil).
-				AnyTimes()
-			_, err := q.CertifyBad(ctx, *test.Query)
+				Times(times)
+			_, err := r.Query().CertifyBad(ctx, *test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
