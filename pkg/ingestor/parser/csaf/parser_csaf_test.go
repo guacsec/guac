@@ -155,3 +155,72 @@ func Test_findProductRef(t *testing.T) {
 		})
 	}
 }
+
+func Test_findPurl(t *testing.T) {
+	// The tree for the default test case
+	defaultTestTree := csaf.ProductBranch{
+		Name: "node1",
+		Branches: []csaf.ProductBranch{
+			{
+				Name: "node2",
+				Product: csaf.Product{
+					IdentificationHelper: map[string]string{
+						"purl": "test 2",
+					},
+				},
+			},
+		},
+	}
+
+	defaultReturnedPurl := defaultTestTree.Branches[0].Product.IdentificationHelper["purl"]
+
+	// The tree for the stack overflow test case
+
+	stackOverflowTree := csaf.ProductBranch{
+		Name: "node1",
+		Branches: []csaf.ProductBranch{
+			{
+				Name: "node2",
+			},
+		},
+	}
+
+	stackOverflowTree.Branches[0].Branches = append(stackOverflowTree.Branches[0].Branches, stackOverflowTree)
+
+	type args struct {
+		ctx         context.Context
+		tree        csaf.ProductBranch
+		product_ref string
+	}
+	tests := []struct {
+		name string
+		args args
+		want *string
+	}{
+		{
+			name: "default",
+			args: args{
+				ctx:         context.Background(),
+				tree:        defaultTestTree,
+				product_ref: "node2",
+			},
+			want: &defaultReturnedPurl,
+		},
+		{
+			name: "can stack overflow",
+			args: args{
+				ctx:         context.Background(),
+				tree:        stackOverflowTree,
+				product_ref: "not equal to any tree nodes",
+			},
+			want: nil,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := findPurl(test.args.ctx, test.args.tree, test.args.product_ref); !reflect.DeepEqual(got, test.want) {
+				t.Errorf("findPurl() = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
