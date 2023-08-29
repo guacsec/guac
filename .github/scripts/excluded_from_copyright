@@ -191,6 +191,7 @@
 ./pkg/assembler/graphql/generated/builder.generated.go
 ./pkg/assembler/graphql/generated/certifyBad.generated.go
 ./pkg/assembler/graphql/generated/certifyGood.generated.go
+./pkg/assembler/graphql/generated/certifyLegal.generated.go
 ./pkg/assembler/graphql/generated/certifyScorecard.generated.go
 ./pkg/assembler/graphql/generated/certifyVEXStatement.generated.go
 ./pkg/assembler/graphql/generated/certifyVuln.generated.go
@@ -203,6 +204,7 @@
 ./pkg/assembler/graphql/generated/hashEqual.generated.go
 ./pkg/assembler/graphql/generated/isDependency.generated.go
 ./pkg/assembler/graphql/generated/isOccurrence.generated.go
+./pkg/assembler/graphql/generated/license.generated.go
 ./pkg/assembler/graphql/generated/isVulnerability.generated.go
 ./pkg/assembler/graphql/generated/metadata.generated.go
 ./pkg/assembler/graphql/generated/osv.generated.go
@@ -221,6 +223,7 @@
 ./pkg/assembler/graphql/resolvers/builder.resolvers.go
 ./pkg/assembler/graphql/resolvers/certifyBad.resolvers.go
 ./pkg/assembler/graphql/resolvers/certifyGood.resolvers.go
+./pkg/assembler/graphql/resolvers/certifyLegal.resolvers.go
 ./pkg/assembler/graphql/resolvers/certifyScorecard.resolvers.go
 ./pkg/assembler/graphql/resolvers/certifyVEXStatement.resolvers.go
 ./pkg/assembler/graphql/resolvers/certifyVuln.resolvers.go
@@ -234,6 +237,7 @@
 ./pkg/assembler/graphql/resolvers/isDependency.resolvers.go
 ./pkg/assembler/graphql/resolvers/isOccurrence.resolvers.go
 ./pkg/assembler/graphql/resolvers/isVulnerability.resolvers.go
+./pkg/assembler/graphql/resolvers/license.resolvers.go
 ./pkg/assembler/graphql/resolvers/metadata.resolvers.go
 ./pkg/assembler/graphql/resolvers/osv.resolvers.go
 ./pkg/assembler/graphql/resolvers/package.resolvers.go

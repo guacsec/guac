@@ -16,6 +16,8 @@
 package helper
 
 import (
+	"strings"
+
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -121,6 +123,30 @@ func ValidatePackageOrArtifactQueryFilter(subject *model.PackageOrArtifactSpec) 
 		if subjectDefined != 1 {
 			return gqlerror.Errorf("must specify at most one subject (package or artifact)")
 		}
+	}
+	return nil
+}
+
+func ValidateLicenseInput(license *model.LicenseInputSpec) error {
+	var inline string
+	var listVersion string
+	if license.Inline != nil {
+		inline = *license.Inline
+	}
+	if license.ListVersion != nil {
+		listVersion = *license.ListVersion
+	}
+	if inline == "" && listVersion == "" {
+		return gqlerror.Errorf("Neither Inline nor ListVersion are provided.")
+	}
+	if inline != "" && listVersion != "" {
+		return gqlerror.Errorf("Both Inline and ListVersion are provided.")
+	}
+	if inline == "" && strings.HasPrefix(license.Name, "LicenseRef") {
+		return gqlerror.Errorf("LicenseRef name provided without inline.")
+	}
+	if listVersion == "" && !strings.HasPrefix(license.Name, "LicenseRef") {
+		return gqlerror.Errorf("Inline provided provided with non LicenseRef name.")
 	}
 	return nil
 }

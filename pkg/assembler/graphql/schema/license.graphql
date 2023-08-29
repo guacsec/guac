@@ -1,0 +1,84 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the license
+
+"""
+License represents a particular license. If the license is found on the SPDX
+license list (https://spdx.org/licenses/) then the fields should be:
+
+Name: SPDX license identifier
+Inline: empty
+ListVersion: SPDX license list version
+
+example:
+
+Name: AGPL-3.0-or-later
+Inline: ""
+ListVersion: 3.21 2023-06-18
+
+If the license is not on the SPDX license list, then a new guid should be
+created and the license text placed inline:
+
+Name: LicenseRef-<guid>
+Inline: Full license text
+ListVersion: empty
+
+example:
+
+Name: LicenseRef-1a2b3c
+Inline: Permission to use, copy, modify, and/or distribute ...
+ListVersion: ""
+"""
+type License {
+  id: ID!
+  name: String!
+  inline: String
+  listVersion: String
+}
+
+"""
+LicenseSpec allows filtering the list of licenses to return in a query.
+"""
+input LicenseSpec {
+  id: ID
+  name: String
+  inline: String
+  listVersion: String
+}
+
+"""
+LicenseInputSpec specifies an license for mutations. One of inline or
+listVersion should be empty or missing.
+"""
+input LicenseInputSpec {
+  name: String!
+  inline: String
+  listVersion: String
+}
+
+extend type Query {
+  "Returns all licenses matching a filter."
+  licenses(licenseSpec: LicenseSpec!): [License!]!
+}
+
+extend type Mutation {
+  "Ingests a new license and returns it."
+  ingestLicense(license: LicenseInputSpec): License!
+  "Bulk ingests new licenses and returns a list of them."
+  ingestLicenses(licenses: [LicenseInputSpec!]!): [License!]!
+}

@@ -1,0 +1,48 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines the GraphQL operations to ingest legal attestations into GUAC
+
+mutation CertifyLegalPkg($pkg: PkgInputSpec!, $declaredLicenses: [LicenseInputSpec!]!, $discoveredLicenses: [LicenseInputSpec!]!, $legal: CertifyLegalInputSpec!) {
+  ingestCertifyLegal(subject: {package: $pkg}, declaredLicenses: $declaredLicenses, discoveredLicenses: $discoveredLicenses, certifyLegal: $legal) {
+    ...AllCertifyLegalTree
+  }
+}
+
+mutation CertifyLegalPkgs($pkgs: [PkgInputSpec!]!, $declaredLicensesList: [[LicenseInputSpec!]!]!, $discoveredLicensesList: [[LicenseInputSpec!]!]!, $legals: [CertifyLegalInputSpec!]!) {
+  ingestCertifyLegals(subjects: {packages: $pkgs}, declaredLicensesList: $declaredLicensesList, discoveredLicensesList: $discoveredLicensesList, certifyLegals: $legals) {
+    ...AllCertifyLegalTree
+  }
+}
+
+mutation CertifyLegalSrc($src: SourceInputSpec!, $declaredLicenses: [LicenseInputSpec!]!, $discoveredLicenses: [LicenseInputSpec!]!, $legal: CertifyLegalInputSpec!) {
+  ingestCertifyLegal(subject: {source: $src}, declaredLicenses: $declaredLicenses, discoveredLicenses: $discoveredLicenses, certifyLegal: $legal) {
+    ...AllCertifyLegalTree
+  }
+}
+
+mutation CertifyLegalSrcs($srcs: [SourceInputSpec!]!, $declaredLicensesList: [[LicenseInputSpec!]!]!, $discoveredLicensesList: [[LicenseInputSpec!]!]!, $legals: [CertifyLegalInputSpec!]!) {
+  ingestCertifyLegals(subjects: {sources: $srcs}, declaredLicensesList: $declaredLicensesList, discoveredLicensesList: $discoveredLicensesList, certifyLegals: $legals) {
+    ...AllCertifyLegalTree
+  }
+}
+
+query CertifyLegals($filter: CertifyLegalSpec!) {
+  CertifyLegal(certifyLegalSpec: $filter) {
+    ...AllCertifyLegalTree
+  }
+}

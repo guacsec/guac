@@ -27,6 +27,8 @@ type MutationResolver interface {
 	IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error)
 	IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (string, error)
 	IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error)
+	IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) (*model.CertifyLegal, error)
+	IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error)
 	IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error)
 	IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error)
 	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error)
@@ -45,6 +47,8 @@ type MutationResolver interface {
 	IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error)
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error)
 	IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error)
+	IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error)
+	IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error)
 	IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error)
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (string, error)
 	IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error)
@@ -62,6 +66,7 @@ type QueryResolver interface {
 	Builders(ctx context.Context, builderSpec model.BuilderSpec) ([]*model.Builder, error)
 	CertifyBad(ctx context.Context, certifyBadSpec model.CertifyBadSpec) ([]*model.CertifyBad, error)
 	CertifyGood(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec) ([]*model.CertifyGood, error)
+	CertifyLegal(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec) ([]*model.CertifyLegal, error)
 	Scorecards(ctx context.Context, scorecardSpec model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error)
 	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
 	CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
@@ -72,6 +77,7 @@ type QueryResolver interface {
 	HashEqual(ctx context.Context, hashEqualSpec model.HashEqualSpec) ([]*model.HashEqual, error)
 	IsDependency(ctx context.Context, isDependencySpec model.IsDependencySpec) ([]*model.IsDependency, error)
 	IsOccurrence(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
+	Licenses(ctx context.Context, licenseSpec model.LicenseSpec) ([]*model.License, error)
 	HasMetadata(ctx context.Context, hasMetadataSpec model.HasMetadataSpec) ([]*model.HasMetadata, error)
 	Packages(ctx context.Context, pkgSpec model.PkgSpec) ([]*model.Package, error)
 	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
@@ -279,6 +285,90 @@ func (ec *executionContext) field_Mutation_ingestCertifyGoods_args(ctx context.C
 		}
 	}
 	args["certifyGoods"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyLegal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PackageOrSourceInput
+	if tmp, ok := rawArgs["subject"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+		arg0, err = ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subject"] = arg0
+	var arg1 []*model.LicenseInputSpec
+	if tmp, ok := rawArgs["declaredLicenses"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicenses"))
+		arg1, err = ec.unmarshalNLicenseInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["declaredLicenses"] = arg1
+	var arg2 []*model.LicenseInputSpec
+	if tmp, ok := rawArgs["discoveredLicenses"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicenses"))
+		arg2, err = ec.unmarshalNLicenseInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["discoveredLicenses"] = arg2
+	var arg3 model.CertifyLegalInputSpec
+	if tmp, ok := rawArgs["certifyLegal"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegal"))
+		arg3, err = ec.unmarshalNCertifyLegalInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyLegal"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyLegals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PackageOrSourceInputs
+	if tmp, ok := rawArgs["subjects"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+		arg0, err = ec.unmarshalNPackageOrSourceInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInputs(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subjects"] = arg0
+	var arg1 [][]*model.LicenseInputSpec
+	if tmp, ok := rawArgs["declaredLicensesList"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicensesList"))
+		arg1, err = ec.unmarshalNLicenseInputSpec2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["declaredLicensesList"] = arg1
+	var arg2 [][]*model.LicenseInputSpec
+	if tmp, ok := rawArgs["discoveredLicensesList"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicensesList"))
+		arg2, err = ec.unmarshalNLicenseInputSpec2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["discoveredLicensesList"] = arg2
+	var arg3 []*model.CertifyLegalInputSpec
+	if tmp, ok := rawArgs["certifyLegals"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegals"))
+		arg3, err = ec.unmarshalNCertifyLegalInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyLegals"] = arg3
 	return args, nil
 }
 
@@ -618,6 +708,36 @@ func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Con
 		}
 	}
 	args["hashEquals"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestLicense_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.LicenseInputSpec
+	if tmp, ok := rawArgs["license"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("license"))
+		arg0, err = ec.unmarshalOLicenseInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["license"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestLicenses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*model.LicenseInputSpec
+	if tmp, ok := rawArgs["licenses"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("licenses"))
+		arg0, err = ec.unmarshalNLicenseInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["licenses"] = arg0
 	return args, nil
 }
 
@@ -1152,6 +1272,21 @@ func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, ra
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_CertifyLegal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyLegalSpec
+	if tmp, ok := rawArgs["certifyLegalSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegalSpec"))
+		arg0, err = ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyLegalSpec"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1374,6 +1509,21 @@ func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, r
 		}
 	}
 	args["searchText"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_licenses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.LicenseSpec
+	if tmp, ok := rawArgs["licenseSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("licenseSpec"))
+		arg0, err = ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["licenseSpec"] = arg0
 	return args, nil
 }
 
@@ -2137,6 +2287,164 @@ func (ec *executionContext) fieldContext_Mutation_ingestCertifyGoods(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestCertifyGoods_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestCertifyLegal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestCertifyLegal(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestCertifyLegal(rctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["declaredLicenses"].([]*model.LicenseInputSpec), fc.Args["discoveredLicenses"].([]*model.LicenseInputSpec), fc.Args["certifyLegal"].(model.CertifyLegalInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyLegal)
+	fc.Result = res
+	return ec.marshalNCertifyLegal2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegal(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestCertifyLegal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyLegal_id(ctx, field)
+			case "subject":
+				return ec.fieldContext_CertifyLegal_subject(ctx, field)
+			case "declaredLicense":
+				return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
+			case "declaredLicenses":
+				return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
+			case "discoveredLicense":
+				return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
+			case "discoveredLicenses":
+				return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
+			case "attribution":
+				return ec.fieldContext_CertifyLegal_attribution(ctx, field)
+			case "justification":
+				return ec.fieldContext_CertifyLegal_justification(ctx, field)
+			case "timeScanned":
+				return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
+			case "origin":
+				return ec.fieldContext_CertifyLegal_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_CertifyLegal_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestCertifyLegal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestCertifyLegals(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestCertifyLegals(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestCertifyLegals(rctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["declaredLicensesList"].([][]*model.LicenseInputSpec), fc.Args["discoveredLicensesList"].([][]*model.LicenseInputSpec), fc.Args["certifyLegals"].([]*model.CertifyLegalInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CertifyLegal)
+	fc.Result = res
+	return ec.marshalNCertifyLegal2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestCertifyLegals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyLegal_id(ctx, field)
+			case "subject":
+				return ec.fieldContext_CertifyLegal_subject(ctx, field)
+			case "declaredLicense":
+				return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
+			case "declaredLicenses":
+				return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
+			case "discoveredLicense":
+				return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
+			case "discoveredLicenses":
+				return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
+			case "attribution":
+				return ec.fieldContext_CertifyLegal_attribution(ctx, field)
+			case "justification":
+				return ec.fieldContext_CertifyLegal_justification(ctx, field)
+			case "timeScanned":
+				return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
+			case "origin":
+				return ec.fieldContext_CertifyLegal_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_CertifyLegal_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestCertifyLegals_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3133,6 +3441,136 @@ func (ec *executionContext) fieldContext_Mutation_ingestOccurrences(ctx context.
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_ingestLicense(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestLicense(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestLicense(rctx, fc.Args["license"].(*model.LicenseInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.License)
+	fc.Result = res
+	return ec.marshalNLicense2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicense(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestLicense(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_License_id(ctx, field)
+			case "name":
+				return ec.fieldContext_License_name(ctx, field)
+			case "inline":
+				return ec.fieldContext_License_inline(ctx, field)
+			case "listVersion":
+				return ec.fieldContext_License_listVersion(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type License", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestLicense_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestLicenses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestLicenses(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestLicenses(rctx, fc.Args["licenses"].([]*model.LicenseInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.License)
+	fc.Result = res
+	return ec.marshalNLicense2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestLicenses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_License_id(ctx, field)
+			case "name":
+				return ec.fieldContext_License_name(ctx, field)
+			case "inline":
+				return ec.fieldContext_License_inline(ctx, field)
+			case "listVersion":
+				return ec.fieldContext_License_listVersion(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type License", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestLicenses_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_ingestHasMetadata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_ingestHasMetadata(ctx, field)
 	if err != nil {
@@ -3996,6 +4434,85 @@ func (ec *executionContext) fieldContext_Query_CertifyGood(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_CertifyLegal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CertifyLegal(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CertifyLegal(rctx, fc.Args["certifyLegalSpec"].(model.CertifyLegalSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CertifyLegal)
+	fc.Result = res
+	return ec.marshalNCertifyLegal2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CertifyLegal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyLegal_id(ctx, field)
+			case "subject":
+				return ec.fieldContext_CertifyLegal_subject(ctx, field)
+			case "declaredLicense":
+				return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
+			case "declaredLicenses":
+				return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
+			case "discoveredLicense":
+				return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
+			case "discoveredLicenses":
+				return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
+			case "attribution":
+				return ec.fieldContext_CertifyLegal_attribution(ctx, field)
+			case "justification":
+				return ec.fieldContext_CertifyLegal_justification(ctx, field)
+			case "timeScanned":
+				return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
+			case "origin":
+				return ec.fieldContext_CertifyLegal_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_CertifyLegal_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CertifyLegal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_scorecards(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_scorecards(ctx, field)
 	if err != nil {
@@ -4684,6 +5201,71 @@ func (ec *executionContext) fieldContext_Query_IsOccurrence(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_IsOccurrence_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_licenses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_licenses(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Licenses(rctx, fc.Args["licenseSpec"].(model.LicenseSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.License)
+	fc.Result = res
+	return ec.marshalNLicense2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_licenses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_License_id(ctx, field)
+			case "name":
+				return ec.fieldContext_License_name(ctx, field)
+			case "inline":
+				return ec.fieldContext_License_inline(ctx, field)
+			case "listVersion":
+				return ec.fieldContext_License_listVersion(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type License", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_licenses_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5782,6 +6364,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "ingestCertifyLegal":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestCertifyLegal(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestCertifyLegals":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestCertifyLegals(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "ingestScorecard":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestScorecard(ctx, field)
@@ -5904,6 +6500,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "ingestOccurrences":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestOccurrences(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestLicense":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestLicense(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestLicenses":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestLicenses(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6103,6 +6713,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_CertifyGood(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "CertifyLegal":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CertifyLegal(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -6323,6 +6955,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_IsOccurrence(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "licenses":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_licenses(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

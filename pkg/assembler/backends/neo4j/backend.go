@@ -17,10 +17,12 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/backends"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -152,4 +154,23 @@ func getPreloadString(prefix, name string) string {
 		return prefix + "." + name
 	}
 	return name
+}
+
+func (c *neo4jClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
+	panic(fmt.Errorf("not implemented: Licenses"))
+}
+func (c *neo4jClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
+	panic(fmt.Errorf("not implemented: IngestLicense"))
+}
+func (c *neo4jClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
+	panic(fmt.Errorf("not implemented: IngestLicenses"))
+}
+func (c *neo4jClient) CertifyLegal(ctx context.Context, certifyLegalSpec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
+	panic(fmt.Errorf("not implemented: CertifyLegal"))
+}
+func (c *neo4jClient) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (*model.CertifyLegal, error) {
+	panic(fmt.Errorf("not implemented: IngestCertifyLegal"))
+}
+func (c *neo4jClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
+	panic(fmt.Errorf("not implemented: IngestCertifyLegals"))
 }

@@ -991,6 +991,640 @@ func (v *AllCertifyGoodSubjectSource) __premarshalJSON() (*__premarshalAllCertif
 	return &retval, nil
 }
 
+// AllCertifyLegalTree includes the GraphQL fields of CertifyLegal requested by the fragment AllCertifyLegalTree.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type AllCertifyLegalTree struct {
+	Id string `json:"id"`
+	// The package version or source that is attested
+	Subject AllCertifyLegalTreeSubjectPackageOrSource `json:"-"`
+	// The license expression as delcared
+	DeclaredLicense string `json:"declaredLicense"`
+	// A list of license objects found in the declared license expression
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+	// The license expression as discovered by scan
+	DiscoveredLicense string `json:"discoveredLicense"`
+	// A list of license objects found in the discovered license expression
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+	// Attribution text of the subject
+	Attribution string `json:"attribution"`
+	// Extra justification for the certification
+	Justification string `json:"justification"`
+	// Time of scan (in RFC 3339 format)
+	TimeScanned time.Time `json:"timeScanned"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+}
+
+// GetId returns AllCertifyLegalTree.Id, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetId() string { return v.Id }
+
+// GetSubject returns AllCertifyLegalTree.Subject, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.Subject
+}
+
+// GetDeclaredLicense returns AllCertifyLegalTree.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetDeclaredLicense() string { return v.DeclaredLicense }
+
+// GetDeclaredLicenses returns AllCertifyLegalTree.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns AllCertifyLegalTree.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetDiscoveredLicense() string { return v.DiscoveredLicense }
+
+// GetDiscoveredLicenses returns AllCertifyLegalTree.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.DiscoveredLicenses
+}
+
+// GetAttribution returns AllCertifyLegalTree.Attribution, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetAttribution() string { return v.Attribution }
+
+// GetJustification returns AllCertifyLegalTree.Justification, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetJustification() string { return v.Justification }
+
+// GetTimeScanned returns AllCertifyLegalTree.TimeScanned, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetTimeScanned() time.Time { return v.TimeScanned }
+
+// GetOrigin returns AllCertifyLegalTree.Origin, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetOrigin() string { return v.Origin }
+
+// GetCollector returns AllCertifyLegalTree.Collector, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTree) GetCollector() string { return v.Collector }
+
+func (v *AllCertifyLegalTree) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllCertifyLegalTree
+		Subject json.RawMessage `json:"subject"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllCertifyLegalTree = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Subject
+		src := firstPass.Subject
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalAllCertifyLegalTreeSubjectPackageOrSource(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal AllCertifyLegalTree.Subject: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalAllCertifyLegalTree struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *AllCertifyLegalTree) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllCertifyLegalTree) __premarshalJSON() (*__premarshalAllCertifyLegalTree, error) {
+	var retval __premarshalAllCertifyLegalTree
+
+	retval.Id = v.Id
+	{
+
+		dst := &retval.Subject
+		src := v.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.DeclaredLicense
+	retval.DeclaredLicenses = v.DeclaredLicenses
+	retval.DiscoveredLicense = v.DiscoveredLicense
+	retval.DiscoveredLicenses = v.DiscoveredLicenses
+	retval.Attribution = v.Attribution
+	retval.Justification = v.Justification
+	retval.TimeScanned = v.TimeScanned
+	retval.Origin = v.Origin
+	retval.Collector = v.Collector
+	return &retval, nil
+}
+
+// AllCertifyLegalTreeDeclaredLicensesLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type AllCertifyLegalTreeDeclaredLicensesLicense struct {
+	AllLicenseTree `json:"-"`
+}
+
+// GetId returns AllCertifyLegalTreeDeclaredLicensesLicense.Id, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeDeclaredLicensesLicense) GetId() string { return v.AllLicenseTree.Id }
+
+// GetName returns AllCertifyLegalTreeDeclaredLicensesLicense.Name, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeDeclaredLicensesLicense) GetName() string { return v.AllLicenseTree.Name }
+
+// GetInline returns AllCertifyLegalTreeDeclaredLicensesLicense.Inline, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeDeclaredLicensesLicense) GetInline() *string {
+	return v.AllLicenseTree.Inline
+}
+
+// GetListVersion returns AllCertifyLegalTreeDeclaredLicensesLicense.ListVersion, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeDeclaredLicensesLicense) GetListVersion() *string {
+	return v.AllLicenseTree.ListVersion
+}
+
+func (v *AllCertifyLegalTreeDeclaredLicensesLicense) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllCertifyLegalTreeDeclaredLicensesLicense
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllCertifyLegalTreeDeclaredLicensesLicense = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllLicenseTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllCertifyLegalTreeDeclaredLicensesLicense struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Inline *string `json:"inline"`
+
+	ListVersion *string `json:"listVersion"`
+}
+
+func (v *AllCertifyLegalTreeDeclaredLicensesLicense) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllCertifyLegalTreeDeclaredLicensesLicense) __premarshalJSON() (*__premarshalAllCertifyLegalTreeDeclaredLicensesLicense, error) {
+	var retval __premarshalAllCertifyLegalTreeDeclaredLicensesLicense
+
+	retval.Id = v.AllLicenseTree.Id
+	retval.Name = v.AllLicenseTree.Name
+	retval.Inline = v.AllLicenseTree.Inline
+	retval.ListVersion = v.AllLicenseTree.ListVersion
+	return &retval, nil
+}
+
+// AllCertifyLegalTreeDiscoveredLicensesLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type AllCertifyLegalTreeDiscoveredLicensesLicense struct {
+	AllLicenseTree `json:"-"`
+}
+
+// GetId returns AllCertifyLegalTreeDiscoveredLicensesLicense.Id, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeDiscoveredLicensesLicense) GetId() string { return v.AllLicenseTree.Id }
+
+// GetName returns AllCertifyLegalTreeDiscoveredLicensesLicense.Name, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeDiscoveredLicensesLicense) GetName() string { return v.AllLicenseTree.Name }
+
+// GetInline returns AllCertifyLegalTreeDiscoveredLicensesLicense.Inline, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeDiscoveredLicensesLicense) GetInline() *string {
+	return v.AllLicenseTree.Inline
+}
+
+// GetListVersion returns AllCertifyLegalTreeDiscoveredLicensesLicense.ListVersion, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeDiscoveredLicensesLicense) GetListVersion() *string {
+	return v.AllLicenseTree.ListVersion
+}
+
+func (v *AllCertifyLegalTreeDiscoveredLicensesLicense) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllCertifyLegalTreeDiscoveredLicensesLicense
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllCertifyLegalTreeDiscoveredLicensesLicense = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllLicenseTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllCertifyLegalTreeDiscoveredLicensesLicense struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Inline *string `json:"inline"`
+
+	ListVersion *string `json:"listVersion"`
+}
+
+func (v *AllCertifyLegalTreeDiscoveredLicensesLicense) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllCertifyLegalTreeDiscoveredLicensesLicense) __premarshalJSON() (*__premarshalAllCertifyLegalTreeDiscoveredLicensesLicense, error) {
+	var retval __premarshalAllCertifyLegalTreeDiscoveredLicensesLicense
+
+	retval.Id = v.AllLicenseTree.Id
+	retval.Name = v.AllLicenseTree.Name
+	retval.Inline = v.AllLicenseTree.Inline
+	retval.ListVersion = v.AllLicenseTree.ListVersion
+	return &retval, nil
+}
+
+// AllCertifyLegalTreeSubjectPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type AllCertifyLegalTreeSubjectPackage struct {
+	Typename   *string `json:"__typename"`
+	AllPkgTree `json:"-"`
+}
+
+// GetTypename returns AllCertifyLegalTreeSubjectPackage.Typename, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeSubjectPackage) GetTypename() *string { return v.Typename }
+
+// GetId returns AllCertifyLegalTreeSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeSubjectPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns AllCertifyLegalTreeSubjectPackage.Type, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeSubjectPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns AllCertifyLegalTreeSubjectPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeSubjectPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *AllCertifyLegalTreeSubjectPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllCertifyLegalTreeSubjectPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllCertifyLegalTreeSubjectPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllCertifyLegalTreeSubjectPackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *AllCertifyLegalTreeSubjectPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllCertifyLegalTreeSubjectPackage) __premarshalJSON() (*__premarshalAllCertifyLegalTreeSubjectPackage, error) {
+	var retval __premarshalAllCertifyLegalTreeSubjectPackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// AllCertifyLegalTreeSubjectPackageOrSource includes the requested fields of the GraphQL interface PackageOrSource.
+//
+// AllCertifyLegalTreeSubjectPackageOrSource is implemented by the following types:
+// AllCertifyLegalTreeSubjectPackage
+// AllCertifyLegalTreeSubjectSource
+// The GraphQL type's documentation follows.
+//
+// PackageOrSource is a union of Package and Source.
+type AllCertifyLegalTreeSubjectPackageOrSource interface {
+	implementsGraphQLInterfaceAllCertifyLegalTreeSubjectPackageOrSource()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *AllCertifyLegalTreeSubjectPackage) implementsGraphQLInterfaceAllCertifyLegalTreeSubjectPackageOrSource() {
+}
+func (v *AllCertifyLegalTreeSubjectSource) implementsGraphQLInterfaceAllCertifyLegalTreeSubjectPackageOrSource() {
+}
+
+func __unmarshalAllCertifyLegalTreeSubjectPackageOrSource(b []byte, v *AllCertifyLegalTreeSubjectPackageOrSource) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Package":
+		*v = new(AllCertifyLegalTreeSubjectPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(AllCertifyLegalTreeSubjectSource)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageOrSource.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for AllCertifyLegalTreeSubjectPackageOrSource: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalAllCertifyLegalTreeSubjectPackageOrSource(v *AllCertifyLegalTreeSubjectPackageOrSource) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *AllCertifyLegalTreeSubjectPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllCertifyLegalTreeSubjectPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *AllCertifyLegalTreeSubjectSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllCertifyLegalTreeSubjectSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for AllCertifyLegalTreeSubjectPackageOrSource: "%T"`, v)
+	}
+}
+
+// AllCertifyLegalTreeSubjectSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type AllCertifyLegalTreeSubjectSource struct {
+	Typename      *string `json:"__typename"`
+	AllSourceTree `json:"-"`
+}
+
+// GetTypename returns AllCertifyLegalTreeSubjectSource.Typename, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeSubjectSource) GetTypename() *string { return v.Typename }
+
+// GetId returns AllCertifyLegalTreeSubjectSource.Id, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeSubjectSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns AllCertifyLegalTreeSubjectSource.Type, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeSubjectSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns AllCertifyLegalTreeSubjectSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *AllCertifyLegalTreeSubjectSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *AllCertifyLegalTreeSubjectSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllCertifyLegalTreeSubjectSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllCertifyLegalTreeSubjectSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllCertifyLegalTreeSubjectSource struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *AllCertifyLegalTreeSubjectSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllCertifyLegalTreeSubjectSource) __premarshalJSON() (*__premarshalAllCertifyLegalTreeSubjectSource, error) {
+	var retval __premarshalAllCertifyLegalTreeSubjectSource
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
 // AllCertifyScorecard includes the GraphQL fields of CertifyScorecard requested by the fragment AllCertifyScorecard.
 // The GraphQL type's documentation follows.
 //
@@ -3757,6 +4391,53 @@ func (v *AllIsOccurrencesTreeSubjectSource) __premarshalJSON() (*__premarshalAll
 	return &retval, nil
 }
 
+// AllLicenseTree includes the GraphQL fields of License requested by the fragment AllLicenseTree.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type AllLicenseTree struct {
+	Id          string  `json:"id"`
+	Name        string  `json:"name"`
+	Inline      *string `json:"inline"`
+	ListVersion *string `json:"listVersion"`
+}
+
+// GetId returns AllLicenseTree.Id, and is useful for accessing the field via an interface.
+func (v *AllLicenseTree) GetId() string { return v.Id }
+
+// GetName returns AllLicenseTree.Name, and is useful for accessing the field via an interface.
+func (v *AllLicenseTree) GetName() string { return v.Name }
+
+// GetInline returns AllLicenseTree.Inline, and is useful for accessing the field via an interface.
+func (v *AllLicenseTree) GetInline() *string { return v.Inline }
+
+// GetListVersion returns AllLicenseTree.ListVersion, and is useful for accessing the field via an interface.
+func (v *AllLicenseTree) GetListVersion() *string { return v.ListVersion }
+
 // AllPkgEqual includes the GraphQL fields of PkgEqual requested by the fragment AllPkgEqual.
 // The GraphQL type's documentation follows.
 //
@@ -5631,6 +6312,933 @@ type CertifyGoodSrcsResponse struct {
 // GetIngestCertifyGoods returns CertifyGoodSrcsResponse.IngestCertifyGoods, and is useful for accessing the field via an interface.
 func (v *CertifyGoodSrcsResponse) GetIngestCertifyGoods() []string { return v.IngestCertifyGoods }
 
+// CertifyLegalInputSpec represents the input for certifying legal information in
+// mutations.
+type CertifyLegalInputSpec struct {
+	DeclaredLicense   string    `json:"declaredLicense"`
+	DiscoveredLicense string    `json:"discoveredLicense"`
+	Attribution       string    `json:"attribution"`
+	Justification     string    `json:"justification"`
+	TimeScanned       time.Time `json:"timeScanned"`
+	Origin            string    `json:"origin"`
+	Collector         string    `json:"collector"`
+}
+
+// GetDeclaredLicense returns CertifyLegalInputSpec.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalInputSpec) GetDeclaredLicense() string { return v.DeclaredLicense }
+
+// GetDiscoveredLicense returns CertifyLegalInputSpec.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalInputSpec) GetDiscoveredLicense() string { return v.DiscoveredLicense }
+
+// GetAttribution returns CertifyLegalInputSpec.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalInputSpec) GetAttribution() string { return v.Attribution }
+
+// GetJustification returns CertifyLegalInputSpec.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalInputSpec) GetJustification() string { return v.Justification }
+
+// GetTimeScanned returns CertifyLegalInputSpec.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalInputSpec) GetTimeScanned() time.Time { return v.TimeScanned }
+
+// GetOrigin returns CertifyLegalInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns CertifyLegalInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalInputSpec) GetCollector() string { return v.Collector }
+
+// CertifyLegalPkgIngestCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegalPkgIngestCertifyLegal struct {
+	AllCertifyLegalTree `json:"-"`
+}
+
+// GetId returns CertifyLegalPkgIngestCertifyLegal.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetId() string { return v.AllCertifyLegalTree.Id }
+
+// GetSubject returns CertifyLegalPkgIngestCertifyLegal.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.AllCertifyLegalTree.Subject
+}
+
+// GetDeclaredLicense returns CertifyLegalPkgIngestCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetDeclaredLicense() string {
+	return v.AllCertifyLegalTree.DeclaredLicense
+}
+
+// GetDeclaredLicenses returns CertifyLegalPkgIngestCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.AllCertifyLegalTree.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns CertifyLegalPkgIngestCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetDiscoveredLicense() string {
+	return v.AllCertifyLegalTree.DiscoveredLicense
+}
+
+// GetDiscoveredLicenses returns CertifyLegalPkgIngestCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.AllCertifyLegalTree.DiscoveredLicenses
+}
+
+// GetAttribution returns CertifyLegalPkgIngestCertifyLegal.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetAttribution() string {
+	return v.AllCertifyLegalTree.Attribution
+}
+
+// GetJustification returns CertifyLegalPkgIngestCertifyLegal.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetJustification() string {
+	return v.AllCertifyLegalTree.Justification
+}
+
+// GetTimeScanned returns CertifyLegalPkgIngestCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetTimeScanned() time.Time {
+	return v.AllCertifyLegalTree.TimeScanned
+}
+
+// GetOrigin returns CertifyLegalPkgIngestCertifyLegal.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetOrigin() string { return v.AllCertifyLegalTree.Origin }
+
+// GetCollector returns CertifyLegalPkgIngestCertifyLegal.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgIngestCertifyLegal) GetCollector() string {
+	return v.AllCertifyLegalTree.Collector
+}
+
+func (v *CertifyLegalPkgIngestCertifyLegal) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyLegalPkgIngestCertifyLegal
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyLegalPkgIngestCertifyLegal = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyLegalTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyLegalPkgIngestCertifyLegal struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyLegalPkgIngestCertifyLegal) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyLegalPkgIngestCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalPkgIngestCertifyLegal, error) {
+	var retval __premarshalCertifyLegalPkgIngestCertifyLegal
+
+	retval.Id = v.AllCertifyLegalTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyLegalTree.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyLegalPkgIngestCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
+	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
+	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
+	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
+	retval.Attribution = v.AllCertifyLegalTree.Attribution
+	retval.Justification = v.AllCertifyLegalTree.Justification
+	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
+	retval.Origin = v.AllCertifyLegalTree.Origin
+	retval.Collector = v.AllCertifyLegalTree.Collector
+	return &retval, nil
+}
+
+// CertifyLegalPkgResponse is returned by CertifyLegalPkg on success.
+type CertifyLegalPkgResponse struct {
+	// Adds a legal certification to a package or source.
+	IngestCertifyLegal CertifyLegalPkgIngestCertifyLegal `json:"ingestCertifyLegal"`
+}
+
+// GetIngestCertifyLegal returns CertifyLegalPkgResponse.IngestCertifyLegal, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgResponse) GetIngestCertifyLegal() CertifyLegalPkgIngestCertifyLegal {
+	return v.IngestCertifyLegal
+}
+
+// CertifyLegalPkgsIngestCertifyLegalsCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegalPkgsIngestCertifyLegalsCertifyLegal struct {
+	AllCertifyLegalTree `json:"-"`
+}
+
+// GetId returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetId() string {
+	return v.AllCertifyLegalTree.Id
+}
+
+// GetSubject returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.AllCertifyLegalTree.Subject
+}
+
+// GetDeclaredLicense returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetDeclaredLicense() string {
+	return v.AllCertifyLegalTree.DeclaredLicense
+}
+
+// GetDeclaredLicenses returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.AllCertifyLegalTree.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetDiscoveredLicense() string {
+	return v.AllCertifyLegalTree.DiscoveredLicense
+}
+
+// GetDiscoveredLicenses returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.AllCertifyLegalTree.DiscoveredLicenses
+}
+
+// GetAttribution returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetAttribution() string {
+	return v.AllCertifyLegalTree.Attribution
+}
+
+// GetJustification returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetJustification() string {
+	return v.AllCertifyLegalTree.Justification
+}
+
+// GetTimeScanned returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetTimeScanned() time.Time {
+	return v.AllCertifyLegalTree.TimeScanned
+}
+
+// GetOrigin returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetOrigin() string {
+	return v.AllCertifyLegalTree.Origin
+}
+
+// GetCollector returns CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) GetCollector() string {
+	return v.AllCertifyLegalTree.Collector
+}
+
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyLegalPkgsIngestCertifyLegalsCertifyLegal
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyLegalPkgsIngestCertifyLegalsCertifyLegal = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyLegalTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyLegalPkgsIngestCertifyLegalsCertifyLegal struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyLegalPkgsIngestCertifyLegalsCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalPkgsIngestCertifyLegalsCertifyLegal, error) {
+	var retval __premarshalCertifyLegalPkgsIngestCertifyLegalsCertifyLegal
+
+	retval.Id = v.AllCertifyLegalTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyLegalTree.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyLegalPkgsIngestCertifyLegalsCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
+	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
+	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
+	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
+	retval.Attribution = v.AllCertifyLegalTree.Attribution
+	retval.Justification = v.AllCertifyLegalTree.Justification
+	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
+	retval.Origin = v.AllCertifyLegalTree.Origin
+	retval.Collector = v.AllCertifyLegalTree.Collector
+	return &retval, nil
+}
+
+// CertifyLegalPkgsResponse is returned by CertifyLegalPkgs on success.
+type CertifyLegalPkgsResponse struct {
+	// Bulk add legal certifications to packages or sources, not both at same time.
+	IngestCertifyLegals []CertifyLegalPkgsIngestCertifyLegalsCertifyLegal `json:"ingestCertifyLegals"`
+}
+
+// GetIngestCertifyLegals returns CertifyLegalPkgsResponse.IngestCertifyLegals, and is useful for accessing the field via an interface.
+func (v *CertifyLegalPkgsResponse) GetIngestCertifyLegals() []CertifyLegalPkgsIngestCertifyLegalsCertifyLegal {
+	return v.IngestCertifyLegals
+}
+
+// CertifyLegalSpec allows filtering the list of legal certifications to
+// return in a query.
+//
+// Specifying just the package allows to query for all certifications associated
+// with the package.
+type CertifyLegalSpec struct {
+	Id                 *string              `json:"id"`
+	Subject            *PackageOrSourceSpec `json:"subject"`
+	DeclaredLicense    *string              `json:"declaredLicense"`
+	DeclaredLicenses   []LicenseSpec        `json:"declaredLicenses"`
+	DiscoveredLicense  *string              `json:"discoveredLicense"`
+	DiscoveredLicenses []LicenseSpec        `json:"discoveredLicenses"`
+	Attribution        *string              `json:"attribution"`
+	Justification      *string              `json:"justification"`
+	TimeScanned        *time.Time           `json:"timeScanned"`
+	Origin             *string              `json:"origin"`
+	Collector          *string              `json:"collector"`
+}
+
+// GetId returns CertifyLegalSpec.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetId() *string { return v.Id }
+
+// GetSubject returns CertifyLegalSpec.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetSubject() *PackageOrSourceSpec { return v.Subject }
+
+// GetDeclaredLicense returns CertifyLegalSpec.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetDeclaredLicense() *string { return v.DeclaredLicense }
+
+// GetDeclaredLicenses returns CertifyLegalSpec.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetDeclaredLicenses() []LicenseSpec { return v.DeclaredLicenses }
+
+// GetDiscoveredLicense returns CertifyLegalSpec.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetDiscoveredLicense() *string { return v.DiscoveredLicense }
+
+// GetDiscoveredLicenses returns CertifyLegalSpec.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetDiscoveredLicenses() []LicenseSpec { return v.DiscoveredLicenses }
+
+// GetAttribution returns CertifyLegalSpec.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetAttribution() *string { return v.Attribution }
+
+// GetJustification returns CertifyLegalSpec.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetJustification() *string { return v.Justification }
+
+// GetTimeScanned returns CertifyLegalSpec.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetTimeScanned() *time.Time { return v.TimeScanned }
+
+// GetOrigin returns CertifyLegalSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns CertifyLegalSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetCollector() *string { return v.Collector }
+
+// CertifyLegalSrcIngestCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegalSrcIngestCertifyLegal struct {
+	AllCertifyLegalTree `json:"-"`
+}
+
+// GetId returns CertifyLegalSrcIngestCertifyLegal.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetId() string { return v.AllCertifyLegalTree.Id }
+
+// GetSubject returns CertifyLegalSrcIngestCertifyLegal.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.AllCertifyLegalTree.Subject
+}
+
+// GetDeclaredLicense returns CertifyLegalSrcIngestCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetDeclaredLicense() string {
+	return v.AllCertifyLegalTree.DeclaredLicense
+}
+
+// GetDeclaredLicenses returns CertifyLegalSrcIngestCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.AllCertifyLegalTree.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns CertifyLegalSrcIngestCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetDiscoveredLicense() string {
+	return v.AllCertifyLegalTree.DiscoveredLicense
+}
+
+// GetDiscoveredLicenses returns CertifyLegalSrcIngestCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.AllCertifyLegalTree.DiscoveredLicenses
+}
+
+// GetAttribution returns CertifyLegalSrcIngestCertifyLegal.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetAttribution() string {
+	return v.AllCertifyLegalTree.Attribution
+}
+
+// GetJustification returns CertifyLegalSrcIngestCertifyLegal.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetJustification() string {
+	return v.AllCertifyLegalTree.Justification
+}
+
+// GetTimeScanned returns CertifyLegalSrcIngestCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetTimeScanned() time.Time {
+	return v.AllCertifyLegalTree.TimeScanned
+}
+
+// GetOrigin returns CertifyLegalSrcIngestCertifyLegal.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetOrigin() string { return v.AllCertifyLegalTree.Origin }
+
+// GetCollector returns CertifyLegalSrcIngestCertifyLegal.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcIngestCertifyLegal) GetCollector() string {
+	return v.AllCertifyLegalTree.Collector
+}
+
+func (v *CertifyLegalSrcIngestCertifyLegal) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyLegalSrcIngestCertifyLegal
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyLegalSrcIngestCertifyLegal = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyLegalTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyLegalSrcIngestCertifyLegal struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyLegalSrcIngestCertifyLegal) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyLegalSrcIngestCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalSrcIngestCertifyLegal, error) {
+	var retval __premarshalCertifyLegalSrcIngestCertifyLegal
+
+	retval.Id = v.AllCertifyLegalTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyLegalTree.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyLegalSrcIngestCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
+	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
+	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
+	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
+	retval.Attribution = v.AllCertifyLegalTree.Attribution
+	retval.Justification = v.AllCertifyLegalTree.Justification
+	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
+	retval.Origin = v.AllCertifyLegalTree.Origin
+	retval.Collector = v.AllCertifyLegalTree.Collector
+	return &retval, nil
+}
+
+// CertifyLegalSrcResponse is returned by CertifyLegalSrc on success.
+type CertifyLegalSrcResponse struct {
+	// Adds a legal certification to a package or source.
+	IngestCertifyLegal CertifyLegalSrcIngestCertifyLegal `json:"ingestCertifyLegal"`
+}
+
+// GetIngestCertifyLegal returns CertifyLegalSrcResponse.IngestCertifyLegal, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcResponse) GetIngestCertifyLegal() CertifyLegalSrcIngestCertifyLegal {
+	return v.IngestCertifyLegal
+}
+
+// CertifyLegalSrcsIngestCertifyLegalsCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegalSrcsIngestCertifyLegalsCertifyLegal struct {
+	AllCertifyLegalTree `json:"-"`
+}
+
+// GetId returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetId() string {
+	return v.AllCertifyLegalTree.Id
+}
+
+// GetSubject returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.AllCertifyLegalTree.Subject
+}
+
+// GetDeclaredLicense returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetDeclaredLicense() string {
+	return v.AllCertifyLegalTree.DeclaredLicense
+}
+
+// GetDeclaredLicenses returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.AllCertifyLegalTree.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetDiscoveredLicense() string {
+	return v.AllCertifyLegalTree.DiscoveredLicense
+}
+
+// GetDiscoveredLicenses returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.AllCertifyLegalTree.DiscoveredLicenses
+}
+
+// GetAttribution returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetAttribution() string {
+	return v.AllCertifyLegalTree.Attribution
+}
+
+// GetJustification returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetJustification() string {
+	return v.AllCertifyLegalTree.Justification
+}
+
+// GetTimeScanned returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetTimeScanned() time.Time {
+	return v.AllCertifyLegalTree.TimeScanned
+}
+
+// GetOrigin returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetOrigin() string {
+	return v.AllCertifyLegalTree.Origin
+}
+
+// GetCollector returns CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) GetCollector() string {
+	return v.AllCertifyLegalTree.Collector
+}
+
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyLegalSrcsIngestCertifyLegalsCertifyLegal
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyLegalSrcsIngestCertifyLegalsCertifyLegal = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyLegalTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyLegalSrcsIngestCertifyLegalsCertifyLegal struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyLegalSrcsIngestCertifyLegalsCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalSrcsIngestCertifyLegalsCertifyLegal, error) {
+	var retval __premarshalCertifyLegalSrcsIngestCertifyLegalsCertifyLegal
+
+	retval.Id = v.AllCertifyLegalTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyLegalTree.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyLegalSrcsIngestCertifyLegalsCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
+	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
+	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
+	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
+	retval.Attribution = v.AllCertifyLegalTree.Attribution
+	retval.Justification = v.AllCertifyLegalTree.Justification
+	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
+	retval.Origin = v.AllCertifyLegalTree.Origin
+	retval.Collector = v.AllCertifyLegalTree.Collector
+	return &retval, nil
+}
+
+// CertifyLegalSrcsResponse is returned by CertifyLegalSrcs on success.
+type CertifyLegalSrcsResponse struct {
+	// Bulk add legal certifications to packages or sources, not both at same time.
+	IngestCertifyLegals []CertifyLegalSrcsIngestCertifyLegalsCertifyLegal `json:"ingestCertifyLegals"`
+}
+
+// GetIngestCertifyLegals returns CertifyLegalSrcsResponse.IngestCertifyLegals, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSrcsResponse) GetIngestCertifyLegals() []CertifyLegalSrcsIngestCertifyLegalsCertifyLegal {
+	return v.IngestCertifyLegals
+}
+
+// CertifyLegalsCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegalsCertifyLegal struct {
+	AllCertifyLegalTree `json:"-"`
+}
+
+// GetId returns CertifyLegalsCertifyLegal.Id, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetId() string { return v.AllCertifyLegalTree.Id }
+
+// GetSubject returns CertifyLegalsCertifyLegal.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetSubject() AllCertifyLegalTreeSubjectPackageOrSource {
+	return v.AllCertifyLegalTree.Subject
+}
+
+// GetDeclaredLicense returns CertifyLegalsCertifyLegal.DeclaredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetDeclaredLicense() string {
+	return v.AllCertifyLegalTree.DeclaredLicense
+}
+
+// GetDeclaredLicenses returns CertifyLegalsCertifyLegal.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetDeclaredLicenses() []AllCertifyLegalTreeDeclaredLicensesLicense {
+	return v.AllCertifyLegalTree.DeclaredLicenses
+}
+
+// GetDiscoveredLicense returns CertifyLegalsCertifyLegal.DiscoveredLicense, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetDiscoveredLicense() string {
+	return v.AllCertifyLegalTree.DiscoveredLicense
+}
+
+// GetDiscoveredLicenses returns CertifyLegalsCertifyLegal.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetDiscoveredLicenses() []AllCertifyLegalTreeDiscoveredLicensesLicense {
+	return v.AllCertifyLegalTree.DiscoveredLicenses
+}
+
+// GetAttribution returns CertifyLegalsCertifyLegal.Attribution, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetAttribution() string { return v.AllCertifyLegalTree.Attribution }
+
+// GetJustification returns CertifyLegalsCertifyLegal.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetJustification() string {
+	return v.AllCertifyLegalTree.Justification
+}
+
+// GetTimeScanned returns CertifyLegalsCertifyLegal.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetTimeScanned() time.Time {
+	return v.AllCertifyLegalTree.TimeScanned
+}
+
+// GetOrigin returns CertifyLegalsCertifyLegal.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetOrigin() string { return v.AllCertifyLegalTree.Origin }
+
+// GetCollector returns CertifyLegalsCertifyLegal.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsCertifyLegal) GetCollector() string { return v.AllCertifyLegalTree.Collector }
+
+func (v *CertifyLegalsCertifyLegal) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyLegalsCertifyLegal
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyLegalsCertifyLegal = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyLegalTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyLegalsCertifyLegal struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	DeclaredLicense string `json:"declaredLicense"`
+
+	DeclaredLicenses []AllCertifyLegalTreeDeclaredLicensesLicense `json:"declaredLicenses"`
+
+	DiscoveredLicense string `json:"discoveredLicense"`
+
+	DiscoveredLicenses []AllCertifyLegalTreeDiscoveredLicensesLicense `json:"discoveredLicenses"`
+
+	Attribution string `json:"attribution"`
+
+	Justification string `json:"justification"`
+
+	TimeScanned time.Time `json:"timeScanned"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyLegalsCertifyLegal) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyLegalsCertifyLegal) __premarshalJSON() (*__premarshalCertifyLegalsCertifyLegal, error) {
+	var retval __premarshalCertifyLegalsCertifyLegal
+
+	retval.Id = v.AllCertifyLegalTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyLegalTree.Subject
+		var err error
+		*dst, err = __marshalAllCertifyLegalTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyLegalsCertifyLegal.AllCertifyLegalTree.Subject: %w", err)
+		}
+	}
+	retval.DeclaredLicense = v.AllCertifyLegalTree.DeclaredLicense
+	retval.DeclaredLicenses = v.AllCertifyLegalTree.DeclaredLicenses
+	retval.DiscoveredLicense = v.AllCertifyLegalTree.DiscoveredLicense
+	retval.DiscoveredLicenses = v.AllCertifyLegalTree.DiscoveredLicenses
+	retval.Attribution = v.AllCertifyLegalTree.Attribution
+	retval.Justification = v.AllCertifyLegalTree.Justification
+	retval.TimeScanned = v.AllCertifyLegalTree.TimeScanned
+	retval.Origin = v.AllCertifyLegalTree.Origin
+	retval.Collector = v.AllCertifyLegalTree.Collector
+	return &retval, nil
+}
+
+// CertifyLegalsResponse is returned by CertifyLegals on success.
+type CertifyLegalsResponse struct {
+	// Returns all legal certifications matching the input filter.
+	CertifyLegal []CertifyLegalsCertifyLegal `json:"CertifyLegal"`
+}
+
+// GetCertifyLegal returns CertifyLegalsResponse.CertifyLegal, and is useful for accessing the field via an interface.
+func (v *CertifyLegalsResponse) GetCertifyLegal() []CertifyLegalsCertifyLegal { return v.CertifyLegal }
+
 // CertifyScorecardResponse is returned by CertifyScorecard on success.
 type CertifyScorecardResponse struct {
 	// Adds a certification that a source repository has a Scorecard. The returned ID can be empty string.
@@ -5732,47 +7340,56 @@ const (
 	EdgeArtifactCertifyGood              Edge = "ARTIFACT_CERTIFY_GOOD"
 	EdgeArtifactCertifyVexStatement      Edge = "ARTIFACT_CERTIFY_VEX_STATEMENT"
 	EdgeArtifactHashEqual                Edge = "ARTIFACT_HASH_EQUAL"
+	EdgeArtifactHasMetadata              Edge = "ARTIFACT_HAS_METADATA"
 	EdgeArtifactHasSbom                  Edge = "ARTIFACT_HAS_SBOM"
 	EdgeArtifactHasSlsa                  Edge = "ARTIFACT_HAS_SLSA"
 	EdgeArtifactIsOccurrence             Edge = "ARTIFACT_IS_OCCURRENCE"
-	EdgeArtifactHasMetadata              Edge = "ARTIFACT_HAS_METADATA"
 	EdgeArtifactPointOfContact           Edge = "ARTIFACT_POINT_OF_CONTACT"
 	EdgeBuilderHasSlsa                   Edge = "BUILDER_HAS_SLSA"
-	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
-	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
-	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
-	EdgeVulnerabilityVulnMetadata        Edge = "VULNERABILITY_VULN_METADATA"
+	EdgeLicenseCertifyLegal              Edge = "LICENSE_CERTIFY_LEGAL"
 	EdgePackageCertifyBad                Edge = "PACKAGE_CERTIFY_BAD"
 	EdgePackageCertifyGood               Edge = "PACKAGE_CERTIFY_GOOD"
+	EdgePackageCertifyLegal              Edge = "PACKAGE_CERTIFY_LEGAL"
 	EdgePackageCertifyVexStatement       Edge = "PACKAGE_CERTIFY_VEX_STATEMENT"
 	EdgePackageCertifyVuln               Edge = "PACKAGE_CERTIFY_VULN"
+	EdgePackageHasMetadata               Edge = "PACKAGE_HAS_METADATA"
 	EdgePackageHasSbom                   Edge = "PACKAGE_HAS_SBOM"
 	EdgePackageHasSourceAt               Edge = "PACKAGE_HAS_SOURCE_AT"
 	EdgePackageIsDependency              Edge = "PACKAGE_IS_DEPENDENCY"
 	EdgePackageIsOccurrence              Edge = "PACKAGE_IS_OCCURRENCE"
 	EdgePackagePkgEqual                  Edge = "PACKAGE_PKG_EQUAL"
-	EdgePackageHasMetadata               Edge = "PACKAGE_HAS_METADATA"
 	EdgePackagePointOfContact            Edge = "PACKAGE_POINT_OF_CONTACT"
 	EdgeSourceCertifyBad                 Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood                Edge = "SOURCE_CERTIFY_GOOD"
+	EdgeSourceCertifyLegal               Edge = "SOURCE_CERTIFY_LEGAL"
 	EdgeSourceCertifyScorecard           Edge = "SOURCE_CERTIFY_SCORECARD"
+	EdgeSourceHasMetadata                Edge = "SOURCE_HAS_METADATA"
 	EdgeSourceHasSourceAt                Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence               Edge = "SOURCE_IS_OCCURRENCE"
-	EdgeSourceHasMetadata                Edge = "SOURCE_HAS_METADATA"
 	EdgeSourcePointOfContact             Edge = "SOURCE_POINT_OF_CONTACT"
+	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
+	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
+	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
+	EdgeVulnerabilityVulnMetadata        Edge = "VULNERABILITY_VULN_METADATA"
 	EdgeCertifyBadArtifact               Edge = "CERTIFY_BAD_ARTIFACT"
 	EdgeCertifyBadPackage                Edge = "CERTIFY_BAD_PACKAGE"
 	EdgeCertifyBadSource                 Edge = "CERTIFY_BAD_SOURCE"
 	EdgeCertifyGoodArtifact              Edge = "CERTIFY_GOOD_ARTIFACT"
 	EdgeCertifyGoodPackage               Edge = "CERTIFY_GOOD_PACKAGE"
 	EdgeCertifyGoodSource                Edge = "CERTIFY_GOOD_SOURCE"
+	EdgeCertifyLegalLicense              Edge = "CERTIFY_LEGAL_LICENSE"
+	EdgeCertifyLegalPackage              Edge = "CERTIFY_LEGAL_PACKAGE"
+	EdgeCertifyLegalSource               Edge = "CERTIFY_LEGAL_SOURCE"
 	EdgeCertifyScorecardSource           Edge = "CERTIFY_SCORECARD_SOURCE"
 	EdgeCertifyVexStatementArtifact      Edge = "CERTIFY_VEX_STATEMENT_ARTIFACT"
-	EdgeCertifyVexStatementVulnerability Edge = "CERTIFY_VEX_STATEMENT_VULNERABILITY"
 	EdgeCertifyVexStatementPackage       Edge = "CERTIFY_VEX_STATEMENT_PACKAGE"
-	EdgeCertifyVulnVulnerability         Edge = "CERTIFY_VULN_VULNERABILITY"
+	EdgeCertifyVexStatementVulnerability Edge = "CERTIFY_VEX_STATEMENT_VULNERABILITY"
 	EdgeCertifyVulnPackage               Edge = "CERTIFY_VULN_PACKAGE"
+	EdgeCertifyVulnVulnerability         Edge = "CERTIFY_VULN_VULNERABILITY"
 	EdgeHashEqualArtifact                Edge = "HASH_EQUAL_ARTIFACT"
+	EdgeHasMetadataArtifact              Edge = "HAS_METADATA_ARTIFACT"
+	EdgeHasMetadataPackage               Edge = "HAS_METADATA_PACKAGE"
+	EdgeHasMetadataSource                Edge = "HAS_METADATA_SOURCE"
 	EdgeHasSbomArtifact                  Edge = "HAS_SBOM_ARTIFACT"
 	EdgeHasSbomPackage                   Edge = "HAS_SBOM_PACKAGE"
 	EdgeHasSlsaBuiltBy                   Edge = "HAS_SLSA_BUILT_BY"
@@ -5784,14 +7401,11 @@ const (
 	EdgeIsOccurrenceArtifact             Edge = "IS_OCCURRENCE_ARTIFACT"
 	EdgeIsOccurrencePackage              Edge = "IS_OCCURRENCE_PACKAGE"
 	EdgeIsOccurrenceSource               Edge = "IS_OCCURRENCE_SOURCE"
-	EdgeVulnEqualVulnerability           Edge = "VULN_EQUAL_VULNERABILITY"
 	EdgePkgEqualPackage                  Edge = "PKG_EQUAL_PACKAGE"
-	EdgeHasMetadataPackage               Edge = "HAS_METADATA_PACKAGE"
-	EdgeHasMetadataArtifact              Edge = "HAS_METADATA_ARTIFACT"
-	EdgeHasMetadataSource                Edge = "HAS_METADATA_SOURCE"
-	EdgePointOfContactPackage            Edge = "POINT_OF_CONTACT_PACKAGE"
 	EdgePointOfContactArtifact           Edge = "POINT_OF_CONTACT_ARTIFACT"
+	EdgePointOfContactPackage            Edge = "POINT_OF_CONTACT_PACKAGE"
 	EdgePointOfContactSource             Edge = "POINT_OF_CONTACT_SOURCE"
+	EdgeVulnEqualVulnerability           Edge = "VULN_EQUAL_VULNERABILITY"
 	EdgeVulnMetadataVulnerability        Edge = "VULN_METADATA_VULNERABILITY"
 )
 
@@ -6472,6 +8086,222 @@ type IngestBuildersResponse struct {
 // GetIngestBuilders returns IngestBuildersResponse.IngestBuilders, and is useful for accessing the field via an interface.
 func (v *IngestBuildersResponse) GetIngestBuilders() []string { return v.IngestBuilders }
 
+// IngestLicenseIngestLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type IngestLicenseIngestLicense struct {
+	AllLicenseTree `json:"-"`
+}
+
+// GetId returns IngestLicenseIngestLicense.Id, and is useful for accessing the field via an interface.
+func (v *IngestLicenseIngestLicense) GetId() string { return v.AllLicenseTree.Id }
+
+// GetName returns IngestLicenseIngestLicense.Name, and is useful for accessing the field via an interface.
+func (v *IngestLicenseIngestLicense) GetName() string { return v.AllLicenseTree.Name }
+
+// GetInline returns IngestLicenseIngestLicense.Inline, and is useful for accessing the field via an interface.
+func (v *IngestLicenseIngestLicense) GetInline() *string { return v.AllLicenseTree.Inline }
+
+// GetListVersion returns IngestLicenseIngestLicense.ListVersion, and is useful for accessing the field via an interface.
+func (v *IngestLicenseIngestLicense) GetListVersion() *string { return v.AllLicenseTree.ListVersion }
+
+func (v *IngestLicenseIngestLicense) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestLicenseIngestLicense
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestLicenseIngestLicense = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllLicenseTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestLicenseIngestLicense struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Inline *string `json:"inline"`
+
+	ListVersion *string `json:"listVersion"`
+}
+
+func (v *IngestLicenseIngestLicense) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestLicenseIngestLicense) __premarshalJSON() (*__premarshalIngestLicenseIngestLicense, error) {
+	var retval __premarshalIngestLicenseIngestLicense
+
+	retval.Id = v.AllLicenseTree.Id
+	retval.Name = v.AllLicenseTree.Name
+	retval.Inline = v.AllLicenseTree.Inline
+	retval.ListVersion = v.AllLicenseTree.ListVersion
+	return &retval, nil
+}
+
+// IngestLicenseResponse is returned by IngestLicense on success.
+type IngestLicenseResponse struct {
+	// Ingests a new license and returns it.
+	IngestLicense IngestLicenseIngestLicense `json:"ingestLicense"`
+}
+
+// GetIngestLicense returns IngestLicenseResponse.IngestLicense, and is useful for accessing the field via an interface.
+func (v *IngestLicenseResponse) GetIngestLicense() IngestLicenseIngestLicense { return v.IngestLicense }
+
+// IngestLicensesIngestLicensesLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type IngestLicensesIngestLicensesLicense struct {
+	AllLicenseTree `json:"-"`
+}
+
+// GetId returns IngestLicensesIngestLicensesLicense.Id, and is useful for accessing the field via an interface.
+func (v *IngestLicensesIngestLicensesLicense) GetId() string { return v.AllLicenseTree.Id }
+
+// GetName returns IngestLicensesIngestLicensesLicense.Name, and is useful for accessing the field via an interface.
+func (v *IngestLicensesIngestLicensesLicense) GetName() string { return v.AllLicenseTree.Name }
+
+// GetInline returns IngestLicensesIngestLicensesLicense.Inline, and is useful for accessing the field via an interface.
+func (v *IngestLicensesIngestLicensesLicense) GetInline() *string { return v.AllLicenseTree.Inline }
+
+// GetListVersion returns IngestLicensesIngestLicensesLicense.ListVersion, and is useful for accessing the field via an interface.
+func (v *IngestLicensesIngestLicensesLicense) GetListVersion() *string {
+	return v.AllLicenseTree.ListVersion
+}
+
+func (v *IngestLicensesIngestLicensesLicense) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestLicensesIngestLicensesLicense
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestLicensesIngestLicensesLicense = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllLicenseTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestLicensesIngestLicensesLicense struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Inline *string `json:"inline"`
+
+	ListVersion *string `json:"listVersion"`
+}
+
+func (v *IngestLicensesIngestLicensesLicense) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestLicensesIngestLicensesLicense) __premarshalJSON() (*__premarshalIngestLicensesIngestLicensesLicense, error) {
+	var retval __premarshalIngestLicensesIngestLicensesLicense
+
+	retval.Id = v.AllLicenseTree.Id
+	retval.Name = v.AllLicenseTree.Name
+	retval.Inline = v.AllLicenseTree.Inline
+	retval.ListVersion = v.AllLicenseTree.ListVersion
+	return &retval, nil
+}
+
+// IngestLicensesResponse is returned by IngestLicenses on success.
+type IngestLicensesResponse struct {
+	// Bulk ingests new licenses and returns a list of them.
+	IngestLicenses []IngestLicensesIngestLicensesLicense `json:"ingestLicenses"`
+}
+
+// GetIngestLicenses returns IngestLicensesResponse.IngestLicenses, and is useful for accessing the field via an interface.
+func (v *IngestLicensesResponse) GetIngestLicenses() []IngestLicensesIngestLicensesLicense {
+	return v.IngestLicenses
+}
+
 // IngestPackageResponse is returned by IngestPackage on success.
 type IngestPackageResponse struct {
 	// Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string.
@@ -6622,6 +8452,149 @@ type IsOccurrencesSrcResponse struct {
 
 // GetIngestOccurrences returns IsOccurrencesSrcResponse.IngestOccurrences, and is useful for accessing the field via an interface.
 func (v *IsOccurrencesSrcResponse) GetIngestOccurrences() []string { return v.IngestOccurrences }
+
+// LicenseInputSpec specifies an license for mutations. One of inline or
+// listVersion should be empty or missing.
+type LicenseInputSpec struct {
+	Name        string  `json:"name"`
+	Inline      *string `json:"inline"`
+	ListVersion *string `json:"listVersion"`
+}
+
+// GetName returns LicenseInputSpec.Name, and is useful for accessing the field via an interface.
+func (v *LicenseInputSpec) GetName() string { return v.Name }
+
+// GetInline returns LicenseInputSpec.Inline, and is useful for accessing the field via an interface.
+func (v *LicenseInputSpec) GetInline() *string { return v.Inline }
+
+// GetListVersion returns LicenseInputSpec.ListVersion, and is useful for accessing the field via an interface.
+func (v *LicenseInputSpec) GetListVersion() *string { return v.ListVersion }
+
+// LicenseSpec allows filtering the list of licenses to return in a query.
+type LicenseSpec struct {
+	Id          *string `json:"id"`
+	Name        *string `json:"name"`
+	Inline      *string `json:"inline"`
+	ListVersion *string `json:"listVersion"`
+}
+
+// GetId returns LicenseSpec.Id, and is useful for accessing the field via an interface.
+func (v *LicenseSpec) GetId() *string { return v.Id }
+
+// GetName returns LicenseSpec.Name, and is useful for accessing the field via an interface.
+func (v *LicenseSpec) GetName() *string { return v.Name }
+
+// GetInline returns LicenseSpec.Inline, and is useful for accessing the field via an interface.
+func (v *LicenseSpec) GetInline() *string { return v.Inline }
+
+// GetListVersion returns LicenseSpec.ListVersion, and is useful for accessing the field via an interface.
+func (v *LicenseSpec) GetListVersion() *string { return v.ListVersion }
+
+// LicensesLicensesLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type LicensesLicensesLicense struct {
+	AllLicenseTree `json:"-"`
+}
+
+// GetId returns LicensesLicensesLicense.Id, and is useful for accessing the field via an interface.
+func (v *LicensesLicensesLicense) GetId() string { return v.AllLicenseTree.Id }
+
+// GetName returns LicensesLicensesLicense.Name, and is useful for accessing the field via an interface.
+func (v *LicensesLicensesLicense) GetName() string { return v.AllLicenseTree.Name }
+
+// GetInline returns LicensesLicensesLicense.Inline, and is useful for accessing the field via an interface.
+func (v *LicensesLicensesLicense) GetInline() *string { return v.AllLicenseTree.Inline }
+
+// GetListVersion returns LicensesLicensesLicense.ListVersion, and is useful for accessing the field via an interface.
+func (v *LicensesLicensesLicense) GetListVersion() *string { return v.AllLicenseTree.ListVersion }
+
+func (v *LicensesLicensesLicense) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*LicensesLicensesLicense
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.LicensesLicensesLicense = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllLicenseTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalLicensesLicensesLicense struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Inline *string `json:"inline"`
+
+	ListVersion *string `json:"listVersion"`
+}
+
+func (v *LicensesLicensesLicense) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *LicensesLicensesLicense) __premarshalJSON() (*__premarshalLicensesLicensesLicense, error) {
+	var retval __premarshalLicensesLicensesLicense
+
+	retval.Id = v.AllLicenseTree.Id
+	retval.Name = v.AllLicenseTree.Name
+	retval.Inline = v.AllLicenseTree.Inline
+	retval.ListVersion = v.AllLicenseTree.ListVersion
+	return &retval, nil
+}
+
+// LicensesResponse is returned by Licenses on success.
+type LicensesResponse struct {
+	// Returns all licenses matching a filter.
+	Licenses []LicensesLicensesLicense `json:"licenses"`
+}
+
+// GetLicenses returns LicensesResponse.Licenses, and is useful for accessing the field via an interface.
+func (v *LicensesResponse) GetLicenses() []LicensesLicensesLicense { return v.Licenses }
 
 // MatchFlags is used to input the PkgMatchType enum.
 type MatchFlags struct {
@@ -7002,6 +8975,30 @@ func (v *NeighborsNeighborsCertifyGood) __premarshalJSON() (*__premarshalNeighbo
 	retval.Collector = v.AllCertifyGood.Collector
 	return &retval, nil
 }
+
+// NeighborsNeighborsCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type NeighborsNeighborsCertifyLegal struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NeighborsNeighborsCertifyLegal.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyLegal) GetTypename() *string { return v.Typename }
 
 // NeighborsNeighborsCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
 // The GraphQL type's documentation follows.
@@ -8065,6 +10062,41 @@ func (v *NeighborsNeighborsIsOccurrence) __premarshalJSON() (*__premarshalNeighb
 	return &retval, nil
 }
 
+// NeighborsNeighborsLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type NeighborsNeighborsLicense struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NeighborsNeighborsLicense.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsLicense) GetTypename() *string { return v.Typename }
+
 // NeighborsNeighborsNode includes the requested fields of the GraphQL interface Node.
 //
 // NeighborsNeighborsNode is implemented by the following types:
@@ -8072,6 +10104,7 @@ func (v *NeighborsNeighborsIsOccurrence) __premarshalJSON() (*__premarshalNeighb
 // NeighborsNeighborsBuilder
 // NeighborsNeighborsCertifyBad
 // NeighborsNeighborsCertifyGood
+// NeighborsNeighborsCertifyLegal
 // NeighborsNeighborsCertifyScorecard
 // NeighborsNeighborsCertifyVEXStatement
 // NeighborsNeighborsCertifyVuln
@@ -8082,6 +10115,7 @@ func (v *NeighborsNeighborsIsOccurrence) __premarshalJSON() (*__premarshalNeighb
 // NeighborsNeighborsHashEqual
 // NeighborsNeighborsIsDependency
 // NeighborsNeighborsIsOccurrence
+// NeighborsNeighborsLicense
 // NeighborsNeighborsPackage
 // NeighborsNeighborsPkgEqual
 // NeighborsNeighborsPointOfContact
@@ -8106,6 +10140,7 @@ func (v *NeighborsNeighborsArtifact) implementsGraphQLInterfaceNeighborsNeighbor
 func (v *NeighborsNeighborsBuilder) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsCertifyBad) implementsGraphQLInterfaceNeighborsNeighborsNode()          {}
 func (v *NeighborsNeighborsCertifyGood) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
+func (v *NeighborsNeighborsCertifyLegal) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
 func (v *NeighborsNeighborsCertifyScorecard) implementsGraphQLInterfaceNeighborsNeighborsNode()    {}
 func (v *NeighborsNeighborsCertifyVEXStatement) implementsGraphQLInterfaceNeighborsNeighborsNode() {}
 func (v *NeighborsNeighborsCertifyVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
@@ -8116,6 +10151,7 @@ func (v *NeighborsNeighborsHasSourceAt) implementsGraphQLInterfaceNeighborsNeigh
 func (v *NeighborsNeighborsHashEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()           {}
 func (v *NeighborsNeighborsIsDependency) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
 func (v *NeighborsNeighborsIsOccurrence) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
+func (v *NeighborsNeighborsLicense) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsPackage) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsPkgEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()            {}
 func (v *NeighborsNeighborsPointOfContact) implementsGraphQLInterfaceNeighborsNeighborsNode()      {}
@@ -8151,6 +10187,9 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 	case "CertifyGood":
 		*v = new(NeighborsNeighborsCertifyGood)
 		return json.Unmarshal(b, *v)
+	case "CertifyLegal":
+		*v = new(NeighborsNeighborsCertifyLegal)
+		return json.Unmarshal(b, *v)
 	case "CertifyScorecard":
 		*v = new(NeighborsNeighborsCertifyScorecard)
 		return json.Unmarshal(b, *v)
@@ -8180,6 +10219,9 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 		return json.Unmarshal(b, *v)
 	case "IsOccurrence":
 		*v = new(NeighborsNeighborsIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "License":
+		*v = new(NeighborsNeighborsLicense)
 		return json.Unmarshal(b, *v)
 	case "Package":
 		*v = new(NeighborsNeighborsPackage)
@@ -8262,6 +10304,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsCertifyGood
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsCertifyLegal:
+		typename = "CertifyLegal"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NeighborsNeighborsCertifyLegal
+		}{typename, v}
 		return json.Marshal(result)
 	case *NeighborsNeighborsCertifyScorecard:
 		typename = "CertifyScorecard"
@@ -8382,6 +10432,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsIsOccurrence
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsLicense:
+		typename = "License"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NeighborsNeighborsLicense
+		}{typename, v}
 		return json.Marshal(result)
 	case *NeighborsNeighborsPackage:
 		typename = "Package"
@@ -9295,6 +11353,7 @@ func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, 
 // NodeNodeBuilder
 // NodeNodeCertifyBad
 // NodeNodeCertifyGood
+// NodeNodeCertifyLegal
 // NodeNodeCertifyScorecard
 // NodeNodeCertifyVEXStatement
 // NodeNodeCertifyVuln
@@ -9305,6 +11364,7 @@ func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, 
 // NodeNodeHashEqual
 // NodeNodeIsDependency
 // NodeNodeIsOccurrence
+// NodeNodeLicense
 // NodeNodePackage
 // NodeNodePkgEqual
 // NodeNodePointOfContact
@@ -9329,6 +11389,7 @@ func (v *NodeNodeArtifact) implementsGraphQLInterfaceNodeNode()              {}
 func (v *NodeNodeBuilder) implementsGraphQLInterfaceNodeNode()               {}
 func (v *NodeNodeCertifyBad) implementsGraphQLInterfaceNodeNode()            {}
 func (v *NodeNodeCertifyGood) implementsGraphQLInterfaceNodeNode()           {}
+func (v *NodeNodeCertifyLegal) implementsGraphQLInterfaceNodeNode()          {}
 func (v *NodeNodeCertifyScorecard) implementsGraphQLInterfaceNodeNode()      {}
 func (v *NodeNodeCertifyVEXStatement) implementsGraphQLInterfaceNodeNode()   {}
 func (v *NodeNodeCertifyVuln) implementsGraphQLInterfaceNodeNode()           {}
@@ -9339,6 +11400,7 @@ func (v *NodeNodeHasSourceAt) implementsGraphQLInterfaceNodeNode()           {}
 func (v *NodeNodeHashEqual) implementsGraphQLInterfaceNodeNode()             {}
 func (v *NodeNodeIsDependency) implementsGraphQLInterfaceNodeNode()          {}
 func (v *NodeNodeIsOccurrence) implementsGraphQLInterfaceNodeNode()          {}
+func (v *NodeNodeLicense) implementsGraphQLInterfaceNodeNode()               {}
 func (v *NodeNodePackage) implementsGraphQLInterfaceNodeNode()               {}
 func (v *NodeNodePkgEqual) implementsGraphQLInterfaceNodeNode()              {}
 func (v *NodeNodePointOfContact) implementsGraphQLInterfaceNodeNode()        {}
@@ -9373,6 +11435,9 @@ func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 	case "CertifyGood":
 		*v = new(NodeNodeCertifyGood)
 		return json.Unmarshal(b, *v)
+	case "CertifyLegal":
+		*v = new(NodeNodeCertifyLegal)
+		return json.Unmarshal(b, *v)
 	case "CertifyScorecard":
 		*v = new(NodeNodeCertifyScorecard)
 		return json.Unmarshal(b, *v)
@@ -9402,6 +11467,9 @@ func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 		return json.Unmarshal(b, *v)
 	case "IsOccurrence":
 		*v = new(NodeNodeIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "License":
+		*v = new(NodeNodeLicense)
 		return json.Unmarshal(b, *v)
 	case "Package":
 		*v = new(NodeNodePackage)
@@ -9484,6 +11552,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodeCertifyGood
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeCertifyLegal:
+		typename = "CertifyLegal"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodeNodeCertifyLegal
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodeNodeCertifyScorecard:
 		typename = "CertifyScorecard"
@@ -9604,6 +11680,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodeIsOccurrence
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeLicense:
+		typename = "License"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodeNodeLicense
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodeNodePackage:
 		typename = "Package"
@@ -10064,6 +12148,30 @@ func (v *NodeNodeCertifyGood) __premarshalJSON() (*__premarshalNodeNodeCertifyGo
 	retval.Collector = v.AllCertifyGood.Collector
 	return &retval, nil
 }
+
+// NodeNodeCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type NodeNodeCertifyLegal struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodeNodeCertifyLegal.Typename, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyLegal) GetTypename() *string { return v.Typename }
 
 // NodeNodeCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
 // The GraphQL type's documentation follows.
@@ -11096,6 +13204,41 @@ func (v *NodeNodeIsOccurrence) __premarshalJSON() (*__premarshalNodeNodeIsOccurr
 	retval.Collector = v.AllIsOccurrencesTree.Collector
 	return &retval, nil
 }
+
+// NodeNodeLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type NodeNodeLicense struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodeNodeLicense.Typename, and is useful for accessing the field via an interface.
+func (v *NodeNodeLicense) GetTypename() *string { return v.Typename }
 
 // NodeNodePackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
@@ -12253,6 +14396,30 @@ func (v *NodesNodesCertifyGood) __premarshalJSON() (*__premarshalNodesNodesCerti
 	return &retval, nil
 }
 
+// NodesNodesCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type NodesNodesCertifyLegal struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodesNodesCertifyLegal.Typename, and is useful for accessing the field via an interface.
+func (v *NodesNodesCertifyLegal) GetTypename() *string { return v.Typename }
+
 // NodesNodesCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
 // The GraphQL type's documentation follows.
 //
@@ -13289,6 +15456,41 @@ func (v *NodesNodesIsOccurrence) __premarshalJSON() (*__premarshalNodesNodesIsOc
 	return &retval, nil
 }
 
+// NodesNodesLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type NodesNodesLicense struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NodesNodesLicense.Typename, and is useful for accessing the field via an interface.
+func (v *NodesNodesLicense) GetTypename() *string { return v.Typename }
+
 // NodesNodesNode includes the requested fields of the GraphQL interface Node.
 //
 // NodesNodesNode is implemented by the following types:
@@ -13296,6 +15498,7 @@ func (v *NodesNodesIsOccurrence) __premarshalJSON() (*__premarshalNodesNodesIsOc
 // NodesNodesBuilder
 // NodesNodesCertifyBad
 // NodesNodesCertifyGood
+// NodesNodesCertifyLegal
 // NodesNodesCertifyScorecard
 // NodesNodesCertifyVEXStatement
 // NodesNodesCertifyVuln
@@ -13306,6 +15509,7 @@ func (v *NodesNodesIsOccurrence) __premarshalJSON() (*__premarshalNodesNodesIsOc
 // NodesNodesHashEqual
 // NodesNodesIsDependency
 // NodesNodesIsOccurrence
+// NodesNodesLicense
 // NodesNodesPackage
 // NodesNodesPkgEqual
 // NodesNodesPointOfContact
@@ -13330,6 +15534,7 @@ func (v *NodesNodesArtifact) implementsGraphQLInterfaceNodesNodesNode()         
 func (v *NodesNodesBuilder) implementsGraphQLInterfaceNodesNodesNode()               {}
 func (v *NodesNodesCertifyBad) implementsGraphQLInterfaceNodesNodesNode()            {}
 func (v *NodesNodesCertifyGood) implementsGraphQLInterfaceNodesNodesNode()           {}
+func (v *NodesNodesCertifyLegal) implementsGraphQLInterfaceNodesNodesNode()          {}
 func (v *NodesNodesCertifyScorecard) implementsGraphQLInterfaceNodesNodesNode()      {}
 func (v *NodesNodesCertifyVEXStatement) implementsGraphQLInterfaceNodesNodesNode()   {}
 func (v *NodesNodesCertifyVuln) implementsGraphQLInterfaceNodesNodesNode()           {}
@@ -13340,6 +15545,7 @@ func (v *NodesNodesHasSourceAt) implementsGraphQLInterfaceNodesNodesNode()      
 func (v *NodesNodesHashEqual) implementsGraphQLInterfaceNodesNodesNode()             {}
 func (v *NodesNodesIsDependency) implementsGraphQLInterfaceNodesNodesNode()          {}
 func (v *NodesNodesIsOccurrence) implementsGraphQLInterfaceNodesNodesNode()          {}
+func (v *NodesNodesLicense) implementsGraphQLInterfaceNodesNodesNode()               {}
 func (v *NodesNodesPackage) implementsGraphQLInterfaceNodesNodesNode()               {}
 func (v *NodesNodesPkgEqual) implementsGraphQLInterfaceNodesNodesNode()              {}
 func (v *NodesNodesPointOfContact) implementsGraphQLInterfaceNodesNodesNode()        {}
@@ -13374,6 +15580,9 @@ func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 	case "CertifyGood":
 		*v = new(NodesNodesCertifyGood)
 		return json.Unmarshal(b, *v)
+	case "CertifyLegal":
+		*v = new(NodesNodesCertifyLegal)
+		return json.Unmarshal(b, *v)
 	case "CertifyScorecard":
 		*v = new(NodesNodesCertifyScorecard)
 		return json.Unmarshal(b, *v)
@@ -13403,6 +15612,9 @@ func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 		return json.Unmarshal(b, *v)
 	case "IsOccurrence":
 		*v = new(NodesNodesIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "License":
+		*v = new(NodesNodesLicense)
 		return json.Unmarshal(b, *v)
 	case "Package":
 		*v = new(NodesNodesPackage)
@@ -13485,6 +15697,14 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesCertifyGood
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesCertifyLegal:
+		typename = "CertifyLegal"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodesNodesCertifyLegal
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodesNodesCertifyScorecard:
 		typename = "CertifyScorecard"
@@ -13605,6 +15825,14 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesIsOccurrence
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesLicense:
+		typename = "License"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodesNodesLicense
+		}{typename, v}
 		return json.Marshal(result)
 	case *NodesNodesPackage:
 		typename = "Package"
@@ -14671,6 +16899,20 @@ func (v *PackageNamespacesResponse) GetPackages() []PackageNamespacesPackagesPac
 	return v.Packages
 }
 
+// PackageOrSourceSpec allows using PackageOrSource union as input for queries.
+//
+// Exactly one field must be specified.
+type PackageOrSourceSpec struct {
+	Package *PkgSpec    `json:"package"`
+	Source  *SourceSpec `json:"source"`
+}
+
+// GetPackage returns PackageOrSourceSpec.Package, and is useful for accessing the field via an interface.
+func (v *PackageOrSourceSpec) GetPackage() *PkgSpec { return v.Package }
+
+// GetSource returns PackageOrSourceSpec.Source, and is useful for accessing the field via an interface.
+func (v *PackageOrSourceSpec) GetSource() *SourceSpec { return v.Source }
+
 // PackageQualifierInputSpec allows specifying package qualifiers in mutations.
 type PackageQualifierInputSpec struct {
 	Key   string `json:"key"`
@@ -15396,6 +17638,30 @@ func (v *PathPathCertifyGood) __premarshalJSON() (*__premarshalPathPathCertifyGo
 	retval.Collector = v.AllCertifyGood.Collector
 	return &retval, nil
 }
+
+// PathPathCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
+// The GraphQL type's documentation follows.
+//
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type PathPathCertifyLegal struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns PathPathCertifyLegal.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyLegal) GetTypename() *string { return v.Typename }
 
 // PathPathCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
 // The GraphQL type's documentation follows.
@@ -16429,6 +18695,41 @@ func (v *PathPathIsOccurrence) __premarshalJSON() (*__premarshalPathPathIsOccurr
 	return &retval, nil
 }
 
+// PathPathLicense includes the requested fields of the GraphQL type License.
+// The GraphQL type's documentation follows.
+//
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type PathPathLicense struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns PathPathLicense.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathLicense) GetTypename() *string { return v.Typename }
+
 // PathPathNode includes the requested fields of the GraphQL interface Node.
 //
 // PathPathNode is implemented by the following types:
@@ -16436,6 +18737,7 @@ func (v *PathPathIsOccurrence) __premarshalJSON() (*__premarshalPathPathIsOccurr
 // PathPathBuilder
 // PathPathCertifyBad
 // PathPathCertifyGood
+// PathPathCertifyLegal
 // PathPathCertifyScorecard
 // PathPathCertifyVEXStatement
 // PathPathCertifyVuln
@@ -16446,6 +18748,7 @@ func (v *PathPathIsOccurrence) __premarshalJSON() (*__premarshalPathPathIsOccurr
 // PathPathHashEqual
 // PathPathIsDependency
 // PathPathIsOccurrence
+// PathPathLicense
 // PathPathPackage
 // PathPathPkgEqual
 // PathPathPointOfContact
@@ -16470,6 +18773,7 @@ func (v *PathPathArtifact) implementsGraphQLInterfacePathPathNode()             
 func (v *PathPathBuilder) implementsGraphQLInterfacePathPathNode()               {}
 func (v *PathPathCertifyBad) implementsGraphQLInterfacePathPathNode()            {}
 func (v *PathPathCertifyGood) implementsGraphQLInterfacePathPathNode()           {}
+func (v *PathPathCertifyLegal) implementsGraphQLInterfacePathPathNode()          {}
 func (v *PathPathCertifyScorecard) implementsGraphQLInterfacePathPathNode()      {}
 func (v *PathPathCertifyVEXStatement) implementsGraphQLInterfacePathPathNode()   {}
 func (v *PathPathCertifyVuln) implementsGraphQLInterfacePathPathNode()           {}
@@ -16480,6 +18784,7 @@ func (v *PathPathHasSourceAt) implementsGraphQLInterfacePathPathNode()          
 func (v *PathPathHashEqual) implementsGraphQLInterfacePathPathNode()             {}
 func (v *PathPathIsDependency) implementsGraphQLInterfacePathPathNode()          {}
 func (v *PathPathIsOccurrence) implementsGraphQLInterfacePathPathNode()          {}
+func (v *PathPathLicense) implementsGraphQLInterfacePathPathNode()               {}
 func (v *PathPathPackage) implementsGraphQLInterfacePathPathNode()               {}
 func (v *PathPathPkgEqual) implementsGraphQLInterfacePathPathNode()              {}
 func (v *PathPathPointOfContact) implementsGraphQLInterfacePathPathNode()        {}
@@ -16514,6 +18819,9 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 	case "CertifyGood":
 		*v = new(PathPathCertifyGood)
 		return json.Unmarshal(b, *v)
+	case "CertifyLegal":
+		*v = new(PathPathCertifyLegal)
+		return json.Unmarshal(b, *v)
 	case "CertifyScorecard":
 		*v = new(PathPathCertifyScorecard)
 		return json.Unmarshal(b, *v)
@@ -16543,6 +18851,9 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 		return json.Unmarshal(b, *v)
 	case "IsOccurrence":
 		*v = new(PathPathIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "License":
+		*v = new(PathPathLicense)
 		return json.Unmarshal(b, *v)
 	case "Package":
 		*v = new(PathPathPackage)
@@ -16625,6 +18936,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathCertifyGood
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathCertifyLegal:
+		typename = "CertifyLegal"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*PathPathCertifyLegal
+		}{typename, v}
 		return json.Marshal(result)
 	case *PathPathCertifyScorecard:
 		typename = "CertifyScorecard"
@@ -16745,6 +19064,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathIsOccurrence
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathLicense:
+		typename = "License"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*PathPathLicense
+		}{typename, v}
 		return json.Marshal(result)
 	case *PathPathPackage:
 		typename = "Package"
@@ -18588,6 +20915,106 @@ func (v *__CertifyGoodSrcsInput) GetSources() []SourceInputSpec { return v.Sourc
 // GetCertifyGoods returns __CertifyGoodSrcsInput.CertifyGoods, and is useful for accessing the field via an interface.
 func (v *__CertifyGoodSrcsInput) GetCertifyGoods() []CertifyGoodInputSpec { return v.CertifyGoods }
 
+// __CertifyLegalPkgInput is used internally by genqlient
+type __CertifyLegalPkgInput struct {
+	Pkg                PkgInputSpec          `json:"pkg"`
+	DeclaredLicenses   []LicenseInputSpec    `json:"declaredLicenses"`
+	DiscoveredLicenses []LicenseInputSpec    `json:"discoveredLicenses"`
+	Legal              CertifyLegalInputSpec `json:"legal"`
+}
+
+// GetPkg returns __CertifyLegalPkgInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetDeclaredLicenses returns __CertifyLegalPkgInput.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalPkgInput) GetDeclaredLicenses() []LicenseInputSpec { return v.DeclaredLicenses }
+
+// GetDiscoveredLicenses returns __CertifyLegalPkgInput.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalPkgInput) GetDiscoveredLicenses() []LicenseInputSpec {
+	return v.DiscoveredLicenses
+}
+
+// GetLegal returns __CertifyLegalPkgInput.Legal, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalPkgInput) GetLegal() CertifyLegalInputSpec { return v.Legal }
+
+// __CertifyLegalPkgsInput is used internally by genqlient
+type __CertifyLegalPkgsInput struct {
+	Pkgs                   []PkgInputSpec          `json:"pkgs"`
+	DeclaredLicensesList   [][]LicenseInputSpec    `json:"declaredLicensesList"`
+	DiscoveredLicensesList [][]LicenseInputSpec    `json:"discoveredLicensesList"`
+	Legals                 []CertifyLegalInputSpec `json:"legals"`
+}
+
+// GetPkgs returns __CertifyLegalPkgsInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetDeclaredLicensesList returns __CertifyLegalPkgsInput.DeclaredLicensesList, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalPkgsInput) GetDeclaredLicensesList() [][]LicenseInputSpec {
+	return v.DeclaredLicensesList
+}
+
+// GetDiscoveredLicensesList returns __CertifyLegalPkgsInput.DiscoveredLicensesList, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalPkgsInput) GetDiscoveredLicensesList() [][]LicenseInputSpec {
+	return v.DiscoveredLicensesList
+}
+
+// GetLegals returns __CertifyLegalPkgsInput.Legals, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalPkgsInput) GetLegals() []CertifyLegalInputSpec { return v.Legals }
+
+// __CertifyLegalSrcInput is used internally by genqlient
+type __CertifyLegalSrcInput struct {
+	Src                SourceInputSpec       `json:"src"`
+	DeclaredLicenses   []LicenseInputSpec    `json:"declaredLicenses"`
+	DiscoveredLicenses []LicenseInputSpec    `json:"discoveredLicenses"`
+	Legal              CertifyLegalInputSpec `json:"legal"`
+}
+
+// GetSrc returns __CertifyLegalSrcInput.Src, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalSrcInput) GetSrc() SourceInputSpec { return v.Src }
+
+// GetDeclaredLicenses returns __CertifyLegalSrcInput.DeclaredLicenses, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalSrcInput) GetDeclaredLicenses() []LicenseInputSpec { return v.DeclaredLicenses }
+
+// GetDiscoveredLicenses returns __CertifyLegalSrcInput.DiscoveredLicenses, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalSrcInput) GetDiscoveredLicenses() []LicenseInputSpec {
+	return v.DiscoveredLicenses
+}
+
+// GetLegal returns __CertifyLegalSrcInput.Legal, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalSrcInput) GetLegal() CertifyLegalInputSpec { return v.Legal }
+
+// __CertifyLegalSrcsInput is used internally by genqlient
+type __CertifyLegalSrcsInput struct {
+	Srcs                   []SourceInputSpec       `json:"srcs"`
+	DeclaredLicensesList   [][]LicenseInputSpec    `json:"declaredLicensesList"`
+	DiscoveredLicensesList [][]LicenseInputSpec    `json:"discoveredLicensesList"`
+	Legals                 []CertifyLegalInputSpec `json:"legals"`
+}
+
+// GetSrcs returns __CertifyLegalSrcsInput.Srcs, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalSrcsInput) GetSrcs() []SourceInputSpec { return v.Srcs }
+
+// GetDeclaredLicensesList returns __CertifyLegalSrcsInput.DeclaredLicensesList, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalSrcsInput) GetDeclaredLicensesList() [][]LicenseInputSpec {
+	return v.DeclaredLicensesList
+}
+
+// GetDiscoveredLicensesList returns __CertifyLegalSrcsInput.DiscoveredLicensesList, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalSrcsInput) GetDiscoveredLicensesList() [][]LicenseInputSpec {
+	return v.DiscoveredLicensesList
+}
+
+// GetLegals returns __CertifyLegalSrcsInput.Legals, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalSrcsInput) GetLegals() []CertifyLegalInputSpec { return v.Legals }
+
+// __CertifyLegalsInput is used internally by genqlient
+type __CertifyLegalsInput struct {
+	Filter CertifyLegalSpec `json:"filter"`
+}
+
+// GetFilter returns __CertifyLegalsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyLegalsInput) GetFilter() CertifyLegalSpec { return v.Filter }
+
 // __CertifyScorecardInput is used internally by genqlient
 type __CertifyScorecardInput struct {
 	Source    SourceInputSpec    `json:"source"`
@@ -18896,6 +21323,22 @@ type __IngestBuildersInput struct {
 // GetBuilders returns __IngestBuildersInput.Builders, and is useful for accessing the field via an interface.
 func (v *__IngestBuildersInput) GetBuilders() []BuilderInputSpec { return v.Builders }
 
+// __IngestLicenseInput is used internally by genqlient
+type __IngestLicenseInput struct {
+	License LicenseInputSpec `json:"license"`
+}
+
+// GetLicense returns __IngestLicenseInput.License, and is useful for accessing the field via an interface.
+func (v *__IngestLicenseInput) GetLicense() LicenseInputSpec { return v.License }
+
+// __IngestLicensesInput is used internally by genqlient
+type __IngestLicensesInput struct {
+	Licenses []LicenseInputSpec `json:"licenses"`
+}
+
+// GetLicenses returns __IngestLicensesInput.Licenses, and is useful for accessing the field via an interface.
+func (v *__IngestLicensesInput) GetLicenses() []LicenseInputSpec { return v.Licenses }
+
 // __IngestPackageInput is used internally by genqlient
 type __IngestPackageInput struct {
 	Pkg PkgInputSpec `json:"pkg"`
@@ -19047,6 +21490,14 @@ func (v *__IsOccurrencesSrcInput) GetArtifacts() []ArtifactInputSpec { return v.
 
 // GetOccurrences returns __IsOccurrencesSrcInput.Occurrences, and is useful for accessing the field via an interface.
 func (v *__IsOccurrencesSrcInput) GetOccurrences() []IsOccurrenceInputSpec { return v.Occurrences }
+
+// __LicensesInput is used internally by genqlient
+type __LicensesInput struct {
+	Filter LicenseSpec `json:"filter"`
+}
+
+// GetFilter returns __LicensesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__LicensesInput) GetFilter() LicenseSpec { return v.Filter }
 
 // __NeighborsInput is used internally by genqlient
 type __NeighborsInput struct {
@@ -19852,6 +22303,535 @@ func CertifyGoodSrcs(
 	var err error
 
 	var data CertifyGoodSrcsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyLegalPkg.
+const CertifyLegalPkg_Operation = `
+mutation CertifyLegalPkg ($pkg: PkgInputSpec!, $declaredLicenses: [LicenseInputSpec!]!, $discoveredLicenses: [LicenseInputSpec!]!, $legal: CertifyLegalInputSpec!) {
+	ingestCertifyLegal(subject: {package:$pkg}, declaredLicenses: $declaredLicenses, discoveredLicenses: $discoveredLicenses, certifyLegal: $legal) {
+		... AllCertifyLegalTree
+	}
+}
+fragment AllCertifyLegalTree on CertifyLegal {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	declaredLicense
+	declaredLicenses {
+		... AllLicenseTree
+	}
+	discoveredLicense
+	discoveredLicenses {
+		... AllLicenseTree
+	}
+	attribution
+	justification
+	timeScanned
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func CertifyLegalPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	declaredLicenses []LicenseInputSpec,
+	discoveredLicenses []LicenseInputSpec,
+	legal CertifyLegalInputSpec,
+) (*CertifyLegalPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyLegalPkg",
+		Query:  CertifyLegalPkg_Operation,
+		Variables: &__CertifyLegalPkgInput{
+			Pkg:                pkg,
+			DeclaredLicenses:   declaredLicenses,
+			DiscoveredLicenses: discoveredLicenses,
+			Legal:              legal,
+		},
+	}
+	var err error
+
+	var data CertifyLegalPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyLegalPkgs.
+const CertifyLegalPkgs_Operation = `
+mutation CertifyLegalPkgs ($pkgs: [PkgInputSpec!]!, $declaredLicensesList: [[LicenseInputSpec!]!]!, $discoveredLicensesList: [[LicenseInputSpec!]!]!, $legals: [CertifyLegalInputSpec!]!) {
+	ingestCertifyLegals(subjects: {packages:$pkgs}, declaredLicensesList: $declaredLicensesList, discoveredLicensesList: $discoveredLicensesList, certifyLegals: $legals) {
+		... AllCertifyLegalTree
+	}
+}
+fragment AllCertifyLegalTree on CertifyLegal {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	declaredLicense
+	declaredLicenses {
+		... AllLicenseTree
+	}
+	discoveredLicense
+	discoveredLicenses {
+		... AllLicenseTree
+	}
+	attribution
+	justification
+	timeScanned
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func CertifyLegalPkgs(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	declaredLicensesList [][]LicenseInputSpec,
+	discoveredLicensesList [][]LicenseInputSpec,
+	legals []CertifyLegalInputSpec,
+) (*CertifyLegalPkgsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyLegalPkgs",
+		Query:  CertifyLegalPkgs_Operation,
+		Variables: &__CertifyLegalPkgsInput{
+			Pkgs:                   pkgs,
+			DeclaredLicensesList:   declaredLicensesList,
+			DiscoveredLicensesList: discoveredLicensesList,
+			Legals:                 legals,
+		},
+	}
+	var err error
+
+	var data CertifyLegalPkgsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyLegalSrc.
+const CertifyLegalSrc_Operation = `
+mutation CertifyLegalSrc ($src: SourceInputSpec!, $declaredLicenses: [LicenseInputSpec!]!, $discoveredLicenses: [LicenseInputSpec!]!, $legal: CertifyLegalInputSpec!) {
+	ingestCertifyLegal(subject: {source:$src}, declaredLicenses: $declaredLicenses, discoveredLicenses: $discoveredLicenses, certifyLegal: $legal) {
+		... AllCertifyLegalTree
+	}
+}
+fragment AllCertifyLegalTree on CertifyLegal {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	declaredLicense
+	declaredLicenses {
+		... AllLicenseTree
+	}
+	discoveredLicense
+	discoveredLicenses {
+		... AllLicenseTree
+	}
+	attribution
+	justification
+	timeScanned
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func CertifyLegalSrc(
+	ctx context.Context,
+	client graphql.Client,
+	src SourceInputSpec,
+	declaredLicenses []LicenseInputSpec,
+	discoveredLicenses []LicenseInputSpec,
+	legal CertifyLegalInputSpec,
+) (*CertifyLegalSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyLegalSrc",
+		Query:  CertifyLegalSrc_Operation,
+		Variables: &__CertifyLegalSrcInput{
+			Src:                src,
+			DeclaredLicenses:   declaredLicenses,
+			DiscoveredLicenses: discoveredLicenses,
+			Legal:              legal,
+		},
+	}
+	var err error
+
+	var data CertifyLegalSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyLegalSrcs.
+const CertifyLegalSrcs_Operation = `
+mutation CertifyLegalSrcs ($srcs: [SourceInputSpec!]!, $declaredLicensesList: [[LicenseInputSpec!]!]!, $discoveredLicensesList: [[LicenseInputSpec!]!]!, $legals: [CertifyLegalInputSpec!]!) {
+	ingestCertifyLegals(subjects: {sources:$srcs}, declaredLicensesList: $declaredLicensesList, discoveredLicensesList: $discoveredLicensesList, certifyLegals: $legals) {
+		... AllCertifyLegalTree
+	}
+}
+fragment AllCertifyLegalTree on CertifyLegal {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	declaredLicense
+	declaredLicenses {
+		... AllLicenseTree
+	}
+	discoveredLicense
+	discoveredLicenses {
+		... AllLicenseTree
+	}
+	attribution
+	justification
+	timeScanned
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func CertifyLegalSrcs(
+	ctx context.Context,
+	client graphql.Client,
+	srcs []SourceInputSpec,
+	declaredLicensesList [][]LicenseInputSpec,
+	discoveredLicensesList [][]LicenseInputSpec,
+	legals []CertifyLegalInputSpec,
+) (*CertifyLegalSrcsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyLegalSrcs",
+		Query:  CertifyLegalSrcs_Operation,
+		Variables: &__CertifyLegalSrcsInput{
+			Srcs:                   srcs,
+			DeclaredLicensesList:   declaredLicensesList,
+			DiscoveredLicensesList: discoveredLicensesList,
+			Legals:                 legals,
+		},
+	}
+	var err error
+
+	var data CertifyLegalSrcsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by CertifyLegals.
+const CertifyLegals_Operation = `
+query CertifyLegals ($filter: CertifyLegalSpec!) {
+	CertifyLegal(certifyLegalSpec: $filter) {
+		... AllCertifyLegalTree
+	}
+}
+fragment AllCertifyLegalTree on CertifyLegal {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	declaredLicense
+	declaredLicenses {
+		... AllLicenseTree
+	}
+	discoveredLicense
+	discoveredLicenses {
+		... AllLicenseTree
+	}
+	attribution
+	justification
+	timeScanned
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func CertifyLegals(
+	ctx context.Context,
+	client graphql.Client,
+	filter CertifyLegalSpec,
+) (*CertifyLegalsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyLegals",
+		Query:  CertifyLegals_Operation,
+		Variables: &__CertifyLegalsInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data CertifyLegalsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -20731,6 +23711,88 @@ func IngestBuilders(
 	return &data, err
 }
 
+// The query or mutation executed by IngestLicense.
+const IngestLicense_Operation = `
+mutation IngestLicense ($license: LicenseInputSpec!) {
+	ingestLicense(license: $license) {
+		... AllLicenseTree
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func IngestLicense(
+	ctx context.Context,
+	client graphql.Client,
+	license LicenseInputSpec,
+) (*IngestLicenseResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestLicense",
+		Query:  IngestLicense_Operation,
+		Variables: &__IngestLicenseInput{
+			License: license,
+		},
+	}
+	var err error
+
+	var data IngestLicenseResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestLicenses.
+const IngestLicenses_Operation = `
+mutation IngestLicenses ($licenses: [LicenseInputSpec!]!) {
+	ingestLicenses(licenses: $licenses) {
+		... AllLicenseTree
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func IngestLicenses(
+	ctx context.Context,
+	client graphql.Client,
+	licenses []LicenseInputSpec,
+) (*IngestLicensesResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestLicenses",
+		Query:  IngestLicenses_Operation,
+		Variables: &__IngestLicensesInput{
+			Licenses: licenses,
+		},
+	}
+	var err error
+
+	var data IngestLicensesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by IngestPackage.
 const IngestPackage_Operation = `
 mutation IngestPackage ($pkg: PkgInputSpec!) {
@@ -21144,6 +24206,47 @@ func IsOccurrencesSrc(
 	var err error
 
 	var data IsOccurrencesSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by Licenses.
+const Licenses_Operation = `
+query Licenses ($filter: LicenseSpec!) {
+	licenses(licenseSpec: $filter) {
+		... AllLicenseTree
+	}
+}
+fragment AllLicenseTree on License {
+	id
+	name
+	inline
+	listVersion
+}
+`
+
+func Licenses(
+	ctx context.Context,
+	client graphql.Client,
+	filter LicenseSpec,
+) (*LicensesResponse, error) {
+	req := &graphql.Request{
+		OpName: "Licenses",
+		Query:  Licenses_Operation,
+		Variables: &__LicensesInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data LicensesResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

@@ -95,6 +95,21 @@ func (mr *MockBackendMockRecorder) CertifyGood(ctx, certifyGoodSpec interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyGood", reflect.TypeOf((*MockBackend)(nil).CertifyGood), ctx, certifyGoodSpec)
 }
 
+// CertifyLegal mocks base method.
+func (m *MockBackend) CertifyLegal(ctx context.Context, certifyLegalSpec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CertifyLegal", ctx, certifyLegalSpec)
+	ret0, _ := ret[0].([]*model.CertifyLegal)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CertifyLegal indicates an expected call of CertifyLegal.
+func (mr *MockBackendMockRecorder) CertifyLegal(ctx, certifyLegalSpec interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyLegal", reflect.TypeOf((*MockBackend)(nil).CertifyLegal), ctx, certifyLegalSpec)
+}
+
 // CertifyVEXStatement mocks base method.
 func (m *MockBackend) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	m.ctrl.T.Helper()
@@ -335,6 +350,36 @@ func (mr *MockBackendMockRecorder) IngestCertifyGoods(ctx, subjects, pkgMatchTyp
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestCertifyGoods", reflect.TypeOf((*MockBackend)(nil).IngestCertifyGoods), ctx, subjects, pkgMatchType, certifyGoods)
 }
 
+// IngestCertifyLegal mocks base method.
+func (m *MockBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (*model.CertifyLegal, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestCertifyLegal", ctx, subject, declaredLicenses, discoveredLicenses, certifyLegal)
+	ret0, _ := ret[0].(*model.CertifyLegal)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestCertifyLegal indicates an expected call of IngestCertifyLegal.
+func (mr *MockBackendMockRecorder) IngestCertifyLegal(ctx, subject, declaredLicenses, discoveredLicenses, certifyLegal interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestCertifyLegal", reflect.TypeOf((*MockBackend)(nil).IngestCertifyLegal), ctx, subject, declaredLicenses, discoveredLicenses, certifyLegal)
+}
+
+// IngestCertifyLegals mocks base method.
+func (m *MockBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestCertifyLegals", ctx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
+	ret0, _ := ret[0].([]*model.CertifyLegal)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestCertifyLegals indicates an expected call of IngestCertifyLegals.
+func (mr *MockBackendMockRecorder) IngestCertifyLegals(ctx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestCertifyLegals", reflect.TypeOf((*MockBackend)(nil).IngestCertifyLegals), ctx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
+}
+
 // IngestCertifyVuln mocks base method.
 func (m *MockBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
 	m.ctrl.T.Helper()
@@ -483,6 +528,36 @@ func (m *MockBackend) IngestHashEquals(ctx context.Context, artifacts, otherArti
 func (mr *MockBackendMockRecorder) IngestHashEquals(ctx, artifacts, otherArtifacts, hashEquals interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestHashEquals", reflect.TypeOf((*MockBackend)(nil).IngestHashEquals), ctx, artifacts, otherArtifacts, hashEquals)
+}
+
+// IngestLicense mocks base method.
+func (m *MockBackend) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestLicense", ctx, license)
+	ret0, _ := ret[0].(*model.License)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestLicense indicates an expected call of IngestLicense.
+func (mr *MockBackendMockRecorder) IngestLicense(ctx, license interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestLicense", reflect.TypeOf((*MockBackend)(nil).IngestLicense), ctx, license)
+}
+
+// IngestLicenses mocks base method.
+func (m *MockBackend) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestLicenses", ctx, licenses)
+	ret0, _ := ret[0].([]*model.License)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestLicenses indicates an expected call of IngestLicenses.
+func (mr *MockBackendMockRecorder) IngestLicenses(ctx, licenses interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestLicenses", reflect.TypeOf((*MockBackend)(nil).IngestLicenses), ctx, licenses)
 }
 
 // IngestOccurrence mocks base method.
@@ -798,6 +873,21 @@ func (m *MockBackend) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 func (mr *MockBackendMockRecorder) IsOccurrence(ctx, isOccurrenceSpec interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsOccurrence", reflect.TypeOf((*MockBackend)(nil).IsOccurrence), ctx, isOccurrenceSpec)
+}
+
+// Licenses mocks base method.
+func (m *MockBackend) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Licenses", ctx, licenseSpec)
+	ret0, _ := ret[0].([]*model.License)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Licenses indicates an expected call of Licenses.
+func (mr *MockBackendMockRecorder) Licenses(ctx, licenseSpec interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Licenses", reflect.TypeOf((*MockBackend)(nil).Licenses), ctx, licenseSpec)
 }
 
 // Neighbors mocks base method.

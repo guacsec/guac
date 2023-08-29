@@ -794,6 +794,25 @@ func (c *arangoClient) Path(ctx context.Context, subject string, target string, 
 	panic(fmt.Errorf("not implemented: Path - Path"))
 }
 
+func (c *arangoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
+	panic(fmt.Errorf("not implemented: Licenses"))
+}
+func (c *arangoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
+	panic(fmt.Errorf("not implemented: IngestLicense"))
+}
+func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
+	panic(fmt.Errorf("not implemented: IngestLicenses"))
+}
+func (c *arangoClient) CertifyLegal(ctx context.Context, certifyLegalSpec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
+	panic(fmt.Errorf("not implemented: CertifyLegal"))
+}
+func (c *arangoClient) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (*model.CertifyLegal, error) {
+	panic(fmt.Errorf("not implemented: IngestCertifyLegal"))
+}
+func (c *arangoClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
+	panic(fmt.Errorf("not implemented: IngestCertifyLegals"))
+}
+
 func ptrfromArangoSearchNGramStreamType(s driver.ArangoSearchNGramStreamType) *driver.ArangoSearchNGramStreamType {
 	return &s
 }

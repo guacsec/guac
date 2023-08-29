@@ -66,6 +66,20 @@ type ComplexityRoot struct {
 		Subject       func(childComplexity int) int
 	}
 
+	CertifyLegal struct {
+		Attribution        func(childComplexity int) int
+		Collector          func(childComplexity int) int
+		DeclaredLicense    func(childComplexity int) int
+		DeclaredLicenses   func(childComplexity int) int
+		DiscoveredLicense  func(childComplexity int) int
+		DiscoveredLicenses func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		Justification      func(childComplexity int) int
+		Origin             func(childComplexity int) int
+		Subject            func(childComplexity int) int
+		TimeScanned        func(childComplexity int) int
+	}
+
 	CertifyScorecard struct {
 		ID        func(childComplexity int) int
 		Scorecard func(childComplexity int) int
@@ -158,6 +172,13 @@ type ComplexityRoot struct {
 		Subject       func(childComplexity int) int
 	}
 
+	License struct {
+		ID          func(childComplexity int) int
+		Inline      func(childComplexity int) int
+		ListVersion func(childComplexity int) int
+		Name        func(childComplexity int) int
+	}
+
 	Mutation struct {
 		IngestArtifact               func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestArtifacts              func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
@@ -167,6 +188,8 @@ type ComplexityRoot struct {
 		IngestCertifyBads            func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
 		IngestCertifyGood            func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCertifyGoods           func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
+		IngestCertifyLegal           func(childComplexity int, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) int
+		IngestCertifyLegals          func(childComplexity int, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) int
 		IngestCertifyVuln            func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) int
 		IngestCertifyVulns           func(childComplexity int, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) int
 		IngestDependencies           func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) int
@@ -177,6 +200,8 @@ type ComplexityRoot struct {
 		IngestHasSourceAt            func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual              func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestHashEquals             func(childComplexity int, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) int
+		IngestLicense                func(childComplexity int, license *model.LicenseInputSpec) int
+		IngestLicenses               func(childComplexity int, licenses []*model.LicenseInputSpec) int
 		IngestOccurrence             func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOccurrences            func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
 		IngestPackage                func(childComplexity int, pkg model.PkgInputSpec) int
@@ -252,6 +277,7 @@ type ComplexityRoot struct {
 		Builders              func(childComplexity int, builderSpec model.BuilderSpec) int
 		CertifyBad            func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
 		CertifyGood           func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
+		CertifyLegal          func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec) int
 		CertifyVEXStatement   func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec) int
 		CertifyVuln           func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
 		FindSoftware          func(childComplexity int, searchText string) int
@@ -262,6 +288,7 @@ type ComplexityRoot struct {
 		HashEqual             func(childComplexity int, hashEqualSpec model.HashEqualSpec) int
 		IsDependency          func(childComplexity int, isDependencySpec model.IsDependencySpec) int
 		IsOccurrence          func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
+		Licenses              func(childComplexity int, licenseSpec model.LicenseSpec) int
 		Neighbors             func(childComplexity int, node string, usingOnly []model.Edge) int
 		Node                  func(childComplexity int, node string) int
 		Nodes                 func(childComplexity int, nodes []string) int
@@ -486,6 +513,83 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyGood.Subject(childComplexity), true
+
+	case "CertifyLegal.attribution":
+		if e.complexity.CertifyLegal.Attribution == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.Attribution(childComplexity), true
+
+	case "CertifyLegal.collector":
+		if e.complexity.CertifyLegal.Collector == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.Collector(childComplexity), true
+
+	case "CertifyLegal.declaredLicense":
+		if e.complexity.CertifyLegal.DeclaredLicense == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.DeclaredLicense(childComplexity), true
+
+	case "CertifyLegal.declaredLicenses":
+		if e.complexity.CertifyLegal.DeclaredLicenses == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.DeclaredLicenses(childComplexity), true
+
+	case "CertifyLegal.discoveredLicense":
+		if e.complexity.CertifyLegal.DiscoveredLicense == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.DiscoveredLicense(childComplexity), true
+
+	case "CertifyLegal.discoveredLicenses":
+		if e.complexity.CertifyLegal.DiscoveredLicenses == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.DiscoveredLicenses(childComplexity), true
+
+	case "CertifyLegal.id":
+		if e.complexity.CertifyLegal.ID == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.ID(childComplexity), true
+
+	case "CertifyLegal.justification":
+		if e.complexity.CertifyLegal.Justification == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.Justification(childComplexity), true
+
+	case "CertifyLegal.origin":
+		if e.complexity.CertifyLegal.Origin == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.Origin(childComplexity), true
+
+	case "CertifyLegal.subject":
+		if e.complexity.CertifyLegal.Subject == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.Subject(childComplexity), true
+
+	case "CertifyLegal.timeScanned":
+		if e.complexity.CertifyLegal.TimeScanned == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.TimeScanned(childComplexity), true
 
 	case "CertifyScorecard.id":
 		if e.complexity.CertifyScorecard.ID == nil {
@@ -921,6 +1025,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsOccurrence.Subject(childComplexity), true
 
+	case "License.id":
+		if e.complexity.License.ID == nil {
+			break
+		}
+
+		return e.complexity.License.ID(childComplexity), true
+
+	case "License.inline":
+		if e.complexity.License.Inline == nil {
+			break
+		}
+
+		return e.complexity.License.Inline(childComplexity), true
+
+	case "License.listVersion":
+		if e.complexity.License.ListVersion == nil {
+			break
+		}
+
+		return e.complexity.License.ListVersion(childComplexity), true
+
+	case "License.name":
+		if e.complexity.License.Name == nil {
+			break
+		}
+
+		return e.complexity.License.Name(childComplexity), true
+
 	case "Mutation.ingestArtifact":
 		if e.complexity.Mutation.IngestArtifact == nil {
 			break
@@ -1016,6 +1148,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestCertifyGoods(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["certifyGoods"].([]*model.CertifyGoodInputSpec)), true
+
+	case "Mutation.ingestCertifyLegal":
+		if e.complexity.Mutation.IngestCertifyLegal == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyLegal_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyLegal(childComplexity, args["subject"].(model.PackageOrSourceInput), args["declaredLicenses"].([]*model.LicenseInputSpec), args["discoveredLicenses"].([]*model.LicenseInputSpec), args["certifyLegal"].(model.CertifyLegalInputSpec)), true
+
+	case "Mutation.ingestCertifyLegals":
+		if e.complexity.Mutation.IngestCertifyLegals == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyLegals_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyLegals(childComplexity, args["subjects"].(model.PackageOrSourceInputs), args["declaredLicensesList"].([][]*model.LicenseInputSpec), args["discoveredLicensesList"].([][]*model.LicenseInputSpec), args["certifyLegals"].([]*model.CertifyLegalInputSpec)), true
 
 	case "Mutation.ingestCertifyVuln":
 		if e.complexity.Mutation.IngestCertifyVuln == nil {
@@ -1136,6 +1292,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestHashEquals(childComplexity, args["artifacts"].([]*model.ArtifactInputSpec), args["otherArtifacts"].([]*model.ArtifactInputSpec), args["hashEquals"].([]*model.HashEqualInputSpec)), true
+
+	case "Mutation.ingestLicense":
+		if e.complexity.Mutation.IngestLicense == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestLicense_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestLicense(childComplexity, args["license"].(*model.LicenseInputSpec)), true
+
+	case "Mutation.ingestLicenses":
+		if e.complexity.Mutation.IngestLicenses == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestLicenses_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestLicenses(childComplexity, args["licenses"].([]*model.LicenseInputSpec)), true
 
 	case "Mutation.ingestOccurrence":
 		if e.complexity.Mutation.IngestOccurrence == nil {
@@ -1609,6 +1789,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyGood(childComplexity, args["certifyGoodSpec"].(model.CertifyGoodSpec)), true
 
+	case "Query.CertifyLegal":
+		if e.complexity.Query.CertifyLegal == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyLegal_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyLegal(childComplexity, args["certifyLegalSpec"].(model.CertifyLegalSpec)), true
+
 	case "Query.CertifyVEXStatement":
 		if e.complexity.Query.CertifyVEXStatement == nil {
 			break
@@ -1728,6 +1920,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.IsOccurrence(childComplexity, args["isOccurrenceSpec"].(model.IsOccurrenceSpec)), true
+
+	case "Query.licenses":
+		if e.complexity.Query.Licenses == nil {
+			break
+		}
+
+		args, err := ec.field_Query_licenses_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Licenses(childComplexity, args["licenseSpec"].(model.LicenseSpec)), true
 
 	case "Query.neighbors":
 		if e.complexity.Query.Neighbors == nil {
@@ -2267,6 +2471,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyGoodInputSpec,
 		ec.unmarshalInputCertifyGoodSpec,
+		ec.unmarshalInputCertifyLegalInputSpec,
+		ec.unmarshalInputCertifyLegalSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
 		ec.unmarshalInputCertifyVulnSpec,
@@ -2283,6 +2489,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceInputSpec,
 		ec.unmarshalInputIsOccurrenceSpec,
+		ec.unmarshalInputLicenseInputSpec,
+		ec.unmarshalInputLicenseSpec,
 		ec.unmarshalInputMatchFlags,
 		ec.unmarshalInputPackageOrArtifactInput,
 		ec.unmarshalInputPackageOrArtifactInputs,
@@ -2761,6 +2969,112 @@ extend type Mutation {
     pkgMatchType: MatchFlags!
     certifyGoods: [CertifyGoodInputSpec!]!
   ): [ID!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/certifyLegal.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the legal certifications
+
+"""
+CertifyLegal is an attestation to attach legal information to a package or source.
+
+The certification information is either copied from an attestation found in an
+SBOM or created by a collector/scanner.
+
+Discovered license is also known as Concluded. More information:
+https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+
+Attribution is also known as Copyright Text. It is what could be displayed to
+comply with notice
+requirements. https://www.nexb.com/oss-attribution-best-practices/
+
+License expressions follow this format:
+https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+"""
+type CertifyLegal {
+  id: ID!
+  "The package version or source that is attested"
+  subject: PackageOrSource!
+  "The license expression as delcared"
+  declaredLicense: String!
+  "A list of license objects found in the declared license expression"
+  declaredLicenses: [License!]!
+  "The license expression as discovered by scan"
+  discoveredLicense: String!
+  "A list of license objects found in the discovered license expression"
+  discoveredLicenses: [License!]!
+  "Attribution text of the subject"
+  attribution: String!
+  "Extra justification for the certification"
+  justification: String!
+  "Time of scan (in RFC 3339 format)"
+  timeScanned: Time!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
+}
+
+"""
+CertifyLegalSpec allows filtering the list of legal certifications to
+return in a query.
+
+Specifying just the package allows to query for all certifications associated
+with the package.
+"""
+input CertifyLegalSpec {
+  id: ID
+  subject: PackageOrSourceSpec
+  declaredLicense: String
+  declaredLicenses: [LicenseSpec!]
+  discoveredLicense: String
+  discoveredLicenses: [LicenseSpec!]
+  attribution: String
+  justification: String
+  timeScanned: Time
+  origin: String
+  collector: String
+}
+
+"""
+CertifyLegalInputSpec represents the input for certifying legal information in
+mutations.
+"""
+input CertifyLegalInputSpec {
+  declaredLicense: String!
+  discoveredLicense: String!
+  attribution: String!
+  justification: String!
+  timeScanned: Time!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all legal certifications matching the input filter."
+  CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
+}
+
+extend type Mutation {
+  "Adds a legal certification to a package or source."
+  ingestCertifyLegal(subject: PackageOrSourceInput!, declaredLicenses: [LicenseInputSpec!]!, discoveredLicenses: [LicenseInputSpec!]!, certifyLegal: CertifyLegalInputSpec!): CertifyLegal!
+  "Bulk add legal certifications to packages or sources, not both at same time."
+  ingestCertifyLegals(subjects: PackageOrSourceInputs!, declaredLicensesList: [[LicenseInputSpec!]!]!, discoveredLicensesList: [[LicenseInputSpec!]!]!, certifyLegals: [CertifyLegalInputSpec!]!): [CertifyLegal!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
@@ -3851,6 +4165,91 @@ extend type Mutation {
   ): [ID!]!
 }
 `, BuiltIn: false},
+	{Name: "../schema/license.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the license
+
+"""
+License represents a particular license. If the license is found on the SPDX
+license list (https://spdx.org/licenses/) then the fields should be:
+
+Name: SPDX license identifier
+Inline: empty
+ListVersion: SPDX license list version
+
+example:
+
+Name: AGPL-3.0-or-later
+Inline: ""
+ListVersion: 3.21 2023-06-18
+
+If the license is not on the SPDX license list, then a new guid should be
+created and the license text placed inline:
+
+Name: LicenseRef-<guid>
+Inline: Full license text
+ListVersion: empty
+
+example:
+
+Name: LicenseRef-1a2b3c
+Inline: Permission to use, copy, modify, and/or distribute ...
+ListVersion: ""
+"""
+type License {
+  id: ID!
+  name: String!
+  inline: String
+  listVersion: String
+}
+
+"""
+LicenseSpec allows filtering the list of licenses to return in a query.
+"""
+input LicenseSpec {
+  id: ID
+  name: String
+  inline: String
+  listVersion: String
+}
+
+"""
+LicenseInputSpec specifies an license for mutations. One of inline or
+listVersion should be empty or missing.
+"""
+input LicenseInputSpec {
+  name: String!
+  inline: String
+  listVersion: String
+}
+
+extend type Query {
+  "Returns all licenses matching a filter."
+  licenses(licenseSpec: LicenseSpec!): [License!]!
+}
+
+extend type Mutation {
+  "Ingests a new license and returns it."
+  ingestLicense(license: LicenseInputSpec): License!
+  "Bulk ingests new licenses and returns a list of them."
+  ingestLicenses(licenses: [LicenseInputSpec!]!): [License!]!
+}
+`, BuiltIn: false},
 	{Name: "../schema/metadata.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
@@ -4184,6 +4583,8 @@ union Node =
   | HasMetadata
   | PointOfContact
   | VulnerabilityMetadata
+  | License
+  | CertifyLegal
 
 """
 Edge allows filtering path/neighbors output to only contain a subset of all
@@ -4202,34 +4603,37 @@ enum Edge {
   ARTIFACT_CERTIFY_GOOD
   ARTIFACT_CERTIFY_VEX_STATEMENT
   ARTIFACT_HASH_EQUAL
+  ARTIFACT_HAS_METADATA
   ARTIFACT_HAS_SBOM
   ARTIFACT_HAS_SLSA
   ARTIFACT_IS_OCCURRENCE
-  ARTIFACT_HAS_METADATA
   ARTIFACT_POINT_OF_CONTACT
   BUILDER_HAS_SLSA
-  VULNERABILITY_CERTIFY_VEX_STATEMENT
-  VULNERABILITY_CERTIFY_VULN
-  VULNERABILITY_VULN_EQUAL
-  VULNERABILITY_VULN_METADATA
+  LICENSE_CERTIFY_LEGAL
   PACKAGE_CERTIFY_BAD
   PACKAGE_CERTIFY_GOOD
+  PACKAGE_CERTIFY_LEGAL
   PACKAGE_CERTIFY_VEX_STATEMENT
   PACKAGE_CERTIFY_VULN
+  PACKAGE_HAS_METADATA
   PACKAGE_HAS_SBOM
   PACKAGE_HAS_SOURCE_AT
   PACKAGE_IS_DEPENDENCY
   PACKAGE_IS_OCCURRENCE
   PACKAGE_PKG_EQUAL
-  PACKAGE_HAS_METADATA
   PACKAGE_POINT_OF_CONTACT
   SOURCE_CERTIFY_BAD
   SOURCE_CERTIFY_GOOD
+  SOURCE_CERTIFY_LEGAL
   SOURCE_CERTIFY_SCORECARD
+  SOURCE_HAS_METADATA
   SOURCE_HAS_SOURCE_AT
   SOURCE_IS_OCCURRENCE
-  SOURCE_HAS_METADATA
   SOURCE_POINT_OF_CONTACT
+  VULNERABILITY_CERTIFY_VEX_STATEMENT
+  VULNERABILITY_CERTIFY_VULN
+  VULNERABILITY_VULN_EQUAL
+  VULNERABILITY_VULN_METADATA
 
   CERTIFY_BAD_ARTIFACT
   CERTIFY_BAD_PACKAGE
@@ -4237,13 +4641,19 @@ enum Edge {
   CERTIFY_GOOD_ARTIFACT
   CERTIFY_GOOD_PACKAGE
   CERTIFY_GOOD_SOURCE
+  CERTIFY_LEGAL_LICENSE
+  CERTIFY_LEGAL_PACKAGE
+  CERTIFY_LEGAL_SOURCE
   CERTIFY_SCORECARD_SOURCE
   CERTIFY_VEX_STATEMENT_ARTIFACT
-  CERTIFY_VEX_STATEMENT_VULNERABILITY
   CERTIFY_VEX_STATEMENT_PACKAGE
-  CERTIFY_VULN_VULNERABILITY
+  CERTIFY_VEX_STATEMENT_VULNERABILITY
   CERTIFY_VULN_PACKAGE
+  CERTIFY_VULN_VULNERABILITY
   HASH_EQUAL_ARTIFACT
+  HAS_METADATA_ARTIFACT
+  HAS_METADATA_PACKAGE
+  HAS_METADATA_SOURCE
   HAS_SBOM_ARTIFACT
   HAS_SBOM_PACKAGE
   HAS_SLSA_BUILT_BY
@@ -4255,14 +4665,11 @@ enum Edge {
   IS_OCCURRENCE_ARTIFACT
   IS_OCCURRENCE_PACKAGE
   IS_OCCURRENCE_SOURCE
-  VULN_EQUAL_VULNERABILITY
   PKG_EQUAL_PACKAGE
-  HAS_METADATA_PACKAGE
-  HAS_METADATA_ARTIFACT
-  HAS_METADATA_SOURCE
-  POINT_OF_CONTACT_PACKAGE
   POINT_OF_CONTACT_ARTIFACT
+  POINT_OF_CONTACT_PACKAGE
   POINT_OF_CONTACT_SOURCE
+  VULN_EQUAL_VULNERABILITY
   VULN_METADATA_VULNERABILITY
 }
 
