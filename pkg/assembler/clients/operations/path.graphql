@@ -17,14 +17,24 @@
 
 # Exposes GraphQL queries to retrieve GUAC graph connectivity data
 
-query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!]!) {
-  path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: $usingOnly) {
+query Path(
+  $subject: ID!
+  $target: ID!
+  $maxPathLength: Int!
+  $usingOnly: [Edge!]!
+) {
+  path(
+    subject: $subject
+    target: $target
+    maxPathLength: $maxPathLength
+    usingOnly: $usingOnly
+  ) {
     __typename
     ... on Package {
-      ... AllPkgTree
+      ...AllPkgTree
     }
     ... on Source {
-      ... AllSourceTree
+      ...AllSourceTree
     }
     ... on Artifact {
       ...AllArtifactTree
@@ -65,7 +75,7 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
     ... on HasSourceAt {
       ...AllHasSourceAt
     }
-    ... on PointOfContact{
+    ... on PointOfContact {
       ...AllPointOfContact
     }
     ... on CertifyVuln {
@@ -82,6 +92,9 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
     }
     ... on VulnerabilityMetadata {
       ...AllVulnMetadataTree
+    }
+    ... on HasMetadata {
+      ...AllHasMetadata
     }
   }
 }
@@ -90,10 +103,10 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
   neighbors(node: $node, usingOnly: $usingOnly) {
     __typename
     ... on Package {
-      ... AllPkgTree
+      ...AllPkgTree
     }
     ... on Source {
-      ... AllSourceTree
+      ...AllSourceTree
     }
     ... on Artifact {
       ...AllArtifactTree
@@ -151,6 +164,9 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
     }
     ... on VulnerabilityMetadata {
       ...AllVulnMetadataTree
+    }
+    ... on HasMetadata {
+      ...AllHasMetadata
     }
   }
 }
@@ -159,10 +175,10 @@ query Node($node: ID!) {
   node(node: $node) {
     __typename
     ... on Package {
-      ... AllPkgTree
+      ...AllPkgTree
     }
     ... on Source {
-      ... AllSourceTree
+      ...AllSourceTree
     }
     ... on Artifact {
       ...AllArtifactTree
@@ -221,6 +237,9 @@ query Node($node: ID!) {
     ... on VulnerabilityMetadata {
       ...AllVulnMetadataTree
     }
+    ... on HasMetadata {
+      ...AllHasMetadata
+    }
   }
 }
 
@@ -228,10 +247,10 @@ query Nodes($nodes: [ID!]!) {
   nodes(nodes: $nodes) {
     __typename
     ... on Package {
-      ... AllPkgTree
+      ...AllPkgTree
     }
     ... on Source {
-      ... AllSourceTree
+      ...AllSourceTree
     }
     ... on Artifact {
       ...AllArtifactTree
@@ -272,7 +291,7 @@ query Nodes($nodes: [ID!]!) {
     ... on HasSourceAt {
       ...AllHasSourceAt
     }
-    ... on PointOfContact{
+    ... on PointOfContact {
       ...AllPointOfContact
     }
     ... on CertifyVuln {
@@ -289,6 +308,9 @@ query Nodes($nodes: [ID!]!) {
     }
     ... on VulnerabilityMetadata {
       ...AllVulnMetadataTree
+    }
+    ... on HasMetadata {
+      ...AllHasMetadata
     }
   }
 }

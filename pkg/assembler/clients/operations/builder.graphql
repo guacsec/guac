@@ -18,15 +18,11 @@
 # Ingest Builder
 
 mutation IngestBuilder($builder: BuilderInputSpec!) {
-  ingestBuilder(builder: $builder) {
-    uri
-  }
+  ingestBuilder(builder: $builder)
 }
 
 # Bulk Ingest Builder
 
 mutation IngestBuilders($builders: [BuilderInputSpec!]!) {
-  ingestBuilders(builders: $builders) {
-    uri
-  }
+  ingestBuilders(builders: $builders)
 }

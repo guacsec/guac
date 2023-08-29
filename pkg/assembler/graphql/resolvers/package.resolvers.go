@@ -11,13 +11,24 @@ import (
 )
 
 // IngestPackage is the resolver for the ingestPackage field.
-func (r *mutationResolver) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
-	return r.Backend.IngestPackage(ctx, pkg)
+func (r *mutationResolver) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (string, error) {
+	ingestedPackage, err := r.Backend.IngestPackage(ctx, pkg)
+	if err != nil {
+		return "", err
+	}
+	return ingestedPackage.ID, err
 }
 
 // IngestPackages is the resolver for the ingestPackages field.
-func (r *mutationResolver) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
-	return r.Backend.IngestPackages(ctx, pkgs)
+func (r *mutationResolver) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error) {
+	ingestedPackages, err := r.Backend.IngestPackages(ctx, pkgs)
+	ingestedPackagesIDS := []string{}
+	if err == nil {
+		for _, Package := range ingestedPackages {
+			ingestedPackagesIDS = append(ingestedPackagesIDS, Package.ID)
+		}
+	}
+	return ingestedPackagesIDS, err
 }
 
 // Packages is the resolver for the packages field.

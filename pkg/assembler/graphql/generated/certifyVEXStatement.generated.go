@@ -908,10 +908,6 @@ func (ec *executionContext) _CertifyVEXStatement(ctx context.Context, sel ast.Se
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNCertifyVEXStatement2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatement(ctx context.Context, sel ast.SelectionSet, v model.CertifyVEXStatement) graphql.Marshaler {
-	return ec._CertifyVEXStatement(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNCertifyVEXStatement2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyVEXStatement) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

@@ -92,13 +92,21 @@ func (c *csafParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStri
 }
 
 func findPurl(ctx context.Context, tree csaf.ProductBranch, product_ref string) *string {
+	return findPurlSearch(ctx, tree, product_ref, make(map[string]bool))
+}
+
+func findPurlSearch(ctx context.Context, tree csaf.ProductBranch, product_ref string, visited map[string]bool) *string {
+	if visited[tree.Name] {
+		return nil
+	}
+	visited[tree.Name] = true
 	if tree.Name == product_ref {
 		purl := tree.Product.IdentificationHelper["purl"]
 		return &purl
 	}
 
 	for _, b := range tree.Branches {
-		purl := findPurl(ctx, b, product_ref)
+		purl := findPurlSearch(ctx, b, product_ref, visited)
 		if purl != nil {
 			return purl
 		}

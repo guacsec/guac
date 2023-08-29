@@ -48,34 +48,38 @@ query HasSourceAtQ1 {
 }
 
 query HasSourceAtQ2 {
-  HasSourceAt(hasSourceAtSpec: {origin: "testing backend"}) {
+  HasSourceAt(hasSourceAtSpec: { origin: "testing backend" }) {
     ...allHasSourceAtTree
   }
 }
 
 query HasSourceAtQ3 {
-  HasSourceAt(hasSourceAtSpec: {package: {name: "openssl", version: "3.0.3"}})  {
+  HasSourceAt(
+    hasSourceAtSpec: { package: { name: "openssl", version: "3.0.3" } }
+  ) {
     ...allHasSourceAtTree
   }
 }
 
 query HasSourceAtQ4 {
   HasSourceAt(
-    hasSourceAtSpec: {source: {name: "https://github.com/django/django"}}
+    hasSourceAtSpec: { source: { name: "https://github.com/django/django" } }
   ) {
     ...allHasSourceAtTree
   }
 }
 
 query HasSourceAtQ5 {
-  HasSourceAt(hasSourceAtSpec: {package: {name: "kubetest"}}) {
+  HasSourceAt(hasSourceAtSpec: { package: { name: "kubetest" } }) {
     ...allHasSourceAtTree
   }
 }
 
 query HasSourceAtQ6 {
   HasSourceAt(
-    hasSourceAtSpec: {source: {name: "https://github.com/vapor-ware/kubetest"}}
+    hasSourceAtSpec: {
+      source: { name: "https://github.com/vapor-ware/kubetest" }
+    }
   ) {
     ...allHasSourceAtTree
   }

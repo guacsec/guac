@@ -12,7 +12,10 @@ query ArtifactQ1 {
 
 query ArtifactQ2 {
   artifacts(
-    artifactSpec: {algorithm: "sha256", digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}
+    artifactSpec: {
+      algorithm: "sha256"
+      digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
+    }
   ) {
     ...allArtifactTree
   }
@@ -20,39 +23,47 @@ query ArtifactQ2 {
 
 query ArtifactQ3 {
   artifacts(
-    artifactSpec: {digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}
+    artifactSpec: {
+      digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
+    }
   ) {
     ...allArtifactTree
   }
 }
 
 query ArtifactQ4 {
-  artifacts(artifactSpec: {algorithm: "sha512"}) {
+  artifacts(artifactSpec: { algorithm: "sha512" }) {
     ...allArtifactTree
   }
 }
 
 query ArtifactQ5 {
-  artifacts(artifactSpec: {digest: "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"}) {
+  artifacts(
+    artifactSpec: { digest: "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9" }
+  ) {
     ...allArtifactTree
   }
 }
 
 mutation ArtifactM1 {
-  ingestArtifact(artifact: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"}) {
+  ingestArtifact(
+    artifact: { algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf" }
+  ) {
     ...allArtifactTree
   }
 }
 
 mutation ArtifactM2 {
-  ingestArtifact(artifact: {algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0"}) {
+  ingestArtifact(
+    artifact: { algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0" }
+  ) {
     ...allArtifactTree
   }
 }
 
 fragment allBuilderTree on Builder {
-    id
-    uri
+  id
+  uri
 }
 
 query BuilderQ1 {
@@ -63,14 +74,16 @@ query BuilderQ1 {
 
 query BuilderQ2 {
   builders(
-    builderSpec: {uri: "https://github.com/Attestations/GitHubHostedActions@v1"}
+    builderSpec: {
+      uri: "https://github.com/Attestations/GitHubHostedActions@v1"
+    }
   ) {
     ...allBuilderTree
   }
 }
 
 mutation BuilderM1 {
-  ingestBuilder(builder: {uri: "https://github.com/Attestations/GitHubHostedActions@v2"}) {
-    ...allBuilderTree
-  }
+  ingestBuilder(
+    builder: { uri: "https://github.com/Attestations/GitHubHostedActions@v2" }
+  )
 }

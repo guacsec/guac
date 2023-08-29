@@ -243,10 +243,6 @@ func (ec *executionContext) _Builder(ctx context.Context, sel ast.SelectionSet, 
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNBuilder2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilder(ctx context.Context, sel ast.SelectionSet, v model.Builder) graphql.Marshaler {
-	return ec._Builder(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNBuilder2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Builder) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

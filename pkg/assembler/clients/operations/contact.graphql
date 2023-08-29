@@ -17,20 +17,36 @@
 
 # Defines the GraphQL operations to ingest a PointOfContact into GUAC
 
-mutation PointOfContactPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $pointOfContact: PointOfContactInputSpec!) {
-  ingestPointOfContact(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, pointOfContact: $pointOfContact) {
-    ...AllPointOfContact
-  }
+mutation PointOfContactPkg(
+  $pkg: PkgInputSpec!
+  $pkgMatchType: MatchFlags!
+  $pointOfContact: PointOfContactInputSpec!
+) {
+  ingestPointOfContact(
+    subject: { package: $pkg }
+    pkgMatchType: $pkgMatchType
+    pointOfContact: $pointOfContact
+  )
 }
 
-mutation PointOfContactSrc($source: SourceInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
-  ingestPointOfContact(subject: {source: $source}, pkgMatchType: {pkg: ALL_VERSIONS}, pointOfContact: $pointOfContact) {
-    ...AllPointOfContact
-  }
+mutation PointOfContactSrc(
+  $source: SourceInputSpec!
+  $pointOfContact: PointOfContactInputSpec!
+) {
+  ingestPointOfContact(
+    subject: { source: $source }
+    pkgMatchType: { pkg: ALL_VERSIONS }
+    pointOfContact: $pointOfContact
+  )
 }
 
-mutation PointOfContactArtifact($artifact: ArtifactInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
-  ingestPointOfContact(subject: {artifact: $artifact}, pkgMatchType: {pkg: ALL_VERSIONS}, pointOfContact: $pointOfContact) {
-    ...AllPointOfContact
-  }
+mutation PointOfContactArtifact(
+  $artifact: ArtifactInputSpec!
+  $pointOfContact: PointOfContactInputSpec!
+) {
+  ingestPointOfContact(
+    subject: { artifact: $artifact }
+    pkgMatchType: { pkg: ALL_VERSIONS }
+    pointOfContact: $pointOfContact
+  )
 }

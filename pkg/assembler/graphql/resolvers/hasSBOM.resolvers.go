@@ -11,13 +11,24 @@ import (
 )
 
 // IngestHasSbom is the resolver for the ingestHasSBOM field.
-func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
-	return r.Backend.IngestHasSbom(ctx, subject, hasSbom)
+func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (string, error) {
+	ingestedHasSbom, err := r.Backend.IngestHasSbom(ctx, subject, hasSbom)
+	if err != nil {
+		return "", err
+	}
+	return ingestedHasSbom.ID, err
 }
 
 // IngestHasSBOMs is the resolver for the ingestHasSBOMs field.
-func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
-	return r.Backend.IngestHasSBOMs(ctx, subjects, hasSBOMs)
+func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]string, error) {
+	ingestedHasSBOMs, err := r.Backend.IngestHasSBOMs(ctx, subjects, hasSBOMs)
+	ingestedHasSBOMSIDS := []string{}
+	if err == nil {
+		for _, hasSBOM := range ingestedHasSBOMs {
+			ingestedHasSBOMSIDS = append(ingestedHasSBOMSIDS, hasSBOM.ID)
+		}
+	}
+	return ingestedHasSBOMSIDS, err
 }
 
 // HasSbom is the resolver for the HasSBOM field.

@@ -435,10 +435,6 @@ func (ec *executionContext) _CertifyGood(ctx context.Context, sel ast.SelectionS
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNCertifyGood2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGood(ctx context.Context, sel ast.SelectionSet, v model.CertifyGood) graphql.Marshaler {
-	return ec._CertifyGood(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNCertifyGood2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyGood) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

@@ -47,39 +47,47 @@ query CertifyVulnQ1 {
 }
 
 query CertifyVulnQ2 {
-  CertifyVuln(certifyVulnSpec: {origin: "testing backend"}) {
+  CertifyVuln(certifyVulnSpec: { origin: "testing backend" }) {
     ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ3 {
-  CertifyVuln(certifyVulnSpec: {package: {name: "openssl"}}) {
+  CertifyVuln(certifyVulnSpec: { package: { name: "openssl" } }) {
     ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ4 {
-  CertifyVuln(certifyVulnSpec: {package: {name: "django"}}) {
+  CertifyVuln(certifyVulnSpec: { package: { name: "django" } }) {
     ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ5 {
-  CertifyVuln(certifyVulnSpec: {vulnerability: {vulnerabilityID: "CVE-2019-13110"}}) {
+  CertifyVuln(
+    certifyVulnSpec: { vulnerability: { vulnerabilityID: "CVE-2019-13110" } }
+  ) {
     ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ6 {
   CertifyVuln(
-    certifyVulnSpec: {vulnerability: {vulnerabilityID: "GHSA-h45f-rjvw-2rv2"}}
+    certifyVulnSpec: {
+      vulnerability: { vulnerabilityID: "GHSA-h45f-rjvw-2rv2" }
+    }
   ) {
     ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ7 {
-  CertifyVuln(certifyVulnSpec: {vulnerability: {type: "osv", vulnerabilityID: "CVE-2019-13110"}}) {
+  CertifyVuln(
+    certifyVulnSpec: {
+      vulnerability: { type: "osv", vulnerabilityID: "CVE-2019-13110" }
+    }
+  ) {
     ...allCertifyVulnTree
   }
 }
@@ -87,9 +95,7 @@ query CertifyVulnQ7 {
 # Setting noVuln to true return all packages that have no vulnerabilities
 # Setting noVuln to false return all packages with vulnerabilities
 query CertifyNoVuln {
-  CertifyVuln(certifyVulnSpec: {
-    vulnerability: {noVuln: true}
-  }) {
+  CertifyVuln(certifyVulnSpec: { vulnerability: { noVuln: true } }) {
     ...allCertifyVulnTree
   }
 }

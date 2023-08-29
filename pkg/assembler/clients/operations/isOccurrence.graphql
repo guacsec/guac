@@ -17,28 +17,52 @@
 
 # Defines the GraphQL operations to ingest occurrence information into GUAC
 
-mutation IsOccurrencePkg($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
-  ingestOccurrence(subject: {package: $pkg}, artifact: $artifact, occurrence: $occurrence) {
-    ...AllIsOccurrencesTree
-  }
+mutation IsOccurrencePkg(
+  $pkg: PkgInputSpec!
+  $artifact: ArtifactInputSpec!
+  $occurrence: IsOccurrenceInputSpec!
+) {
+  ingestOccurrence(
+    subject: { package: $pkg }
+    artifact: $artifact
+    occurrence: $occurrence
+  )
 }
 
-mutation IsOccurrenceSrc($source: SourceInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
-  ingestOccurrence(subject: {source: $source}, artifact: $artifact, occurrence: $occurrence) {
-    ...AllIsOccurrencesTree
-  }
+mutation IsOccurrenceSrc(
+  $source: SourceInputSpec!
+  $artifact: ArtifactInputSpec!
+  $occurrence: IsOccurrenceInputSpec!
+) {
+  ingestOccurrence(
+    subject: { source: $source }
+    artifact: $artifact
+    occurrence: $occurrence
+  )
 }
 
 # Defines the GraphQL operations to bulk ingest occurrences information into GUAC
 
-mutation IsOccurrencesPkg($pkgs: [PkgInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
-  ingestOccurrences(subjects: {packages: $pkgs}, artifacts: $artifacts, occurrences: $occurrences) {
-    ...AllIsOccurrencesTree
-  }
+mutation IsOccurrencesPkg(
+  $pkgs: [PkgInputSpec!]!
+  $artifacts: [ArtifactInputSpec!]!
+  $occurrences: [IsOccurrenceInputSpec!]!
+) {
+  ingestOccurrences(
+    subjects: { packages: $pkgs }
+    artifacts: $artifacts
+    occurrences: $occurrences
+  )
 }
 
-mutation IsOccurrencesSrc($sources: [SourceInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
-  ingestOccurrences(subjects: {sources: $sources}, artifacts: $artifacts, occurrences: $occurrences) {
-    ...AllIsOccurrencesTree
-  }
+mutation IsOccurrencesSrc(
+  $sources: [SourceInputSpec!]!
+  $artifacts: [ArtifactInputSpec!]!
+  $occurrences: [IsOccurrenceInputSpec!]!
+) {
+  ingestOccurrences(
+    subjects: { sources: $sources }
+    artifacts: $artifacts
+    occurrences: $occurrences
+  )
 }

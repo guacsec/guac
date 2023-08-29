@@ -116,10 +116,10 @@ fragment AllIsOccurrencesTree on IsOccurrence {
   id
   subject {
     __typename
-    ...on Package {
+    ... on Package {
       ...AllPkgTree
     }
-   ...on Source {
+    ... on Source {
       ...AllSourceTree
     }
   }
@@ -259,7 +259,7 @@ fragment AllCertifyVuln on CertifyVuln {
     ...AllPkgTree
   }
   vulnerability {
-      ...AllVulnerabilityTree
+    ...AllVulnerabilityTree
   }
   metadata {
     dbUri
@@ -339,24 +339,24 @@ fragment AllHasMetadata on HasMetadata {
 }
 
 fragment AllPointOfContact on PointOfContact {
-    id
-    subject {
-      __typename
-      ... on Package {
-        ...AllPkgTree
-      }
-      ... on Source {
-        ...AllSourceTree
-      }
-      ... on Artifact {
-        ...AllArtifactTree
-      }
+  id
+  subject {
+    __typename
+    ... on Package {
+      ...AllPkgTree
     }
+    ... on Source {
+      ...AllSourceTree
+    }
+    ... on Artifact {
+      ...AllArtifactTree
+    }
+  }
 
-    email
-    info
-    since
-    justification
-    origin
-    collector
+  email
+  info
+  since
+  justification
+  origin
+  collector
 }

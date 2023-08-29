@@ -17,20 +17,36 @@
 
 # Defines the GraphQL operations to ingest a HasMetadata into GUAC
 
-mutation HasMetadataPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $hasMetadata: HasMetadataInputSpec!) {
-  ingestHasMetadata(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, hasMetadata: $hasMetadata) {
-    ...AllHasMetadata
-  }
+mutation HasMetadataPkg(
+  $pkg: PkgInputSpec!
+  $pkgMatchType: MatchFlags!
+  $hasMetadata: HasMetadataInputSpec!
+) {
+  ingestHasMetadata(
+    subject: { package: $pkg }
+    pkgMatchType: $pkgMatchType
+    hasMetadata: $hasMetadata
+  )
 }
 
-mutation HasMetadataSrc($source: SourceInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
-  ingestHasMetadata(subject: {source: $source}, pkgMatchType: {pkg: ALL_VERSIONS}, hasMetadata: $hasMetadata) {
-    ...AllHasMetadata
-  }
+mutation HasMetadataSrc(
+  $source: SourceInputSpec!
+  $hasMetadata: HasMetadataInputSpec!
+) {
+  ingestHasMetadata(
+    subject: { source: $source }
+    pkgMatchType: { pkg: ALL_VERSIONS }
+    hasMetadata: $hasMetadata
+  )
 }
 
-mutation HasMetadataArtifact($artifact: ArtifactInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
-  ingestHasMetadata(subject: {artifact: $artifact}, pkgMatchType: {pkg: ALL_VERSIONS}, hasMetadata: $hasMetadata) {
-    ...AllHasMetadata
-  }
+mutation HasMetadataArtifact(
+  $artifact: ArtifactInputSpec!
+  $hasMetadata: HasMetadataInputSpec!
+) {
+  ingestHasMetadata(
+    subject: { artifact: $artifact }
+    pkgMatchType: { pkg: ALL_VERSIONS }
+    hasMetadata: $hasMetadata
+  )
 }

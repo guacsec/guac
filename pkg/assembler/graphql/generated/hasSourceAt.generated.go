@@ -578,10 +578,6 @@ func (ec *executionContext) _HasSourceAt(ctx context.Context, sel ast.SelectionS
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNHasSourceAt2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAt(ctx context.Context, sel ast.SelectionSet, v model.HasSourceAt) graphql.Marshaler {
-	return ec._HasSourceAt(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNHasSourceAt2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HasSourceAt) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

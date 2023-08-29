@@ -11,13 +11,24 @@ import (
 )
 
 // IngestDependency is the resolver for the ingestDependency field.
-func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
-	return r.Backend.IngestDependency(ctx, pkg, depPkg, depPkgMatchType, dependency)
+func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+	ingestedDependency, err := r.Backend.IngestDependency(ctx, pkg, depPkg, depPkgMatchType, dependency)
+	if err != nil {
+		return "", err
+	}
+	return ingestedDependency.ID, err
 }
 
 // IngestDependencies is the resolver for the ingestDependencies field.
-func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
-	return r.Backend.IngestDependencies(ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
+func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+	ingestedDependencies, err := r.Backend.IngestDependencies(ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
+	ingestedDependenciesIDS := []string{}
+	if err == nil {
+		for _, dependency := range ingestedDependencies {
+			ingestedDependenciesIDS = append(ingestedDependenciesIDS, dependency.ID)
+		}
+	}
+	return ingestedDependenciesIDS, err
 }
 
 // IsDependency is the resolver for the IsDependency field.

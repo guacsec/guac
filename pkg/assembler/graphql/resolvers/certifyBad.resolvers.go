@@ -7,20 +7,63 @@ package resolvers
 import (
 	"context"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestCertifyBad is the resolver for the ingestCertifyBad field.
-func (r *mutationResolver) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	return r.Backend.IngestCertifyBad(ctx, subject, &pkgMatchType, certifyBad)
+func (r *mutationResolver) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error) {
+	funcName := "IngestCertifyBad"
+	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+	ingestedCertifyBad, err := r.Backend.IngestCertifyBad(ctx, subject, &pkgMatchType, certifyBad)
+	if err != nil {
+		return "", err
+	}
+	return ingestedCertifyBad.ID, err
 }
 
 // IngestCertifyBads is the resolver for the ingestCertifyBads field.
-func (r *mutationResolver) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
-	return r.Backend.IngestCertifyBads(ctx, subjects, &pkgMatchType, certifyBads)
+func (r *mutationResolver) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
+	funcName := "IngestCertifyBads"
+	valuesDefined := 0
+	ingestedCertifyBadsIDS := []string{}
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(certifyBads) {
+			return ingestedCertifyBadsIDS, gqlerror.Errorf("%v :: uneven packages and certifyBads for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Artifacts) > 0 {
+		if len(subjects.Artifacts) != len(certifyBads) {
+			return ingestedCertifyBadsIDS, gqlerror.Errorf("%v :: uneven artifacts and certifyBads for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Sources) > 0 {
+		if len(subjects.Sources) != len(certifyBads) {
+			return ingestedCertifyBadsIDS, gqlerror.Errorf("%v :: uneven sources and certifyBads for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return ingestedCertifyBadsIDS, gqlerror.Errorf("%v :: must specify at most packages, artifacts or sources", funcName)
+	}
+	ingestedCertifyBads, err := r.Backend.IngestCertifyBads(ctx, subjects, &pkgMatchType, certifyBads)
+	if err == nil {
+		for _, certifybad := range ingestedCertifyBads {
+			ingestedCertifyBadsIDS = append(ingestedCertifyBadsIDS, certifybad.ID)
+		}
+	}
+	return ingestedCertifyBadsIDS, err
 }
 
 // CertifyBad is the resolver for the CertifyBad field.
 func (r *queryResolver) CertifyBad(ctx context.Context, certifyBadSpec model.CertifyBadSpec) ([]*model.CertifyBad, error) {
+	if err := helper.ValidatePackageSourceOrArtifactQueryFilter(certifyBadSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("CertifyBad :: %s", err)
+	}
 	return r.Backend.CertifyBad(ctx, &certifyBadSpec)
 }

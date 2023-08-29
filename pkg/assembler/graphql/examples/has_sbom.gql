@@ -44,25 +44,32 @@ query HasSBOMQ1 {
 }
 
 query HasSBOMQ2 {
-  HasSBOM(hasSBOMSpec: {origin: "Demo ingestion"}) {
+  HasSBOM(hasSBOMSpec: { origin: "Demo ingestion" }) {
     ...allHasSBOMTree
   }
 }
 
 query HasSBOMQ3 {
-  HasSBOM(hasSBOMSpec: {subject: {package: {name: "openssl"}}}) {
+  HasSBOM(hasSBOMSpec: { subject: { package: { name: "openssl" } } }) {
     ...allHasSBOMTree
   }
 }
 
 query HasSBOMQ4 {
-  HasSBOM(hasSBOMSpec: {subject: {artifact: {algorithm: "sha256"}}}) {
+  HasSBOM(hasSBOMSpec: { subject: { artifact: { algorithm: "sha256" } } }) {
     ...allHasSBOMTree
   }
 }
 
 query HasSBOMQ5 {
-  HasSBOM(hasSBOMSpec: {subject: {package: {name: "openssl"}, artifact: {algorithm: "sha256"}}}) {
+  HasSBOM(
+    hasSBOMSpec: {
+      subject: {
+        package: { name: "openssl" }
+        artifact: { algorithm: "sha256" }
+      }
+    }
+  ) {
     ...allHasSBOMTree
   }
 }

@@ -67,8 +67,14 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Certifies that a package or artifact has an SBOM."
-  ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
-  "Bulk ingest that package or artifact has an SBOM."
-  ingestHasSBOMs(subjects: PackageOrArtifactInputs!, hasSBOMs: [HasSBOMInputSpec!]!): [HasSBOM!]!
+  "Certifies that a package or artifact has an SBOM. The returned ID can be empty string."
+  ingestHasSBOM(
+    subject: PackageOrArtifactInput!
+    hasSBOM: HasSBOMInputSpec!
+  ): ID!
+  "Bulk ingest that package or artifact has an SBOM. The returned array of IDs can be a an array of empty string."
+  ingestHasSBOMs(
+    subjects: PackageOrArtifactInputs!
+    hasSBOMs: [HasSBOMInputSpec!]!
+  ): [ID!]!
 }
