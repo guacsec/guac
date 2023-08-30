@@ -4,6 +4,8 @@ run:
     - ".*\\.pb\\.go$"
     - "pkg/assembler/generated/.*"
     - "resolvers/schema\\.resolvers\\.go"
+  build-tags:
+    - integration
 linters:
   enable:
     - forcetypeassert
