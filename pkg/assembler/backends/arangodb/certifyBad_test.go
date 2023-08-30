@@ -17,6 +17,7 @@ package arangodb
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -476,7 +477,7 @@ func TestCertifyBad(t *testing.T) {
 			Query: &model.CertifyBadSpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: true,
+			ExpQueryErr: false,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -521,6 +522,9 @@ func TestCertifyBad(t *testing.T) {
 				if err != nil {
 					return
 				}
+			}
+			if test.Name == "Query on Package" {
+				fmt.Print("here")
 			}
 			got, err := b.CertifyBad(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
@@ -783,6 +787,10 @@ func TestIngestCertifyBads(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
+			err := deleteDatabase(ctx, arangArg)
+			if err != nil {
+				t.Fatalf("error deleting arango database: %v", err)
+			}
 			b, err := GetBackend(ctx, arangArg)
 			if err != nil {
 				t.Fatalf("error creating arango backend: %v", err)

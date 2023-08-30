@@ -753,7 +753,7 @@ func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, e
 }
 
 func getCollectedPackageQualifiers(qualifierList []string) []*model.PackageQualifier {
-	var qualifiers []*model.PackageQualifier
+	qualifiers := []*model.PackageQualifier{}
 	for i := range qualifierList {
 		if i%2 == 0 {
 			key := qualifierList[i]
@@ -770,7 +770,7 @@ func getCollectedPackageQualifiers(qualifierList []string) []*model.PackageQuali
 
 func generateModelPackage(pkgTypeID, pkgType, namespaceID, namespaceStr, nameID, nameStr string, versionID, versionValue, subPathValue *string, qualifiersValue []string) *model.Package {
 	var version *model.PackageVersion = nil
-	if versionValue != nil && subPathValue != nil && qualifiersValue != nil {
+	if versionValue != nil && subPathValue != nil {
 		qualifiers := getCollectedPackageQualifiers(qualifiersValue)
 		version = &model.PackageVersion{
 			ID:         *versionID,
@@ -780,7 +780,7 @@ func generateModelPackage(pkgTypeID, pkgType, namespaceID, namespaceStr, nameID,
 		}
 	}
 
-	var versions []*model.PackageVersion
+	versions := []*model.PackageVersion{}
 	if version != nil {
 		versions = append(versions, version)
 	}
