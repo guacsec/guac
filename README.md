@@ -46,7 +46,7 @@ Here is an overview of the architecture of GUAC:
 For an in-depth view and explanation of components of the GUAC Beta, please
 refer to [how GUAC works](https://docs.guac.sh/how-guac-works/).
 
-## Supported input formats
+## Supported input documents
 
 - [CycloneDX](https://github.com/CycloneDX/specification)
 - [Dead Simple Signing Envelope](https://github.com/secure-systems-lab/dsse)
@@ -56,6 +56,7 @@ refer to [how GUAC works](https://docs.guac.sh/how-guac-works/).
 - [OSV](https://osv.dev/)
 - [SLSA](https://github.com/slsa-framework/slsa)
 - [SPDX](https://spdx.dev/specifications/)
+- [CSAF/CSAF VEX](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html)
 
 Note that GUAC uses software identifiers standards to help link metadata
 together. However, these identifiers are not always available and heuristics
@@ -63,6 +64,20 @@ need to be used to link them. Therefore, there may be unhandled edge cases and
 errors occurring when ingesting data. We appreciate it if you could create a
 [data quality issue](https://github.com/guacsec/guac/issues/new?assignees=&labels=bug%2C+data-sources%2C+data-quality&projects=&template=bug_report_ingestion.md&title=%5Bingestion%2Fdata-quality+issue%5D+FILL+THIS+IN)
 if you encounter any errors or bugs with ingestion.
+
+## GraphQL backends
+
+The following are [GraphQL backends](pkg/assembler/backends) that are implemented for GUAC. The backends are categorized into:
+
+1. Supported/Unsupported: Supported backends are those that will be maintained by the project. Unsupported backends are not actively maintained by the project but will accept community contributions.
+2. Complete/Incomplete: Complete backends support all mandatory GraphQL APIs. Incomplete backends support a subset of those APIs and may not be feature complete.
+3. Optimized: The backend has gone through a level of optimization to help improve performance.
+
+The enumerated backends are:
+- [inmem (supported, complete, optimized)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/inmem): a non-persistent in-memory backend that doesn't require any additional infrastructure. Also acts as a conformance backend for API implementations. We recommend starting with this if you're just starting with GUAC!
+- [arangoDB (supported, incomplete, optimized)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/arangodb): a persistent backend based on [ArangoDB](https://arangodb.com/)
+- [ent (supported, incomplete)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/ent): a persistent backend based on [ent](https://entgo.io/) that can run on various SQL backends such as [PostgreSQL](https://www.postgresql.org/), [MySQL](https://www.mysql.com/) and [SQLite](https://www.sqlite.org/index.html).
+- [neo4j/openCypher (unsupported, incomplete)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/neo4j): a persistent backend based on [neo4j](https://neo4j.com/) and [openCypher](https://opencypher.org/). This backend should work with any database that supported openCypher queries.
 
 ## Additional References
 
