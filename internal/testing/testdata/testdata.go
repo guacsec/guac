@@ -240,7 +240,7 @@ var (
 			"buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
 			"invocation": {
 			  "configSource": {
-				"uri": "githttps://github.com/curl/curl-docker@master",
+				"uri": "git+https://github.com/curl/curl-docker@master",
 				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },
 				"entryPoint": "build.yaml:maketgz"
 			  }
@@ -253,7 +253,7 @@ var (
 			},
 			"materials": [
 			  {
-				"uri": "githttps://github.com/curl/curl-docker@master",
+				"uri": "git+https://github.com/curl/curl-docker@master",
 				"digest": { "sha1": "24279c5185ddc042896e3748f47fa89b48c1c14e" }
 			  }, {
 				"uri": "github_hosted_vm:ubuntu-18.04:20210123.1",
@@ -293,7 +293,7 @@ var (
             },
             "resolvedDependencies": [
                 {
-                    "uri": "githttps://github.com/octocat/hello-world@refs/heads/main",
+                    "uri": "git+https://github.com/octocat/hello-world@refs/heads/main",
                     "digest": {
                         "gitCommit": "c27d339ee6075c1f744c5d4b200f7901aad2c369"
                     }
@@ -373,7 +373,7 @@ var (
 		Digest:    "24279c5185ddc042896e3748f47fa89b48c1c14e",
 	}
 
-	mat1Src, _ = asmhelpers.VcsToSrc("githttps://github.com/curl/curl-docker@master")
+	mat1Src, _ = asmhelpers.VcsToSrc("git+https://github.com/curl/curl-docker@master")
 
 	mat2 = model.ArtifactInputSpec{
 		Algorithm: "sha1",
@@ -426,9 +426,9 @@ var (
 						{Key: "slsa.metadata.completeness.materials", Value: "false"},
 						{Key: "slsa.buildType", Value: "https://github.com/Attestations/GitHubActionsWorkflow@v1"},
 						{Key: "slsa.invocation.configSource.entryPoint", Value: "build.yaml:maketgz"},
-						{Key: "slsa.invocation.configSource.uri", Value: "githttps://github.com/curl/curl-docker@master"},
+						{Key: "slsa.invocation.configSource.uri", Value: "git+https://github.com/curl/curl-docker@master"},
 						{Key: "slsa.metadata.reproducible", Value: "false"},
-						{Key: "slsa.materials.0.uri", Value: "githttps://github.com/curl/curl-docker@master"},
+						{Key: "slsa.materials.0.uri", Value: "git+https://github.com/curl/curl-docker@master"},
 						{Key: "slsa.builder.id", Value: "https://github.com/Attestations/GitHubHostedActions@v1"},
 						{Key: "slsa.invocation.configSource.digest.sha1", Value: "d6525c840a62b398424a78d792f457477135d0cf"},
 						{Key: "slsa.metadata.completeness.parameters", Value: "false"},
@@ -493,7 +493,7 @@ var (
 					StartedOn:   &slsa1time,
 					SlsaPredicate: []model.SLSAPredicateInputSpec{
 						{Key: "slsa.buildDefinition.buildType", Value: "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1"},
-						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e08"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e+08"},
 						{Key: "slsa.buildDefinition.externalParameters.inputs.deploy_target", Value: "deployment_sys_1a"},
 						{Key: "slsa.buildDefinition.externalParameters.inputs.perform_deploy", Value: "true"},
 						{Key: "slsa.buildDefinition.externalParameters.vars.MASCOT", Value: "Mona"},
@@ -503,7 +503,7 @@ var (
 						{Key: "slsa.buildDefinition.internalParameters.github.actor_id", Value: "1234567"},
 						{Key: "slsa.buildDefinition.internalParameters.github.event_name", Value: "workflow_dispatch"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.gitCommit", Value: "c27d339ee6075c1f744c5d4b200f7901aad2c369"},
-						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "githttps://github.com/octocat/hello-world@refs/heads/main"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.1.uri", Value: "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"},
 						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
 						{Key: "slsa.runDetails.metadata.invocationID", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
@@ -740,11 +740,11 @@ var (
 	// CycloneDX Testdata
 	cdxTopLevelPack, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=nonroot")
 
-	cdxTzdataPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/tzdata@2021a-1deb11u6?arch=all&distro=debian-11")
+	cdxTzdataPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11")
 
 	cdxNetbasePack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11")
 
-	cdxBasefilesPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/base-files@11.1deb11u5?arch=amd64&distro=debian-11")
+	cdxBasefilesPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11")
 
 	CdxDeps = []assembler.IsDependencyIngest{
 		{
@@ -753,7 +753,7 @@ var (
 			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "11.1deb11u5",
+				VersionRange:   "11.1+deb11u5",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
@@ -773,7 +773,7 @@ var (
 			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2021a-1deb11u6",
+				VersionRange:   "2021a-1+deb11u6",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
@@ -2153,7 +2153,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					StartedOn:   &slsaStartTime,
 					SlsaPredicate: []generated.SLSAPredicateInputSpec{
 						{Key: "slsa.buildDefinition.buildType", Value: "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1"},
-						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e08"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e+08"},
 						{Key: "slsa.buildDefinition.externalParameters.inputs.deploy_target", Value: "deployment_sys_1a"},
 						{Key: "slsa.buildDefinition.externalParameters.inputs.perform_deploy", Value: "true"},
 						{Key: "slsa.buildDefinition.externalParameters.vars.MASCOT", Value: "Mona"},
@@ -2163,7 +2163,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 						{Key: "slsa.buildDefinition.internalParameters.github.actor_id", Value: "1234567"},
 						{Key: "slsa.buildDefinition.internalParameters.github.event_name", Value: "workflow_dispatch"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.gitCommit", Value: "c27d339ee6075c1f744c5d4b200f7901aad2c369"},
-						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "githttps://github.com/octocat/hello-world@refs/heads/main"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.1.uri", Value: "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"},
 						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
 						{Key: "slsa.runDetails.metadata.invocationID", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},

@@ -23,6 +23,7 @@ import (
 )
 
 func Test_cyclonedxTypeGuesser_GuessDocumentType(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name     string
 		blob     []byte
