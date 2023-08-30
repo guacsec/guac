@@ -21,7 +21,7 @@ func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model
 	ingestedVEXStatement, err := r.Backend.IngestVEXStatement(ctx, subject,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
 		vexStatement)
-	if err == nil {
+	if err != nil {
 		return "", err
 	}
 	return ingestedVEXStatement.ID, err
