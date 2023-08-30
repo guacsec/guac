@@ -98,8 +98,11 @@ var (
 	//go:embed exampledata/cyclonedx-no-top-level.json
 	CycloneDXExampleNoTopLevelComp []byte
 
-	//go:embed exampledata/sample-cyclonedx-vex.json
-	CycloneDXExampleVEX []byte
+	//go:embed exampledata/cyclonedx-unaffected-vex.json
+	CycloneDXVEXUnAffected []byte
+
+	//go:embed exampledata/cyclonedx-vex-affected.json
+	CycloneDXVEXAffected []byte
 
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
@@ -131,6 +134,99 @@ var (
 	//go:embed exampledata/ingest_predicates.json
 	IngestPredicatesExample []byte
 
+	// CycloneDX VEX testdata unaffected
+	pkg, _   = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.10.0?type=jar")
+	vulnSpec = &generated.VulnerabilityInputSpec{
+		Type:            "cve",
+		VulnerabilityID: "cve-2020-25649",
+	}
+	CycloneDXUnAffectedVexIngest = []assembler.VexIngest{
+		{
+			Pkg:           pkg,
+			Vulnerability: vulnSpec,
+			VexData: &generated.VexStatementInputSpec{
+				Status:           "NOT_AFFECTED",
+				VexJustification: "VULNERABLE_CODE_NOT_IN_EXECUTE_PATH",
+				Statement:        "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly.",
+				StatusNotes:      "not_affected:code_not_reachable",
+				KnownSince:       parseUTCTime("2020-12-03T00:00:00.000Z"),
+			},
+		},
+	}
+	CycloneDXUnAffectedVulnMetadata = []assembler.VulnMetadataIngest{
+		{
+			Vulnerability: vulnSpec,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  "CVSSv31",
+				ScoreValue: 7.5,
+				Timestamp:  parseUTCTime("2020-12-03T00:00:00.000Z"),
+			},
+		},
+		{
+			Vulnerability: vulnSpec,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  "CVSSv31",
+				ScoreValue: 8.2,
+				Timestamp:  parseUTCTime("2020-12-03T00:00:00.000Z"),
+			},
+		},
+		{
+			Vulnerability: vulnSpec,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  "CVSSv31",
+				ScoreValue: 0.0,
+				Timestamp:  parseUTCTime("2020-12-03T00:00:00.000Z"),
+			},
+		},
+	}
+
+	// CycloneDX VEX testdata in triage
+	pkg1, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.4")
+	pkg2, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.6")
+
+	vulnSpecAffected = &generated.VulnerabilityInputSpec{
+		Type:            "cve",
+		VulnerabilityID: "cve-2021-44228",
+	}
+	vexDataAffected = &generated.VexStatementInputSpec{
+		Status:      "AFFECTED",
+		Statement:   "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
+		StatusNotes: "exploitable:",
+	}
+	CycloneDXAffectedVexIngest = []assembler.VexIngest{
+		{
+			Pkg:           pkg1,
+			Vulnerability: vulnSpecAffected,
+			VexData:       vexDataAffected,
+		},
+		{
+			Pkg:           pkg2,
+			Vulnerability: vulnSpecAffected,
+			VexData:       vexDataAffected,
+		},
+	}
+	CycloneDXAffectedVulnMetadata = []assembler.VulnMetadataIngest{
+		{
+			Vulnerability: vulnSpecAffected,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  "CVSSv31",
+				ScoreValue: 10,
+			},
+		},
+	}
+	CycloneDXAffectedCertifyVuln = []assembler.CertifyVulnIngest{
+		{
+			Pkg:           pkg1,
+			Vulnerability: vulnSpecAffected,
+			VulnData:      &generated.ScanMetadataInput{},
+		},
+		{
+			Pkg:           pkg2,
+			Vulnerability: vulnSpecAffected,
+			VulnData:      &generated.ScanMetadataInput{},
+		},
+	}
+
 	// DSSE/SLSA Testdata
 
 	// Taken from: https://slsa.dev/provenance/v0.2#example
@@ -144,7 +240,7 @@ var (
 			"buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
 			"invocation": {
 			  "configSource": {
-				"uri": "git+https://github.com/curl/curl-docker@master",
+				"uri": "githttps://github.com/curl/curl-docker@master",
 				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },
 				"entryPoint": "build.yaml:maketgz"
 			  }
@@ -157,7 +253,7 @@ var (
 			},
 			"materials": [
 			  {
-				"uri": "git+https://github.com/curl/curl-docker@master",
+				"uri": "githttps://github.com/curl/curl-docker@master",
 				"digest": { "sha1": "24279c5185ddc042896e3748f47fa89b48c1c14e" }
 			  }, {
 				"uri": "github_hosted_vm:ubuntu-18.04:20210123.1",
@@ -197,7 +293,7 @@ var (
             },
             "resolvedDependencies": [
                 {
-                    "uri": "git+https://github.com/octocat/hello-world@refs/heads/main",
+                    "uri": "githttps://github.com/octocat/hello-world@refs/heads/main",
                     "digest": {
                         "gitCommit": "c27d339ee6075c1f744c5d4b200f7901aad2c369"
                     }
@@ -277,7 +373,7 @@ var (
 		Digest:    "24279c5185ddc042896e3748f47fa89b48c1c14e",
 	}
 
-	mat1Src, _ = asmhelpers.VcsToSrc("git+https://github.com/curl/curl-docker@master")
+	mat1Src, _ = asmhelpers.VcsToSrc("githttps://github.com/curl/curl-docker@master")
 
 	mat2 = model.ArtifactInputSpec{
 		Algorithm: "sha1",
@@ -330,9 +426,9 @@ var (
 						{Key: "slsa.metadata.completeness.materials", Value: "false"},
 						{Key: "slsa.buildType", Value: "https://github.com/Attestations/GitHubActionsWorkflow@v1"},
 						{Key: "slsa.invocation.configSource.entryPoint", Value: "build.yaml:maketgz"},
-						{Key: "slsa.invocation.configSource.uri", Value: "git+https://github.com/curl/curl-docker@master"},
+						{Key: "slsa.invocation.configSource.uri", Value: "githttps://github.com/curl/curl-docker@master"},
 						{Key: "slsa.metadata.reproducible", Value: "false"},
-						{Key: "slsa.materials.0.uri", Value: "git+https://github.com/curl/curl-docker@master"},
+						{Key: "slsa.materials.0.uri", Value: "githttps://github.com/curl/curl-docker@master"},
 						{Key: "slsa.builder.id", Value: "https://github.com/Attestations/GitHubHostedActions@v1"},
 						{Key: "slsa.invocation.configSource.digest.sha1", Value: "d6525c840a62b398424a78d792f457477135d0cf"},
 						{Key: "slsa.metadata.completeness.parameters", Value: "false"},
@@ -397,7 +493,7 @@ var (
 					StartedOn:   &slsa1time,
 					SlsaPredicate: []model.SLSAPredicateInputSpec{
 						{Key: "slsa.buildDefinition.buildType", Value: "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1"},
-						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e+08"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e08"},
 						{Key: "slsa.buildDefinition.externalParameters.inputs.deploy_target", Value: "deployment_sys_1a"},
 						{Key: "slsa.buildDefinition.externalParameters.inputs.perform_deploy", Value: "true"},
 						{Key: "slsa.buildDefinition.externalParameters.vars.MASCOT", Value: "Mona"},
@@ -407,7 +503,7 @@ var (
 						{Key: "slsa.buildDefinition.internalParameters.github.actor_id", Value: "1234567"},
 						{Key: "slsa.buildDefinition.internalParameters.github.event_name", Value: "workflow_dispatch"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.gitCommit", Value: "c27d339ee6075c1f744c5d4b200f7901aad2c369"},
-						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "githttps://github.com/octocat/hello-world@refs/heads/main"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.1.uri", Value: "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"},
 						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
 						{Key: "slsa.runDetails.metadata.invocationID", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
@@ -644,11 +740,11 @@ var (
 	// CycloneDX Testdata
 	cdxTopLevelPack, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=nonroot")
 
-	cdxTzdataPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11")
+	cdxTzdataPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/tzdata@2021a-1deb11u6?arch=all&distro=debian-11")
 
 	cdxNetbasePack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11")
 
-	cdxBasefilesPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11")
+	cdxBasefilesPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/base-files@11.1deb11u5?arch=amd64&distro=debian-11")
 
 	CdxDeps = []assembler.IsDependencyIngest{
 		{
@@ -657,7 +753,7 @@ var (
 			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "11.1+deb11u5",
+				VersionRange:   "11.1deb11u5",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
@@ -677,7 +773,7 @@ var (
 			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2021a-1+deb11u6",
+				VersionRange:   "2021a-1deb11u6",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
@@ -2057,7 +2153,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 					StartedOn:   &slsaStartTime,
 					SlsaPredicate: []generated.SLSAPredicateInputSpec{
 						{Key: "slsa.buildDefinition.buildType", Value: "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1"},
-						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e+08"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e08"},
 						{Key: "slsa.buildDefinition.externalParameters.inputs.deploy_target", Value: "deployment_sys_1a"},
 						{Key: "slsa.buildDefinition.externalParameters.inputs.perform_deploy", Value: "true"},
 						{Key: "slsa.buildDefinition.externalParameters.vars.MASCOT", Value: "Mona"},
@@ -2067,7 +2163,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 						{Key: "slsa.buildDefinition.internalParameters.github.actor_id", Value: "1234567"},
 						{Key: "slsa.buildDefinition.internalParameters.github.event_name", Value: "workflow_dispatch"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.gitCommit", Value: "c27d339ee6075c1f744c5d4b200f7901aad2c369"},
-						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "githttps://github.com/octocat/hello-world@refs/heads/main"},
 						{Key: "slsa.buildDefinition.resolvedDependencies.1.uri", Value: "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"},
 						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
 						{Key: "slsa.runDetails.metadata.invocationID", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
@@ -2498,6 +2594,14 @@ func parseRfc3339(s string) time.Time {
 
 func toTime(s string) time.Time {
 	timeScanned, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		panic(err)
+	}
+	return timeScanned
+}
+
+func parseUTCTime(s string) time.Time {
+	timeScanned, err := time.Parse("2006-01-02T15:04:05Z", s)
 	if err != nil {
 		panic(err)
 	}

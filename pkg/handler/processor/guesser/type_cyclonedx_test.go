@@ -73,7 +73,7 @@ func Test_cyclonedxTypeGuesser_GuessDocumentType(t *testing.T) {
 		},
 		{
 			name:     "valid cyclonedx vex json Document",
-			blob:     testdata.CycloneDXExampleVEX,
+			blob:     testdata.CycloneDXVEXUnAffected,
 			format:   processor.FormatJSON,
 			expected: processor.DocumentCdxVex,
 		},

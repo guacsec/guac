@@ -46,7 +46,7 @@ func (p *CdxVexProcessor) ValidateSchema(d *processor.Document) error {
 
 func (p *CdxVexProcessor) Unpack(d *processor.Document) ([]*processor.Document, error) {
 	if d.Type != processor.DocumentCdxVex {
-		return nil, fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentCsaf, d.Type)
+		return nil, fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentCdxVex, d.Type)
 	}
 
 	return []*processor.Document{}, nil
