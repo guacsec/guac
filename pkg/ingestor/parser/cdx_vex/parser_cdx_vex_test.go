@@ -68,7 +68,7 @@ func Test_CdxVexParser(t *testing.T) {
 
 			preds := c.GetPredicates(ctx)
 			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
-				t.Errorf("csaf.GetPredicate mismatch values (+got, -expected): %s", d)
+				t.Errorf("cdxVex.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}
