@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package backend
 
 // Usually this would be part of ent, but the import cycle doesn't allow for it.

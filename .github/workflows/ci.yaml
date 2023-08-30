@@ -68,27 +68,12 @@ jobs:
         run: go mod download
       - name: Run integration tests
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             ENT_TEST_DATABASE_URL: 'postgresql://guac:guac@localhost/guac?sslmode=disable'
         run: make integration-test
-        
+
   test-unit:
     runs-on: ubuntu-latest
     name: CI for unit tests
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: guac
-          POSTGRES_PASSWORD: guac
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
     steps:
       - name: Checkout code
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # tag=v3
@@ -103,8 +88,6 @@ jobs:
       - name: Setup the project
         run: go mod download
       - name: Run tests
-        env:
-          ENT_TEST_DATABASE_URL: 'postgresql://guac:guac@localhost/guac?sslmode=disable'
         run: make test
 
   static-analysis:
