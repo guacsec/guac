@@ -642,5 +642,8 @@ func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.Pack
 	// }
 	// panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))
 	return nil, fmt.Errorf("not implemented - IngestVEXStatement")
+}
 
+func (c *neo4jClient) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+	return []string{}, fmt.Errorf("not implemented - IngestVEXStatements")
 }
