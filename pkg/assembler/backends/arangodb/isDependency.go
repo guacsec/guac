@@ -54,6 +54,7 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 		combinedIsDependency = append(combinedIsDependency, depPkgVersionIsDependency...)
 
 		// dep pkgName isDependency
+		values = map[string]any{}
 		arangoQueryBuilder = setPkgVersionMatchValues(isDependencySpec.Package, values)
 		arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
 		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values, false)
@@ -85,7 +86,7 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 		combinedIsDependency = append(combinedIsDependency, depPkgVersionIsDependency...)
 
 		// dep pkgName isDependency
-
+		values = map[string]any{}
 		arangoQueryBuilder = newForQuery(isDependenciesStr, "isDependency")
 		arangoQueryBuilder.forInBound(isDependencySubjectPkgEdgesStr, "pVersion", "isDependency")
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")

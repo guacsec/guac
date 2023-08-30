@@ -175,6 +175,31 @@ func arangoDBConnect(address, user, password string) (driver.Client, error) {
 	return client, nil
 }
 
+func deleteDatabase(ctx context.Context, args backends.BackendArgs) error {
+	config, ok := args.(*ArangoConfig)
+	if !ok {
+		return fmt.Errorf("failed to assert arango config from backend args")
+	}
+	arangodbClient, err := arangoDBConnect(config.DBAddr, config.User, config.Pass)
+	if err != nil {
+		return fmt.Errorf("failed to connect to arango DB %s database with error: %w", config.DBAddr, err)
+	}
+	var db driver.Database
+	// check if database exists
+	dbExists, err := arangodbClient.DatabaseExists(ctx, "guac_db")
+	if err != nil {
+		return fmt.Errorf("failed to check %s database with error: %w", config.DBAddr, err)
+	}
+	if dbExists {
+		db, err = arangodbClient.Database(ctx, "guac_db")
+		if err != nil {
+			return fmt.Errorf("failed to connect %s database with error: %w", config.DBAddr, err)
+		}
+		db.Remove(ctx)
+	}
+	return nil
+}
+
 func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {
 	config, ok := args.(*ArangoConfig)
 	if !ok {

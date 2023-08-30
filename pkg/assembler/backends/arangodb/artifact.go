@@ -36,7 +36,6 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 		"digest": art.digest
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Artifacts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for artifacts: %w", err)

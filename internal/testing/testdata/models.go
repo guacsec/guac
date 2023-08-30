@@ -30,6 +30,11 @@ var A2 = &model.ArtifactInputSpec{
 	Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
 }
 
+var A1out = &model.Artifact{
+	Algorithm: "sha256",
+	Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+}
+
 var A2out = &model.Artifact{
 	Algorithm: "sha1",
 	Digest:    "7a8f47318e4676dacb0142afa0b83029cd7befd9",

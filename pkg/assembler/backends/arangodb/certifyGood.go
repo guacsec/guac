@@ -44,6 +44,7 @@ func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.C
 			combinedCertifyGood = append(combinedCertifyGood, pkgVersionCertifyGoods...)
 
 			// pkgName certifyGood
+			values = map[string]any{}
 			arangoQueryBuilder = setPkgNameMatchValues(certifyGoodSpec.Subject.Package, values)
 			arangoQueryBuilder.forOutBound(certifyGoodPkgNameEdgesStr, "certifyGood", "pName")
 			setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
@@ -101,6 +102,7 @@ func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.C
 		combinedCertifyGood = append(combinedCertifyGood, pkgVersionCertifyGoods...)
 
 		// pkgName certifyGood
+		values = map[string]any{}
 		arangoQueryBuilder = newForQuery(certifyGoodsStr, "certifyGood")
 		setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
 		arangoQueryBuilder.forInBound(certifyGoodPkgNameEdgesStr, "pName", "certifyGood")
@@ -114,6 +116,7 @@ func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.C
 		combinedCertifyGood = append(combinedCertifyGood, pkgNameCertifyGoods...)
 
 		// get sources
+		values = map[string]any{}
 		arangoQueryBuilder = newForQuery(certifyGoodsStr, "certifyGood")
 		setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
 		arangoQueryBuilder.forInBound(certifyGoodSrcEdgesStr, "sName", "certifyGood")
@@ -127,6 +130,7 @@ func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.C
 		combinedCertifyGood = append(combinedCertifyGood, srcCertifyGoods...)
 
 		// get artifacts
+		values = map[string]any{}
 		arangoQueryBuilder = newForQuery(certifyGoodsStr, "certifyGood")
 		setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
 		arangoQueryBuilder.forInBound(certifyGoodArtEdgesStr, "art", "certifyGood")
