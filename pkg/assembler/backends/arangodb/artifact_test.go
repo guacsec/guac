@@ -118,6 +118,14 @@ func getArangoConfig() *ArangoConfig {
 func Test_demoClient_IngestArtifacts(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	c, err := GetBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
 	tests := []struct {
 		name           string
 		artifactInputs []*model.ArtifactInputSpec
@@ -153,14 +161,6 @@ func Test_demoClient_IngestArtifacts(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := deleteDatabase(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error deleting arango database: %v", err)
-			}
-			c, err := GetBackend(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error creating arango backend: %v", err)
-			}
 			got, err := c.IngestArtifacts(ctx, tt.artifactInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
@@ -176,6 +176,14 @@ func Test_demoClient_IngestArtifacts(t *testing.T) {
 func Test_demoClient_IngestArtifact(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	c, err := GetBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
 	tests := []struct {
 		name          string
 		artifactInput *model.ArtifactInputSpec
@@ -221,15 +229,6 @@ func Test_demoClient_IngestArtifact(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := deleteDatabase(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error deleting arango database: %v", err)
-			}
-			c, err := GetBackend(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error creating arango backend: %v", err)
-			}
-
 			got, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
@@ -245,6 +244,14 @@ func Test_demoClient_IngestArtifact(t *testing.T) {
 func Test_demoClient_Artifacts(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	c, err := GetBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
 	tests := []struct {
 		name          string
 		artifactInput *model.ArtifactInputSpec
@@ -304,14 +311,6 @@ func Test_demoClient_Artifacts(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := deleteDatabase(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error deleting arango database: %v", err)
-			}
-			c, err := GetBackend(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error creating arango backend: %v", err)
-			}
 			ingestedArt, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)

@@ -347,7 +347,7 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 }
 
 func getCollectedScorecardChecks(checksList []string) ([]*model.ScorecardCheck, error) {
-	var scorecardChecks []*model.ScorecardCheck
+	scorecardChecks := []*model.ScorecardCheck{}
 	for i := range checksList {
 		if i%2 == 0 {
 			check := checksList[i]

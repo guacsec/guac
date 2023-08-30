@@ -26,7 +26,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func TestCertifyBad(t *testing.T) {
+func TestCertifyGood(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -40,7 +40,7 @@ func TestCertifyBad(t *testing.T) {
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
-		CB    *model.CertifyBadInputSpec
+		CG    *model.CertifyGoodInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -48,8 +48,8 @@ func TestCertifyBad(t *testing.T) {
 		InSrc        []*model.SourceInputSpec
 		InArt        []*model.ArtifactInputSpec
 		Calls        []call
-		Query        *model.CertifyBadSpec
-		ExpCB        []*model.CertifyBad
+		Query        *model.CertifyGoodSpec
+		ExpCG        []*model.CertifyGood
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
@@ -64,15 +64,15 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -90,15 +90,15 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -120,7 +120,7 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -131,15 +131,15 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -161,7 +161,7 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification one",
 					},
 				},
@@ -172,15 +172,15 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification two",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Justification: ptrfrom.String("test justification one"),
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification one",
@@ -199,7 +199,7 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -210,7 +210,7 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -218,19 +218,19 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S1,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
 						Version: ptrfrom.String("2.11.1"),
 					},
 				},
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P2out,
 					Justification: "test justification",
@@ -253,7 +253,7 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -261,7 +261,7 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S1,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -269,19 +269,19 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S2,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Source: &model.SourceSpec{
 						Name: ptrfrom.String("bobsrepo"),
 					},
 				},
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.S2out,
 					Justification: "test justification",
@@ -297,7 +297,7 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A1,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -305,7 +305,7 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A2,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -313,19 +313,19 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S1,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Artifact: &model.ArtifactSpec{
 						Algorithm: ptrfrom.String("sha1"),
 					},
 				},
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
@@ -340,7 +340,7 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A1,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -348,19 +348,19 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A2,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Artifact: &model.ArtifactSpec{
 						Algorithm: ptrfrom.String("asdf"),
 					},
 				},
 			},
-			ExpCB: nil,
+			ExpCG: nil,
 		},
 		{
 			Name:  "Query multiple",
@@ -370,7 +370,7 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S1,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -378,19 +378,19 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S2,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Source: &model.SourceSpec{
 						Type: ptrfrom.String("git"),
 					},
 				},
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.S2out,
 					Justification: "test justification",
@@ -412,7 +412,7 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -423,7 +423,7 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -434,19 +434,19 @@ func TestCertifyBad(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
 						Version: ptrfrom.String("2.11.1"),
 					},
 				},
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P2out,
 					Justification: "test justification",
@@ -465,7 +465,7 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A1,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -473,12 +473,12 @@ func TestCertifyBad(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A2,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
@@ -486,19 +486,19 @@ func TestCertifyBad(t *testing.T) {
 			},
 		},
 		{
-			Name:  "Query bad ID",
+			Name:  "Query good ID",
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S1,
 					},
-					CB: &model.CertifyBadInputSpec{
+					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				ID: ptrfrom.String("asdf"),
 			},
 			ExpQueryErr: false,
@@ -525,12 +525,12 @@ func TestCertifyBad(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB)
+				found, err := b.IngestCertifyGood(ctx, o.Sub, o.Match, *o.CG)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if test.Name == "Query ID" {
-					test.Query = &model.CertifyBadSpec{
+					test.Query = &model.CertifyGoodSpec{
 						ID: ptrfrom.String(found.ID),
 					}
 				}
@@ -538,21 +538,21 @@ func TestCertifyBad(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.CertifyBad(ctx, test.Query)
+			got, err := b.CertifyGood(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpCB, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpCG, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}
 }
 
-func TestIngestCertifyBads(t *testing.T) {
+func TestIngestCertifyGoods(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -566,7 +566,7 @@ func TestIngestCertifyBads(t *testing.T) {
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInputs
 		Match *model.MatchFlags
-		CB    []*model.CertifyBadInputSpec
+		CG    []*model.CertifyGoodInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -574,8 +574,8 @@ func TestIngestCertifyBads(t *testing.T) {
 		InSrc        []*model.SourceInputSpec
 		InArt        []*model.ArtifactInputSpec
 		Calls        []call
-		Query        *model.CertifyBadSpec
-		ExpCB        []*model.CertifyBad
+		Query        *model.CertifyGoodSpec
+		ExpCG        []*model.CertifyGood
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
@@ -590,17 +590,17 @@ func TestIngestCertifyBads(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: []*model.CertifyBadInputSpec{
+					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
 						},
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -618,17 +618,17 @@ func TestIngestCertifyBads(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
-					CB: []*model.CertifyBadInputSpec{
+					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
 						},
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -650,7 +650,7 @@ func TestIngestCertifyBads(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: []*model.CertifyBadInputSpec{
+					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -660,10 +660,10 @@ func TestIngestCertifyBads(t *testing.T) {
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -686,7 +686,7 @@ func TestIngestCertifyBads(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: []*model.CertifyBadInputSpec{
+					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -699,21 +699,21 @@ func TestIngestCertifyBads(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInputs{
 						Sources: []*model.SourceInputSpec{testdata.S1},
 					},
-					CB: []*model.CertifyBadInputSpec{
+					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
 						},
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
 						Version: ptrfrom.String("2.11.1"),
 					},
 				},
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P2out,
 					Justification: "test justification",
@@ -736,7 +736,7 @@ func TestIngestCertifyBads(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					CB: []*model.CertifyBadInputSpec{
+					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -746,7 +746,7 @@ func TestIngestCertifyBads(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInputs{
 						Sources: []*model.SourceInputSpec{testdata.S2, testdata.S2},
 					},
-					CB: []*model.CertifyBadInputSpec{
+					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -756,14 +756,14 @@ func TestIngestCertifyBads(t *testing.T) {
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Source: &model.SourceSpec{
 						Name: ptrfrom.String("bobsrepo"),
 					},
 				},
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.S2out,
 					Justification: "test justification",
@@ -779,7 +779,7 @@ func TestIngestCertifyBads(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInputs{
 						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 					},
-					CB: []*model.CertifyBadInputSpec{
+					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -792,21 +792,21 @@ func TestIngestCertifyBads(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInputs{
 						Sources: []*model.SourceInputSpec{testdata.S1},
 					},
-					CB: []*model.CertifyBadInputSpec{
+					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
 						},
 					},
 				},
 			},
-			Query: &model.CertifyBadSpec{
+			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Artifact: &model.ArtifactSpec{
 						Algorithm: ptrfrom.String("sha1"),
 					},
 				},
 			},
-			ExpCB: []*model.CertifyBad{
+			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
@@ -835,7 +835,7 @@ func TestIngestCertifyBads(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyBads(ctx, o.Sub, o.Match, o.CB)
+				_, err := b.IngestCertifyGoods(ctx, o.Sub, o.Match, o.CG)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -843,14 +843,14 @@ func TestIngestCertifyBads(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.CertifyBad(ctx, test.Query)
+			got, err := b.CertifyGood(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpCB, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpCG, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -858,11 +858,11 @@ func TestIngestCertifyBads(t *testing.T) {
 }
 
 // TODO (pxp928): add tests back in when implemented
-// func TestCertifyBadNeighbors(t *testing.T) {
+// func TestCertifyGoodNeighbors(t *testing.T) {
 // 	type call struct {
 // 		Sub   model.PackageSourceOrArtifactInput
 // 		Match *model.MatchFlags
-// 		CB    *model.CertifyBadInputSpec
+// 		CG    *model.CertifyGoodInputSpec
 // 	}
 // 	tests := []struct {
 // 		Name         string
@@ -883,14 +883,14 @@ func TestIngestCertifyBads(t *testing.T) {
 // 					Match: &model.MatchFlags{
 // 						Pkg: model.PkgMatchTypeSpecificVersion,
 // 					},
-// 					CB: &model.CertifyBadInputSpec{
+// 					CG: &model.CertifyGoodInputSpec{
 // 						Justification: "test justification",
 // 					},
 // 				},
 // 			},
 // 			ExpNeighbors: map[string][]string{
 // 				"4": []string{"1", "5"}, // pkg version
-// 				"5": []string{"1"},      // certify bad
+// 				"5": []string{"1"},      // certify good
 // 			},
 // 		},
 // 		{
@@ -906,7 +906,7 @@ func TestIngestCertifyBads(t *testing.T) {
 // 					Match: &model.MatchFlags{
 // 						Pkg: model.PkgMatchTypeAllVersions,
 // 					},
-// 					CB: &model.CertifyBadInputSpec{
+// 					CG: &model.CertifyGoodInputSpec{
 // 						Justification: "test justification",
 // 					},
 // 				},
@@ -914,7 +914,7 @@ func TestIngestCertifyBads(t *testing.T) {
 // 					Sub: model.PackageSourceOrArtifactInput{
 // 						Source: testdata.S1,
 // 					},
-// 					CB: &model.CertifyBadInputSpec{
+// 					CG: &model.CertifyGoodInputSpec{
 // 						Justification: "test justification",
 // 					},
 // 				},
@@ -922,7 +922,7 @@ func TestIngestCertifyBads(t *testing.T) {
 // 					Sub: model.PackageSourceOrArtifactInput{
 // 						Artifact: testdata.A1,
 // 					},
-// 					CB: &model.CertifyBadInputSpec{
+// 					CG: &model.CertifyGoodInputSpec{
 // 						Justification: "test justification",
 // 					},
 // 				},
@@ -965,8 +965,8 @@ func TestIngestCertifyBads(t *testing.T) {
 // 				}
 // 			}
 // 			for _, o := range test.Calls {
-// 				if _, err := b.IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB); err != nil {
-// 					t.Fatalf("Could not ingest CertifyBad: %v", err)
+// 				if _, err := b.IngestCertifyGood(ctx, o.Sub, o.Match, *o.CG); err != nil {
+// 					t.Fatalf("Could not ingest CertifyGood: %v", err)
 // 				}
 // 			}
 // 			for q, r := range test.ExpNeighbors {

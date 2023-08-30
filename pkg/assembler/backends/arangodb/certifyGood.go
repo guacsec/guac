@@ -164,8 +164,6 @@ func getSrcCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'origin': certifyGood.origin
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "certifyGood")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyGood: %w", err)
@@ -188,8 +186,6 @@ func getArtCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'collector': certifyGood.collector,
 		'origin': certifyGood.origin
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "certifyGood")
 	if err != nil {
@@ -239,8 +235,6 @@ func getPkgCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 			'origin': certifyGood.origin
 		  }`)
 	}
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "certifyGood")
 	if err != nil {

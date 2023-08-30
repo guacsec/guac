@@ -62,6 +62,14 @@ import (
 func Test_demoClient_IngestBuilder(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	c, err := GetBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
 	tests := []struct {
 		name         string
 		builderInput *model.BuilderInputSpec
@@ -92,14 +100,6 @@ func Test_demoClient_IngestBuilder(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := deleteDatabase(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error deleting arango database: %v", err)
-			}
-			c, err := GetBackend(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error creating arango backend: %v", err)
-			}
 			got, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
@@ -115,6 +115,14 @@ func Test_demoClient_IngestBuilder(t *testing.T) {
 func Test_demoClient_IngestBuilders(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	c, err := GetBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
 	tests := []struct {
 		name          string
 		builderInputs []*model.BuilderInputSpec
@@ -144,14 +152,6 @@ func Test_demoClient_IngestBuilders(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := deleteDatabase(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error deleting arango database: %v", err)
-			}
-			c, err := GetBackend(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error creating arango backend: %v", err)
-			}
 			got, err := c.IngestBuilders(ctx, tt.builderInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
@@ -200,12 +200,14 @@ func Test_demoClient_Builders(t *testing.T) {
 		}},
 		wantErr: false,
 	}, {
-		name: "chains",
+		name: "query all",
 		builderInput: &model.BuilderInputSpec{
 			URI: "https://tekton.dev/chains/v2",
 		},
 		builderSpec: &model.BuilderSpec{},
 		want: []*model.Builder{{
+			URI: "https://github.com/CreateFork/HubHostedActions@v1",
+		}, {
 			URI: "https://tekton.dev/chains/v2",
 		}},
 		wantErr: false,
@@ -215,10 +217,6 @@ func Test_demoClient_Builders(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := deleteDatabase(ctx, arangArg)
-			if err != nil {
-				t.Fatalf("error deleting arango database: %v", err)
-			}
 			c, err := GetBackend(ctx, arangArg)
 			if err != nil {
 				t.Fatalf("error creating arango backend: %v", err)
