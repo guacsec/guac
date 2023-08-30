@@ -115,23 +115,21 @@ func findPurl(ctx context.Context, tree csaf.ProductBranch, product_ref string) 
 // findProductRef searches for a product reference string for the given product ID
 // by recursively traversing the CSAF product tree.
 //
-// It calls findProductRefSearch to perform the recursive search, passing along
-// the context, product tree, product ID to find, and an empty visited map to
-// track searched nodes.
-//
 // findProductRefSearch was seperated from findProductRef so that the code can use
 // a visited map and avoid infinite recursion.
+//
+// It returns a pointer to the product reference string if found,
+// otherwise nil.
 func findProductRef(ctx context.Context, tree csaf.ProductBranch, product_id string) *string {
 	return findProductRefSearch(ctx, tree, product_id, make(map[visitedProductRef]bool))
 }
 
 // findProductRefSearch recursively searches the product tree for a product
-// reference matching the given product ID.
+// reference matching the given product ID. It does this with a visited map to
+// avoid infinite recursion.
 //
-// It tracks visited nodes in the tree to avoid infinite recursion.
-//
-// If the product ID is found in a relationship, it returns the associated
-// product reference string.
+// It returns a pointer to the product reference string if found,
+// otherwise nil.
 func findProductRefSearch(ctx context.Context, tree csaf.ProductBranch, product_id string, visited map[visitedProductRef]bool) *string {
 	if visited[visitedProductRef{tree.Product.Name, tree.Product.ID, tree.Name, tree.Category}] {
 		return nil
@@ -154,12 +152,9 @@ func findProductRefSearch(ctx context.Context, tree csaf.ProductBranch, product_
 }
 
 // findActionStatement searches the given Vulnerability tree to find the action statement
-// for the product with the given product_id.
-//
-// It iterates through the Remediations in the tree and checks if the ProductIDs slice
-// contains the product_id. If found, it returns a pointer to the Details string for that
-// Remediation.
-// If no matching Remediation is found, it returns nil.
+// for the product with the given product_id. If a matching product is found, it returns
+// a pointer to the Details string for the Remediation.
+// If no matching product is found, it returns nil.
 func findActionStatement(tree *csaf.Vulnerability, product_id string) *string {
 	for _, r := range tree.Remediations {
 		for _, p := range r.ProductIDs {
@@ -172,12 +167,9 @@ func findActionStatement(tree *csaf.Vulnerability, product_id string) *string {
 }
 
 // findImpactStatement searches the given Vulnerability tree to find the impact statement
-// for the product with the given product_id.
-//
-// It iterates through the Threats in the tree and looks for one with Category "impact".
-// It then checks if the ProductIDs slice contains the product_id.
-// If found, it returns a pointer to the Details string for that Threat.
-// If no matching Threat is found, it returns nil.
+// for the product with the given product_id. If a matching product is found, it returns
+// a pointer to the Details string for the Threat.
+// If no matching product is found, it returns nil.
 func findImpactStatement(tree *csaf.Vulnerability, product_id string) *string {
 	for _, t := range tree.Threats {
 		if t.Category == "impact" {
@@ -192,16 +184,8 @@ func findImpactStatement(tree *csaf.Vulnerability, product_id string) *string {
 }
 
 // findPkgSpec finds the package specification for the product with the
-// given ID in the CSAF document.
-//
-// It first calls findProductRef to get the product reference string for
-// the ID. If not found, returns an error.
-//
-// It then calls findPurl to get the purl for that product reference.
-// If not found, returns an error.
-//
-// Finally, it calls helpers.PurlToPkg to convert the purl to a package
-// spec to return.
+// given ID in the CSAF document. It returns a pointer to the package
+// specification if found, otherwise an error.
 func (c *csafParser) findPkgSpec(ctx context.Context, product_id string) (*generated.PkgInputSpec, error) {
 	pref := findProductRef(ctx, c.csaf.ProductTree, product_id)
 	if pref == nil {
@@ -219,9 +203,8 @@ func (c *csafParser) findPkgSpec(ctx context.Context, product_id string) (*gener
 // generateVexIngest generates a VEX ingest object from a CSAF vulnerability and other input data.
 //
 // The function maps CSAF data into a VEX ingest object for adding to the vulnerability graph.
-// It sets the VEX statement fields like justification, status and text.
-// It finds the package for the product ID to add to ingest.
-// Returns nil if the package cannot be found.
+// It then tries to find the package for the product ID to add to ingest.
+// If it can't be found, it then returns nil, otherwise it returns a pointer to the VEX ingest object.
 func (c *csafParser) generateVexIngest(ctx context.Context, vulnInput *generated.VulnerabilityInputSpec, csafVuln *csaf.Vulnerability, status string, product_id string) *assembler.VexIngest {
 	logger := logging.FromContext(ctx)
 	vi := &assembler.VexIngest{}
