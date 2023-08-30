@@ -26,6 +26,7 @@ import (
 )
 
 // TODO (pxp928): add tests back in when implemented
+
 // func Test_artifactStruct_Neighbors(t *testing.T) {
 // 	type fields struct {
 // 		id          uint32

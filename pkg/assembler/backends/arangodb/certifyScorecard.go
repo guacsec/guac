@@ -73,8 +73,6 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 		'origin': scorecard.origin
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Scorecards")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Scorecards: %w", err)

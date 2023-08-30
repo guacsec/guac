@@ -529,13 +529,13 @@ func TestCertifyBad(t *testing.T) {
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
+				if err != nil {
+					return
+				}
 				if test.Name == "Query ID" {
 					test.Query = &model.CertifyBadSpec{
 						ID: ptrfrom.String(found.ID),
 					}
-				}
-				if err != nil {
-					return
 				}
 			}
 			got, err := b.CertifyBad(ctx, test.Query)
@@ -858,6 +858,7 @@ func TestIngestCertifyBads(t *testing.T) {
 }
 
 // TODO (pxp928): add tests back in when implemented
+
 // func TestCertifyBadNeighbors(t *testing.T) {
 // 	type call struct {
 // 		Sub   model.PackageSourceOrArtifactInput

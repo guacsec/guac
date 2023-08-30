@@ -130,8 +130,6 @@ func getPkgVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder 
 		'origin': certifyVex.origin  
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVEXStatement")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyVEXStatement: %w", err)
@@ -164,8 +162,6 @@ func getArtifactVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBui
 		'collector': certifyVex.collector,
 		'origin': certifyVex.origin  
 	}`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVEXStatement")
 	if err != nil {
@@ -213,12 +209,12 @@ func setVexMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVexSpec *m
 		arangoQueryBuilder.forOutBound(certifyVexVulnEdgesStr, "vVulnID", "certifyVex")
 		if certifyVexSpec.Vulnerability.VulnerabilityID != nil {
 			arangoQueryBuilder.filter("vVulnID", "vulnerabilityID", "==", "@vulnerabilityID")
-			queryValues["vulnerabilityID"] = *certifyVexSpec.Vulnerability.VulnerabilityID
+			queryValues["vulnerabilityID"] = strings.ToLower(*certifyVexSpec.Vulnerability.VulnerabilityID)
 		}
 		arangoQueryBuilder.forInBound(vulnHasVulnerabilityIDStr, "vType", "vVulnID")
 		if certifyVexSpec.Vulnerability.Type != nil {
 			arangoQueryBuilder.filter("vType", "type", "==", "@vulnType")
-			queryValues["vulnType"] = *certifyVexSpec.Vulnerability.Type
+			queryValues["vulnType"] = strings.ToLower(*certifyVexSpec.Vulnerability.Type)
 		}
 	} else {
 		arangoQueryBuilder.forOutBound(certifyVexVulnEdgesStr, "vVulnID", "certifyVex")

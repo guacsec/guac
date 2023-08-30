@@ -40,6 +40,10 @@ var A2out = &model.Artifact{
 	Digest:    "7a8f47318e4676dacb0142afa0b83029cd7befd9",
 }
 
+var B1 = &model.BuilderInputSpec{
+	URI: "asdf",
+}
+
 var S1 = &model.SourceInputSpec{
 	Type:      "git",
 	Namespace: "github.com/jeff",
@@ -121,12 +125,44 @@ var P2out = &model.Package{
 	}},
 }
 
+var P3 = &model.PkgInputSpec{
+	Type:    "pypi",
+	Name:    "tensorflow",
+	Version: ptrfrom.String("2.11.1"),
+	Subpath: ptrfrom.String("saved_model_cli.py"),
+}
+var P3out = &model.Package{
+	Type: "pypi",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name: "tensorflow",
+			Versions: []*model.PackageVersion{{
+				Version:    "2.11.1",
+				Subpath:    "saved_model_cli.py",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
+}
+
 var P4 = &model.PkgInputSpec{
 	Type:      "conan",
 	Namespace: ptrfrom.String("openssl.org"),
 	Name:      "openssl",
 	Version:   ptrfrom.String("3.0.3"),
 }
+var P4outName = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name:     "openssl",
+			Versions: []*model.PackageVersion{},
+		}},
+	}},
+}
+
+var MAll = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
 
 var CB1out = &model.CertifyBad{
 	Subject:       S2out,
@@ -171,12 +207,67 @@ var C2out = &model.VulnerabilityID{
 	VulnerabilityID: "cve-2014-8139",
 }
 
-var B1 = &model.BuilderInputSpec{
-	URI: "asdf",
+var C3 = &model.VulnerabilityInputSpec{
+	Type:            "CVE",
+	VulnerabilityID: "cVe-2014-8140",
+}
+var C3out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2014-8140",
+}
+
+var G1 = &model.VulnerabilityInputSpec{
+	Type:            "GHSA",
+	VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+}
+var G1out = &model.VulnerabilityID{
+	VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
+}
+
+var G2 = &model.VulnerabilityInputSpec{
+	Type:            "ghsa",
+	VulnerabilityID: "GHSA-xrw3-wqph-3fxg",
+}
+var G2out = &model.VulnerabilityID{
+	VulnerabilityID: "ghsa-xrw3-wqph-3fxg",
+}
+
+var G3 = &model.VulnerabilityInputSpec{
+	Type:            "ghsa",
+	VulnerabilityID: "GHSA-8v4j-7jgf-5rg9",
+}
+var G3out = &model.VulnerabilityID{
+	VulnerabilityID: "ghsa-8v4j-7jgf-5rg9",
 }
 
 var O1 = &model.VulnerabilityInputSpec{
 	Type:            "OSV",
 	VulnerabilityID: "CVE-2014-8140",
 }
-var MAll = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
+
+var O1out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2014-8140",
+}
+
+var O2 = &model.VulnerabilityInputSpec{
+	Type:            "osv",
+	VulnerabilityID: "CVE-2022-26499",
+}
+var O2out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2022-26499",
+}
+
+var O3 = &model.VulnerabilityInputSpec{
+	Type:            "osv",
+	VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+}
+var O3out = &model.VulnerabilityID{
+	VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
+}
+
+var NoVulnInput = &model.VulnerabilityInputSpec{
+	Type:            "noVuln",
+	VulnerabilityID: "",
+}
+var NoVulnOut = &model.VulnerabilityID{
+	VulnerabilityID: "",
+}
