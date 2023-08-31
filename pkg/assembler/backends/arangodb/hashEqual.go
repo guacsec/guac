@@ -286,7 +286,7 @@ func getHashEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model
 	type collectedData struct {
 		Artifact      *model.Artifact `json:"artifact"`
 		EqualArtifact *model.Artifact `json:"equalArtifact"`
-		HashEqualId   string          `json:"hashEqual"`
+		HashEqualId   string          `json:"hashEqual_id"`
 		Justification string          `json:"justification"`
 		Collector     string          `json:"collector"`
 		Origin        string          `json:"origin"`

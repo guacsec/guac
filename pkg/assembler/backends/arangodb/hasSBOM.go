@@ -160,27 +160,27 @@ func setHasSBOMMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSBOMSpec *
 	}
 	if hasSBOMSpec.URI != nil {
 		arangoQueryBuilder.filter("hasSBOM", "uri", "==", "@uri")
-		queryValues["uri"] = hasSBOMSpec.URI
+		queryValues["uri"] = *hasSBOMSpec.URI
 	}
 	if hasSBOMSpec.Algorithm != nil {
 		arangoQueryBuilder.filter("hasSBOM", "algorithm", "==", "@algorithm")
-		queryValues["algorithm"] = hasSBOMSpec.Algorithm
+		queryValues["algorithm"] = strings.ToLower(*hasSBOMSpec.Algorithm)
 	}
 	if hasSBOMSpec.Digest != nil {
 		arangoQueryBuilder.filter("hasSBOM", "digest", "==", "@digest")
-		queryValues["digest"] = hasSBOMSpec.Digest
+		queryValues["digest"] = strings.ToLower(*hasSBOMSpec.Digest)
 	}
 	if hasSBOMSpec.DownloadLocation != nil {
 		arangoQueryBuilder.filter("hasSBOM", "downloadLocation", "==", "@downloadLocation")
-		queryValues["downloadLocation"] = hasSBOMSpec.DownloadLocation
+		queryValues["downloadLocation"] = *hasSBOMSpec.DownloadLocation
 	}
 	if hasSBOMSpec.Origin != nil {
 		arangoQueryBuilder.filter("hasSBOM", origin, "==", "@"+origin)
-		queryValues[origin] = hasSBOMSpec.Origin
+		queryValues[origin] = *hasSBOMSpec.Origin
 	}
 	if hasSBOMSpec.Collector != nil {
 		arangoQueryBuilder.filter("hasSBOM", collector, "==", "@"+collector)
-		queryValues[collector] = hasSBOMSpec.Collector
+		queryValues[collector] = *hasSBOMSpec.Collector
 	}
 }
 
@@ -196,8 +196,8 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 	}
 
 	values["uri"] = hasSbom.URI
-	values["algorithm"] = hasSbom.Algorithm
-	values["digest"] = hasSbom.Digest
+	values["algorithm"] = strings.ToLower(hasSbom.Algorithm)
+	values["digest"] = strings.ToLower(hasSbom.Digest)
 	values["downloadLocation"] = hasSbom.DownloadLocation
 	values["origin"] = hasSbom.Origin
 	values["collector"] = hasSbom.Collector

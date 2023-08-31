@@ -90,8 +90,6 @@ func getPkgCertifyVulnForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'origin': certifyVuln.origin
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVuln")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyVuln: %w", err)

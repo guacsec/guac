@@ -746,6 +746,9 @@ func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
 	if status == model.DependencyTypeUnknown.String() {
 		return model.DependencyTypeUnknown, nil
 	}
+	if status == "" {
+		return "", nil
+	}
 	return model.DependencyTypeUnknown, fmt.Errorf("failed to convert DependencyType to enum")
 }
 
