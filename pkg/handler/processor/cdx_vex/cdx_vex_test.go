@@ -58,10 +58,10 @@ func Test_ValidateSchema(t *testing.T) {
 			name: "Invalid format for cdx-vex document",
 			doc: processor.Document{
 				Type:   processor.DocumentCdxVex,
-				Format: processor.FormatXML,
+				Format: processor.FormatUnknown,
 				Blob:   testdata.CycloneDXVEXUnAffected,
 			},
-			expectedErr: fmt.Errorf("unable to support parsing of cdx-vex document format: %v", processor.FormatXML),
+			expectedErr: fmt.Errorf("unable to support parsing of cdx-vex document format: %v", processor.FormatUnknown),
 		},
 	}
 
