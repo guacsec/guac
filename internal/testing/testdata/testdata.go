@@ -1234,7 +1234,6 @@ var (
 				"type":"pypi",
 				"namespace":"",
 				"name":"filelock",
-				"version":"3.12.3",
 				"qualifiers":null,
 				"subpath":""
 			 },
@@ -1251,7 +1250,6 @@ var (
 				"type":"pypi",
 				"namespace":"",
 				"name":"filelock",
-				"version":"3.12.3",
 				"qualifiers":null,
 				"subpath":""
 			 },
@@ -1278,7 +1276,6 @@ var (
 				"type":"pypi",
 				"namespace":"",
 				"name":"filelock",
-				"version":"3.12.3",
 				"qualifiers":null,
 				"subpath":""
 			 },
