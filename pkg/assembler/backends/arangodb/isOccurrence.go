@@ -120,8 +120,6 @@ func getSrcOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'origin': isOccurrence.origin
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsOccurrence")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for IsOccurrence: %w", err)
@@ -156,8 +154,6 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'collector': isOccurrence.collector,
 		'origin': isOccurrence.origin
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsOccurrence")
 	if err != nil {

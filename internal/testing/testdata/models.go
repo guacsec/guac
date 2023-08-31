@@ -110,6 +110,43 @@ var S2out = &model.Source{
 		}},
 	}},
 }
+
+var S3 = &model.SourceInputSpec{
+	Type:      "git",
+	Namespace: "github.com/jeff",
+	Name:      "myrepo",
+	Tag:       ptrfrom.String("v1.0"),
+}
+var S3out = &model.Source{
+	Type: "git",
+	Namespaces: []*model.SourceNamespace{{
+		Namespace: "github.com/jeff",
+		Names: []*model.SourceName{{
+			Name:   "myrepo",
+			Tag:    ptrfrom.String("v1.0"),
+			Commit: ptrfrom.String(""),
+		}},
+	}},
+}
+
+var S4 = &model.SourceInputSpec{
+	Type:      "bitbucket",
+	Namespace: "github.com/bob",
+	Name:      "bobsrepo",
+	Commit:    ptrfrom.String("5e7c41f"),
+}
+var S4out = &model.Source{
+	Type: "bitbucket",
+	Namespaces: []*model.SourceNamespace{{
+		Namespace: "github.com/bob",
+		Names: []*model.SourceName{{
+			Name:   "bobsrepo",
+			Tag:    ptrfrom.String(""),
+			Commit: ptrfrom.String("5e7c41f"),
+		}},
+	}},
+}
+
 var P1 = &model.PkgInputSpec{
 	Type: "pypi",
 	Name: "tensorflow",
