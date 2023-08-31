@@ -45,6 +45,9 @@ query Path(
     ... on Vulnerability {
       ...AllVulnerabilityTree
     }
+    ... on License {
+      ...AllLicenseTree
+    }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
     }
@@ -95,6 +98,9 @@ query Path(
     }
     ... on HasMetadata {
       ...AllHasMetadata
+    }
+    ... on CertifyLegal {
+      ...AllCertifyLegalTree
     }
   }
 }
@@ -117,6 +123,9 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
     ... on Vulnerability {
       ...AllVulnerabilityTree
     }
+    ... on License {
+      ...AllLicenseTree
+    }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
     }
@@ -167,6 +176,9 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
     }
     ... on HasMetadata {
       ...AllHasMetadata
+    }
+    ... on CertifyLegal {
+      ...AllCertifyLegalTree
     }
   }
 }
@@ -189,6 +201,9 @@ query Node($node: ID!) {
     ... on Vulnerability {
       ...AllVulnerabilityTree
     }
+    ... on License {
+      ...AllLicenseTree
+    }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
     }
@@ -239,6 +254,9 @@ query Node($node: ID!) {
     }
     ... on HasMetadata {
       ...AllHasMetadata
+    }
+    ... on CertifyLegal {
+      ...AllCertifyLegalTree
     }
   }
 }
@@ -261,6 +279,9 @@ query Nodes($nodes: [ID!]!) {
     ... on Vulnerability {
       ...AllVulnerabilityTree
     }
+    ... on License {
+      ...AllLicenseTree
+    }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
     }
@@ -311,6 +332,9 @@ query Nodes($nodes: [ID!]!) {
     }
     ... on HasMetadata {
       ...AllHasMetadata
+    }
+    ... on CertifyLegal {
+      ...AllCertifyLegalTree
     }
   }
 }
