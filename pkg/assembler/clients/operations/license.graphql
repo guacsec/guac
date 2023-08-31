@@ -18,17 +18,13 @@
 # Ingest License
 
 mutation IngestLicense($license: LicenseInputSpec!) {
-  ingestLicense(license: $license) {
-    ...AllLicenseTree
-  }
+  ingestLicense(license: $license)
 }
 
 # Bulk Ingest Licenses
 
 mutation IngestLicenses($licenses: [LicenseInputSpec!]!) {
-  ingestLicenses(licenses: $licenses) {
-    ...AllLicenseTree
-  }
+  ingestLicenses(licenses: $licenses)
 }
 
 # Exposes GraphQL queries to retrieve GUAC licenses

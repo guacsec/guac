@@ -365,10 +365,6 @@ func (ec *executionContext) _License(ctx context.Context, sel ast.SelectionSet, 
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNLicense2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicense(ctx context.Context, sel ast.SelectionSet, v model.License) graphql.Marshaler {
-	return ec._License(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNLicense2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.License) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

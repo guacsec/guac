@@ -27,8 +27,8 @@ type MutationResolver interface {
 	IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error)
 	IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (string, error)
 	IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error)
-	IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) (*model.CertifyLegal, error)
-	IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error)
+	IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) (string, error)
+	IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error)
 	IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error)
 	IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error)
 	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error)
@@ -47,8 +47,8 @@ type MutationResolver interface {
 	IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error)
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error)
 	IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error)
-	IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error)
-	IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error)
+	IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error)
+	IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error)
 	IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error)
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (string, error)
 	IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error)
@@ -2319,9 +2319,9 @@ func (ec *executionContext) _Mutation_ingestCertifyLegal(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.CertifyLegal)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNCertifyLegal2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegal(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyLegal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2331,31 +2331,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestCertifyLegal(ctx context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyLegal_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_CertifyLegal_subject(ctx, field)
-			case "declaredLicense":
-				return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
-			case "declaredLicenses":
-				return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
-			case "discoveredLicense":
-				return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
-			case "discoveredLicenses":
-				return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
-			case "attribution":
-				return ec.fieldContext_CertifyLegal_attribution(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyLegal_justification(ctx, field)
-			case "timeScanned":
-				return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyLegal_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyLegal_collector(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	defer func() {
@@ -2398,9 +2374,9 @@ func (ec *executionContext) _Mutation_ingestCertifyLegals(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.CertifyLegal)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalNCertifyLegal2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalᚄ(ctx, field.Selections, res)
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestCertifyLegals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2410,31 +2386,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestCertifyLegals(ctx contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyLegal_id(ctx, field)
-			case "subject":
-				return ec.fieldContext_CertifyLegal_subject(ctx, field)
-			case "declaredLicense":
-				return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
-			case "declaredLicenses":
-				return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
-			case "discoveredLicense":
-				return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
-			case "discoveredLicenses":
-				return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
-			case "attribution":
-				return ec.fieldContext_CertifyLegal_attribution(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyLegal_justification(ctx, field)
-			case "timeScanned":
-				return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyLegal_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyLegal_collector(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	defer func() {
@@ -3467,9 +3419,9 @@ func (ec *executionContext) _Mutation_ingestLicense(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.License)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNLicense2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicense(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestLicense(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3479,17 +3431,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestLicense(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_License_id(ctx, field)
-			case "name":
-				return ec.fieldContext_License_name(ctx, field)
-			case "inline":
-				return ec.fieldContext_License_inline(ctx, field)
-			case "listVersion":
-				return ec.fieldContext_License_listVersion(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type License", field.Name)
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	defer func() {
@@ -3532,9 +3474,9 @@ func (ec *executionContext) _Mutation_ingestLicenses(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.License)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalNLicense2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseᚄ(ctx, field.Selections, res)
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestLicenses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3544,17 +3486,7 @@ func (ec *executionContext) fieldContext_Mutation_ingestLicenses(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_License_id(ctx, field)
-			case "name":
-				return ec.fieldContext_License_name(ctx, field)
-			case "inline":
-				return ec.fieldContext_License_inline(ctx, field)
-			case "listVersion":
-				return ec.fieldContext_License_listVersion(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type License", field.Name)
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	defer func() {

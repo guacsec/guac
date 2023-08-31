@@ -3072,9 +3072,9 @@ extend type Query {
 
 extend type Mutation {
   "Adds a legal certification to a package or source."
-  ingestCertifyLegal(subject: PackageOrSourceInput!, declaredLicenses: [LicenseInputSpec!]!, discoveredLicenses: [LicenseInputSpec!]!, certifyLegal: CertifyLegalInputSpec!): CertifyLegal!
+  ingestCertifyLegal(subject: PackageOrSourceInput!, declaredLicenses: [LicenseInputSpec!]!, discoveredLicenses: [LicenseInputSpec!]!, certifyLegal: CertifyLegalInputSpec!): ID!
   "Bulk add legal certifications to packages or sources, not both at same time."
-  ingestCertifyLegals(subjects: PackageOrSourceInputs!, declaredLicensesList: [[LicenseInputSpec!]!]!, discoveredLicensesList: [[LicenseInputSpec!]!]!, certifyLegals: [CertifyLegalInputSpec!]!): [CertifyLegal!]!
+  ingestCertifyLegals(subjects: PackageOrSourceInputs!, declaredLicensesList: [[LicenseInputSpec!]!]!, discoveredLicensesList: [[LicenseInputSpec!]!]!, certifyLegals: [CertifyLegalInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
@@ -4245,9 +4245,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new license and returns it."
-  ingestLicense(license: LicenseInputSpec): License!
+  ingestLicense(license: LicenseInputSpec): ID!
   "Bulk ingests new licenses and returns a list of them."
-  ingestLicenses(licenses: [LicenseInputSpec!]!): [License!]!
+  ingestLicenses(licenses: [LicenseInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/metadata.graphql", Input: `#

@@ -11,15 +11,27 @@ import (
 )
 
 // IngestCertifyLegal is the resolver for the ingestCertifyLegal field.
-func (r *mutationResolver) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) (*model.CertifyLegal, error) {
+func (r *mutationResolver) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) (string, error) {
 	// TODO validate subjects are pkg or source
-	return r.Backend.IngestCertifyLegal(ctx, subject, declaredLicenses, discoveredLicenses, &certifyLegal)
+	cl, err := r.Backend.IngestCertifyLegal(ctx, subject, declaredLicenses, discoveredLicenses, &certifyLegal)
+	if err != nil {
+		return "", err
+	}
+	return cl.ID, nil
 }
 
 // IngestCertifyLegals is the resolver for the ingestCertifyLegals field.
-func (r *mutationResolver) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
+func (r *mutationResolver) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 	// TODO validate subjects are pkg or source
-	return r.Backend.IngestCertifyLegals(ctx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
+	cls, err := r.Backend.IngestCertifyLegals(ctx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
+	if err != nil {
+		return nil, err
+	}
+	var ids []string
+	for _, cl := range cls {
+		ids = append(ids, cl.ID)
+	}
+	return ids, nil
 }
 
 // CertifyLegal is the resolver for the CertifyLegal field.

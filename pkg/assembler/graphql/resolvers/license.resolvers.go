@@ -12,21 +12,33 @@ import (
 )
 
 // IngestLicense is the resolver for the ingestLicense field.
-func (r *mutationResolver) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
+func (r *mutationResolver) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
 	if err := helper.ValidateLicenseInput(license); err != nil {
-		return nil, err
+		return "", err
 	}
-	return r.Backend.IngestLicense(ctx, license)
+	il, err := r.Backend.IngestLicense(ctx, license)
+	if err != nil {
+		return "", err
+	}
+	return il.ID, nil
 }
 
 // IngestLicenses is the resolver for the ingestLicenses field.
-func (r *mutationResolver) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
+func (r *mutationResolver) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
 	for _, l := range licenses {
 		if err := helper.ValidateLicenseInput(l); err != nil {
 			return nil, err
 		}
 	}
-	return r.Backend.IngestLicenses(ctx, licenses)
+	ils, err := r.Backend.IngestLicenses(ctx, licenses)
+	if err != nil {
+		return nil, err
+	}
+	var ids []string
+	for _, il := range ils {
+		ids = append(ids, il.ID)
+	}
+	return ids, nil
 }
 
 // Licenses is the resolver for the licenses field.

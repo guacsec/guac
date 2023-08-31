@@ -78,7 +78,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new license and returns it."
-  ingestLicense(license: LicenseInputSpec): License!
+  ingestLicense(license: LicenseInputSpec): ID!
   "Bulk ingests new licenses and returns a list of them."
-  ingestLicenses(licenses: [LicenseInputSpec!]!): [License!]!
+  ingestLicenses(licenses: [LicenseInputSpec!]!): [ID!]!
 }
