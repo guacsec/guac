@@ -196,12 +196,13 @@ func TestIsDependency(t *testing.T) {
 			},
 			Query: &model.IsDependencySpec{
 				Package: &model.PkgSpec{
-					ID: ptrfrom.String("4"),
+					Name:    ptrfrom.String("tensorflow"),
+					Version: ptrfrom.String("2.11.1"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P1out,
+					Package:          testdata.P2out,
 					DependentPackage: testdata.P2outName,
 				},
 			},
@@ -236,6 +237,224 @@ func TestIsDependency(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on dep pkg - type",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P4,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DependentPackage: &model.PkgSpec{
+					Type: ptrfrom.String("conan"),
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P4outName,
+				},
+			},
+		},
+		{
+			Name:  "Query on dep pkg - namespace",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P4,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DependentPackage: &model.PkgSpec{
+					Namespace: ptrfrom.String("openssl.org"),
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P4outName,
+				},
+			},
+		},
+		{
+			Name:  "Query on dep pkg - version",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P4,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DependentPackage: &model.PkgSpec{
+					Version: ptrfrom.String("3.0.3"),
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P4out,
+				},
+			},
+		},
+		{
+			Name:  "Query on dep pkg - subpath",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P3,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DependentPackage: &model.PkgSpec{
+					Subpath: ptrfrom.String("saved_model_cli.py"),
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P3out,
+				},
+			},
+		},
+		{
+			Name:  "Query on dep pkg - match empty qualifiers",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P4,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DependentPackage: &model.PkgSpec{
+					MatchOnlyEmptyQualifiers: ptrfrom.Bool(true),
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P4out,
+				},
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P3out,
+				},
+			},
+		},
+		{
+			Name:  "Query on dep pkg - match empty qualifiers false",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P5},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P5,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DependentPackage: &model.PkgSpec{
+					MatchOnlyEmptyQualifiers: ptrfrom.Bool(false),
+					Qualifiers: []*model.PackageQualifierSpec{
+						{
+							Key:   "test",
+							Value: ptrfrom.String("test"),
+						},
+					},
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P5out,
+				},
+			},
+		},
+		{
+			Name:  "Query on dep pkg - match qualifiers",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P5},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P5,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DependentPackage: &model.PkgSpec{
+					Qualifiers: []*model.PackageQualifierSpec{
+						{
+							Key:   "test",
+							Value: ptrfrom.String("test"),
+						},
+					},
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P5out,
+				},
+			},
+		},
+		{
 			Name:  "Query on pkg multiple",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
 			Calls: []call{
@@ -254,14 +473,11 @@ func TestIsDependency(t *testing.T) {
 			},
 			Query: &model.IsDependencySpec{
 				Package: &model.PkgSpec{
-					Type: ptrfrom.String("pypi"),
+					Name:    ptrfrom.String("tensorflow"),
+					Subpath: ptrfrom.String("saved_model_cli.py"),
 				},
 			},
 			ExpID: []*model.IsDependency{
-				{
-					Package:          testdata.P1out,
-					DependentPackage: testdata.P1outName,
-				},
 				{
 					Package:          testdata.P3out,
 					DependentPackage: testdata.P1outName,
@@ -353,13 +569,10 @@ func TestIsDependency(t *testing.T) {
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
-			Query: &model.IsDependencySpec{
-				ID: ptrfrom.String("8"),
-			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P1outName,
+					Package:          testdata.P1out,
+					DependentPackage: testdata.P2outName,
 				},
 			},
 		},
@@ -469,7 +682,10 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				Justification: ptrfrom.String("test justification"),
+				Package: &model.PkgSpec{
+					Name:    ptrfrom.String("tensorflow"),
+					Subpath: ptrfrom.String("saved_model_cli.py"),
+				},
 			},
 			ExpID: []*model.IsDependency{
 				{
@@ -477,29 +693,40 @@ func TestIsDependency(t *testing.T) {
 					DependentPackage: testdata.P2out,
 					Justification:    "test justification",
 				},
+				{
+					Package:          testdata.P3out,
+					DependentPackage: testdata.P4outName,
+				},
+				{
+					Package:          testdata.P3out,
+					DependentPackage: testdata.P1outName,
+				},
 			},
 		},
 		{
 			Name:  "IsDep from version to name",
-			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P3},
+			InPkg: []*model.PkgInputSpec{testdata.P4, testdata.P3},
 			Calls: []call{
 				{
 					P1: testdata.P3,
-					P2: testdata.P2,
+					P2: testdata.P4,
 					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
-						Justification: "test justification",
+						Justification: "test justification name only",
 					},
 				},
 			},
 			Query: &model.IsDependencySpec{
-				Justification: ptrfrom.String("test justification"),
+				DependentPackage: &model.PkgSpec{
+					Name: ptrfrom.String("openssl"),
+				},
+				Justification: ptrfrom.String("test justification name only"),
 			},
 			ExpID: []*model.IsDependency{
 				{
 					Package:          testdata.P3out,
-					DependentPackage: testdata.P2outName,
-					Justification:    "test justification",
+					DependentPackage: testdata.P4outName,
+					Justification:    "test justification name only",
 				},
 			},
 		},
@@ -512,7 +739,7 @@ func TestIsDependency(t *testing.T) {
 					P2: testdata.P2,
 					MF: mSpecific,
 					ID: &model.IsDependencyInputSpec{
-						Justification: "test justification",
+						Justification: "test justification return specific",
 					},
 				},
 				{
@@ -520,23 +747,23 @@ func TestIsDependency(t *testing.T) {
 					P2: testdata.P2,
 					MF: mAll,
 					ID: &model.IsDependencyInputSpec{
-						Justification: "test justification",
+						Justification: "test justification return specific",
 					},
 				},
 			},
 			Query: &model.IsDependencySpec{
-				Justification: ptrfrom.String("test justification"),
+				Justification: ptrfrom.String("test justification return specific"),
 			},
 			ExpID: []*model.IsDependency{
 				{
 					Package:          testdata.P3out,
 					DependentPackage: testdata.P2out,
-					Justification:    "test justification",
+					Justification:    "test justification return specific",
 				},
 				{
 					Package:          testdata.P3out,
 					DependentPackage: testdata.P2outName,
-					Justification:    "test justification",
+					Justification:    "test justification return specific",
 				},
 			},
 		},
@@ -572,13 +799,6 @@ func TestIsDependency(t *testing.T) {
 			if err != nil {
 				return
 			}
-			// less := func(a, b *model.Package) bool { return a.Version < b.Version }
-			// for _, he := range got {
-			// 	slices.SortFunc(he.Packages, less)
-			// }
-			// for _, he := range test.ExpID {
-			// 	slices.SortFunc(he.Packages, less)
-			// }
 			if diff := cmp.Diff(test.ExpID, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
@@ -636,6 +856,35 @@ func TestIsDependencies(t *testing.T) {
 				{
 					Package:          testdata.P2out,
 					DependentPackage: testdata.P4outName,
+					Justification:    "test justification",
+				},
+			},
+		},
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3, testdata.P4},
+			Calls: []call{{
+				P1s: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+				P2s: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+				MF:  mSpecific,
+				IDs: []*model.IsDependencyInputSpec{
+					{
+						Justification: "test justification",
+					},
+					{
+						Justification: "test justification",
+					},
+				},
+			}},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P1out,
+					DependentPackage: testdata.P2out,
+					Justification:    "test justification",
+				},
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P4out,
 					Justification:    "test justification",
 				},
 			},

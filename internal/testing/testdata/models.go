@@ -193,6 +193,21 @@ var P4 = &model.PkgInputSpec{
 	Name:      "openssl",
 	Version:   ptrfrom.String("3.0.3"),
 }
+
+var P4out = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name: "openssl",
+			Versions: []*model.PackageVersion{{
+				Version:    "3.0.3",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
+}
+
 var P4outName = &model.Package{
 	Type: "conan",
 	Namespaces: []*model.PackageNamespace{{
@@ -200,6 +215,36 @@ var P4outName = &model.Package{
 		Names: []*model.PackageName{{
 			Name:     "openssl",
 			Versions: []*model.PackageVersion{},
+		}},
+	}},
+}
+
+var P5 = &model.PkgInputSpec{
+	Type:      "conan",
+	Namespace: ptrfrom.String("openssl.org"),
+	Name:      "openssl",
+	Version:   ptrfrom.String("3.0.3"),
+	Qualifiers: []*model.PackageQualifierInputSpec{{
+		Key:   "test",
+		Value: "test",
+	}},
+}
+
+var P5out = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name: "openssl",
+			Versions: []*model.PackageVersion{{
+				Version: "3.0.3",
+				Qualifiers: []*model.PackageQualifier{
+					{
+						Key:   "test",
+						Value: "test",
+					},
+				},
+			}},
 		}},
 	}},
 }

@@ -65,8 +65,6 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 		'origin': hasSLSA.origin
 	}`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSlsa")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasSlsa: %w", err)
