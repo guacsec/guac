@@ -179,16 +179,6 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 }
 
 func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
-	if len(subjects) != len(slsaList) {
-		return nil, fmt.Errorf("uneven subjects and slsa attestation for ingestion")
-	}
-	if len(subjects) != len(builtFromList) {
-		return nil, fmt.Errorf("uneven subjects and built from artifact list for ingestion")
-	}
-	if len(subjects) != len(builtByList) {
-		return nil, fmt.Errorf("uneven subjects and built by for ingestion")
-	}
-
 	builtFromMap := map[string][]*model.Artifact{}
 	var listOfValues []map[string]any
 

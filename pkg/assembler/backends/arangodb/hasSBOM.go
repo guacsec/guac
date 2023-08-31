@@ -207,10 +207,6 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 
 func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
 	if len(subjects.Packages) > 0 {
-		if len(subjects.Packages) != len(hasSBOMs) {
-			return nil, fmt.Errorf("uneven packages and hasSBOMs for ingestion")
-		}
-
 		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
@@ -314,10 +310,6 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		return hasSBOMList, nil
 
 	} else if len(subjects.Artifacts) > 0 {
-
-		if len(subjects.Artifacts) != len(hasSBOMs) {
-			return nil, fmt.Errorf("uneven artifacts and hasSBOMs for ingestion")
-		}
 
 		var listOfValues []map[string]any
 

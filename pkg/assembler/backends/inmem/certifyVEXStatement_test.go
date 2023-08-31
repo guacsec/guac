@@ -729,54 +729,6 @@ func TestVEX(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:   "Ingest double sub",
-			InPkg:  []*model.PkgInputSpec{p1},
-			InArt:  []*model.ArtifactInputSpec{a1},
-			InVuln: []*model.VulnerabilityInputSpec{o1},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package:  p1,
-						Artifact: a1,
-					},
-					Vuln: o1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name:   "Query double sub",
-			InPkg:  []*model.PkgInputSpec{p1},
-			InVuln: []*model.VulnerabilityInputSpec{o1},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: o1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			Query: &model.CertifyVEXStatementSpec{
-				Subject: &model.PackageOrArtifactSpec{
-					Package: &model.PkgSpec{
-						Version: ptrfrom.String(""),
-					},
-					Artifact: &model.ArtifactSpec{
-						Algorithm: ptrfrom.String("sha256"),
-					},
-				},
-			},
-			ExpQueryErr: true,
-		},
-		{
 			Name:   "Query bad id",
 			InPkg:  []*model.PkgInputSpec{p1},
 			InVuln: []*model.VulnerabilityInputSpec{o1},

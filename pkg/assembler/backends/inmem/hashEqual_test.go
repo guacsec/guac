@@ -384,41 +384,6 @@ func TestHashEqual(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Query three",
-			InArt: []*model.ArtifactInputSpec{a1, a2, a3},
-			Calls: []call{
-				{
-					A1: a1,
-					A2: a2,
-					HE: &model.HashEqualInputSpec{},
-				},
-				{
-					A1: a2,
-					A2: a3,
-					HE: &model.HashEqualInputSpec{},
-				},
-				{
-					A1: a1,
-					A2: a3,
-					HE: &model.HashEqualInputSpec{},
-				},
-			},
-			Query: &model.HashEqualSpec{
-				Artifacts: []*model.ArtifactSpec{
-					{
-						Algorithm: ptrfrom.String("gitHash"),
-					},
-					{
-						Digest: ptrfrom.String("6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"),
-					},
-					{
-						Digest: ptrfrom.String("asdf"),
-					},
-				},
-			},
-			ExpQueryErr: true,
-		},
-		{
 			Name:  "Query bad ID",
 			InArt: []*model.ArtifactInputSpec{a1, a2, a3},
 			Calls: []call{

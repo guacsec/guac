@@ -116,7 +116,62 @@ var P2out = &model.Package{
 	}},
 }
 
+var P4 = &model.PkgInputSpec{
+	Type:      "conan",
+	Namespace: ptrfrom.String("openssl.org"),
+	Name:      "openssl",
+	Version:   ptrfrom.String("3.0.3"),
+}
+
 var CB1out = &model.CertifyBad{
 	Subject:       S2out,
 	Justification: "test justification",
 }
+
+var CG1out = &model.CertifyGood{
+	Subject:       P1out,
+	Justification: "test justification one",
+}
+
+var SC1out = &model.CertifyScorecard{
+	Source: S1out,
+	Scorecard: &model.Scorecard{
+		Checks: []*model.ScorecardCheck{},
+		Origin: "test origin",
+	},
+}
+
+var V1 = &model.VulnerabilityInputSpec{
+	Type:            "OSV",
+	VulnerabilityID: "CVE-2014-8140",
+}
+
+var VEX1out = &model.CertifyVEXStatement{
+	ID: "1",
+}
+
+var C1 = &model.VulnerabilityInputSpec{
+	Type:            "cve",
+	VulnerabilityID: "CVE-2019-13110",
+}
+var C1out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2019-13110",
+}
+
+var C2 = &model.VulnerabilityInputSpec{
+	Type:            "cve",
+	VulnerabilityID: "CVE-2014-8139",
+}
+var C2out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2014-8139",
+}
+
+var B1 = &model.BuilderInputSpec{
+	URI: "asdf",
+}
+
+var O1 = &model.VulnerabilityInputSpec{
+	Type:            "OSV",
+	VulnerabilityID: "CVE-2014-8140",
+}
+var MAll = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}

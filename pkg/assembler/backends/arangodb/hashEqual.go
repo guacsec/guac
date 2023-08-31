@@ -26,9 +26,6 @@ import (
 )
 
 func (c *arangoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
-	if hashEqualSpec.Artifacts != nil && len(hashEqualSpec.Artifacts) > 2 {
-		return nil, fmt.Errorf("cannot specify more than 2 artifacts in HashEquals")
-	}
 	values := map[string]any{}
 	if hashEqualSpec.Artifacts != nil {
 		if len(hashEqualSpec.Artifacts) == 1 {
@@ -167,12 +164,6 @@ func getHashEqualQueryValues(artifact *model.ArtifactInputSpec, equalArtifact *m
 }
 
 func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
-	if len(artifacts) != len(otherArtifacts) {
-		return nil, fmt.Errorf("uneven artifacts and other artifacts for ingestion")
-	} else if len(artifacts) != len(hashEquals) {
-		return nil, fmt.Errorf("uneven artifacts and hashEquals for ingestion")
-	}
-
 	var listOfValues []map[string]any
 
 	for i := range artifacts {

@@ -22,7 +22,6 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -68,9 +67,6 @@ func (c *demoClient) IngestPointOfContact(ctx context.Context, subject model.Pac
 
 func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec, readOnly bool) (*model.PointOfContact, error) {
 	funcName := "IngestPointOfContact"
-	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, "PointOfContact subject"); err != nil {
-		return nil, err
-	}
 
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
@@ -191,11 +187,6 @@ func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.Pac
 // Query PointOfContact
 func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
 	funcName := "PointOfContact"
-	if filter != nil {
-		if err := helper.ValidatePackageSourceOrArtifactQueryFilter(filter.Subject); err != nil {
-			return nil, err
-		}
-	}
 
 	c.m.RLock()
 	defer c.m.RUnlock()

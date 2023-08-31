@@ -22,7 +22,6 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -58,23 +57,6 @@ func (n *hasSBOMStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest HasSBOM
 
 func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
-	valuesDefined := 0
-	if len(subjects.Packages) > 0 {
-		if len(subjects.Packages) != len(hasSBOMs) {
-			return nil, gqlerror.Errorf("uneven packages and hasSBOMs for ingestion")
-		}
-		valuesDefined = valuesDefined + 1
-	}
-	if len(subjects.Artifacts) > 0 {
-		if len(subjects.Artifacts) != len(hasSBOMs) {
-			return nil, gqlerror.Errorf("uneven artifact and hasSBOMs for ingestion")
-		}
-		valuesDefined = valuesDefined + 1
-	}
-	if valuesDefined != 1 {
-		return nil, gqlerror.Errorf("must specify at most packages or artifacts for %v", "IngestHasSBOMs")
-	}
-
 	var modelHasSboms []*model.HasSbom
 
 	for i := range hasSBOMs {
@@ -104,9 +86,6 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 
 func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec, readOnly bool) (*model.HasSbom, error) {
 	funcName := "IngestHasSbom"
-	if err := helper.ValidatePackageOrArtifactInput(&subject, "IngestHasSbom"); err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
@@ -215,12 +194,6 @@ func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
 
 func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 	funcName := "HasSBOM"
-	if filter != nil {
-		if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-	}
-
 	c.m.RLock()
 	defer c.m.RUnlock()
 

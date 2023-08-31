@@ -61,13 +61,6 @@ func (n *certifyVulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, er
 
 // Ingest CertifyVuln
 func (c *demoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
-	// TODO (pxp928): move checks to resolver so all backends don't have to implement
-	if len(pkgs) != len(vulnerabilities) {
-		return nil, gqlerror.Errorf("uneven packages and vulnerabilities for ingestion")
-	}
-	if len(pkgs) != len(certifyVulns) {
-		return nil, gqlerror.Errorf("uneven packages and certifyVuln for ingestion")
-	}
 	var modelCertifyVulnList []*model.CertifyVuln
 	for i := range certifyVulns {
 		certifyVuln, err := c.IngestCertifyVuln(ctx, *pkgs[i], *vulnerabilities[i], *certifyVulns[i])

@@ -27,7 +27,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func TestVulEqual(t *testing.T) {
+func TestVulnEqual(t *testing.T) {
 	type call struct {
 		Vuln      *model.VulnerabilityInputSpec
 		OtherVuln *model.VulnerabilityInputSpec

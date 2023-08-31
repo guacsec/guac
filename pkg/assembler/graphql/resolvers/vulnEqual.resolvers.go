@@ -30,7 +30,7 @@ func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnE
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 
 	if vulnEqualSpec.Vulnerabilities != nil && len(vulnEqualSpec.Vulnerabilities) > 2 {
-		return nil, gqlerror.Errorf("cannot specify more than 2 vulnerabilities in VulnEqual")
+		return nil, gqlerror.Errorf("VulnEqual :: cannot specify more than 2 vulnerabilities in VulnEqual")
 	}
 
 	if len(vulnEqualSpec.Vulnerabilities) > 0 {

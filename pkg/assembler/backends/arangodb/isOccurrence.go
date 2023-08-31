@@ -225,12 +225,6 @@ func getOccurrenceQueryValues(pkg *model.PkgInputSpec, src *model.SourceInputSpe
 
 func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
 	if len(subjects.Packages) > 0 {
-		if len(subjects.Packages) != len(artifacts) {
-			return nil, fmt.Errorf("uneven packages and artifacts for ingestion")
-		} else if len(subjects.Packages) != len(occurrences) {
-			return nil, fmt.Errorf("uneven packages and occurrence for ingestion")
-		}
-
 		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
@@ -337,12 +331,6 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		return isOccurrenceList, nil
 
 	} else if len(subjects.Sources) > 0 {
-		if len(subjects.Sources) != len(artifacts) {
-			return nil, fmt.Errorf("uneven sources and artifacts for ingestion")
-		} else if len(subjects.Sources) != len(occurrences) {
-			return nil, fmt.Errorf("uneven sources and occurrence for ingestion")
-		}
-
 		var listOfValues []map[string]any
 
 		for i := range subjects.Sources {

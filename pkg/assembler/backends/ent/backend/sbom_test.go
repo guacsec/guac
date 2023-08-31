@@ -422,23 +422,6 @@ func (s *Suite) Test_HasSBOM() {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Ingest without two subjects",
-			InPkg: []*model.PkgInputSpec{p1},
-			InArt: []*model.ArtifactInputSpec{a1},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package:  p1,
-						Artifact: a1,
-					},
-					Spec: &model.HasSBOMInputSpec{
-						DownloadLocation: "location one",
-					},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
 			Name:  "Query bad ID",
 			InPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{

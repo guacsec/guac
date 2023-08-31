@@ -715,22 +715,6 @@ func TestIngestHasSLSAs(t *testing.T) {
 				},
 			},
 		},
-		{
-			Name:  "Ingest no Materials 1",
-			InArt: []*model.ArtifactInputSpec{a1},
-			InBld: []*model.BuilderInputSpec{b1},
-			Calls: []call{
-				{
-					Sub: []*model.ArtifactInputSpec{a1},
-					BF:  [][]*model.ArtifactInputSpec{[]*model.ArtifactInputSpec{}},
-					BB:  []*model.BuilderInputSpec{b1},
-					SLSA: []*model.SLSAInputSpec{
-						{},
-					},
-				},
-			},
-			ExpIngestErr: true,
-		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0

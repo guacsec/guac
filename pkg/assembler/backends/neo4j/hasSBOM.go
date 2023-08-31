@@ -33,13 +33,7 @@ const (
 // TODO: noe4j backend does not match the schema. This needs updating before use!
 func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
-	// TODO: Fix validation
 	queryAll := true
-	// queryAll, err := helper.ValidatePackageOrSourceQueryInput(hasSBOMSpec.Subject)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 

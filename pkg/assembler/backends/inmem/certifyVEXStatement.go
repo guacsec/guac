@@ -17,13 +17,11 @@ package inmem
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -95,14 +93,6 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 
 func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {
 	funcName := "IngestVEXStatement"
-	if err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement"); err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-
-	err := validateVexInputBasedOnStatus(vexStatement.Status, vexStatement.VexJustification, vexStatement.Statement)
-	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
 
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
@@ -230,12 +220,6 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 	c.m.RLock()
 	defer c.m.RUnlock()
 	funcName := "CertifyVEXStatement"
-
-	if filter != nil {
-		if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
-			return nil, err
-		}
-	}
 
 	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
@@ -439,18 +423,4 @@ func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.Certi
 		Collector:        link.collector,
 	}
 	return &certifyVuln, nil
-}
-
-/*
-For [status] “not_affected”, a VEX statement SHOULD provide a [justification].
-If [justification] is not provided then [impact_statement] MUST be provided.
-For [status] “affected”, MUST include one [action_statement]
-*/
-func validateVexInputBasedOnStatus(status model.VexStatus, justification model.VexJustification, statement string) error {
-	if status == model.VexStatusNotAffected && justification == model.VexJustificationNotProvided && statement == "" {
-		return fmt.Errorf("for [status] “not_affected”, if [justification] is not provided then [statement] MUST be provided")
-	} else if status == model.VexStatusAffected && justification == model.VexJustificationNotProvided && statement == "" {
-		return fmt.Errorf("for [status] “affected”, MUST include one [statement]")
-	}
-	return nil
 }

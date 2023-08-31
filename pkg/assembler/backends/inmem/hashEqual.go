@@ -75,13 +75,6 @@ func (n *hashEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest HashEqual
 
 func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
-	if len(artifacts) != len(otherArtifacts) {
-		return nil, gqlerror.Errorf("uneven artifacts and other artifacts for ingestion")
-	}
-	if len(artifacts) != len(hashEquals) {
-		return nil, gqlerror.Errorf("uneven artifacts and hashEquals nodes for ingestion")
-	}
-
 	var modelHashEquals []*model.HashEqual
 	for i := range hashEquals {
 		hashEqual, err := c.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
@@ -201,10 +194,6 @@ func (c *demoClient) matchArtifacts(filter []*model.ArtifactSpec, value []uint32
 
 func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	funcName := "HashEqual"
-	if len(filter.Artifacts) > 2 {
-		return nil, gqlerror.Errorf(
-			"%v :: Provided spec has too many Artifacts", funcName)
-	}
 	c.m.RLock()
 	defer c.m.RUnlock()
 	if filter.ID != nil {

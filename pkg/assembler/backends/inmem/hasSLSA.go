@@ -159,15 +159,6 @@ func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSp
 // Ingest HasSlsa
 
 func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
-	if len(subjects) != len(slsaList) {
-		return nil, gqlerror.Errorf("uneven subjects and slsa attestation for ingestion")
-	}
-	if len(subjects) != len(builtFromList) {
-		return nil, gqlerror.Errorf("uneven subjects and built from artifact list for ingestion")
-	}
-	if len(subjects) != len(builtByList) {
-		return nil, gqlerror.Errorf("uneven subjects and built by for ingestion")
-	}
 	var modelHasSLSAList []*model.HasSlsa
 	for i := range subjects {
 		hasSLSA, err := c.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsaList[i])
@@ -190,9 +181,6 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec, readOnly bool) (
 	*model.HasSlsa, error) {
 
-	if len(builtFrom) < 1 {
-		return nil, gqlerror.Errorf("IngestSLSA :: Must have at least 1 builtFrom")
-	}
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 

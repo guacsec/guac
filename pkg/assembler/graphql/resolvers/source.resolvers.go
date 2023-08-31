@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestSource is the resolver for the ingestSource field.
@@ -33,5 +34,11 @@ func (r *mutationResolver) IngestSources(ctx context.Context, sources []*model.S
 
 // Sources is the resolver for the sources field.
 func (r *queryResolver) Sources(ctx context.Context, sourceSpec model.SourceSpec) ([]*model.Source, error) {
+	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
+		if *sourceSpec.Commit != "" && *sourceSpec.Tag != "" {
+			return nil, gqlerror.Errorf("Sources :: Passing both commit and tag selectors is an error")
+		}
+	}
+
 	return r.Backend.Sources(ctx, &sourceSpec)
 }
