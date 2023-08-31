@@ -26,6 +26,15 @@ func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgI
 
 // IngestCertifyVulns is the resolver for the ingestCertifyVulns field.
 func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+	funcName := "IngestCertifyVulns"
+	ingestedCertifyVulnsIDS := []string{}
+	if len(pkgs) != len(vulnerabilities) {
+		return ingestedCertifyVulnsIDS, gqlerror.Errorf("%v :: uneven packages and vulnerabilities for ingestion", funcName)
+	}
+	if len(pkgs) != len(certifyVulns) {
+		return ingestedCertifyVulnsIDS, gqlerror.Errorf("%v :: uneven packages and certifyVuln for ingestion", funcName)
+	}
+
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
 	for _, v := range vulnerabilities {
@@ -36,7 +45,6 @@ func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model
 		lowercaseVulnInputList = append(lowercaseVulnInputList, &lowercaseVulnInput)
 	}
 	ingestedCertifyVulns, err := r.Backend.IngestCertifyVulns(ctx, pkgs, lowercaseVulnInputList, certifyVulns)
-	ingestedCertifyVulnsIDS := []string{}
 	if err == nil {
 		for _, certifyVuln := range ingestedCertifyVulns {
 			ingestedCertifyVulnsIDS = append(ingestedCertifyVulnsIDS, certifyVuln.ID)

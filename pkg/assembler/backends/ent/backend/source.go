@@ -130,12 +130,6 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSp
 }
 
 func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
-	if filter != nil && filter.Commit != nil && filter.Tag != nil {
-		if *filter.Commit != "" && *filter.Tag != "" {
-			return nil, Errorf("Passing both commit and tag selectors is an error")
-		}
-	}
-
 	records, err := b.client.SourceName.Query().
 		Where(sourceQuery(filter)).
 		Limit(MaxPageSize).

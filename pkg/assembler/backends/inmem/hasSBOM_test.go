@@ -423,23 +423,6 @@ func TestHasSBOM(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Ingest without two subjects",
-			InPkg: []*model.PkgInputSpec{p1},
-			InArt: []*model.ArtifactInputSpec{a1},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package:  p1,
-						Artifact: a1,
-					},
-					HS: &model.HasSBOMInputSpec{
-						DownloadLocation: "location one",
-					},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
 			Name:  "Query bad ID",
 			InPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{
@@ -530,7 +513,7 @@ func TestHasSBOM(t *testing.T) {
 	}
 }
 
-func TestIngestHasSBOM(t *testing.T) {
+func TestIngestHasSBOMs(t *testing.T) {
 	type call struct {
 		Sub model.PackageOrArtifactInputs
 		HS  []*model.HasSBOMInputSpec

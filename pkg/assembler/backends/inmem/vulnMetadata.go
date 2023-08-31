@@ -53,10 +53,6 @@ func (n *vulnerabilityMetadataLink) BuildModelNode(c *demoClient) (model.Node, e
 
 // Ingest VulnerabilityMetadata
 func (c *demoClient) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
-	// TODO (pxp928): move checks to resolver so all backends don't have to implement
-	if len(vulnerabilities) != len(vulnerabilityMetadatas) {
-		return nil, gqlerror.Errorf("uneven vulnerabilities and vulnerabilityMetadatas for ingestion")
-	}
 	var modelVulnMetadataIDList []string
 	for i := range vulnerabilityMetadatas {
 		vulnMetadata, err := c.IngestVulnerabilityMetadata(ctx, *vulnerabilities[i], *vulnerabilityMetadatas[i])

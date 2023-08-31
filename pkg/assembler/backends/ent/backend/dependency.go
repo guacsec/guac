@@ -61,13 +61,6 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 }
 
 func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
-	if len(pkgs) != len(depPkgs) {
-		return nil, Errorf("uneven packages and dependent packages for ingestion")
-	}
-	if len(pkgs) != len(dependencies) {
-		return nil, Errorf("uneven packages and dependencies nodes for ingestion")
-	}
-
 	// TODO: This looks like a good candidate for using BulkCreate()
 
 	var modelIsDependencies []*model.IsDependency

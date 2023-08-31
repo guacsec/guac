@@ -1058,32 +1058,6 @@ func TestIngestCertifyVulns(t *testing.T) {
 				},
 			},
 		},
-		{
-			Name:  "Ingest without vuln",
-			InPkg: []*model.PkgInputSpec{p2},
-			Calls: []call{
-				{
-					Pkgs:         []*model.PkgInputSpec{p2},
-					Vulns:        []*model.VulnerabilityInputSpec{},
-					CertifyVulns: []*model.ScanMetadataInput{&model.ScanMetadataInput{}},
-				},
-			},
-			Query:        &model.CertifyVulnSpec{},
-			ExpIngestErr: true,
-		},
-		{
-			Name:  "Ingest missing pkg",
-			InPkg: []*model.PkgInputSpec{},
-			Calls: []call{
-				{
-					Pkgs:         []*model.PkgInputSpec{},
-					Vulns:        []*model.VulnerabilityInputSpec{},
-					CertifyVulns: []*model.ScanMetadataInput{&model.ScanMetadataInput{}},
-				},
-			},
-			Query:        &model.CertifyVulnSpec{},
-			ExpIngestErr: true,
-		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0

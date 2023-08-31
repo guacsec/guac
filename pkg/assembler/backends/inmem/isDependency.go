@@ -54,12 +54,6 @@ func (n *isDependencyLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
 	// TODO(LUMJJB): match flags
-	if len(pkgs) != len(depPkgs) {
-		return nil, gqlerror.Errorf("uneven packages and dependent packages for ingestion")
-	}
-	if len(pkgs) != len(dependencies) {
-		return nil, gqlerror.Errorf("uneven packages and dependencies nodes for ingestion")
-	}
 
 	var modelIsDependencies []*model.IsDependency
 	for i := range dependencies {

@@ -7,11 +7,18 @@ package resolvers
 import (
 	"context"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestHasMetadata is the resolver for the ingestHasMetadata field.
 func (r *mutationResolver) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
+	funcName := "IngestHasMetadata"
+	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
 	ingestedHasMetadata, err := r.Backend.IngestHasMetadata(ctx, subject, &pkgMatchType, hasMetadata)
 	if err != nil {
 		return "", err
@@ -21,5 +28,8 @@ func (r *mutationResolver) IngestHasMetadata(ctx context.Context, subject model.
 
 // HasMetadata is the resolver for the HasMetadata field.
 func (r *queryResolver) HasMetadata(ctx context.Context, hasMetadataSpec model.HasMetadataSpec) ([]*model.HasMetadata, error) {
+	if err := helper.ValidatePackageSourceOrArtifactQueryFilter(hasMetadataSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("HasMetadata ::  %s", err)
+	}
 	return r.Backend.HasMetadata(ctx, &hasMetadataSpec)
 }

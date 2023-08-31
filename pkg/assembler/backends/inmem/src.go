@@ -263,11 +263,6 @@ func duplicateSrcName(names srcNameList, input model.SourceInputSpec) (bool, *sr
 func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
-	if filter != nil && filter.Commit != nil && filter.Tag != nil {
-		if *filter.Commit != "" && *filter.Tag != "" {
-			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
-		}
-	}
 	if filter != nil && filter.ID != nil {
 		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {

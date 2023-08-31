@@ -304,11 +304,6 @@ func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpe
 
 func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
 	// TODO(LUMJJB): handle pkgmatchtype
-	if len(pkgs) != len(depPkgs) {
-		return nil, fmt.Errorf("uneven packages and dependent packages for ingestion")
-	} else if len(pkgs) != len(dependencies) {
-		return nil, fmt.Errorf("uneven packages and isDependency for ingestion")
-	}
 
 	var listOfValues []map[string]any
 

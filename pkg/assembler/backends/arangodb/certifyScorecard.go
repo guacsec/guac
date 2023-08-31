@@ -173,10 +173,6 @@ func getScorecardValues(src *model.SourceInputSpec, scorecard *model.ScorecardIn
 // Ingest Scorecards
 
 func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
-	if len(sources) != len(scorecards) {
-		return nil, fmt.Errorf("uneven source and scorecards for ingestion")
-	}
-
 	var listOfValues []map[string]any
 
 	for i := range sources {

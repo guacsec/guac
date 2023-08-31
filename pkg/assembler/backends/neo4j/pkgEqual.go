@@ -30,10 +30,6 @@ import (
 
 func (c *neo4jClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 
-	if pkgEqualSpec.Packages != nil && len(pkgEqualSpec.Packages) > 2 {
-		return nil, gqlerror.Errorf("cannot specify more than 2 packages in PkgEqual")
-	}
-
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 

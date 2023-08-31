@@ -25,21 +25,12 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	funcName := "IsOccurrence"
-	if query != nil {
-		if err := helper.ValidatePackageOrSourceQueryFilter(query.Subject); err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-	} else {
-		return nil, nil
-	}
 
 	predicates := []predicate.Occurrence{
 		optionalPredicate(query.ID, IDEQ),
@@ -118,9 +109,6 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	spec model.IsOccurrenceInputSpec,
 ) (*model.IsOccurrence, error) {
 	funcName := "IngestOccurrence"
-	if err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence"); err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
-	}
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		tx := ent.TxFromContext(ctx)

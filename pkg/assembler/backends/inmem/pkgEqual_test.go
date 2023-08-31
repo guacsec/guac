@@ -384,41 +384,6 @@ func TestPkgEqual(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Query three",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p2,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			Query: &model.PkgEqualSpec{
-				Packages: []*model.PkgSpec{
-					{
-						Name: ptrfrom.String("somename"),
-					},
-					{
-						Version: ptrfrom.String("1.2.3"),
-					},
-					{
-						Type: ptrfrom.String("asdf"),
-					},
-				},
-			},
-			ExpQueryErr: true,
-		},
-		{
 			Name:  "Query bad ID",
 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{

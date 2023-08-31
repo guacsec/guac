@@ -34,13 +34,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	// TODO: Fix validation
 	queryAll := true
-	// queryAll, err := helper.ValidatePackageOrSourceQueryInput(isOccurrenceSpec.Subject)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	aggregateIsOccurrence := []*model.IsOccurrence{}
 
 	if queryAll || (isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Package != nil) {
@@ -217,11 +211,6 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.Packag
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
-
-	err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence")
-	if err != nil {
-		return nil, err
-	}
 
 	var sb strings.Builder
 	var firstMatch bool = true

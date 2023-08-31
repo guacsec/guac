@@ -174,14 +174,6 @@ func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.Vul
 }
 
 func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
-	// TODO (pxp928): move checks to resolver so all backends don't have to implement
-	if len(pkgs) != len(vulnerabilities) {
-		return nil, fmt.Errorf("uneven packages and vulnerabilities for ingestion")
-	}
-	if len(pkgs) != len(certifyVulns) {
-		return nil, fmt.Errorf("uneven packages and certifyVuln for ingestion")
-	}
-
 	var listOfValues []map[string]any
 
 	for i := range certifyVulns {

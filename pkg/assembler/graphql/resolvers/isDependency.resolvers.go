@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestDependency is the resolver for the ingestDependency field.
@@ -21,8 +22,16 @@ func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.PkgIn
 
 // IngestDependencies is the resolver for the ingestDependencies field.
 func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
-	ingestedDependencies, err := r.Backend.IngestDependencies(ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
+	funcName := "IngestDependencies"
 	ingestedDependenciesIDS := []string{}
+	if len(pkgs) != len(depPkgs) {
+		return ingestedDependenciesIDS, gqlerror.Errorf("%v :: uneven packages and dependent packages for ingestion", funcName)
+	}
+	if len(pkgs) != len(dependencies) {
+		return ingestedDependenciesIDS, gqlerror.Errorf("%v :: uneven packages and dependencies nodes for ingestion", funcName)
+	}
+
+	ingestedDependencies, err := r.Backend.IngestDependencies(ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
 	if err == nil {
 		for _, dependency := range ingestedDependencies {
 			ingestedDependenciesIDS = append(ingestedDependenciesIDS, dependency.ID)

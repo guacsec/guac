@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -21,8 +22,12 @@ func (r *mutationResolver) IngestScorecard(ctx context.Context, source model.Sou
 
 // IngestScorecards is the resolver for the ingestScorecards field.
 func (r *mutationResolver) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
-	ingestedScorecards, err := r.Backend.IngestScorecards(ctx, sources, scorecards)
+	funcName := "IngestScorecards"
 	ingestedScorecardsIDS := []string{}
+	if len(sources) != len(scorecards) {
+		return ingestedScorecardsIDS, fmt.Errorf("%v :: uneven source and scorecards for ingestion", funcName)
+	}
+	ingestedScorecards, err := r.Backend.IngestScorecards(ctx, sources, scorecards)
 	if err == nil {
 		for _, scorecard := range ingestedScorecards {
 			ingestedScorecardsIDS = append(ingestedScorecardsIDS, scorecard.ID)

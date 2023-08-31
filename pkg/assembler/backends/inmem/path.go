@@ -39,10 +39,6 @@ func processUsingOnly(usingOnly []model.Edge) edgeMap {
 }
 
 func (c *demoClient) Path(ctx context.Context, source string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
-	if maxPathLength <= 0 {
-		return nil, gqlerror.Errorf("maxPathLength argument must be positive, got %d", maxPathLength)
-	}
-
 	sourceID, err := strconv.ParseUint(source, 10, 32)
 	if err != nil {
 		return nil, err

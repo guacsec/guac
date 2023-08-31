@@ -600,48 +600,6 @@ func TestPointOfContact(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Ingest with two subjects",
-			InSrc: []*model.SourceInputSpec{s1},
-			InArt: []*model.ArtifactInputSpec{a1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source:   s1,
-						Artifact: a1,
-					},
-					HM: &model.PointOfContactInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name:  "Query with two subjects",
-			InSrc: []*model.SourceInputSpec{s1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source: s1,
-					},
-					HM: &model.PointOfContactInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.PointOfContactSpec{
-				Subject: &model.PackageSourceOrArtifactSpec{
-					Package: &model.PkgSpec{
-						Version: ptrfrom.String("2.11.1"),
-					},
-					Artifact: &model.ArtifactSpec{
-						Algorithm: ptrfrom.String("asdf"),
-					},
-				},
-			},
-			ExpQueryErr: true,
-		},
-		{
 			Name:  "Query good ID",
 			InSrc: []*model.SourceInputSpec{s1},
 			Calls: []call{

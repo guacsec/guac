@@ -196,9 +196,6 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 
 func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	funcName := "PkgEqual"
-	if filter != nil && len(filter.Packages) > 2 {
-		return nil, gqlerror.Errorf("%v :: too many packages in query, max 2, got: %v", funcName, len(filter.Packages))
-	}
 	c.m.RLock()
 	defer c.m.RUnlock()
 	if filter.ID != nil {
