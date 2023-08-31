@@ -34,6 +34,7 @@ type Document struct {
 	Blob              []byte
 	Type              DocumentType
 	Format            FormatType
+	Encoding          EncodingType
 	SourceInformation SourceInformation
 }
 
@@ -76,6 +77,13 @@ const (
 	FormatJSONLines FormatType = "JSON_LINES"
 	FormatXML       FormatType = "XML"
 	FormatUnknown   FormatType = "UNKNOWN"
+)
+
+type EncodingType string
+
+const (
+	EncodingBzip2   EncodingType = "BZIP2"
+	EncodingUnknown EncodingType = "UNKNOWN"
 )
 
 // SourceInformation provides additional information about where the document comes from

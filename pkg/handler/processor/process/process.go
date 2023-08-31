@@ -16,10 +16,13 @@
 package process
 
 import (
+	"bytes"
+	"compress/bzip2"
 	"context"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"io"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -135,6 +138,10 @@ func processHelper(ctx context.Context, doc *processor.Document) (*processor.Doc
 }
 
 func processDocument(ctx context.Context, i *processor.Document) ([]*processor.Document, error) {
+	if err := decodeDocument(i); err != nil {
+		return nil, err
+	}
+
 	if err := preProcessDocument(ctx, i); err != nil {
 		return nil, err
 	}
@@ -201,4 +208,29 @@ func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
 		return nil, fmt.Errorf("no document processor registered for type: %s", i.Type)
 	}
 	return p.Unpack(i) // nolint:wrapcheck
+}
+
+func decodeDocument(i *processor.Document) error {
+	var reader io.Reader
+	switch i.Encoding {
+	case processor.EncodingBzip2:
+		reader = bzip2.NewReader(bytes.NewReader(i.Blob))
+	// TODO Add more encoding options
+	case processor.EncodingUnknown:
+	}
+	if reader != nil {
+		if err := decompressDocument(i, reader); err != nil {
+			return fmt.Errorf("unable to decode document: %w", err)
+		}
+	}
+	return nil
+}
+
+func decompressDocument(i *processor.Document, reader io.Reader) error {
+	uncompressed, err := io.ReadAll(reader)
+	if err != nil {
+		return fmt.Errorf("unable to decompress document: %w", err)
+	}
+	i.Blob = uncompressed
+	return nil
 }
