@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.5" version="1">
+    <vulnerabilities>
+        <vulnerability>
+            <id>CVE-2018-7489</id>
+            <source>
+                <name>NVD</name>
+                <url>https://nvd.nist.gov/vuln/detail/CVE-2019-9997</url>
+            </source>
+            <ratings>
+                <rating>
+                    <source>
+                        <name>NVD</name>
+                        <url>https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator?vector=AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H&amp;version=3.0</url>
+                    </source>
+                    <score>9.8</score>
+                    <severity>critical</severity>
+                    <method>CVSSv3</method>
+                    <vector>AN/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</vector>
+                </rating>
+            </ratings>
+            <cwes>
+                <cwe>184</cwe>
+                <cwe>502</cwe>
+            </cwes>
+            <description>FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution because of an incomplete fix for the CVE-2017-7525 deserialization flaw. This is exploitable by sending maliciously crafted JSON input to the readValue method of the ObjectMapper, bypassing a blacklist that is ineffective if the c3p0 libraries are available in the classpath.</description>
+            <recommendation>Upgrade com.fasterxml.jackson.core:jackson-databind to version 2.6.7.5, 2.8.11.1, 2.9.5 or higher.</recommendation>
+            <advisories>
+                <advisory>
+                    <title>GitHub Commit</title>
+                    <url>https://github.com/FasterXML/jackson-databind/commit/6799f8f10cc78e9af6d443ed6982d00a13f2e7d2</url>
+                </advisory>
+                <advisory>
+                    <title>GitHub Issue</title>
+                    <url>https://github.com/FasterXML/jackson-databind/issues/1931</url>
+                </advisory>
+            </advisories>
+            <created>2021-01-01T00:00:00.000Z</created>
+            <published>2021-01-01T00:00:00.000Z</published>
+            <updated>2021-01-01T00:00:00.000Z</updated>
+            <analysis>
+                <state>not_affected</state>
+                <justification>code_not_reachable</justification>
+                <responses>
+                    <response>will_not_fix</response>
+                    <response>update</response>
+                </responses>
+                <detail>An optional explanation of why the application is not affected by the vulnerable component.</detail>
+            </analysis>
+            <affects>
+                <target>
+                    <ref>urn:cdx:3e671687-395b-41f5-a30f-a58921a69b79/1#jackson-databind-2.8.0</ref>
+                </target>
+            </affects>
+        </vulnerability>
+    </vulnerabilities>
+</bom>

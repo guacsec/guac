@@ -39,11 +39,19 @@ func Test_ValidateSchema(t *testing.T) {
 			expectedErr: fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentCdxVex, processor.DocumentCsaf),
 		},
 		{
-			name: "Successful validation of cdx-vex document",
+			name: "Successful validation of cdx-vex json document",
 			doc: processor.Document{
 				Type:   processor.DocumentCdxVex,
 				Format: processor.FormatJSON,
 				Blob:   testdata.CycloneDXVEXUnAffected,
+			},
+		},
+		{
+			name: "Successful validation of cdx-vex xml document",
+			doc: processor.Document{
+				Type:   processor.DocumentCdxVex,
+				Format: processor.FormatXML,
+				Blob:   testdata.CyloneDXVEXExampleXML,
 			},
 		},
 		{

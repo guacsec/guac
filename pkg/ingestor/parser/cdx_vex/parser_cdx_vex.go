@@ -17,7 +17,6 @@ package cdx_vex
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -29,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
@@ -59,11 +59,11 @@ func NewCdxVexParser() common.DocumentParser {
 // Parse breaks out the document into the graph components
 func (c *cdxVexParser) Parse(ctx context.Context, doc *processor.Document) error {
 	c.doc = doc
-	err := json.Unmarshal(doc.Blob, &c.cdxBom)
+	bom, err := cyclonedx.ParseCycloneDXBOM(doc)
 	if err != nil {
-		return fmt.Errorf("unable to unmarshal CDX VEX document: %w", err)
+		return fmt.Errorf("unable to parse cdx-vex document: %w", err)
 	}
-
+	c.cdxBom = bom
 	return nil
 }
 
@@ -73,11 +73,11 @@ func (c *cdxVexParser) GetIdentities(ctx context.Context) []common.TrustInformat
 }
 
 func (c *cdxVexParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return c.identifierStrings, nil
 }
 
 // Get package name and range versions to create package input spec for the affected packages.
-func getAffectedPackages(ctx context.Context, vulnInput *generated.VulnerabilityInputSpec, vexData generated.VexStatementInputSpec, affectsObj cdx.Affects) *[]assembler.VexIngest {
+func (c *cdxVexParser) getAffectedPackages(ctx context.Context, vulnInput *generated.VulnerabilityInputSpec, vexData generated.VexStatementInputSpec, affectsObj cdx.Affects) *[]assembler.VexIngest {
 	logger := logging.FromContext(ctx)
 	var pkgRef string
 	// TODO: retrieve purl from metadata if present - https://github.com/guacsec/guac/blob/main/pkg/ingestor/parser/cyclonedx/parser_cyclonedx.go#L76
@@ -104,6 +104,7 @@ func getAffectedPackages(ctx context.Context, vulnInput *generated.Vulnerability
 			return nil
 		}
 
+		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkgURL)
 		return &[]assembler.VexIngest{{VexData: &vexData, Vulnerability: vulnInput, Pkg: pkg}}
 	}
 
@@ -133,6 +134,7 @@ func getAffectedPackages(ctx context.Context, vulnInput *generated.Vulnerability
 		}
 		vi.Pkg = pkg
 		viList = append(viList, *vi)
+		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkgURL)
 	}
 
 	return &viList
@@ -177,7 +179,7 @@ func (c *cdxVexParser) GetPredicates(ctx context.Context) *assembler.IngestPredi
 		}
 
 		for _, affect := range *vulnerability.Affects {
-			vi := getAffectedPackages(ctx, vuln, vd, affect)
+			vi := c.getAffectedPackages(ctx, vuln, vd, affect)
 			if vi == nil {
 				continue
 			}

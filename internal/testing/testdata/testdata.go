@@ -104,6 +104,9 @@ var (
 	//go:embed exampledata/cyclonedx-vex-affected.json
 	CycloneDXVEXAffected []byte
 
+	//go:embed exampledata/cyclonedx-vex.xml
+	CyloneDXVEXExampleXML []byte
+
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
 
@@ -145,8 +148,8 @@ var (
 			Pkg:           pkg,
 			Vulnerability: vulnSpec,
 			VexData: &generated.VexStatementInputSpec{
-				Status:           "NOT_AFFECTED",
-				VexJustification: "VULNERABLE_CODE_NOT_IN_EXECUTE_PATH",
+				Status:           generated.VexStatusNotAffected,
+				VexJustification: generated.VexJustificationVulnerableCodeNotInExecutePath,
 				Statement:        "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly.",
 				StatusNotes:      "not_affected:code_not_reachable",
 				KnownSince:       parseUTCTime("2020-12-03T00:00:00.000Z"),
@@ -157,7 +160,7 @@ var (
 		{
 			Vulnerability: vulnSpec,
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
-				ScoreType:  "CVSSv31",
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 7.5,
 				Timestamp:  parseUTCTime("2020-12-03T00:00:00.000Z"),
 			},
@@ -165,7 +168,7 @@ var (
 		{
 			Vulnerability: vulnSpec,
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
-				ScoreType:  "CVSSv31",
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 8.2,
 				Timestamp:  parseUTCTime("2020-12-03T00:00:00.000Z"),
 			},
@@ -173,7 +176,7 @@ var (
 		{
 			Vulnerability: vulnSpec,
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
-				ScoreType:  "CVSSv31",
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 0.0,
 				Timestamp:  parseUTCTime("2020-12-03T00:00:00.000Z"),
 			},
@@ -189,7 +192,7 @@ var (
 		VulnerabilityID: "cve-2021-44228",
 	}
 	vexDataAffected = &generated.VexStatementInputSpec{
-		Status:      "AFFECTED",
+		Status:      generated.VexStatusAffected,
 		Statement:   "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
 		StatusNotes: "exploitable:",
 	}
@@ -209,7 +212,7 @@ var (
 		{
 			Vulnerability: vulnSpecAffected,
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
-				ScoreType:  "CVSSv31",
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 10,
 			},
 		},
@@ -2024,8 +2027,8 @@ var (
 			},
 			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2023-0286"},
 			VexData: &model.VexStatementInputSpec{
-				Status:           "AFFECTED",
-				VexJustification: "NOT_PROVIDED",
+				Status:           generated.VexStatusAffected,
+				VexJustification: generated.VexJustificationNotProvided,
 				Statement: `For details on how to apply this update, which includes the changes described in this advisory, refer to:
 
 https://access.redhat.com/articles/11258

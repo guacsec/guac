@@ -48,6 +48,9 @@ func (_ *cycloneDXTypeGuesser) GuessDocumentType(blob []byte, format processor.F
 		decoder := cdx.NewBOMDecoder(reader, cdx.BOMFileFormatXML)
 		err := decoder.Decode(bom)
 		if err == nil && strings.HasPrefix(bom.XMLNS, "http://cyclonedx.org/schema/bom/") {
+			if bom.Vulnerabilities != nil {
+				return processor.DocumentCdxVex
+			}
 			return processor.DocumentCycloneDX
 		}
 	}

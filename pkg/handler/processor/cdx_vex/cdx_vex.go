@@ -16,6 +16,7 @@
 package cdx_vex
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -39,6 +40,11 @@ func (p *CdxVexProcessor) ValidateSchema(d *processor.Document) error {
 			return nil
 		}
 		return err
+	case processor.FormatXML:
+		reader := bytes.NewReader(d.Blob)
+		bom := new(cdx.BOM)
+		decoder := cdx.NewBOMDecoder(reader, cdx.BOMFileFormatXML)
+		return decoder.Decode(bom)
 	}
 
 	return fmt.Errorf("unable to support parsing of cdx-vex document format: %v", d.Format)

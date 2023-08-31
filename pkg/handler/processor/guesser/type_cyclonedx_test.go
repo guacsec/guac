@@ -78,6 +78,12 @@ func Test_cyclonedxTypeGuesser_GuessDocumentType(t *testing.T) {
 			format:   processor.FormatJSON,
 			expected: processor.DocumentCdxVex,
 		},
+		{
+			name:     "valid cyclonedx vex xml Document",
+			blob:     testdata.CyloneDXVEXExampleXML,
+			format:   processor.FormatXML,
+			expected: processor.DocumentCdxVex,
+		},
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {

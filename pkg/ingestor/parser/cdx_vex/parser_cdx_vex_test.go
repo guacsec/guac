@@ -39,7 +39,8 @@ func Test_CdxVexParser(t *testing.T) {
 		{
 			name: "successfully parsed a cdx_vex document containing unaffected package",
 			doc: &processor.Document{
-				Blob: testdata.CycloneDXVEXUnAffected,
+				Blob:   testdata.CycloneDXVEXUnAffected,
+				Format: processor.FormatJSON,
 			},
 			wantPredicates: &assembler.IngestPredicates{
 				Vex:          testdata.CycloneDXUnAffectedVexIngest,
@@ -49,7 +50,8 @@ func Test_CdxVexParser(t *testing.T) {
 		{
 			name: "successfully parsed a cdx_vex document containing affected package",
 			doc: &processor.Document{
-				Blob: testdata.CycloneDXVEXAffected,
+				Blob:   testdata.CycloneDXVEXAffected,
+				Format: processor.FormatJSON,
 			},
 			wantPredicates: &assembler.IngestPredicates{
 				Vex:          testdata.CycloneDXAffectedVexIngest,
