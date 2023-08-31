@@ -114,8 +114,6 @@ func getPkgHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 		'origin': hasSBOM.origin  
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSBOM")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasSBOM: %w", err)
@@ -141,8 +139,6 @@ func getArtifactHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQuer
 		'collector': hasSBOM.collector,
 		'origin': hasSBOM.origin  
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSBOM")
 	if err != nil {

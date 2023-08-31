@@ -190,19 +190,19 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 	}
 	if isDependencySpec.VersionRange != nil {
 		arangoQueryBuilder.filter("isDependency", versionRangeStr, "==", "@"+versionRangeStr)
-		queryValues[versionRangeStr] = isDependencySpec.VersionRange
+		queryValues[versionRangeStr] = *isDependencySpec.VersionRange
 	}
 	if isDependencySpec.DependencyType != nil {
 		arangoQueryBuilder.filter("isDependency", dependencyTypeStr, "==", "@"+dependencyTypeStr)
-		queryValues[dependencyTypeStr] = isDependencySpec.DependencyType.String()
+		queryValues[dependencyTypeStr] = *isDependencySpec.DependencyType
 	}
 	if isDependencySpec.Origin != nil {
 		arangoQueryBuilder.filter("isDependency", origin, "==", "@"+origin)
-		queryValues[origin] = isDependencySpec.Origin
+		queryValues[origin] = *isDependencySpec.Origin
 	}
 	if isDependencySpec.Collector != nil {
 		arangoQueryBuilder.filter("isDependency", collector, "==", "@"+collector)
-		queryValues[collector] = isDependencySpec.Collector
+		queryValues[collector] = *isDependencySpec.Collector
 	}
 	if isDependencySpec.DependentPackage != nil {
 		if !queryDepPkgVersion {

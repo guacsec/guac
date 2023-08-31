@@ -175,15 +175,15 @@ func setIsOccurrenceMatchValues(arangoQueryBuilder *arangoQueryBuilder, isOccurr
 	}
 	if isOccurrenceSpec.Justification != nil {
 		arangoQueryBuilder.filter("isOccurrence", justification, "==", "@"+justification)
-		queryValues[justification] = isOccurrenceSpec.Justification
+		queryValues[justification] = *isOccurrenceSpec.Justification
 	}
 	if isOccurrenceSpec.Origin != nil {
 		arangoQueryBuilder.filter("isOccurrence", origin, "==", "@"+origin)
-		queryValues[origin] = isOccurrenceSpec.Origin
+		queryValues[origin] = *isOccurrenceSpec.Origin
 	}
 	if isOccurrenceSpec.Collector != nil {
 		arangoQueryBuilder.filter("isOccurrence", collector, "==", "@"+collector)
-		queryValues[collector] = isOccurrenceSpec.Collector
+		queryValues[collector] = *isOccurrenceSpec.Collector
 	}
 	arangoQueryBuilder.forOutBound(isOccurrenceArtEdgesStr, "art", "isOccurrence")
 	if isOccurrenceSpec.Artifact != nil {

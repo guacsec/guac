@@ -106,31 +106,31 @@ func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVu
 	}
 	if certifyVulnSpec.TimeScanned != nil {
 		arangoQueryBuilder.filter("certifyVuln", timeScannedStr, "==", "@"+timeScannedStr)
-		queryValues[timeScannedStr] = certifyVulnSpec.TimeScanned
+		queryValues[timeScannedStr] = *certifyVulnSpec.TimeScanned
 	}
 	if certifyVulnSpec.DbURI != nil {
 		arangoQueryBuilder.filter("certifyVuln", dbUriStr, "==", "@"+dbUriStr)
-		queryValues[dbUriStr] = certifyVulnSpec.DbURI
+		queryValues[dbUriStr] = *certifyVulnSpec.DbURI
 	}
 	if certifyVulnSpec.DbVersion != nil {
 		arangoQueryBuilder.filter("certifyVuln", dbVersionStr, "==", "@"+dbVersionStr)
-		queryValues[dbVersionStr] = certifyVulnSpec.DbVersion
+		queryValues[dbVersionStr] = *certifyVulnSpec.DbVersion
 	}
 	if certifyVulnSpec.ScannerURI != nil {
 		arangoQueryBuilder.filter("certifyVuln", scannerUriStr, "==", "@"+scannerUriStr)
-		queryValues[scannerUriStr] = certifyVulnSpec.ScannerURI
+		queryValues[scannerUriStr] = *certifyVulnSpec.ScannerURI
 	}
 	if certifyVulnSpec.ScannerVersion != nil {
 		arangoQueryBuilder.filter("certifyVuln", scannerVersionStr, "==", "@"+scannerVersionStr)
-		queryValues[scannerVersionStr] = certifyVulnSpec.ScannerVersion
+		queryValues[scannerVersionStr] = *certifyVulnSpec.ScannerVersion
 	}
 	if certifyVulnSpec.Origin != nil {
 		arangoQueryBuilder.filter("certifyVuln", origin, "==", "@"+origin)
-		queryValues[origin] = certifyVulnSpec.Origin
+		queryValues[origin] = *certifyVulnSpec.Origin
 	}
 	if certifyVulnSpec.Collector != nil {
 		arangoQueryBuilder.filter("certifyVuln", collector, "==", "@"+collector)
-		queryValues[collector] = certifyVulnSpec.Collector
+		queryValues[collector] = *certifyVulnSpec.Collector
 	}
 	if certifyVulnSpec.Vulnerability != nil {
 

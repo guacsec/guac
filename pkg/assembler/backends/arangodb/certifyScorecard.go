@@ -93,7 +93,7 @@ func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, cert
 	}
 	if certifyScorecardSpec.AggregateScore != nil {
 		arangoQueryBuilder.filter("scorecard", aggregateScoreStr, "==", "@"+aggregateScoreStr)
-		queryValues[aggregateScoreStr] = certifyScorecardSpec.AggregateScore
+		queryValues[aggregateScoreStr] = *certifyScorecardSpec.AggregateScore
 	}
 	if len(certifyScorecardSpec.Checks) > 0 {
 		checks := getChecks(certifyScorecardSpec.Checks)
@@ -102,19 +102,19 @@ func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, cert
 	}
 	if certifyScorecardSpec.ScorecardVersion != nil {
 		arangoQueryBuilder.filter("scorecard", scorecardVersionStr, "==", "@"+scorecardVersionStr)
-		queryValues[scorecardVersionStr] = certifyScorecardSpec.ScorecardVersion
+		queryValues[scorecardVersionStr] = *certifyScorecardSpec.ScorecardVersion
 	}
 	if certifyScorecardSpec.ScorecardCommit != nil {
 		arangoQueryBuilder.filter("scorecard", scorecardCommitStr, "==", "@"+scorecardCommitStr)
-		queryValues[scorecardCommitStr] = certifyScorecardSpec.ScorecardCommit
+		queryValues[scorecardCommitStr] = *certifyScorecardSpec.ScorecardCommit
 	}
 	if certifyScorecardSpec.Origin != nil {
 		arangoQueryBuilder.filter("scorecard", origin, "==", "@"+origin)
-		queryValues["origin"] = certifyScorecardSpec.Origin
+		queryValues["origin"] = *certifyScorecardSpec.Origin
 	}
 	if certifyScorecardSpec.Collector != nil {
 		arangoQueryBuilder.filter("scorecard", collector, "==", "@"+collector)
-		queryValues["collector"] = certifyScorecardSpec.Collector
+		queryValues["collector"] = *certifyScorecardSpec.Collector
 	}
 	if certifyScorecardSpec.Source == nil {
 		// get sources

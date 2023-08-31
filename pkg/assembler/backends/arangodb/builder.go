@@ -52,7 +52,7 @@ func setBuilderMatchValues(builderSpec *model.BuilderSpec, queryValues map[strin
 		}
 		if builderSpec.URI != nil {
 			arangoQueryBuilder.filter("build", "uri", "==", "@uri")
-			queryValues["uri"] = builderSpec.URI
+			queryValues["uri"] = *builderSpec.URI
 		}
 	}
 	return arangoQueryBuilder

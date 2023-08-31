@@ -252,15 +252,15 @@ func setCertifyGoodMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyGo
 	}
 	if certifyGoodSpec.Justification != nil {
 		arangoQueryBuilder.filter("certifyGood", justification, "==", "@"+justification)
-		queryValues[justification] = certifyGoodSpec.Justification
+		queryValues[justification] = *certifyGoodSpec.Justification
 	}
 	if certifyGoodSpec.Origin != nil {
 		arangoQueryBuilder.filter("certifyGood", origin, "==", "@"+origin)
-		queryValues[origin] = certifyGoodSpec.Origin
+		queryValues[origin] = *certifyGoodSpec.Origin
 	}
 	if certifyGoodSpec.Collector != nil {
 		arangoQueryBuilder.filter("certifyGood", collector, "==", "@"+collector)
-		queryValues[collector] = certifyGoodSpec.Collector
+		queryValues[collector] = *certifyGoodSpec.Collector
 	}
 }
 

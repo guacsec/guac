@@ -44,6 +44,7 @@ var A3 = &model.ArtifactInputSpec{
 	Algorithm: "sha512",
 	Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
 }
+
 var A3out = &model.Artifact{
 	Algorithm: "sha512",
 	Digest:    "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7",
@@ -54,8 +55,25 @@ var A4 = &model.ArtifactInputSpec{
 	Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
 }
 
+var A4out = &model.Artifact{
+	Algorithm: "sha1",
+	Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+}
+
 var B1 = &model.BuilderInputSpec{
 	URI: "asdf",
+}
+
+var B1out = &model.Builder{
+	URI: "asdf",
+}
+
+var B2 = &model.BuilderInputSpec{
+	URI: "qwer",
+}
+
+var B2out = &model.Builder{
+	URI: "qwer",
 }
 
 var S1 = &model.SourceInputSpec{
