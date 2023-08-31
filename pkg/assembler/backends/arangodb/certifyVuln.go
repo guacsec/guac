@@ -97,7 +97,7 @@ func getPkgCertifyVulnForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return geCertifyVuln(ctx, cursor)
+	return geCertifyVulnFromCursor(ctx, cursor)
 }
 
 func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVulnSpec *model.CertifyVulnSpec, queryValues map[string]any) {
@@ -298,7 +298,7 @@ func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.Pkg
 	}
 	defer cursor.Close()
 
-	certifyVulnList, err := geCertifyVuln(ctx, cursor)
+	certifyVulnList, err := geCertifyVulnFromCursor(ctx, cursor)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get certifyVulns from arango cursor: %w", err)
 	}
@@ -393,7 +393,7 @@ func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInput
 	}
 	defer cursor.Close()
 
-	certifyVulnList, err := geCertifyVuln(ctx, cursor)
+	certifyVulnList, err := geCertifyVulnFromCursor(ctx, cursor)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get certifyVulns from arango cursor: %w", err)
 	}
@@ -405,7 +405,7 @@ func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInput
 	}
 }
 
-func geCertifyVuln(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyVuln, error) {
+func geCertifyVulnFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyVuln, error) {
 	type collectedData struct {
 		PkgVersion     *dbPkgVersion `json:"pkgVersion"`
 		Vulnerability  *dbVulnID     `json:"vulnerability"`

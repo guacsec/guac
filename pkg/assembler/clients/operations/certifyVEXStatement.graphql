@@ -40,3 +40,31 @@ mutation CertifyVexArtifact(
     vexStatement: $vexStatement
   )
 }
+
+
+# Defines the GraphQL operations to bulk ingest VEX statements into GUAC
+
+mutation CertifyVexPkgs(
+  $pkgs: [PkgInputSpec!]!, 
+  $vulnerabilities: [VulnerabilityInputSpec!]!, 
+  $vexStatements: [VexStatementInputSpec!]!
+) {
+  ingestVEXStatements(
+    subjects: {
+      packages: $pkgs}, 
+      vulnerabilities: 
+      $vulnerabilities, 
+      vexStatements: $vexStatements)
+}
+
+mutation CertifyVexArtifacts(
+  $artifacts: [ArtifactInputSpec!]!, 
+  $vulnerabilities: [VulnerabilityInputSpec!]!, 
+  $vexStatements: [VexStatementInputSpec!]!
+  ) {
+  ingestVEXStatements(
+    subjects: {artifacts: $artifacts}, 
+    vulnerabilities: $vulnerabilities, 
+    vexStatements: $vexStatements)
+}
+

@@ -47,19 +47,20 @@ func ingestData(port int) {
 	ingestDependency(ctx, gqlclient)
 	ingestOccurrence(ctx, gqlclient)
 	ingestVulnerability(ctx, gqlclient)
-	ingestVulnerabilities(ctx, gqlclient)
+	bulkIngestVulnerabilities(ctx, gqlclient)
 	ingestVulnerabilityMetadata(ctx, gqlclient)
-	ingestVulnerabilityMetadatas(ctx, gqlclient)
+	bulkIngestVulnerabilityMetadata(ctx, gqlclient)
 	ingestPkgEqual(ctx, gqlclient)
 	ingestCertifyBad(ctx, gqlclient)
-	ingestCertifyBads(ctx, gqlclient)
+	bulkIngestCertifyBad(ctx, gqlclient)
 	ingestCertifyGood(ctx, gqlclient)
-	ingestCertifyGoods(ctx, gqlclient)
+	bulkIngestCertifyGood(ctx, gqlclient)
 	ingestHashEqual(ctx, gqlclient)
 	ingestHasSBOM(ctx, gqlclient)
 	ingestHasSourceAt(ctx, gqlclient)
 	ingestIsVulnerability(ctx, gqlclient)
 	ingestVEXStatement(ctx, gqlclient)
+	bulkIngestVEXStatement(ctx, gqlclient)
 	ingestReachabilityTestData(ctx, gqlclient)
 	time := time.Since(start)
 	logger.Infof("Ingesting test data into backend server took %v", time)
@@ -507,7 +508,7 @@ func ingestVulnerabilityMetadata(ctx context.Context, client graphql.Client) {
 	}
 }
 
-func ingestVulnerabilityMetadatas(ctx context.Context, client graphql.Client) {
+func bulkIngestVulnerabilityMetadata(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 	ingestVulnerabilityMetadatas := []struct {
@@ -893,7 +894,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 	}
 }
 
-func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
+func bulkIngestVulnerabilities(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 	opensslNs := "openssl.org"
@@ -1423,7 +1424,7 @@ func ingestCertifyBad(ctx context.Context, client graphql.Client) {
 	}
 }
 
-func ingestCertifyBads(ctx context.Context, client graphql.Client) {
+func bulkIngestCertifyBad(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 	opensslNs := "openssl.org"
 	opensslVersion := "3.0.3"
@@ -1747,7 +1748,7 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client) {
 	}
 }
 
-func ingestCertifyGoods(ctx context.Context, client graphql.Client) {
+func bulkIngestCertifyGood(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 	opensslNs := "openssl.org"
 	opensslVersion := "3.0.3"
@@ -2521,6 +2522,270 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			}
 			if _, err := model.CertifyVexArtifact(ctx, client, *ingest.artifact, *ingest.vuln, ingest.vexStatement); err != nil {
 				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+
+		} else {
+			fmt.Printf("input missing for package or artifact")
+		}
+	}
+}
+
+func bulkIngestVEXStatement(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
+	opensslNs := "openssl.org"
+	opensslVersion := "3.0.3"
+	ingestCertifyVex := []struct {
+		name          string
+		pkgs          []model.PkgInputSpec
+		artifacts     []model.ArtifactInputSpec
+		vulns         []model.VulnerabilityInputSpec
+		vexStatements []model.VexStatementInputSpec
+	}{
+		{
+			name: "bulk ingest packages",
+			pkgs: []model.PkgInputSpec{
+				{
+					Type:       "conan",
+					Namespace:  &opensslNs,
+					Name:       "openssl",
+					Version:    &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+				},
+				{
+					Type:       "conan",
+					Namespace:  &opensslNs,
+					Name:       "openssl",
+					Version:    &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+				},
+				{
+					Type:       "conan",
+					Namespace:  &opensslNs,
+					Name:       "openssl",
+					Version:    &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+				},
+				{
+					Type:       "conan",
+					Namespace:  &opensslNs,
+					Name:       "openssl",
+					Version:    &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+				},
+				{
+					Type:       "conan",
+					Namespace:  &opensslNs,
+					Name:       "openssl",
+					Version:    &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+				},
+				{
+					Type:       "conan",
+					Namespace:  &opensslNs,
+					Name:       "openssl",
+					Version:    &opensslVersion,
+					Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+				},
+			},
+			vulns: []model.VulnerabilityInputSpec{
+				{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2019-14750",
+				},
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+				},
+				{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2019-14750",
+				},
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2019-13110",
+				},
+				{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+				},
+			},
+			vexStatements: []model.VexStatementInputSpec{
+				{
+					Status:           model.VexStatusFixed,
+					VexJustification: model.VexJustificationNotProvided,
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusAffected,
+					VexJustification: model.VexJustificationNotProvided,
+					Statement:        "this package is vulnerable to this CVE",
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusNotAffected,
+					VexJustification: model.VexJustificationComponentNotPresent,
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusFixed,
+					VexJustification: model.VexJustificationNotProvided,
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusAffected,
+					VexJustification: model.VexJustificationNotProvided,
+					Statement:        "this package is vulnerable to this CVE",
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusNotAffected,
+					VexJustification: model.VexJustificationComponentNotPresent,
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+			},
+		},
+		{
+			name: "bulk ingest artifacts",
+			artifacts: []model.ArtifactInputSpec{
+				{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+				{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+				{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+				{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+				{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+				{
+					Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+					Algorithm: "sha256",
+				},
+			},
+			vulns: []model.VulnerabilityInputSpec{
+				{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2018-15710",
+				},
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2018-43610",
+				},
+				{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-hj5f-4gvw-4rv2",
+				},
+				{
+					Type:            "osv",
+					VulnerabilityID: "CVE-2018-15710",
+				},
+				{
+					Type:            "cve",
+					VulnerabilityID: "CVE-2018-43610",
+				},
+				{
+					Type:            "ghsa",
+					VulnerabilityID: "GHSA-hj5f-4gvw-4rv2",
+				},
+			},
+			vexStatements: []model.VexStatementInputSpec{
+				{
+					Status:           model.VexStatusUnderInvestigation,
+					VexJustification: model.VexJustificationNotProvided,
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusNotAffected,
+					VexJustification: model.VexJustificationNotProvided,
+					Statement:        "this artifact is not vulnerable to this CVE",
+					StatusNotes:      "status not affected because code not in execution path",
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusNotAffected,
+					VexJustification: model.VexJustificationVulnerableCodeNotInExecutePath,
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusUnderInvestigation,
+					VexJustification: model.VexJustificationNotProvided,
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusNotAffected,
+					VexJustification: model.VexJustificationNotProvided,
+					Statement:        "this artifact is not vulnerable to this CVE",
+					StatusNotes:      "status not affected because code not in execution path",
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+				{
+					Status:           model.VexStatusNotAffected,
+					VexJustification: model.VexJustificationVulnerableCodeNotInExecutePath,
+					KnownSince:       tm,
+					Origin:           "Demo ingestion",
+					Collector:        "Demo ingestion",
+				},
+			},
+		},
+	}
+	for _, ingest := range ingestCertifyVex {
+		if ingest.pkgs != nil {
+			if _, err := model.IngestPackages(ctx, client, ingest.pkgs); err != nil {
+				logger.Errorf("Error in ingesting packages: %v\n", err)
+			}
+			if _, err := model.IngestVulnerabilities(ctx, client, ingest.vulns); err != nil {
+				logger.Errorf("Error in ingesting vulnerabilities: %v\n", err)
+			}
+			if _, err := model.CertifyVexPkgs(ctx, client, ingest.pkgs, ingest.vulns, ingest.vexStatements); err != nil {
+				logger.Errorf("Error in ingesting CertifyVexPkgs: %v\n", err)
+			}
+
+		} else if ingest.artifacts != nil {
+			if _, err := model.IngestArtifacts(ctx, client, ingest.artifacts); err != nil {
+				logger.Errorf("Error in ingesting artifacts: %v\n", err)
+			}
+			if _, err := model.IngestVulnerabilities(ctx, client, ingest.vulns); err != nil {
+				logger.Errorf("Error in ingesting vulnerabilities: %v\n", err)
+			}
+			if _, err := model.CertifyVexArtifacts(ctx, client, ingest.artifacts, ingest.vulns, ingest.vexStatements); err != nil {
+				logger.Errorf("Error in ingesting CertifyVexArtifacts: %v\n", err)
 			}
 
 		} else {

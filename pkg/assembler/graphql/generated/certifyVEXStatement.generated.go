@@ -1002,6 +1002,28 @@ func (ec *executionContext) unmarshalNVexStatementInputSpec2githubᚗcomᚋguacs
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNVexStatementInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.VexStatementInputSpec, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.VexStatementInputSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNVexStatementInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNVexStatementInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx context.Context, v interface{}) (*model.VexStatementInputSpec, error) {
+	res, err := ec.unmarshalInputVexStatementInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, v interface{}) (model.VexStatus, error) {
 	var res model.VexStatus
 	err := res.UnmarshalGQL(v)
