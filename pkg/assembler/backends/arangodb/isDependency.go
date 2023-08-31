@@ -179,7 +179,7 @@ func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 	}
 	defer cursor.Close()
 
-	return getIsDependency(ctx, cursor)
+	return getIsDependencyFromCursor(ctx, cursor)
 }
 
 func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any, queryDepPkgVersion bool) {
@@ -532,7 +532,7 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 	}
 	defer cursor.Close()
 
-	return getIsDependency(ctx, cursor)
+	return getIsDependencyFromCursor(ctx, cursor)
 }
 
 func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
@@ -728,7 +728,7 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	}
 	defer cursor.Close()
 
-	isDependencyList, err := getIsDependency(ctx, cursor)
+	isDependencyList, err := getIsDependencyFromCursor(ctx, cursor)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dependency from arango cursor: %w", err)
 	}
@@ -753,7 +753,7 @@ func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
 	return model.DependencyTypeUnknown, fmt.Errorf("failed to convert DependencyType to enum")
 }
 
-func getIsDependency(ctx context.Context, cursor driver.Cursor) ([]*model.IsDependency, error) {
+func getIsDependencyFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.IsDependency, error) {
 	type collectedData struct {
 		PkgVersion     *dbPkgVersion `json:"pkgVersion"`
 		DepPkg         *dbPkgVersion `json:"depPkg"`

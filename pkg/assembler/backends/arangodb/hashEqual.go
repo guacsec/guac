@@ -131,7 +131,7 @@ func getHashEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuild
 	}
 	defer cursor.Close()
 
-	return getHashEqual(ctx, cursor)
+	return getHashEqualFromCursor(ctx, cursor)
 }
 
 func setHashEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, hashEqualSpec *model.HashEqualSpec, queryValues map[string]any) {
@@ -239,7 +239,7 @@ func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.
 	}
 	defer cursor.Close()
 
-	return getHashEqual(ctx, cursor)
+	return getHashEqualFromCursor(ctx, cursor)
 }
 
 func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
@@ -279,7 +279,7 @@ RETURN {
 	}
 	defer cursor.Close()
 
-	hashEqualList, err := getHashEqual(ctx, cursor)
+	hashEqualList, err := getHashEqualFromCursor(ctx, cursor)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get hashEqual from arango cursor: %w", err)
 	}
@@ -291,7 +291,7 @@ RETURN {
 	}
 }
 
-func getHashEqual(ctx context.Context, cursor driver.Cursor) ([]*model.HashEqual, error) {
+func getHashEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.HashEqual, error) {
 	type collectedData struct {
 		Artifact      *model.Artifact `json:"artifact"`
 		EqualArtifact *model.Artifact `json:"equalArtifact"`

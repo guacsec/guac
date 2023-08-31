@@ -105,6 +105,13 @@ const (
 	hasSBOMArtEdgesStr string = "hasSBOMArtEdges"
 	hasSBOMsStr        string = "hasSBOMs"
 
+	// certifyVex collection
+
+	certifyVexPkgEdgesStr  string = "certifyVexPkgEdges"
+	certifyVexArtEdgesStr  string = "certifyVexArtEdges"
+	certifyVexVulnEdgesStr string = "certifyVexVulnEdges"
+	certifyVEXsStr         string = "certifyVEXs"
+
 	// certifyVuln collection
 	certifyVulnPkgEdgesStr string = "certifyVulnPkgEdges"
 	certifyVulnEdgesStr    string = "certifyVulnEdges"
@@ -269,12 +276,12 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var isOccurrenceSubjectPkgEdges driver.EdgeDefinition
 		isOccurrenceSubjectPkgEdges.Collection = isOccurrenceSubjectPkgEdgesStr
 		isOccurrenceSubjectPkgEdges.From = []string{pkgVersionsStr}
-		isOccurrenceSubjectPkgEdges.To = []string{isDependenciesStr}
+		isOccurrenceSubjectPkgEdges.To = []string{isOccurrencesStr}
 
 		var isOccurrenceSubjectSrcEdges driver.EdgeDefinition
 		isOccurrenceSubjectSrcEdges.Collection = isOccurrenceSubjectSrcEdgesStr
 		isOccurrenceSubjectSrcEdges.From = []string{srcNamesStr}
-		isOccurrenceSubjectSrcEdges.To = []string{isDependenciesStr}
+		isOccurrenceSubjectSrcEdges.To = []string{isOccurrencesStr}
 
 		// setup hasSLSA collections
 		var hasSLSASubjectArtEdges driver.EdgeDefinition
@@ -306,13 +313,29 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// setup hasSBOM collections
 		var hasSBOMPkgEdges driver.EdgeDefinition
 		hasSBOMPkgEdges.Collection = hasSBOMPkgEdgesStr
-		hasSBOMPkgEdges.From = []string{artifactsStr}
+		hasSBOMPkgEdges.From = []string{pkgVersionsStr}
 		hasSBOMPkgEdges.To = []string{hasSBOMsStr}
 
 		var hasSBOMArtEdges driver.EdgeDefinition
 		hasSBOMArtEdges.Collection = hasSBOMArtEdgesStr
 		hasSBOMArtEdges.From = []string{artifactsStr}
 		hasSBOMArtEdges.To = []string{hasSBOMsStr}
+
+		// setup certifyVex collections
+		var certifyVexPkgEdges driver.EdgeDefinition
+		certifyVexPkgEdges.Collection = certifyVexPkgEdgesStr
+		certifyVexPkgEdges.From = []string{pkgVersionsStr}
+		certifyVexPkgEdges.To = []string{certifyVEXsStr}
+
+		var certifyVexArtEdges driver.EdgeDefinition
+		certifyVexArtEdges.Collection = certifyVexArtEdgesStr
+		certifyVexArtEdges.From = []string{artifactsStr}
+		certifyVexArtEdges.To = []string{certifyVEXsStr}
+
+		var certifyVexVulnEdges driver.EdgeDefinition
+		certifyVexVulnEdges.Collection = certifyVexVulnEdgesStr
+		certifyVexVulnEdges.From = []string{certifyVEXsStr}
+		certifyVexVulnEdges.To = []string{vulnerabilitiesStr}
 
 		// setup certifyVuln collections
 		var certifyVulnPkgEdges driver.EdgeDefinition
@@ -381,7 +404,8 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			isOccurrenceArtEdges, isOccurrenceSubjectPkgEdges, isOccurrenceSubjectSrcEdges, hasSLSASubjectArtEdges,
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
 			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
-			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges}
+			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
+			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -733,10 +757,6 @@ func getPreloadString(prefix, name string) string {
 
 // Retrieval read-only queries for evidence trees
 
-func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
-	panic(fmt.Errorf("not implemented: CertifyVEXStatement - CertifyVEXStatement"))
-}
-
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
@@ -758,9 +778,6 @@ func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.
 }
 func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
-}
-func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
-	panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type

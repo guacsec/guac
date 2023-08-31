@@ -190,6 +190,7 @@ type ComplexityRoot struct {
 		IngestSource                 func(childComplexity int, source model.SourceInputSpec) int
 		IngestSources                func(childComplexity int, sources []*model.SourceInputSpec) int
 		IngestVEXStatement           func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) int
+		IngestVEXStatements          func(childComplexity int, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) int
 		IngestVulnEqual              func(childComplexity int, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) int
 		IngestVulnerabilities        func(childComplexity int, vulns []*model.VulnerabilityInputSpec) int
 		IngestVulnerability          func(childComplexity int, vuln model.VulnerabilityInputSpec) int
@@ -1291,6 +1292,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.VulnerabilityInputSpec), args["vexStatement"].(model.VexStatementInputSpec)), true
+
+	case "Mutation.ingestVEXStatements":
+		if e.complexity.Mutation.IngestVEXStatements == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestVEXStatements_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestVEXStatements(childComplexity, args["subjects"].(model.PackageOrArtifactInputs), args["vulnerabilities"].([]*model.VulnerabilityInputSpec), args["vexStatements"].([]*model.VexStatementInputSpec)), true
 
 	case "Mutation.ingestVulnEqual":
 		if e.complexity.Mutation.IngestVulnEqual == nil {
@@ -2516,7 +2529,7 @@ extend type Query {
 extend type Mutation {
   "Ingests a new builder and returns it. The returned ID can be empty string."
   ingestBuilder(builder: BuilderInputSpec): ID!
-  "Bulk ingests new builders and returns a list of them."
+  "Bulk ingests new builders and returns a list of them. The returned array of IDs can be a an array of empty string."
   ingestBuilders(builders: [BuilderInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
@@ -3029,6 +3042,12 @@ extend type Mutation {
     vulnerability: VulnerabilityInputSpec!
     vexStatement: VexStatementInputSpec!
   ): ID!
+  "Bulk add VEX certifications for a package and vulnerability. The returned array of IDs can be a an array of empty string."
+  ingestVEXStatements(
+    subjects: PackageOrArtifactInputs!, 
+    vulnerabilities: [VulnerabilityInputSpec!]!, 
+    vexStatements: [VexStatementInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#

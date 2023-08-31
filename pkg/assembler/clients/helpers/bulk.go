@@ -166,13 +166,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestHasSBOMs failed with error: %w", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for VEX
 			logger.Infof("assembling VEX : %v", len(p.Vex))
-			for _, v := range p.Vex {
-				if err := ingestVex(ctx, gqlclient, v); err != nil {
-					return fmt.Errorf("ingestVex failed with error: %w", err)
-
-				}
+			if err := ingestVEXs(ctx, gqlclient, p.Vex); err != nil {
+				return fmt.Errorf("ingestVEXs failed with error: %w", err)
 			}
 
 			logger.Infof("assembling HashEqual : %v", len(p.HashEqual))
@@ -246,6 +242,47 @@ func ingestCertifyVulns(ctx context.Context, client graphql.Client, cv []assembl
 		_, err := model.CertifyVulnPkgs(ctx, client, pkgs, vulnerabilities, scanMetadataList)
 		if err != nil {
 			return fmt.Errorf("CertifyVulnPkgs failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestVEXs(ctx context.Context, client graphql.Client, vi []assembler.VexIngest) error {
+
+	var pkgs []model.PkgInputSpec
+	var artifacts []model.ArtifactInputSpec
+	var pkgVulns []model.VulnerabilityInputSpec
+	var artVulns []model.VulnerabilityInputSpec
+	var pkgVEXs []model.VexStatementInputSpec
+	var artVEXs []model.VexStatementInputSpec
+	for _, ingest := range vi {
+		if ingest.Pkg != nil && ingest.Artifact != nil {
+			return fmt.Errorf("unable to create CertifyVex with both artifact and Pkg subject specified")
+		}
+		if ingest.Pkg == nil && ingest.Artifact == nil {
+			return fmt.Errorf("unable to create CertifyVex without either artifact and Pkg subject specified")
+		}
+
+		if ingest.Pkg != nil {
+			pkgs = append(pkgs, *ingest.Pkg)
+			pkgVulns = append(pkgVulns, *ingest.Vulnerability)
+			pkgVEXs = append(pkgVEXs, *ingest.VexData)
+		} else {
+			artifacts = append(artifacts, *ingest.Artifact)
+			artVulns = append(artVulns, *ingest.Vulnerability)
+			artVEXs = append(artVEXs, *ingest.VexData)
+		}
+	}
+	if len(artifacts) > 0 {
+		_, err := model.CertifyVexArtifacts(ctx, client, artifacts, artVulns, artVEXs)
+		if err != nil {
+			return fmt.Errorf("CertifyVexArtifacts failed with error: %w", err)
+		}
+	}
+	if len(pkgs) > 0 {
+		_, err := model.CertifyVexPkgs(ctx, client, pkgs, pkgVulns, pkgVEXs)
+		if err != nil {
+			return fmt.Errorf("CertifyVexPkgs failed with error: %w", err)
 		}
 	}
 	return nil
