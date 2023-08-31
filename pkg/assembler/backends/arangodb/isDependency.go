@@ -187,8 +187,6 @@ func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 		}`)
 	}
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsDependency")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for IsDependency: %w", err)
@@ -540,7 +538,6 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 		// TODO: add version into return
 	}
 
-	fmt.Println(sb.String())
 	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestDependency")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest isDependency: %w", err)

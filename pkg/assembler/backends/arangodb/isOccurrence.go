@@ -637,10 +637,11 @@ func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mo
 		}
 
 		isOccurrence := &model.IsOccurrence{
-			ID:        createdValue.IsOccurrenceID,
-			Artifact:  createdValue.Artifact,
-			Origin:    createdValue.Collector,
-			Collector: createdValue.Origin,
+			ID:            createdValue.IsOccurrenceID,
+			Artifact:      createdValue.Artifact,
+			Justification: createdValue.Justification,
+			Origin:        createdValue.Collector,
+			Collector:     createdValue.Origin,
 		}
 		if pkg != nil {
 			isOccurrence.Subject = pkg
