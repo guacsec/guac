@@ -8,10 +8,15 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Path is the resolver for the path field.
 func (r *queryResolver) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
+	if maxPathLength <= 0 {
+		return nil, gqlerror.Errorf("Path :: maxPathLength argument must be positive, got %d", maxPathLength)
+	}
+
 	return r.Backend.Path(ctx, subject, target, maxPathLength, usingOnly)
 }
 

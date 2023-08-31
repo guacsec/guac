@@ -22,7 +22,6 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -99,29 +98,6 @@ func (n *isOccurrenceStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest IngestOccurrences
 
 func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	valuesDefined := 0
-	if len(subjects.Packages) > 0 {
-		if len(subjects.Packages) != len(artifacts) {
-			return nil, gqlerror.Errorf("uneven packages and artifacts for ingestion")
-		}
-		if len(subjects.Packages) != len(occurrences) {
-			return nil, gqlerror.Errorf("uneven packages and occurrence for ingestion")
-		}
-		valuesDefined = valuesDefined + 1
-	}
-	if len(subjects.Sources) > 0 {
-		if len(subjects.Sources) != len(artifacts) {
-			return nil, gqlerror.Errorf("uneven Sources and artifacts for ingestion")
-		}
-		if len(subjects.Sources) != len(occurrences) {
-			return nil, gqlerror.Errorf("uneven Sources and occurrence for ingestion")
-		}
-		valuesDefined = valuesDefined + 1
-	}
-	if valuesDefined != 1 {
-		return nil, gqlerror.Errorf("must specify at most packages or sources for %v", "IngestOccurrences")
-	}
-
 	var modelIsOccurrences []*model.IsOccurrence
 
 	for i := range occurrences {
@@ -153,9 +129,6 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 
 func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec, readOnly bool) (*model.IsOccurrence, error) {
 	funcName := "IngestOccurrence"
-	if err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence"); err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
 
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
@@ -288,11 +261,6 @@ func (c *demoClient) artifactMatch(aID uint32, artifactSpec *model.ArtifactSpec)
 
 func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 	funcName := "IsOccurrence"
-	if filter != nil {
-		if err := helper.ValidatePackageOrSourceQueryFilter(filter.Subject); err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-	}
 
 	c.m.RLock()
 	defer c.m.RUnlock()

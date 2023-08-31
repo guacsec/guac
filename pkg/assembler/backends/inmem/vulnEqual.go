@@ -131,9 +131,6 @@ func (c *demoClient) convVulnEqual(in *vulnerabilityEqualLink) (*model.VulnEqual
 // Query IsVulnerability
 func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 	funcName := "VulnEqual"
-	if filter != nil && len(filter.Vulnerabilities) > 2 {
-		return nil, gqlerror.Errorf("%v :: too many vulnerabilities in query, max 2, got: %v", funcName, len(filter.Vulnerabilities))
-	}
 	c.m.RLock()
 	defer c.m.RUnlock()
 	if filter.ID != nil {

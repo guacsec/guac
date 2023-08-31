@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -33,13 +32,7 @@ func (c *neo4jClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.Ce
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	// TODO: Fix validation
 	queryAll := true
-	// queryAll, err := helper.ValidatePackageSourceOrArtifactQueryInput(certifyGoodSpec.Subject)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	aggregateCertifyGood := []*model.CertifyGood{}
 
 	if queryAll || (certifyGoodSpec.Subject != nil && certifyGoodSpec.Subject.Package != nil) {
@@ -265,11 +258,6 @@ func generateModelCertifyGood(subject model.PackageSourceOrArtifact, justificati
 // ingest certifyGood
 
 func (c *neo4jClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-
-	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "IngestCertifyGood")
-	if err != nil {
-		return nil, err
-	}
 	panic(fmt.Errorf("not implemented: IngestCertifyGood - IngestCertifyGood"))
 }
 

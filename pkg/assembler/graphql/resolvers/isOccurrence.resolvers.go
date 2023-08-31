@@ -7,11 +7,17 @@ package resolvers
 import (
 	"context"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestOccurrence is the resolver for the ingestOccurrence field.
 func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+	funcName := "IngestOccurrence"
+	if err := helper.ValidatePackageOrSourceInput(&subject, funcName); err != nil {
+		return "", gqlerror.Errorf("%v :: %s", funcName, err)
+	}
 	ingestedOccurrence, err := r.Backend.IngestOccurrence(ctx, subject, artifact, occurrence)
 	if err != nil {
 		return "", err
@@ -21,17 +27,44 @@ func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.P
 
 // IngestOccurrences is the resolver for the ingestOccurrences field.
 func (r *mutationResolver) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
-	ingestedOccurences, err := r.Backend.IngestOccurrences(ctx, subjects, artifacts, occurrences)
-	ingestedOccurencesIDs := []string{}
+	funcName := "IngestOccurrences"
+	ingestedOccurrencesIDs := []string{}
+	valuesDefined := 0
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(artifacts) {
+			return ingestedOccurrencesIDs, gqlerror.Errorf("%v :: uneven packages and artifacts for ingestion", funcName)
+		}
+		if len(subjects.Packages) != len(occurrences) {
+			return ingestedOccurrencesIDs, gqlerror.Errorf("%v :: uneven packages and occurrence for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Sources) > 0 {
+		if len(subjects.Sources) != len(artifacts) {
+			return ingestedOccurrencesIDs, gqlerror.Errorf("%v :: uneven Sources and artifacts for ingestion", funcName)
+		}
+		if len(subjects.Sources) != len(occurrences) {
+			return ingestedOccurrencesIDs, gqlerror.Errorf("%v :: uneven Sources and occurrence for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return ingestedOccurrencesIDs, gqlerror.Errorf("%v :: must specify at most packages or sources", funcName)
+	}
+
+	ingestedOccurrences, err := r.Backend.IngestOccurrences(ctx, subjects, artifacts, occurrences)
 	if err == nil {
-		for _, occurence := range ingestedOccurences {
-			ingestedOccurencesIDs = append(ingestedOccurencesIDs, occurence.ID)
+		for _, occurrence := range ingestedOccurrences {
+			ingestedOccurrencesIDs = append(ingestedOccurrencesIDs, occurrence.ID)
 		}
 	}
-	return ingestedOccurencesIDs, err
+	return ingestedOccurrencesIDs, err
 }
 
 // IsOccurrence is the resolver for the IsOccurrence field.
 func (r *queryResolver) IsOccurrence(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+	if err := helper.ValidatePackageOrSourceQueryFilter(isOccurrenceSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("IsOccurrence :: %s", err)
+	}
 	return r.Backend.IsOccurrence(ctx, &isOccurrenceSpec)
 }

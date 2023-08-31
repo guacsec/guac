@@ -503,46 +503,6 @@ func (s *Suite) TestOccurrence() {
 			},
 		},
 		{
-			Name:  "Ingest without package",
-			InPkg: []*model.PkgInputSpec{},
-			InArt: []*model.ArtifactInputSpec{a1},
-			Calls: []call{
-				{
-					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
-					},
-					Artifact: a1,
-					Occurrence: &model.IsOccurrenceInputSpec{
-						Justification: "justification",
-					},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name:  "Query error",
-			InPkg: []*model.PkgInputSpec{p1},
-			InArt: []*model.ArtifactInputSpec{a1},
-			Calls: []call{
-				{
-					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
-					},
-					Artifact: a1,
-					Occurrence: &model.IsOccurrenceInputSpec{
-						Justification: "justification",
-					},
-				},
-			},
-			Query: &model.IsOccurrenceSpec{
-				Subject: &model.PackageOrSourceSpec{
-					Package: &model.PkgSpec{},
-					Source:  &model.SourceSpec{},
-				},
-			},
-			ExpQueryErr: true,
-		},
-		{
 			Name:  "Query bad ID",
 			InPkg: []*model.PkgInputSpec{p1},
 			InArt: []*model.ArtifactInputSpec{a1},

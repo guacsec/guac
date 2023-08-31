@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestPkgEqual is the resolver for the ingestPkgEqual field.
@@ -21,5 +22,8 @@ func (r *mutationResolver) IngestPkgEqual(ctx context.Context, pkg model.PkgInpu
 
 // PkgEqual is the resolver for the PkgEqual field.
 func (r *queryResolver) PkgEqual(ctx context.Context, pkgEqualSpec model.PkgEqualSpec) ([]*model.PkgEqual, error) {
+	if len(pkgEqualSpec.Packages) > 2 {
+		return nil, gqlerror.Errorf("PkgEqual :: too many packages in query, max 2, got: %v", len(pkgEqualSpec.Packages))
+	}
 	return r.Backend.PkgEqual(ctx, &pkgEqualSpec)
 }

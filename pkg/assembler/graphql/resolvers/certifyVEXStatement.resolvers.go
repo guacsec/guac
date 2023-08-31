@@ -8,15 +8,26 @@ import (
 	"context"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestVEXStatement is the resolver for the ingestVEXStatement field.
 func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
-	if strings.ToLower(vulnerability.Type) == "novuln" {
-		return "", gqlerror.Errorf("novuln type cannot be used for VEX")
+	funcName := "IngestVEXStatement"
+	if err := helper.ValidatePackageOrArtifactInput(&subject, funcName); err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	err := helper.ValidateVexInput(vexStatement)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+	err = helper.ValidateVulnerabilityInputSpec(vulnerability)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	ingestedVEXStatement, err := r.Backend.IngestVEXStatement(ctx, subject,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
@@ -66,6 +77,10 @@ func (r *mutationResolver) IngestVEXStatements(ctx context.Context, subjects mod
 
 // CertifyVEXStatement is the resolver for the CertifyVEXStatement field.
 func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
+	if err := helper.ValidatePackageOrArtifactQueryFilter(certifyVEXStatementSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("CertifyVEXStatement :: %s", err)
+	}
+
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 
 	if certifyVEXStatementSpec.Vulnerability != nil {

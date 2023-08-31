@@ -56,9 +56,6 @@ func (n *scorecardLink) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest Scorecards
 
 func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
-	if len(sources) != len(scorecards) {
-		return nil, gqlerror.Errorf("uneven source and scorecards for ingestion")
-	}
 	var modelCertifyScorecards []*model.CertifyScorecard
 	for i := range scorecards {
 		scorecard, err := c.IngestScorecard(ctx, *sources[i], *scorecards[i])

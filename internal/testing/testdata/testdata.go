@@ -98,6 +98,15 @@ var (
 	//go:embed exampledata/cyclonedx-no-top-level.json
 	CycloneDXExampleNoTopLevelComp []byte
 
+	//go:embed exampledata/cyclonedx-unaffected-vex.json
+	CycloneDXVEXUnAffected []byte
+
+	//go:embed exampledata/cyclonedx-vex-affected.json
+	CycloneDXVEXAffected []byte
+
+	//go:embed exampledata/cyclonedx-vex.xml
+	CyloneDXVEXExampleXML []byte
+
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
 
@@ -127,6 +136,99 @@ var (
 
 	//go:embed exampledata/ingest_predicates.json
 	IngestPredicatesExample []byte
+
+	// CycloneDX VEX testdata unaffected
+	pkg, _   = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.10.0?type=jar")
+	vulnSpec = &generated.VulnerabilityInputSpec{
+		Type:            "cve",
+		VulnerabilityID: "cve-2020-25649",
+	}
+	CycloneDXUnAffectedVexIngest = []assembler.VexIngest{
+		{
+			Pkg:           pkg,
+			Vulnerability: vulnSpec,
+			VexData: &generated.VexStatementInputSpec{
+				Status:           generated.VexStatusNotAffected,
+				VexJustification: generated.VexJustificationVulnerableCodeNotInExecutePath,
+				Statement:        "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly.",
+				StatusNotes:      "not_affected:code_not_reachable",
+				KnownSince:       parseUTCTime("2020-12-03T00:00:00.000Z"),
+			},
+		},
+	}
+	CycloneDXUnAffectedVulnMetadata = []assembler.VulnMetadataIngest{
+		{
+			Vulnerability: vulnSpec,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+				ScoreValue: 7.5,
+				Timestamp:  parseUTCTime("2020-12-03T00:00:00.000Z"),
+			},
+		},
+		{
+			Vulnerability: vulnSpec,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+				ScoreValue: 8.2,
+				Timestamp:  parseUTCTime("2020-12-03T00:00:00.000Z"),
+			},
+		},
+		{
+			Vulnerability: vulnSpec,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+				ScoreValue: 0.0,
+				Timestamp:  parseUTCTime("2020-12-03T00:00:00.000Z"),
+			},
+		},
+	}
+
+	// CycloneDX VEX testdata in triage
+	pkg1, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.4")
+	pkg2, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.6")
+
+	vulnSpecAffected = &generated.VulnerabilityInputSpec{
+		Type:            "cve",
+		VulnerabilityID: "cve-2021-44228",
+	}
+	vexDataAffected = &generated.VexStatementInputSpec{
+		Status:      generated.VexStatusAffected,
+		Statement:   "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
+		StatusNotes: "exploitable:",
+	}
+	CycloneDXAffectedVexIngest = []assembler.VexIngest{
+		{
+			Pkg:           pkg1,
+			Vulnerability: vulnSpecAffected,
+			VexData:       vexDataAffected,
+		},
+		{
+			Pkg:           pkg2,
+			Vulnerability: vulnSpecAffected,
+			VexData:       vexDataAffected,
+		},
+	}
+	CycloneDXAffectedVulnMetadata = []assembler.VulnMetadataIngest{
+		{
+			Vulnerability: vulnSpecAffected,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+				ScoreValue: 10,
+			},
+		},
+	}
+	CycloneDXAffectedCertifyVuln = []assembler.CertifyVulnIngest{
+		{
+			Pkg:           pkg1,
+			Vulnerability: vulnSpecAffected,
+			VulnData:      &generated.ScanMetadataInput{},
+		},
+		{
+			Pkg:           pkg2,
+			Vulnerability: vulnSpecAffected,
+			VulnData:      &generated.ScanMetadataInput{},
+		},
+	}
 
 	// DSSE/SLSA Testdata
 
@@ -1987,8 +2089,8 @@ var (
 			},
 			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2023-0286"},
 			VexData: &model.VexStatementInputSpec{
-				Status:           "AFFECTED",
-				VexJustification: "NOT_PROVIDED",
+				Status:           generated.VexStatusAffected,
+				VexJustification: generated.VexJustificationNotProvided,
 				Statement: `For details on how to apply this update, which includes the changes described in this advisory, refer to:
 
 https://access.redhat.com/articles/11258
@@ -2557,6 +2659,14 @@ func parseRfc3339(s string) time.Time {
 
 func toTime(s string) time.Time {
 	timeScanned, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		panic(err)
+	}
+	return timeScanned
+}
+
+func parseUTCTime(s string) time.Time {
+	timeScanned, err := time.Parse("2006-01-02T15:04:05Z", s)
 	if err != nil {
 		panic(err)
 	}

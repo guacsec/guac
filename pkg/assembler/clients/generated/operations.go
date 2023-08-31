@@ -20707,10 +20707,14 @@ func (v *VulnerabilityMetadataInputSpec) GetCollector() string { return v.Collec
 type VulnerabilityScoreType string
 
 const (
-	VulnerabilityScoreTypeCvssv2 VulnerabilityScoreType = "CVSSv2"
-	VulnerabilityScoreTypeCvssv3 VulnerabilityScoreType = "CVSSv3"
-	VulnerabilityScoreTypeEpssv1 VulnerabilityScoreType = "EPSSv1"
-	VulnerabilityScoreTypeEpssv2 VulnerabilityScoreType = "EPSSv2"
+	VulnerabilityScoreTypeCvssv2  VulnerabilityScoreType = "CVSSv2"
+	VulnerabilityScoreTypeCvssv3  VulnerabilityScoreType = "CVSSv3"
+	VulnerabilityScoreTypeEpssv1  VulnerabilityScoreType = "EPSSv1"
+	VulnerabilityScoreTypeEpssv2  VulnerabilityScoreType = "EPSSv2"
+	VulnerabilityScoreTypeCvssv31 VulnerabilityScoreType = "CVSSv31"
+	VulnerabilityScoreTypeCvssv4  VulnerabilityScoreType = "CVSSv4"
+	VulnerabilityScoreTypeOwasp   VulnerabilityScoreType = "OWASP"
+	VulnerabilityScoreTypeSsvc    VulnerabilityScoreType = "SSVC"
 )
 
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.

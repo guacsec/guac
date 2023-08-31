@@ -28,10 +28,6 @@ import (
 
 func (c *neo4jClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 
-	if hashEqualSpec.Artifacts != nil && len(hashEqualSpec.Artifacts) > 2 {
-		return nil, gqlerror.Errorf("cannot specify more than 2 artifacts in HashEquals")
-	}
-
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 

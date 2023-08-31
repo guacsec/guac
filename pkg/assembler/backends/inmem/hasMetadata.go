@@ -22,7 +22,6 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -68,9 +67,6 @@ func (c *demoClient) IngestHasMetadata(ctx context.Context, subject model.Packag
 
 func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec, readOnly bool) (*model.HasMetadata, error) {
 	funcName := "IngestHasMetadata"
-	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, "HasMetadata subject"); err != nil {
-		return nil, err
-	}
 
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
@@ -191,11 +187,6 @@ func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.Packag
 // Query HasMetadata
 func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
 	funcName := "HasMetadata"
-	if filter != nil {
-		if err := helper.ValidatePackageSourceOrArtifactQueryFilter(filter.Subject); err != nil {
-			return nil, err
-		}
-	}
 
 	c.m.RLock()
 	defer c.m.RUnlock()

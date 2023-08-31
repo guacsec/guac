@@ -53,7 +53,7 @@ func NewCycloneDXParser() common.DocumentParser {
 // Parse breaks out the document into the graph components
 func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) error {
 	c.doc = doc
-	cdxBom, err := parseCycloneDXBOM(doc)
+	cdxBom, err := ParseCycloneDXBOM(doc)
 	if err != nil {
 		return fmt.Errorf("failed to parse cyclonedx BOM: %w", err)
 	}
@@ -180,7 +180,7 @@ func (c *cyclonedxParser) getPackages(cdxBom *cdx.BOM) error {
 	return nil
 }
 
-func parseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
+func ParseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
 	bom := cdx.BOM{}
 	switch doc.Format {
 	case processor.FormatJSON:

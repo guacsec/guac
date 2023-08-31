@@ -150,3 +150,34 @@ func ValidateLicenseInput(license *model.LicenseInputSpec) error {
 	}
 	return nil
 }
+
+// ValidateVexInput
+/*
+For [status] “not_affected”, a VEX statement SHOULD provide a [justification].
+If [justification] is not provided then [impact_statement] MUST be provided.
+For [status] “affected”, MUST include one [action_statement]
+*/
+func ValidateVexInput(vexStatement model.VexStatementInputSpec) error {
+	if vexStatement.Status == model.VexStatusNotAffected && vexStatement.VexJustification == model.VexJustificationNotProvided && vexStatement.Statement == "" {
+		return gqlerror.Errorf("for [status] “not_affected”, if [justification] is not provided then [statement] MUST be provided")
+	} else if vexStatement.Status == model.VexStatusAffected && vexStatement.VexJustification == model.VexJustificationNotProvided && vexStatement.Statement == "" {
+		return gqlerror.Errorf("for [status] “affected”, MUST include one [statement]")
+	}
+	return nil
+}
+
+func ValidateVulnerabilityInputSpec(vulnerability model.VulnerabilityInputSpec) error {
+	if strings.ToLower(vulnerability.Type) == "novuln" {
+		return gqlerror.Errorf("%v type cannot be used for VEX", vulnerability.Type)
+	}
+	return nil
+}
+
+func ValidateVulnerabilitySpec(vulnerability model.VulnerabilitySpec) error {
+	if vulnerability.NoVuln != nil && !*vulnerability.NoVuln {
+		if vulnerability.Type != nil && strings.EqualFold(*vulnerability.Type, "novuln") {
+			return gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")
+		}
+	}
+	return nil
+}
