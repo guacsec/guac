@@ -92,6 +92,12 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
 			}
 
+			licenses := p.GetLicenses(ctx)
+			logger.Infof("assembling Licenses: %v", len(licenses))
+			if err := ingestLicenses(ctx, gqlclient, licenses); err != nil {
+				return fmt.Errorf("ingestLicenses failed with error: %w", err)
+			}
+
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			if err := ingestCertifyScorecards(ctx, gqlclient, p.CertifyScorecard); err != nil {
 				return fmt.Errorf("ingestCertifyScorecards failed with error: %w", err)
@@ -182,6 +188,11 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			if err := ingestPkgEquals(ctx, gqlclient, p.PkgEqual); err != nil {
 				return fmt.Errorf("ingestPkgEquals failed with error: %w", err)
 			}
+
+			logger.Infof("assembling CertifyLegal : %v", len(p.CertifyLegal))
+			if err := ingestCertifyLegals(ctx, gqlclient, p.CertifyLegal); err != nil {
+				return fmt.Errorf("ingestCertifyLegals failed with error: %w", err)
+			}
 		}
 		return nil
 	}
@@ -223,6 +234,14 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client, v []model
 	_, err := model.IngestVulnerabilities(ctx, client, v)
 	if err != nil {
 		return fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
+	}
+	return nil
+}
+
+func ingestLicenses(ctx context.Context, client graphql.Client, v []model.LicenseInputSpec) error {
+	_, err := model.IngestLicenses(ctx, client, v)
+	if err != nil {
+		return fmt.Errorf("ingestLicenses failed with error: %w", err)
 	}
 	return nil
 }
@@ -672,6 +691,51 @@ func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembl
 		_, err := model.IsOccurrencesPkg(ctx, client, pkgs, pkgArtifacts, pkgOccurrences)
 		if err != nil {
 			return fmt.Errorf("isOccurrencesPkg failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembler.CertifyLegalIngest) error {
+	var pkgs []model.PkgInputSpec
+	var sources []model.SourceInputSpec
+	var pkgDec [][]model.LicenseInputSpec
+	var pkgDis [][]model.LicenseInputSpec
+	var pkgCL []model.CertifyLegalInputSpec
+	var srcDec [][]model.LicenseInputSpec
+	var srcDis [][]model.LicenseInputSpec
+	var srcCL []model.CertifyLegalInputSpec
+	for _, ingest := range v {
+
+		if ingest.Pkg != nil && ingest.Src != nil {
+			return fmt.Errorf("unable to create CertifyLegal with both Src and Pkg subject specified")
+		}
+		if ingest.Pkg == nil && ingest.Src == nil {
+			return fmt.Errorf("unable to create CertifyLegal without either Src and Pkg subject specified")
+		}
+
+		if ingest.Pkg != nil {
+			pkgs = append(pkgs, *ingest.Pkg)
+			pkgDec = append(pkgDec, ingest.Declared)
+			pkgDis = append(pkgDis, ingest.Discovered)
+			pkgCL = append(pkgCL, *ingest.CertifyLegal)
+		} else {
+			sources = append(sources, *ingest.Src)
+			srcDec = append(srcDec, ingest.Declared)
+			srcDis = append(srcDis, ingest.Discovered)
+			srcCL = append(srcCL, *ingest.CertifyLegal)
+		}
+	}
+	if len(sources) > 0 {
+		_, err := model.CertifyLegalSrcs(ctx, client, sources, srcDec, srcDis, srcCL)
+		if err != nil {
+			return fmt.Errorf("certifyLegalSrc failed with error: %w", err)
+		}
+	}
+	if len(pkgs) > 0 {
+		_, err := model.CertifyLegalPkgs(ctx, client, pkgs, pkgDec, pkgDis, pkgCL)
+		if err != nil {
+			return fmt.Errorf("certifyLegalPkg failed with error: %w", err)
 		}
 	}
 	return nil

@@ -734,10 +734,77 @@ var (
 		},
 	}
 
+	SpdxCertifyLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: baselayoutPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			Discovered: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense:   "GPL-2.0-only",
+				DiscoveredLicense: "GPL-2.0-only",
+				Justification:     "Found in SPDX document.",
+				TimeScanned:       parseRfc3339("2022-09-24T17:27:55.556104Z"),
+			},
+		},
+		{
+			Pkg: baselayoutdataPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			Discovered: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense:   "GPL-2.0-only",
+				DiscoveredLicense: "GPL-2.0-only",
+				Justification:     "Found in SPDX document.",
+				TimeScanned:       parseRfc3339("2022-09-24T17:27:55.556104Z"),
+			},
+		},
+		{
+			Pkg: keysPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "MIT",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			Discovered: []model.LicenseInputSpec{
+				{
+					Name:        "MIT",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense:   "MIT",
+				DiscoveredLicense: "MIT",
+				Justification:     "Found in SPDX document.",
+				TimeScanned:       parseRfc3339("2022-09-24T17:27:55.556104Z"),
+			},
+		},
+	}
+
 	SpdxIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: SpdxDeps,
 		IsOccurrence: SpdxOccurences,
 		HasSBOM:      SpdxHasSBOM,
+		CertifyLegal: SpdxCertifyLegal,
 	}
 
 	// CycloneDX Testdata
@@ -2613,6 +2680,8 @@ var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.SortSlices(packageQualifierInputSpecLess),
 	cmpopts.SortSlices(psaInputSpecLess),
 	cmpopts.SortSlices(slsaPredicateInputSpecLess),
+	cmpopts.SortSlices(certifyLegalInputSpecLess),
+	cmpopts.SortSlices(licenseInputSpecLess),
 }
 
 func certifyScorecardLess(e1, e2 assembler.CertifyScorecardIngest) bool {
@@ -2636,6 +2705,14 @@ func psaInputSpecLess(e1, e2 model.ArtifactInputSpec) bool {
 }
 
 func slsaPredicateInputSpecLess(e1, e2 model.SLSAPredicateInputSpec) bool {
+	return gLess(e1, e2)
+}
+
+func certifyLegalInputSpecLess(e1, e2 assembler.CertifyLegalIngest) bool {
+	return gLess(e1, e2)
+}
+
+func licenseInputSpecLess(e1, e2 generated.LicenseInputSpec) bool {
 	return gLess(e1, e2)
 }
 

@@ -76,6 +76,14 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			licenses := p.GetLicenses(ctx)
+			logger.Infof("assembling License: %v", len(licenses))
+			for _, v := range licenses {
+				if err := ingestLicense(ctx, gqlclient, &v); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			for _, v := range p.CertifyScorecard {
 				if err := ingestCertifyScorecard(ctx, gqlclient, v); err != nil {
@@ -187,6 +195,13 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 					return err
 				}
 			}
+
+			logger.Infof("assembling CertifyLegal : %v", len(p.CertifyLegal))
+			for _, cl := range p.CertifyLegal {
+				if err := ingestCertifyLegal(ctx, gqlclient, cl); err != nil {
+					return err
+				}
+			}
 		}
 		return nil
 	}
@@ -214,6 +229,11 @@ func ingestBuilder(ctx context.Context, client graphql.Client, v *model.BuilderI
 
 func ingestVulnerability(ctx context.Context, client graphql.Client, v *model.VulnerabilityInputSpec) error {
 	_, err := model.IngestVulnerability(ctx, client, *v)
+	return err
+}
+
+func ingestLicense(ctx context.Context, client graphql.Client, l *model.LicenseInputSpec) error {
+	_, err := model.IngestLicense(ctx, client, *l)
 	return err
 }
 
@@ -406,6 +426,22 @@ func ingestHashEqual(ctx context.Context, client graphql.Client, v assembler.Has
 		return fmt.Errorf("unable to create HashEqual without equal artifact")
 	}
 	_, err := model.IngestHashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
+	return err
+}
+
+func ingestCertifyLegal(ctx context.Context, client graphql.Client, v assembler.CertifyLegalIngest) error {
+	if v.Pkg != nil && v.Src != nil {
+		return fmt.Errorf("unable to create CertifyLegal with both Src and Pkg subject specified")
+	}
+	if v.Pkg == nil && v.Src == nil {
+		return fmt.Errorf("unable to create CertifyLegal without either Src and Pkg subject specified")
+	}
+
+	if v.Src != nil {
+		_, err := model.CertifyLegalSrc(ctx, client, *v.Src, v.Declared, v.Discovered, *v.CertifyLegal)
+		return err
+	}
+	_, err := model.CertifyLegalPkg(ctx, client, *v.Pkg, v.Declared, v.Discovered, *v.CertifyLegal)
 	return err
 }
 
