@@ -268,6 +268,17 @@ func normalizeTimeStampAndScorecard(blob []byte) ([]byte, error) {
 		if depPackage.Scorecard != nil {
 			depPackage.Scorecard = nil
 		}
+		if depPackage.CurrentPackage.Version != nil {
+			depPackage.CurrentPackage.Version = nil
+		}
+	}
+	for _, isDepPackage := range packageComponent.IsDepPackages {
+		if isDepPackage.DepPackageInput.Version != nil {
+			isDepPackage.DepPackageInput.Version = nil
+		}
+		if isDepPackage.CurrentPackageInput.Version != nil {
+			isDepPackage.CurrentPackageInput.Version = nil
+		}
 	}
 	return json.Marshal(packageComponent)
 }
