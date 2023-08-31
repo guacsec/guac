@@ -4623,6 +4623,10 @@ enum VulnerabilityScoreType {
   CVSSv3
   EPSSv1
   EPSSv2
+  CVSSv31
+  CVSSv4
+  OWASP
+  SSVC
 }
 
 "The Comparator is used by the vulnerability score filter on ranges"

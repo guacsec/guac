@@ -1,0 +1,54 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "metadata" : {
+    "timestamp" : "2022-03-03T00:00:00Z",
+    "component" : {
+      "name" : "ABC",
+      "type" : "application",
+      "bom-ref" : "product-ABC"
+    }
+  },
+  "vulnerabilities": [
+    {
+      "id": "CVE-2021-44228",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228"
+      },
+      "ratings": [
+        {
+          "source": {
+            "name": "NVD",
+            "url": "https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator?vector=AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H&version=3.1"
+          },
+          "score": 10.0,
+          "severity": "critical",
+          "method": "CVSSv31",
+          "vector": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"
+        }
+      ],
+      "analysis": {
+        "state": "exploitable",
+        "response": ["will_not_fix", "update"],
+        "detail": "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release."
+      },
+      "affects": [
+        {
+          "ref": "urn:cdx:3e671687-395b-41f5-a30f-a58921a69b79/1#pkg:maven/com.fasterxml.jackson.core/jackson-databind@",
+          "versions": [
+            {
+              "version": "2.4",
+              "status": "affected"
+            },
+            {
+              "version": "2.6",
+              "status": "affected"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

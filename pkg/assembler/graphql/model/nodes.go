@@ -1762,10 +1762,14 @@ func (e VexStatus) MarshalGQL(w io.Writer) {
 type VulnerabilityScoreType string
 
 const (
-	VulnerabilityScoreTypeCVSSv2 VulnerabilityScoreType = "CVSSv2"
-	VulnerabilityScoreTypeCVSSv3 VulnerabilityScoreType = "CVSSv3"
-	VulnerabilityScoreTypeEPSSv1 VulnerabilityScoreType = "EPSSv1"
-	VulnerabilityScoreTypeEPSSv2 VulnerabilityScoreType = "EPSSv2"
+	VulnerabilityScoreTypeCVSSv2  VulnerabilityScoreType = "CVSSv2"
+	VulnerabilityScoreTypeCVSSv3  VulnerabilityScoreType = "CVSSv3"
+	VulnerabilityScoreTypeEPSSv1  VulnerabilityScoreType = "EPSSv1"
+	VulnerabilityScoreTypeEPSSv2  VulnerabilityScoreType = "EPSSv2"
+	VulnerabilityScoreTypeCVSSv31 VulnerabilityScoreType = "CVSSv31"
+	VulnerabilityScoreTypeCVSSv4  VulnerabilityScoreType = "CVSSv4"
+	VulnerabilityScoreTypeOwasp   VulnerabilityScoreType = "OWASP"
+	VulnerabilityScoreTypeSsvc    VulnerabilityScoreType = "SSVC"
 )
 
 var AllVulnerabilityScoreType = []VulnerabilityScoreType{
@@ -1773,11 +1777,15 @@ var AllVulnerabilityScoreType = []VulnerabilityScoreType{
 	VulnerabilityScoreTypeCVSSv3,
 	VulnerabilityScoreTypeEPSSv1,
 	VulnerabilityScoreTypeEPSSv2,
+	VulnerabilityScoreTypeCVSSv31,
+	VulnerabilityScoreTypeCVSSv4,
+	VulnerabilityScoreTypeOwasp,
+	VulnerabilityScoreTypeSsvc,
 }
 
 func (e VulnerabilityScoreType) IsValid() bool {
 	switch e {
-	case VulnerabilityScoreTypeCVSSv2, VulnerabilityScoreTypeCVSSv3, VulnerabilityScoreTypeEPSSv1, VulnerabilityScoreTypeEPSSv2:
+	case VulnerabilityScoreTypeCVSSv2, VulnerabilityScoreTypeCVSSv3, VulnerabilityScoreTypeEPSSv1, VulnerabilityScoreTypeEPSSv2, VulnerabilityScoreTypeCVSSv31, VulnerabilityScoreTypeCVSSv4, VulnerabilityScoreTypeOwasp, VulnerabilityScoreTypeSsvc:
 		return true
 	}
 	return false

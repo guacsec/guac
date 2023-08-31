@@ -1,0 +1,96 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "vulnerabilities": [
+    {
+      "id": "CVE-2020-25649",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-25649"
+      },
+      "references": [
+        {
+          "id": "SNYK-JAVA-COMFASTERXMLJACKSONCORE-1048302",
+          "source": {
+            "name": "SNYK",
+            "url": "https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-1048302"
+          }
+        }
+      ],
+      "ratings": [
+        {
+          "source": {
+            "name": "NVD",
+            "url": "https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator?vector=AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N&version=3.1"
+          },
+          "score": 7.5,
+          "severity": "high",
+          "method": "CVSSv31",
+          "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+        },
+        {
+          "source": {
+            "name": "SNYK",
+            "url": "https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-1048302"
+          },
+          "score": 8.2,
+          "severity": "high",
+          "method": "CVSSv31",
+          "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+        },
+        {
+          "source": {
+            "name": "Acme Inc",
+            "url": "https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator?vector=AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N/CR:X/IR:X/AR:X/MAV:X/MAC:X/MPR:X/MUI:X/MS:X/MC:N/MI:N/MA:N&version=3.1"
+          },
+          "score": 0.0,
+          "severity": "none",
+          "method": "CVSSv31",
+          "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N/CR:X/IR:X/AR:X/MAV:X/MAC:X/MPR:X/MUI:X/MS:X/MC:N/MI:N/MA:N"
+        }
+      ],
+      "cwes": [
+        611
+      ],
+      "description": "com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.\n\nAffected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.",
+      "detail": "XXE Injection is a type of attack against an application that parses XML input. XML is a markup language that defines a set of rules for encoding documents in a format that is both human-readable and machine-readable. By default, many XML processors allow specification of an external entity, a URI that is dereferenced and evaluated during XML processing. When an XML document is being parsed, the parser can make a request and include the content at the specified URI inside of the XML document.\n\nAttacks can include disclosing local files, which may contain sensitive data such as passwords or private user data, using file: schemes or relative paths in the system identifier.",
+      "recommendation": "Upgrade com.fasterxml.jackson.core:jackson-databind to version 2.6.7.4, 2.9.10.7, 2.10.5.1 or higher.",
+      "advisories": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/FasterXML/jackson-databind/commit/612f971b78c60202e9cd75a299050c8f2d724a59"
+        },
+        {
+          "title": "GitHub Issue",
+          "url": "https://github.com/FasterXML/jackson-databind/issues/2589"
+        },
+        {
+          "title": "RedHat Bugzilla Bug",
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=1887664"
+        }
+      ],
+      "created": "2020-12-03T00:00:00.000Z",
+      "published": "2020-12-03T00:00:00.000Z",
+      "updated": "2021-10-26T00:00:00.000Z",
+      "credits": {
+        "individuals": [
+          {
+            "name": "Bartosz Baranowski"
+          }
+        ]
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "code_not_reachable",
+        "response": ["will_not_fix", "update"],
+        "detail": "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly."
+      },
+      "affects": [
+        {
+          "ref": "urn:cdx:3e671687-395b-41f5-a30f-a58921a69b79/1#pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.10.0?type=jar"
+        }
+      ]
+    }
+  ]
+}
