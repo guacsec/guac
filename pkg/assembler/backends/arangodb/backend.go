@@ -195,7 +195,10 @@ func deleteDatabase(ctx context.Context, args backends.BackendArgs) error {
 		if err != nil {
 			return fmt.Errorf("failed to connect %s database with error: %w", config.DBAddr, err)
 		}
-		db.Remove(ctx)
+		err = db.Remove(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to delete %s database with error: %w", config.DBAddr, err)
+		}
 	}
 	return nil
 }
