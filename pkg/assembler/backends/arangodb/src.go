@@ -301,9 +301,8 @@ func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *a
 func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
-	var fields []string
 	if _, ok := ctx.Value("graphql").(graphql.OperationContext); ok {
-		fields = getPreloads(ctx)
+		fields := getPreloads(ctx)
 
 		nameRequired := false
 		namespaceRequired := false

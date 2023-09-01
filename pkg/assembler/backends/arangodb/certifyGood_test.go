@@ -236,7 +236,7 @@ func TestCertifyGood(t *testing.T) {
 					Justification: "test justification",
 				},
 				{
-					Subject:       testdata.P1outName,
+					Subject:       testdata.P2outName,
 					Justification: "test justification",
 				},
 			},
@@ -442,6 +442,7 @@ func TestCertifyGood(t *testing.T) {
 			Query: &model.CertifyGoodSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
+						Type:    ptrfrom.String("pypi"),
 						Version: ptrfrom.String("2.11.1"),
 					},
 				},
@@ -452,7 +453,7 @@ func TestCertifyGood(t *testing.T) {
 					Justification: "test justification",
 				},
 				{
-					Subject:       testdata.P1outName,
+					Subject:       testdata.P2outName,
 					Justification: "test justification",
 				},
 			},
@@ -719,7 +720,7 @@ func TestIngestCertifyGoods(t *testing.T) {
 					Justification: "test justification",
 				},
 				{
-					Subject:       testdata.P1outName,
+					Subject:       testdata.P2outName,
 					Justification: "test justification",
 				},
 			},

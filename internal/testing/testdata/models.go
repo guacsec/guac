@@ -130,13 +130,13 @@ var S3out = &model.Source{
 }
 
 var S4 = &model.SourceInputSpec{
-	Type:      "bitbucket",
+	Type:      "svn",
 	Namespace: "github.com/bob",
 	Name:      "bobsrepo",
 	Commit:    ptrfrom.String("5e7c41f"),
 }
 var S4out = &model.Source{
-	Type: "bitbucket",
+	Type: "svn",
 	Namespaces: []*model.SourceNamespace{{
 		Namespace: "github.com/bob",
 		Names: []*model.SourceName{{

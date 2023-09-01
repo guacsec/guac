@@ -189,15 +189,15 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P4},
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: testdata.P4,
 					},
 					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
+						Pkg: model.PkgMatchTypeAllVersions,
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -205,7 +205,7 @@ func TestCertifyBad(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P2,
+						Package: testdata.P4,
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -226,17 +226,20 @@ func TestCertifyBad(t *testing.T) {
 			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
-						Version: ptrfrom.String("2.11.1"),
+						Type:      ptrfrom.String("conan"),
+						Namespace: ptrfrom.String("openssl.org"),
+						Name:      ptrfrom.String("openssl"),
+						Version:   ptrfrom.String("3.0.3"),
 					},
 				},
 			},
 			ExpCB: []*model.CertifyBad{
 				{
-					Subject:       testdata.P2out,
+					Subject:       testdata.P4out,
 					Justification: "test justification",
 				},
 				{
-					Subject:       testdata.P1outName,
+					Subject:       testdata.P4outName,
 					Justification: "test justification",
 				},
 			},
@@ -442,6 +445,7 @@ func TestCertifyBad(t *testing.T) {
 			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
+						Type:    ptrfrom.String("pypi"),
 						Version: ptrfrom.String("2.11.1"),
 					},
 				},

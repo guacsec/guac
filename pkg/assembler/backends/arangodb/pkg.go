@@ -22,6 +22,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -413,32 +414,35 @@ func setPkgVersionMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any
 }
 
 func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
-	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
-	// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
-	fields := getPreloads(ctx)
 
-	nameRequired := false
-	namespaceRequired := false
-	versionRequired := false
-	for _, f := range fields {
-		if f == namespaces {
-			namespaceRequired = true
-		}
-		if f == names {
-			nameRequired = true
-		}
-		if f == versions {
-			versionRequired = true
-		}
-	}
+	if _, ok := ctx.Value("graphql").(graphql.OperationContext); ok {
+		// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
+		// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
+		// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
+		fields := getPreloads(ctx)
 
-	if !namespaceRequired && !nameRequired && !versionRequired {
-		return c.packagesType(ctx, pkgSpec)
-	} else if namespaceRequired && !nameRequired && !versionRequired {
-		return c.packagesNamespace(ctx, pkgSpec)
-	} else if nameRequired && !versionRequired {
-		return c.packagesName(ctx, pkgSpec)
+		nameRequired := false
+		namespaceRequired := false
+		versionRequired := false
+		for _, f := range fields {
+			if f == namespaces {
+				namespaceRequired = true
+			}
+			if f == names {
+				nameRequired = true
+			}
+			if f == versions {
+				versionRequired = true
+			}
+		}
+
+		if !namespaceRequired && !nameRequired && !versionRequired {
+			return c.packagesType(ctx, pkgSpec)
+		} else if namespaceRequired && !nameRequired && !versionRequired {
+			return c.packagesNamespace(ctx, pkgSpec)
+		} else if nameRequired && !versionRequired {
+			return c.packagesName(ctx, pkgSpec)
+		}
 	}
 
 	values := map[string]any{}
@@ -683,7 +687,7 @@ func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, e
 				return nil, fmt.Errorf("failed to get packages from cursor: %w", err)
 			}
 		} else {
-			var pkgQualifiers []*model.PackageQualifier
+			pkgQualifiers := []*model.PackageQualifier{}
 			if doc.QualifierList != nil {
 				pkgQualifiers = getCollectedPackageQualifiers(doc.QualifierList)
 			}
