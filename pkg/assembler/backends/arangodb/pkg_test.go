@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"golang.org/x/exp/slices"
 )
 
 // func Test_pkgNamespaceStruct_Neighbors(t *testing.T) {
@@ -406,6 +407,7 @@ func Test_Packages(t *testing.T) {
 				t.Errorf("arangoClient.Packages() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			slices.SortFunc(got, lessPkg)
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
@@ -761,11 +763,16 @@ func Test_PackagesName(t *testing.T) {
 				t.Errorf("arangoClient.packagesName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			slices.SortFunc(got, lessPkg)
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}
+}
+
+func lessPkg(a, b *model.Package) bool {
+	return a.Namespaces[0].Names[0].Name < b.Namespaces[0].Names[0].Name
 }
 
 func Test_IngestPackages(t *testing.T) {
@@ -787,7 +794,7 @@ func Test_IngestPackages(t *testing.T) {
 	}{{
 		name:      "tensorflow empty version",
 		pkgInputs: []*model.PkgInputSpec{testdata.P3, testdata.P4},
-		want:      []*model.Package{testdata.P3out, testdata.P4out},
+		want:      []*model.Package{testdata.P4out, testdata.P3out},
 		wantErr:   false,
 	}}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -800,6 +807,7 @@ func Test_IngestPackages(t *testing.T) {
 				t.Errorf("arangoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			slices.SortFunc(got, lessPkg)
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}

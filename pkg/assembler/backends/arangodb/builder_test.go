@@ -25,6 +25,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"golang.org/x/exp/slices"
 )
 
 // TODO (pxp928): add tests back in when implemented
@@ -115,6 +116,10 @@ func Test_IngestBuilder(t *testing.T) {
 	}
 }
 
+func lessBuilder(a, b *model.Builder) bool {
+	return a.URI < b.URI
+}
+
 func Test_IngestBuilders(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
@@ -160,6 +165,7 @@ func Test_IngestBuilders(t *testing.T) {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			slices.SortFunc(got, lessBuilder)
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
@@ -237,6 +243,7 @@ func Test_Builders(t *testing.T) {
 				t.Errorf("demoClient.Builders() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			slices.SortFunc(got, lessBuilder)
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}

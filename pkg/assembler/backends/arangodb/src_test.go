@@ -26,7 +26,12 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"golang.org/x/exp/slices"
 )
+
+func lessSource(a, b *model.Source) bool {
+	return a.Namespaces[0].Namespace < b.Namespaces[0].Namespace
+}
 
 func Test_IngestSources(t *testing.T) {
 	ctx := context.Background()
@@ -47,7 +52,7 @@ func Test_IngestSources(t *testing.T) {
 	}{{
 		name:      "test batch source ingestion",
 		srcInputs: []*model.SourceInputSpec{testdata.S3, testdata.S4},
-		want:      []*model.Source{testdata.S3out, testdata.S4out},
+		want:      []*model.Source{testdata.S4out, testdata.S3out},
 		wantErr:   false,
 	}}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -60,6 +65,7 @@ func Test_IngestSources(t *testing.T) {
 				t.Errorf("arangoClient.IngestSources() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			slices.SortFunc(got, lessSource)
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
@@ -143,6 +149,7 @@ func Test_Sources(t *testing.T) {
 				t.Errorf("arangoClient.Sources() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			slices.SortFunc(got, lessSource)
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
@@ -351,6 +358,7 @@ func Test_SourceNamespaces(t *testing.T) {
 				t.Errorf("arangoClient.Sources() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			slices.SortFunc(got, lessSource)
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
