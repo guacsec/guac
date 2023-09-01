@@ -185,6 +185,20 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._VulnerabilityMetadata(ctx, sel, obj)
+	case model.License:
+		return ec._License(ctx, sel, &obj)
+	case *model.License:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._License(ctx, sel, obj)
+	case model.CertifyLegal:
+		return ec._CertifyLegal(ctx, sel, &obj)
+	case *model.CertifyLegal:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._CertifyLegal(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}

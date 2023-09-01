@@ -88,6 +88,7 @@ type srcNameNode struct {
 	goodLinks           []uint32
 	hasMetadataLinks    []uint32
 	pointOfContactLinks []uint32
+	certifyLegals       []uint32
 }
 
 func (n *srcNamespaceStruct) ID() uint32 { return n.id }
@@ -133,6 +134,9 @@ func (n *srcNameNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	if allowedEdges[model.EdgeSourcePointOfContact] {
 		out = append(out, n.pointOfContactLinks...)
 	}
+	if allowedEdges[model.EdgeSourceCertifyLegal] {
+		out = append(out, n.certifyLegals...)
+	}
 
 	return out
 }
@@ -152,6 +156,7 @@ func (p *srcNameNode) setScorecardLinks(id uint32)   { p.scorecardLinks = append
 func (p *srcNameNode) setOccurrenceLinks(id uint32)  { p.occurrences = append(p.occurrences, id) }
 func (p *srcNameNode) setCertifyBadLinks(id uint32)  { p.badLinks = append(p.badLinks, id) }
 func (p *srcNameNode) setCertifyGoodLinks(id uint32) { p.goodLinks = append(p.goodLinks, id) }
+func (p *srcNameNode) setCertifyLegals(id uint32)    { p.certifyLegals = append(p.certifyLegals, id) }
 func (p *srcNameNode) setHasMetadataLinks(id uint32) {
 	p.hasMetadataLinks = append(p.hasMetadataLinks, id)
 }
