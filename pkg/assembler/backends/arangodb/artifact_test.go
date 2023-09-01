@@ -118,7 +118,7 @@ func getArangoConfig() *ArangoConfig {
 	}
 }
 
-func Test_demoClient_IngestArtifacts(t *testing.T) {
+func Test_IngestArtifacts(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -176,7 +176,7 @@ func Test_demoClient_IngestArtifacts(t *testing.T) {
 	}
 }
 
-func Test_demoClient_IngestArtifact(t *testing.T) {
+func Test_IngestArtifact(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -244,7 +244,7 @@ func Test_demoClient_IngestArtifact(t *testing.T) {
 	}
 }
 
-func Test_demoClient_Artifacts(t *testing.T) {
+func Test_Artifacts(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)

@@ -62,7 +62,7 @@ import (
 // 	}
 // }
 
-func Test_demoClient_IngestBuilder(t *testing.T) {
+func Test_IngestBuilder(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -115,7 +115,7 @@ func Test_demoClient_IngestBuilder(t *testing.T) {
 	}
 }
 
-func Test_demoClient_IngestBuilders(t *testing.T) {
+func Test_IngestBuilders(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -167,7 +167,7 @@ func Test_demoClient_IngestBuilders(t *testing.T) {
 	}
 }
 
-func Test_demoClient_Builders(t *testing.T) {
+func Test_Builders(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	tests := []struct {

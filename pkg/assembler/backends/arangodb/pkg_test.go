@@ -291,7 +291,7 @@ import (
 // 	}
 // }
 
-func Test_demoClient_Packages(t *testing.T) {
+func Test_Packages(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -413,7 +413,7 @@ func Test_demoClient_Packages(t *testing.T) {
 	}
 }
 
-func Test_demoClient_PackageTypes(t *testing.T) {
+func Test_PackageTypes(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -523,7 +523,7 @@ func Test_demoClient_PackageTypes(t *testing.T) {
 	}
 }
 
-func Test_demoClient_PackagesNamespace(t *testing.T) {
+func Test_PackagesNamespace(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -637,7 +637,7 @@ func Test_demoClient_PackagesNamespace(t *testing.T) {
 	}
 }
 
-func Test_demoClient_PackagesName(t *testing.T) {
+func Test_PackagesName(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -768,7 +768,7 @@ func Test_demoClient_PackagesName(t *testing.T) {
 	}
 }
 
-func Test_demoClient_IngestPackages(t *testing.T) {
+func Test_IngestPackages(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)

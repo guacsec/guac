@@ -54,7 +54,7 @@ jobs:
         ports:
           - 5432:5432
       arango:
-        image: arangodb:latest@sha256:c26d8eebcb339d30bd52c97e5a16dab09d102b820180406b572dbe2c4f15cbf5
+        image: arangodb:latest@sha256:085b45e8c56d5d4114e409482694d40fc8d1678c6b5d98d774bab31193034d6a
         env:
           ARANGO_ROOT_PASSWORD: test123
         ports:

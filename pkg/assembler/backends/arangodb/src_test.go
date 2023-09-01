@@ -28,7 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func Test_demoClient_IngestSources(t *testing.T) {
+func Test_IngestSources(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -67,7 +67,7 @@ func Test_demoClient_IngestSources(t *testing.T) {
 	}
 }
 
-func Test_demoClient_Sources(t *testing.T) {
+func Test_Sources(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -150,7 +150,7 @@ func Test_demoClient_Sources(t *testing.T) {
 	}
 }
 
-func Test_demoClient_SourceTypes(t *testing.T) {
+func Test_SourceTypes(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
@@ -249,7 +249,7 @@ func Test_demoClient_SourceTypes(t *testing.T) {
 	}
 }
 
-func Test_demoClient_SourceNamespaces(t *testing.T) {
+func Test_SourceNamespaces(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
 	err := deleteDatabase(ctx, arangArg)
