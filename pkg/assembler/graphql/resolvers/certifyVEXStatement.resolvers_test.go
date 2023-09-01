@@ -107,6 +107,25 @@ func TestIngestVEXStatement(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
+			Name: "Ingest vulnerability cve with novulnID",
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Vuln: &model.VulnerabilityInputSpec{
+						Type:            "cve",
+						VulnerabilityID: "",
+					},
+					In: &model.VexStatementInputSpec{
+						Status:           model.VexStatusAffected,
+						VexJustification: "test justification",
+					},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
 			Name: "Happy path",
 			Calls: []call{
 				{

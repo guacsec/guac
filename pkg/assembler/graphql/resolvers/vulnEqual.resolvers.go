@@ -8,12 +8,34 @@ import (
 	"context"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestVulnEqual is the resolver for the ingestVulnEqual field.
 func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
+	funcName := "IngestVulnEqual"
+	err := helper.ValidateNoVul(vulnerability)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
+	err = helper.ValidateVulnerabilityIDInputSpec(vulnerability)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
+	err = helper.ValidateNoVul(otherVulnerability)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
+	err = helper.ValidateVulnerabilityIDInputSpec(otherVulnerability)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	ingestedVulnEqual, err := r.Backend.IngestVulnEqual(ctx,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
@@ -36,7 +58,6 @@ func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnE
 	if len(vulnEqualSpec.Vulnerabilities) > 0 {
 		var lowercaseVulnFilterList []*model.VulnerabilitySpec
 		for _, v := range vulnEqualSpec.Vulnerabilities {
-
 			var typeLowerCase *string = nil
 			var vulnIDLowerCase *string = nil
 			if v.Type != nil {

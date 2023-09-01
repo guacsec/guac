@@ -338,8 +338,6 @@ func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec
 		"tag": sName.tag
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Sources")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for sources: %w", err)
@@ -363,8 +361,6 @@ func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.Source
 		"type_id": sType._id,
 		"type": sType.type
 	}`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "sourcesType")
 	if err != nil {
@@ -415,8 +411,6 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 		"namespace_id": sNs._id,
 		"namespace": sNs.namespace
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "sourcesNamespace")
 	if err != nil {

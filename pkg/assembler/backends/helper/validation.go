@@ -142,9 +142,16 @@ func ValidateVexInput(vexStatement model.VexStatementInputSpec) error {
 	return nil
 }
 
-func ValidateVulnerabilityInputSpec(vulnerability model.VulnerabilityInputSpec) error {
+func ValidateNoVul(vulnerability model.VulnerabilityInputSpec) error {
 	if strings.ToLower(vulnerability.Type) == "novuln" {
-		return gqlerror.Errorf("%v type cannot be used for VEX", vulnerability.Type)
+		return gqlerror.Errorf("novuln type cannot be used")
+	}
+	return nil
+}
+
+func ValidateVulnerabilityIDInputSpec(vulnerability model.VulnerabilityInputSpec) error {
+	if strings.ToLower(vulnerability.Type) != "novuln" && vulnerability.VulnerabilityID == "" {
+		return gqlerror.Errorf("vulnerabilityID must be specified for type %s", vulnerability.Type)
 	}
 	return nil
 }

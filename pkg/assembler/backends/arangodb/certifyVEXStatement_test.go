@@ -380,69 +380,6 @@ func TestVEX(t *testing.T) {
 			},
 		},
 		{
-			Name:   "Query on noVuln",
-			InPkg:  []*model.PkgInputSpec{testdata.P1},
-			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1, testdata.NoVulnInput},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Vuln: testdata.O1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Vuln: testdata.O2,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Vuln: testdata.C1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Vuln: testdata.NoVulnInput,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			Query: &model.CertifyVEXStatementSpec{
-				Vulnerability: &model.VulnerabilitySpec{
-					Type: ptrfrom.String("noVuln"),
-				},
-			},
-			ExpVEX: []*model.CertifyVEXStatement{
-				{
-					Subject: testdata.P1out,
-					Vulnerability: &model.Vulnerability{
-						Type:             "novuln",
-						VulnerabilityIDs: []*model.VulnerabilityID{testdata.NoVulnOut},
-					},
-					VexJustification: "test justification",
-					KnownSince:       time.Unix(1e9, 0),
-				},
-			},
-		},
-		{
 			Name:   "Query on Status",
 			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.O1},
@@ -758,60 +695,6 @@ func TestVEX(t *testing.T) {
 					KnownSince:       time.Unix(1e9, 0),
 				},
 			},
-		},
-		{
-			Name:   "Ingest noVuln",
-			InPkg:  []*model.PkgInputSpec{testdata.P1},
-			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Vuln: testdata.NoVulnInput,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			Query: &model.CertifyVEXStatementSpec{
-				Vulnerability: &model.VulnerabilitySpec{
-					Type: ptrfrom.String("noVuln"),
-				},
-			},
-			ExpVEX: []*model.CertifyVEXStatement{
-				{
-					Subject: testdata.P1out,
-					Vulnerability: &model.Vulnerability{
-						Type:             "novuln",
-						VulnerabilityIDs: []*model.VulnerabilityID{testdata.NoVulnOut},
-					},
-					VexJustification: "test justification",
-					KnownSince:       time.Unix(1e9, 0),
-				},
-			},
-		},
-		{
-			Name:   "Query bad id",
-			InPkg:  []*model.PkgInputSpec{testdata.P1},
-			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Vuln: testdata.O1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			Query: &model.CertifyVEXStatementSpec{
-				ID: ptrfrom.String("-5"),
-			},
-			ExpQueryErr: false,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
