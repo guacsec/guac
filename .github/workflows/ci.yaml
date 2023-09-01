@@ -53,6 +53,12 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+      arango:
+        image: arangodb:latest@sha256:c26d8eebcb339d30bd52c97e5a16dab09d102b820180406b572dbe2c4f15cbf5
+        env:
+          ARANGO_ROOT_PASSWORD: test123
+        ports:
+          - 8529:8529
     steps:
       - name: Checkout code
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # tag=v3
