@@ -520,8 +520,8 @@ github.com/prometheus/common v0.42.0 h1:EKsfXEYo4JpWMHH5cg+KOUWeuJSov1Id8zGR8eeI
 github.com/prometheus/common v0.42.0/go.mod h1:xBwqVerjNdUDjgODMpudtOMwlOwf2SaTr1yjz4b7Zbc=
 github.com/prometheus/procfs v0.10.1 h1:kYK1Va/YMlutzCGazswoHKo//tZVlFpKYh+PymziUAg=
 github.com/prometheus/procfs v0.10.1/go.mod h1:nwNm2aOCAYw8uTR/9bWRREkZFxAUcWzPHWJq+XBB/FM=
-github.com/regclient/regclient v0.4.8 h1:h4uZRR4OT4oO+50qWu4bj+rzqRs/JwD3erb6lHIkYK4=
-github.com/regclient/regclient v0.4.8/go.mod h1:UC6i29I09h9KHyABGLGvsvGi7KYRY8ZKLyt7fzvW4oE=
+github.com/regclient/regclient v0.5.1 h1:fAcQn+9HhdsRN+snecUG2cCxx4+eQygpxuJyRP0SkoE=
+github.com/regclient/regclient v0.5.1/go.mod h1:zR5zvU2KYuYiFI0lZRhw5S3bqxvamCPRte9tXqp+WXs=
 github.com/rhysd/actionlint v1.6.24 h1:5f61cF5ssP2pzG0jws5bEsfZBNhbBcO9nl7vTzVKjzs=
 github.com/rhysd/actionlint v1.6.24/go.mod h1:gQmz9r2wlcpLy+VdbzK0GINJQnAK5/sNH3BpwW4Mt5I=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
