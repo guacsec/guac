@@ -206,7 +206,7 @@ require (
 	github.com/regclient/regclient v0.5.1
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sigstore/sigstore v1.6.5
-	github.com/spdx/tools-golang v0.5.2
+	github.com/spdx/tools-golang v0.5.3
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	github.com/vektah/gqlparser/v2 v2.5.8
