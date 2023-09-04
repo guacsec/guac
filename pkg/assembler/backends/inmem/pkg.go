@@ -124,6 +124,7 @@ type pkgVersionNode struct {
 	hasMetadataLinks    []uint32
 	pointOfContactLinks []uint32
 	pkgEquals           []uint32
+	certifyLegals       []uint32
 }
 
 // Be type safe, don't use any / interface{}
@@ -228,6 +229,9 @@ func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	if allowedEdges[model.EdgePackagePointOfContact] {
 		out = append(out, n.pointOfContactLinks...)
 	}
+	if allowedEdges[model.EdgePackageCertifyLegal] {
+		out = append(out, n.certifyLegals...)
+	}
 
 	return out
 }
@@ -314,6 +318,8 @@ func (p *pkgVersionNode) getPointOfContactLinks() []uint32   { return p.pointOfC
 
 // pkgEqual back edges
 func (p *pkgVersionNode) setPkgEquals(id uint32) { p.pkgEquals = append(p.pkgEquals, id) }
+
+func (p *pkgVersionNode) setCertifyLegals(id uint32) { p.certifyLegals = append(p.certifyLegals, id) }
 
 // Ingest Package
 

@@ -72,55 +72,45 @@ func (c *demoClient) getNextID() uint32 {
 }
 
 type demoClient struct {
-	id uint32
-	m  sync.RWMutex
+	id    uint32
+	m     sync.RWMutex
+	index indexType
 
-	artifacts              artMap
-	builders               builderMap
+	artifacts       artMap
+	builders        builderMap
+	licenses        licMap
+	packages        pkgTypeMap
+	sources         srcTypeMap
+	vulnerabilities vulnTypeMap
+
 	certifyBads            badList
 	certifyGoods           goodList
-	pkgEquals              pkgEqualList
-	vulnerabilities        vulnTypeMap
-	vulnerabilityEquals    vulnerabilityEqualList
-	vulnerabilityMetadatas vulnerabilityMetadataList
+	certifyLegals          certifyLegalList
+	certifyVulnerabilities certifyVulnerabilityList
 	hasMetadatas           hasMetadataList
-	pointOfContacts        pointOfContactList
 	hasSBOMs               hasSBOMList
 	hasSLSAs               hasSLSAList
 	hasSources             hasSrcList
 	hashEquals             hashEqualList
-	index                  indexType
 	isDependencies         isDependencyList
 	occurrences            isOccurrenceList
-	packages               pkgTypeMap
+	pkgEquals              pkgEqualList
+	pointOfContacts        pointOfContactList
 	scorecards             scorecardList
-	sources                srcTypeMap
 	vexs                   vexList
-	certifyVulnerabilities certifyVulnerabilityList
+	vulnerabilityEquals    vulnerabilityEqualList
+	vulnerabilityMetadatas vulnerabilityMetadataList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		artifacts:              artMap{},
-		builders:               builderMap{},
-		certifyBads:            badList{},
-		certifyGoods:           goodList{},
-		pkgEquals:              pkgEqualList{},
-		vulnerabilities:        vulnTypeMap{},
-		vulnerabilityEquals:    vulnerabilityEqualList{},
-		vulnerabilityMetadatas: vulnerabilityMetadataList{},
-		hasSBOMs:               hasSBOMList{},
-		hasSLSAs:               hasSLSAList{},
-		hasSources:             hasSrcList{},
-		hashEquals:             hashEqualList{},
-		index:                  indexType{},
-		isDependencies:         isDependencyList{},
-		occurrences:            isOccurrenceList{},
-		packages:               pkgTypeMap{},
-		scorecards:             scorecardList{},
-		sources:                srcTypeMap{},
-		vexs:                   vexList{},
-		certifyVulnerabilities: certifyVulnerabilityList{},
+		artifacts:       artMap{},
+		builders:        builderMap{},
+		index:           indexType{},
+		licenses:        licMap{},
+		packages:        pkgTypeMap{},
+		sources:         srcTypeMap{},
+		vulnerabilities: vulnTypeMap{},
 	}
 
 	return client, nil

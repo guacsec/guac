@@ -67,6 +67,13 @@ fragment AllBuilderTree on Builder {
   uri
 }
 
+fragment AllLicenseTree on License {
+  id
+  name
+  inline
+  listVersion
+}
+
 fragment AllVulnerabilityTree on Vulnerability {
   id
   type
@@ -170,6 +177,32 @@ fragment AllSLSATree on HasSLSA {
     origin
     collector
   }
+}
+
+fragment AllCertifyLegalTree on CertifyLegal {
+  id
+  subject {
+    __typename
+    ... on Package {
+      ...AllPkgTree
+    }
+    ... on Source {
+      ...AllSourceTree
+    }
+  }
+  declaredLicense
+  declaredLicenses {
+    ...AllLicenseTree
+  }
+  discoveredLicense
+  discoveredLicenses {
+    ...AllLicenseTree
+  }
+  attribution
+  justification
+  timeScanned
+  origin
+  collector
 }
 
 fragment AllCertifyBad on CertifyBad {

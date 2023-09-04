@@ -181,6 +181,77 @@ type CertifyGoodSpec struct {
 	Collector     *string                      `json:"collector,omitempty"`
 }
 
+// CertifyLegal is an attestation to attach legal information to a package or source.
+//
+// The certification information is either copied from an attestation found in an
+// SBOM or created by a collector/scanner.
+//
+// Discovered license is also known as Concluded. More information:
+// https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+//
+// Attribution is also known as Copyright Text. It is what could be displayed to
+// comply with notice
+// requirements. https://www.nexb.com/oss-attribution-best-practices/
+//
+// License expressions follow this format:
+// https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+type CertifyLegal struct {
+	ID string `json:"id"`
+	// The package version or source that is attested
+	Subject PackageOrSource `json:"subject"`
+	// The license expression as delcared
+	DeclaredLicense string `json:"declaredLicense"`
+	// A list of license objects found in the declared license expression
+	DeclaredLicenses []*License `json:"declaredLicenses"`
+	// The license expression as discovered by scan
+	DiscoveredLicense string `json:"discoveredLicense"`
+	// A list of license objects found in the discovered license expression
+	DiscoveredLicenses []*License `json:"discoveredLicenses"`
+	// Attribution text of the subject
+	Attribution string `json:"attribution"`
+	// Extra justification for the certification
+	Justification string `json:"justification"`
+	// Time of scan (in RFC 3339 format)
+	TimeScanned time.Time `json:"timeScanned"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+}
+
+func (CertifyLegal) IsNode() {}
+
+// CertifyLegalInputSpec represents the input for certifying legal information in
+// mutations.
+type CertifyLegalInputSpec struct {
+	DeclaredLicense   string    `json:"declaredLicense"`
+	DiscoveredLicense string    `json:"discoveredLicense"`
+	Attribution       string    `json:"attribution"`
+	Justification     string    `json:"justification"`
+	TimeScanned       time.Time `json:"timeScanned"`
+	Origin            string    `json:"origin"`
+	Collector         string    `json:"collector"`
+}
+
+// CertifyLegalSpec allows filtering the list of legal certifications to
+// return in a query.
+//
+// Specifying just the package allows to query for all certifications associated
+// with the package.
+type CertifyLegalSpec struct {
+	ID                 *string              `json:"id,omitempty"`
+	Subject            *PackageOrSourceSpec `json:"subject,omitempty"`
+	DeclaredLicense    *string              `json:"declaredLicense,omitempty"`
+	DeclaredLicenses   []*LicenseSpec       `json:"declaredLicenses,omitempty"`
+	DiscoveredLicense  *string              `json:"discoveredLicense,omitempty"`
+	DiscoveredLicenses []*LicenseSpec       `json:"discoveredLicenses,omitempty"`
+	Attribution        *string              `json:"attribution,omitempty"`
+	Justification      *string              `json:"justification,omitempty"`
+	TimeScanned        *time.Time           `json:"timeScanned,omitempty"`
+	Origin             *string              `json:"origin,omitempty"`
+	Collector          *string              `json:"collector,omitempty"`
+}
+
 // CertifyScorecard is an attestation to attach a Scorecard analysis to a
 // particular source repository.
 type CertifyScorecard struct {
@@ -574,6 +645,56 @@ type IsOccurrenceSpec struct {
 	Justification *string              `json:"justification,omitempty"`
 	Origin        *string              `json:"origin,omitempty"`
 	Collector     *string              `json:"collector,omitempty"`
+}
+
+// License represents a particular license. If the license is found on the SPDX
+// license list (https://spdx.org/licenses/) then the fields should be:
+//
+// Name: SPDX license identifier
+// Inline: empty
+// ListVersion: SPDX license list version
+//
+// example:
+//
+// Name: AGPL-3.0-or-later
+// Inline: ""
+// ListVersion: 3.21 2023-06-18
+//
+// If the license is not on the SPDX license list, then a new guid should be
+// created and the license text placed inline:
+//
+// Name: LicenseRef-<guid>
+// Inline: Full license text
+// ListVersion: empty
+//
+// example:
+//
+// Name: LicenseRef-1a2b3c
+// Inline: Permission to use, copy, modify, and/or distribute ...
+// ListVersion: ""
+type License struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Inline      *string `json:"inline,omitempty"`
+	ListVersion *string `json:"listVersion,omitempty"`
+}
+
+func (License) IsNode() {}
+
+// LicenseInputSpec specifies an license for mutations. One of inline or
+// listVersion should be empty or missing.
+type LicenseInputSpec struct {
+	Name        string  `json:"name"`
+	Inline      *string `json:"inline,omitempty"`
+	ListVersion *string `json:"listVersion,omitempty"`
+}
+
+// LicenseSpec allows filtering the list of licenses to return in a query.
+type LicenseSpec struct {
+	ID          *string `json:"id,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	Inline      *string `json:"inline,omitempty"`
+	ListVersion *string `json:"listVersion,omitempty"`
 }
 
 // MatchFlags is used to input the PkgMatchType enum.
@@ -1459,47 +1580,56 @@ const (
 	EdgeArtifactCertifyGood              Edge = "ARTIFACT_CERTIFY_GOOD"
 	EdgeArtifactCertifyVexStatement      Edge = "ARTIFACT_CERTIFY_VEX_STATEMENT"
 	EdgeArtifactHashEqual                Edge = "ARTIFACT_HASH_EQUAL"
+	EdgeArtifactHasMetadata              Edge = "ARTIFACT_HAS_METADATA"
 	EdgeArtifactHasSbom                  Edge = "ARTIFACT_HAS_SBOM"
 	EdgeArtifactHasSlsa                  Edge = "ARTIFACT_HAS_SLSA"
 	EdgeArtifactIsOccurrence             Edge = "ARTIFACT_IS_OCCURRENCE"
-	EdgeArtifactHasMetadata              Edge = "ARTIFACT_HAS_METADATA"
 	EdgeArtifactPointOfContact           Edge = "ARTIFACT_POINT_OF_CONTACT"
 	EdgeBuilderHasSlsa                   Edge = "BUILDER_HAS_SLSA"
-	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
-	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
-	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
-	EdgeVulnerabilityVulnMetadata        Edge = "VULNERABILITY_VULN_METADATA"
+	EdgeLicenseCertifyLegal              Edge = "LICENSE_CERTIFY_LEGAL"
 	EdgePackageCertifyBad                Edge = "PACKAGE_CERTIFY_BAD"
 	EdgePackageCertifyGood               Edge = "PACKAGE_CERTIFY_GOOD"
+	EdgePackageCertifyLegal              Edge = "PACKAGE_CERTIFY_LEGAL"
 	EdgePackageCertifyVexStatement       Edge = "PACKAGE_CERTIFY_VEX_STATEMENT"
 	EdgePackageCertifyVuln               Edge = "PACKAGE_CERTIFY_VULN"
+	EdgePackageHasMetadata               Edge = "PACKAGE_HAS_METADATA"
 	EdgePackageHasSbom                   Edge = "PACKAGE_HAS_SBOM"
 	EdgePackageHasSourceAt               Edge = "PACKAGE_HAS_SOURCE_AT"
 	EdgePackageIsDependency              Edge = "PACKAGE_IS_DEPENDENCY"
 	EdgePackageIsOccurrence              Edge = "PACKAGE_IS_OCCURRENCE"
 	EdgePackagePkgEqual                  Edge = "PACKAGE_PKG_EQUAL"
-	EdgePackageHasMetadata               Edge = "PACKAGE_HAS_METADATA"
 	EdgePackagePointOfContact            Edge = "PACKAGE_POINT_OF_CONTACT"
 	EdgeSourceCertifyBad                 Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood                Edge = "SOURCE_CERTIFY_GOOD"
+	EdgeSourceCertifyLegal               Edge = "SOURCE_CERTIFY_LEGAL"
 	EdgeSourceCertifyScorecard           Edge = "SOURCE_CERTIFY_SCORECARD"
+	EdgeSourceHasMetadata                Edge = "SOURCE_HAS_METADATA"
 	EdgeSourceHasSourceAt                Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence               Edge = "SOURCE_IS_OCCURRENCE"
-	EdgeSourceHasMetadata                Edge = "SOURCE_HAS_METADATA"
 	EdgeSourcePointOfContact             Edge = "SOURCE_POINT_OF_CONTACT"
+	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
+	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
+	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
+	EdgeVulnerabilityVulnMetadata        Edge = "VULNERABILITY_VULN_METADATA"
 	EdgeCertifyBadArtifact               Edge = "CERTIFY_BAD_ARTIFACT"
 	EdgeCertifyBadPackage                Edge = "CERTIFY_BAD_PACKAGE"
 	EdgeCertifyBadSource                 Edge = "CERTIFY_BAD_SOURCE"
 	EdgeCertifyGoodArtifact              Edge = "CERTIFY_GOOD_ARTIFACT"
 	EdgeCertifyGoodPackage               Edge = "CERTIFY_GOOD_PACKAGE"
 	EdgeCertifyGoodSource                Edge = "CERTIFY_GOOD_SOURCE"
+	EdgeCertifyLegalLicense              Edge = "CERTIFY_LEGAL_LICENSE"
+	EdgeCertifyLegalPackage              Edge = "CERTIFY_LEGAL_PACKAGE"
+	EdgeCertifyLegalSource               Edge = "CERTIFY_LEGAL_SOURCE"
 	EdgeCertifyScorecardSource           Edge = "CERTIFY_SCORECARD_SOURCE"
 	EdgeCertifyVexStatementArtifact      Edge = "CERTIFY_VEX_STATEMENT_ARTIFACT"
-	EdgeCertifyVexStatementVulnerability Edge = "CERTIFY_VEX_STATEMENT_VULNERABILITY"
 	EdgeCertifyVexStatementPackage       Edge = "CERTIFY_VEX_STATEMENT_PACKAGE"
-	EdgeCertifyVulnVulnerability         Edge = "CERTIFY_VULN_VULNERABILITY"
+	EdgeCertifyVexStatementVulnerability Edge = "CERTIFY_VEX_STATEMENT_VULNERABILITY"
 	EdgeCertifyVulnPackage               Edge = "CERTIFY_VULN_PACKAGE"
+	EdgeCertifyVulnVulnerability         Edge = "CERTIFY_VULN_VULNERABILITY"
 	EdgeHashEqualArtifact                Edge = "HASH_EQUAL_ARTIFACT"
+	EdgeHasMetadataArtifact              Edge = "HAS_METADATA_ARTIFACT"
+	EdgeHasMetadataPackage               Edge = "HAS_METADATA_PACKAGE"
+	EdgeHasMetadataSource                Edge = "HAS_METADATA_SOURCE"
 	EdgeHasSbomArtifact                  Edge = "HAS_SBOM_ARTIFACT"
 	EdgeHasSbomPackage                   Edge = "HAS_SBOM_PACKAGE"
 	EdgeHasSlsaBuiltBy                   Edge = "HAS_SLSA_BUILT_BY"
@@ -1511,14 +1641,11 @@ const (
 	EdgeIsOccurrenceArtifact             Edge = "IS_OCCURRENCE_ARTIFACT"
 	EdgeIsOccurrencePackage              Edge = "IS_OCCURRENCE_PACKAGE"
 	EdgeIsOccurrenceSource               Edge = "IS_OCCURRENCE_SOURCE"
-	EdgeVulnEqualVulnerability           Edge = "VULN_EQUAL_VULNERABILITY"
 	EdgePkgEqualPackage                  Edge = "PKG_EQUAL_PACKAGE"
-	EdgeHasMetadataPackage               Edge = "HAS_METADATA_PACKAGE"
-	EdgeHasMetadataArtifact              Edge = "HAS_METADATA_ARTIFACT"
-	EdgeHasMetadataSource                Edge = "HAS_METADATA_SOURCE"
-	EdgePointOfContactPackage            Edge = "POINT_OF_CONTACT_PACKAGE"
 	EdgePointOfContactArtifact           Edge = "POINT_OF_CONTACT_ARTIFACT"
+	EdgePointOfContactPackage            Edge = "POINT_OF_CONTACT_PACKAGE"
 	EdgePointOfContactSource             Edge = "POINT_OF_CONTACT_SOURCE"
+	EdgeVulnEqualVulnerability           Edge = "VULN_EQUAL_VULNERABILITY"
 	EdgeVulnMetadataVulnerability        Edge = "VULN_METADATA_VULNERABILITY"
 )
 
@@ -1527,47 +1654,56 @@ var AllEdge = []Edge{
 	EdgeArtifactCertifyGood,
 	EdgeArtifactCertifyVexStatement,
 	EdgeArtifactHashEqual,
+	EdgeArtifactHasMetadata,
 	EdgeArtifactHasSbom,
 	EdgeArtifactHasSlsa,
 	EdgeArtifactIsOccurrence,
-	EdgeArtifactHasMetadata,
 	EdgeArtifactPointOfContact,
 	EdgeBuilderHasSlsa,
-	EdgeVulnerabilityCertifyVexStatement,
-	EdgeVulnerabilityCertifyVuln,
-	EdgeVulnerabilityVulnEqual,
-	EdgeVulnerabilityVulnMetadata,
+	EdgeLicenseCertifyLegal,
 	EdgePackageCertifyBad,
 	EdgePackageCertifyGood,
+	EdgePackageCertifyLegal,
 	EdgePackageCertifyVexStatement,
 	EdgePackageCertifyVuln,
+	EdgePackageHasMetadata,
 	EdgePackageHasSbom,
 	EdgePackageHasSourceAt,
 	EdgePackageIsDependency,
 	EdgePackageIsOccurrence,
 	EdgePackagePkgEqual,
-	EdgePackageHasMetadata,
 	EdgePackagePointOfContact,
 	EdgeSourceCertifyBad,
 	EdgeSourceCertifyGood,
+	EdgeSourceCertifyLegal,
 	EdgeSourceCertifyScorecard,
+	EdgeSourceHasMetadata,
 	EdgeSourceHasSourceAt,
 	EdgeSourceIsOccurrence,
-	EdgeSourceHasMetadata,
 	EdgeSourcePointOfContact,
+	EdgeVulnerabilityCertifyVexStatement,
+	EdgeVulnerabilityCertifyVuln,
+	EdgeVulnerabilityVulnEqual,
+	EdgeVulnerabilityVulnMetadata,
 	EdgeCertifyBadArtifact,
 	EdgeCertifyBadPackage,
 	EdgeCertifyBadSource,
 	EdgeCertifyGoodArtifact,
 	EdgeCertifyGoodPackage,
 	EdgeCertifyGoodSource,
+	EdgeCertifyLegalLicense,
+	EdgeCertifyLegalPackage,
+	EdgeCertifyLegalSource,
 	EdgeCertifyScorecardSource,
 	EdgeCertifyVexStatementArtifact,
-	EdgeCertifyVexStatementVulnerability,
 	EdgeCertifyVexStatementPackage,
-	EdgeCertifyVulnVulnerability,
+	EdgeCertifyVexStatementVulnerability,
 	EdgeCertifyVulnPackage,
+	EdgeCertifyVulnVulnerability,
 	EdgeHashEqualArtifact,
+	EdgeHasMetadataArtifact,
+	EdgeHasMetadataPackage,
+	EdgeHasMetadataSource,
 	EdgeHasSbomArtifact,
 	EdgeHasSbomPackage,
 	EdgeHasSlsaBuiltBy,
@@ -1579,20 +1715,17 @@ var AllEdge = []Edge{
 	EdgeIsOccurrenceArtifact,
 	EdgeIsOccurrencePackage,
 	EdgeIsOccurrenceSource,
-	EdgeVulnEqualVulnerability,
 	EdgePkgEqualPackage,
-	EdgeHasMetadataPackage,
-	EdgeHasMetadataArtifact,
-	EdgeHasMetadataSource,
-	EdgePointOfContactPackage,
 	EdgePointOfContactArtifact,
+	EdgePointOfContactPackage,
 	EdgePointOfContactSource,
+	EdgeVulnEqualVulnerability,
 	EdgeVulnMetadataVulnerability,
 }
 
 func (e Edge) IsValid() bool {
 	switch e {
-	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactHasMetadata, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgeVulnerabilityVulnMetadata, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackageHasMetadata, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceHasMetadata, EdgeSourcePointOfContact, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementVulnerability, EdgeCertifyVexStatementPackage, EdgeCertifyVulnVulnerability, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeVulnEqualVulnerability, EdgePkgEqualPackage, EdgeHasMetadataPackage, EdgeHasMetadataArtifact, EdgeHasMetadataSource, EdgePointOfContactPackage, EdgePointOfContactArtifact, EdgePointOfContactSource, EdgeVulnMetadataVulnerability:
+	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasMetadata, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeLicenseCertifyLegal, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyLegal, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasMetadata, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyLegal, EdgeSourceCertifyScorecard, EdgeSourceHasMetadata, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourcePointOfContact, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgeVulnerabilityVulnMetadata, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyLegalLicense, EdgeCertifyLegalPackage, EdgeCertifyLegalSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementPackage, EdgeCertifyVexStatementVulnerability, EdgeCertifyVulnPackage, EdgeCertifyVulnVulnerability, EdgeHashEqualArtifact, EdgeHasMetadataArtifact, EdgeHasMetadataPackage, EdgeHasMetadataSource, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgePkgEqualPackage, EdgePointOfContactArtifact, EdgePointOfContactPackage, EdgePointOfContactSource, EdgeVulnEqualVulnerability, EdgeVulnMetadataVulnerability:
 		return true
 	}
 	return false

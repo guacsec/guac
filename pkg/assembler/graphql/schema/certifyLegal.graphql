@@ -1,0 +1,105 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the legal certifications
+
+"""
+CertifyLegal is an attestation to attach legal information to a package or source.
+
+The certification information is either copied from an attestation found in an
+SBOM or created by a collector/scanner.
+
+Discovered license is also known as Concluded. More information:
+https://docs.clearlydefined.io/curation-guidelines#the-difference-between-declared-and-discovered-licenses
+
+Attribution is also known as Copyright Text. It is what could be displayed to
+comply with notice
+requirements. https://www.nexb.com/oss-attribution-best-practices/
+
+License expressions follow this format:
+https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/
+"""
+type CertifyLegal {
+  id: ID!
+  "The package version or source that is attested"
+  subject: PackageOrSource!
+  "The license expression as delcared"
+  declaredLicense: String!
+  "A list of license objects found in the declared license expression"
+  declaredLicenses: [License!]!
+  "The license expression as discovered by scan"
+  discoveredLicense: String!
+  "A list of license objects found in the discovered license expression"
+  discoveredLicenses: [License!]!
+  "Attribution text of the subject"
+  attribution: String!
+  "Extra justification for the certification"
+  justification: String!
+  "Time of scan (in RFC 3339 format)"
+  timeScanned: Time!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
+}
+
+"""
+CertifyLegalSpec allows filtering the list of legal certifications to
+return in a query.
+
+Specifying just the package allows to query for all certifications associated
+with the package.
+"""
+input CertifyLegalSpec {
+  id: ID
+  subject: PackageOrSourceSpec
+  declaredLicense: String
+  declaredLicenses: [LicenseSpec!]
+  discoveredLicense: String
+  discoveredLicenses: [LicenseSpec!]
+  attribution: String
+  justification: String
+  timeScanned: Time
+  origin: String
+  collector: String
+}
+
+"""
+CertifyLegalInputSpec represents the input for certifying legal information in
+mutations.
+"""
+input CertifyLegalInputSpec {
+  declaredLicense: String!
+  discoveredLicense: String!
+  attribution: String!
+  justification: String!
+  timeScanned: Time!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all legal certifications matching the input filter."
+  CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
+}
+
+extend type Mutation {
+  "Adds a legal certification to a package or source."
+  ingestCertifyLegal(subject: PackageOrSourceInput!, declaredLicenses: [LicenseInputSpec!]!, discoveredLicenses: [LicenseInputSpec!]!, certifyLegal: CertifyLegalInputSpec!): ID!
+  "Bulk add legal certifications to packages or sources, not both at same time."
+  ingestCertifyLegals(subjects: PackageOrSourceInputs!, declaredLicensesList: [[LicenseInputSpec!]!]!, discoveredLicensesList: [[LicenseInputSpec!]!]!, certifyLegals: [CertifyLegalInputSpec!]!): [ID!]!
+}
