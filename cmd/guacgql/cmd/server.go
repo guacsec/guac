@@ -185,9 +185,10 @@ func generateNeptuneToken(neptuneURL string, region string) (string, error) {
 	return string(password), nil
 }
 
-// This method returns the AWS signer to be used for signing the request to be sent to Neptune Cluster.
-// It checks for the presence of AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN in the environment.
-// If not found, it creates a new session and gets the credentials from the session.
+// This method returns the AWS signer to be used for signing the request to be
+// sent to Neptune Cluster.  It checks for the presence of AWS_ACCESS_KEY_ID,
+// AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN in the environment.  If not
+// found, it creates a new session and gets the credentials from the session.
 func getAWSRequestSigner() (*v4.Signer, error) {
 	accessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
@@ -230,14 +231,16 @@ func getInMem(ctx context.Context) (backends.Backend, error) {
 }
 
 func getNeptune(ctx context.Context) (backends.Backend, error) {
-	// TODO: rename the neo4j config to something more generic since it would be used by Neptune as well.
-	neptuneRequestURL := fmt.Sprintf("https://%s:%d/opencypher", flags.neptuneEndpoint, flags.neptunePort)
-	neptuneToken, err := generateNeptuneToken(neptuneRequestURL, flags.neptuneRegion)
+	neptuneRequestURL := fmt.Sprintf("https://%s:%d/opencypher",
+		flags.neptuneEndpoint, flags.neptunePort)
+	neptuneToken, err := generateNeptuneToken(neptuneRequestURL,
+		flags.neptuneRegion)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create password for neptune: %w", err)
 	}
 
-	neptuneDBAddr := fmt.Sprintf("bolt+s://%s:%d/opencypher", flags.neptuneEndpoint, flags.neptunePort)
+	neptuneDBAddr := fmt.Sprintf("bolt+s://%s:%d/opencypher",
+		flags.neptuneEndpoint, flags.neptunePort)
 	args := &neo4j.Neo4jConfig{
 		User:   flags.neptuneUser,
 		Pass:   neptuneToken,
