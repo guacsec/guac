@@ -174,4 +174,25 @@ var O1 = &model.VulnerabilityInputSpec{
 	Type:            "OSV",
 	VulnerabilityID: "CVE-2014-8140",
 }
+
+var O1out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2014-8140",
+}
+
+var O2 = &model.VulnerabilityInputSpec{
+	Type:            "osv",
+	VulnerabilityID: "CVE-2022-26499",
+}
+var O2out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2022-26499",
+}
+
+var G1 = &model.VulnerabilityInputSpec{
+	Type:            "GHSA",
+	VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+}
+var G1out = &model.VulnerabilityID{
+	VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
+}
+
 var MAll = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
