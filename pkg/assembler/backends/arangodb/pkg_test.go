@@ -299,7 +299,7 @@ func Test_Packages(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -422,7 +422,7 @@ func Test_PackageTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -532,7 +532,7 @@ func Test_PackagesNamespace(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -646,7 +646,7 @@ func Test_PackagesName(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -782,7 +782,7 @@ func Test_IngestPackages(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}

@@ -13,25 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package backends
 
 import (
 	"context"
 
-	"entgo.io/ent/dialect"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
+	"golang.org/x/exp/maps"
 )
 
-func main() {
-	ctx := context.Background()
+type GBFunc func(context.Context, BackendArgs) (Backend, error)
 
-	_, err := backend.SetupBackend(ctx, &backend.BackendOptions{
-		AutoMigrate: true,
-		DriverName:  dialect.Postgres,
-		Address:     "postgres://localhost:5432/guac?sslmode=disable",
-	})
+var getBackend map[string]GBFunc
 
-	if err != nil {
-		panic(err)
-	}
+func init() {
+	getBackend = make(map[string]GBFunc)
+}
+
+func Register(name string, gb GBFunc) {
+	getBackend[name] = gb
+}
+
+func Get(name string, ctx context.Context, args BackendArgs) (Backend, error) {
+	return getBackend[name](ctx, args)
+}
+
+func List() []string {
+	return maps.Keys(getBackend)
 }

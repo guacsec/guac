@@ -51,8 +51,15 @@ type neo4jClient struct {
 	driver neo4j.Driver
 }
 
-func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
-	config := args.(*Neo4jConfig)
+func init() {
+	backends.Register("neo4j", getBackend)
+}
+
+func getBackend(_ context.Context, args backends.BackendArgs) (backends.Backend, error) {
+	config, ok := args.(*Neo4jConfig)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert neo4j config from backend args")
+	}
 	token := neo4j.BasicAuth(config.User, config.Pass, config.Realm)
 	driver, err := neo4j.NewDriver(config.DBAddr, token)
 	if err != nil {

@@ -161,6 +161,10 @@ type arangoClient struct {
 	graph  driver.Graph
 }
 
+func init() {
+	backends.Register("arango", getBackend)
+}
+
 func arangoDBConnect(address, user, password string) (driver.Client, error) {
 	conn, err := arangodbdriverhttp.NewConnection(arangodbdriverhttp.ConnectionConfig{
 		Endpoints: []string{address},
@@ -208,7 +212,7 @@ func deleteDatabase(ctx context.Context, args backends.BackendArgs) error {
 	return nil
 }
 
-func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {
+func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {
 	config, ok := args.(*ArangoConfig)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert arango config from backend args")

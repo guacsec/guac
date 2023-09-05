@@ -18,29 +18,22 @@
 package cmd
 
 import (
-	"context"
-
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 )
 
 func init() {
-	if getBackend == nil {
-		getBackend = make(map[string]backendFunc)
+	if getOpts == nil {
+		getOpts = make(map[string]optsFunc)
 	}
-	getBackend[ent] = getEnt
+	getOpts[ent] = getEnt
 }
 
-func getEnt(ctx context.Context) (backends.Backend, error) {
-	client, err := entbackend.SetupBackend(ctx, entbackend.BackendOptions{
+func getEnt() backends.BackendArgs {
+	return &entbackend.BackendOptions{
 		DriverName:  flags.dbDriver,
 		Address:     flags.dbAddress,
 		Debug:       flags.dbDebug,
 		AutoMigrate: flags.dbMigrate,
-	})
-	if err != nil {
-		return nil, err
 	}
-
-	return entbackend.GetBackend(client)
 }

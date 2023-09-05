@@ -70,7 +70,7 @@ func Test_IngestBuilder(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := GetBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -127,7 +127,7 @@ func Test_IngestBuilders(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := GetBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -226,7 +226,7 @@ func Test_Builders(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := GetBackend(ctx, arangArg)
+			c, err := getBackend(ctx, arangArg)
 			if err != nil {
 				t.Fatalf("error creating arango backend: %v", err)
 			}
