@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
@@ -45,6 +46,11 @@ func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability mo
 		return "", err
 	}
 	return ingestedVulnEqual.ID, err
+}
+
+// IngestVulnEquals is the resolver for the ingestVulnEquals field.
+func (r *mutationResolver) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+	panic(fmt.Errorf("not implemented: IngestVulnEquals - ingestVulnEquals"))
 }
 
 // VulnEqual is the resolver for the vulnEqual field.

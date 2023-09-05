@@ -56,6 +56,7 @@ type MutationResolver interface {
 	IngestSource(ctx context.Context, source model.SourceInputSpec) (string, error)
 	IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]string, error)
 	IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error)
+	IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error)
 	IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error)
 	IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error)
 	IngestVulnerability(ctx context.Context, vuln model.VulnerabilityInputSpec) (string, error)
@@ -1161,6 +1162,39 @@ func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Cont
 		}
 	}
 	args["vulnEqual"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVulnEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*model.VulnerabilityInputSpec
+	if tmp, ok := rawArgs["vulnerabilities"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
+		arg0, err = ec.unmarshalNVulnerabilityInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnerabilities"] = arg0
+	var arg1 []*model.VulnerabilityInputSpec
+	if tmp, ok := rawArgs["otherVulnerabilities"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherVulnerabilities"))
+		arg1, err = ec.unmarshalNVulnerabilityInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["otherVulnerabilities"] = arg1
+	var arg2 []*model.VulnEqualInputSpec
+	if tmp, ok := rawArgs["vulnEquals"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEquals"))
+		arg2, err = ec.unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnEquals"] = arg2
 	return args, nil
 }
 
@@ -3888,6 +3922,61 @@ func (ec *executionContext) fieldContext_Mutation_ingestVulnEqual(ctx context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_ingestVulnEquals(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestVulnEquals(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestVulnEquals(rctx, fc.Args["vulnerabilities"].([]*model.VulnerabilityInputSpec), fc.Args["otherVulnerabilities"].([]*model.VulnerabilityInputSpec), fc.Args["vulnEquals"].([]*model.VulnEqualInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestVulnEquals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestVulnEquals_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_ingestVulnerabilityMetadata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_ingestVulnerabilityMetadata(ctx, field)
 	if err != nil {
@@ -6495,6 +6584,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "ingestVulnEqual":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestVulnEqual(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestVulnEquals":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestVulnEquals(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

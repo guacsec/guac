@@ -795,9 +795,6 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
 
-func (c *arangoClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
-	panic(fmt.Errorf("not implemented: VulnEqual"))
-}
 func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
 }
@@ -807,9 +804,7 @@ func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqua
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
 }
-func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestVulnEqual"))
-}
+
 func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
 }

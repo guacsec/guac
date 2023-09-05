@@ -217,6 +217,7 @@ type ComplexityRoot struct {
 		IngestVEXStatement           func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) int
 		IngestVEXStatements          func(childComplexity int, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) int
 		IngestVulnEqual              func(childComplexity int, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) int
+		IngestVulnEquals             func(childComplexity int, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) int
 		IngestVulnerabilities        func(childComplexity int, vulns []*model.VulnerabilityInputSpec) int
 		IngestVulnerability          func(childComplexity int, vuln model.VulnerabilityInputSpec) int
 		IngestVulnerabilityMetadata  func(childComplexity int, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) int
@@ -1496,6 +1497,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestVulnEqual(childComplexity, args["vulnerability"].(model.VulnerabilityInputSpec), args["otherVulnerability"].(model.VulnerabilityInputSpec), args["vulnEqual"].(model.VulnEqualInputSpec)), true
+
+	case "Mutation.ingestVulnEquals":
+		if e.complexity.Mutation.IngestVulnEquals == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestVulnEquals_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestVulnEquals(childComplexity, args["vulnerabilities"].([]*model.VulnerabilityInputSpec), args["otherVulnerabilities"].([]*model.VulnerabilityInputSpec), args["vulnEquals"].([]*model.VulnEqualInputSpec)), true
 
 	case "Mutation.ingestVulnerabilities":
 		if e.complexity.Mutation.IngestVulnerabilities == nil {
@@ -5003,6 +5016,12 @@ extend type Mutation {
     otherVulnerability: VulnerabilityInputSpec!
     vulnEqual: VulnEqualInputSpec!
   ): ID!
+  "Bulk ingest mapping between vulnerabilities. The returned array of IDs can be a an array of empty string."
+  ingestVulnEquals(
+    vulnerabilities: [VulnerabilityInputSpec!]!
+    otherVulnerabilities: [VulnerabilityInputSpec!]!
+    vulnEquals: [VulnEqualInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnMetadata.graphql", Input: `#
