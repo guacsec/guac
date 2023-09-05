@@ -32,9 +32,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	v4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 
+	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
-	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
@@ -50,6 +52,20 @@ const (
 	neptune            = "neptune"
 	neptuneServiceName = "neptune-db"
 )
+
+type backendFunc func(context.Context) (backends.Backend, error)
+
+var getBackend map[string]backendFunc
+
+func init() {
+	if getBackend == nil {
+		getBackend = make(map[string]backendFunc)
+	}
+	getBackend[arango] = getArango
+	getBackend[neo4js] = getNeo4j
+	getBackend[inmems] = getInMem
+	getBackend[neptune] = getNeptune
+}
 
 func startServer(cmd *cobra.Command) {
 	ctx := logging.WithLogger(context.Background())
@@ -111,96 +127,20 @@ func startServer(cmd *cobra.Command) {
 }
 
 func validateFlags() error {
-	switch flags.backend {
-	case inmems, neo4js, arango, ent, neptune:
-		// Valid
-		return nil
-	default:
+	if !slices.Contains(maps.Keys(getBackend), flags.backend) {
 		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
 	}
+	return nil
 }
 
 func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	var topResolver resolvers.Resolver
 
-	switch flags.backend {
-	case ent:
-		client, err := entbackend.SetupBackend(ctx, entbackend.BackendOptions{
-			DriverName:  flags.dbDriver,
-			Address:     flags.dbAddress,
-			Debug:       flags.dbDebug,
-			AutoMigrate: flags.dbMigrate,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		backend, err := entbackend.GetBackend(client)
-		if err != nil {
-			return nil, fmt.Errorf("Error creating ent backend: %w", err)
-		}
-		topResolver = resolvers.Resolver{Backend: backend}
-
-	case neo4js:
-		args := neo4j.Neo4jConfig{
-			User:   flags.nUser,
-			Pass:   flags.nPass,
-			Realm:  flags.nRealm,
-			DBAddr: flags.nAddr,
-		}
-
-		backend, err := neo4j.GetBackend(&args)
-		if err != nil {
-			return nil, fmt.Errorf("error creating neo4j backend: %w", err)
-		}
-
-		topResolver = resolvers.Resolver{Backend: backend}
-
-	case arango:
-		args := arangodb.ArangoConfig{
-			User:   flags.arangoUser,
-			Pass:   flags.arangoPass,
-			DBAddr: flags.arangoAddr,
-		}
-		backend, err := arangodb.GetBackend(ctx, &args)
-		if err != nil {
-			return nil, fmt.Errorf("error creating arango backend: %w", err)
-		}
-
-		topResolver = resolvers.Resolver{Backend: backend}
-	case inmems:
-		args := inmem.DemoCredentials{}
-		backend, err := inmem.GetBackend(&args)
-		if err != nil {
-			return nil, fmt.Errorf("error creating inmem backend: %w", err)
-		}
-
-		topResolver = resolvers.Resolver{Backend: backend}
-
-	case neptune:
-		// TODO: rename the neo4j config to something more generic since it would be used by Neptune as well.
-		neptuneRequestURL := fmt.Sprintf("https://%s:%d/opencypher", flags.neptuneEndpoint, flags.neptunePort)
-		neptuneToken, err := generateNeptuneToken(neptuneRequestURL, flags.neptuneRegion)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create password for neptune: %w", err)
-		}
-
-		neptuneDBAddr := fmt.Sprintf("bolt+s://%s:%d/opencypher", flags.neptuneEndpoint, flags.neptunePort)
-		args := neo4j.Neo4jConfig{
-			User:   flags.neptuneUser,
-			Pass:   neptuneToken,
-			DBAddr: neptuneDBAddr,
-			Realm:  flags.neptuneRealm,
-		}
-		backend, err := neo4j.GetBackend(&args)
-		if err != nil {
-			return nil, fmt.Errorf("error creating neptune backend: %w", err)
-		}
-
-		topResolver = resolvers.Resolver{Backend: backend}
-	default:
-		return nil, fmt.Errorf("invalid backend specified: %q", flags.backend)
+	backend, err := getBackend[flags.backend](ctx)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating %v backend: %w", flags.backend, err)
 	}
+	topResolver = resolvers.Resolver{Backend: backend}
 
 	config := generated.Config{Resolvers: &topResolver}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
@@ -263,4 +203,46 @@ func getAWSRequestSigner() (*v4.Signer, error) {
 	}
 
 	return v4.NewSigner(sess.Config.Credentials), nil
+}
+
+func getArango(ctx context.Context) (backends.Backend, error) {
+	args := &arangodb.ArangoConfig{
+		User:   flags.arangoUser,
+		Pass:   flags.arangoPass,
+		DBAddr: flags.arangoAddr,
+	}
+	return arangodb.GetBackend(ctx, args)
+}
+
+func getNeo4j(ctx context.Context) (backends.Backend, error) {
+	args := &neo4j.Neo4jConfig{
+		User:   flags.nUser,
+		Pass:   flags.nPass,
+		Realm:  flags.nRealm,
+		DBAddr: flags.nAddr,
+	}
+	return neo4j.GetBackend(args)
+}
+
+func getInMem(ctx context.Context) (backends.Backend, error) {
+	args := &inmem.DemoCredentials{}
+	return inmem.GetBackend(args)
+}
+
+func getNeptune(ctx context.Context) (backends.Backend, error) {
+	// TODO: rename the neo4j config to something more generic since it would be used by Neptune as well.
+	neptuneRequestURL := fmt.Sprintf("https://%s:%d/opencypher", flags.neptuneEndpoint, flags.neptunePort)
+	neptuneToken, err := generateNeptuneToken(neptuneRequestURL, flags.neptuneRegion)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create password for neptune: %w", err)
+	}
+
+	neptuneDBAddr := fmt.Sprintf("bolt+s://%s:%d/opencypher", flags.neptuneEndpoint, flags.neptunePort)
+	args := &neo4j.Neo4jConfig{
+		User:   flags.neptuneUser,
+		Pass:   neptuneToken,
+		DBAddr: neptuneDBAddr,
+		Realm:  flags.neptuneRealm,
+	}
+	return neo4j.GetBackend(args)
 }
