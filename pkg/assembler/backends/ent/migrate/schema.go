@@ -280,7 +280,7 @@ var (
 		{Name: "scanner_version", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "vulnerability_id", Type: field.TypeInt, Nullable: true},
+		{Name: "vulnerability_id", Type: field.TypeInt},
 		{Name: "package_id", Type: field.TypeInt},
 	}
 	// CertifyVulnsTable holds the schema information for the "certify_vulns" table.
@@ -290,10 +290,10 @@ var (
 		PrimaryKey: []*schema.Column{CertifyVulnsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "certify_vulns_vulnerability_types_vulnerability",
+				Symbol:     "certify_vulns_vulnerability_ids_vulnerability",
 				Columns:    []*schema.Column{CertifyVulnsColumns[8]},
-				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
-				OnDelete:   schema.SetNull,
+				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "certify_vulns_package_versions_package",
@@ -790,6 +790,19 @@ var (
 		Columns:    SourceTypesColumns,
 		PrimaryKey: []*schema.Column{SourceTypesColumns[0]},
 	}
+	// VulnEqualsColumns holds the columns for the "vuln_equals" table.
+	VulnEqualsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+	}
+	// VulnEqualsTable holds the schema information for the "vuln_equals" table.
+	VulnEqualsTable = &schema.Table{
+		Name:       "vuln_equals",
+		Columns:    VulnEqualsColumns,
+		PrimaryKey: []*schema.Column{VulnEqualsColumns[0]},
+	}
 	// VulnerabilityIdsColumns holds the columns for the "vulnerability_ids" table.
 	VulnerabilityIdsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -910,6 +923,31 @@ var (
 			},
 		},
 	}
+	// VulnEqualVulnerabilityIdsColumns holds the columns for the "vuln_equal_vulnerability_ids" table.
+	VulnEqualVulnerabilityIdsColumns = []*schema.Column{
+		{Name: "vuln_equal_id", Type: field.TypeInt},
+		{Name: "vulnerability_id_id", Type: field.TypeInt},
+	}
+	// VulnEqualVulnerabilityIdsTable holds the schema information for the "vuln_equal_vulnerability_ids" table.
+	VulnEqualVulnerabilityIdsTable = &schema.Table{
+		Name:       "vuln_equal_vulnerability_ids",
+		Columns:    VulnEqualVulnerabilityIdsColumns,
+		PrimaryKey: []*schema.Column{VulnEqualVulnerabilityIdsColumns[0], VulnEqualVulnerabilityIdsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vuln_equal_vulnerability_ids_vuln_equal_id",
+				Columns:    []*schema.Column{VulnEqualVulnerabilityIdsColumns[0]},
+				RefColumns: []*schema.Column{VulnEqualsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "vuln_equal_vulnerability_ids_vulnerability_id_id",
+				Columns:    []*schema.Column{VulnEqualVulnerabilityIdsColumns[1]},
+				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArtifactsTable,
@@ -934,11 +972,13 @@ var (
 		SourceNamesTable,
 		SourceNamespacesTable,
 		SourceTypesTable,
+		VulnEqualsTable,
 		VulnerabilityIdsTable,
 		VulnerabilityTypesTable,
 		HashEqualArtifactsTable,
 		PkgEqualPackagesTable,
 		SlsaAttestationBuiltFromTable,
+		VulnEqualVulnerabilityIdsTable,
 	}
 )
 
@@ -954,7 +994,7 @@ func init() {
 	CertifyVexesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	CertifyVexesTable.ForeignKeys[1].RefTable = ArtifactsTable
 	CertifyVexesTable.ForeignKeys[2].RefTable = VulnerabilityTypesTable
-	CertifyVulnsTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
+	CertifyVulnsTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
@@ -983,4 +1023,6 @@ func init() {
 	PkgEqualPackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
+	VulnEqualVulnerabilityIdsTable.ForeignKeys[0].RefTable = VulnEqualsTable
+	VulnEqualVulnerabilityIdsTable.ForeignKeys[1].RefTable = VulnerabilityIdsTable
 }

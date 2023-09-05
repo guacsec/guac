@@ -33,6 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -5527,6 +5528,252 @@ func (st *SourceType) ToEdge(order *SourceTypeOrder) *SourceTypeEdge {
 	return &SourceTypeEdge{
 		Node:   st,
 		Cursor: order.Field.toCursor(st),
+	}
+}
+
+// VulnEqualEdge is the edge representation of VulnEqual.
+type VulnEqualEdge struct {
+	Node   *VulnEqual `json:"node"`
+	Cursor Cursor     `json:"cursor"`
+}
+
+// VulnEqualConnection is the connection containing edges to VulnEqual.
+type VulnEqualConnection struct {
+	Edges      []*VulnEqualEdge `json:"edges"`
+	PageInfo   PageInfo         `json:"pageInfo"`
+	TotalCount int              `json:"totalCount"`
+}
+
+func (c *VulnEqualConnection) build(nodes []*VulnEqual, pager *vulnequalPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *VulnEqual
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *VulnEqual {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *VulnEqual {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*VulnEqualEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &VulnEqualEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// VulnEqualPaginateOption enables pagination customization.
+type VulnEqualPaginateOption func(*vulnequalPager) error
+
+// WithVulnEqualOrder configures pagination ordering.
+func WithVulnEqualOrder(order *VulnEqualOrder) VulnEqualPaginateOption {
+	if order == nil {
+		order = DefaultVulnEqualOrder
+	}
+	o := *order
+	return func(pager *vulnequalPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultVulnEqualOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithVulnEqualFilter configures pagination filter.
+func WithVulnEqualFilter(filter func(*VulnEqualQuery) (*VulnEqualQuery, error)) VulnEqualPaginateOption {
+	return func(pager *vulnequalPager) error {
+		if filter == nil {
+			return errors.New("VulnEqualQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type vulnequalPager struct {
+	reverse bool
+	order   *VulnEqualOrder
+	filter  func(*VulnEqualQuery) (*VulnEqualQuery, error)
+}
+
+func newVulnEqualPager(opts []VulnEqualPaginateOption, reverse bool) (*vulnequalPager, error) {
+	pager := &vulnequalPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultVulnEqualOrder
+	}
+	return pager, nil
+}
+
+func (p *vulnequalPager) applyFilter(query *VulnEqualQuery) (*VulnEqualQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *vulnequalPager) toCursor(ve *VulnEqual) Cursor {
+	return p.order.Field.toCursor(ve)
+}
+
+func (p *vulnequalPager) applyCursors(query *VulnEqualQuery, after, before *Cursor) (*VulnEqualQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultVulnEqualOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *vulnequalPager) applyOrder(query *VulnEqualQuery) *VulnEqualQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultVulnEqualOrder.Field {
+		query = query.Order(DefaultVulnEqualOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *vulnequalPager) orderExpr(query *VulnEqualQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultVulnEqualOrder.Field {
+			b.Comma().Ident(DefaultVulnEqualOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to VulnEqual.
+func (ve *VulnEqualQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...VulnEqualPaginateOption,
+) (*VulnEqualConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newVulnEqualPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if ve, err = pager.applyFilter(ve); err != nil {
+		return nil, err
+	}
+	conn := &VulnEqualConnection{Edges: []*VulnEqualEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = ve.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if ve, err = pager.applyCursors(ve, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		ve.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := ve.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	ve = pager.applyOrder(ve)
+	nodes, err := ve.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// VulnEqualOrderField defines the ordering field of VulnEqual.
+type VulnEqualOrderField struct {
+	// Value extracts the ordering value from the given VulnEqual.
+	Value    func(*VulnEqual) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) vulnequal.OrderOption
+	toCursor func(*VulnEqual) Cursor
+}
+
+// VulnEqualOrder defines the ordering of VulnEqual.
+type VulnEqualOrder struct {
+	Direction OrderDirection       `json:"direction"`
+	Field     *VulnEqualOrderField `json:"field"`
+}
+
+// DefaultVulnEqualOrder is the default ordering of VulnEqual.
+var DefaultVulnEqualOrder = &VulnEqualOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &VulnEqualOrderField{
+		Value: func(ve *VulnEqual) (ent.Value, error) {
+			return ve.ID, nil
+		},
+		column: vulnequal.FieldID,
+		toTerm: vulnequal.ByID,
+		toCursor: func(ve *VulnEqual) Cursor {
+			return Cursor{ID: ve.ID}
+		},
+	},
+}
+
+// ToEdge converts VulnEqual into VulnEqualEdge.
+func (ve *VulnEqual) ToEdge(order *VulnEqualOrder) *VulnEqualEdge {
+	if order == nil {
+		order = DefaultVulnEqualOrder
+	}
+	return &VulnEqualEdge{
+		Node:   ve,
+		Cursor: order.Field.toCursor(ve),
 	}
 }
 

@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
@@ -781,7 +782,7 @@ func (cv *CertifyVulnQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = (&VulnerabilityTypeClient{config: cv.config}).Query()
+				query = (&VulnerabilityIDClient{config: cv.config}).Query()
 			)
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
@@ -2498,6 +2499,92 @@ func newSourceTypePaginateArgs(rv map[string]any) *sourcetypePaginateArgs {
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (ve *VulnEqualQuery) CollectFields(ctx context.Context, satisfies ...string) (*VulnEqualQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return ve, nil
+	}
+	if err := ve.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return ve, nil
+}
+
+func (ve *VulnEqualQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(vulnequal.Columns))
+		selectedFields = []string{vulnequal.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "vulnerabilityIds":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&VulnerabilityIDClient{config: ve.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			ve.WithNamedVulnerabilityIds(alias, func(wq *VulnerabilityIDQuery) {
+				*wq = *query
+			})
+		case "justification":
+			if _, ok := fieldSeen[vulnequal.FieldJustification]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldJustification)
+				fieldSeen[vulnequal.FieldJustification] = struct{}{}
+			}
+		case "origin":
+			if _, ok := fieldSeen[vulnequal.FieldOrigin]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldOrigin)
+				fieldSeen[vulnequal.FieldOrigin] = struct{}{}
+			}
+		case "collector":
+			if _, ok := fieldSeen[vulnequal.FieldCollector]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldCollector)
+				fieldSeen[vulnequal.FieldCollector] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		ve.Select(selectedFields...)
+	}
+	return nil
+}
+
+type vulnequalPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []VulnEqualPaginateOption
+}
+
+func newVulnEqualPaginateArgs(rv map[string]any) *vulnequalPaginateArgs {
+	args := &vulnequalPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
 func (vi *VulnerabilityIDQuery) CollectFields(ctx context.Context, satisfies ...string) (*VulnerabilityIDQuery, error) {
 	fc := graphql.GetFieldContext(ctx)
 	if fc == nil {
@@ -2532,6 +2619,18 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 				selectedFields = append(selectedFields, vulnerabilityid.FieldTypeID)
 				fieldSeen[vulnerabilityid.FieldTypeID] = struct{}{}
 			}
+		case "vulnEquals":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&VulnEqualClient{config: vi.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			vi.WithNamedVulnEquals(alias, func(wq *VulnEqualQuery) {
+				*wq = *query
+			})
 		case "vulnerabilityID":
 			if _, ok := fieldSeen[vulnerabilityid.FieldVulnerabilityID]; !ok {
 				selectedFields = append(selectedFields, vulnerabilityid.FieldVulnerabilityID)

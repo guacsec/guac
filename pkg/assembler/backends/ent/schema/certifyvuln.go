@@ -31,7 +31,7 @@ type CertifyVuln struct {
 // Fields of the Vulnerability.
 func (CertifyVuln) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("vulnerability_id").Optional().Nillable().Comment("Advisory is one of OSV, GHSA, or CVE, or nil if not vulnerable"),
+		field.Int("vulnerability_id"),
 		field.Int("package_id"),
 		field.Time("time_scanned"),
 		field.String("db_uri"),
@@ -46,7 +46,7 @@ func (CertifyVuln) Fields() []ent.Field {
 // Edges of the Vulnerability.
 func (CertifyVuln) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("vulnerability", VulnerabilityType.Type).Unique().Field("vulnerability_id").Comment("Vulnerability is one of OSV, GHSA, or CVE"),
+		edge.To("vulnerability", VulnerabilityID.Type).Unique().Field("vulnerability_id").Required(),
 		edge.To("package", PackageVersion.Type).Unique().Field("package_id").Required(),
 	}
 }

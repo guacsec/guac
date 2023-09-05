@@ -19,33 +19,32 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/index"
 )
 
-// VulnerabilityID holds the schema definition for the VulnerabilityID entity.
-type VulnerabilityID struct {
+// VulnEqual holds the schema definition for the VulnEqual entity.
+type VulnEqual struct {
 	ent.Schema
 }
 
-// Fields of the VulnerabilityID.
-func (VulnerabilityID) Fields() []ent.Field {
+// Fields of the VulnEqual.
+func (VulnEqual) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("vulnerability_id").Comment("ID of the vulnerability, one of OSV, GHSA, CVE, or custom"),
-		field.Int("type_id"),
+		field.String("justification"),
+		field.String("origin"),
+		field.String("collector"),
 	}
 }
 
-// Edges of the VulnerabilityID.
-func (VulnerabilityID) Edges() []ent.Edge {
+// Edges of the VulnEqual.
+func (VulnEqual) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("type", VulnerabilityType.Type).Ref("vulnerability_ids").Field("type_id").Required().Unique(),
-		edge.From("vuln_equals", VulnEqual.Type).Ref("vulnerability_ids"),
+		edge.To("vulnerability_ids", VulnerabilityID.Type).Required(),
 	}
 }
 
-// Indexes of the VulnerabilityID.
-func (VulnerabilityID) Indexes() []ent.Index {
-	return []ent.Index{
-		index.Fields("vulnerability_id", "type_id").Unique(),
-	}
-}
+// Indexes of the VulnEqual.
+//func (VulnEqual) Indexes() []ent.Index {
+//	return []ent.Index{
+//		index.Fields("justification", "origin", "collector")/*.Edges("vulnerability_ids")*/,
+//	}
+//}

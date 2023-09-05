@@ -13,7 +13,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 )
 
 // CertifyVulnQuery is the builder for querying CertifyVuln entities.
@@ -23,7 +23,7 @@ type CertifyVulnQuery struct {
 	order             []certifyvuln.OrderOption
 	inters            []Interceptor
 	predicates        []predicate.CertifyVuln
-	withVulnerability *VulnerabilityTypeQuery
+	withVulnerability *VulnerabilityIDQuery
 	withPackage       *PackageVersionQuery
 	modifiers         []func(*sql.Selector)
 	loadTotal         []func(context.Context, []*CertifyVuln) error
@@ -64,8 +64,8 @@ func (cvq *CertifyVulnQuery) Order(o ...certifyvuln.OrderOption) *CertifyVulnQue
 }
 
 // QueryVulnerability chains the current query on the "vulnerability" edge.
-func (cvq *CertifyVulnQuery) QueryVulnerability() *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: cvq.config}).Query()
+func (cvq *CertifyVulnQuery) QueryVulnerability() *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: cvq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cvq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,7 +76,7 @@ func (cvq *CertifyVulnQuery) QueryVulnerability() *VulnerabilityTypeQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvuln.Table, certifyvuln.FieldID, selector),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvuln.VulnerabilityTable, certifyvuln.VulnerabilityColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cvq.driver.Dialect(), step)
@@ -309,8 +309,8 @@ func (cvq *CertifyVulnQuery) Clone() *CertifyVulnQuery {
 
 // WithVulnerability tells the query-builder to eager-load the nodes that are connected to
 // the "vulnerability" edge. The optional arguments are used to configure the query builder of the edge.
-func (cvq *CertifyVulnQuery) WithVulnerability(opts ...func(*VulnerabilityTypeQuery)) *CertifyVulnQuery {
-	query := (&VulnerabilityTypeClient{config: cvq.config}).Query()
+func (cvq *CertifyVulnQuery) WithVulnerability(opts ...func(*VulnerabilityIDQuery)) *CertifyVulnQuery {
+	query := (&VulnerabilityIDClient{config: cvq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -435,7 +435,7 @@ func (cvq *CertifyVulnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	}
 	if query := cvq.withVulnerability; query != nil {
 		if err := cvq.loadVulnerability(ctx, query, nodes, nil,
-			func(n *CertifyVuln, e *VulnerabilityType) { n.Edges.Vulnerability = e }); err != nil {
+			func(n *CertifyVuln, e *VulnerabilityID) { n.Edges.Vulnerability = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -453,14 +453,11 @@ func (cvq *CertifyVulnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	return nodes, nil
 }
 
-func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *VulnerabilityTypeQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *VulnerabilityType)) error {
+func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *VulnerabilityIDQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *VulnerabilityID)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*CertifyVuln)
 	for i := range nodes {
-		if nodes[i].VulnerabilityID == nil {
-			continue
-		}
-		fk := *nodes[i].VulnerabilityID
+		fk := nodes[i].VulnerabilityID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -469,7 +466,7 @@ func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *Vulne
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(vulnerabilitytype.IDIn(ids...))
+	query.Where(vulnerabilityid.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
