@@ -8,12 +8,18 @@ import (
 	"context"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestCertifyVuln is the resolver for the ingestCertifyVuln field.
 func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
+	funcName := "IngestCertifyVuln"
+	err := helper.ValidateVulnerabilityIDInputSpec(vulnerability)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	ingestedCertifyVuln, err := r.Backend.IngestCertifyVuln(ctx, pkg,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
@@ -38,6 +44,12 @@ func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
 	for _, v := range vulnerabilities {
+
+		err := helper.ValidateVulnerabilityIDInputSpec(*v)
+		if err != nil {
+			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+
 		lowercaseVulnInput := model.VulnerabilityInputSpec{
 			Type:            strings.ToLower(v.Type),
 			VulnerabilityID: strings.ToLower(v.VulnerabilityID),

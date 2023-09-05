@@ -30,9 +30,50 @@ var A2 = &model.ArtifactInputSpec{
 	Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
 }
 
+var A1out = &model.Artifact{
+	Algorithm: "sha256",
+	Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+}
+
 var A2out = &model.Artifact{
 	Algorithm: "sha1",
 	Digest:    "7a8f47318e4676dacb0142afa0b83029cd7befd9",
+}
+
+var A3 = &model.ArtifactInputSpec{
+	Algorithm: "sha512",
+	Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
+}
+
+var A3out = &model.Artifact{
+	Algorithm: "sha512",
+	Digest:    "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7",
+}
+
+var A4 = &model.ArtifactInputSpec{
+	Algorithm: "sha1",
+	Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+}
+
+var A4out = &model.Artifact{
+	Algorithm: "sha1",
+	Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+}
+
+var B1 = &model.BuilderInputSpec{
+	URI: "asdf",
+}
+
+var B1out = &model.Builder{
+	URI: "asdf",
+}
+
+var B2 = &model.BuilderInputSpec{
+	URI: "qwer",
+}
+
+var B2out = &model.Builder{
+	URI: "qwer",
 }
 
 var S1 = &model.SourceInputSpec{
@@ -69,6 +110,43 @@ var S2out = &model.Source{
 		}},
 	}},
 }
+
+var S3 = &model.SourceInputSpec{
+	Type:      "git",
+	Namespace: "github.com/jeff",
+	Name:      "myrepo",
+	Tag:       ptrfrom.String("v1.0"),
+}
+var S3out = &model.Source{
+	Type: "git",
+	Namespaces: []*model.SourceNamespace{{
+		Namespace: "github.com/jeff",
+		Names: []*model.SourceName{{
+			Name:   "myrepo",
+			Tag:    ptrfrom.String("v1.0"),
+			Commit: ptrfrom.String(""),
+		}},
+	}},
+}
+
+var S4 = &model.SourceInputSpec{
+	Type:      "svn",
+	Namespace: "github.com/bob",
+	Name:      "bobsrepo",
+	Commit:    ptrfrom.String("5e7c41f"),
+}
+var S4out = &model.Source{
+	Type: "svn",
+	Namespaces: []*model.SourceNamespace{{
+		Namespace: "github.com/bob",
+		Names: []*model.SourceName{{
+			Name:   "bobsrepo",
+			Tag:    ptrfrom.String(""),
+			Commit: ptrfrom.String("5e7c41f"),
+		}},
+	}},
+}
+
 var P1 = &model.PkgInputSpec{
 	Type: "pypi",
 	Name: "tensorflow",
@@ -116,12 +194,99 @@ var P2out = &model.Package{
 	}},
 }
 
+var P2outName = &model.Package{
+	Type: "pypi",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name:     "tensorflow",
+			Versions: []*model.PackageVersion{},
+		}},
+	}},
+}
+
+var P3 = &model.PkgInputSpec{
+	Type:    "pypi",
+	Name:    "tensorflow",
+	Version: ptrfrom.String("2.11.1"),
+	Subpath: ptrfrom.String("saved_model_cli.py"),
+}
+var P3out = &model.Package{
+	Type: "pypi",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name: "tensorflow",
+			Versions: []*model.PackageVersion{{
+				Version:    "2.11.1",
+				Subpath:    "saved_model_cli.py",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
+}
+
 var P4 = &model.PkgInputSpec{
 	Type:      "conan",
 	Namespace: ptrfrom.String("openssl.org"),
 	Name:      "openssl",
 	Version:   ptrfrom.String("3.0.3"),
 }
+
+var P4out = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name: "openssl",
+			Versions: []*model.PackageVersion{{
+				Version:    "3.0.3",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
+}
+
+var P4outName = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name:     "openssl",
+			Versions: []*model.PackageVersion{},
+		}},
+	}},
+}
+
+var P5 = &model.PkgInputSpec{
+	Type:      "conan",
+	Namespace: ptrfrom.String("openssl.org"),
+	Name:      "openssl",
+	Version:   ptrfrom.String("3.0.3"),
+	Qualifiers: []*model.PackageQualifierInputSpec{{
+		Key:   "test",
+		Value: "test",
+	}},
+}
+
+var P5out = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name: "openssl",
+			Versions: []*model.PackageVersion{{
+				Version: "3.0.3",
+				Qualifiers: []*model.PackageQualifier{
+					{
+						Key:   "test",
+						Value: "test",
+					},
+				},
+			}},
+		}},
+	}},
+}
+
+var MAll = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
 
 var CB1out = &model.CertifyBad{
 	Subject:       S2out,
@@ -166,12 +331,67 @@ var C2out = &model.VulnerabilityID{
 	VulnerabilityID: "cve-2014-8139",
 }
 
-var B1 = &model.BuilderInputSpec{
-	URI: "asdf",
+var C3 = &model.VulnerabilityInputSpec{
+	Type:            "CVE",
+	VulnerabilityID: "cVe-2014-8140",
+}
+var C3out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2014-8140",
+}
+
+var G1 = &model.VulnerabilityInputSpec{
+	Type:            "GHSA",
+	VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+}
+var G1out = &model.VulnerabilityID{
+	VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
+}
+
+var G2 = &model.VulnerabilityInputSpec{
+	Type:            "ghsa",
+	VulnerabilityID: "GHSA-xrw3-wqph-3fxg",
+}
+var G2out = &model.VulnerabilityID{
+	VulnerabilityID: "ghsa-xrw3-wqph-3fxg",
+}
+
+var G3 = &model.VulnerabilityInputSpec{
+	Type:            "ghsa",
+	VulnerabilityID: "GHSA-8v4j-7jgf-5rg9",
+}
+var G3out = &model.VulnerabilityID{
+	VulnerabilityID: "ghsa-8v4j-7jgf-5rg9",
 }
 
 var O1 = &model.VulnerabilityInputSpec{
 	Type:            "OSV",
 	VulnerabilityID: "CVE-2014-8140",
 }
-var MAll = model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}
+
+var O1out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2014-8140",
+}
+
+var O2 = &model.VulnerabilityInputSpec{
+	Type:            "osv",
+	VulnerabilityID: "CVE-2022-26499",
+}
+var O2out = &model.VulnerabilityID{
+	VulnerabilityID: "cve-2022-26499",
+}
+
+var O3 = &model.VulnerabilityInputSpec{
+	Type:            "osv",
+	VulnerabilityID: "GHSA-h45f-rjvw-2rv2",
+}
+var O3out = &model.VulnerabilityID{
+	VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
+}
+
+var NoVulnInput = &model.VulnerabilityInputSpec{
+	Type:            "noVuln",
+	VulnerabilityID: "",
+}
+var NoVulnOut = &model.VulnerabilityID{
+	VulnerabilityID: "",
+}

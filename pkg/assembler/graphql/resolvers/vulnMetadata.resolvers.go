@@ -15,9 +15,15 @@ import (
 
 // IngestVulnerabilityMetadata is the resolver for the ingestVulnerabilityMetadata field.
 func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
-	err := helper.ValidateVulnerabilityInputSpec(vulnerability)
+	funcName := "IngestVulnerabilityMetadata"
+	err := helper.ValidateNoVul(vulnerability)
 	if err != nil {
-		return "", gqlerror.Errorf("IngestVulnerabilityMetadata ::  %s", err)
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
+	err = helper.ValidateVulnerabilityIDInputSpec(vulnerability)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
@@ -35,9 +41,17 @@ func (r *mutationResolver) IngestVulnerabilityMetadatas(ctx context.Context, vul
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
 	for _, v := range vulnerabilities {
-		if strings.ToLower(v.Type) == "novuln" {
-			return []string{}, gqlerror.Errorf("%v :: novuln type cannot be used for vulnerability metadata", funcName)
+
+		err := helper.ValidateNoVul(*v)
+		if err != nil {
+			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
+
+		err = helper.ValidateVulnerabilityIDInputSpec(*v)
+		if err != nil {
+			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+
 		lowercaseVulnInput := model.VulnerabilityInputSpec{
 			Type:            strings.ToLower(v.Type),
 			VulnerabilityID: strings.ToLower(v.VulnerabilityID),
