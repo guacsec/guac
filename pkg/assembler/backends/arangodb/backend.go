@@ -117,6 +117,11 @@ const (
 	certifyVulnEdgesStr    string = "certifyVulnEdges"
 	certifyVulnsStr        string = "certifyVulns"
 
+	// vulnMetadata collection
+
+	vulnMetadataEdgesStr string = "vulnMetadataEdges"
+	vulnMetadatasStr     string = "vulnMetadatas"
+
 	// certifyScorecard collection
 
 	scorecardSrcEdgesStr string = "scorecardSrcEdges"
@@ -371,11 +376,16 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		certifyVulnPkgEdges.From = []string{pkgVersionsStr}
 		certifyVulnPkgEdges.To = []string{certifyVulnsStr}
 
-		// setup certifyVuln collections
 		var certifyVulnEdges driver.EdgeDefinition
 		certifyVulnEdges.Collection = certifyVulnEdgesStr
 		certifyVulnEdges.From = []string{certifyVulnsStr}
 		certifyVulnEdges.To = []string{vulnerabilitiesStr}
+
+		// setup vulnMetadata collections
+		var vulnMetadataEdges driver.EdgeDefinition
+		vulnMetadataEdges.Collection = vulnMetadataEdgesStr
+		vulnMetadataEdges.From = []string{vulnerabilitiesStr}
+		vulnMetadataEdges.To = []string{vulnMetadatasStr}
 
 		// setup certifyScorecard collections
 		var certifyScorecardSrcEdges driver.EdgeDefinition
@@ -433,7 +443,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
 			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
-			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges}
+			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)

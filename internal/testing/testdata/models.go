@@ -16,9 +16,13 @@
 package testdata
 
 import (
+	"time"
+
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+var T1, _ = time.Parse(time.RFC3339, "2023-01-01T00:00:00Z")
 
 var A1 = &model.ArtifactInputSpec{
 	Algorithm: "sha256",
