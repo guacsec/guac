@@ -175,6 +175,34 @@ func arangoDBConnect(address, user, password string) (driver.Client, error) {
 	return client, nil
 }
 
+func deleteDatabase(ctx context.Context, args backends.BackendArgs) error {
+	config, ok := args.(*ArangoConfig)
+	if !ok {
+		return fmt.Errorf("failed to assert arango config from backend args")
+	}
+	arangodbClient, err := arangoDBConnect(config.DBAddr, config.User, config.Pass)
+	if err != nil {
+		return fmt.Errorf("failed to connect to arango DB %s database with error: %w", config.DBAddr, err)
+	}
+	var db driver.Database
+	// check if database exists
+	dbExists, err := arangodbClient.DatabaseExists(ctx, "guac_db")
+	if err != nil {
+		return fmt.Errorf("failed to check %s database with error: %w", config.DBAddr, err)
+	}
+	if dbExists {
+		db, err = arangodbClient.Database(ctx, "guac_db")
+		if err != nil {
+			return fmt.Errorf("failed to connect %s database with error: %w", config.DBAddr, err)
+		}
+		err = db.Remove(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to delete %s database with error: %w", config.DBAddr, err)
+		}
+	}
+	return nil
+}
+
 func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {
 	config, ok := args.(*ArangoConfig)
 	if !ok {
@@ -436,7 +464,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for vulnerabilities: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID"}, true, "byArtIDEqualArtID"); err != nil {
+		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID", "justification"}, true, "byArtIDEqualArtIDJust"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
 		}
 
@@ -480,12 +508,8 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "origin"}, true, "byPkgIDArtIDOrigin"); err != nil {
+		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "justification"}, true, "byPkgIDArtIDJust"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"digest"}, true, "byDigest"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hasSBOMs: %w", err)
 		}
 
 		// GUAC key indices for package

@@ -30,6 +30,18 @@ const (
 	dependencyTypeStr string = "dependencyType"
 )
 
+func checkPkgNameDependency(isDependencySpec *model.IsDependencySpec) bool {
+	if isDependencySpec.DependentPackage != nil {
+		if isDependencySpec.DependentPackage.Version != nil ||
+			isDependencySpec.DependentPackage.Subpath != nil ||
+			isDependencySpec.DependentPackage.Qualifiers != nil ||
+			isDependencySpec.DependentPackage.MatchOnlyEmptyQualifiers != nil {
+			return false
+		}
+	}
+	return true
+}
+
 // Query IsDependency
 
 func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
@@ -53,18 +65,21 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 
 		combinedIsDependency = append(combinedIsDependency, depPkgVersionIsDependency...)
 
-		// dep pkgName isDependency
-		arangoQueryBuilder = setPkgVersionMatchValues(isDependencySpec.Package, values)
-		arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
-		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values, false)
+		if checkPkgNameDependency(isDependencySpec) {
+			// dep pkgName isDependency
+			values = map[string]any{}
+			arangoQueryBuilder = setPkgVersionMatchValues(isDependencySpec.Package, values)
+			arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
+			setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values, false)
 
-		depPkgNameIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values, false)
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve dependent package name isDependency with error: %w", err)
+			depPkgNameIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values, false)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve dependent package name isDependency with error: %w", err)
+			}
+
+			combinedIsDependency = append(combinedIsDependency, depPkgNameIsDependency...)
+
 		}
-
-		combinedIsDependency = append(combinedIsDependency, depPkgNameIsDependency...)
-
 		return combinedIsDependency, nil
 	} else {
 		var combinedIsDependency []*model.IsDependency
@@ -84,22 +99,23 @@ func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model
 
 		combinedIsDependency = append(combinedIsDependency, depPkgVersionIsDependency...)
 
-		// dep pkgName isDependency
+		if checkPkgNameDependency(isDependencySpec) {
+			// dep pkgName isDependency
+			values = map[string]any{}
+			arangoQueryBuilder = newForQuery(isDependenciesStr, "isDependency")
+			arangoQueryBuilder.forInBound(isDependencySubjectPkgEdgesStr, "pVersion", "isDependency")
+			arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
+			arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
+			arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
+			setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values, false)
 
-		arangoQueryBuilder = newForQuery(isDependenciesStr, "isDependency")
-		arangoQueryBuilder.forInBound(isDependencySubjectPkgEdgesStr, "pVersion", "isDependency")
-		arangoQueryBuilder.forInBound(pkgHasVersionStr, "pName", "pVersion")
-		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
-		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
-		setIsDependencyMatchValues(arangoQueryBuilder, isDependencySpec, values, false)
+			depPkgNameIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values, false)
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve dependent package name isDependency with error: %w", err)
+			}
 
-		depPkgNameIsDependency, err := getDependencyForQuery(ctx, c, arangoQueryBuilder, values, false)
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve dependent package name isDependency with error: %w", err)
+			combinedIsDependency = append(combinedIsDependency, depPkgNameIsDependency...)
 		}
-
-		combinedIsDependency = append(combinedIsDependency, depPkgNameIsDependency...)
-
 		return combinedIsDependency, nil
 	}
 }
@@ -171,8 +187,6 @@ func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 		}`)
 	}
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsDependency")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for IsDependency: %w", err)
@@ -189,19 +203,23 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 	}
 	if isDependencySpec.VersionRange != nil {
 		arangoQueryBuilder.filter("isDependency", versionRangeStr, "==", "@"+versionRangeStr)
-		queryValues[versionRangeStr] = isDependencySpec.VersionRange
+		queryValues[versionRangeStr] = *isDependencySpec.VersionRange
 	}
 	if isDependencySpec.DependencyType != nil {
 		arangoQueryBuilder.filter("isDependency", dependencyTypeStr, "==", "@"+dependencyTypeStr)
-		queryValues[dependencyTypeStr] = isDependencySpec.DependencyType.String()
+		queryValues[dependencyTypeStr] = *isDependencySpec.DependencyType
+	}
+	if isDependencySpec.Justification != nil {
+		arangoQueryBuilder.filter("isDependency", justification, "==", "@"+justification)
+		queryValues[justification] = *isDependencySpec.Justification
 	}
 	if isDependencySpec.Origin != nil {
 		arangoQueryBuilder.filter("isDependency", origin, "==", "@"+origin)
-		queryValues[origin] = isDependencySpec.Origin
+		queryValues[origin] = *isDependencySpec.Origin
 	}
 	if isDependencySpec.Collector != nil {
 		arangoQueryBuilder.filter("isDependency", collector, "==", "@"+collector)
-		queryValues[collector] = isDependencySpec.Collector
+		queryValues[collector] = *isDependencySpec.Collector
 	}
 	if isDependencySpec.DependentPackage != nil {
 		if !queryDepPkgVersion {
@@ -520,7 +538,6 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 		// TODO: add version into return
 	}
 
-	fmt.Println(sb.String())
 	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestDependency")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest isDependency: %w", err)
@@ -744,6 +761,9 @@ func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
 	}
 	if status == model.DependencyTypeUnknown.String() {
 		return model.DependencyTypeUnknown, nil
+	}
+	if status == "" {
+		return "", nil
 	}
 	return model.DependencyTypeUnknown, fmt.Errorf("failed to convert DependencyType to enum")
 }

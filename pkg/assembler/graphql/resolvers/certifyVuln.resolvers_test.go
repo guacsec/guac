@@ -63,6 +63,22 @@ func TestIngestCertifyVulns(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
+			Name: "Ingest vulnerability cve with novulnID",
+			Calls: []call{
+				{
+					Pkgs: []*model.PkgInputSpec{testdata.P2},
+					Vulns: []*model.VulnerabilityInputSpec{
+						{
+							Type:            "cve",
+							VulnerabilityID: "",
+						},
+					},
+					CertifyVulns: []*model.ScanMetadataInput{&model.ScanMetadataInput{}},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
 			Name: "Happy path",
 			Calls: []call{
 				{

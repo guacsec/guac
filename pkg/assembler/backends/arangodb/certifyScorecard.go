@@ -73,8 +73,6 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 		'origin': scorecard.origin
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Scorecards")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for Scorecards: %w", err)
@@ -95,7 +93,7 @@ func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, cert
 	}
 	if certifyScorecardSpec.AggregateScore != nil {
 		arangoQueryBuilder.filter("scorecard", aggregateScoreStr, "==", "@"+aggregateScoreStr)
-		queryValues[aggregateScoreStr] = certifyScorecardSpec.AggregateScore
+		queryValues[aggregateScoreStr] = *certifyScorecardSpec.AggregateScore
 	}
 	if len(certifyScorecardSpec.Checks) > 0 {
 		checks := getChecks(certifyScorecardSpec.Checks)
@@ -104,19 +102,19 @@ func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, cert
 	}
 	if certifyScorecardSpec.ScorecardVersion != nil {
 		arangoQueryBuilder.filter("scorecard", scorecardVersionStr, "==", "@"+scorecardVersionStr)
-		queryValues[scorecardVersionStr] = certifyScorecardSpec.ScorecardVersion
+		queryValues[scorecardVersionStr] = *certifyScorecardSpec.ScorecardVersion
 	}
 	if certifyScorecardSpec.ScorecardCommit != nil {
 		arangoQueryBuilder.filter("scorecard", scorecardCommitStr, "==", "@"+scorecardCommitStr)
-		queryValues[scorecardCommitStr] = certifyScorecardSpec.ScorecardCommit
+		queryValues[scorecardCommitStr] = *certifyScorecardSpec.ScorecardCommit
 	}
 	if certifyScorecardSpec.Origin != nil {
 		arangoQueryBuilder.filter("scorecard", origin, "==", "@"+origin)
-		queryValues["origin"] = certifyScorecardSpec.Origin
+		queryValues["origin"] = *certifyScorecardSpec.Origin
 	}
 	if certifyScorecardSpec.Collector != nil {
 		arangoQueryBuilder.filter("scorecard", collector, "==", "@"+collector)
-		queryValues["collector"] = certifyScorecardSpec.Collector
+		queryValues["collector"] = *certifyScorecardSpec.Collector
 	}
 	if certifyScorecardSpec.Source == nil {
 		// get sources
@@ -347,7 +345,7 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 }
 
 func getCollectedScorecardChecks(checksList []string) ([]*model.ScorecardCheck, error) {
-	var scorecardChecks []*model.ScorecardCheck
+	scorecardChecks := []*model.ScorecardCheck{}
 	for i := range checksList {
 		if i%2 == 0 {
 			check := checksList[i]

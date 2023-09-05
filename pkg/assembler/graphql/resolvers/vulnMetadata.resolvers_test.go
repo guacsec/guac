@@ -58,6 +58,24 @@ func TestIngestVulnerabilityMetadata(t *testing.T) {
 			ExpIngestErr: true,
 		},
 		{
+			Name: "Ingest with type cve with no ID",
+			Calls: []call{
+				{
+					Vuln: &model.VulnerabilityInputSpec{
+						Type: "cve",
+					},
+					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+						ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+						ScoreValue: 7.9,
+						Timestamp:  t1,
+						Collector:  "test collector",
+						Origin:     "test origin",
+					},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
 			Name: "Happy path",
 			Calls: []call{
 				{
@@ -137,6 +155,28 @@ func TestIngestVulnerabilityMetadatas(t *testing.T) {
 					Vulns: []*model.VulnerabilityInputSpec{
 						{
 							Type: "novuln",
+						},
+					},
+					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
+						{
+							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+							ScoreValue: 7.9,
+							Timestamp:  t1,
+							Collector:  "test collector",
+							Origin:     "test origin",
+						},
+					},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "Ingest with vulnerability type cve with no id",
+			Calls: []call{
+				{
+					Vulns: []*model.VulnerabilityInputSpec{
+						{
+							Type: "cve",
 						},
 					},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
