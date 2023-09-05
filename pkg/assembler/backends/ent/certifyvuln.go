@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 )
 
 // CertifyVuln is the model entity for the CertifyVuln schema.
@@ -19,8 +19,8 @@ type CertifyVuln struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Advisory is one of OSV, GHSA, or CVE, or nil if not vulnerable
-	VulnerabilityID *int `json:"vulnerability_id,omitempty"`
+	// VulnerabilityID holds the value of the "vulnerability_id" field.
+	VulnerabilityID int `json:"vulnerability_id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
 	PackageID int `json:"package_id,omitempty"`
 	// TimeScanned holds the value of the "time_scanned" field.
@@ -45,8 +45,8 @@ type CertifyVuln struct {
 
 // CertifyVulnEdges holds the relations/edges for other nodes in the graph.
 type CertifyVulnEdges struct {
-	// Vulnerability is one of OSV, GHSA, or CVE
-	Vulnerability *VulnerabilityType `json:"vulnerability,omitempty"`
+	// Vulnerability holds the value of the vulnerability edge.
+	Vulnerability *VulnerabilityID `json:"vulnerability,omitempty"`
 	// Package holds the value of the package edge.
 	Package *PackageVersion `json:"package,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -58,11 +58,11 @@ type CertifyVulnEdges struct {
 
 // VulnerabilityOrErr returns the Vulnerability value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e CertifyVulnEdges) VulnerabilityOrErr() (*VulnerabilityType, error) {
+func (e CertifyVulnEdges) VulnerabilityOrErr() (*VulnerabilityID, error) {
 	if e.loadedTypes[0] {
 		if e.Vulnerability == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: vulnerabilitytype.Label}
+			return nil, &NotFoundError{label: vulnerabilityid.Label}
 		}
 		return e.Vulnerability, nil
 	}
@@ -118,8 +118,7 @@ func (cv *CertifyVuln) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field vulnerability_id", values[i])
 			} else if value.Valid {
-				cv.VulnerabilityID = new(int)
-				*cv.VulnerabilityID = int(value.Int64)
+				cv.VulnerabilityID = int(value.Int64)
 			}
 		case certifyvuln.FieldPackageID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -183,7 +182,7 @@ func (cv *CertifyVuln) Value(name string) (ent.Value, error) {
 }
 
 // QueryVulnerability queries the "vulnerability" edge of the CertifyVuln entity.
-func (cv *CertifyVuln) QueryVulnerability() *VulnerabilityTypeQuery {
+func (cv *CertifyVuln) QueryVulnerability() *VulnerabilityIDQuery {
 	return NewCertifyVulnClient(cv.config).QueryVulnerability(cv)
 }
 
@@ -215,10 +214,8 @@ func (cv *CertifyVuln) String() string {
 	var builder strings.Builder
 	builder.WriteString("CertifyVuln(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", cv.ID))
-	if v := cv.VulnerabilityID; v != nil {
-		builder.WriteString("vulnerability_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("vulnerability_id=")
+	builder.WriteString(fmt.Sprintf("%v", cv.VulnerabilityID))
 	builder.WriteString(", ")
 	builder.WriteString("package_id=")
 	builder.WriteString(fmt.Sprintf("%v", cv.PackageID))

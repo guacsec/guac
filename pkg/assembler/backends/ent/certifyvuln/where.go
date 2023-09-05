@@ -120,16 +120,6 @@ func VulnerabilityIDNotIn(vs ...int) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldNotIn(FieldVulnerabilityID, vs...))
 }
 
-// VulnerabilityIDIsNil applies the IsNil predicate on the "vulnerability_id" field.
-func VulnerabilityIDIsNil() predicate.CertifyVuln {
-	return predicate.CertifyVuln(sql.FieldIsNull(FieldVulnerabilityID))
-}
-
-// VulnerabilityIDNotNil applies the NotNil predicate on the "vulnerability_id" field.
-func VulnerabilityIDNotNil() predicate.CertifyVuln {
-	return predicate.CertifyVuln(sql.FieldNotNull(FieldVulnerabilityID))
-}
-
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
 func PackageIDEQ(v int) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldEQ(FieldPackageID, v))
@@ -592,7 +582,7 @@ func HasVulnerability() predicate.CertifyVuln {
 }
 
 // HasVulnerabilityWith applies the HasEdge predicate on the "vulnerability" edge with a given conditions (other predicates).
-func HasVulnerabilityWith(preds ...predicate.VulnerabilityType) predicate.CertifyVuln {
+func HasVulnerabilityWith(preds ...predicate.VulnerabilityID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(func(s *sql.Selector) {
 		step := newVulnerabilityStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
