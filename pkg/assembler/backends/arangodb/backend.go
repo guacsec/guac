@@ -122,6 +122,12 @@ const (
 	vulnMetadataEdgesStr string = "vulnMetadataEdges"
 	vulnMetadatasStr     string = "vulnMetadatas"
 
+	// vulnEquals collections
+
+	vulnEqualVulnEdgesStr        string = "vulnEqualVulnEdges"
+	vulnEqualSubjectVulnEdgesStr string = "vulnEqualSubjectVulnEdges"
+	vulnEqualsStr                string = "vulnEquals"
+
 	// certifyScorecard collection
 
 	scorecardSrcEdgesStr string = "scorecardSrcEdges"
@@ -387,6 +393,17 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		vulnMetadataEdges.From = []string{vulnerabilitiesStr}
 		vulnMetadataEdges.To = []string{vulnMetadatasStr}
 
+		// setup vulnEqual collections
+		var vulnEqualVulnEdges driver.EdgeDefinition
+		vulnEqualVulnEdges.Collection = vulnEqualVulnEdgesStr
+		vulnEqualVulnEdges.From = []string{vulnEqualsStr}
+		vulnEqualVulnEdges.To = []string{vulnerabilitiesStr}
+
+		var vulnEqualSubjectVulnEdges driver.EdgeDefinition
+		vulnEqualSubjectVulnEdges.Collection = vulnEqualSubjectVulnEdgesStr
+		vulnEqualSubjectVulnEdges.From = []string{vulnerabilitiesStr}
+		vulnEqualSubjectVulnEdges.To = []string{vulnEqualsStr}
+
 		// setup certifyScorecard collections
 		var certifyScorecardSrcEdges driver.EdgeDefinition
 		certifyScorecardSrcEdges.Collection = scorecardSrcEdgesStr
@@ -443,7 +460,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
 			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
-			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges}
+			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)

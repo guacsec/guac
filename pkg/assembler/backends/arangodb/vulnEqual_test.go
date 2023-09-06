@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -83,7 +85,7 @@ func TestVulnEqual(t *testing.T) {
 			},
 		},
 		{
-			Name:   "Igest same twice",
+			Name:   "Ingest same twice",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1},
 			Calls: []call{
 				{
@@ -201,6 +203,128 @@ func TestVulnEqual(t *testing.T) {
 			},
 		},
 		{
+			Name:   "Query on OSV and other vulnerability ID",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
+			Calls: []call{
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Vuln:      testdata.O2,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				Vulnerabilities: []*model.VulnerabilitySpec{
+					{
+						VulnerabilityID: ptrfrom.String("CVE-2022-26499"),
+					},
+					{
+						VulnerabilityID: ptrfrom.String("CVE-2019-13110"),
+					},
+				},
+			},
+			ExpVulnEqual: []*model.VulnEqual{
+				{
+					Vulnerabilities: []*model.Vulnerability{
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+						},
+						{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+						},
+					},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:   "Query on OSV and other vulnerability ID",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
+			Calls: []call{
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Vuln:      testdata.O2,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				Vulnerabilities: []*model.VulnerabilitySpec{
+					{
+						VulnerabilityID: ptrfrom.String("CVE-2022-26499"),
+					},
+					{
+						Type:            ptrfrom.String("cve"),
+						VulnerabilityID: ptrfrom.String("CVE-2019-13110"),
+					},
+				},
+			},
+			ExpVulnEqual: []*model.VulnEqual{
+				{
+					Vulnerabilities: []*model.Vulnerability{
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+						},
+						{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+						},
+					},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:   "Query on OSV and novuln (return nothing as not valid)",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
+			Calls: []call{
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Vuln:      testdata.O2,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				Vulnerabilities: []*model.VulnerabilitySpec{
+					{
+						VulnerabilityID: ptrfrom.String("CVE-2022-26499"),
+					},
+					{
+						NoVuln: ptrfrom.Bool(true),
+					},
+				},
+			},
+			ExpVulnEqual: nil,
+		},
+		{
 			Name:   "Query on GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1, testdata.C2, testdata.G1},
 			Calls: []call{
@@ -237,12 +361,12 @@ func TestVulnEqual(t *testing.T) {
 				{
 					Vulnerabilities: []*model.Vulnerability{
 						{
-							Type:             "osv",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
-						},
-						{
 							Type:             "ghsa",
 							VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+						},
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
 						},
 					},
 					Justification: "test justification",
@@ -313,7 +437,8 @@ func TestVulnEqual(t *testing.T) {
 			Query: &model.VulnEqualSpec{
 				Vulnerabilities: []*model.VulnerabilitySpec{
 					{
-						Type: ptrfrom.String("cve"),
+						Type:            ptrfrom.String("cve"),
+						VulnerabilityID: ptrfrom.String("cve-2014-8139"),
 					},
 				},
 			},
@@ -321,25 +446,12 @@ func TestVulnEqual(t *testing.T) {
 				{
 					Vulnerabilities: []*model.Vulnerability{
 						{
-							Type:             "osv",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
-						},
-						{
-							Type:             "cve",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
-						},
-					},
-					Justification: "test justification",
-				},
-				{
-					Vulnerabilities: []*model.Vulnerability{
-						{
-							Type:             "osv",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
-						},
-						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
+						},
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
 						},
 					},
 					Justification: "test justification",
@@ -347,7 +459,7 @@ func TestVulnEqual(t *testing.T) {
 			},
 		},
 		{
-			Name:   "Query ID",
+			Name:   "Query on ID",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1, testdata.C2, testdata.G1},
 			Calls: []call{
 				{
@@ -383,8 +495,8 @@ func TestVulnEqual(t *testing.T) {
 							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
 						},
 						{
-							Type:             "cve",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+							Type:             "ghsa",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
 						},
 					},
 					Justification: "test justification",
@@ -438,7 +550,7 @@ func TestVulnEqual(t *testing.T) {
 			Query: &model.VulnEqualSpec{
 				ID: ptrfrom.String("-123"),
 			},
-			ExpQueryErr: true,
+			ExpQueryErr: false,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -452,12 +564,17 @@ func TestVulnEqual(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
+				found, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
+				}
+				if test.Name == "Query on ID" {
+					test.Query = &model.VulnEqualSpec{
+						ID: ptrfrom.String(found.ID),
+					}
 				}
 			}
 			got, err := b.VulnEqual(ctx, test.Query)
@@ -536,12 +653,12 @@ func TestIngestVulnEquals(t *testing.T) {
 				{
 					Vulnerabilities: []*model.Vulnerability{
 						{
-							Type:             "osv",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
-						},
-						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
+						},
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
 						},
 					},
 					Justification: "test justification",
@@ -582,6 +699,19 @@ func TestIngestVulnEquals(t *testing.T) {
 					},
 					Justification: "test justification",
 				},
+				{
+					Vulnerabilities: []*model.Vulnerability{
+						{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
+						},
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+						},
+					},
+					Justification: "test justification",
+				},
 			},
 		},
 
@@ -613,12 +743,12 @@ func TestIngestVulnEquals(t *testing.T) {
 				{
 					Vulnerabilities: []*model.Vulnerability{
 						{
-							Type:             "osv",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
-						},
-						{
 							Type:             "ghsa",
 							VulnerabilityIDs: []*model.VulnerabilityID{testdata.G2out},
+						},
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
 						},
 					},
 					Justification: "test justification",
