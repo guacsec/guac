@@ -83,6 +83,7 @@ type EncodingType string
 
 const (
 	EncodingBzip2   EncodingType = "BZIP2"
+	EncodingZstd    EncodingType = "ZSTD"
 	EncodingUnknown EncodingType = "UNKNOWN"
 )
 

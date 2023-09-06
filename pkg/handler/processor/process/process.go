@@ -38,6 +38,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/klauspost/compress/zstd"
 )
 
 var (
@@ -211,11 +212,18 @@ func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
 }
 
 func decodeDocument(ctx context.Context, i *processor.Document) error {
+	logger := logging.FromContext(ctx)
 	var reader io.Reader
+	var err error
+	logger.Infof("Decoding document with encoding:  %v", i.Encoding)
 	switch i.Encoding {
 	case processor.EncodingBzip2:
 		reader = bzip2.NewReader(bytes.NewReader(i.Blob))
-	// TODO Add more encoding options
+	case processor.EncodingZstd:
+		reader, err = zstd.NewReader(bytes.NewReader(i.Blob))
+		if err != nil {
+			return fmt.Errorf("unable to create zstd reader: %w", err)
+		}
 	case processor.EncodingUnknown:
 	}
 	if reader != nil {
@@ -227,8 +235,6 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 }
 
 func decompressDocument(ctx context.Context, i *processor.Document, reader io.Reader) error {
-	logger := logging.FromContext(ctx)
-	logger.Infof("Decoding document:  %v", i.Encoding)
 	uncompressed, err := io.ReadAll(reader)
 	if err != nil {
 		return fmt.Errorf("unable to decompress document: %w", err)
