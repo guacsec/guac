@@ -56,12 +56,13 @@ func NewServer(port int) (*server, error) {
 
 func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntriesRequest) (*pb.AddCollectEntriesResponse, error) {
 	logger := ctxzap.Extract(ctx).Sugar()
-	logger.Infof("AddCollectEntries called with entries: %v", in.Entries)
+	logger.Debugf("AddCollectEntries called with entries: %v", in.Entries)
 
 	err := s.Db.AddCollectEntries(ctx, in.Entries)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add entry to db: %w", err)
 	}
+	logger.Infof("AddCollectEntries added %d entries", len(in.Entries))
 
 	return &pb.AddCollectEntriesResponse{
 		Success: true,
@@ -70,7 +71,7 @@ func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntries
 
 func (s *server) GetCollectEntries(ctx context.Context, in *pb.GetCollectEntriesRequest) (*pb.GetCollectEntriesResponse, error) {
 	logger := ctxzap.Extract(ctx).Sugar()
-	logger.Infof("GetCollectEntries called with filters: %v", in.Filters)
+	logger.Debugf("GetCollectEntries called with filters: %v", in.Filters)
 
 	ret, err := s.Db.GetCollectEntries(ctx, in.Filters, in.SinceTime)
 	if err != nil {
@@ -126,6 +127,7 @@ func (s *server) Serve(ctx context.Context) error {
 				grpc_zap.UnaryServerInterceptor(logger.Desugar()),
 				contextToZapFieldsUnaryServerInterceptor(),
 			)),
+		grpc.MaxRecvMsgSize(16777216),
 	}
 	gs := grpc.NewServer(opts...)
 
