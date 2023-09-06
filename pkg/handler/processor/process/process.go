@@ -138,7 +138,7 @@ func processHelper(ctx context.Context, doc *processor.Document) (*processor.Doc
 }
 
 func processDocument(ctx context.Context, i *processor.Document) ([]*processor.Document, error) {
-	if err := decodeDocument(i); err != nil {
+	if err := decodeDocument(ctx, i); err != nil {
 		return nil, err
 	}
 
@@ -210,7 +210,7 @@ func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
 	return p.Unpack(i) // nolint:wrapcheck
 }
 
-func decodeDocument(i *processor.Document) error {
+func decodeDocument(ctx context.Context, i *processor.Document) error {
 	var reader io.Reader
 	switch i.Encoding {
 	case processor.EncodingBzip2:
@@ -219,14 +219,16 @@ func decodeDocument(i *processor.Document) error {
 	case processor.EncodingUnknown:
 	}
 	if reader != nil {
-		if err := decompressDocument(i, reader); err != nil {
+		if err := decompressDocument(ctx, i, reader); err != nil {
 			return fmt.Errorf("unable to decode document: %w", err)
 		}
 	}
 	return nil
 }
 
-func decompressDocument(i *processor.Document, reader io.Reader) error {
+func decompressDocument(ctx context.Context, i *processor.Document, reader io.Reader) error {
+	logger := logging.FromContext(ctx)
+	logger.Infof("Decoding document:  %v", i.Encoding)
 	uncompressed, err := io.ReadAll(reader)
 	if err != nil {
 		return fmt.Errorf("unable to decompress document: %w", err)
