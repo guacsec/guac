@@ -7496,6 +7496,24 @@ type IngestSourcesResponse struct {
 // GetIngestSources returns IngestSourcesResponse.IngestSources, and is useful for accessing the field via an interface.
 func (v *IngestSourcesResponse) GetIngestSources() []string { return v.IngestSources }
 
+// IngestVulnEqualResponse is returned by IngestVulnEqual on success.
+type IngestVulnEqualResponse struct {
+	// Ingest a mapping between vulnerabilities. The returned ID can be empty string.
+	IngestVulnEqual string `json:"ingestVulnEqual"`
+}
+
+// GetIngestVulnEqual returns IngestVulnEqualResponse.IngestVulnEqual, and is useful for accessing the field via an interface.
+func (v *IngestVulnEqualResponse) GetIngestVulnEqual() string { return v.IngestVulnEqual }
+
+// IngestVulnEqualsResponse is returned by IngestVulnEquals on success.
+type IngestVulnEqualsResponse struct {
+	// Bulk ingest mapping between vulnerabilities. The returned array of IDs can be a an array of empty string.
+	IngestVulnEquals []string `json:"ingestVulnEquals"`
+}
+
+// GetIngestVulnEquals returns IngestVulnEqualsResponse.IngestVulnEquals, and is useful for accessing the field via an interface.
+func (v *IngestVulnEqualsResponse) GetIngestVulnEquals() []string { return v.IngestVulnEquals }
+
 // IngestVulnerabilitiesResponse is returned by IngestVulnerabilities on success.
 type IngestVulnerabilitiesResponse struct {
 	// Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs can be a an array of empty string.
@@ -20515,25 +20533,6 @@ func (v *VulnEqualInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns VulnEqualInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *VulnEqualInputSpec) GetCollector() string { return v.Collector }
 
-// VulnEqualResponse is returned by VulnEqual on success.
-type VulnEqualResponse struct {
-	// Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string.
-	Vuln string `json:"vuln"`
-	// Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string.
-	OtherVuln string `json:"otherVuln"`
-	// Ingest a mapping between vulnerabilities. The returned ID can be empty string.
-	IngestVulnEqual string `json:"ingestVulnEqual"`
-}
-
-// GetVuln returns VulnEqualResponse.Vuln, and is useful for accessing the field via an interface.
-func (v *VulnEqualResponse) GetVuln() string { return v.Vuln }
-
-// GetOtherVuln returns VulnEqualResponse.OtherVuln, and is useful for accessing the field via an interface.
-func (v *VulnEqualResponse) GetOtherVuln() string { return v.OtherVuln }
-
-// GetIngestVulnEqual returns VulnEqualResponse.IngestVulnEqual, and is useful for accessing the field via an interface.
-func (v *VulnEqualResponse) GetIngestVulnEqual() string { return v.IngestVulnEqual }
-
 // VulnHasMetadataResponse is returned by VulnHasMetadata on success.
 type VulnHasMetadataResponse struct {
 	// Adds metadata about a vulnerability. The returned ID can be empty string.
@@ -21379,6 +21378,44 @@ type __IngestSourcesInput struct {
 // GetSources returns __IngestSourcesInput.Sources, and is useful for accessing the field via an interface.
 func (v *__IngestSourcesInput) GetSources() []SourceInputSpec { return v.Sources }
 
+// __IngestVulnEqualInput is used internally by genqlient
+type __IngestVulnEqualInput struct {
+	Vulnerability      VulnerabilityInputSpec `json:"vulnerability"`
+	OtherVulnerability VulnerabilityInputSpec `json:"otherVulnerability"`
+	VulnEqual          VulnEqualInputSpec     `json:"vulnEqual"`
+}
+
+// GetVulnerability returns __IngestVulnEqualInput.Vulnerability, and is useful for accessing the field via an interface.
+func (v *__IngestVulnEqualInput) GetVulnerability() VulnerabilityInputSpec { return v.Vulnerability }
+
+// GetOtherVulnerability returns __IngestVulnEqualInput.OtherVulnerability, and is useful for accessing the field via an interface.
+func (v *__IngestVulnEqualInput) GetOtherVulnerability() VulnerabilityInputSpec {
+	return v.OtherVulnerability
+}
+
+// GetVulnEqual returns __IngestVulnEqualInput.VulnEqual, and is useful for accessing the field via an interface.
+func (v *__IngestVulnEqualInput) GetVulnEqual() VulnEqualInputSpec { return v.VulnEqual }
+
+// __IngestVulnEqualsInput is used internally by genqlient
+type __IngestVulnEqualsInput struct {
+	Vulnerabilities      []VulnerabilityInputSpec `json:"vulnerabilities"`
+	OtherVulnerabilities []VulnerabilityInputSpec `json:"otherVulnerabilities"`
+	VulnEquals           []VulnEqualInputSpec     `json:"vulnEquals"`
+}
+
+// GetVulnerabilities returns __IngestVulnEqualsInput.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *__IngestVulnEqualsInput) GetVulnerabilities() []VulnerabilityInputSpec {
+	return v.Vulnerabilities
+}
+
+// GetOtherVulnerabilities returns __IngestVulnEqualsInput.OtherVulnerabilities, and is useful for accessing the field via an interface.
+func (v *__IngestVulnEqualsInput) GetOtherVulnerabilities() []VulnerabilityInputSpec {
+	return v.OtherVulnerabilities
+}
+
+// GetVulnEquals returns __IngestVulnEqualsInput.VulnEquals, and is useful for accessing the field via an interface.
+func (v *__IngestVulnEqualsInput) GetVulnEquals() []VulnEqualInputSpec { return v.VulnEquals }
+
 // __IngestVulnerabilitiesInput is used internally by genqlient
 type __IngestVulnerabilitiesInput struct {
 	Vulns []VulnerabilityInputSpec `json:"vulns"`
@@ -21704,24 +21741,6 @@ type __SourcesInput struct {
 
 // GetFilter returns __SourcesInput.Filter, and is useful for accessing the field via an interface.
 func (v *__SourcesInput) GetFilter() SourceSpec { return v.Filter }
-
-// __VulnEqualInput is used internally by genqlient
-type __VulnEqualInput struct {
-	Vulnerability      VulnerabilityInputSpec `json:"vulnerability"`
-	OtherVulnerability VulnerabilityInputSpec `json:"otherVulnerability"`
-	VulnEqual          VulnEqualInputSpec     `json:"vulnEqual"`
-}
-
-// GetVulnerability returns __VulnEqualInput.Vulnerability, and is useful for accessing the field via an interface.
-func (v *__VulnEqualInput) GetVulnerability() VulnerabilityInputSpec { return v.Vulnerability }
-
-// GetOtherVulnerability returns __VulnEqualInput.OtherVulnerability, and is useful for accessing the field via an interface.
-func (v *__VulnEqualInput) GetOtherVulnerability() VulnerabilityInputSpec {
-	return v.OtherVulnerability
-}
-
-// GetVulnEqual returns __VulnEqualInput.VulnEqual, and is useful for accessing the field via an interface.
-func (v *__VulnEqualInput) GetVulnEqual() VulnEqualInputSpec { return v.VulnEqual }
 
 // __VulnHasMetadataInput is used internally by genqlient
 type __VulnHasMetadataInput struct {
@@ -23634,6 +23653,80 @@ func IngestSources(
 	var err error
 
 	var data IngestSourcesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestVulnEqual.
+const IngestVulnEqual_Operation = `
+mutation IngestVulnEqual ($vulnerability: VulnerabilityInputSpec!, $otherVulnerability: VulnerabilityInputSpec!, $vulnEqual: VulnEqualInputSpec!) {
+	ingestVulnEqual(vulnerability: $vulnerability, otherVulnerability: $otherVulnerability, vulnEqual: $vulnEqual)
+}
+`
+
+func IngestVulnEqual(
+	ctx context.Context,
+	client graphql.Client,
+	vulnerability VulnerabilityInputSpec,
+	otherVulnerability VulnerabilityInputSpec,
+	vulnEqual VulnEqualInputSpec,
+) (*IngestVulnEqualResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestVulnEqual",
+		Query:  IngestVulnEqual_Operation,
+		Variables: &__IngestVulnEqualInput{
+			Vulnerability:      vulnerability,
+			OtherVulnerability: otherVulnerability,
+			VulnEqual:          vulnEqual,
+		},
+	}
+	var err error
+
+	var data IngestVulnEqualResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestVulnEquals.
+const IngestVulnEquals_Operation = `
+mutation IngestVulnEquals ($vulnerabilities: [VulnerabilityInputSpec!]!, $otherVulnerabilities: [VulnerabilityInputSpec!]!, $vulnEquals: [VulnEqualInputSpec!]!) {
+	ingestVulnEquals(vulnerabilities: $vulnerabilities, otherVulnerabilities: $otherVulnerabilities, vulnEquals: $vulnEquals)
+}
+`
+
+func IngestVulnEquals(
+	ctx context.Context,
+	client graphql.Client,
+	vulnerabilities []VulnerabilityInputSpec,
+	otherVulnerabilities []VulnerabilityInputSpec,
+	vulnEquals []VulnEqualInputSpec,
+) (*IngestVulnEqualsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestVulnEquals",
+		Query:  IngestVulnEquals_Operation,
+		Variables: &__IngestVulnEqualsInput{
+			Vulnerabilities:      vulnerabilities,
+			OtherVulnerabilities: otherVulnerabilities,
+			VulnEquals:           vulnEquals,
+		},
+	}
+	var err error
+
+	var data IngestVulnEqualsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -26305,45 +26398,6 @@ func Sources(
 	var err error
 
 	var data SourcesResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-// The query or mutation executed by VulnEqual.
-const VulnEqual_Operation = `
-mutation VulnEqual ($vulnerability: VulnerabilityInputSpec!, $otherVulnerability: VulnerabilityInputSpec!, $vulnEqual: VulnEqualInputSpec!) {
-	vuln: ingestVulnerability(vuln: $vulnerability)
-	otherVuln: ingestVulnerability(vuln: $otherVulnerability)
-	ingestVulnEqual(vulnerability: $vulnerability, otherVulnerability: $otherVulnerability, vulnEqual: $vulnEqual)
-}
-`
-
-func VulnEqual(
-	ctx context.Context,
-	client graphql.Client,
-	vulnerability VulnerabilityInputSpec,
-	otherVulnerability VulnerabilityInputSpec,
-	vulnEqual VulnEqualInputSpec,
-) (*VulnEqualResponse, error) {
-	req := &graphql.Request{
-		OpName: "VulnEqual",
-		Query:  VulnEqual_Operation,
-		Variables: &__VulnEqualInput{
-			Vulnerability:      vulnerability,
-			OtherVulnerability: otherVulnerability,
-			VulnEqual:          vulnEqual,
-		},
-	}
-	var err error
-
-	var data VulnEqualResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

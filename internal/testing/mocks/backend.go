@@ -785,6 +785,21 @@ func (mr *MockBackendMockRecorder) IngestVulnEqual(ctx, vulnerability, otherVuln
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestVulnEqual", reflect.TypeOf((*MockBackend)(nil).IngestVulnEqual), ctx, vulnerability, otherVulnerability, vulnEqual)
 }
 
+// IngestVulnEquals mocks base method.
+func (m *MockBackend) IngestVulnEquals(ctx context.Context, vulnerabilities, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestVulnEquals", ctx, vulnerabilities, otherVulnerabilities, vulnEquals)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestVulnEquals indicates an expected call of IngestVulnEquals.
+func (mr *MockBackendMockRecorder) IngestVulnEquals(ctx, vulnerabilities, otherVulnerabilities, vulnEquals interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestVulnEquals", reflect.TypeOf((*MockBackend)(nil).IngestVulnEquals), ctx, vulnerabilities, otherVulnerabilities, vulnEquals)
+}
+
 // IngestVulnerabilities mocks base method.
 func (m *MockBackend) IngestVulnerabilities(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]*model.Vulnerability, error) {
 	m.ctrl.T.Helper()
