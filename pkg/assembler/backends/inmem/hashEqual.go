@@ -79,7 +79,7 @@ func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.Ar
 	for i := range hashEquals {
 		hashEqual, err := c.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestDependency failed with err: %v", err)
+			return nil, gqlerror.Errorf("IngestHashEqual failed with err: %v", err)
 		}
 		modelHashEquals = append(modelHashEquals, hashEqual)
 	}

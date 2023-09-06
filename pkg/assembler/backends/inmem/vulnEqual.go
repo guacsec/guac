@@ -50,6 +50,19 @@ func (n *vulnerabilityEqualLink) BuildModelNode(c *demoClient) (model.Node, erro
 }
 
 // Ingest IsVulnerability
+
+func (c *demoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+	var modelHashEqualsIDs []string
+	for i := range vulnEquals {
+		vulnEqual, err := c.IngestVulnEqual(ctx, *vulnerabilities[i], *otherVulnerabilities[i], *vulnEquals[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestVulnEqual failed with err: %v", err)
+		}
+		modelHashEqualsIDs = append(modelHashEqualsIDs, vulnEqual.ID)
+	}
+	return modelHashEqualsIDs, nil
+}
+
 func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
 	return c.ingestVulnEqual(ctx, vulnerability, otherVulnerability, vulnEqual, true)
 }
