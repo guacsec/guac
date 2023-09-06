@@ -2241,7 +2241,7 @@ func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestVulnerability(ctx, client, *ingest.otherVuln); err != nil {
 			logger.Errorf("Error in ingesting other vuln: %v\n", err)
 		}
-		if _, err := model.VulnEqual(ctx, client, *ingest.vuln, *ingest.otherVuln, ingest.vulnEqual); err != nil {
+		if _, err := model.IngestVulnEqual(ctx, client, *ingest.vuln, *ingest.otherVuln, ingest.vulnEqual); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 

@@ -23,13 +23,16 @@ import (
 )
 
 // Ingest IsVulnerability
-func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestVulnEqual"))
 
+func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+	panic(fmt.Errorf("not implemented: IngestVulnEquals"))
 }
 
-// Query IsVulnerability
+func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
+	panic(fmt.Errorf("not implemented: IngestVulnEqual"))
+}
+
+// Query VulnEqual
 func (c *arangoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 	panic(fmt.Errorf("not implemented: VulnEqual"))
-
 }
