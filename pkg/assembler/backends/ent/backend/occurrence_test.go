@@ -99,6 +99,16 @@ var p2out = &model.Package{
 	}},
 }
 
+var p2outName = &model.Package{
+	Type: "pypi",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name:     "tensorflow",
+			Versions: []*model.PackageVersion{},
+		}},
+	}},
+}
+
 var p3 = &model.PkgInputSpec{
 	Type:    "pypi",
 	Name:    "tensorflow",
@@ -135,6 +145,17 @@ var p4out = &model.Package{
 				Version:    "3.0.3",
 				Qualifiers: []*model.PackageQualifier{},
 			}},
+		}},
+	}},
+}
+
+var p4outName = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name:     "openssl",
+			Versions: []*model.PackageVersion{},
 		}},
 	}},
 }

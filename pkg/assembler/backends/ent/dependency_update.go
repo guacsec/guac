@@ -35,9 +35,43 @@ func (du *DependencyUpdate) SetPackageID(i int) *DependencyUpdate {
 	return du
 }
 
-// SetDependentPackageID sets the "dependent_package_id" field.
-func (du *DependencyUpdate) SetDependentPackageID(i int) *DependencyUpdate {
-	du.mutation.SetDependentPackageID(i)
+// SetDependentPackageNameID sets the "dependent_package_name_id" field.
+func (du *DependencyUpdate) SetDependentPackageNameID(i int) *DependencyUpdate {
+	du.mutation.SetDependentPackageNameID(i)
+	return du
+}
+
+// SetNillableDependentPackageNameID sets the "dependent_package_name_id" field if the given value is not nil.
+func (du *DependencyUpdate) SetNillableDependentPackageNameID(i *int) *DependencyUpdate {
+	if i != nil {
+		du.SetDependentPackageNameID(*i)
+	}
+	return du
+}
+
+// ClearDependentPackageNameID clears the value of the "dependent_package_name_id" field.
+func (du *DependencyUpdate) ClearDependentPackageNameID() *DependencyUpdate {
+	du.mutation.ClearDependentPackageNameID()
+	return du
+}
+
+// SetDependentPackageVersionID sets the "dependent_package_version_id" field.
+func (du *DependencyUpdate) SetDependentPackageVersionID(i int) *DependencyUpdate {
+	du.mutation.SetDependentPackageVersionID(i)
+	return du
+}
+
+// SetNillableDependentPackageVersionID sets the "dependent_package_version_id" field if the given value is not nil.
+func (du *DependencyUpdate) SetNillableDependentPackageVersionID(i *int) *DependencyUpdate {
+	if i != nil {
+		du.SetDependentPackageVersionID(*i)
+	}
+	return du
+}
+
+// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
+func (du *DependencyUpdate) ClearDependentPackageVersionID() *DependencyUpdate {
+	du.mutation.ClearDependentPackageVersionID()
 	return du
 }
 
@@ -76,9 +110,14 @@ func (du *DependencyUpdate) SetPackage(p *PackageVersion) *DependencyUpdate {
 	return du.SetPackageID(p.ID)
 }
 
-// SetDependentPackage sets the "dependent_package" edge to the PackageName entity.
-func (du *DependencyUpdate) SetDependentPackage(p *PackageName) *DependencyUpdate {
-	return du.SetDependentPackageID(p.ID)
+// SetDependentPackageName sets the "dependent_package_name" edge to the PackageName entity.
+func (du *DependencyUpdate) SetDependentPackageName(p *PackageName) *DependencyUpdate {
+	return du.SetDependentPackageNameID(p.ID)
+}
+
+// SetDependentPackageVersion sets the "dependent_package_version" edge to the PackageVersion entity.
+func (du *DependencyUpdate) SetDependentPackageVersion(p *PackageVersion) *DependencyUpdate {
+	return du.SetDependentPackageVersionID(p.ID)
 }
 
 // Mutation returns the DependencyMutation object of the builder.
@@ -92,9 +131,15 @@ func (du *DependencyUpdate) ClearPackage() *DependencyUpdate {
 	return du
 }
 
-// ClearDependentPackage clears the "dependent_package" edge to the PackageName entity.
-func (du *DependencyUpdate) ClearDependentPackage() *DependencyUpdate {
-	du.mutation.ClearDependentPackage()
+// ClearDependentPackageName clears the "dependent_package_name" edge to the PackageName entity.
+func (du *DependencyUpdate) ClearDependentPackageName() *DependencyUpdate {
+	du.mutation.ClearDependentPackageName()
+	return du
+}
+
+// ClearDependentPackageVersion clears the "dependent_package_version" edge to the PackageVersion entity.
+func (du *DependencyUpdate) ClearDependentPackageVersion() *DependencyUpdate {
+	du.mutation.ClearDependentPackageVersion()
 	return du
 }
 
@@ -134,9 +179,6 @@ func (du *DependencyUpdate) check() error {
 	}
 	if _, ok := du.mutation.PackageID(); du.mutation.PackageCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
-	}
-	if _, ok := du.mutation.DependentPackageID(); du.mutation.DependentPackageCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Dependency.dependent_package"`)
 	}
 	return nil
 }
@@ -197,12 +239,12 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if du.mutation.DependentPackageCleared() {
+	if du.mutation.DependentPackageNameCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   dependency.DependentPackageTable,
-			Columns: []string{dependency.DependentPackageColumn},
+			Table:   dependency.DependentPackageNameTable,
+			Columns: []string{dependency.DependentPackageNameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
@@ -210,15 +252,44 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := du.mutation.DependentPackageIDs(); len(nodes) > 0 {
+	if nodes := du.mutation.DependentPackageNameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   dependency.DependentPackageTable,
-			Columns: []string{dependency.DependentPackageColumn},
+			Table:   dependency.DependentPackageNameTable,
+			Columns: []string{dependency.DependentPackageNameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if du.mutation.DependentPackageVersionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   dependency.DependentPackageVersionTable,
+			Columns: []string{dependency.DependentPackageVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.DependentPackageVersionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   dependency.DependentPackageVersionTable,
+			Columns: []string{dependency.DependentPackageVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -252,9 +323,43 @@ func (duo *DependencyUpdateOne) SetPackageID(i int) *DependencyUpdateOne {
 	return duo
 }
 
-// SetDependentPackageID sets the "dependent_package_id" field.
-func (duo *DependencyUpdateOne) SetDependentPackageID(i int) *DependencyUpdateOne {
-	duo.mutation.SetDependentPackageID(i)
+// SetDependentPackageNameID sets the "dependent_package_name_id" field.
+func (duo *DependencyUpdateOne) SetDependentPackageNameID(i int) *DependencyUpdateOne {
+	duo.mutation.SetDependentPackageNameID(i)
+	return duo
+}
+
+// SetNillableDependentPackageNameID sets the "dependent_package_name_id" field if the given value is not nil.
+func (duo *DependencyUpdateOne) SetNillableDependentPackageNameID(i *int) *DependencyUpdateOne {
+	if i != nil {
+		duo.SetDependentPackageNameID(*i)
+	}
+	return duo
+}
+
+// ClearDependentPackageNameID clears the value of the "dependent_package_name_id" field.
+func (duo *DependencyUpdateOne) ClearDependentPackageNameID() *DependencyUpdateOne {
+	duo.mutation.ClearDependentPackageNameID()
+	return duo
+}
+
+// SetDependentPackageVersionID sets the "dependent_package_version_id" field.
+func (duo *DependencyUpdateOne) SetDependentPackageVersionID(i int) *DependencyUpdateOne {
+	duo.mutation.SetDependentPackageVersionID(i)
+	return duo
+}
+
+// SetNillableDependentPackageVersionID sets the "dependent_package_version_id" field if the given value is not nil.
+func (duo *DependencyUpdateOne) SetNillableDependentPackageVersionID(i *int) *DependencyUpdateOne {
+	if i != nil {
+		duo.SetDependentPackageVersionID(*i)
+	}
+	return duo
+}
+
+// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
+func (duo *DependencyUpdateOne) ClearDependentPackageVersionID() *DependencyUpdateOne {
+	duo.mutation.ClearDependentPackageVersionID()
 	return duo
 }
 
@@ -293,9 +398,14 @@ func (duo *DependencyUpdateOne) SetPackage(p *PackageVersion) *DependencyUpdateO
 	return duo.SetPackageID(p.ID)
 }
 
-// SetDependentPackage sets the "dependent_package" edge to the PackageName entity.
-func (duo *DependencyUpdateOne) SetDependentPackage(p *PackageName) *DependencyUpdateOne {
-	return duo.SetDependentPackageID(p.ID)
+// SetDependentPackageName sets the "dependent_package_name" edge to the PackageName entity.
+func (duo *DependencyUpdateOne) SetDependentPackageName(p *PackageName) *DependencyUpdateOne {
+	return duo.SetDependentPackageNameID(p.ID)
+}
+
+// SetDependentPackageVersion sets the "dependent_package_version" edge to the PackageVersion entity.
+func (duo *DependencyUpdateOne) SetDependentPackageVersion(p *PackageVersion) *DependencyUpdateOne {
+	return duo.SetDependentPackageVersionID(p.ID)
 }
 
 // Mutation returns the DependencyMutation object of the builder.
@@ -309,9 +419,15 @@ func (duo *DependencyUpdateOne) ClearPackage() *DependencyUpdateOne {
 	return duo
 }
 
-// ClearDependentPackage clears the "dependent_package" edge to the PackageName entity.
-func (duo *DependencyUpdateOne) ClearDependentPackage() *DependencyUpdateOne {
-	duo.mutation.ClearDependentPackage()
+// ClearDependentPackageName clears the "dependent_package_name" edge to the PackageName entity.
+func (duo *DependencyUpdateOne) ClearDependentPackageName() *DependencyUpdateOne {
+	duo.mutation.ClearDependentPackageName()
+	return duo
+}
+
+// ClearDependentPackageVersion clears the "dependent_package_version" edge to the PackageVersion entity.
+func (duo *DependencyUpdateOne) ClearDependentPackageVersion() *DependencyUpdateOne {
+	duo.mutation.ClearDependentPackageVersion()
 	return duo
 }
 
@@ -364,9 +480,6 @@ func (duo *DependencyUpdateOne) check() error {
 	}
 	if _, ok := duo.mutation.PackageID(); duo.mutation.PackageCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Dependency.package"`)
-	}
-	if _, ok := duo.mutation.DependentPackageID(); duo.mutation.DependentPackageCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Dependency.dependent_package"`)
 	}
 	return nil
 }
@@ -444,12 +557,12 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if duo.mutation.DependentPackageCleared() {
+	if duo.mutation.DependentPackageNameCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   dependency.DependentPackageTable,
-			Columns: []string{dependency.DependentPackageColumn},
+			Table:   dependency.DependentPackageNameTable,
+			Columns: []string{dependency.DependentPackageNameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
@@ -457,15 +570,44 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := duo.mutation.DependentPackageIDs(); len(nodes) > 0 {
+	if nodes := duo.mutation.DependentPackageNameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   dependency.DependentPackageTable,
-			Columns: []string{dependency.DependentPackageColumn},
+			Table:   dependency.DependentPackageNameTable,
+			Columns: []string{dependency.DependentPackageNameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if duo.mutation.DependentPackageVersionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   dependency.DependentPackageVersionTable,
+			Columns: []string{dependency.DependentPackageVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.DependentPackageVersionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   dependency.DependentPackageVersionTable,
+			Columns: []string{dependency.DependentPackageVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

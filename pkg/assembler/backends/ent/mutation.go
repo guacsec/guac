@@ -5392,22 +5392,24 @@ func (m *CertifyVulnMutation) ResetEdge(name string) error {
 // DependencyMutation represents an operation that mutates the Dependency nodes in the graph.
 type DependencyMutation struct {
 	config
-	op                       Op
-	typ                      string
-	id                       *int
-	version_range            *string
-	dependency_type          *dependency.DependencyType
-	justification            *string
-	origin                   *string
-	collector                *string
-	clearedFields            map[string]struct{}
-	_package                 *int
-	cleared_package          bool
-	dependent_package        *int
-	cleareddependent_package bool
-	done                     bool
-	oldValue                 func(context.Context) (*Dependency, error)
-	predicates               []predicate.Dependency
+	op                               Op
+	typ                              string
+	id                               *int
+	version_range                    *string
+	dependency_type                  *dependency.DependencyType
+	justification                    *string
+	origin                           *string
+	collector                        *string
+	clearedFields                    map[string]struct{}
+	_package                         *int
+	cleared_package                  bool
+	dependent_package_name           *int
+	cleareddependent_package_name    bool
+	dependent_package_version        *int
+	cleareddependent_package_version bool
+	done                             bool
+	oldValue                         func(context.Context) (*Dependency, error)
+	predicates                       []predicate.Dependency
 }
 
 var _ ent.Mutation = (*DependencyMutation)(nil)
@@ -5544,40 +5546,102 @@ func (m *DependencyMutation) ResetPackageID() {
 	m._package = nil
 }
 
-// SetDependentPackageID sets the "dependent_package_id" field.
-func (m *DependencyMutation) SetDependentPackageID(i int) {
-	m.dependent_package = &i
+// SetDependentPackageNameID sets the "dependent_package_name_id" field.
+func (m *DependencyMutation) SetDependentPackageNameID(i int) {
+	m.dependent_package_name = &i
 }
 
-// DependentPackageID returns the value of the "dependent_package_id" field in the mutation.
-func (m *DependencyMutation) DependentPackageID() (r int, exists bool) {
-	v := m.dependent_package
+// DependentPackageNameID returns the value of the "dependent_package_name_id" field in the mutation.
+func (m *DependencyMutation) DependentPackageNameID() (r int, exists bool) {
+	v := m.dependent_package_name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDependentPackageID returns the old "dependent_package_id" field's value of the Dependency entity.
+// OldDependentPackageNameID returns the old "dependent_package_name_id" field's value of the Dependency entity.
 // If the Dependency object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DependencyMutation) OldDependentPackageID(ctx context.Context) (v int, err error) {
+func (m *DependencyMutation) OldDependentPackageNameID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDependentPackageID is only allowed on UpdateOne operations")
+		return v, errors.New("OldDependentPackageNameID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDependentPackageID requires an ID field in the mutation")
+		return v, errors.New("OldDependentPackageNameID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDependentPackageID: %w", err)
+		return v, fmt.Errorf("querying old value for OldDependentPackageNameID: %w", err)
 	}
-	return oldValue.DependentPackageID, nil
+	return oldValue.DependentPackageNameID, nil
 }
 
-// ResetDependentPackageID resets all changes to the "dependent_package_id" field.
-func (m *DependencyMutation) ResetDependentPackageID() {
-	m.dependent_package = nil
+// ClearDependentPackageNameID clears the value of the "dependent_package_name_id" field.
+func (m *DependencyMutation) ClearDependentPackageNameID() {
+	m.dependent_package_name = nil
+	m.clearedFields[dependency.FieldDependentPackageNameID] = struct{}{}
+}
+
+// DependentPackageNameIDCleared returns if the "dependent_package_name_id" field was cleared in this mutation.
+func (m *DependencyMutation) DependentPackageNameIDCleared() bool {
+	_, ok := m.clearedFields[dependency.FieldDependentPackageNameID]
+	return ok
+}
+
+// ResetDependentPackageNameID resets all changes to the "dependent_package_name_id" field.
+func (m *DependencyMutation) ResetDependentPackageNameID() {
+	m.dependent_package_name = nil
+	delete(m.clearedFields, dependency.FieldDependentPackageNameID)
+}
+
+// SetDependentPackageVersionID sets the "dependent_package_version_id" field.
+func (m *DependencyMutation) SetDependentPackageVersionID(i int) {
+	m.dependent_package_version = &i
+}
+
+// DependentPackageVersionID returns the value of the "dependent_package_version_id" field in the mutation.
+func (m *DependencyMutation) DependentPackageVersionID() (r int, exists bool) {
+	v := m.dependent_package_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDependentPackageVersionID returns the old "dependent_package_version_id" field's value of the Dependency entity.
+// If the Dependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DependencyMutation) OldDependentPackageVersionID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDependentPackageVersionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDependentPackageVersionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDependentPackageVersionID: %w", err)
+	}
+	return oldValue.DependentPackageVersionID, nil
+}
+
+// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
+func (m *DependencyMutation) ClearDependentPackageVersionID() {
+	m.dependent_package_version = nil
+	m.clearedFields[dependency.FieldDependentPackageVersionID] = struct{}{}
+}
+
+// DependentPackageVersionIDCleared returns if the "dependent_package_version_id" field was cleared in this mutation.
+func (m *DependencyMutation) DependentPackageVersionIDCleared() bool {
+	_, ok := m.clearedFields[dependency.FieldDependentPackageVersionID]
+	return ok
+}
+
+// ResetDependentPackageVersionID resets all changes to the "dependent_package_version_id" field.
+func (m *DependencyMutation) ResetDependentPackageVersionID() {
+	m.dependent_package_version = nil
+	delete(m.clearedFields, dependency.FieldDependentPackageVersionID)
 }
 
 // SetVersionRange sets the "version_range" field.
@@ -5786,30 +5850,56 @@ func (m *DependencyMutation) ResetPackage() {
 	m.cleared_package = false
 }
 
-// ClearDependentPackage clears the "dependent_package" edge to the PackageName entity.
-func (m *DependencyMutation) ClearDependentPackage() {
-	m.cleareddependent_package = true
+// ClearDependentPackageName clears the "dependent_package_name" edge to the PackageName entity.
+func (m *DependencyMutation) ClearDependentPackageName() {
+	m.cleareddependent_package_name = true
 }
 
-// DependentPackageCleared reports if the "dependent_package" edge to the PackageName entity was cleared.
-func (m *DependencyMutation) DependentPackageCleared() bool {
-	return m.cleareddependent_package
+// DependentPackageNameCleared reports if the "dependent_package_name" edge to the PackageName entity was cleared.
+func (m *DependencyMutation) DependentPackageNameCleared() bool {
+	return m.DependentPackageNameIDCleared() || m.cleareddependent_package_name
 }
 
-// DependentPackageIDs returns the "dependent_package" edge IDs in the mutation.
+// DependentPackageNameIDs returns the "dependent_package_name" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// DependentPackageID instead. It exists only for internal usage by the builders.
-func (m *DependencyMutation) DependentPackageIDs() (ids []int) {
-	if id := m.dependent_package; id != nil {
+// DependentPackageNameID instead. It exists only for internal usage by the builders.
+func (m *DependencyMutation) DependentPackageNameIDs() (ids []int) {
+	if id := m.dependent_package_name; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetDependentPackage resets all changes to the "dependent_package" edge.
-func (m *DependencyMutation) ResetDependentPackage() {
-	m.dependent_package = nil
-	m.cleareddependent_package = false
+// ResetDependentPackageName resets all changes to the "dependent_package_name" edge.
+func (m *DependencyMutation) ResetDependentPackageName() {
+	m.dependent_package_name = nil
+	m.cleareddependent_package_name = false
+}
+
+// ClearDependentPackageVersion clears the "dependent_package_version" edge to the PackageVersion entity.
+func (m *DependencyMutation) ClearDependentPackageVersion() {
+	m.cleareddependent_package_version = true
+}
+
+// DependentPackageVersionCleared reports if the "dependent_package_version" edge to the PackageVersion entity was cleared.
+func (m *DependencyMutation) DependentPackageVersionCleared() bool {
+	return m.DependentPackageVersionIDCleared() || m.cleareddependent_package_version
+}
+
+// DependentPackageVersionIDs returns the "dependent_package_version" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DependentPackageVersionID instead. It exists only for internal usage by the builders.
+func (m *DependencyMutation) DependentPackageVersionIDs() (ids []int) {
+	if id := m.dependent_package_version; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDependentPackageVersion resets all changes to the "dependent_package_version" edge.
+func (m *DependencyMutation) ResetDependentPackageVersion() {
+	m.dependent_package_version = nil
+	m.cleareddependent_package_version = false
 }
 
 // Where appends a list predicates to the DependencyMutation builder.
@@ -5846,12 +5936,15 @@ func (m *DependencyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DependencyMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m._package != nil {
 		fields = append(fields, dependency.FieldPackageID)
 	}
-	if m.dependent_package != nil {
-		fields = append(fields, dependency.FieldDependentPackageID)
+	if m.dependent_package_name != nil {
+		fields = append(fields, dependency.FieldDependentPackageNameID)
+	}
+	if m.dependent_package_version != nil {
+		fields = append(fields, dependency.FieldDependentPackageVersionID)
 	}
 	if m.version_range != nil {
 		fields = append(fields, dependency.FieldVersionRange)
@@ -5878,8 +5971,10 @@ func (m *DependencyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case dependency.FieldPackageID:
 		return m.PackageID()
-	case dependency.FieldDependentPackageID:
-		return m.DependentPackageID()
+	case dependency.FieldDependentPackageNameID:
+		return m.DependentPackageNameID()
+	case dependency.FieldDependentPackageVersionID:
+		return m.DependentPackageVersionID()
 	case dependency.FieldVersionRange:
 		return m.VersionRange()
 	case dependency.FieldDependencyType:
@@ -5901,8 +5996,10 @@ func (m *DependencyMutation) OldField(ctx context.Context, name string) (ent.Val
 	switch name {
 	case dependency.FieldPackageID:
 		return m.OldPackageID(ctx)
-	case dependency.FieldDependentPackageID:
-		return m.OldDependentPackageID(ctx)
+	case dependency.FieldDependentPackageNameID:
+		return m.OldDependentPackageNameID(ctx)
+	case dependency.FieldDependentPackageVersionID:
+		return m.OldDependentPackageVersionID(ctx)
 	case dependency.FieldVersionRange:
 		return m.OldVersionRange(ctx)
 	case dependency.FieldDependencyType:
@@ -5929,12 +6026,19 @@ func (m *DependencyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPackageID(v)
 		return nil
-	case dependency.FieldDependentPackageID:
+	case dependency.FieldDependentPackageNameID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDependentPackageID(v)
+		m.SetDependentPackageNameID(v)
+		return nil
+	case dependency.FieldDependentPackageVersionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDependentPackageVersionID(v)
 		return nil
 	case dependency.FieldVersionRange:
 		v, ok := value.(string)
@@ -6003,7 +6107,14 @@ func (m *DependencyMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *DependencyMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(dependency.FieldDependentPackageNameID) {
+		fields = append(fields, dependency.FieldDependentPackageNameID)
+	}
+	if m.FieldCleared(dependency.FieldDependentPackageVersionID) {
+		fields = append(fields, dependency.FieldDependentPackageVersionID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -6016,6 +6127,14 @@ func (m *DependencyMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *DependencyMutation) ClearField(name string) error {
+	switch name {
+	case dependency.FieldDependentPackageNameID:
+		m.ClearDependentPackageNameID()
+		return nil
+	case dependency.FieldDependentPackageVersionID:
+		m.ClearDependentPackageVersionID()
+		return nil
+	}
 	return fmt.Errorf("unknown Dependency nullable field %s", name)
 }
 
@@ -6026,8 +6145,11 @@ func (m *DependencyMutation) ResetField(name string) error {
 	case dependency.FieldPackageID:
 		m.ResetPackageID()
 		return nil
-	case dependency.FieldDependentPackageID:
-		m.ResetDependentPackageID()
+	case dependency.FieldDependentPackageNameID:
+		m.ResetDependentPackageNameID()
+		return nil
+	case dependency.FieldDependentPackageVersionID:
+		m.ResetDependentPackageVersionID()
 		return nil
 	case dependency.FieldVersionRange:
 		m.ResetVersionRange()
@@ -6050,12 +6172,15 @@ func (m *DependencyMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DependencyMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m._package != nil {
 		edges = append(edges, dependency.EdgePackage)
 	}
-	if m.dependent_package != nil {
-		edges = append(edges, dependency.EdgeDependentPackage)
+	if m.dependent_package_name != nil {
+		edges = append(edges, dependency.EdgeDependentPackageName)
+	}
+	if m.dependent_package_version != nil {
+		edges = append(edges, dependency.EdgeDependentPackageVersion)
 	}
 	return edges
 }
@@ -6068,8 +6193,12 @@ func (m *DependencyMutation) AddedIDs(name string) []ent.Value {
 		if id := m._package; id != nil {
 			return []ent.Value{*id}
 		}
-	case dependency.EdgeDependentPackage:
-		if id := m.dependent_package; id != nil {
+	case dependency.EdgeDependentPackageName:
+		if id := m.dependent_package_name; id != nil {
+			return []ent.Value{*id}
+		}
+	case dependency.EdgeDependentPackageVersion:
+		if id := m.dependent_package_version; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -6078,7 +6207,7 @@ func (m *DependencyMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DependencyMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -6090,12 +6219,15 @@ func (m *DependencyMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DependencyMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleared_package {
 		edges = append(edges, dependency.EdgePackage)
 	}
-	if m.cleareddependent_package {
-		edges = append(edges, dependency.EdgeDependentPackage)
+	if m.cleareddependent_package_name {
+		edges = append(edges, dependency.EdgeDependentPackageName)
+	}
+	if m.cleareddependent_package_version {
+		edges = append(edges, dependency.EdgeDependentPackageVersion)
 	}
 	return edges
 }
@@ -6106,8 +6238,10 @@ func (m *DependencyMutation) EdgeCleared(name string) bool {
 	switch name {
 	case dependency.EdgePackage:
 		return m.cleared_package
-	case dependency.EdgeDependentPackage:
-		return m.cleareddependent_package
+	case dependency.EdgeDependentPackageName:
+		return m.cleareddependent_package_name
+	case dependency.EdgeDependentPackageVersion:
+		return m.cleareddependent_package_version
 	}
 	return false
 }
@@ -6119,8 +6253,11 @@ func (m *DependencyMutation) ClearEdge(name string) error {
 	case dependency.EdgePackage:
 		m.ClearPackage()
 		return nil
-	case dependency.EdgeDependentPackage:
-		m.ClearDependentPackage()
+	case dependency.EdgeDependentPackageName:
+		m.ClearDependentPackageName()
+		return nil
+	case dependency.EdgeDependentPackageVersion:
+		m.ClearDependentPackageVersion()
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency unique edge %s", name)
@@ -6133,8 +6270,11 @@ func (m *DependencyMutation) ResetEdge(name string) error {
 	case dependency.EdgePackage:
 		m.ResetPackage()
 		return nil
-	case dependency.EdgeDependentPackage:
-		m.ResetDependentPackage()
+	case dependency.EdgeDependentPackageName:
+		m.ResetDependentPackageName()
+		return nil
+	case dependency.EdgeDependentPackageVersion:
+		m.ResetDependentPackageVersion()
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency edge %s", name)
