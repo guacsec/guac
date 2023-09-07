@@ -1068,7 +1068,7 @@ func ingestPkgEqual(ctx context.Context, client graphql.Client, graph assembler.
 			return fmt.Errorf("error in ingesting EqualPkg for PkgEqual: %v\n", err)
 		}
 
-		_, err = model.PkgEqual(ctx, client, *ingest.Pkg, *ingest.EqualPkg, *ingest.PkgEqual)
+		_, err = model.IngestPkgEqual(ctx, client, *ingest.Pkg, *ingest.EqualPkg, *ingest.PkgEqual)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting PkgEqual: %v\n", err)
@@ -1091,7 +1091,7 @@ func ingestHashEqual(ctx context.Context, client graphql.Client, graph assembler
 			return fmt.Errorf("error in ingesting EqualArtifact for HashEqual: %v\n", err)
 		}
 
-		_, err = model.HashEqual(ctx, client, *ingest.Artifact, *ingest.EqualArtifact, *ingest.HashEqual)
+		_, err = model.IngestHashEqual(ctx, client, *ingest.Artifact, *ingest.EqualArtifact, *ingest.HashEqual)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting HashEqual: %v\n", err)

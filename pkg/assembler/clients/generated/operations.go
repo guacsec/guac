@@ -7388,24 +7388,6 @@ func (v *HashEqualInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns HashEqualInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 
-// HashEqualResponse is returned by HashEqual on success.
-type HashEqualResponse struct {
-	// Adds a certification that two artifacts are equal. The returned ID can be empty string.
-	IngestHashEqual string `json:"ingestHashEqual"`
-}
-
-// GetIngestHashEqual returns HashEqualResponse.IngestHashEqual, and is useful for accessing the field via an interface.
-func (v *HashEqualResponse) GetIngestHashEqual() string { return v.IngestHashEqual }
-
-// HashEqualsResponse is returned by HashEquals on success.
-type HashEqualsResponse struct {
-	// Bulk ingest certifications that two artifacts are equal. The returned array of IDs can be a an array of empty string.
-	IngestHashEquals []string `json:"ingestHashEquals"`
-}
-
-// GetIngestHashEquals returns HashEqualsResponse.IngestHashEquals, and is useful for accessing the field via an interface.
-func (v *HashEqualsResponse) GetIngestHashEquals() []string { return v.IngestHashEquals }
-
 // IngestArtifactResponse is returned by IngestArtifact on success.
 type IngestArtifactResponse struct {
 	// Ingests a new artifact and returns it. The returned ID can be empty string.
@@ -7441,6 +7423,24 @@ type IngestBuildersResponse struct {
 
 // GetIngestBuilders returns IngestBuildersResponse.IngestBuilders, and is useful for accessing the field via an interface.
 func (v *IngestBuildersResponse) GetIngestBuilders() []string { return v.IngestBuilders }
+
+// IngestHashEqualResponse is returned by IngestHashEqual on success.
+type IngestHashEqualResponse struct {
+	// Adds a certification that two artifacts are equal. The returned ID can be empty string.
+	IngestHashEqual string `json:"ingestHashEqual"`
+}
+
+// GetIngestHashEqual returns IngestHashEqualResponse.IngestHashEqual, and is useful for accessing the field via an interface.
+func (v *IngestHashEqualResponse) GetIngestHashEqual() string { return v.IngestHashEqual }
+
+// IngestHashEqualsResponse is returned by IngestHashEquals on success.
+type IngestHashEqualsResponse struct {
+	// Bulk ingest certifications that two artifacts are equal. The returned array of IDs can be a an array of empty string.
+	IngestHashEquals []string `json:"ingestHashEquals"`
+}
+
+// GetIngestHashEquals returns IngestHashEqualsResponse.IngestHashEquals, and is useful for accessing the field via an interface.
+func (v *IngestHashEqualsResponse) GetIngestHashEquals() []string { return v.IngestHashEquals }
 
 // IngestLicenseResponse is returned by IngestLicense on success.
 type IngestLicenseResponse struct {
@@ -21265,38 +21265,6 @@ func (v *__HasSourceAtInput) GetSource() SourceInputSpec { return v.Source }
 // GetHasSourceAt returns __HasSourceAtInput.HasSourceAt, and is useful for accessing the field via an interface.
 func (v *__HasSourceAtInput) GetHasSourceAt() HasSourceAtInputSpec { return v.HasSourceAt }
 
-// __HashEqualInput is used internally by genqlient
-type __HashEqualInput struct {
-	Artifact      ArtifactInputSpec  `json:"artifact"`
-	OtherArtifact ArtifactInputSpec  `json:"otherArtifact"`
-	HashEqual     HashEqualInputSpec `json:"hashEqual"`
-}
-
-// GetArtifact returns __HashEqualInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__HashEqualInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
-
-// GetOtherArtifact returns __HashEqualInput.OtherArtifact, and is useful for accessing the field via an interface.
-func (v *__HashEqualInput) GetOtherArtifact() ArtifactInputSpec { return v.OtherArtifact }
-
-// GetHashEqual returns __HashEqualInput.HashEqual, and is useful for accessing the field via an interface.
-func (v *__HashEqualInput) GetHashEqual() HashEqualInputSpec { return v.HashEqual }
-
-// __HashEqualsInput is used internally by genqlient
-type __HashEqualsInput struct {
-	Artifacts      []ArtifactInputSpec  `json:"artifacts"`
-	OtherArtifacts []ArtifactInputSpec  `json:"otherArtifacts"`
-	HashEquals     []HashEqualInputSpec `json:"hashEquals"`
-}
-
-// GetArtifacts returns __HashEqualsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__HashEqualsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
-
-// GetOtherArtifacts returns __HashEqualsInput.OtherArtifacts, and is useful for accessing the field via an interface.
-func (v *__HashEqualsInput) GetOtherArtifacts() []ArtifactInputSpec { return v.OtherArtifacts }
-
-// GetHashEquals returns __HashEqualsInput.HashEquals, and is useful for accessing the field via an interface.
-func (v *__HashEqualsInput) GetHashEquals() []HashEqualInputSpec { return v.HashEquals }
-
 // __IngestArtifactInput is used internally by genqlient
 type __IngestArtifactInput struct {
 	Artifact ArtifactInputSpec `json:"artifact"`
@@ -21328,6 +21296,38 @@ type __IngestBuildersInput struct {
 
 // GetBuilders returns __IngestBuildersInput.Builders, and is useful for accessing the field via an interface.
 func (v *__IngestBuildersInput) GetBuilders() []BuilderInputSpec { return v.Builders }
+
+// __IngestHashEqualInput is used internally by genqlient
+type __IngestHashEqualInput struct {
+	Artifact      ArtifactInputSpec  `json:"artifact"`
+	OtherArtifact ArtifactInputSpec  `json:"otherArtifact"`
+	HashEqual     HashEqualInputSpec `json:"hashEqual"`
+}
+
+// GetArtifact returns __IngestHashEqualInput.Artifact, and is useful for accessing the field via an interface.
+func (v *__IngestHashEqualInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// GetOtherArtifact returns __IngestHashEqualInput.OtherArtifact, and is useful for accessing the field via an interface.
+func (v *__IngestHashEqualInput) GetOtherArtifact() ArtifactInputSpec { return v.OtherArtifact }
+
+// GetHashEqual returns __IngestHashEqualInput.HashEqual, and is useful for accessing the field via an interface.
+func (v *__IngestHashEqualInput) GetHashEqual() HashEqualInputSpec { return v.HashEqual }
+
+// __IngestHashEqualsInput is used internally by genqlient
+type __IngestHashEqualsInput struct {
+	Artifacts      []ArtifactInputSpec  `json:"artifacts"`
+	OtherArtifacts []ArtifactInputSpec  `json:"otherArtifacts"`
+	HashEquals     []HashEqualInputSpec `json:"hashEquals"`
+}
+
+// GetArtifacts returns __IngestHashEqualsInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__IngestHashEqualsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetOtherArtifacts returns __IngestHashEqualsInput.OtherArtifacts, and is useful for accessing the field via an interface.
+func (v *__IngestHashEqualsInput) GetOtherArtifacts() []ArtifactInputSpec { return v.OtherArtifacts }
+
+// GetHashEquals returns __IngestHashEqualsInput.HashEquals, and is useful for accessing the field via an interface.
+func (v *__IngestHashEqualsInput) GetHashEquals() []HashEqualInputSpec { return v.HashEquals }
 
 // __IngestLicenseInput is used internally by genqlient
 type __IngestLicenseInput struct {
@@ -23275,80 +23275,6 @@ func HasSourceAt(
 	return &data, err
 }
 
-// The query or mutation executed by HashEqual.
-const HashEqual_Operation = `
-mutation HashEqual ($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
-	ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual)
-}
-`
-
-func HashEqual(
-	ctx context.Context,
-	client graphql.Client,
-	artifact ArtifactInputSpec,
-	otherArtifact ArtifactInputSpec,
-	hashEqual HashEqualInputSpec,
-) (*HashEqualResponse, error) {
-	req := &graphql.Request{
-		OpName: "HashEqual",
-		Query:  HashEqual_Operation,
-		Variables: &__HashEqualInput{
-			Artifact:      artifact,
-			OtherArtifact: otherArtifact,
-			HashEqual:     hashEqual,
-		},
-	}
-	var err error
-
-	var data HashEqualResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-// The query or mutation executed by HashEquals.
-const HashEquals_Operation = `
-mutation HashEquals ($artifacts: [ArtifactInputSpec!]!, $otherArtifacts: [ArtifactInputSpec!]!, $hashEquals: [HashEqualInputSpec!]!) {
-	ingestHashEquals(artifacts: $artifacts, otherArtifacts: $otherArtifacts, hashEquals: $hashEquals)
-}
-`
-
-func HashEquals(
-	ctx context.Context,
-	client graphql.Client,
-	artifacts []ArtifactInputSpec,
-	otherArtifacts []ArtifactInputSpec,
-	hashEquals []HashEqualInputSpec,
-) (*HashEqualsResponse, error) {
-	req := &graphql.Request{
-		OpName: "HashEquals",
-		Query:  HashEquals_Operation,
-		Variables: &__HashEqualsInput{
-			Artifacts:      artifacts,
-			OtherArtifacts: otherArtifacts,
-			HashEquals:     hashEquals,
-		},
-	}
-	var err error
-
-	var data HashEqualsResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
 // The query or mutation executed by IngestArtifact.
 const IngestArtifact_Operation = `
 mutation IngestArtifact ($artifact: ArtifactInputSpec!) {
@@ -23470,6 +23396,80 @@ func IngestBuilders(
 	var err error
 
 	var data IngestBuildersResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestHashEqual.
+const IngestHashEqual_Operation = `
+mutation IngestHashEqual ($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
+	ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual)
+}
+`
+
+func IngestHashEqual(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	otherArtifact ArtifactInputSpec,
+	hashEqual HashEqualInputSpec,
+) (*IngestHashEqualResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestHashEqual",
+		Query:  IngestHashEqual_Operation,
+		Variables: &__IngestHashEqualInput{
+			Artifact:      artifact,
+			OtherArtifact: otherArtifact,
+			HashEqual:     hashEqual,
+		},
+	}
+	var err error
+
+	var data IngestHashEqualResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestHashEquals.
+const IngestHashEquals_Operation = `
+mutation IngestHashEquals ($artifacts: [ArtifactInputSpec!]!, $otherArtifacts: [ArtifactInputSpec!]!, $hashEquals: [HashEqualInputSpec!]!) {
+	ingestHashEquals(artifacts: $artifacts, otherArtifacts: $otherArtifacts, hashEquals: $hashEquals)
+}
+`
+
+func IngestHashEquals(
+	ctx context.Context,
+	client graphql.Client,
+	artifacts []ArtifactInputSpec,
+	otherArtifacts []ArtifactInputSpec,
+	hashEquals []HashEqualInputSpec,
+) (*IngestHashEqualsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestHashEquals",
+		Query:  IngestHashEquals_Operation,
+		Variables: &__IngestHashEqualsInput{
+			Artifacts:      artifacts,
+			OtherArtifacts: otherArtifacts,
+			HashEquals:     hashEquals,
+		},
+	}
+	var err error
+
+	var data IngestHashEqualsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

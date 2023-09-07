@@ -173,13 +173,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestHashEquals failed with error: %w", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for PkgEqual
 			logger.Infof("assembling PkgEqual : %v", len(p.PkgEqual))
-			for _, equal := range p.PkgEqual {
-				if err := ingestPkgEqual(ctx, gqlclient, equal); err != nil {
-					return fmt.Errorf("ingestPkgEqual failed with error: %w", err)
-
-				}
+			if err := ingestPkgEquals(ctx, gqlclient, p.PkgEqual); err != nil {
+				return fmt.Errorf("ingestPkgEquals failed with error: %w", err)
 			}
 		}
 		return nil
@@ -395,6 +391,24 @@ func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assemb
 	return nil
 }
 
+func ingestPkgEquals(ctx context.Context, client graphql.Client, v []assembler.PkgEqualIngest) error {
+	var packages []model.PkgInputSpec
+	var equalPackages []model.PkgInputSpec
+	var pkgEquals []model.PkgEqualInputSpec
+	for _, ingest := range v {
+		packages = append(packages, *ingest.Pkg)
+		equalPackages = append(equalPackages, *ingest.EqualPkg)
+		pkgEquals = append(pkgEquals, *ingest.PkgEqual)
+	}
+	if len(v) > 0 {
+		_, err := model.IngestPkgEquals(ctx, client, packages, equalPackages, pkgEquals)
+		if err != nil {
+			return fmt.Errorf("PkgEquals failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
 func ingestHashEquals(ctx context.Context, client graphql.Client, v []assembler.HashEqualIngest) error {
 	var artifacts []model.ArtifactInputSpec
 	var equalArtifacts []model.ArtifactInputSpec
@@ -405,7 +419,7 @@ func ingestHashEquals(ctx context.Context, client graphql.Client, v []assembler.
 		hashEquals = append(hashEquals, *ingest.HashEqual)
 	}
 	if len(v) > 0 {
-		_, err := model.HashEquals(ctx, client, artifacts, equalArtifacts, hashEquals)
+		_, err := model.IngestHashEquals(ctx, client, artifacts, equalArtifacts, hashEquals)
 		if err != nil {
 			return fmt.Errorf("HashEquals failed with error: %w", err)
 		}

@@ -381,7 +381,7 @@ func ingestHashEqual(ctx context.Context, client graphql.Client, v assembler.Has
 	if v.EqualArtifact == nil {
 		return fmt.Errorf("unable to create HashEqual without equal artifact")
 	}
-	_, err := model.HashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
+	_, err := model.IngestHashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
 	return err
 }
 
