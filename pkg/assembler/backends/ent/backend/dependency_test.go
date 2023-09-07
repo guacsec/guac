@@ -571,6 +571,41 @@ func (s *Suite) TestIsDependency() {
 				},
 			},
 		},
+		{
+			Name:  "Ingest DependentPackage with version and query without version",
+			InPkg: []*model.PkgInputSpec{p2, p4},
+			Calls: []call{
+				{
+					P1: p2,
+					P2: p4,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{
+						Justification: "test justification",
+						VersionRange:  "v3.0.3",
+					},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				Package: &model.PkgSpec{
+					Type: ptrfrom.String("pypi"),
+					Name: ptrfrom.String("tensorflow"),
+				},
+				DependentPackage: &model.PkgSpec{
+					Type:      ptrfrom.String("conan"),
+					Namespace: ptrfrom.String("openssl.org"),
+					Name:      ptrfrom.String("openssl"),
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          p2out,
+					DependentPackage: p4out,
+					Justification:    "test justification",
+					DependencyType:   model.DependencyTypeUnknown,
+					VersionRange:     "v3.0.3",
+				},
+			},
+		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0

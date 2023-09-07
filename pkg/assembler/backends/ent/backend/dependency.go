@@ -41,7 +41,12 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 	)
 	if spec.DependentPackage != nil {
 		if spec.DependentPackage.Version == nil {
-			query.Where(dependency.HasDependentPackageNameWith(packageNameQuery(spec.DependentPackage)))
+			query.Where(
+				dependency.Or(
+					dependency.HasDependentPackageNameWith(packageNameQuery(spec.DependentPackage)),
+					dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependentPackage)),
+				),
+			)
 		} else {
 			query.Where(dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependentPackage)))
 		}
