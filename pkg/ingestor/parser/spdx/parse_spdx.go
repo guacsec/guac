@@ -157,6 +157,9 @@ func (s *spdxParser) getFiles() error {
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range file.Checksums {
+			if isEmptyChecksum(checksum.Value) {
+				continue
+			}
 			// for each file create a package for each of them so they can be referenced as a dependency
 			purl := asmhelpers.GuacFilePurl(strings.ToLower(string(checksum.Algorithm)), checksum.Value, &file.FileName)
 			pkg, err := asmhelpers.PurlToPkg(purl)
@@ -169,6 +172,7 @@ func (s *spdxParser) getFiles() error {
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
+
 			s.fileArtifacts[string(file.FileSPDXIdentifier)] = append(s.fileArtifacts[string(file.FileSPDXIdentifier)], artifact)
 		}
 	}
@@ -323,4 +327,16 @@ func getJustification(r *spdx.Relationship) string {
 		s += fmt.Sprintf("with comment: %s", r.RelationshipComment)
 	}
 	return s
+}
+
+func isEmptyChecksum(v string) bool {
+	return map[string]bool{
+		// all 0 hash
+		"0000000000000000000000000000000000000000":                         true,
+		"0000000000000000000000000000000000000000000000000000000000000000": true,
+		// sha1 empty file
+		"da39a3ee5e6b4b0d3255bfef95601890afd80709": true,
+		// sha256 empty file
+		"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": true,
+	}[v]
 }
