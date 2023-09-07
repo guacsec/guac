@@ -207,6 +207,7 @@ type ComplexityRoot struct {
 		IngestPackage                func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestPackages               func(childComplexity int, pkgs []*model.PkgInputSpec) int
 		IngestPkgEqual               func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
+		IngestPkgEquals              func(childComplexity int, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) int
 		IngestPointOfContact         func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
 		IngestSLSAs                  func(childComplexity int, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) int
 		IngestScorecard              func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
@@ -1377,6 +1378,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestPkgEqual(childComplexity, args["pkg"].(model.PkgInputSpec), args["otherPackage"].(model.PkgInputSpec), args["pkgEqual"].(model.PkgEqualInputSpec)), true
+
+	case "Mutation.ingestPkgEquals":
+		if e.complexity.Mutation.IngestPkgEquals == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestPkgEquals_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestPkgEquals(childComplexity, args["pkgs"].([]*model.PkgInputSpec), args["otherPackages"].([]*model.PkgInputSpec), args["pkgEquals"].([]*model.PkgEqualInputSpec)), true
 
 	case "Mutation.ingestPointOfContact":
 		if e.complexity.Mutation.IngestPointOfContact == nil {
@@ -4794,6 +4807,12 @@ extend type Mutation {
     otherPackage: PkgInputSpec!
     pkgEqual: PkgEqualInputSpec!
   ): ID!
+  "Bulk ingest mapping between packages. The returned array of IDs can be a an array of empty string."
+  ingestPkgEquals(
+    pkgs: [PkgInputSpec!]!
+    otherPackages: [PkgInputSpec!]!
+    pkgEquals: [PkgEqualInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/search.graphql", Input: `#

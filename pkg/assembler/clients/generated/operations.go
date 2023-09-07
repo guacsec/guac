@@ -7478,6 +7478,24 @@ type IngestPackagesResponse struct {
 // GetIngestPackages returns IngestPackagesResponse.IngestPackages, and is useful for accessing the field via an interface.
 func (v *IngestPackagesResponse) GetIngestPackages() []string { return v.IngestPackages }
 
+// IngestPkgEqualResponse is returned by IngestPkgEqual on success.
+type IngestPkgEqualResponse struct {
+	// Adds a certification that two packages are similar. The returned ID can be empty string.
+	IngestPkgEqual string `json:"ingestPkgEqual"`
+}
+
+// GetIngestPkgEqual returns IngestPkgEqualResponse.IngestPkgEqual, and is useful for accessing the field via an interface.
+func (v *IngestPkgEqualResponse) GetIngestPkgEqual() string { return v.IngestPkgEqual }
+
+// IngestPkgEqualsResponse is returned by IngestPkgEquals on success.
+type IngestPkgEqualsResponse struct {
+	// Bulk ingest mapping between packages. The returned array of IDs can be a an array of empty string.
+	IngestPkgEquals []string `json:"ingestPkgEquals"`
+}
+
+// GetIngestPkgEquals returns IngestPkgEqualsResponse.IngestPkgEquals, and is useful for accessing the field via an interface.
+func (v *IngestPkgEqualsResponse) GetIngestPkgEquals() []string { return v.IngestPkgEquals }
+
 // IngestSourceResponse is returned by IngestSource on success.
 type IngestSourceResponse struct {
 	// Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string.
@@ -20007,25 +20025,6 @@ func (v *PkgEqualInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns PkgEqualInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *PkgEqualInputSpec) GetCollector() string { return v.Collector }
 
-// PkgEqualResponse is returned by PkgEqual on success.
-type PkgEqualResponse struct {
-	// Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string.
-	Pkg string `json:"pkg"`
-	// Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string.
-	OtherPackage string `json:"otherPackage"`
-	// Adds a certification that two packages are similar. The returned ID can be empty string.
-	IngestPkgEqual string `json:"ingestPkgEqual"`
-}
-
-// GetPkg returns PkgEqualResponse.Pkg, and is useful for accessing the field via an interface.
-func (v *PkgEqualResponse) GetPkg() string { return v.Pkg }
-
-// GetOtherPackage returns PkgEqualResponse.OtherPackage, and is useful for accessing the field via an interface.
-func (v *PkgEqualResponse) GetOtherPackage() string { return v.OtherPackage }
-
-// GetIngestPkgEqual returns PkgEqualResponse.IngestPkgEqual, and is useful for accessing the field via an interface.
-func (v *PkgEqualResponse) GetIngestPkgEqual() string { return v.IngestPkgEqual }
-
 // PkgInputSpec specifies a package for mutations.
 //
 // This is different than PkgSpec because we want to encode mandatory fields:
@@ -21362,6 +21361,38 @@ type __IngestPackagesInput struct {
 // GetPkgs returns __IngestPackagesInput.Pkgs, and is useful for accessing the field via an interface.
 func (v *__IngestPackagesInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
 
+// __IngestPkgEqualInput is used internally by genqlient
+type __IngestPkgEqualInput struct {
+	Pkg          PkgInputSpec      `json:"pkg"`
+	OtherPackage PkgInputSpec      `json:"otherPackage"`
+	PkgEqual     PkgEqualInputSpec `json:"pkgEqual"`
+}
+
+// GetPkg returns __IngestPkgEqualInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__IngestPkgEqualInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetOtherPackage returns __IngestPkgEqualInput.OtherPackage, and is useful for accessing the field via an interface.
+func (v *__IngestPkgEqualInput) GetOtherPackage() PkgInputSpec { return v.OtherPackage }
+
+// GetPkgEqual returns __IngestPkgEqualInput.PkgEqual, and is useful for accessing the field via an interface.
+func (v *__IngestPkgEqualInput) GetPkgEqual() PkgEqualInputSpec { return v.PkgEqual }
+
+// __IngestPkgEqualsInput is used internally by genqlient
+type __IngestPkgEqualsInput struct {
+	Pkgs          []PkgInputSpec      `json:"pkgs"`
+	OtherPackages []PkgInputSpec      `json:"otherPackages"`
+	PkgEquals     []PkgEqualInputSpec `json:"pkgEquals"`
+}
+
+// GetPkgs returns __IngestPkgEqualsInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__IngestPkgEqualsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetOtherPackages returns __IngestPkgEqualsInput.OtherPackages, and is useful for accessing the field via an interface.
+func (v *__IngestPkgEqualsInput) GetOtherPackages() []PkgInputSpec { return v.OtherPackages }
+
+// GetPkgEquals returns __IngestPkgEqualsInput.PkgEquals, and is useful for accessing the field via an interface.
+func (v *__IngestPkgEqualsInput) GetPkgEquals() []PkgEqualInputSpec { return v.PkgEquals }
+
 // __IngestSourceInput is used internally by genqlient
 type __IngestSourceInput struct {
 	Source SourceInputSpec `json:"source"`
@@ -21631,22 +21662,6 @@ func (v *__PathInput) GetMaxPathLength() int { return v.MaxPathLength }
 
 // GetUsingOnly returns __PathInput.UsingOnly, and is useful for accessing the field via an interface.
 func (v *__PathInput) GetUsingOnly() []Edge { return v.UsingOnly }
-
-// __PkgEqualInput is used internally by genqlient
-type __PkgEqualInput struct {
-	Pkg          PkgInputSpec      `json:"pkg"`
-	OtherPackage PkgInputSpec      `json:"otherPackage"`
-	PkgEqual     PkgEqualInputSpec `json:"pkgEqual"`
-}
-
-// GetPkg returns __PkgEqualInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__PkgEqualInput) GetPkg() PkgInputSpec { return v.Pkg }
-
-// GetOtherPackage returns __PkgEqualInput.OtherPackage, and is useful for accessing the field via an interface.
-func (v *__PkgEqualInput) GetOtherPackage() PkgInputSpec { return v.OtherPackage }
-
-// GetPkgEqual returns __PkgEqualInput.PkgEqual, and is useful for accessing the field via an interface.
-func (v *__PkgEqualInput) GetPkgEqual() PkgEqualInputSpec { return v.PkgEqual }
 
 // __PointOfContactArtifactInput is used internally by genqlient
 type __PointOfContactArtifactInput struct {
@@ -23587,6 +23602,80 @@ func IngestPackages(
 	var err error
 
 	var data IngestPackagesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestPkgEqual.
+const IngestPkgEqual_Operation = `
+mutation IngestPkgEqual ($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual: PkgEqualInputSpec!) {
+	ingestPkgEqual(pkg: $pkg, otherPackage: $otherPackage, pkgEqual: $pkgEqual)
+}
+`
+
+func IngestPkgEqual(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	otherPackage PkgInputSpec,
+	pkgEqual PkgEqualInputSpec,
+) (*IngestPkgEqualResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestPkgEqual",
+		Query:  IngestPkgEqual_Operation,
+		Variables: &__IngestPkgEqualInput{
+			Pkg:          pkg,
+			OtherPackage: otherPackage,
+			PkgEqual:     pkgEqual,
+		},
+	}
+	var err error
+
+	var data IngestPkgEqualResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestPkgEquals.
+const IngestPkgEquals_Operation = `
+mutation IngestPkgEquals ($pkgs: [PkgInputSpec!]!, $otherPackages: [PkgInputSpec!]!, $pkgEquals: [PkgEqualInputSpec!]!) {
+	ingestPkgEquals(pkgs: $pkgs, otherPackages: $otherPackages, pkgEquals: $pkgEquals)
+}
+`
+
+func IngestPkgEquals(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	otherPackages []PkgInputSpec,
+	pkgEquals []PkgEqualInputSpec,
+) (*IngestPkgEqualsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestPkgEquals",
+		Query:  IngestPkgEquals_Operation,
+		Variables: &__IngestPkgEqualsInput{
+			Pkgs:          pkgs,
+			OtherPackages: otherPackages,
+			PkgEquals:     pkgEquals,
+		},
+	}
+	var err error
+
+	var data IngestPkgEqualsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -26125,45 +26214,6 @@ func Path(
 	var err error
 
 	var data PathResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-// The query or mutation executed by PkgEqual.
-const PkgEqual_Operation = `
-mutation PkgEqual ($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual: PkgEqualInputSpec!) {
-	pkg: ingestPackage(pkg: $pkg)
-	otherPackage: ingestPackage(pkg: $otherPackage)
-	ingestPkgEqual(pkg: $pkg, otherPackage: $otherPackage, pkgEqual: $pkgEqual)
-}
-`
-
-func PkgEqual(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	otherPackage PkgInputSpec,
-	pkgEqual PkgEqualInputSpec,
-) (*PkgEqualResponse, error) {
-	req := &graphql.Request{
-		OpName: "PkgEqual",
-		Query:  PkgEqual_Operation,
-		Variables: &__PkgEqualInput{
-			Pkg:          pkg,
-			OtherPackage: otherPackage,
-			PkgEqual:     pkgEqual,
-		},
-	}
-	var err error
-
-	var data PkgEqualResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

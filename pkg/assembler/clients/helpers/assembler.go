@@ -370,7 +370,7 @@ func ingestPkgEqual(ctx context.Context, client graphql.Client, v assembler.PkgE
 	if v.EqualPkg == nil {
 		return fmt.Errorf("unable to create pkgEqual without EqualPkg")
 	}
-	_, err := model.PkgEqual(ctx, client, *v.Pkg, *v.EqualPkg, *v.PkgEqual)
+	_, err := model.IngestPkgEqual(ctx, client, *v.Pkg, *v.EqualPkg, *v.PkgEqual)
 	return err
 }
 
