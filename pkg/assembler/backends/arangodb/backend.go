@@ -816,18 +816,10 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
 
-func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
-	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
-}
-
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
-}
-
-func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type
