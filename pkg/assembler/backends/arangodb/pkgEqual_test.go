@@ -15,432 +15,649 @@
 
 package arangodb
 
-// func TestPkgEqual(t *testing.T) {
-// 	type call struct {
-// 		P1 *model.PkgInputSpec
-// 		P2 *model.PkgInputSpec
-// 		HE *model.PkgEqualInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		Calls        []call
-// 		Query        *model.PkgEqualSpec
-// 		ExpHE        []*model.PkgEqual
-// 		ExpIngestErr bool
-// 		ExpQueryErr  bool
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{p1, p2},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Justification: ptrfrom.String("test justification"),
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages:      []*model.Package{p1out, p2out},
-// 					Justification: "test justification",
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Ingest same, different order",
-// 			InPkg: []*model.PkgInputSpec{p1, p2},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					P1: p2,
-// 					P2: p1,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Justification: ptrfrom.String("test justification"),
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages:      []*model.Package{p1out, p2out},
-// 					Justification: "test justification",
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Query on Justification",
-// 			InPkg: []*model.PkgInputSpec{p1, p2},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification one",
-// 					},
-// 				},
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification two",
-// 					},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Justification: ptrfrom.String("test justification one"),
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages:      []*model.Package{p1out, p2out},
-// 					Justification: "test justification one",
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Query on pkg",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p1,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Packages: []*model.PkgSpec{{
-// 					ID: ptrfrom.String("6"),
-// 				}},
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages: []*model.Package{p1out, p3out},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Query on pkg multiple",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p1,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Packages: []*model.PkgSpec{{
-// 					ID: ptrfrom.String("4"),
-// 				}},
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages: []*model.Package{p1out, p2out},
-// 				},
-// 				{
-// 					Packages: []*model.Package{p1out, p3out},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Query on pkg details",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p1,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Packages: []*model.PkgSpec{{
-// 					Version: ptrfrom.String("2.11.1"),
-// 					Subpath: ptrfrom.String(""),
-// 				}},
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages: []*model.Package{p1out, p2out},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Query on pkg algo and pkg",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p1,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Packages: []*model.PkgSpec{{
-// 					Type:      ptrfrom.String("pypi"),
-// 					Namespace: ptrfrom.String(""),
-// 					Name:      ptrfrom.String("tensorflow"),
-// 					Version:   ptrfrom.String("2.11.1"),
-// 				}},
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages: []*model.Package{p1out, p2out},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Query on both pkgs",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p2,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Packages: []*model.PkgSpec{
-// 					{
-// 						Subpath: ptrfrom.String("saved_model_cli.py"),
-// 					},
-// 					{
-// 						ID: ptrfrom.String("6"),
-// 					},
-// 				},
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages: []*model.Package{p2out, p3out},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Query on both pkgs, one filter",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p2,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p1,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Packages: []*model.PkgSpec{
-// 					{
-// 						Version: ptrfrom.String(""),
-// 					},
-// 					{
-// 						Version: ptrfrom.String("2.11.1"),
-// 						Subpath: ptrfrom.String("saved_model_cli.py"),
-// 					},
-// 				},
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages: []*model.Package{p1out, p3out},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Query none",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p2,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p1,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				Packages: []*model.PkgSpec{
-// 					{
-// 						Version: ptrfrom.String("1.2.3"),
-// 					},
-// 				},
-// 			},
-// 			ExpHE: nil,
-// 		},
-// 		{
-// 			Name:  "Query on ID",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p2,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p1,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				ID: ptrfrom.String("8"),
-// 			},
-// 			ExpHE: []*model.PkgEqual{
-// 				{
-// 					Packages: []*model.Package{p2out, p3out},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			Name:  "Ingest no P1",
-// 			InPkg: []*model.PkgInputSpec{p2},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			ExpIngestErr: true,
-// 		},
-// 		{
-// 			Name:  "Ingest no P2",
-// 			InPkg: []*model.PkgInputSpec{p1},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			ExpIngestErr: true,
-// 		},
-// 		{
-// 			Name:  "Query bad ID",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-// 			Calls: []call{
-// 				{
-// 					P1: p1,
-// 					P2: p2,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p2,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 				{
-// 					P1: p1,
-// 					P2: p3,
-// 					HE: &model.PkgEqualInputSpec{},
-// 				},
-// 			},
-// 			Query: &model.PkgEqualSpec{
-// 				ID: ptrfrom.String("asdf"),
-// 			},
-// 			ExpQueryErr: true,
-// 		},
-// 	}
-// 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-// 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-// 	}, cmp.Ignore())
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.GetBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, a := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *a); err != nil {
-// 					t.Fatalf("Could not ingest pkg: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				_, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
-// 				if (err != nil) != test.ExpIngestErr {
-// 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
-// 				}
-// 				if err != nil {
-// 					return
-// 				}
-// 			}
-// 			got, err := b.PkgEqual(ctx, test.Query)
-// 			if (err != nil) != test.ExpQueryErr {
-// 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
-// 			}
-// 			if err != nil {
-// 				return
-// 			}
-// 			// less := func(a, b *model.Package) bool { return a.Version < b.Version }
-// 			// for _, he := range got {
-// 			// 	slices.SortFunc(he.Packages, less)
-// 			// }
-// 			// for _, he := range test.ExpHE {
-// 			// 	slices.SortFunc(he.Packages, less)
-// 			// }
-// 			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
-// 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 			}
-// 		})
-// 	}
-// }
+import (
+	"context"
+	"strings"
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/assembler/backends"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+)
+
+func TestPkgEqual(t *testing.T) {
+	type call struct {
+		P1 *model.PkgInputSpec
+		P2 *model.PkgInputSpec
+		HE *model.PkgEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		Calls        []call
+		Query        *model.PkgEqualSpec
+		ExpHE        []*model.PkgEqual
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Ingest same, different order",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Justification",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification one",
+					},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification two",
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Justification: ptrfrom.String("test justification one"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification one",
+				},
+			},
+		},
+		{
+			Name:  "Query on pkg",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{{
+					ID: ptrfrom.String("6"),
+				}},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages: []*model.Package{testdata.P1out, testdata.P3out},
+				},
+			},
+		},
+		{
+			Name:  "Query on pkg multiple",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{{
+					ID: ptrfrom.String("4"),
+				}},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages: []*model.Package{testdata.P1out, testdata.P2out},
+				},
+				{
+					Packages: []*model.Package{testdata.P1out, testdata.P3out},
+				},
+			},
+		},
+		{
+			Name:  "Query on pkg details",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{{
+					Version: ptrfrom.String("2.11.1"),
+					Subpath: ptrfrom.String(""),
+				}},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages: []*model.Package{testdata.P1out, testdata.P2out},
+				},
+			},
+		},
+		{
+			Name:  "Query on pkg algo and pkg",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{{
+					Type:      ptrfrom.String("pypi"),
+					Namespace: ptrfrom.String(""),
+					Name:      ptrfrom.String("tensorflow"),
+					Version:   ptrfrom.String("2.11.1"),
+				}},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages: []*model.Package{testdata.P1out, testdata.P2out},
+				},
+			},
+		},
+		{
+			Name:  "Query on both pkgs",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{
+					{
+						Subpath: ptrfrom.String("saved_model_cli.py"),
+					},
+					{
+						ID: ptrfrom.String("6"),
+					},
+				},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages: []*model.Package{testdata.P2out, testdata.P3out},
+				},
+			},
+		},
+		{
+			Name:  "Query on both pkgs, one filter",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{
+					{
+						Version: ptrfrom.String(""),
+					},
+					{
+						Version: ptrfrom.String("2.11.1"),
+						Subpath: ptrfrom.String("saved_model_cli.py"),
+					},
+				},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages: []*model.Package{testdata.P1out, testdata.P3out},
+				},
+			},
+		},
+		{
+			Name:  "Query none",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{
+					{
+						Version: ptrfrom.String("1.2.3"),
+					},
+				},
+			},
+			ExpHE: nil,
+		},
+		{
+			Name:  "Query on ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				ID: ptrfrom.String("8"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages: []*model.Package{testdata.P2out, testdata.P3out},
+				},
+			},
+		},
+		{
+			Name:  "Ingest no P1",
+			InPkg: []*model.PkgInputSpec{testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name:  "Ingest no P2",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name:  "Query bad ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	ctx := context.Background()
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			b, err := backends.Get("inmem", nil, nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, a := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.PkgEqual(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			// less := func(a, b *model.Package) bool { return a.Version < b.Version }
+			// for _, he := range got {
+			// 	slices.SortFunc(he.Packages, less)
+			// }
+			// for _, he := range test.ExpHE {
+			// 	slices.SortFunc(he.Packages, less)
+			// }
+			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestIngestPkgEquals(t *testing.T) {
+	type call struct {
+		P1 []*model.PkgInputSpec
+		P2 []*model.PkgInputSpec
+		PE []*model.PkgEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		Calls        []call
+		Query        *model.PkgEqualSpec
+		ExpHE        []*model.PkgEqual
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+					P2: []*model.PkgInputSpec{testdata.P2, testdata.P2},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Ingest same, different order",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+					P2: []*model.PkgInputSpec{testdata.P2, testdata.P1},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on pkg details",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+					P2: []*model.PkgInputSpec{testdata.P2, testdata.P3},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{{
+					Version: ptrfrom.String("2.11.1"),
+					Subpath: ptrfrom.String(""),
+				}},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on pkg algo and pkg",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+					P2: []*model.PkgInputSpec{testdata.P2, testdata.P3},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{{
+					Type:      ptrfrom.String("pypi"),
+					Namespace: ptrfrom.String(""),
+					Name:      ptrfrom.String("tensorflow"),
+					Version:   ptrfrom.String("2.11.1"),
+				}},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on both pkgs, one filter",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+					P2: []*model.PkgInputSpec{testdata.P2, testdata.P3},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{
+					{
+						Version: ptrfrom.String(""),
+					},
+					{
+						Version: ptrfrom.String("2.11.1"),
+						Subpath: ptrfrom.String("saved_model_cli.py"),
+					},
+				},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P3out},
+					Justification: "test justification",
+				},
+			},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	ctx := context.Background()
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			b, err := backends.Get("inmem", nil, nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+				t.Fatalf("Could not ingest pkg: %v", err)
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestPkgEquals(ctx, o.P1, o.P2, o.PE)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.PkgEqual(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+// TODO (pxp928): add tests back in when implemented
 
 // func TestPkgEqualNeighbors(t *testing.T) {
 // 	type call struct {
@@ -456,45 +673,45 @@ package arangodb
 // 	}{
 // 		{
 // 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{p1, p2},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 // 			Calls: []call{
 // 				{
-// 					P1: p1,
-// 					P2: p2,
+// 					P1: testdata.P1,
+// 					P2: testdata.P2,
 // 					HE: &model.PkgEqualInputSpec{
 // 						Justification: "test justification",
 // 					},
 // 				},
 // 			},
 // 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "6"}, // p1
-// 				"5": []string{"1", "6"}, // p2
+// 				"4": []string{"1", "6"}, // testdata.P1
+// 				"5": []string{"1", "6"}, // testdata.P2
 // 				"6": []string{"1", "1"}, // pkgequal
 // 			},
 // 		},
 // 		{
 // 			Name:  "Multiple",
-// 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
 // 			Calls: []call{
 // 				{
-// 					P1: p1,
-// 					P2: p2,
+// 					P1: testdata.P1,
+// 					P2: testdata.P2,
 // 					HE: &model.PkgEqualInputSpec{
 // 						Justification: "test justification",
 // 					},
 // 				},
 // 				{
-// 					P1: p1,
-// 					P2: p3,
+// 					P1: testdata.P1,
+// 					P2: testdata.P3,
 // 					HE: &model.PkgEqualInputSpec{
 // 						Justification: "test justification",
 // 					},
 // 				},
 // 			},
 // 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "7", "8"}, // p1
-// 				"5": []string{"1", "7"},      // p2
-// 				"6": []string{"1", "8"},      // p3
+// 				"4": []string{"1", "7", "8"}, // testdata.P1
+// 				"5": []string{"1", "7"},      // testdata.P2
+// 				"6": []string{"1", "8"},      // testdata.P3
 // 				"7": []string{"1", "1"},      // pkgequal 1
 // 				"8": []string{"1", "1"},      // pkgequal 2
 // 			},
@@ -503,7 +720,7 @@ package arangodb
 // 	ctx := context.Background()
 // 	for _, test := range tests {
 // 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.GetBackend(nil)
+// 			b, err := backends.Get("inmem", nil, nil)
 // 			if err != nil {
 // 				t.Fatalf("Could not instantiate testing backend: %v", err)
 // 			}

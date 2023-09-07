@@ -457,8 +457,8 @@ func TestPkgEqual(t *testing.T) {
 func TestIngestPkgEquals(t *testing.T) {
 	type call struct {
 		P1 []*model.PkgInputSpec
-		P2 *model.PkgInputSpec
-		HE *model.PkgEqualInputSpec
+		P2 []*model.PkgInputSpec
+		PE []*model.PkgEqualInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -474,10 +474,15 @@ func TestIngestPkgEquals(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{p1, p2},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{
-						Justification: "test justification",
+					P1: []*model.PkgInputSpec{p1, p1},
+					P2: []*model.PkgInputSpec{p2, p2},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
 					},
 				},
 			},
@@ -496,17 +501,15 @@ func TestIngestPkgEquals(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{p1, p2},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{
-						Justification: "test justification",
-					},
-				},
-				{
-					P1: p2,
-					P2: p1,
-					HE: &model.PkgEqualInputSpec{
-						Justification: "test justification",
+					P1: []*model.PkgInputSpec{p1, p2},
+					P2: []*model.PkgInputSpec{p2, p1},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
 					},
 				},
 			},
@@ -521,102 +524,20 @@ func TestIngestPkgEquals(t *testing.T) {
 			},
 		},
 		{
-			Name:  "Query on Justification",
-			InPkg: []*model.PkgInputSpec{p1, p2},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{
-						Justification: "test justification one",
-					},
-				},
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{
-						Justification: "test justification two",
-					},
-				},
-			},
-			Query: &model.PkgEqualSpec{
-				Justification: ptrfrom.String("test justification one"),
-			},
-			ExpHE: []*model.PkgEqual{
-				{
-					Packages:      []*model.Package{p1out, p2out},
-					Justification: "test justification one",
-				},
-			},
-		},
-		{
-			Name:  "Query on pkg",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			Query: &model.PkgEqualSpec{
-				Packages: []*model.PkgSpec{{
-					ID: ptrfrom.String("6"),
-				}},
-			},
-			ExpHE: []*model.PkgEqual{
-				{
-					Packages: []*model.Package{p1out, p3out},
-				},
-			},
-		},
-		{
-			Name:  "Query on pkg multiple",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			Query: &model.PkgEqualSpec{
-				Packages: []*model.PkgSpec{{
-					ID: ptrfrom.String("4"),
-				}},
-			},
-			ExpHE: []*model.PkgEqual{
-				{
-					Packages: []*model.Package{p1out, p2out},
-				},
-				{
-					Packages: []*model.Package{p1out, p3out},
-				},
-			},
-		},
-		{
 			Name:  "Query on pkg details",
 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
+					P1: []*model.PkgInputSpec{p1, p1},
+					P2: []*model.PkgInputSpec{p2, p3},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
 				},
 			},
 			Query: &model.PkgEqualSpec{
@@ -627,7 +548,8 @@ func TestIngestPkgEquals(t *testing.T) {
 			},
 			ExpHE: []*model.PkgEqual{
 				{
-					Packages: []*model.Package{p1out, p2out},
+					Packages:      []*model.Package{p1out, p2out},
+					Justification: "test justification",
 				},
 			},
 		},
@@ -636,14 +558,16 @@ func TestIngestPkgEquals(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
+					P1: []*model.PkgInputSpec{p1, p1},
+					P2: []*model.PkgInputSpec{p2, p3},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
 				},
 			},
 			Query: &model.PkgEqualSpec{
@@ -656,38 +580,8 @@ func TestIngestPkgEquals(t *testing.T) {
 			},
 			ExpHE: []*model.PkgEqual{
 				{
-					Packages: []*model.Package{p1out, p2out},
-				},
-			},
-		},
-		{
-			Name:  "Query on both pkgs",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p2,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			Query: &model.PkgEqualSpec{
-				Packages: []*model.PkgSpec{
-					{
-						Subpath: ptrfrom.String("saved_model_cli.py"),
-					},
-					{
-						ID: ptrfrom.String("6"),
-					},
-				},
-			},
-			ExpHE: []*model.PkgEqual{
-				{
-					Packages: []*model.Package{p2out, p3out},
+					Packages:      []*model.Package{p1out, p2out},
+					Justification: "test justification",
 				},
 			},
 		},
@@ -696,19 +590,16 @@ func TestIngestPkgEquals(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p2,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
+					P1: []*model.PkgInputSpec{p1, p1},
+					P2: []*model.PkgInputSpec{p2, p3},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
 				},
 			},
 			Query: &model.PkgEqualSpec{
@@ -724,116 +615,10 @@ func TestIngestPkgEquals(t *testing.T) {
 			},
 			ExpHE: []*model.PkgEqual{
 				{
-					Packages: []*model.Package{p1out, p3out},
+					Packages:      []*model.Package{p1out, p3out},
+					Justification: "test justification",
 				},
 			},
-		},
-		{
-			Name:  "Query none",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p2,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			Query: &model.PkgEqualSpec{
-				Packages: []*model.PkgSpec{
-					{
-						Version: ptrfrom.String("1.2.3"),
-					},
-				},
-			},
-			ExpHE: nil,
-		},
-		{
-			Name:  "Query on ID",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p2,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			Query: &model.PkgEqualSpec{
-				ID: ptrfrom.String("8"),
-			},
-			ExpHE: []*model.PkgEqual{
-				{
-					Packages: []*model.Package{p2out, p3out},
-				},
-			},
-		},
-		{
-			Name:  "Ingest no P1",
-			InPkg: []*model.PkgInputSpec{p2},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name:  "Ingest no P2",
-			InPkg: []*model.PkgInputSpec{p1},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name:  "Query bad ID",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p2,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			Query: &model.PkgEqualSpec{
-				ID: ptrfrom.String("asdf"),
-			},
-			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -842,17 +627,15 @@ func TestIngestPkgEquals(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := inmem.GetBackend(nil)
+			b, err := backends.Get("inmem", nil, nil)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
-					t.Fatalf("Could not ingest pkg: %v", err)
-				}
+			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+				t.Fatalf("Could not ingest pkg: %v", err)
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
+				_, err := b.IngestPkgEquals(ctx, o.P1, o.P2, o.PE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -867,13 +650,6 @@ func TestIngestPkgEquals(t *testing.T) {
 			if err != nil {
 				return
 			}
-			// less := func(a, b *model.Package) bool { return a.Version < b.Version }
-			// for _, he := range got {
-			// 	slices.SortFunc(he.Packages, less)
-			// }
-			// for _, he := range test.ExpHE {
-			// 	slices.SortFunc(he.Packages, less)
-			// }
 			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
