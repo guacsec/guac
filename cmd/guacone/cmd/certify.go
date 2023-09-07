@@ -25,6 +25,7 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/cli"
+	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -67,7 +68,7 @@ var certifyCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
+		assemblerFunc := ingestor.GetAssembler(ctx, opts.graphqlEndpoint)
 
 		preds := &assembler.IngestPredicates{}
 		var pkgInput *model.PkgInputSpec
