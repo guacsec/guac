@@ -35,7 +35,7 @@ func Test_arangoClient_FindSoftware(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}

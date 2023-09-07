@@ -28,7 +28,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	"github.com/guacsec/guac/pkg/assembler/backends"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
@@ -1699,8 +1700,7 @@ func startTestServer() (*http.Server, error) {
 
 func getGraphqlTestServer() (*handler.Server, error) {
 	var topResolver resolvers.Resolver
-	args := inmem.DemoCredentials{}
-	backend, err := inmem.GetBackend(&args)
+	backend, err := backends.Get("inmem", nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating inmem backend: %w", err)
 	}

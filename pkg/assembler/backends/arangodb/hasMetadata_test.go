@@ -615,7 +615,7 @@ package arangodb
 // 	ctx := context.Background()
 // 	for _, test := range tests {
 // 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.GetBackend(nil)
+// 			b, err := inmem.getBackend(nil)
 // 			if err != nil {
 // 				t.Fatalf("Could not instantiate testing backend: %v", err)
 // 			}
@@ -744,7 +744,7 @@ package arangodb
 // 	ctx := context.Background()
 // 	for _, test := range tests {
 // 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.GetBackend(nil)
+// 			b, err := inmem.getBackend(nil)
 // 			if err != nil {
 // 				t.Fatalf("Could not instantiate testing backend: %v", err)
 // 			}
