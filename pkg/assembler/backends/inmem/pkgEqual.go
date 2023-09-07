@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -51,7 +50,15 @@ func (n *pkgEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest PkgEqual
 
 func (c *demoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
-	return nil, fmt.Errorf("not implemented - IngestPkgEquals")
+	var modelPkgEqualsIDs []string
+	for i := range pkgEquals {
+		pkgEqual, err := c.IngestPkgEqual(ctx, *pkgs[i], *otherPackages[i], *pkgEquals[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestPkgEqual failed with err: %v", err)
+		}
+		modelPkgEqualsIDs = append(modelPkgEqualsIDs, pkgEqual.ID)
+	}
+	return modelPkgEqualsIDs, nil
 }
 
 func (c *demoClient) convPkgEqual(in *pkgEqualStruct) (*model.PkgEqual, error) {
