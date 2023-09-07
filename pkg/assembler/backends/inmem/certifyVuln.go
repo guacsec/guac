@@ -60,20 +60,24 @@ func (n *certifyVulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, er
 }
 
 // Ingest CertifyVuln
-func (c *demoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
-	var modelCertifyVulnList []*model.CertifyVuln
+func (c *demoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+	var modelCertifyVulnListIDS []string
 	for i := range certifyVulns {
-		certifyVuln, err := c.IngestCertifyVuln(ctx, *pkgs[i], *vulnerabilities[i], *certifyVulns[i])
+		certifyVuln, err := c.ingestVulnerability(ctx, *pkgs[i], *vulnerabilities[i], *certifyVulns[i], true)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestCertifyVuln failed with err: %v", err)
+			return []string{}, gqlerror.Errorf("IngestCertifyVuln failed with err: %v", err)
 		}
-		modelCertifyVulnList = append(modelCertifyVulnList, certifyVuln)
+		modelCertifyVulnListIDS = append(modelCertifyVulnListIDS, certifyVuln.ID)
 	}
-	return modelCertifyVulnList, nil
+	return modelCertifyVulnListIDS, nil
 }
 
-func (c *demoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
-	return c.ingestVulnerability(ctx, pkg, vulnerability, certifyVuln, true)
+func (c *demoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
+	model, err := c.ingestVulnerability(ctx, pkg, vulnerability, certifyVuln, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput, readOnly bool) (*model.CertifyVuln, error) {

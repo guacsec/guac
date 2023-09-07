@@ -74,20 +74,24 @@ func (n *hashEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest HashEqual
 
-func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
-	var modelHashEquals []*model.HashEqual
+func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
+	var modelHashEqualsIDS []string
 	for i := range hashEquals {
-		hashEqual, err := c.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
+		hashEqual, err := c.ingestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i], true)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestDependency failed with err: %v", err)
+			return []string{}, gqlerror.Errorf("IngestDependency failed with err: %v", err)
 		}
-		modelHashEquals = append(modelHashEquals, hashEqual)
+		modelHashEqualsIDS = append(modelHashEqualsIDS, hashEqual.ID)
 	}
-	return modelHashEquals, nil
+	return modelHashEqualsIDS, nil
 }
 
-func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
-	return c.ingestHashEqual(ctx, artifact, equalArtifact, hashEqual, true)
+func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
+	model, err := c.ingestHashEqual(ctx, artifact, equalArtifact, hashEqual, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec, readOnly bool) (*model.HashEqual, error) {

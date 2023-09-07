@@ -65,7 +65,7 @@ func (n *certifyLegalStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convLegal(n)
 }
 
-func (c *demoClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
+func (c *demoClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 	// FIXME move to resolver
 	// valuesDefined := 0
 	// if len(subjects.Packages) > 0 {
@@ -90,31 +90,35 @@ func (c *demoClient) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 	// 	return nil, gqlerror.Errorf("must specify at most packages or sources for %v", "IngestOccurrences")
 	// }
 
-	var rv []*model.CertifyLegal
+	var rv []string
 
 	for i, v := range certifyLegals {
 		var l *model.CertifyLegal
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrSourceInput{Package: subjects.Packages[i]}
-			l, err = c.IngestCertifyLegal(ctx, subject, declaredLicensesList[i], discoveredLicensesList[i], v)
+			l, err = c.ingestCertifyLegal(ctx, subject, declaredLicensesList[i], discoveredLicensesList[i], v, true)
 			if err != nil {
-				return nil, gqlerror.Errorf("IngestCertifyLegals failed with err: %v", err)
+				return []string{}, gqlerror.Errorf("IngestCertifyLegals failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageOrSourceInput{Source: subjects.Sources[i]}
-			l, err = c.IngestCertifyLegal(ctx, subject, declaredLicensesList[i], discoveredLicensesList[i], v)
+			l, err = c.ingestCertifyLegal(ctx, subject, declaredLicensesList[i], discoveredLicensesList[i], v, true)
 			if err != nil {
-				return nil, gqlerror.Errorf("IngestCertifyLegals failed with err: %v", err)
+				return []string{}, gqlerror.Errorf("IngestCertifyLegals failed with err: %v", err)
 			}
 		}
-		rv = append(rv, l)
+		rv = append(rv, l.ID)
 	}
 	return rv, nil
 }
 
-func (c *demoClient) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (*model.CertifyLegal, error) {
-	return c.ingestCertifyLegal(ctx, subject, declaredLicenses, discoveredLicenses, certifyLegal, true)
+func (c *demoClient) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (string, error) {
+	model, err := c.ingestCertifyLegal(ctx, subject, declaredLicenses, discoveredLicenses, certifyLegal, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec, readOnly bool) (*model.CertifyLegal, error) {

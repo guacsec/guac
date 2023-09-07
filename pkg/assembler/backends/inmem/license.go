@@ -53,20 +53,24 @@ func (n *licStruct) setCertifyLegals(id uint32) { n.certifyLegals = append(n.cer
 
 // Ingest Licenses
 
-func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
-	var modelLicenses []*model.License
+func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
+	var modelLicensesIDS []string
 	for _, lic := range licenses {
-		modelLic, err := c.IngestLicense(ctx, lic)
+		modelLic, err := c.ingestLicense(ctx, lic, true)
 		if err != nil {
-			return nil, gqlerror.Errorf("ingestLicense failed with err: %v", err)
+			return []string{}, gqlerror.Errorf("ingestLicense failed with err: %v", err)
 		}
-		modelLicenses = append(modelLicenses, modelLic)
+		modelLicensesIDS = append(modelLicensesIDS, modelLic.ID)
 	}
-	return modelLicenses, nil
+	return modelLicensesIDS, nil
 }
 
-func (c *demoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
-	return c.ingestLicense(ctx, license, true)
+func (c *demoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
+	model, err := c.ingestLicense(ctx, license, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestLicense(ctx context.Context, license *model.LicenseInputSpec, readOnly bool) (*model.License, error) {

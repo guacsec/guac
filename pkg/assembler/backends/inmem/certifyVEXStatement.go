@@ -71,15 +71,15 @@ func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.Pac
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrArtifactInput{Package: subjects.Packages[i]}
-			certVex, err = c.IngestVEXStatement(ctx, subject, *vulnerabilities[i], *vexStatements[i])
+			certVex, err = c.ingestVEXStatement(ctx, subject, *vulnerabilities[i], *vexStatements[i], true)
 			if err != nil {
-				return nil, gqlerror.Errorf("IngestVEXStatement failed with err: %v", err)
+				return []string{}, gqlerror.Errorf("IngestVEXStatement failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			certVex, err = c.IngestVEXStatement(ctx, subject, *vulnerabilities[i], *vexStatements[i])
+			certVex, err = c.ingestVEXStatement(ctx, subject, *vulnerabilities[i], *vexStatements[i], true)
 			if err != nil {
-				return nil, gqlerror.Errorf("IngestVEXStatement failed with err: %v", err)
+				return []string{}, gqlerror.Errorf("IngestVEXStatement failed with err: %v", err)
 			}
 		}
 		modelVexStatementIDs = append(modelVexStatementIDs, certVex.ID)
@@ -87,8 +87,12 @@ func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.Pac
 	return modelVexStatementIDs, nil
 }
 
-func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
-	return c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, true)
+func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
+	model, err := c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {

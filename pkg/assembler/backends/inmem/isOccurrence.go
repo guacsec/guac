@@ -97,34 +97,38 @@ func (n *isOccurrenceStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest IngestOccurrences
 
-func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	var modelIsOccurrences []*model.IsOccurrence
+func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+	var modelIsOccurrencesIDS []string
 
 	for i := range occurrences {
 		var isOccurrence *model.IsOccurrence
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrSourceInput{Package: subjects.Packages[i]}
-			isOccurrence, err = c.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
+			isOccurrence, err = c.ingestOccurrence(ctx, subject, *artifacts[i], *occurrences[i], true)
 			if err != nil {
-				return nil, gqlerror.Errorf("ingestOccurrence failed with err: %v", err)
+				return []string{}, gqlerror.Errorf("ingestOccurrence failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageOrSourceInput{Source: subjects.Sources[i]}
-			isOccurrence, err = c.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
+			isOccurrence, err = c.ingestOccurrence(ctx, subject, *artifacts[i], *occurrences[i], true)
 			if err != nil {
-				return nil, gqlerror.Errorf("ingestOccurrence failed with err: %v", err)
+				return []string{}, gqlerror.Errorf("ingestOccurrence failed with err: %v", err)
 			}
 		}
-		modelIsOccurrences = append(modelIsOccurrences, isOccurrence)
+		modelIsOccurrencesIDS = append(modelIsOccurrencesIDS, isOccurrence.ID)
 	}
-	return modelIsOccurrences, nil
+	return modelIsOccurrencesIDS, nil
 }
 
 // Ingest IsOccurrence
 
-func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
-	return c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
+func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+	model, err := c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec, readOnly bool) (*model.IsOccurrence, error) {

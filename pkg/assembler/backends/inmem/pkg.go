@@ -323,19 +323,26 @@ func (p *pkgVersionNode) setCertifyLegals(id uint32) { p.certifyLegals = append(
 
 // Ingest Package
 
-func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
-	var modelPkgs []*model.Package
+func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error) {
+	var modelPkgsIDS []string
 	for _, pkg := range pkgs {
-		modelPkg, err := c.IngestPackage(ctx, *pkg)
+		modelPkg, err := c.ingestPackage(ctx, *pkg, true)
 		if err != nil {
-			return nil, gqlerror.Errorf("ingestPackage failed with err: %v", err)
+			return []string{}, gqlerror.Errorf("ingestPackage failed with err: %v", err)
 		}
-		modelPkgs = append(modelPkgs, modelPkg)
+		modelPkgsIDS = append(modelPkgsIDS, modelPkg.ID)
 	}
-	return modelPkgs, nil
+	return modelPkgsIDS, nil
+}
+func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (string, error) {
+	model, err := c.ingestPackage(ctx, input, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
-func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
+func (c *demoClient) ingestPackage(ctx context.Context, input model.PkgInputSpec, readOnly bool) (*model.Package, error) {
 	c.m.RLock()
 	namespacesStruct, hasNamespace := c.packages[input.Type]
 	c.m.RUnlock()

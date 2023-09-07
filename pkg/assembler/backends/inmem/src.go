@@ -166,19 +166,26 @@ func (p *srcNameNode) setPointOfContactLinks(id uint32) {
 
 // Ingest Source
 
-func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
-	var modelSources []*model.Source
+func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]string, error) {
+	var modelSourcesIDS []string
 	for _, src := range sources {
-		modelSrc, err := c.IngestSource(ctx, *src)
+		modelSrc, err := c.ingestSource(ctx, *src, true)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestSources failed with err: %v", err)
+			return []string{}, gqlerror.Errorf("IngestSources failed with err: %v", err)
 		}
-		modelSources = append(modelSources, modelSrc)
+		modelSourcesIDS = append(modelSourcesIDS, modelSrc.ID)
 	}
-	return modelSources, nil
+	return modelSourcesIDS, nil
+}
+func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (string, error) {
+	model, err := c.ingestSource(ctx, input, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
-func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
+func (c *demoClient) ingestSource(ctx context.Context, input model.SourceInputSpec, readOnly bool) (*model.Source, error) {
 	c.m.RLock()
 	namespacesStruct, hasNamespace := c.sources[input.Type]
 	c.m.RUnlock()

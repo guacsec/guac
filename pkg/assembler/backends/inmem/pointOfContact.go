@@ -61,8 +61,12 @@ func (n *pointOfContactLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest PointOfContact
-func (c *demoClient) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
-	return c.ingestPointOfContact(ctx, subject, pkgMatchType, pointOfContact, true)
+func (c *demoClient) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
+	model, err := c.ingestPointOfContact(ctx, subject, pkgMatchType, pointOfContact, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec, readOnly bool) (*model.PointOfContact, error) {

@@ -131,8 +131,12 @@ func (c *demoClient) convPkgEqual(in *pkgEqualStruct) (*model.PkgEqual, error) {
 	return out, nil
 }
 
-func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
-	return c.ingestPkgEqual(ctx, pkg, depPkg, pkgEqual, true)
+func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
+	model, err := c.ingestPkgEqual(ctx, pkg, depPkg, pkgEqual, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec, readOnly bool) (*model.PkgEqual, error) {

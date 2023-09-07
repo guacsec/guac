@@ -520,13 +520,13 @@ func Test_demoClient_Packages(t *testing.T) {
 				packages: pkgTypeMap{},
 				index:    indexType{},
 			}
-			ingestedPkg, err := c.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgID, err := c.IngestPackage(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = &ingestedPkgID
 			}
 			got, err := c.Packages(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {

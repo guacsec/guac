@@ -52,23 +52,27 @@ func (n *isDependencyLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest IngestDependencies
 
-func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO(LUMJJB): match flags
 
-	var modelIsDependencies []*model.IsDependency
+	var modelIsDependenciesIDS []string
 	for i := range dependencies {
-		isDependency, err := c.IngestDependency(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
+		isDependency, err := c.ingestDependency(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i], true)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestDependency failed with err: %v", err)
+			return []string{}, gqlerror.Errorf("IngestDependency failed with err: %v", err)
 		}
-		modelIsDependencies = append(modelIsDependencies, isDependency)
+		modelIsDependenciesIDS = append(modelIsDependenciesIDS, isDependency.ID)
 	}
-	return modelIsDependencies, nil
+	return modelIsDependenciesIDS, nil
 }
 
 // Ingest IsDependency
-func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
-	return c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, true)
+func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+	model, err :=  c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec, readOnly bool) (*model.IsDependency, error) {

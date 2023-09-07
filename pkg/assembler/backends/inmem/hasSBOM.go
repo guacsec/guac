@@ -56,32 +56,36 @@ func (n *hasSBOMStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest HasSBOM
 
-func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
-	var modelHasSboms []*model.HasSbom
+func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]string, error) {
+	var modelHasSbomsIDS []string
 
 	for i := range hasSBOMs {
 		var hasSBOM *model.HasSbom
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrArtifactInput{Package: subjects.Packages[i]}
-			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i])
+			hasSBOM, err = c.ingestHasSbom(ctx, subject, *hasSBOMs[i], true)
 			if err != nil {
-				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
+				return []string{}, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i])
+			hasSBOM, err = c.ingestHasSbom(ctx, subject, *hasSBOMs[i], true)
 			if err != nil {
-				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
+				return []string{}, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
 			}
 		}
-		modelHasSboms = append(modelHasSboms, hasSBOM)
+		modelHasSbomsIDS = append(modelHasSbomsIDS, hasSBOM.ID)
 	}
-	return modelHasSboms, nil
+	return modelHasSbomsIDS, nil
 }
 
-func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec) (*model.HasSbom, error) {
-	return c.ingestHasSbom(ctx, subject, input, true)
+func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec) (string, error) {
+	model, err := c.ingestHasSbom(ctx, subject, input, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec, readOnly bool) (*model.HasSbom, error) {

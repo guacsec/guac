@@ -392,7 +392,7 @@ func Test_demoClient_Artifacts(t *testing.T) {
 				return
 			}
 			if tt.idInFilter {
-				tt.artifactSpec.ID = &ingestedArt.ID
+				tt.artifactSpec.ID = &ingestedArt
 			}
 			got, err := c.Artifacts(ctx, tt.artifactSpec)
 			if (err != nil) != tt.wantErr {
@@ -476,13 +476,13 @@ func Test_demoClient_buildArtifactResponse(t *testing.T) {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			artID, err := strconv.ParseUint(art.ID, 10, 32)
+			artID, err := strconv.ParseUint(art, 10, 32)
 			if err != nil {
 				t.Errorf("failed to convert string to uint, error = %v", err)
 				return
 			}
 			if tt.idInFilter {
-				tt.artifactSpec.ID = &art.ID
+				tt.artifactSpec.ID = &art
 			}
 			got, err := c.buildArtifactResponse(uint32(artID), tt.artifactSpec)
 			if (err != nil) != tt.wantErr {
@@ -538,7 +538,7 @@ func Test_demoClient_getArtifactIDFromInput(t *testing.T) {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			artID, err := strconv.ParseUint(art.ID, 10, 32)
+			artID, err := strconv.ParseUint(art, 10, 32)
 			if err != nil {
 				t.Errorf("failed to convert string to uint, error = %v", err)
 				return

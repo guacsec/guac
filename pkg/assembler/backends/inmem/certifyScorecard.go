@@ -55,21 +55,25 @@ func (n *scorecardLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest Scorecards
 
-func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
-	var modelCertifyScorecards []*model.CertifyScorecard
+func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+	var modelCertifyScorecardsIDS []string
 	for i := range scorecards {
-		scorecard, err := c.IngestScorecard(ctx, *sources[i], *scorecards[i])
+		scorecard, err := c.certifyScorecard(ctx, *sources[i], *scorecards[i], true)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestScorecard failed with err: %v", err)
+			return []string{}, gqlerror.Errorf("IngestScorecard failed with err: %v", err)
 		}
-		modelCertifyScorecards = append(modelCertifyScorecards, scorecard)
+		modelCertifyScorecardsIDS = append(modelCertifyScorecardsIDS, scorecard.ID) 
 	}
-	return modelCertifyScorecards, nil
+	return modelCertifyScorecardsIDS, nil
 }
 
 // Ingest CertifyScorecard
-func (c *demoClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
-	return c.certifyScorecard(ctx, source, scorecard, true)
+func (c *demoClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+	model, err := c.certifyScorecard(ctx, source, scorecard, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err 
 }
 
 func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec, readOnly bool) (*model.CertifyScorecard, error) {

@@ -56,22 +56,28 @@ func (c *demoClient) builderByKey(uri string) (*builderStruct, error) {
 
 // Ingest Builders
 
-func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
+func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
 	var modelBuilders []*model.Builder
+	var modelBuildersIDS []string
 	for _, build := range builders {
-		modelBuild, err := c.IngestBuilder(ctx, build)
+		modelBuild, err := c.ingestBuilder(ctx, build, true)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestBuilder failed with err: %v", err)
+			return []string{}, gqlerror.Errorf("IngestBuilder failed with err: %v", err)
 		}
 		modelBuilders = append(modelBuilders, modelBuild)
+		modelBuildersIDS = append(modelBuildersIDS, modelBuild.ID)
 	}
-	return modelBuilders, nil
+	return modelBuildersIDS, nil
 }
 
 // Ingest Builder
 
-func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
-	return c.ingestBuilder(ctx, builder, true)
+func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
+	model, err := c.ingestBuilder(ctx, builder, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.BuilderInputSpec, readOnly bool) (*model.Builder, error) {

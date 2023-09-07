@@ -50,8 +50,12 @@ func (n *vulnerabilityEqualLink) BuildModelNode(c *demoClient) (model.Node, erro
 }
 
 // Ingest IsVulnerability
-func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
-	return c.ingestVulnEqual(ctx, vulnerability, otherVulnerability, vulnEqual, true)
+func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
+	model, err := c.ingestVulnEqual(ctx, vulnerability, otherVulnerability, vulnEqual, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec, readOnly bool) (*model.VulnEqual, error) {

@@ -99,20 +99,24 @@ func (n *artStruct) setPointOfContactLinks(id uint32) {
 
 // Ingest Artifacts
 
-func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	var modelArtifacts []*model.Artifact
+func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+	var modelArtifactsIDS []string
 	for _, art := range artifacts {
-		modelArt, err := c.IngestArtifact(ctx, art)
+		modelArt, err := c.ingestArtifact(ctx, art, true)
 		if err != nil {
 			return nil, gqlerror.Errorf("ingestArtifact failed with err: %v", err)
 		}
-		modelArtifacts = append(modelArtifacts, modelArt)
+		modelArtifactsIDS = append(modelArtifactsIDS, modelArt.ID)
 	}
-	return modelArtifacts, nil
+	return modelArtifactsIDS, nil
 }
 
-func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
-	return c.ingestArtifact(ctx, artifact, true)
+func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
+	model, err := c.ingestArtifact(ctx, artifact, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, readOnly bool) (*model.Artifact, error) {

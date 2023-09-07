@@ -61,8 +61,12 @@ func (n *hasMetadataLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest HasMetadata
-func (c *demoClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
-	return c.ingestHasMetadata(ctx, subject, pkgMatchType, hasMetadata, true)
+func (c *demoClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
+	model, err := c.ingestHasMetadata(ctx, subject, pkgMatchType, hasMetadata, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec, readOnly bool) (*model.HasMetadata, error) {

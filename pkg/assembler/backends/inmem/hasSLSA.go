@@ -158,22 +158,26 @@ func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSp
 
 // Ingest HasSlsa
 
-func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
-	var modelHasSLSAList []*model.HasSlsa
+func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+	var modelHasSLSAListIDS []string
 	for i := range subjects {
-		hasSLSA, err := c.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsaList[i])
+		hasSLSA, err := c.ingestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsaList[i], true)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestSLSA failed with err: %v", err)
 		}
-		modelHasSLSAList = append(modelHasSLSAList, hasSLSA)
+		modelHasSLSAListIDS = append(modelHasSLSAListIDS, hasSLSA.ID)
 	}
-	return modelHasSLSAList, nil
+	return modelHasSLSAListIDS, nil
 }
 
 func (c *demoClient) IngestSLSA(ctx context.Context,
 	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
-	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	return c.ingestSLSA(ctx, subject, builtFrom, builtBy, slsa, true)
+	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
+	model, err := c.ingestSLSA(ctx, subject, builtFrom, builtBy, slsa, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 
 func (c *demoClient) ingestSLSA(ctx context.Context,

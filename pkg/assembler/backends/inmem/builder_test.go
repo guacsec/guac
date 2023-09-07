@@ -292,7 +292,7 @@ func Test_demoClient_Builders(t *testing.T) {
 				return
 			}
 			if tt.idInFilter {
-				tt.builderSpec.ID = &ingestedBuilder.ID
+				tt.builderSpec.ID = &ingestedBuilder
 			}
 			got, err := c.Builders(ctx, tt.builderSpec)
 			if (err != nil) != tt.wantErr {
@@ -353,14 +353,14 @@ func Test_demoClient_exactBuilder(t *testing.T) {
 				return
 			}
 			if tt.idInFilter {
-				tt.builderSpec.ID = &ingestedBuilder.ID
+				tt.builderSpec.ID = &ingestedBuilder
 			}
 			got, err := c.exactBuilder(tt.builderSpec)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.exactBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			id64, err := strconv.ParseUint(ingestedBuilder.ID, 10, 32)
+			id64, err := strconv.ParseUint(ingestedBuilder, 10, 32)
 			if err != nil {
 				t.Errorf("failed to convert string to uint32: %v", err)
 				return

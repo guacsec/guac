@@ -153,13 +153,13 @@ func Test_demoClient_Sources(t *testing.T) {
 				sources: srcTypeMap{},
 				index:   indexType{},
 			}
-			ingestedPkg, err := c.IngestSource(ctx, *tt.srcInput)
+			ingestedPkgID, err := c.IngestSource(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedPkg.Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = &ingestedPkgID
 			}
 			got, err := c.Sources(ctx, tt.srcFilter)
 			if (err != nil) != tt.wantErr {

@@ -58,38 +58,42 @@ func (n *goodLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest CertifyGood
 
-func (c *demoClient) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
-	var modelCertifyGoods []*model.CertifyGood
+func (c *demoClient) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
+	var modelCertifyGoodsIDS []string
 
 	for i := range certifyGoods {
 		var certifyGood *model.CertifyGood
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
-			certifyGood, err = c.IngestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i])
+			certifyGood, err = c.ingestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i], true)
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyGood failed with err: %v", err)
 			}
 		} else if len(subjects.Sources) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
-			certifyGood, err = c.IngestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i])
+			certifyGood, err = c.ingestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i], true)
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyGood failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			certifyGood, err = c.IngestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i])
+			certifyGood, err = c.ingestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i], true)
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyGood failed with err: %v", err)
 			}
 		}
-		modelCertifyGoods = append(modelCertifyGoods, certifyGood)
+		modelCertifyGoodsIDS = append(modelCertifyGoodsIDS, certifyGood.ID)
 	}
-	return modelCertifyGoods, nil
+	return modelCertifyGoodsIDS, nil
 }
 
-func (c *demoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-	return c.ingestCertifyGood(ctx, subject, pkgMatchType, certifyGood, true)
+func (c *demoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (string, error) {
+	model, err := c.ingestCertifyGood(ctx, subject, pkgMatchType, certifyGood, true)
+	if err != nil {
+		return "", err
+	}
+	return model.ID, err
 }
 func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec, readOnly bool) (*model.CertifyGood, error) {
 	funcName := "IngestCertifyGood"
