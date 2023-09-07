@@ -23,6 +23,7 @@ import (
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/cdx_vex"
 	"github.com/guacsec/guac/pkg/handler/processor/csaf"
@@ -64,7 +65,7 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 
 // Subscribe is used by NATS JetStream to stream the documents received from the collector
 // and process them them via Process
-func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
+func Subscribe(ctx context.Context, em collector.Emitter) error {
 	logger := logging.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
@@ -79,25 +80,19 @@ func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) e
 
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d []byte) error {
+
 		doc := processor.Document{}
 		err := json.Unmarshal(d, &doc)
 		if err != nil {
 			logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
 			return nil
 		}
-		docTree, err := Process(ctx, &doc)
-		if err != nil {
-			logger.Error("[processor: %s] failed process document: %v", uuidString, err)
-			return nil
-		}
 
-		err = transportFunc(docTree)
+		err = em(&doc)
 		if err != nil {
 			logger.Error("[processor: %s] failed transportFunc: %v", uuidString, err)
 			return nil
 		}
-
-		logger.Infof("[processor: %s] docTree Processed: %+v", uuidString, docTree.Document.SourceInformation)
 		return nil
 	}
 
