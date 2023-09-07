@@ -130,7 +130,7 @@ func Test_IngestArtifacts(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := GetBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -189,7 +189,7 @@ func Test_IngestArtifact(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := GetBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -257,7 +257,7 @@ func Test_Artifacts(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := GetBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}

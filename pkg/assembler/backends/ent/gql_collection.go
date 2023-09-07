@@ -924,7 +924,7 @@ func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, dependency.FieldPackageID)
 				fieldSeen[dependency.FieldPackageID] = struct{}{}
 			}
-		case "dependentPackage":
+		case "dependentPackageName":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -933,20 +933,39 @@ func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			d.withDependentPackage = query
-			if _, ok := fieldSeen[dependency.FieldDependentPackageID]; !ok {
-				selectedFields = append(selectedFields, dependency.FieldDependentPackageID)
-				fieldSeen[dependency.FieldDependentPackageID] = struct{}{}
+			d.withDependentPackageName = query
+			if _, ok := fieldSeen[dependency.FieldDependentPackageNameID]; !ok {
+				selectedFields = append(selectedFields, dependency.FieldDependentPackageNameID)
+				fieldSeen[dependency.FieldDependentPackageNameID] = struct{}{}
+			}
+		case "dependentPackageVersion":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PackageVersionClient{config: d.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			d.withDependentPackageVersion = query
+			if _, ok := fieldSeen[dependency.FieldDependentPackageVersionID]; !ok {
+				selectedFields = append(selectedFields, dependency.FieldDependentPackageVersionID)
+				fieldSeen[dependency.FieldDependentPackageVersionID] = struct{}{}
 			}
 		case "packageID":
 			if _, ok := fieldSeen[dependency.FieldPackageID]; !ok {
 				selectedFields = append(selectedFields, dependency.FieldPackageID)
 				fieldSeen[dependency.FieldPackageID] = struct{}{}
 			}
-		case "dependentPackageID":
-			if _, ok := fieldSeen[dependency.FieldDependentPackageID]; !ok {
-				selectedFields = append(selectedFields, dependency.FieldDependentPackageID)
-				fieldSeen[dependency.FieldDependentPackageID] = struct{}{}
+		case "dependentPackageNameID":
+			if _, ok := fieldSeen[dependency.FieldDependentPackageNameID]; !ok {
+				selectedFields = append(selectedFields, dependency.FieldDependentPackageNameID)
+				fieldSeen[dependency.FieldDependentPackageNameID] = struct{}{}
+			}
+		case "dependentPackageVersionID":
+			if _, ok := fieldSeen[dependency.FieldDependentPackageVersionID]; !ok {
+				selectedFields = append(selectedFields, dependency.FieldDependentPackageVersionID)
+				fieldSeen[dependency.FieldDependentPackageVersionID] = struct{}{}
 			}
 		case "versionRange":
 			if _, ok := fieldSeen[dependency.FieldVersionRange]; !ok {

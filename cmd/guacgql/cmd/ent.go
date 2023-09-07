@@ -13,25 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+//go:build !(386 || arm || mips)
+
+package cmd
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
+	"github.com/guacsec/guac/pkg/assembler/backends"
+	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 )
 
-func main() {
-	ctx := context.Background()
+func init() {
+	if getOpts == nil {
+		getOpts = make(map[string]optsFunc)
+	}
+	getOpts[ent] = getEnt
+}
 
-	_, err := backend.SetupBackend(ctx, &backend.BackendOptions{
-		AutoMigrate: true,
-		DriverName:  dialect.Postgres,
-		Address:     "postgres://localhost:5432/guac?sslmode=disable",
-	})
-
-	if err != nil {
-		panic(err)
+func getEnt() backends.BackendArgs {
+	return &entbackend.BackendOptions{
+		DriverName:  flags.dbDriver,
+		Address:     flags.dbAddress,
+		Debug:       flags.dbDebug,
+		AutoMigrate: flags.dbMigrate,
 	}
 }

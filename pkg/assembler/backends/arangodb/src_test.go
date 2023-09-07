@@ -40,7 +40,7 @@ func Test_IngestSources(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -80,7 +80,7 @@ func Test_Sources(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -164,7 +164,7 @@ func Test_SourceTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -263,7 +263,7 @@ func Test_SourceNamespaces(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}

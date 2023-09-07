@@ -122,13 +122,10 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				return fmt.Errorf("ingestVulnMetadatas failed with error: %w", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for IsVuln
 			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
-			for _, iv := range p.VulnEqual {
-				if err := ingestVulnEqual(ctx, gqlclient, iv); err != nil {
-					return fmt.Errorf("ingestIsVuln failed with error: %w", err)
+			if err := ingestVulnEquals(ctx, gqlclient, p.VulnEqual); err != nil {
+				return fmt.Errorf("ingestVulnEquals failed with error: %w", err)
 
-				}
 			}
 
 			// TODO(pxp928): add bulk ingestion for HasSourceAt
@@ -299,6 +296,24 @@ func ingestVulnMetadatas(ctx context.Context, client graphql.Client, vm []assemb
 		_, err := model.VulnHasMetadatas(ctx, client, vulnerabilities, vulnMetadataList)
 		if err != nil {
 			return fmt.Errorf("VulnHasMetadatas failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestVulnEquals(ctx context.Context, client graphql.Client, ve []assembler.VulnEqualIngest) error {
+	var vulnerabilities []model.VulnerabilityInputSpec
+	var equalVulnerabilities []model.VulnerabilityInputSpec
+	var vulnEqualList []model.VulnEqualInputSpec
+	for _, ingest := range ve {
+		vulnerabilities = append(vulnerabilities, *ingest.Vulnerability)
+		equalVulnerabilities = append(equalVulnerabilities, *ingest.EqualVulnerability)
+		vulnEqualList = append(vulnEqualList, *ingest.VulnEqual)
+	}
+	if len(ve) > 0 {
+		_, err := model.IngestVulnEquals(ctx, client, vulnerabilities, equalVulnerabilities, vulnEqualList)
+		if err != nil {
+			return fmt.Errorf("IngestVulnEquals failed with error: %w", err)
 		}
 	}
 	return nil

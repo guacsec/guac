@@ -47,7 +47,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -930,7 +930,7 @@ func TestIngestCertifyVulns(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := GetBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangArg)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1438,7 +1438,7 @@ func TestIngestCertifyVulns(t *testing.T) {
 // 	ctx := context.Background()
 // 	for _, test := range tests {
 // 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.GetBackend(nil)
+// 			b, err := inmem.getBackend(nil)
 // 			if err != nil {
 // 				t.Fatalf("Could not instantiate testing backend: %v", err)
 // 			}

@@ -41,22 +41,30 @@ type EntBackend struct {
 	client *ent.Client
 }
 
-func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
+func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {
+	config, ok := args.(*BackendOptions)
+	if !ok {
+		return nil, fmt.Errorf("failed to get ent config from backend args")
+	}
+	client, err := SetupBackend(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+	return GetBackend(client)
+}
+
+func GetBackend(client *ent.Client) (backends.Backend, error) {
+	if client == nil {
+		return nil, fmt.Errorf("invalid args: client is required, got nil")
+	}
+
 	be := &EntBackend{}
-	if args == nil {
-		return nil, fmt.Errorf("invalid args: WithClient is required, got nil")
+	err := client.Ping(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("failed to ping db: %w", err)
 	}
 
-	if client, ok := args.(*ent.Client); ok {
-		err := client.Ping(context.Background())
-		if err != nil {
-			return nil, fmt.Errorf("failed to ping db: %w", err)
-		}
-
-		be.client = client
-	} else {
-		return nil, fmt.Errorf("invalid args type")
-	}
+	be.client = client
 
 	return be, nil
 }

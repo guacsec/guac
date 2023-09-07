@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -39,7 +40,16 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 		optionalPredicate(spec.Collector, dependency.Collector),
 	)
 	if spec.DependentPackage != nil {
-		query.Where(dependency.HasDependentPackageWith(packageNameQuery(spec.DependentPackage)))
+		if spec.DependentPackage.Version == nil {
+			query.Where(
+				dependency.Or(
+					dependency.HasDependentPackageNameWith(packageNameQuery(spec.DependentPackage)),
+					dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependentPackage)),
+				),
+			)
+		} else {
+			query.Where(dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependentPackage)))
+		}
 	}
 	if spec.Package != nil {
 		query.Where(dependency.HasPackageWith(packageVersionQuery(spec.Package)))
@@ -51,7 +61,8 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 
 	deps, err := query.
 		WithPackage(withPackageVersionTree()).
-		WithDependentPackage(withPackageNameTree()).
+		WithDependentPackageName(withPackageNameTree()).
+		WithDependentPackageVersion(withPackageVersionTree()).
 		All(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, funcName)
@@ -74,62 +85,76 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgIn
 	return modelIsDependencies, nil
 }
 
-// func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, spec model.IsDependencyInputSpec) (*model.IsDependency, error) {
-// func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
-// 	funcName := "IngestDependency"
+func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (*model.IsDependency, error) {
+	funcName := "IngestDependency"
 
-// 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-// 		client := ent.TxFromContext(ctx)
-// 		p, err := getPkgVersion(ctx, client.Client(), pkg)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		dp, err := getPkgName(ctx, client.Client(), depPkg)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		id, err := client.Dependency.Create().
-// 			SetPackage(p).
-// 			SetDependentPackage(dp).
-// 			SetVersionRange(spec.VersionRange).
-// 			SetDependencyType(dependencyTypeToEnum(spec.DependencyType)).
-// 			SetJustification(spec.Justification).
-// 			SetOrigin(spec.Origin).
-// 			SetCollector(spec.Collector).
-// 			OnConflict(
-// 				sql.ConflictColumns(
-// 					dependency.FieldPackageID,
-// 					dependency.FieldDependentPackageID,
-// 					dependency.FieldVersionRange,
-// 					dependency.FieldDependencyType,
-// 					dependency.FieldJustification,
-// 					dependency.FieldOrigin,
-// 					dependency.FieldCollector,
-// 				),
-// 			).
-// 			Ignore().
-// 			ID(ctx)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return &id, nil
-// 	})
-// 	if err != nil {
-// 		return nil, errors.Wrap(err, funcName)
-// 	}
+	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+		client := ent.TxFromContext(ctx)
+		p, err := getPkgVersion(ctx, client.Client(), pkg)
+		if err != nil {
+			return nil, err
+		}
+		query := client.Dependency.Create().
+			SetPackage(p).
+			SetVersionRange(dep.VersionRange).
+			SetDependencyType(dependencyTypeToEnum(dep.DependencyType)).
+			SetJustification(dep.Justification).
+			SetOrigin(dep.Origin).
+			SetCollector(dep.Collector)
 
-// 	// Upsert only gets ID, so need to query the object
-// 	record, err := b.client.Dependency.Query().
-// 		Where(dependency.ID(*recordID)).
-// 		WithPackage(withPackageVersionTree()).
-// 		WithDependentPackage(withPackageNameTree()).
-// 		Only(ctx)
-// 	if err != nil {
-// 		return nil, errors.Wrap(err, funcName)
-// 	}
+		conflictColumns := []string{
+			dependency.FieldPackageID,
+			dependency.FieldVersionRange,
+			dependency.FieldDependencyType,
+			dependency.FieldJustification,
+			dependency.FieldOrigin,
+			dependency.FieldCollector,
+		}
 
-// 	return toModelIsDependencyWithBackrefs(record), nil
-// }
+		var conflictWhere *sql.Predicate
+
+		if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+			dpn, err := getPkgName(ctx, client.Client(), depPkg)
+			if err != nil {
+				return nil, err
+			}
+			query.SetDependentPackageName(dpn)
+			conflictColumns = append(conflictColumns, dependency.FieldDependentPackageNameID)
+			conflictWhere = sql.And(
+				sql.NotNull(dependency.FieldDependentPackageNameID),
+				sql.IsNull(dependency.FieldDependentPackageVersionID),
+			)
+		} else {
+			dpv, err := getPkgVersion(ctx, client.Client(), depPkg)
+			if err != nil {
+				return nil, err
+			}
+			query.SetDependentPackageVersion(dpv)
+			conflictColumns = append(conflictColumns, dependency.FieldDependentPackageVersionID)
+			conflictWhere = sql.And(
+				sql.IsNull(dependency.FieldDependentPackageNameID),
+				sql.NotNull(dependency.FieldDependentPackageVersionID),
+			)
+		}
+
+		id, err := query.
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictWhere(conflictWhere),
+			).
+			Ignore().
+			ID(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return &id, nil
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, funcName)
+	}
+
+	return &model.IsDependency{ID: nodeID(*recordID)}, nil
+}
 
 func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
 	switch t {
@@ -138,6 +163,6 @@ func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
 	case model.DependencyTypeIndirect:
 		return dependency.DependencyTypeINDIRECT
 	default:
-		return dependency.DependencyTypeUNSPECIFIED
+		return dependency.DependencyTypeUNKNOWN
 	}
 }

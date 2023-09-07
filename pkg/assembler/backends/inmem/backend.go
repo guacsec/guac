@@ -16,6 +16,7 @@
 package inmem
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -28,7 +29,9 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-type DemoCredentials struct{}
+func init() {
+	backends.Register("inmem", getBackend)
+}
 
 // node is the common interface of all backend nodes.
 type node interface {
@@ -102,7 +105,7 @@ type demoClient struct {
 	vulnerabilityMetadatas vulnerabilityMetadataList
 }
 
-func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
+func getBackend(_ context.Context, _ backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
 		artifacts:       artMap{},
 		builders:        builderMap{},

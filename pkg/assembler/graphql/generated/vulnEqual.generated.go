@@ -503,6 +503,28 @@ func (ec *executionContext) unmarshalNVulnEqualInputSpec2githubᚗcomᚋguacsec�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNVulnEqualInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.VulnEqualInputSpec, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.VulnEqualInputSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNVulnEqualInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNVulnEqualInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualInputSpec(ctx context.Context, v interface{}) (*model.VulnEqualInputSpec, error) {
+	res, err := ec.unmarshalInputVulnEqualInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx context.Context, v interface{}) (model.VulnEqualSpec, error) {
 	res, err := ec.unmarshalInputVulnEqualSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)

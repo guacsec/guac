@@ -180,12 +180,20 @@ func (d *Dependency) Package(ctx context.Context) (*PackageVersion, error) {
 	return result, err
 }
 
-func (d *Dependency) DependentPackage(ctx context.Context) (*PackageName, error) {
-	result, err := d.Edges.DependentPackageOrErr()
+func (d *Dependency) DependentPackageName(ctx context.Context) (*PackageName, error) {
+	result, err := d.Edges.DependentPackageNameOrErr()
 	if IsNotLoaded(err) {
-		result, err = d.QueryDependentPackage().Only(ctx)
+		result, err = d.QueryDependentPackageName().Only(ctx)
 	}
-	return result, err
+	return result, MaskNotFound(err)
+}
+
+func (d *Dependency) DependentPackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := d.Edges.DependentPackageVersionOrErr()
+	if IsNotLoaded(err) {
+		result, err = d.QueryDependentPackageVersion().Only(ctx)
+	}
+	return result, MaskNotFound(err)
 }
 
 func (hsa *HasSourceAt) PackageVersion(ctx context.Context) (*PackageVersion, error) {
