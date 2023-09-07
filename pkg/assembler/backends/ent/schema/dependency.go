@@ -17,10 +17,12 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // Dependency holds the schema definition for the Dependency entity.
@@ -39,9 +41,10 @@ func (Dependency) Annotations() []schema.Annotation {
 func (Dependency) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("package_id"),
-		field.Int("dependent_package_id"),
+		field.Int("dependent_package_name_id").Optional(),
+		field.Int("dependent_package_version_id").Optional(),
 		field.String("version_range"),
-		field.Enum("dependency_type").Values("UNSPECIFIED", "DIRECT", "INDIRECT"),
+		field.Enum("dependency_type").Values(model.DependencyTypeDirect.String(), model.DependencyTypeIndirect.String(), model.DependencyTypeUnknown.String()),
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
@@ -55,9 +58,11 @@ func (Dependency) Edges() []ent.Edge {
 			Required().
 			Field("package_id").
 			Unique(),
-		edge.To("dependent_package", PackageName.Type).
-			Required().
-			Field("dependent_package_id").
+		edge.To("dependent_package_name", PackageName.Type).
+			Field("dependent_package_name_id").
+			Unique(),
+		edge.To("dependent_package_version", PackageVersion.Type).
+			Field("dependent_package_version_id").
 			Unique(),
 	}
 }
@@ -66,7 +71,12 @@ func (Dependency) Edges() []ent.Edge {
 func (Dependency) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("version_range", "dependency_type", "justification", "origin", "collector").
-			Edges("package", "dependent_package").
-			Unique(),
+			Edges("package", "dependent_package_name").
+			Unique().
+			Annotations(entsql.IndexWhere("dependent_package_name_id IS NOT NULL AND dependent_package_version_id IS NULL")).StorageKey("dep_package_name"),
+		index.Fields("version_range", "dependency_type", "justification", "origin", "collector").
+			Edges("package", "dependent_package_version").
+			Unique().
+			Annotations(entsql.IndexWhere("dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL")).StorageKey("dep_package_version"),
 	}
 }

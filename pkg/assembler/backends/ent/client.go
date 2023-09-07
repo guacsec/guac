@@ -1623,15 +1623,31 @@ func (c *DependencyClient) QueryPackage(d *Dependency) *PackageVersionQuery {
 	return query
 }
 
-// QueryDependentPackage queries the dependent_package edge of a Dependency.
-func (c *DependencyClient) QueryDependentPackage(d *Dependency) *PackageNameQuery {
+// QueryDependentPackageName queries the dependent_package_name edge of a Dependency.
+func (c *DependencyClient) QueryDependentPackageName(d *Dependency) *PackageNameQuery {
 	query := (&PackageNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := d.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(dependency.Table, dependency.FieldID, id),
 			sqlgraph.To(packagename.Table, packagename.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageTable, dependency.DependentPackageColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageNameTable, dependency.DependentPackageNameColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDependentPackageVersion queries the dependent_package_version edge of a Dependency.
+func (c *DependencyClient) QueryDependentPackageVersion(d *Dependency) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dependency.Table, dependency.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageVersionTable, dependency.DependentPackageVersionColumn),
 		)
 		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil

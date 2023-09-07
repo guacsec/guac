@@ -58,9 +58,14 @@ func PackageID(v int) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldPackageID, v))
 }
 
-// DependentPackageID applies equality check predicate on the "dependent_package_id" field. It's identical to DependentPackageIDEQ.
-func DependentPackageID(v int) predicate.Dependency {
-	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageID, v))
+// DependentPackageNameID applies equality check predicate on the "dependent_package_name_id" field. It's identical to DependentPackageNameIDEQ.
+func DependentPackageNameID(v int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageNameID, v))
+}
+
+// DependentPackageVersionID applies equality check predicate on the "dependent_package_version_id" field. It's identical to DependentPackageVersionIDEQ.
+func DependentPackageVersionID(v int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageVersionID, v))
 }
 
 // VersionRange applies equality check predicate on the "version_range" field. It's identical to VersionRangeEQ.
@@ -103,24 +108,64 @@ func PackageIDNotIn(vs ...int) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNotIn(FieldPackageID, vs...))
 }
 
-// DependentPackageIDEQ applies the EQ predicate on the "dependent_package_id" field.
-func DependentPackageIDEQ(v int) predicate.Dependency {
-	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageID, v))
+// DependentPackageNameIDEQ applies the EQ predicate on the "dependent_package_name_id" field.
+func DependentPackageNameIDEQ(v int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageNameID, v))
 }
 
-// DependentPackageIDNEQ applies the NEQ predicate on the "dependent_package_id" field.
-func DependentPackageIDNEQ(v int) predicate.Dependency {
-	return predicate.Dependency(sql.FieldNEQ(FieldDependentPackageID, v))
+// DependentPackageNameIDNEQ applies the NEQ predicate on the "dependent_package_name_id" field.
+func DependentPackageNameIDNEQ(v int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldNEQ(FieldDependentPackageNameID, v))
 }
 
-// DependentPackageIDIn applies the In predicate on the "dependent_package_id" field.
-func DependentPackageIDIn(vs ...int) predicate.Dependency {
-	return predicate.Dependency(sql.FieldIn(FieldDependentPackageID, vs...))
+// DependentPackageNameIDIn applies the In predicate on the "dependent_package_name_id" field.
+func DependentPackageNameIDIn(vs ...int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldIn(FieldDependentPackageNameID, vs...))
 }
 
-// DependentPackageIDNotIn applies the NotIn predicate on the "dependent_package_id" field.
-func DependentPackageIDNotIn(vs ...int) predicate.Dependency {
-	return predicate.Dependency(sql.FieldNotIn(FieldDependentPackageID, vs...))
+// DependentPackageNameIDNotIn applies the NotIn predicate on the "dependent_package_name_id" field.
+func DependentPackageNameIDNotIn(vs ...int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldNotIn(FieldDependentPackageNameID, vs...))
+}
+
+// DependentPackageNameIDIsNil applies the IsNil predicate on the "dependent_package_name_id" field.
+func DependentPackageNameIDIsNil() predicate.Dependency {
+	return predicate.Dependency(sql.FieldIsNull(FieldDependentPackageNameID))
+}
+
+// DependentPackageNameIDNotNil applies the NotNil predicate on the "dependent_package_name_id" field.
+func DependentPackageNameIDNotNil() predicate.Dependency {
+	return predicate.Dependency(sql.FieldNotNull(FieldDependentPackageNameID))
+}
+
+// DependentPackageVersionIDEQ applies the EQ predicate on the "dependent_package_version_id" field.
+func DependentPackageVersionIDEQ(v int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageVersionID, v))
+}
+
+// DependentPackageVersionIDNEQ applies the NEQ predicate on the "dependent_package_version_id" field.
+func DependentPackageVersionIDNEQ(v int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldNEQ(FieldDependentPackageVersionID, v))
+}
+
+// DependentPackageVersionIDIn applies the In predicate on the "dependent_package_version_id" field.
+func DependentPackageVersionIDIn(vs ...int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldIn(FieldDependentPackageVersionID, vs...))
+}
+
+// DependentPackageVersionIDNotIn applies the NotIn predicate on the "dependent_package_version_id" field.
+func DependentPackageVersionIDNotIn(vs ...int) predicate.Dependency {
+	return predicate.Dependency(sql.FieldNotIn(FieldDependentPackageVersionID, vs...))
+}
+
+// DependentPackageVersionIDIsNil applies the IsNil predicate on the "dependent_package_version_id" field.
+func DependentPackageVersionIDIsNil() predicate.Dependency {
+	return predicate.Dependency(sql.FieldIsNull(FieldDependentPackageVersionID))
+}
+
+// DependentPackageVersionIDNotNil applies the NotNil predicate on the "dependent_package_version_id" field.
+func DependentPackageVersionIDNotNil() predicate.Dependency {
+	return predicate.Dependency(sql.FieldNotNull(FieldDependentPackageVersionID))
 }
 
 // VersionRangeEQ applies the EQ predicate on the "version_range" field.
@@ -426,21 +471,44 @@ func HasPackageWith(preds ...predicate.PackageVersion) predicate.Dependency {
 	})
 }
 
-// HasDependentPackage applies the HasEdge predicate on the "dependent_package" edge.
-func HasDependentPackage() predicate.Dependency {
+// HasDependentPackageName applies the HasEdge predicate on the "dependent_package_name" edge.
+func HasDependentPackageName() predicate.Dependency {
 	return predicate.Dependency(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, DependentPackageTable, DependentPackageColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, DependentPackageNameTable, DependentPackageNameColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasDependentPackageWith applies the HasEdge predicate on the "dependent_package" edge with a given conditions (other predicates).
-func HasDependentPackageWith(preds ...predicate.PackageName) predicate.Dependency {
+// HasDependentPackageNameWith applies the HasEdge predicate on the "dependent_package_name" edge with a given conditions (other predicates).
+func HasDependentPackageNameWith(preds ...predicate.PackageName) predicate.Dependency {
 	return predicate.Dependency(func(s *sql.Selector) {
-		step := newDependentPackageStep()
+		step := newDependentPackageNameStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDependentPackageVersion applies the HasEdge predicate on the "dependent_package_version" edge.
+func HasDependentPackageVersion() predicate.Dependency {
+	return predicate.Dependency(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, DependentPackageVersionTable, DependentPackageVersionColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDependentPackageVersionWith applies the HasEdge predicate on the "dependent_package_version" edge with a given conditions (other predicates).
+func HasDependentPackageVersionWith(preds ...predicate.PackageVersion) predicate.Dependency {
+	return predicate.Dependency(func(s *sql.Selector) {
+		step := newDependentPackageVersionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
