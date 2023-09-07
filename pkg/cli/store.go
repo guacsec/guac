@@ -71,7 +71,6 @@ func init() {
 	set.Bool("service-poll", true, "sets the collector or certifier to polling mode")
 	set.BoolP("poll", "p", false, "sets the collector or certifier to polling mode")
 	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
-	set.Bool("async-ingest", true, "sets the ingestor in async mode, meaning document will be sent via pub/sub between ingestion stages")
 
 	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")
 	set.BoolP("package-name", "n", false, "if type is package, enable if attestation is at package-name level (for all versions), defaults to specific version")
