@@ -261,7 +261,7 @@ func Test_spdxParser(t *testing.T) {
 			"documentDescribes": [
 				"SPDXRef-6dcd47a4-bfcb-47d7-8ee4-60b6dc4861a8"
 			],
-			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+			"name":"test-sbom",
 			"packages":[
 				{
 					"SPDXID": "SPDXRef-8c5bc68a-d747-48de-b737-bc9703c330e7",
@@ -324,6 +324,215 @@ func Test_spdxParser(t *testing.T) {
 				},
 				HasSBOM: []assembler.HasSBOMIngest{
 					{Pkg: pUrlToPkgDiscardError("pkg:oci/redhat/ubi9-container@sha256:4227a4b5013999a412196237c62e40d778d09cdc751720a66ff3701fbe5a4a9d?repository_url=registry.redhat.io/ubi9&tag=9.1.0-1750")},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX with files that have 0000 hash file representation",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM")},
+			doc: &processor.Document{
+				Blob: []byte(`
+		{
+			"SPDXID":"SPDXRef-DOCUMENT",
+			"spdxVersion": "SPDX-2.2",
+			"name":"testsbom",
+			"files":[
+				{
+				  "fileName": "file1",
+				  "SPDXID": "SPDXRef-3431c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA1",
+					  "checksumValue": "0000000000000000000000000000000000000000"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "file2",
+				  "SPDXID": "SPDXRef-def1c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA256",
+					  "checksumValue": "0000000000000000000000000000000000000000000000000000000000000000"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA1",
+					  "checksumValue": "ba1c68d88439599dcca7594d610030a19eda4f63"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				}
+
+			]
+		}
+	`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				IsDependency: []assembler.IsDependencyIngest{
+					{
+						Pkg:             pUrlToPkgDiscardError("pkg:guac/spdx/testsbom"),
+						DepPkg:          pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63#include-file"),
+						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeAllVersions},
+						IsDependency: &generated.IsDependencyInputSpec{
+							DependencyType: generated.DependencyTypeUnknown,
+							Justification:  "top-level package GUAC heuristic connecting to each file/package",
+						},
+					},
+				},
+				IsOccurrence: []assembler.IsOccurrenceIngest{
+
+					{
+						Pkg: pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63#include-file"),
+						Artifact: &generated.ArtifactInputSpec{
+							Algorithm: "sha1",
+							Digest:    "ba1c68d88439599dcca7594d610030a19eda4f63",
+						},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
+					},
+				},
+				HasSBOM: []assembler.HasSBOMIngest{
+					{Pkg: pUrlToPkgDiscardError("pkg:guac/spdx/testsbom")},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX with files that have empty file hash representation",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM")},
+			doc: &processor.Document{
+				Blob: []byte(`
+		{
+			"SPDXID":"SPDXRef-DOCUMENT",
+			"spdxVersion": "SPDX-2.2",
+			"name":"testsbom",
+			"files":[
+				{
+				  "fileName": "file1",
+				  "SPDXID": "SPDXRef-3431c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA1",
+					  "checksumValue": "0000000000000000000000000000000000000000"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "file2",
+				  "SPDXID": "SPDXRef-def1c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA256",
+					  "checksumValue": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "file2",
+				  "SPDXID": "SPDXRef-dde3c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA512",
+					  "checksumValue": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA1",
+					  "checksumValue": "ba1c68d88439599dcca7594d610030a19eda4f63"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				}
+
+			]
+		}
+	`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				IsDependency: []assembler.IsDependencyIngest{
+					{
+						Pkg:             pUrlToPkgDiscardError("pkg:guac/spdx/testsbom"),
+						DepPkg:          pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63#include-file"),
+						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeAllVersions},
+						IsDependency: &generated.IsDependencyInputSpec{
+							DependencyType: generated.DependencyTypeUnknown,
+							Justification:  "top-level package GUAC heuristic connecting to each file/package",
+						},
+					},
+				},
+				IsOccurrence: []assembler.IsOccurrenceIngest{
+
+					{
+						Pkg: pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63#include-file"),
+						Artifact: &generated.ArtifactInputSpec{
+							Algorithm: "sha1",
+							Digest:    "ba1c68d88439599dcca7594d610030a19eda4f63",
+						},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
+					},
+				},
+				HasSBOM: []assembler.HasSBOMIngest{
+					{Pkg: pUrlToPkgDiscardError("pkg:guac/spdx/testsbom")},
 				},
 			},
 			wantErr: false,
