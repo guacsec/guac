@@ -2143,6 +2143,35 @@ var (
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 
+	// OpenVEX
+
+	//go:embed exampledata/valid-open-vex.json
+	ValidOpenVEXExample []byte
+
+	OpenVEXExample = []assembler.VexIngest{
+		{
+			Pkg: &generated.PkgInputSpec{
+				Name:      "git",
+				Version:   strP("sha256:23a264e6e429852221a963e9f17338ba3f5796dc7086e46439a6f4482cf6e0cb"),
+				Namespace: strP(""),
+				Type:      "oci",
+				Subpath:   strP(""),
+			},
+			Artifact: nil,
+			Vulnerability: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-2023-12345",
+			},
+			VexData: &generated.VexStatementInputSpec{
+				KnownSince:       parseRfc3339("2023-01-09T21:23:03.579712389-06:00"),
+				Origin:           "https://openvex.dev/docs/public/vex-a06f9de1ad1b1e555a33b2d0c1e7e6ecc4dc1800ff457c61ea09d8e97670d2a3",
+				VexJustification: generated.VexJustificationInlineMitigationsAlreadyExist,
+				Status:           generated.VexStatusNotAffected,
+				Statement:        "Included git is mitigated against CVE-2023-12345 !",
+			},
+		},
+	}
+
 	// CSAF
 	//go:embed exampledata/rhsa-csaf.json
 	CsafExampleRedHat []byte
