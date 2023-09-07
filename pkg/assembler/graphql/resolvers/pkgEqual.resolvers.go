@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -23,7 +22,16 @@ func (r *mutationResolver) IngestPkgEqual(ctx context.Context, pkg model.PkgInpu
 
 // IngestPkgEquals is the resolver for the ingestPkgEquals field.
 func (r *mutationResolver) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
-	panic(fmt.Errorf("not implemented: IngestPkgEquals - ingestPkgEquals"))
+	funcName := "IngestPkgEquals"
+	ingestedHashEqualsIDS := []string{}
+	if len(pkgs) != len(otherPackages) {
+		return ingestedHashEqualsIDS, gqlerror.Errorf("%v :: uneven packages and other packages for ingestion", funcName)
+	} else if len(pkgs) != len(pkgEquals) {
+		return ingestedHashEqualsIDS, gqlerror.Errorf("%v :: uneven packages and pkgEquals for ingestion", funcName)
+	}
+
+	ingestedHashEquals, err := r.Backend.IngestPkgEquals(ctx, pkgs, otherPackages, pkgEquals)
+	return ingestedHashEquals, err
 }
 
 // PkgEqual is the resolver for the PkgEqual field.

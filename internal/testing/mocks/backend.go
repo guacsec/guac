@@ -635,6 +635,21 @@ func (mr *MockBackendMockRecorder) IngestPkgEqual(ctx, pkg, depPkg, pkgEqual int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestPkgEqual", reflect.TypeOf((*MockBackend)(nil).IngestPkgEqual), ctx, pkg, depPkg, pkgEqual)
 }
 
+// IngestPkgEquals mocks base method.
+func (m *MockBackend) IngestPkgEquals(ctx context.Context, pkgs, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestPkgEquals", ctx, pkgs, otherPackages, pkgEquals)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestPkgEquals indicates an expected call of IngestPkgEquals.
+func (mr *MockBackendMockRecorder) IngestPkgEquals(ctx, pkgs, otherPackages, pkgEquals interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestPkgEquals", reflect.TypeOf((*MockBackend)(nil).IngestPkgEquals), ctx, pkgs, otherPackages, pkgEquals)
+}
+
 // IngestPointOfContact mocks base method.
 func (m *MockBackend) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
 	m.ctrl.T.Helper()
