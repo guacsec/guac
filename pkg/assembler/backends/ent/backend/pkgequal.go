@@ -41,15 +41,15 @@ func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]
 	return collect(records, toModelPkgEqual), nil
 }
 
-func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
+func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.PkgEqual, error) {
 		return upsertPackageEqual(ctx, ent.TxFromContext(ctx), pkg, depPkg, pkgEqual)
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelPkgEqual(record), nil
+	return toModelPkgEqual(record).ID, nil
 }
 
 func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInputSpec, pkgB model.PkgInputSpec, spec model.PkgEqualInputSpec) (*ent.PkgEqual, error) {
