@@ -47,6 +47,60 @@ func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability mo
 	return ingestedVulnEqual.ID, err
 }
 
+// IngestVulnEquals is the resolver for the ingestVulnEquals field.
+func (r *mutationResolver) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+	funcName := "IngestVulnEquals"
+
+	if len(vulnerabilities) != len(otherVulnerabilities) {
+		return []string{}, gqlerror.Errorf("%v :: uneven vulnerabilities and other vulnerabilities for ingestion", funcName)
+	} else if len(vulnerabilities) != len(vulnEquals) {
+		return []string{}, gqlerror.Errorf("%v :: uneven artifacts and hashEquals for ingestion", funcName)
+	}
+
+	var lowercaseVulnList []*model.VulnerabilityInputSpec
+	var lowercaseOtherVulnList []*model.VulnerabilityInputSpec
+	for i := range vulnEquals {
+		err := helper.ValidateNoVul(*vulnerabilities[i])
+		if err != nil {
+			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+
+		err = helper.ValidateVulnerabilityIDInputSpec(*vulnerabilities[i])
+		if err != nil {
+			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+
+		err = helper.ValidateNoVul(*otherVulnerabilities[i])
+		if err != nil {
+			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+
+		err = helper.ValidateVulnerabilityIDInputSpec(*otherVulnerabilities[i])
+		if err != nil {
+			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+
+		lowercaseVulnInput := model.VulnerabilityInputSpec{
+			Type:            strings.ToLower(vulnerabilities[i].Type),
+			VulnerabilityID: strings.ToLower(vulnerabilities[i].VulnerabilityID),
+		}
+		lowercaseVulnList = append(lowercaseVulnList, &lowercaseVulnInput)
+
+		lowercaseOtherVulnInput := model.VulnerabilityInputSpec{
+			Type:            strings.ToLower(otherVulnerabilities[i].Type),
+			VulnerabilityID: strings.ToLower(otherVulnerabilities[i].VulnerabilityID),
+		}
+		lowercaseOtherVulnList = append(lowercaseOtherVulnList, &lowercaseOtherVulnInput)
+	}
+
+	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+	ingestedVulnEqualsIDS, err := r.Backend.IngestVulnEquals(ctx, lowercaseVulnList, lowercaseOtherVulnList, vulnEquals)
+	if err != nil {
+		return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+	return ingestedVulnEqualsIDS, err
+}
+
 // VulnEqual is the resolver for the vulnEqual field.
 func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase

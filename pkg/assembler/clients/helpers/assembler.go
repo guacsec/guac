@@ -254,7 +254,7 @@ func ingestVulnEqual(ctx context.Context, client graphql.Client, ve assembler.Vu
 		return fmt.Errorf("unable to create VulnEqual without equal vulnerability")
 	}
 
-	_, err := model.VulnEqual(ctx, client, *ve.Vulnerability, *ve.EqualVulnerability, *ve.VulnEqual)
+	_, err := model.IngestVulnEqual(ctx, client, *ve.Vulnerability, *ve.EqualVulnerability, *ve.VulnEqual)
 	return err
 }
 

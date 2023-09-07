@@ -17,16 +17,28 @@
 
 # Defines the GraphQL operations to certify that two vulnerabilities are identical
 
-mutation VulnEqual(
+mutation IngestVulnEqual(
   $vulnerability: VulnerabilityInputSpec!
   $otherVulnerability: VulnerabilityInputSpec!
   $vulnEqual: VulnEqualInputSpec!
 ) {
-  vuln: ingestVulnerability(vuln: $vulnerability)
-  otherVuln: ingestVulnerability(vuln: $otherVulnerability)
   ingestVulnEqual(
     vulnerability: $vulnerability
     otherVulnerability: $otherVulnerability
     vulnEqual: $vulnEqual
+  )
+}
+
+# Defines the GraphQL operations to bulk certify that two vulnerabilities are identical
+
+mutation IngestVulnEquals(
+  $vulnerabilities: [VulnerabilityInputSpec!]!, 
+  $otherVulnerabilities: [VulnerabilityInputSpec!]!
+  $vulnEquals: [VulnEqualInputSpec!]!
+  ) {
+  ingestVulnEquals(
+    vulnerabilities: $vulnerabilities,
+    otherVulnerabilities: $otherVulnerabilities,
+    vulnEquals: $vulnEquals
   )
 }

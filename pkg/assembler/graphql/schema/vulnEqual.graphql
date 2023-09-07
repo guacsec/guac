@@ -65,4 +65,10 @@ extend type Mutation {
     otherVulnerability: VulnerabilityInputSpec!
     vulnEqual: VulnEqualInputSpec!
   ): ID!
+  "Bulk ingest mapping between vulnerabilities. The returned array of IDs can be a an array of empty string."
+  ingestVulnEquals(
+    vulnerabilities: [VulnerabilityInputSpec!]!
+    otherVulnerabilities: [VulnerabilityInputSpec!]!
+    vulnEquals: [VulnEqualInputSpec!]!
+  ): [ID!]!
 }

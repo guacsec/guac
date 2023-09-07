@@ -122,6 +122,12 @@ const (
 	vulnMetadataEdgesStr string = "vulnMetadataEdges"
 	vulnMetadatasStr     string = "vulnMetadatas"
 
+	// vulnEquals collections
+
+	vulnEqualVulnEdgesStr        string = "vulnEqualVulnEdges"
+	vulnEqualSubjectVulnEdgesStr string = "vulnEqualSubjectVulnEdges"
+	vulnEqualsStr                string = "vulnEquals"
+
 	// certifyScorecard collection
 
 	scorecardSrcEdgesStr string = "scorecardSrcEdges"
@@ -391,6 +397,17 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		vulnMetadataEdges.From = []string{vulnerabilitiesStr}
 		vulnMetadataEdges.To = []string{vulnMetadatasStr}
 
+		// setup vulnEqual collections
+		var vulnEqualVulnEdges driver.EdgeDefinition
+		vulnEqualVulnEdges.Collection = vulnEqualVulnEdgesStr
+		vulnEqualVulnEdges.From = []string{vulnEqualsStr}
+		vulnEqualVulnEdges.To = []string{vulnerabilitiesStr}
+
+		var vulnEqualSubjectVulnEdges driver.EdgeDefinition
+		vulnEqualSubjectVulnEdges.Collection = vulnEqualSubjectVulnEdgesStr
+		vulnEqualSubjectVulnEdges.From = []string{vulnerabilitiesStr}
+		vulnEqualSubjectVulnEdges.To = []string{vulnEqualsStr}
+
 		// setup certifyScorecard collections
 		var certifyScorecardSrcEdges driver.EdgeDefinition
 		certifyScorecardSrcEdges.Collection = scorecardSrcEdgesStr
@@ -447,7 +464,7 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
 			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
-			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges}
+			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -799,9 +816,6 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
 
-func (c *arangoClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
-	panic(fmt.Errorf("not implemented: VulnEqual"))
-}
 func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
 }
@@ -811,9 +825,7 @@ func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqua
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
 }
-func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestVulnEqual"))
-}
+
 func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
 	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
 }

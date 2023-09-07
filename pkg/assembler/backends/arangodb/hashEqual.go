@@ -239,12 +239,6 @@ func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.
 }
 
 func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
-
-	artifacts := []model.ArtifactInputSpec{artifact, equalArtifact}
-	sort.SliceStable(artifacts, func(i, j int) bool {
-		return artifacts[i].Digest < artifacts[j].Digest
-	})
-
 	query := `
 LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @equal_algorithm FILTER art.digest == @equal_digest RETURN art)
@@ -275,7 +269,7 @@ RETURN {
     'origin': hashEqual.origin
 }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getHashEqualQueryValues(&artifacts[0], &artifacts[1], &hashEqual), "IngestHashEqual")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getHashEqualQueryValues(&artifact, &equalArtifact, &hashEqual), "IngestHashEqual")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest hashEqual: %w", err)
 	}
