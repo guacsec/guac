@@ -84,9 +84,9 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 	vi.Vulnerability = vulnInput
 
 	for _, p := range vexStatement.Products {
+
 		// TODO: Add package information
 		// currently there is only one package, but multiple products, need to fix this.
-
 		vi.Pkg, _ = helpers.PurlToPkg(p)
 	}
 
