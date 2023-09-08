@@ -128,6 +128,12 @@ const (
 	vulnEqualSubjectVulnEdgesStr string = "vulnEqualSubjectVulnEdges"
 	vulnEqualsStr                string = "vulnEquals"
 
+	// pkgEquals collections
+
+	pkgEqualPkgEdgesStr        string = "pkgEqualPkgEdges"
+	pkgEqualSubjectPkgEdgesStr string = "pkgEqualSubjectPkgEdges"
+	pkgEqualsStr               string = "pkgEquals"
+
 	// certifyScorecard collection
 
 	scorecardSrcEdgesStr string = "scorecardSrcEdges"
@@ -408,6 +414,17 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		vulnEqualSubjectVulnEdges.From = []string{vulnerabilitiesStr}
 		vulnEqualSubjectVulnEdges.To = []string{vulnEqualsStr}
 
+		// setup pkgEqual collections
+		var pkgEqualPkgEdges driver.EdgeDefinition
+		pkgEqualPkgEdges.Collection = pkgEqualPkgEdgesStr
+		pkgEqualPkgEdges.From = []string{pkgEqualsStr}
+		pkgEqualPkgEdges.To = []string{pkgVersionsStr}
+
+		var pkgEqualSubjectPkgEdges driver.EdgeDefinition
+		pkgEqualSubjectPkgEdges.Collection = pkgEqualSubjectPkgEdgesStr
+		pkgEqualSubjectPkgEdges.From = []string{pkgVersionsStr}
+		pkgEqualSubjectPkgEdges.To = []string{pkgEqualsStr}
+
 		// setup certifyScorecard collections
 		var certifyScorecardSrcEdges driver.EdgeDefinition
 		certifyScorecardSrcEdges.Collection = scorecardSrcEdgesStr
@@ -464,7 +481,8 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
 			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
-			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges}
+			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges,
+			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -816,18 +834,10 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
 
-func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
-	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
-}
-
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
-}
-
-func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type

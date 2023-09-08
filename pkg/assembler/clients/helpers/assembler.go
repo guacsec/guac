@@ -370,7 +370,7 @@ func ingestPkgEqual(ctx context.Context, client graphql.Client, v assembler.PkgE
 	if v.EqualPkg == nil {
 		return fmt.Errorf("unable to create pkgEqual without EqualPkg")
 	}
-	_, err := model.PkgEqual(ctx, client, *v.Pkg, *v.EqualPkg, *v.PkgEqual)
+	_, err := model.IngestPkgEqual(ctx, client, *v.Pkg, *v.EqualPkg, *v.PkgEqual)
 	return err
 }
 
@@ -381,7 +381,7 @@ func ingestHashEqual(ctx context.Context, client graphql.Client, v assembler.Has
 	if v.EqualArtifact == nil {
 		return fmt.Errorf("unable to create HashEqual without equal artifact")
 	}
-	_, err := model.HashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
+	_, err := model.IngestHashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
 	return err
 }
 

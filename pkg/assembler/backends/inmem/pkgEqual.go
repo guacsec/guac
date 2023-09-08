@@ -47,72 +47,19 @@ func (n *pkgEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convPkgEqual(n)
 }
 
-// func registerAllPkgEqual(client *demoClient) error {
-
-// 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-// 	//	("conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable")
-
-// 	selectedType := "conan"
-// 	selectedNameSpace := "openssl.org"
-// 	selectedName := "openssl"
-// 	selectedVersion := "3.0.3"
-// 	selectedSubPath := ""
-// 	qualifierA := "bincrafters"
-// 	qualifierB := "stable"
-// 	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
-// 	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Subpath: &selectedSubPath, Qualifiers: selectedQualifiers}
-// 	selectedPackage1, err := client.Packages(context.TODO(), selectedPkgSpec)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// pkg:conan/openssl@3.0.3
-// 	//	("conan", "", "openssl", "3.0.3", "")
-// 	selectedType = "conan"
-// 	selectedNameSpace = ""
-// 	selectedName = "openssl"
-// 	selectedVersion = "3.0.3"
-// 	selectedSubPath = ""
-// 	selectedPkgSpec = &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Subpath: &selectedSubPath}
-// 	selectedPackage2, err := client.Packages(context.TODO(), selectedPkgSpec)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	client.registerPkgEqual([]*model.Package{selectedPackage1[0], selectedPackage2[0]}, "these two opnessl packages are the same", "inmem backend", "inmem backend")
-
-// 	// pkg:pypi/django@1.11.1
-// 	// client.registerPackage("pypi", "", "django", "1.11.1", "")
-
-// 	selectedType = "pypi"
-// 	selectedNameSpace = ""
-// 	selectedName = "django"
-// 	selectedVersion = "1.11.1"
-// 	selectedSubPath = ""
-// 	selectedPkgSpec = &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Subpath: &selectedSubPath}
-// 	selectedPackage3, err := client.Packages(context.TODO(), selectedPkgSpec)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// pkg:pypi/django@1.11.1#subpath
-// 	// client.registerPackage("pypi", "", "django", "1.11.1", "subpath")
-
-// 	selectedType = "pypi"
-// 	selectedNameSpace = ""
-// 	selectedName = "django"
-// 	selectedVersion = "1.11.1"
-// 	selectedSubPath = "subpath"
-// 	selectedPkgSpec = &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Subpath: &selectedSubPath}
-// 	selectedPackage4, err := client.Packages(context.TODO(), selectedPkgSpec)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	client.registerPkgEqual([]*model.Package{selectedPackage3[0], selectedPackage4[0]}, "these two pypi packages are the same", "inmem backend", "inmem backend")
-
-// 	return nil
-// }
-
 // Ingest PkgEqual
+
+func (c *demoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
+	var modelPkgEqualsIDs []string
+	for i := range pkgEquals {
+		pkgEqual, err := c.IngestPkgEqual(ctx, *pkgs[i], *otherPackages[i], *pkgEquals[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestPkgEqual failed with err: %v", err)
+		}
+		modelPkgEqualsIDs = append(modelPkgEqualsIDs, pkgEqual.ID)
+	}
+	return modelPkgEqualsIDs, nil
+}
 
 func (c *demoClient) convPkgEqual(in *pkgEqualStruct) (*model.PkgEqual, error) {
 	out := &model.PkgEqual{
