@@ -307,17 +307,6 @@ var (
 				Name:    "certifyvuln_db_uri_db_version_scanner_uri_scanner_version_origin_collector_vulnerability_id_package_id",
 				Unique:  true,
 				Columns: []*schema.Column{CertifyVulnsColumns[2], CertifyVulnsColumns[3], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[7], CertifyVulnsColumns[8], CertifyVulnsColumns[9]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "vulnerability_id IS NOT NULL",
-				},
-			},
-			{
-				Name:    "certifyvuln_db_uri_db_version_scanner_uri_scanner_version_origin_collector_package_id",
-				Unique:  true,
-				Columns: []*schema.Column{CertifyVulnsColumns[2], CertifyVulnsColumns[3], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[7], CertifyVulnsColumns[9]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "vulnerability_id IS NULL",
-				},
 			},
 		},
 	}
