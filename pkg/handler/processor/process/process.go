@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"compress/bzip2"
 	"context"
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -38,11 +37,13 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
 	"github.com/guacsec/guac/pkg/logging"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/klauspost/compress/zstd"
 )
 
 var (
 	documentProcessors = map[processor.DocumentType]processor.DocumentProcessor{}
+	json               = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 func init() {
