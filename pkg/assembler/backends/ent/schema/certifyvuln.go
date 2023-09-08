@@ -17,7 +17,6 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -54,7 +53,6 @@ func (CertifyVuln) Edges() []ent.Edge {
 // Indexes of the Vulnerability.
 func (CertifyVuln) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("db_uri", "db_version", "scanner_uri", "scanner_version", "origin", "collector").Edges("vulnerability", "package").Unique().Annotations(entsql.IndexWhere("vulnerability_id IS NOT NULL")),
-		index.Fields("db_uri", "db_version", "scanner_uri", "scanner_version", "origin", "collector").Edges("package").Unique().Annotations(entsql.IndexWhere("vulnerability_id IS NULL")),
+		index.Fields("db_uri", "db_version", "scanner_uri", "scanner_version", "origin", "collector").Edges("vulnerability", "package").Unique(),
 	}
 }

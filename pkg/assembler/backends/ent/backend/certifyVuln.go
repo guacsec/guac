@@ -48,21 +48,12 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSp
 			certifyvuln.FieldDbVersion,
 		}
 
-		var conflictPredicate *sql.Predicate
-
-		if spec.Type == NoVuln {
-			// No vulnerability found, so we don't have a vulnerability ID to set
-			conflictPredicate = sql.And(sql.IsNull(certifyvuln.FieldVulnerabilityID))
-		} else {
-			vuln, err := getVulnerabilityFromInput(ctx, client.Client(), spec)
-			if err != nil {
-				return nil, err
-			}
-
-			insert.SetVulnerability(vuln)
-			columns = append(columns, certifyvuln.FieldVulnerabilityID)
-			conflictPredicate = sql.And(sql.NotNull(certifyvuln.FieldVulnerabilityID))
+		vuln, err := getVulnerabilityFromInput(ctx, client.Client(), spec)
+		if err != nil {
+			return nil, err
 		}
+		insert.SetVulnerability(vuln)
+		columns = append(columns, certifyvuln.FieldVulnerabilityID)
 
 		pv, err := getPkgVersion(ctx, client.Client(), pkg)
 		if err != nil {
@@ -82,7 +73,6 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSp
 		id, err := insert.
 			OnConflict(
 				sql.ConflictColumns(columns...),
-				sql.ConflictWhere(conflictPredicate),
 			).
 			Ignore().
 			ID(ctx)
