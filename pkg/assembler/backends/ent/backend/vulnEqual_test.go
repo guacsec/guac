@@ -479,3 +479,183 @@ func (s *Suite) TestVulnEqual() {
 		})
 	}
 }
+
+func (s *Suite) TestIngestVulnEquals() {
+	type call struct {
+		Vulns      []*model.VulnerabilityInputSpec
+		OtherVulns []*model.VulnerabilityInputSpec
+		Ins        []*model.VulnEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InVuln       []*model.VulnerabilityInputSpec
+		Calls        []call
+		Query        *model.VulnEqualSpec
+		ExpVulnEqual []*model.VulnEqual
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:   "HappyPath",
+			InVuln: []*model.VulnerabilityInputSpec{o1, c1, o1, c2},
+			Calls: []call{
+				call{
+					Vulns:      []*model.VulnerabilityInputSpec{o1, o1},
+					OtherVulns: []*model.VulnerabilityInputSpec{c1, c2},
+					Ins: []*model.VulnEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpVulnEqual: []*model.VulnEqual{
+				&model.VulnEqual{
+					Vulnerabilities: []*model.Vulnerability{
+						&model.Vulnerability{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
+						},
+						&model.Vulnerability{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
+						},
+					},
+					Justification: "test justification",
+				},
+				&model.VulnEqual{
+					Vulnerabilities: []*model.Vulnerability{
+						&model.Vulnerability{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
+						},
+						&model.Vulnerability{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{c2out},
+						},
+					},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:   "Ingest same twice",
+			InVuln: []*model.VulnerabilityInputSpec{o1, c1, o1, c1},
+			Calls: []call{
+				call{
+					Vulns:      []*model.VulnerabilityInputSpec{o1, o1},
+					OtherVulns: []*model.VulnerabilityInputSpec{c1, c1},
+					Ins: []*model.VulnEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpVulnEqual: []*model.VulnEqual{
+				&model.VulnEqual{
+					Vulnerabilities: []*model.Vulnerability{
+						&model.Vulnerability{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
+						},
+						&model.Vulnerability{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
+						},
+					},
+					Justification: "test justification",
+				},
+			},
+		},
+
+		{
+			Name:   "Query on OSV",
+			InVuln: []*model.VulnerabilityInputSpec{o1, c1, o2, g2},
+			Calls: []call{
+				call{
+					Vulns:      []*model.VulnerabilityInputSpec{o1, o2},
+					OtherVulns: []*model.VulnerabilityInputSpec{c1, g2},
+					Ins: []*model.VulnEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				Vulnerabilities: []*model.VulnerabilitySpec{
+					{
+						VulnerabilityID: ptrfrom.String("GHSA-xrw3-wqph-3fxg"),
+					},
+				},
+			},
+			ExpVulnEqual: []*model.VulnEqual{
+				&model.VulnEqual{
+					Vulnerabilities: []*model.Vulnerability{
+						&model.Vulnerability{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{o2out},
+						},
+						&model.Vulnerability{
+							Type:             "ghsa",
+							VulnerabilityIDs: []*model.VulnerabilityID{g2out},
+						},
+					},
+					Justification: "test justification",
+				},
+			},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	ctx := context.Background()
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("GetBackend() error = %v", err)
+			}
+
+			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
+				t.Fatalf("Could not ingest vulnerability: %a", err)
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestVulnEquals(ctx, o.Vulns, o.OtherVulns, o.Ins)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.VulnEqual(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpVulnEqual, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

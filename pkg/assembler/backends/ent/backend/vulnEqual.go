@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
@@ -49,7 +50,7 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 	query := b.client.VulnEqual.Query().
 		Where(where...).
 		WithVulnerabilityIds(func(query *ent.VulnerabilityIDQuery) {
-			query.WithType()
+			query.WithType().Order(vulnerabilityid.ByID())
 		})
 
 	results, err := query.Limit(MaxPageSize).All(ctx)
@@ -58,6 +59,18 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 	}
 
 	return collect(results, toModelVulnEqual), nil
+}
+
+func (b *EntBackend) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+	var ids []string
+	for i, vulnEqual := range vulnEquals {
+		ve, err := b.IngestVulnEqual(ctx, *vulnerabilities[i], *otherVulnerabilities[i], *vulnEqual)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestVulnEquals failed with err: %v", err)
+		}
+		ids = append(ids, ve.ID)
+	}
+	return ids, nil
 }
 
 func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
