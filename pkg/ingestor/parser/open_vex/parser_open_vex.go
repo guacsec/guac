@@ -61,33 +61,36 @@ func (c *openVEXParser) GetIdentifiers(ctx context.Context) (*common.IdentifierS
 	return nil, fmt.Errorf("not yet implemented")
 }
 
-func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInputSpec, vexStatement *vex.Statement, status string) *assembler.VexIngest {
-	vi := &assembler.VexIngest{}
-
-	vd := generated.VexStatementInputSpec{}
-	vd.KnownSince = *c.openVex.Metadata.Timestamp
-	vd.Origin = c.openVex.Metadata.ID
-
-	if vexStatus, ok := vexStatusMap[status]; ok {
-		vd.Status = vexStatus
-	}
-
-	if vd.Status == generated.VexStatusNotAffected {
-		vd.Statement = vexStatement.ImpactStatement
-	} else {
-		vd.Statement = vexStatement.ActionStatement
-	}
-
-	vd.VexJustification = justificationsMap[string(vexStatement.Justification)]
-
-	vi.VexData = &vd
-	vi.Vulnerability = vulnInput
+func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInputSpec, vexStatement *vex.Statement, status string) *[]assembler.VexIngest {
+	vi := &[]assembler.VexIngest{}
 
 	for _, p := range vexStatement.Products {
+		vd := generated.VexStatementInputSpec{}
+		vd.KnownSince = *c.openVex.Metadata.Timestamp
+		vd.Origin = c.openVex.Metadata.ID
 
-		// TODO: Add package information
-		// currently there is only one package, but multiple products, need to fix this.
-		vi.Pkg, _ = helpers.PurlToPkg(p)
+		ingest := &assembler.VexIngest{}
+
+		// TODO: Include the vex version
+
+		if vexStatus, ok := vexStatusMap[status]; ok {
+			vd.Status = vexStatus
+		}
+
+		if vd.Status == generated.VexStatusNotAffected {
+			vd.Statement = vexStatement.ImpactStatement
+		} else {
+			vd.Statement = vexStatement.ActionStatement
+		}
+
+		vd.VexJustification = justificationsMap[string(vexStatement.Justification)]
+
+		ingest.VexData = &vd
+		ingest.Vulnerability = vulnInput
+
+		ingest.Pkg, _ = helpers.PurlToPkg(p)
+
+		*vi = append(*vi, *ingest)
 	}
 
 	return vi
@@ -108,18 +111,21 @@ func (c *openVEXParser) GetPredicates(_ context.Context) *assembler.IngestPredic
 		if vi == nil {
 			continue
 		}
-		vis = append(vis, *vi)
 
-		if s.Status == vex.StatusAffected || s.Status == vex.StatusUnderInvestigation {
-			vulnData := generated.ScanMetadataInput{
-				TimeScanned: *c.openVex.Metadata.Timestamp,
+		for _, ingest := range *vi {
+			vis = append(vis, ingest)
+
+			if s.Status == vex.StatusAffected || s.Status == vex.StatusUnderInvestigation {
+				vulnData := generated.ScanMetadataInput{
+					TimeScanned: *c.openVex.Metadata.Timestamp,
+				}
+				cv := assembler.CertifyVulnIngest{
+					Pkg:           ingest.Pkg,
+					Vulnerability: vuln,
+					VulnData:      &vulnData,
+				}
+				cvs = append(cvs, cv)
 			}
-			cv := assembler.CertifyVulnIngest{
-				Pkg:           vi.Pkg, // vi.Pkg is currently nil because vi.Pkg doesn't get set
-				Vulnerability: vuln,
-				VulnData:      &vulnData,
-			}
-			cvs = append(cvs, cv)
 		}
 	}
 
