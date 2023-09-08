@@ -17,6 +17,7 @@ package guesser
 
 import (
 	"encoding/json"
+
 	"github.com/openvex/go-vex/pkg/vex"
 
 	"github.com/guacsec/guac/pkg/handler/processor"

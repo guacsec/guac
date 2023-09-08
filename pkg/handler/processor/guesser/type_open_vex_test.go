@@ -1,9 +1,10 @@
 package guesser
 
 import (
+	"testing"
+
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"testing"
 )
 
 func Test_openVexTypeGuesser_GuessDocumentType(t *testing.T) {

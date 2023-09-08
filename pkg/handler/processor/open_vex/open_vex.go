@@ -18,6 +18,7 @@ package open_vex
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/openvex/go-vex/pkg/vex"
 )

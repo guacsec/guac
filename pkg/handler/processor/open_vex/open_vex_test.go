@@ -1,10 +1,11 @@
 package open_vex
 
 import (
-	"github.com/guacsec/guac/internal/testing/testdata"
-	"github.com/guacsec/guac/pkg/handler/processor"
 	"reflect"
 	"testing"
+
+	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 func TestOpenVEXProcessor_ValidateSchema(t *testing.T) {
