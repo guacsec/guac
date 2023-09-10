@@ -161,6 +161,27 @@ func TestHashEqual(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on artifact ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
+			Calls: []call{
+				{
+					A1: testdata.A1,
+					A2: testdata.A2,
+					HE: &model.HashEqualInputSpec{},
+				},
+				{
+					A1: testdata.A1,
+					A2: testdata.A3,
+					HE: &model.HashEqualInputSpec{},
+				},
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts: []*model.Artifact{testdata.A1out, testdata.A3out},
+				},
+			},
+		},
+		{
 			Name:  "Query on artifact multiple",
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
 			Calls: []call{
@@ -463,6 +484,18 @@ func TestHashEqual(t *testing.T) {
 				if test.Name == "Query on ID" {
 					test.Query = &model.HashEqualSpec{
 						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.Name == "Query on artifact ID" {
+					test.Query = &model.HashEqualSpec{
+						Artifacts: []*model.ArtifactSpec{
+							{
+								ID: ptrfrom.String(found.Artifacts[0].ID),
+							},
+							{
+								ID: ptrfrom.String(found.Artifacts[1].ID),
+							},
+						},
 					}
 				}
 			}

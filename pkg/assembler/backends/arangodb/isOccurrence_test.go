@@ -213,6 +213,38 @@ func TestOccurrence(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on Artifact ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InArt: []*model.ArtifactInputSpec{testdata.A4, testdata.A2},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P1,
+					},
+					Artifact: testdata.A2,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P1,
+					},
+					Artifact: testdata.A4,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+			},
+			ExpOcc: []*model.IsOccurrence{
+				{
+					Subject:       testdata.P1out,
+					Artifact:      testdata.A4out,
+					Justification: "justification",
+				},
+			},
+		},
+		{
 			Name:  "Query on Package",
 			InPkg: []*model.PkgInputSpec{testdata.P4, testdata.P2},
 			InArt: []*model.ArtifactInputSpec{testdata.A1},
@@ -252,6 +284,38 @@ func TestOccurrence(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on Package ID",
+			InPkg: []*model.PkgInputSpec{testdata.P4, testdata.P2},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P2,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P4,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+			},
+			ExpOcc: []*model.IsOccurrence{
+				{
+					Subject:       testdata.P4out,
+					Artifact:      testdata.A1out,
+					Justification: "justification",
+				},
+			},
+		},
+		{
 			Name:  "Query on Source",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InSrc: []*model.SourceInputSpec{testdata.S1},
@@ -279,6 +343,39 @@ func TestOccurrence(t *testing.T) {
 			Query: &model.IsOccurrenceSpec{
 				Subject: &model.PackageOrSourceSpec{
 					Source: &model.SourceSpec{},
+				},
+			},
+			ExpOcc: []*model.IsOccurrence{
+				{
+					Subject:       testdata.S1out,
+					Artifact:      testdata.A1out,
+					Justification: "justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Source ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P1,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Source: testdata.S1,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
 				},
 			},
 			ExpOcc: []*model.IsOccurrence{
@@ -430,6 +527,36 @@ func TestOccurrence(t *testing.T) {
 					test.Query = &model.IsOccurrenceSpec{
 						ID: ptrfrom.String(found.ID),
 					}
+				}
+				if test.Name == "Query on Package ID" {
+					if _, ok := found.Subject.(*model.Package); ok {
+						test.Query = &model.IsOccurrenceSpec{
+							Subject: &model.PackageOrSourceSpec{
+								Package: &model.PkgSpec{
+									ID: ptrfrom.String(found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID),
+								},
+							},
+						}
+					}
+				}
+				if test.Name == "Query on Source ID" {
+					if _, ok := found.Subject.(*model.Source); ok {
+						test.Query = &model.IsOccurrenceSpec{
+							Subject: &model.PackageOrSourceSpec{
+								Source: &model.SourceSpec{
+									ID: ptrfrom.String(found.Subject.(*model.Source).Namespaces[0].Names[0].ID),
+								},
+							},
+						}
+					}
+				}
+				if test.Name == "Query on Artifact ID" {
+					test.Query = &model.IsOccurrenceSpec{
+						Artifact: &model.ArtifactSpec{
+							ID: ptrfrom.String(found.Artifact.ID),
+						},
+					}
+
 				}
 			}
 			got, err := b.IsOccurrence(ctx, test.Query)

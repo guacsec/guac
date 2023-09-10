@@ -207,6 +207,10 @@ func setVexMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVexSpec *m
 	}
 	if certifyVexSpec.Vulnerability != nil {
 		arangoQueryBuilder.forOutBound(certifyVexVulnEdgesStr, "vVulnID", "certifyVex")
+		if certifyVexSpec.Vulnerability.ID != nil {
+			arangoQueryBuilder.filter("vVulnID", "_id", "==", "@id")
+			queryValues["id"] = *certifyVexSpec.Vulnerability.ID
+		}
 		if certifyVexSpec.Vulnerability.VulnerabilityID != nil {
 			arangoQueryBuilder.filter("vVulnID", "vulnerabilityID", "==", "@vulnerabilityID")
 			queryValues["vulnerabilityID"] = strings.ToLower(*certifyVexSpec.Vulnerability.VulnerabilityID)

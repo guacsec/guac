@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -802,9 +804,6 @@ func TestIngestPkgEquals(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if test.Name == "Query on pkg algo and pkg" {
-				fmt.Print("here")
-			}
 			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest pkg: %v", err)
 			}

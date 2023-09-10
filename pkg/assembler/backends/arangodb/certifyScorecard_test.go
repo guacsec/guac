@@ -109,6 +109,33 @@ func TestCertifyScorecard(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on Source ID",
+			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+			Calls: []call{
+				{
+					Src: testdata.S1,
+					SC: &model.ScorecardInputSpec{
+						Origin: "test origin",
+					},
+				},
+				{
+					Src: testdata.S2,
+					SC: &model.ScorecardInputSpec{
+						Origin: "test origin",
+					},
+				},
+			},
+			ExpSC: []*model.CertifyScorecard{
+				{
+					Source: testdata.S2out,
+					Scorecard: &model.Scorecard{
+						Checks: []*model.ScorecardCheck{},
+						Origin: "test origin",
+					},
+				},
+			},
+		},
+		{
 			Name:  "Query multiple",
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
@@ -500,6 +527,14 @@ func TestCertifyScorecard(t *testing.T) {
 					test.Query = &model.CertifyScorecardSpec{
 						ID: ptrfrom.String(found.ID),
 					}
+				}
+				if test.Name == "Query on Source ID" {
+					test.Query = &model.CertifyScorecardSpec{
+						Source: &model.SourceSpec{
+							ID: ptrfrom.String(found.Source.Namespaces[0].Names[0].ID),
+						},
+					}
+
 				}
 			}
 			got, err := b.Scorecards(ctx, test.Query)

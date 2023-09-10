@@ -64,6 +64,10 @@ func matchVulnEqualByInput(ctx context.Context, c *arangoClient, vulnEqualSpec *
 		}
 
 		arangoQueryBuilder.forOutBound(vulnEqualVulnEdgesStr, "evVulnID", "vulnEqual")
+		if secondVulnerability.ID != nil {
+			arangoQueryBuilder.filter("evVulnID", "_id", "==", "@equal_id")
+			values["equal_id"] = *secondVulnerability.ID
+		}
 		if secondVulnerability.VulnerabilityID != nil {
 			arangoQueryBuilder.filter("evVulnID", "vulnerabilityID", "==", "@equal_vulnerabilityID")
 			values["equal_vulnerabilityID"] = strings.ToLower(*secondVulnerability.VulnerabilityID)
@@ -95,6 +99,10 @@ func matchVulnEqualByInput(ctx context.Context, c *arangoClient, vulnEqualSpec *
 		}
 
 		arangoQueryBuilder.forInBound(vulnEqualSubjectVulnEdgesStr, "evVulnID", "vulnEqual")
+		if secondVulnerability.ID != nil {
+			arangoQueryBuilder.filter("evVulnID", "_id", "==", "@equal_id")
+			values["equal_id"] = *secondVulnerability.ID
+		}
 		if secondVulnerability.VulnerabilityID != nil {
 			arangoQueryBuilder.filter("evVulnID", "vulnerabilityID", "==", "@equal_vulnerabilityID")
 			values["equal_vulnerabilityID"] = strings.ToLower(*secondVulnerability.VulnerabilityID)
@@ -138,8 +146,6 @@ func getVulnEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuild
 		'collector': vulnEqual.collector,
 		'origin': vulnEqual.origin
 	}`)
-
-	fmt.Print(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "vulnEqual")
 	if err != nil {

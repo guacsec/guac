@@ -32,7 +32,8 @@ const (
 
 func checkPkgNameDependency(isDependencySpec *model.IsDependencySpec) bool {
 	if isDependencySpec.DependentPackage != nil {
-		if isDependencySpec.DependentPackage.Version != nil ||
+		if isDependencySpec.DependentPackage.ID != nil ||
+			isDependencySpec.DependentPackage.Version != nil ||
 			isDependencySpec.DependentPackage.Subpath != nil ||
 			isDependencySpec.DependentPackage.Qualifiers != nil ||
 			isDependencySpec.DependentPackage.MatchOnlyEmptyQualifiers != nil {
@@ -240,6 +241,10 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 			}
 		} else {
 			arangoQueryBuilder.forOutBound(isDependencyDepPkgVersionEdgesStr, "depVersion", "isDependency")
+			if isDependencySpec.DependentPackage.ID != nil {
+				arangoQueryBuilder.filter("depVersion", "_id", "==", "@depVersionID")
+				queryValues["depVersionID"] = *isDependencySpec.DependentPackage.ID
+			}
 			if isDependencySpec.DependentPackage.Version != nil {
 				arangoQueryBuilder.filter("depVersion", "version", "==", "@depVersionValue")
 				queryValues["depVersionValue"] = *isDependencySpec.DependentPackage.Version

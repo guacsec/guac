@@ -247,6 +247,30 @@ func TestCertifyBad(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on Package version ID",
+			InPkg: []*model.PkgInputSpec{testdata.P4},
+			InSrc: []*model.SourceInputSpec{},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P4,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       testdata.P4out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
 			Name:  "Query on Source",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
@@ -294,6 +318,27 @@ func TestCertifyBad(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on Source ID",
+			InPkg: []*model.PkgInputSpec{},
+			InSrc: []*model.SourceInputSpec{testdata.S2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Source: testdata.S2,
+					},
+					CB: &model.CertifyBadInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       testdata.S2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
 			Name:  "Query on Artifact",
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
@@ -327,6 +372,35 @@ func TestCertifyBad(t *testing.T) {
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Artifact: &model.ArtifactSpec{
 						Algorithm: ptrfrom.String("sha1"),
+					},
+				},
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       testdata.A2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Artifact ID",
+			InSrc: []*model.SourceInputSpec{},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Artifact: testdata.A1,
+					},
+					CB: &model.CertifyBadInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Artifact: testdata.A2,
+					},
+					CB: &model.CertifyBadInputSpec{
+						Justification: "test justification",
 					},
 				},
 			},
@@ -541,6 +615,39 @@ func TestCertifyBad(t *testing.T) {
 				if test.Name == "Query ID" {
 					test.Query = &model.CertifyBadSpec{
 						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.Name == "Query on Package version ID" {
+					if _, ok := found.Subject.(*model.Package); ok {
+						test.Query = &model.CertifyBadSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Package: &model.PkgSpec{
+									ID: ptrfrom.String(found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID),
+								},
+							},
+						}
+					}
+				}
+				if test.Name == "Query on Source ID" {
+					if _, ok := found.Subject.(*model.Source); ok {
+						test.Query = &model.CertifyBadSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Source: &model.SourceSpec{
+									ID: ptrfrom.String(found.Subject.(*model.Source).Namespaces[0].Names[0].ID),
+								},
+							},
+						}
+					}
+				}
+				if test.Name == "Query on Artifact ID" {
+					if _, ok := found.Subject.(*model.Artifact); ok {
+						test.Query = &model.CertifyBadSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Artifact: &model.ArtifactSpec{
+									ID: ptrfrom.String(found.Subject.(*model.Artifact).ID),
+								},
+							},
+						}
 					}
 				}
 			}

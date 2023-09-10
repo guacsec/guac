@@ -140,6 +140,10 @@ func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVu
 		}
 
 		arangoQueryBuilder.forOutBound(certifyVulnEdgesStr, "vVulnID", "certifyVuln")
+		if certifyVulnSpec.Vulnerability.ID != nil {
+			arangoQueryBuilder.filter("vVulnID", "_id", "==", "@id")
+			queryValues["id"] = *certifyVulnSpec.Vulnerability.ID
+		}
 		if certifyVulnSpec.Vulnerability.VulnerabilityID != nil {
 			arangoQueryBuilder.filter("vVulnID", "vulnerabilityID", "==", "@vulnerabilityID")
 			queryValues["vulnerabilityID"] = strings.ToLower(*certifyVulnSpec.Vulnerability.VulnerabilityID)

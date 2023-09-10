@@ -203,6 +203,41 @@ func TestVulnEqual(t *testing.T) {
 			},
 		},
 		{
+			Name:   "Query on vulnerability IDs",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
+			Calls: []call{
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Vuln:      testdata.O2,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpVulnEqual: []*model.VulnEqual{
+				{
+					Vulnerabilities: []*model.Vulnerability{
+						{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+						},
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+						},
+					},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
 			Name:   "Query on OSV and other vulnerability ID",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
 			Calls: []call{
@@ -574,6 +609,18 @@ func TestVulnEqual(t *testing.T) {
 				if test.Name == "Query on ID" {
 					test.Query = &model.VulnEqualSpec{
 						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.Name == "Query on vulnerability IDs" {
+					test.Query = &model.VulnEqualSpec{
+						Vulnerabilities: []*model.VulnerabilitySpec{
+							{
+								ID: ptrfrom.String(found.Vulnerabilities[0].ID),
+							},
+							{
+								ID: ptrfrom.String(found.Vulnerabilities[1].ID),
+							},
+						},
 					}
 				}
 			}

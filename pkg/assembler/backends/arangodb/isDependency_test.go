@@ -19,6 +19,7 @@ package arangodb
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -457,6 +458,41 @@ func TestIsDependency(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on pkg - match empty qualifiers false",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P5},
+			Calls: []call{
+				{
+					P1: testdata.P5,
+					P2: testdata.P2,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				Package: &model.PkgSpec{
+					MatchOnlyEmptyQualifiers: ptrfrom.Bool(false),
+					Qualifiers: []*model.PackageQualifierSpec{
+						{
+							Key:   "test",
+							Value: ptrfrom.String("test"),
+						},
+					},
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P5out,
+					DependentPackage: testdata.P2out,
+				},
+			},
+		},
+		{
 			Name:  "Query on pkg multiple",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
 			Calls: []call{
@@ -769,12 +805,63 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name:  "Query on pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P4,
+					P2: testdata.P2,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P4out,
+					DependentPackage: testdata.P2out,
+				},
+			},
+		},
+		{
+			Name:  "Query on dep pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P4,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P4out,
+				},
+			},
+		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
+			if test.Name == "Query on pkg" {
+				fmt.Print("here")
+			}
 			for _, a := range test.InPkg {
 				if _, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
@@ -791,6 +878,20 @@ func TestIsDependency(t *testing.T) {
 				if test.Name == "Query on ID" {
 					test.Query = &model.IsDependencySpec{
 						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.Name == "Query on pkg ID" {
+					test.Query = &model.IsDependencySpec{
+						Package: &model.PkgSpec{
+							ID: ptrfrom.String(found.Package.Namespaces[0].Names[0].Versions[0].ID),
+						},
+					}
+				}
+				if test.Name == "Query on dep pkg ID" {
+					test.Query = &model.IsDependencySpec{
+						DependentPackage: &model.PkgSpec{
+							ID: ptrfrom.String(found.DependentPackage.Namespaces[0].Names[0].Versions[0].ID),
+						},
 					}
 				}
 			}

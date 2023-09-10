@@ -76,8 +76,6 @@ func getVulnMetadataForQuery(ctx context.Context, c *arangoClient, arangoQueryBu
 		'origin': vulnMetadata.origin
 	  }`)
 
-	fmt.Print(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "VulnerabilityMetadata")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for VulnerabilityMetadata: %w", err)
