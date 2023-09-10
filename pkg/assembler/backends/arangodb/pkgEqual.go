@@ -63,6 +63,10 @@ func matchPkgEqualByInput(ctx context.Context, c *arangoClient, pkgEqualSpec *mo
 	if secondPkg != nil {
 
 		arangoQueryBuilder.forOutBound(pkgEqualPkgEdgesStr, "epVersion", "pkgEqual")
+		if secondPkg.ID != nil {
+			arangoQueryBuilder.filter("epVersion", "_id", "==", "@equal_id")
+			values["equal_id"] = *secondPkg.ID
+		}
 		if secondPkg.Version != nil {
 			arangoQueryBuilder.filter("epVersion", "version", "==", "@equalVersionValue")
 			values["equalVersionValue"] = *secondPkg.Version
@@ -120,6 +124,10 @@ func matchPkgEqualByInput(ctx context.Context, c *arangoClient, pkgEqualSpec *mo
 	if secondPkg != nil {
 
 		arangoQueryBuilder.forInBound(pkgEqualSubjectPkgEdgesStr, "epVersion", "pkgEqual")
+		if secondPkg.ID != nil {
+			arangoQueryBuilder.filter("epVersion", "_id", "==", "@equal_id")
+			values["equal_id"] = *secondPkg.ID
+		}
 		if secondPkg.Version != nil {
 			arangoQueryBuilder.filter("epVersion", "version", "==", "@equalVersionValue")
 			values["equalVersionValue"] = *secondPkg.Version

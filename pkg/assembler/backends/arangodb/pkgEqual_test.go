@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -120,7 +118,7 @@ func TestPkgEqual(t *testing.T) {
 					P1: testdata.P1,
 					P2: testdata.P2,
 					HE: &model.PkgEqualInputSpec{
-						Justification: "test justification two",
+						Justification: "test justification",
 					},
 				},
 			},
@@ -131,6 +129,74 @@ func TestPkgEqual(t *testing.T) {
 				{
 					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
 					Justification: "test justification one",
+				},
+			},
+		},
+		{
+			Name:  "Query on pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification one",
+					},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification two",
+					},
+				},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification two",
+				},
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification one",
+				},
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on secondary pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification one",
+					},
+				},
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification two",
+					},
+				},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification two",
+				},
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification one",
+				},
+				{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification",
 				},
 			},
 		},
@@ -210,7 +276,7 @@ func TestPkgEqual(t *testing.T) {
 					P1: testdata.P1,
 					P2: testdata.P2,
 					HE: &model.PkgEqualInputSpec{
-						Justification: "test justification 3",
+						Justification: "test justification",
 					},
 				},
 				{
@@ -226,14 +292,22 @@ func TestPkgEqual(t *testing.T) {
 					Type:      ptrfrom.String("pypi"),
 					Namespace: ptrfrom.String(""),
 					Name:      ptrfrom.String("tensorflow"),
+					Subpath:   ptrfrom.String(""),
 					Version:   ptrfrom.String("2.11.1"),
 				}},
-				Justification: ptrfrom.String("test justification 3"),
 			},
 			ExpHE: []*model.PkgEqual{
 				{
 					Packages:      []*model.Package{testdata.P2out, testdata.P1out},
-					Justification: "test justification 3",
+					Justification: "test justification two",
+				},
+				{
+					Packages:      []*model.Package{testdata.P2out, testdata.P1out},
+					Justification: "test justification one",
+				},
+				{
+					Packages:      []*model.Package{testdata.P2out, testdata.P1out},
+					Justification: "test justification",
 				},
 			},
 		},
@@ -510,6 +584,25 @@ func TestPkgEqual(t *testing.T) {
 						ID: ptrfrom.String(found.ID),
 					}
 				}
+				if test.Name == "Query on pkg ID" {
+					test.Query = &model.PkgEqualSpec{
+						Packages: []*model.PkgSpec{{
+							ID: ptrfrom.String(found.Packages[0].Namespaces[0].Names[0].Versions[0].ID),
+						}},
+					}
+				}
+				if test.Name == "Query on secondary pkg ID" {
+					test.Query = &model.PkgEqualSpec{
+						Packages: []*model.PkgSpec{
+							{
+								ID: ptrfrom.String(found.Packages[0].Namespaces[0].Names[0].Versions[0].ID),
+							},
+							{
+								ID: ptrfrom.String(found.Packages[1].Namespaces[0].Names[0].Versions[0].ID),
+							},
+						},
+					}
+				}
 			}
 			got, err := b.PkgEqual(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
@@ -644,7 +737,7 @@ func TestIngestPkgEquals(t *testing.T) {
 					P2: []*model.PkgInputSpec{testdata.P2, testdata.P3},
 					PE: []*model.PkgEqualInputSpec{
 						{
-							Justification: "test justification 3",
+							Justification: "test justification",
 						},
 						{
 							Justification: "test justification",
@@ -657,14 +750,14 @@ func TestIngestPkgEquals(t *testing.T) {
 					Type:      ptrfrom.String("pypi"),
 					Namespace: ptrfrom.String(""),
 					Name:      ptrfrom.String("tensorflow"),
+					Subpath:   ptrfrom.String(""),
 					Version:   ptrfrom.String("2.11.1"),
 				}},
-				Justification: ptrfrom.String("test justification 3"),
 			},
 			ExpHE: []*model.PkgEqual{
 				{
 					Packages:      []*model.Package{testdata.P2out, testdata.P1out},
-					Justification: "test justification 3",
+					Justification: "test justification",
 				},
 			},
 		},
@@ -709,6 +802,9 @@ func TestIngestPkgEquals(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
+			if test.Name == "Query on pkg algo and pkg" {
+				fmt.Print("here")
+			}
 			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest pkg: %v", err)
 			}
