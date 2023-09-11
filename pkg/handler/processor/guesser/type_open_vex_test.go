@@ -45,7 +45,7 @@ func Test_openVexTypeGuesser_GuessDocumentType(t *testing.T) {
 		{
 			name: "valid openvex Document",
 			args: args{
-				blob:   testdata.ValidOpenVEXExample,
+				blob:   testdata.NotAffectedOpenVEXExample,
 				format: processor.FormatJSON,
 			},
 			want: processor.DocumentOpenVEX,

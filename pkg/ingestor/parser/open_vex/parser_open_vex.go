@@ -95,7 +95,7 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 
 		if vd.Status == generated.VexStatusNotAffected {
 			vd.Statement = vexStatement.ImpactStatement
-		} else {
+		} else if vd.Status == generated.VexStatusAffected {
 			vd.Statement = vexStatement.ActionStatement
 		}
 

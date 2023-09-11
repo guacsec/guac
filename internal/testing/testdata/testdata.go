@@ -2145,10 +2145,10 @@ var (
 
 	// OpenVEX
 
-	//go:embed exampledata/valid-open-vex.json
-	ValidOpenVEXExample []byte
+	//go:embed exampledata/open-vex-not-affected.json
+	NotAffectedOpenVEXExample []byte
 
-	OpenVEXExample = []assembler.VexIngest{
+	NotAffectedOpenVexIngest = []assembler.VexIngest{
 		{
 			Pkg: &generated.PkgInputSpec{
 				Name:      "git",
@@ -2168,6 +2168,51 @@ var (
 				VexJustification: generated.VexJustificationInlineMitigationsAlreadyExist,
 				Status:           generated.VexStatusNotAffected,
 				Statement:        "Included git is mitigated against CVE-2023-12345 !",
+			},
+		},
+	}
+
+	//go:embed exampledata/open-vex-affected.json
+	AffectedOpenVex []byte
+
+	AffectedOpenVexIngest = []assembler.VexIngest{
+		{
+			Pkg: &generated.PkgInputSpec{
+				Name:      "bash",
+				Version:   strP("1.0.0"),
+				Namespace: strP("wolfi"),
+				Type:      "apk",
+				Subpath:   strP(""),
+			},
+			Artifact: nil,
+			Vulnerability: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-1234-5678",
+			},
+			VexData: &generated.VexStatementInputSpec{
+				KnownSince: parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
+				Origin:     "merged-vex-67124ea942ef30e1f42f3f2bf405fbbc4f5a56e6e87684fc5cd957212fa3e025",
+				Status:     generated.VexStatusAffected,
+				Statement:  "This is a test action statement",
+			},
+		},
+	}
+
+	AffectedOpenVEXCertifyVulnIngest = []assembler.CertifyVulnIngest{
+		{
+			Pkg: &generated.PkgInputSpec{
+				Name:      "bash",
+				Version:   strP("1.0.0"),
+				Namespace: strP("wolfi"),
+				Type:      "apk",
+				Subpath:   strP(""),
+			},
+			Vulnerability: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-1234-5678",
+			},
+			VulnData: &generated.ScanMetadataInput{
+				TimeScanned: parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
 			},
 		},
 	}

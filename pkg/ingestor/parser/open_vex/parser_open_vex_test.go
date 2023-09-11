@@ -17,7 +17,11 @@ package open_vex
 
 import (
 	"context"
+	"reflect"
 	"testing"
+
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/openvex/go-vex/pkg/vex"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -39,7 +43,7 @@ func Test_openVEXParser_Parse(t *testing.T) {
 			name: "test",
 			args: args{
 				ctx: context.Background(),
-				doc: &processor.Document{Blob: testdata.ValidOpenVEXExample},
+				doc: &processor.Document{Blob: testdata.NotAffectedOpenVEXExample},
 			},
 			wantErr: false,
 		},
@@ -68,10 +72,10 @@ func Test_openVEXParser_GetPredicates(t *testing.T) {
 		want   *assembler.IngestPredicates
 	}{
 		{
-			name: "default",
+			name: "status not affected",
 			fields: fields{
 				doc: &processor.Document{
-					Blob:   testdata.ValidOpenVEXExample,
+					Blob:   testdata.NotAffectedOpenVEXExample,
 					Format: processor.FormatJSON,
 					Type:   processor.DocumentOpenVEX,
 					SourceInformation: processor.SourceInformation{
@@ -84,7 +88,28 @@ func Test_openVEXParser_GetPredicates(t *testing.T) {
 				ctx: context.Background(),
 			},
 			want: &assembler.IngestPredicates{
-				Vex: testdata.OpenVEXExample,
+				Vex: testdata.NotAffectedOpenVexIngest,
+			},
+		},
+		{
+			name: "status affected",
+			fields: fields{
+				doc: &processor.Document{
+					Blob:   testdata.AffectedOpenVex,
+					Format: processor.FormatJSON,
+					Type:   processor.DocumentOpenVEX,
+					SourceInformation: processor.SourceInformation{
+						Collector: "TestCollector",
+						Source:    "TestSource",
+					},
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+			},
+			want: &assembler.IngestPredicates{
+				Vex:         testdata.AffectedOpenVexIngest,
+				CertifyVuln: testdata.AffectedOpenVEXCertifyVulnIngest,
 			},
 		},
 	}
@@ -104,5 +129,68 @@ func Test_openVEXParser_GetPredicates(t *testing.T) {
 				t.Errorf("csaf.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
+	}
+}
+
+func Test_openVEXParser_GetIdentities(t *testing.T) {
+	type fields struct {
+		doc               *processor.Document
+		identifierStrings *common.IdentifierStrings
+		openVex           *vex.VEX
+	}
+	type args struct {
+		ctx context.Context
+	}
+	test := struct {
+		name   string
+		fields fields
+		args   args
+		want   []common.TrustInformation
+	}{
+		name: "default case",
+		want: nil,
+	}
+	c := &openVEXParser{
+		doc:               test.fields.doc,
+		identifierStrings: test.fields.identifierStrings,
+		openVex:           test.fields.openVex,
+	}
+	if got := c.GetIdentities(test.args.ctx); !reflect.DeepEqual(got, test.want) {
+		t.Errorf("GetIdentities() = %v, want %v", got, test.want)
+	}
+}
+
+func Test_openVEXParser_GetIdentifiers(t *testing.T) {
+	type fields struct {
+		doc               *processor.Document
+		identifierStrings *common.IdentifierStrings
+		openVex           *vex.VEX
+	}
+	type args struct {
+		ctx context.Context
+	}
+	test := struct {
+		name    string
+		fields  fields
+		args    args
+		want    *common.IdentifierStrings
+		wantErr bool
+	}{
+		name:    "default case",
+		want:    nil,
+		wantErr: true,
+	}
+	c := &openVEXParser{
+		doc:               test.fields.doc,
+		identifierStrings: test.fields.identifierStrings,
+		openVex:           test.fields.openVex,
+	}
+	got, err := c.GetIdentifiers(test.args.ctx)
+	if (err != nil) != test.wantErr {
+		t.Errorf("GetIdentifiers() error = %v, wantErr %v", err, test.wantErr)
+		return
+	}
+	if !reflect.DeepEqual(got, test.want) {
+		t.Errorf("GetIdentifiers() got = %v, want %v", got, test.want)
 	}
 }

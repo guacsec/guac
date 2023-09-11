@@ -36,7 +36,7 @@ func TestOpenVEXProcessor_ValidateSchema(t *testing.T) {
 			name: "default OpenVEX document",
 			args: args{
 				d: &processor.Document{
-					Blob:   testdata.ValidOpenVEXExample,
+					Blob:   testdata.NotAffectedOpenVEXExample,
 					Type:   processor.DocumentOpenVEX,
 					Format: processor.FormatJSON,
 				},
@@ -47,7 +47,7 @@ func TestOpenVEXProcessor_ValidateSchema(t *testing.T) {
 			name: "incorrect type",
 			args: args{
 				d: &processor.Document{
-					Blob:   testdata.ValidOpenVEXExample,
+					Blob:   testdata.NotAffectedOpenVEXExample,
 					Type:   processor.DocumentUnknown,
 					Format: processor.FormatJSON,
 				},
@@ -69,7 +69,7 @@ func TestOpenVEXProcessor_ValidateSchema(t *testing.T) {
 			name: "invalid OpenVEX document format",
 			args: args{
 				d: &processor.Document{
-					Blob:   testdata.ValidOpenVEXExample,
+					Blob:   testdata.NotAffectedOpenVEXExample,
 					Type:   processor.DocumentOpenVEX,
 					Format: processor.FormatUnknown,
 				},
