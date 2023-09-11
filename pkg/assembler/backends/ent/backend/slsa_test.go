@@ -555,3 +555,226 @@ func (s *Suite) TestHasSLSA() {
 		})
 	}
 }
+
+func (s *Suite) TestIngestHasSLSAs() {
+	type call struct {
+		Sub  []*model.ArtifactInputSpec
+		BF   [][]*model.ArtifactInputSpec
+		BB   []*model.BuilderInputSpec
+		SLSA []*model.SLSAInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InArt        []*model.ArtifactInputSpec
+		InBld        []*model.BuilderInputSpec
+		Calls        []call
+		Query        *model.HasSLSASpec
+		ExpHS        []*model.HasSlsa
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			InBld: []*model.BuilderInputSpec{b1},
+			Calls: []call{
+				{
+					Sub: []*model.ArtifactInputSpec{a1},
+					BF:  [][]*model.ArtifactInputSpec{[]*model.ArtifactInputSpec{a2}},
+					BB:  []*model.BuilderInputSpec{b1},
+					SLSA: []*model.SLSAInputSpec{
+						{
+							BuildType: "test type",
+						},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuildType: ptrfrom.String("test type"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: a1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   b1out,
+						BuiltFrom: []*model.Artifact{a2out},
+						BuildType: "test type",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Ingest twice",
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			InBld: []*model.BuilderInputSpec{b1},
+			Calls: []call{
+				{
+					Sub: []*model.ArtifactInputSpec{a1, a1},
+					BF:  [][]*model.ArtifactInputSpec{[]*model.ArtifactInputSpec{a2}, []*model.ArtifactInputSpec{a2}},
+					BB:  []*model.BuilderInputSpec{b1, b1},
+					SLSA: []*model.SLSAInputSpec{
+						{
+							BuildType: "test type",
+						},
+						{
+							BuildType: "test type",
+						},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuildType: ptrfrom.String("test type"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: a1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   b1out,
+						BuiltFrom: []*model.Artifact{a2out},
+						BuildType: "test type",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Query on Build Type",
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			InBld: []*model.BuilderInputSpec{b1},
+			Calls: []call{
+				{
+					Sub: []*model.ArtifactInputSpec{a1, a1},
+					BF:  [][]*model.ArtifactInputSpec{[]*model.ArtifactInputSpec{a2}, []*model.ArtifactInputSpec{a2}},
+					BB:  []*model.BuilderInputSpec{b1, b1},
+					SLSA: []*model.SLSAInputSpec{
+						{
+							BuildType: "test type one",
+						},
+						{
+							BuildType: "test type two",
+						},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuildType: ptrfrom.String("test type one"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: a1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   b1out,
+						BuiltFrom: []*model.Artifact{a2out},
+						BuildType: "test type one",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Query on Subject",
+			InArt: []*model.ArtifactInputSpec{a1, a2, a3},
+			InBld: []*model.BuilderInputSpec{b1},
+			Calls: []call{
+				{
+					Sub: []*model.ArtifactInputSpec{a1, a3},
+					BF:  [][]*model.ArtifactInputSpec{[]*model.ArtifactInputSpec{a2}, []*model.ArtifactInputSpec{a2}},
+					BB:  []*model.BuilderInputSpec{b1, b1},
+					SLSA: []*model.SLSAInputSpec{
+						{},
+						{},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				Subject: &model.ArtifactSpec{
+					Algorithm: ptrfrom.String("sha256"),
+				},
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: a1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   b1out,
+						BuiltFrom: []*model.Artifact{a2out},
+					},
+				},
+			},
+		},
+		{
+			Name:  "Query on Materials",
+			InArt: []*model.ArtifactInputSpec{a1, a2, a3, a4},
+			InBld: []*model.BuilderInputSpec{b1},
+			Calls: []call{
+				{
+					Sub: []*model.ArtifactInputSpec{a1, a1, a1},
+					BF:  [][]*model.ArtifactInputSpec{[]*model.ArtifactInputSpec{a2}, []*model.ArtifactInputSpec{a2, a3}, []*model.ArtifactInputSpec{a4}},
+					BB:  []*model.BuilderInputSpec{b1, b1, b1},
+					SLSA: []*model.SLSAInputSpec{
+						{},
+						{},
+						{},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuiltFrom: []*model.ArtifactSpec{{
+					Digest: ptrfrom.String("7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
+				}},
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: a1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   b1out,
+						BuiltFrom: []*model.Artifact{a2out},
+					},
+				},
+				{
+					Subject: a1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   b1out,
+						BuiltFrom: []*model.Artifact{a2out, a3out},
+					},
+				},
+			},
+		},
+	}
+	ctx := s.Ctx
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, bld := range test.InBld {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+					t.Fatalf("Could not ingest builder: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.HasSlsa(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpHS, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
