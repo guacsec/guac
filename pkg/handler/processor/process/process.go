@@ -16,10 +16,13 @@
 package process
 
 import (
+	"bytes"
+	"compress/bzip2"
 	"context"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"io"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -35,6 +38,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/klauspost/compress/zstd"
 )
 
 var (
@@ -135,6 +139,10 @@ func processHelper(ctx context.Context, doc *processor.Document) (*processor.Doc
 }
 
 func processDocument(ctx context.Context, i *processor.Document) ([]*processor.Document, error) {
+	if err := decodeDocument(ctx, i); err != nil {
+		return nil, err
+	}
+
 	if err := preProcessDocument(ctx, i); err != nil {
 		return nil, err
 	}
@@ -201,4 +209,36 @@ func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
 		return nil, fmt.Errorf("no document processor registered for type: %s", i.Type)
 	}
 	return p.Unpack(i) // nolint:wrapcheck
+}
+
+func decodeDocument(ctx context.Context, i *processor.Document) error {
+	logger := logging.FromContext(ctx)
+	var reader io.Reader
+	var err error
+	logger.Infof("Decoding document with encoding:  %v", i.Encoding)
+	switch i.Encoding {
+	case processor.EncodingBzip2:
+		reader = bzip2.NewReader(bytes.NewReader(i.Blob))
+	case processor.EncodingZstd:
+		reader, err = zstd.NewReader(bytes.NewReader(i.Blob))
+		if err != nil {
+			return fmt.Errorf("unable to create zstd reader: %w", err)
+		}
+	case processor.EncodingUnknown:
+	}
+	if reader != nil {
+		if err := decompressDocument(ctx, i, reader); err != nil {
+			return fmt.Errorf("unable to decode document: %w", err)
+		}
+	}
+	return nil
+}
+
+func decompressDocument(ctx context.Context, i *processor.Document, reader io.Reader) error {
+	uncompressed, err := io.ReadAll(reader)
+	if err != nil {
+		return fmt.Errorf("unable to decompress document: %w", err)
+	}
+	i.Blob = uncompressed
+	return nil
 }
