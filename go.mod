@@ -117,6 +117,8 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/buildkit v0.12.1 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nats-io/jwt/v2 v2.4.1 // indirect
 	github.com/nats-io/nkeys v0.4.4 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
@@ -192,6 +194,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jedib0t/go-pretty/v6 v6.4.7
 	github.com/jeremywohl/flatten v1.0.1
+	github.com/json-iterator/go v1.1.12
 	github.com/klauspost/compress v1.16.7
 	github.com/lib/pq v1.10.9
 	github.com/manifoldco/promptui v0.9.0
