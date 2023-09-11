@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -61,6 +62,11 @@ func (n *hasMetadataLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest HasMetadata
+
+func (c *demoClient) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
+	return nil, fmt.Errorf("not implemented: IngestBulkHasMetadata")
+}
+
 func (c *demoClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
 	return c.ingestHasMetadata(ctx, subject, pkgMatchType, hasMetadata, true)
 }
