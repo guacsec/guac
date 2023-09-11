@@ -774,6 +774,7 @@ func (c *demoClient) exactPackageVersion(filter *model.PkgSpec) (*pkgVersionNode
 		}
 		for _, v := range nm.versions {
 			if *filter.Version != v.version ||
+				filter.Subpath == nil ||
 				noMatchInput(filter.Subpath, v.subpath) ||
 				noMatchQualifiers(filter, v.qualifiers) {
 				continue
