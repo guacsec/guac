@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -29,7 +28,30 @@ func (r *mutationResolver) IngestHasMetadata(ctx context.Context, subject model.
 
 // IngestBulkHasMetadata is the resolver for the ingestBulkHasMetadata field.
 func (r *mutationResolver) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
-	panic(fmt.Errorf("not implemented: IngestBulkHasMetadata - ingestBulkHasMetadata"))
+	funcName := "IngestBulkHasMetadata"
+	valuesDefined := 0
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(hasMetadataList) {
+			return []string{}, gqlerror.Errorf("%v :: uneven packages and hasMetadata for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Artifacts) > 0 {
+		if len(subjects.Artifacts) != len(hasMetadataList) {
+			return []string{}, gqlerror.Errorf("%v :: uneven artifacts and hasMetadata for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Sources) > 0 {
+		if len(subjects.Sources) != len(hasMetadataList) {
+			return []string{}, gqlerror.Errorf("%v :: uneven sources and hasMetadata for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return []string{}, gqlerror.Errorf("%v :: must specify at most packages, artifacts or sources", funcName)
+	}
+	return r.Backend.IngestBulkHasMetadata(ctx, subjects, &pkgMatchType, hasMetadataList)
 }
 
 // HasMetadata is the resolver for the HasMetadata field.

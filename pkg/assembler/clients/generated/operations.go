@@ -7244,6 +7244,17 @@ type HasMetadataArtifactResponse struct {
 // GetIngestHasMetadata returns HasMetadataArtifactResponse.IngestHasMetadata, and is useful for accessing the field via an interface.
 func (v *HasMetadataArtifactResponse) GetIngestHasMetadata() string { return v.IngestHasMetadata }
 
+// HasMetadataArtifactsResponse is returned by HasMetadataArtifacts on success.
+type HasMetadataArtifactsResponse struct {
+	// Adds bulk metadata about a package, source or artifact. The returned array of IDs can be a an array of empty string.
+	IngestBulkHasMetadata []string `json:"ingestBulkHasMetadata"`
+}
+
+// GetIngestBulkHasMetadata returns HasMetadataArtifactsResponse.IngestBulkHasMetadata, and is useful for accessing the field via an interface.
+func (v *HasMetadataArtifactsResponse) GetIngestBulkHasMetadata() []string {
+	return v.IngestBulkHasMetadata
+}
+
 // HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type HasMetadataInputSpec struct {
 	Key           string    `json:"key"`
@@ -7281,6 +7292,15 @@ type HasMetadataPkgResponse struct {
 // GetIngestHasMetadata returns HasMetadataPkgResponse.IngestHasMetadata, and is useful for accessing the field via an interface.
 func (v *HasMetadataPkgResponse) GetIngestHasMetadata() string { return v.IngestHasMetadata }
 
+// HasMetadataPkgsResponse is returned by HasMetadataPkgs on success.
+type HasMetadataPkgsResponse struct {
+	// Adds bulk metadata about a package, source or artifact. The returned array of IDs can be a an array of empty string.
+	IngestBulkHasMetadata []string `json:"ingestBulkHasMetadata"`
+}
+
+// GetIngestBulkHasMetadata returns HasMetadataPkgsResponse.IngestBulkHasMetadata, and is useful for accessing the field via an interface.
+func (v *HasMetadataPkgsResponse) GetIngestBulkHasMetadata() []string { return v.IngestBulkHasMetadata }
+
 // HasMetadataSrcResponse is returned by HasMetadataSrc on success.
 type HasMetadataSrcResponse struct {
 	// Adds metadata about a package, source or artifact. The returned ID can be empty string.
@@ -7289,6 +7309,15 @@ type HasMetadataSrcResponse struct {
 
 // GetIngestHasMetadata returns HasMetadataSrcResponse.IngestHasMetadata, and is useful for accessing the field via an interface.
 func (v *HasMetadataSrcResponse) GetIngestHasMetadata() string { return v.IngestHasMetadata }
+
+// HasMetadataSrcsResponse is returned by HasMetadataSrcs on success.
+type HasMetadataSrcsResponse struct {
+	// Adds bulk metadata about a package, source or artifact. The returned array of IDs can be a an array of empty string.
+	IngestBulkHasMetadata []string `json:"ingestBulkHasMetadata"`
+}
+
+// GetIngestBulkHasMetadata returns HasMetadataSrcsResponse.IngestBulkHasMetadata, and is useful for accessing the field via an interface.
+func (v *HasMetadataSrcsResponse) GetIngestBulkHasMetadata() []string { return v.IngestBulkHasMetadata }
 
 // HasSBOMArtifactResponse is returned by HasSBOMArtifact on success.
 type HasSBOMArtifactResponse struct {
@@ -21185,6 +21214,20 @@ func (v *__HasMetadataArtifactInput) GetArtifact() ArtifactInputSpec { return v.
 // GetHasMetadata returns __HasMetadataArtifactInput.HasMetadata, and is useful for accessing the field via an interface.
 func (v *__HasMetadataArtifactInput) GetHasMetadata() HasMetadataInputSpec { return v.HasMetadata }
 
+// __HasMetadataArtifactsInput is used internally by genqlient
+type __HasMetadataArtifactsInput struct {
+	Artifacts       []ArtifactInputSpec    `json:"artifacts"`
+	HasMetadataList []HasMetadataInputSpec `json:"hasMetadataList"`
+}
+
+// GetArtifacts returns __HasMetadataArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__HasMetadataArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetHasMetadataList returns __HasMetadataArtifactsInput.HasMetadataList, and is useful for accessing the field via an interface.
+func (v *__HasMetadataArtifactsInput) GetHasMetadataList() []HasMetadataInputSpec {
+	return v.HasMetadataList
+}
+
 // __HasMetadataPkgInput is used internally by genqlient
 type __HasMetadataPkgInput struct {
 	Pkg          PkgInputSpec         `json:"pkg"`
@@ -21201,6 +21244,24 @@ func (v *__HasMetadataPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatch
 // GetHasMetadata returns __HasMetadataPkgInput.HasMetadata, and is useful for accessing the field via an interface.
 func (v *__HasMetadataPkgInput) GetHasMetadata() HasMetadataInputSpec { return v.HasMetadata }
 
+// __HasMetadataPkgsInput is used internally by genqlient
+type __HasMetadataPkgsInput struct {
+	Pkgs            []PkgInputSpec         `json:"pkgs"`
+	PkgMatchType    MatchFlags             `json:"pkgMatchType"`
+	HasMetadataList []HasMetadataInputSpec `json:"hasMetadataList"`
+}
+
+// GetPkgs returns __HasMetadataPkgsInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__HasMetadataPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetPkgMatchType returns __HasMetadataPkgsInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__HasMetadataPkgsInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
+
+// GetHasMetadataList returns __HasMetadataPkgsInput.HasMetadataList, and is useful for accessing the field via an interface.
+func (v *__HasMetadataPkgsInput) GetHasMetadataList() []HasMetadataInputSpec {
+	return v.HasMetadataList
+}
+
 // __HasMetadataSrcInput is used internally by genqlient
 type __HasMetadataSrcInput struct {
 	Source      SourceInputSpec      `json:"source"`
@@ -21212,6 +21273,20 @@ func (v *__HasMetadataSrcInput) GetSource() SourceInputSpec { return v.Source }
 
 // GetHasMetadata returns __HasMetadataSrcInput.HasMetadata, and is useful for accessing the field via an interface.
 func (v *__HasMetadataSrcInput) GetHasMetadata() HasMetadataInputSpec { return v.HasMetadata }
+
+// __HasMetadataSrcsInput is used internally by genqlient
+type __HasMetadataSrcsInput struct {
+	Sources         []SourceInputSpec      `json:"sources"`
+	HasMetadataList []HasMetadataInputSpec `json:"hasMetadataList"`
+}
+
+// GetSources returns __HasMetadataSrcsInput.Sources, and is useful for accessing the field via an interface.
+func (v *__HasMetadataSrcsInput) GetSources() []SourceInputSpec { return v.Sources }
+
+// GetHasMetadataList returns __HasMetadataSrcsInput.HasMetadataList, and is useful for accessing the field via an interface.
+func (v *__HasMetadataSrcsInput) GetHasMetadataList() []HasMetadataInputSpec {
+	return v.HasMetadataList
+}
 
 // __HasSBOMArtifactInput is used internally by genqlient
 type __HasSBOMArtifactInput struct {
@@ -23059,6 +23134,41 @@ func HasMetadataArtifact(
 	return &data, err
 }
 
+// The query or mutation executed by HasMetadataArtifacts.
+const HasMetadataArtifacts_Operation = `
+mutation HasMetadataArtifacts ($artifacts: [ArtifactInputSpec!]!, $hasMetadataList: [HasMetadataInputSpec!]!) {
+	ingestBulkHasMetadata(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadataList: $hasMetadataList)
+}
+`
+
+func HasMetadataArtifacts(
+	ctx context.Context,
+	client graphql.Client,
+	artifacts []ArtifactInputSpec,
+	hasMetadataList []HasMetadataInputSpec,
+) (*HasMetadataArtifactsResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasMetadataArtifacts",
+		Query:  HasMetadataArtifacts_Operation,
+		Variables: &__HasMetadataArtifactsInput{
+			Artifacts:       artifacts,
+			HasMetadataList: hasMetadataList,
+		},
+	}
+	var err error
+
+	var data HasMetadataArtifactsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by HasMetadataPkg.
 const HasMetadataPkg_Operation = `
 mutation HasMetadataPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $hasMetadata: HasMetadataInputSpec!) {
@@ -23096,6 +23206,43 @@ func HasMetadataPkg(
 	return &data, err
 }
 
+// The query or mutation executed by HasMetadataPkgs.
+const HasMetadataPkgs_Operation = `
+mutation HasMetadataPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $hasMetadataList: [HasMetadataInputSpec!]!) {
+	ingestBulkHasMetadata(subjects: {packages:$pkgs}, pkgMatchType: $pkgMatchType, hasMetadataList: $hasMetadataList)
+}
+`
+
+func HasMetadataPkgs(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	pkgMatchType MatchFlags,
+	hasMetadataList []HasMetadataInputSpec,
+) (*HasMetadataPkgsResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasMetadataPkgs",
+		Query:  HasMetadataPkgs_Operation,
+		Variables: &__HasMetadataPkgsInput{
+			Pkgs:            pkgs,
+			PkgMatchType:    pkgMatchType,
+			HasMetadataList: hasMetadataList,
+		},
+	}
+	var err error
+
+	var data HasMetadataPkgsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by HasMetadataSrc.
 const HasMetadataSrc_Operation = `
 mutation HasMetadataSrc ($source: SourceInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
@@ -23120,6 +23267,41 @@ func HasMetadataSrc(
 	var err error
 
 	var data HasMetadataSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by HasMetadataSrcs.
+const HasMetadataSrcs_Operation = `
+mutation HasMetadataSrcs ($sources: [SourceInputSpec!]!, $hasMetadataList: [HasMetadataInputSpec!]!) {
+	ingestBulkHasMetadata(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadataList: $hasMetadataList)
+}
+`
+
+func HasMetadataSrcs(
+	ctx context.Context,
+	client graphql.Client,
+	sources []SourceInputSpec,
+	hasMetadataList []HasMetadataInputSpec,
+) (*HasMetadataSrcsResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasMetadataSrcs",
+		Query:  HasMetadataSrcs_Operation,
+		Variables: &__HasMetadataSrcsInput{
+			Sources:         sources,
+			HasMetadataList: hasMetadataList,
+		},
+	}
+	var err error
+
+	var data HasMetadataSrcsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

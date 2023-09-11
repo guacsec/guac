@@ -290,6 +290,21 @@ func (mr *MockBackendMockRecorder) IngestBuilders(ctx, builders interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestBuilders", reflect.TypeOf((*MockBackend)(nil).IngestBuilders), ctx, builders)
 }
 
+// IngestBulkHasMetadata mocks base method.
+func (m *MockBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestBulkHasMetadata", ctx, subjects, pkgMatchType, hasMetadataList)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestBulkHasMetadata indicates an expected call of IngestBulkHasMetadata.
+func (mr *MockBackendMockRecorder) IngestBulkHasMetadata(ctx, subjects, pkgMatchType, hasMetadataList interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestBulkHasMetadata", reflect.TypeOf((*MockBackend)(nil).IngestBulkHasMetadata), ctx, subjects, pkgMatchType, hasMetadataList)
+}
+
 // IngestBulkVulnerabilityMetadata mocks base method.
 func (m *MockBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
