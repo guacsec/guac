@@ -25,7 +25,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	cdxVex "github.com/guacsec/guac/pkg/ingestor/parser/cdx_vex"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/csaf"
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
@@ -47,7 +46,6 @@ func init() {
 	_ = RegisterDocumentParser(scorecard.NewScorecardParser, processor.DocumentScorecard)
 	_ = RegisterDocumentParser(deps_dev.NewDepsDevParser, processor.DocumentDepsDev)
 	_ = RegisterDocumentParser(csaf.NewCsafParser, processor.DocumentCsaf)
-	_ = RegisterDocumentParser(cdxVex.NewCdxVexParser, processor.DocumentCdxVex)
 }
 
 var (

@@ -209,26 +209,6 @@ func Test_GuessDocument(t *testing.T) {
 		},
 		expectedType:   processor.DocumentCsaf,
 		expectedFormat: processor.FormatJSON,
-	}, {
-		name: "valid cdx vex json Document",
-		document: &processor.Document{
-			Blob:              testdata.CycloneDXVEXUnAffected,
-			Type:              processor.DocumentUnknown,
-			Format:            processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectedType:   processor.DocumentCdxVex,
-		expectedFormat: processor.FormatJSON,
-	}, {
-		name: "valid cdx vex xml Document",
-		document: &processor.Document{
-			Blob:              testdata.CyloneDXVEXExampleXML,
-			Type:              processor.DocumentUnknown,
-			Format:            processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectedType:   processor.DocumentCdxVex,
-		expectedFormat: processor.FormatXML,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
