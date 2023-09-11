@@ -544,6 +544,209 @@ func (s *Suite) TestPkgEqual() {
 	}
 }
 
+func (s *Suite) TestIngestPkgEquals() {
+	type call struct {
+		P1 []*model.PkgInputSpec
+		P2 []*model.PkgInputSpec
+		PE []*model.PkgEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		Calls        []call
+		Query        *model.PkgEqualSpec
+		ExpHE        []*model.PkgEqual
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{p1, p2},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{p1, p1},
+					P2: []*model.PkgInputSpec{p2, p2},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{p1out, p2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Ingest same, different order",
+			InPkg: []*model.PkgInputSpec{p1, p2},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{p1, p2},
+					P2: []*model.PkgInputSpec{p2, p1},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{p1out, p2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on pkg details",
+			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{p1, p1},
+					P2: []*model.PkgInputSpec{p2, p3},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{{
+					Version: ptrfrom.String("2.11.1"),
+					Subpath: ptrfrom.String(""),
+				}},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{p1out, p2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on pkg algo and pkg",
+			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{p1, p1},
+					P2: []*model.PkgInputSpec{p2, p3},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{{
+					Type:      ptrfrom.String("pypi"),
+					Namespace: ptrfrom.String(""),
+					Name:      ptrfrom.String("tensorflow"),
+					Version:   ptrfrom.String("2.11.1"),
+					Subpath:   ptrfrom.String(""),
+				}},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{p1out, p2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on both pkgs, one filter",
+			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Calls: []call{
+				{
+					P1: []*model.PkgInputSpec{p1, p1},
+					P2: []*model.PkgInputSpec{p2, p3},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				Packages: []*model.PkgSpec{
+					{
+						Version: ptrfrom.String(""),
+					},
+					{
+						Version: ptrfrom.String("2.11.1"),
+						Subpath: ptrfrom.String("saved_model_cli.py"),
+					},
+				},
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:      []*model.Package{p1out, p3out},
+					Justification: "test justification",
+				},
+			},
+		},
+	}
+	ctx := s.Ctx
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+
+			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+				t.Fatalf("Could not ingest pkg: %v", err)
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestPkgEquals(ctx, o.P1, o.P2, o.PE)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.PkgEqual(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func (s *Suite) TestPkgEqualNeighbors() {
 	s.T().Skip()
 
