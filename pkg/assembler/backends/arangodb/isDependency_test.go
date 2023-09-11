@@ -51,13 +51,16 @@ func TestIsDependency(t *testing.T) {
 		ID *model.IsDependencyInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		Calls        []call
-		Query        *model.IsDependencySpec
-		ExpID        []*model.IsDependency
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name          string
+		InPkg         []*model.PkgInputSpec
+		Calls         []call
+		Query         *model.IsDependencySpec
+		QueryID       bool
+		QueryPkgID    bool
+		QueryDepPkgID bool
+		ExpID         []*model.IsDependency
+		ExpIngestErr  bool
+		ExpQueryErr   bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -457,6 +460,41 @@ func TestIsDependency(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on pkg - match empty qualifiers false",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P5},
+			Calls: []call{
+				{
+					P1: testdata.P5,
+					P2: testdata.P2,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				Package: &model.PkgSpec{
+					MatchOnlyEmptyQualifiers: ptrfrom.Bool(false),
+					Qualifiers: []*model.PackageQualifierSpec{
+						{
+							Key:   "test",
+							Value: ptrfrom.String("test"),
+						},
+					},
+				},
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P5out,
+					DependentPackage: testdata.P2out,
+				},
+			},
+		},
+		{
 			Name:  "Query on pkg multiple",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
 			Calls: []call{
@@ -571,6 +609,7 @@ func TestIsDependency(t *testing.T) {
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
+			QueryID: true,
 			ExpID: []*model.IsDependency{
 				{
 					Package:          testdata.P1out,
@@ -769,6 +808,56 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name:  "Query on pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P4,
+					P2: testdata.P2,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			QueryPkgID: true,
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P4out,
+					DependentPackage: testdata.P2out,
+				},
+			},
+		},
+		{
+			Name:  "Query on dep pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P1,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+				{
+					P1: testdata.P2,
+					P2: testdata.P4,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			QueryDepPkgID: true,
+			ExpID: []*model.IsDependency{
+				{
+					Package:          testdata.P2out,
+					DependentPackage: testdata.P4out,
+				},
+			},
+		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
@@ -788,9 +877,23 @@ func TestIsDependency(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.IsDependencySpec{
 						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.QueryPkgID {
+					test.Query = &model.IsDependencySpec{
+						Package: &model.PkgSpec{
+							ID: ptrfrom.String(found.Package.Namespaces[0].Names[0].Versions[0].ID),
+						},
+					}
+				}
+				if test.QueryDepPkgID {
+					test.Query = &model.IsDependencySpec{
+						DependentPackage: &model.PkgSpec{
+							ID: ptrfrom.String(found.DependentPackage.Namespaces[0].Names[0].Versions[0].ID),
+						},
 					}
 				}
 			}

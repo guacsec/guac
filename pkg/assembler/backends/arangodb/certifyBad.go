@@ -44,18 +44,20 @@ func (c *arangoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cer
 
 			combinedCertifyBad = append(combinedCertifyBad, pkgVersionCertifyBads...)
 
-			// pkgName certifyBad
-			values = map[string]any{}
-			arangoQueryBuilder = setPkgNameMatchValues(certifyBadSpec.Subject.Package, values)
-			arangoQueryBuilder.forOutBound(certifyBadPkgNameEdgesStr, "certifyBad", "pName")
-			setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
+			if certifyBadSpec.Subject.Package.ID == nil {
+				// pkgName certifyBad
+				values = map[string]any{}
+				arangoQueryBuilder = setPkgNameMatchValues(certifyBadSpec.Subject.Package, values)
+				arangoQueryBuilder.forOutBound(certifyBadPkgNameEdgesStr, "certifyBad", "pName")
+				setCertifyBadMatchValues(arangoQueryBuilder, certifyBadSpec, values)
 
-			pkgNameCertifyBads, err := getPkgCertifyBadForQuery(ctx, c, arangoQueryBuilder, values, false)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve package name certifyBad with error: %w", err)
+				pkgNameCertifyBads, err := getPkgCertifyBadForQuery(ctx, c, arangoQueryBuilder, values, false)
+				if err != nil {
+					return nil, fmt.Errorf("failed to retrieve package name certifyBad with error: %w", err)
+				}
+
+				combinedCertifyBad = append(combinedCertifyBad, pkgNameCertifyBads...)
 			}
-
-			combinedCertifyBad = append(combinedCertifyBad, pkgNameCertifyBads...)
 		}
 		if certifyBadSpec.Subject.Source != nil {
 			values := map[string]any{}

@@ -61,6 +61,8 @@ func TestIngestVulnMetadata(t *testing.T) {
 		Calls        []call
 		ExpVuln      []*model.VulnerabilityMetadata
 		Query        *model.VulnerabilityMetadataSpec
+		QueryID      bool
+		QueryVulnID  bool
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
@@ -176,6 +178,36 @@ func TestIngestVulnMetadata(t *testing.T) {
 			},
 		},
 		{
+			Name:   "Query on Vulnerability ID",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
+			Calls: []call{
+				{
+					Vuln: testdata.O1,
+					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+						ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+						ScoreValue: 7.9,
+						Timestamp:  testdata.T1,
+						Collector:  "test collector",
+						Origin:     "test origin",
+					},
+				},
+			},
+			QueryVulnID: true,
+			ExpVuln: []*model.VulnerabilityMetadata{
+				{
+					Vulnerability: &model.Vulnerability{
+						Type:             "osv",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+					},
+					ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+					ScoreValue: 7.9,
+					Timestamp:  testdata.T1,
+					Collector:  "test collector",
+					Origin:     "test origin",
+				},
+			},
+		},
+		{
 			Name:   "Certify GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 			Calls: []call{
@@ -271,6 +303,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 					},
 				},
 			},
+			QueryID: true,
 			ExpVuln: []*model.VulnerabilityMetadata{
 				{
 					Vulnerability: &model.Vulnerability{
@@ -954,8 +987,16 @@ func TestIngestVulnMetadata(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				ingestedVuln, err := b.IngestVulnerability(ctx, *g)
+				if err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
+				}
+				if test.QueryVulnID {
+					test.Query = &model.VulnerabilityMetadataSpec{
+						Vulnerability: &model.VulnerabilitySpec{
+							ID: ptrfrom.String(ingestedVuln.VulnerabilityIDs[0].ID),
+						},
+					}
 				}
 			}
 			ids := make([]string, len(test.Calls))
@@ -967,7 +1008,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.VulnerabilityMetadataSpec{
 						ID: ptrfrom.String(record),
 					}

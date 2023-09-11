@@ -43,18 +43,20 @@ func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.C
 
 			combinedCertifyGood = append(combinedCertifyGood, pkgVersionCertifyGoods...)
 
-			// pkgName certifyGood
-			values = map[string]any{}
-			arangoQueryBuilder = setPkgNameMatchValues(certifyGoodSpec.Subject.Package, values)
-			arangoQueryBuilder.forOutBound(certifyGoodPkgNameEdgesStr, "certifyGood", "pName")
-			setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
+			if certifyGoodSpec.Subject.Package.ID == nil {
+				// pkgName certifyGood
+				values = map[string]any{}
+				arangoQueryBuilder = setPkgNameMatchValues(certifyGoodSpec.Subject.Package, values)
+				arangoQueryBuilder.forOutBound(certifyGoodPkgNameEdgesStr, "certifyGood", "pName")
+				setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
 
-			pkgNameCertifyGoods, err := getPkgCertifyGoodForQuery(ctx, c, arangoQueryBuilder, values, false)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve package name certifyGood with error: %w", err)
+				pkgNameCertifyGoods, err := getPkgCertifyGoodForQuery(ctx, c, arangoQueryBuilder, values, false)
+				if err != nil {
+					return nil, fmt.Errorf("failed to retrieve package name certifyGood with error: %w", err)
+				}
+
+				combinedCertifyGood = append(combinedCertifyGood, pkgNameCertifyGoods...)
 			}
-
-			combinedCertifyGood = append(combinedCertifyGood, pkgNameCertifyGoods...)
 		}
 		if certifyGoodSpec.Subject.Source != nil {
 			values := map[string]any{}

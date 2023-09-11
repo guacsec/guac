@@ -49,6 +49,8 @@ func TestVulnEqual(t *testing.T) {
 		InVuln       []*model.VulnerabilityInputSpec
 		Calls        []call
 		Query        *model.VulnEqualSpec
+		QueryID      bool
+		QueryVulnID  bool
 		ExpVulnEqual []*model.VulnEqual
 		ExpIngestErr bool
 		ExpQueryErr  bool
@@ -196,6 +198,42 @@ func TestVulnEqual(t *testing.T) {
 						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+						},
+					},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:   "Query on vulnerability IDs",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
+			Calls: []call{
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Vuln:      testdata.O2,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			QueryVulnID: true,
+			ExpVulnEqual: []*model.VulnEqual{
+				{
+					Vulnerabilities: []*model.Vulnerability{
+						{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+						},
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
 						},
 					},
 					Justification: "test justification",
@@ -484,9 +522,7 @@ func TestVulnEqual(t *testing.T) {
 					},
 				},
 			},
-			Query: &model.VulnEqualSpec{
-				ID: ptrfrom.String("8"),
-			},
+			QueryID: true,
 			ExpVulnEqual: []*model.VulnEqual{
 				{
 					Vulnerabilities: []*model.Vulnerability{
@@ -571,9 +607,21 @@ func TestVulnEqual(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.VulnEqualSpec{
 						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.QueryVulnID {
+					test.Query = &model.VulnEqualSpec{
+						Vulnerabilities: []*model.VulnerabilitySpec{
+							{
+								ID: ptrfrom.String(found.Vulnerabilities[0].ID),
+							},
+							{
+								ID: ptrfrom.String(found.Vulnerabilities[1].ID),
+							},
+						},
 					}
 				}
 			}

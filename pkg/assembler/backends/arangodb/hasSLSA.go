@@ -112,8 +112,14 @@ func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *
 	}
 	arangoQueryBuilder.forOutBound(hasSLSABuiltByEdgesStr, "build", "hasSLSA")
 	if hasSLSASpec.BuiltBy != nil {
-		arangoQueryBuilder.filter("build", "uri", "==", "@uri")
-		queryValues["uri"] = *hasSLSASpec.BuiltBy.URI
+		if hasSLSASpec.BuiltBy.ID != nil {
+			arangoQueryBuilder.filter("build", "_id", "==", "@id")
+			queryValues["id"] = *hasSLSASpec.BuiltBy.ID
+		}
+		if hasSLSASpec.BuiltBy.URI != nil {
+			arangoQueryBuilder.filter("build", "uri", "==", "@uri")
+			queryValues["uri"] = *hasSLSASpec.BuiltBy.URI
+		}
 	}
 }
 

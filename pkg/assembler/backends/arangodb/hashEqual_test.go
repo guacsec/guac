@@ -50,6 +50,8 @@ func TestHashEqual(t *testing.T) {
 		InArt        []*model.ArtifactInputSpec
 		Calls        []call
 		Query        *model.HashEqualSpec
+		QueryID      bool
+		QueryArtID   bool
 		ExpHE        []*model.HashEqual
 		ExpIngestErr bool
 		ExpQueryErr  bool
@@ -154,6 +156,28 @@ func TestHashEqual(t *testing.T) {
 					Digest: ptrfrom.String("374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7"),
 				}},
 			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts: []*model.Artifact{testdata.A1out, testdata.A3out},
+				},
+			},
+		},
+		{
+			Name:  "Query on artifact ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
+			Calls: []call{
+				{
+					A1: testdata.A1,
+					A2: testdata.A2,
+					HE: &model.HashEqualInputSpec{},
+				},
+				{
+					A1: testdata.A1,
+					A2: testdata.A3,
+					HE: &model.HashEqualInputSpec{},
+				},
+			},
+			QueryArtID: true,
 			ExpHE: []*model.HashEqual{
 				{
 					Artifacts: []*model.Artifact{testdata.A1out, testdata.A3out},
@@ -410,6 +434,7 @@ func TestHashEqual(t *testing.T) {
 					HE: &model.HashEqualInputSpec{},
 				},
 			},
+			QueryID: true,
 			ExpHE: []*model.HashEqual{
 				{
 					Artifacts: []*model.Artifact{testdata.A1out, testdata.A3out},
@@ -460,9 +485,21 @@ func TestHashEqual(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.HashEqualSpec{
 						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.QueryArtID {
+					test.Query = &model.HashEqualSpec{
+						Artifacts: []*model.ArtifactSpec{
+							{
+								ID: ptrfrom.String(found.Artifacts[0].ID),
+							},
+							{
+								ID: ptrfrom.String(found.Artifacts[1].ID),
+							},
+						},
 					}
 				}
 			}

@@ -65,6 +65,9 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		Calls        []call
 		ExpVuln      []*model.CertifyVuln
 		Query        *model.CertifyVulnSpec
+		QueryID      bool
+		QueryPkgID   bool
+		QueryVulnID  bool
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
@@ -243,6 +246,37 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 			},
 		},
 		{
+			Name:   "Query on Vulnerability ID",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			Calls: []call{
+				{
+					Pkg:  testdata.P2,
+					Vuln: testdata.G1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+					},
+				},
+			},
+			QueryVulnID: true,
+			ExpVuln: []*model.CertifyVuln{
+				{
+					Package: testdata.P2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "ghsa",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+					},
+					Metadata: vmd1,
+				},
+			},
+		},
+		{
 			Name:   "Query ID",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 			InPkg:  []*model.PkgInputSpec{testdata.P2},
@@ -261,9 +295,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					},
 				},
 			},
-			Query: &model.CertifyVulnSpec{
-				ID: ptrfrom.String("7"),
-			},
+			QueryID: true,
 			ExpVuln: []*model.CertifyVuln{
 				{
 					Package: testdata.P2out,
@@ -505,6 +537,37 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					Subpath: ptrfrom.String("saved_model_cli.py"),
 				},
 			},
+			ExpVuln: []*model.CertifyVuln{
+				{
+					Package: testdata.P3out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "ghsa",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+					},
+					Metadata: vmd1,
+				},
+			},
+		},
+		{
+			Name:   "Query on Package ID",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			InPkg:  []*model.PkgInputSpec{testdata.P3},
+			Calls: []call{
+				{
+					Pkg:  testdata.P3,
+					Vuln: testdata.G1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+					},
+				},
+			},
+			QueryPkgID: true,
 			ExpVuln: []*model.CertifyVuln{
 				{
 					Package: testdata.P3out,
@@ -893,9 +956,23 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query ID" {
+				if test.QueryID {
 					test.Query = &model.CertifyVulnSpec{
 						ID: ptrfrom.String(record.ID),
+					}
+				}
+				if test.QueryPkgID {
+					test.Query = &model.CertifyVulnSpec{
+						Package: &model.PkgSpec{
+							ID: ptrfrom.String(record.Package.Namespaces[0].Names[0].Versions[0].ID),
+						},
+					}
+				}
+				if test.QueryVulnID {
+					test.Query = &model.CertifyVulnSpec{
+						Vulnerability: &model.VulnerabilitySpec{
+							ID: ptrfrom.String(record.Vulnerability.ID),
+						},
 					}
 				}
 				ids[i] = record.ID
@@ -908,7 +985,6 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					}
 				}
 			}
-
 			got, err := b.CertifyVuln(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
