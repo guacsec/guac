@@ -176,7 +176,7 @@ require (
 require (
 	entgo.io/contrib v0.4.5
 	entgo.io/ent v0.12.4-0.20230702151415-1ec75238037c
-	github.com/99designs/gqlgen v0.17.36
+	github.com/99designs/gqlgen v0.17.37
 	github.com/CycloneDX/cyclonedx-go v0.7.1
 	github.com/DATA-DOG/go-txdb v0.1.7
 	github.com/Khan/genqlient v0.6.0
@@ -212,7 +212,7 @@ require (
 	github.com/spdx/tools-golang v0.5.3
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
-	github.com/vektah/gqlparser/v2 v2.5.8
+	github.com/vektah/gqlparser/v2 v2.5.9
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 	gopkg.in/yaml.v3 v3.0.1
 )
