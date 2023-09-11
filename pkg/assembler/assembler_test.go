@@ -84,6 +84,7 @@ func TestIngestPredicates(t *testing.T) {
 		wantMaterials []generated.ArtifactInputSpec
 		wantBuilder   []*generated.BuilderInputSpec
 		wantVuln      []*generated.VulnerabilityInputSpec
+		wantLicense   []generated.LicenseInputSpec
 	}{{
 		name: "get nouns",
 		field: IngestPredicates{
@@ -627,6 +628,60 @@ func TestIngestPredicates(t *testing.T) {
 					},
 				},
 			},
+			CertifyLegal: []CertifyLegalIngest{
+				{
+					Pkg: maven,
+					Declared: []generated.LicenseInputSpec{
+						{
+							Name:        "asdf",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+					},
+					Discovered: []generated.LicenseInputSpec{
+						{
+							Name:        "asdf",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+						{
+							Name:        "qwer",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+					},
+					CertifyLegal: &generated.CertifyLegalInputSpec{
+						DeclaredLicense:   "asdf",
+						DiscoveredLicense: "asdf AND qwer",
+						Attribution:       "Copyright Jeff",
+						Justification:     "Scanner foo",
+						TimeScanned:       toTime("2022-10-06"),
+					},
+				},
+				{
+					Pkg: openSSL,
+					Declared: []generated.LicenseInputSpec{
+						{
+							Name:        "qwer",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+					},
+					Discovered: []generated.LicenseInputSpec{
+						{
+							Name:        "qwer",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+						{
+							Name:   "LicenseRef-123",
+							Inline: ptrfrom.String("This is the license text."),
+						},
+					},
+					CertifyLegal: &generated.CertifyLegalInputSpec{
+						DeclaredLicense:   "qwer",
+						DiscoveredLicense: "qwer AND LicenseRef-123",
+						Attribution:       "Copyright Jeff",
+						Justification:     "Scanner foo",
+						TimeScanned:       toTime("2022-10-06"),
+					},
+				},
+			},
 		},
 		wantPkg:    []*generated.PkgInputSpec{rootFilePack, maven, openSSL, openSSLWithQualifier, topLevelPack, baselayoutPack, baselayoutdataPack, worldFilePack},
 		wantSource: []*generated.SourceInputSpec{k8sSource},
@@ -733,6 +788,20 @@ func TestIngestPredicates(t *testing.T) {
 				VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 			},
 		},
+		wantLicense: []generated.LicenseInputSpec{
+			{
+				Name:        "qwer",
+				ListVersion: ptrfrom.String("1.2.3"),
+			},
+			{
+				Name:        "asdf",
+				ListVersion: ptrfrom.String("1.2.3"),
+			},
+			{
+				Name:   "LicenseRef-123",
+				Inline: ptrfrom.String("This is the license text."),
+			},
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -775,6 +844,12 @@ func TestIngestPredicates(t *testing.T) {
 			}
 			if diff := cmp.Diff(tt.wantVuln, gotVulns, cmpopts.SortSlices(vulnSort)); diff != "" {
 				t.Errorf("Unexpected gotVulns results. (-want +got):\n%s", diff)
+			}
+
+			gotLicenses := i.GetLicenses(ctx)
+			licSort := func(a, b generated.LicenseInputSpec) bool { return a.Name < b.Name }
+			if diff := cmp.Diff(tt.wantLicense, gotLicenses, cmpopts.SortSlices(licSort)); diff != "" {
+				t.Errorf("Unexpected GetLicenses results. (-want +got):\n%s", diff)
 			}
 		})
 	}
