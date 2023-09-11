@@ -97,7 +97,7 @@ type Backend interface {
 	IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error)
 	IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error)
 	IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error)
-	IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error)
+	IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error)
 
 	// Topological queries: queries where node connectivity matters more than node type
 	Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error)

@@ -289,7 +289,7 @@ func ingestVulnMetadatas(ctx context.Context, client graphql.Client, vm []assemb
 		vulnMetadataList = append(vulnMetadataList, *ingest.VulnMetadata)
 	}
 	if len(vm) > 0 {
-		_, err := model.VulnHasMetadatas(ctx, client, vulnerabilities, vulnMetadataList)
+		_, err := model.BulkVulnHasMetadata(ctx, client, vulnerabilities, vulnMetadataList)
 		if err != nil {
 			return fmt.Errorf("VulnHasMetadatas failed with error: %w", err)
 		}

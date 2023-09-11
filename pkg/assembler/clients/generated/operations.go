@@ -6028,6 +6028,17 @@ type BuilderInputSpec struct {
 // GetUri returns BuilderInputSpec.Uri, and is useful for accessing the field via an interface.
 func (v *BuilderInputSpec) GetUri() string { return v.Uri }
 
+// BulkVulnHasMetadataResponse is returned by BulkVulnHasMetadata on success.
+type BulkVulnHasMetadataResponse struct {
+	// Bulk add certifications that vulnerability has a specific score. The returned array of IDs can be a an array of empty string.
+	IngestBulkVulnerabilityMetadata []string `json:"ingestBulkVulnerabilityMetadata"`
+}
+
+// GetIngestBulkVulnerabilityMetadata returns BulkVulnHasMetadataResponse.IngestBulkVulnerabilityMetadata, and is useful for accessing the field via an interface.
+func (v *BulkVulnHasMetadataResponse) GetIngestBulkVulnerabilityMetadata() []string {
+	return v.IngestBulkVulnerabilityMetadata
+}
+
 // CertifyBadArtifactResponse is returned by CertifyBadArtifact on success.
 type CertifyBadArtifactResponse struct {
 	// Adds a certification that a package, source or artifact is considered bad. The returned ID can be empty string.
@@ -20543,17 +20554,6 @@ func (v *VulnHasMetadataResponse) GetIngestVulnerabilityMetadata() string {
 	return v.IngestVulnerabilityMetadata
 }
 
-// VulnHasMetadatasResponse is returned by VulnHasMetadatas on success.
-type VulnHasMetadatasResponse struct {
-	// Bulk add certifications that vulnerability has a specific score. The returned array of IDs can be a an array of empty string.
-	IngestVulnerabilityMetadatas []string `json:"ingestVulnerabilityMetadatas"`
-}
-
-// GetIngestVulnerabilityMetadatas returns VulnHasMetadatasResponse.IngestVulnerabilityMetadatas, and is useful for accessing the field via an interface.
-func (v *VulnHasMetadatasResponse) GetIngestVulnerabilityMetadatas() []string {
-	return v.IngestVulnerabilityMetadatas
-}
-
 // VulnerabilitiesResponse is returned by Vulnerabilities on success.
 type VulnerabilitiesResponse struct {
 	// Returns all vulnerabilities matching a filter.
@@ -20752,6 +20752,22 @@ type __ArtifactsInput struct {
 
 // GetFilter returns __ArtifactsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__ArtifactsInput) GetFilter() ArtifactSpec { return v.Filter }
+
+// __BulkVulnHasMetadataInput is used internally by genqlient
+type __BulkVulnHasMetadataInput struct {
+	Vulnerabilities           []VulnerabilityInputSpec         `json:"vulnerabilities"`
+	VulnerabilityMetadataList []VulnerabilityMetadataInputSpec `json:"vulnerabilityMetadataList"`
+}
+
+// GetVulnerabilities returns __BulkVulnHasMetadataInput.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *__BulkVulnHasMetadataInput) GetVulnerabilities() []VulnerabilityInputSpec {
+	return v.Vulnerabilities
+}
+
+// GetVulnerabilityMetadataList returns __BulkVulnHasMetadataInput.VulnerabilityMetadataList, and is useful for accessing the field via an interface.
+func (v *__BulkVulnHasMetadataInput) GetVulnerabilityMetadataList() []VulnerabilityMetadataInputSpec {
+	return v.VulnerabilityMetadataList
+}
 
 // __CertifyBadArtifactInput is used internally by genqlient
 type __CertifyBadArtifactInput struct {
@@ -21771,22 +21787,6 @@ func (v *__VulnHasMetadataInput) GetVulnMetadata() VulnerabilityMetadataInputSpe
 	return v.VulnMetadata
 }
 
-// __VulnHasMetadatasInput is used internally by genqlient
-type __VulnHasMetadatasInput struct {
-	Vulnerabilities []VulnerabilityInputSpec         `json:"vulnerabilities"`
-	VulnMetadatas   []VulnerabilityMetadataInputSpec `json:"vulnMetadatas"`
-}
-
-// GetVulnerabilities returns __VulnHasMetadatasInput.Vulnerabilities, and is useful for accessing the field via an interface.
-func (v *__VulnHasMetadatasInput) GetVulnerabilities() []VulnerabilityInputSpec {
-	return v.Vulnerabilities
-}
-
-// GetVulnMetadatas returns __VulnHasMetadatasInput.VulnMetadatas, and is useful for accessing the field via an interface.
-func (v *__VulnHasMetadatasInput) GetVulnMetadatas() []VulnerabilityMetadataInputSpec {
-	return v.VulnMetadatas
-}
-
 // __VulnerabilitiesInput is used internally by genqlient
 type __VulnerabilitiesInput struct {
 	Filter VulnerabilitySpec `json:"filter"`
@@ -21824,6 +21824,41 @@ func Artifacts(
 	var err error
 
 	var data ArtifactsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by BulkVulnHasMetadata.
+const BulkVulnHasMetadata_Operation = `
+mutation BulkVulnHasMetadata ($vulnerabilities: [VulnerabilityInputSpec!]!, $vulnerabilityMetadataList: [VulnerabilityMetadataInputSpec!]!) {
+	ingestBulkVulnerabilityMetadata(vulnerabilities: $vulnerabilities, vulnerabilityMetadataList: $vulnerabilityMetadataList)
+}
+`
+
+func BulkVulnHasMetadata(
+	ctx context.Context,
+	client graphql.Client,
+	vulnerabilities []VulnerabilityInputSpec,
+	vulnerabilityMetadataList []VulnerabilityMetadataInputSpec,
+) (*BulkVulnHasMetadataResponse, error) {
+	req := &graphql.Request{
+		OpName: "BulkVulnHasMetadata",
+		Query:  BulkVulnHasMetadata_Operation,
+		Variables: &__BulkVulnHasMetadataInput{
+			Vulnerabilities:           vulnerabilities,
+			VulnerabilityMetadataList: vulnerabilityMetadataList,
+		},
+	}
+	var err error
+
+	var data BulkVulnHasMetadataResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -26483,41 +26518,6 @@ func VulnHasMetadata(
 	var err error
 
 	var data VulnHasMetadataResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-// The query or mutation executed by VulnHasMetadatas.
-const VulnHasMetadatas_Operation = `
-mutation VulnHasMetadatas ($vulnerabilities: [VulnerabilityInputSpec!]!, $vulnMetadatas: [VulnerabilityMetadataInputSpec!]!) {
-	ingestVulnerabilityMetadatas(vulnerabilities: $vulnerabilities, vulnerabilityMetadatas: $vulnMetadatas)
-}
-`
-
-func VulnHasMetadatas(
-	ctx context.Context,
-	client graphql.Client,
-	vulnerabilities []VulnerabilityInputSpec,
-	vulnMetadatas []VulnerabilityMetadataInputSpec,
-) (*VulnHasMetadatasResponse, error) {
-	req := &graphql.Request{
-		OpName: "VulnHasMetadatas",
-		Query:  VulnHasMetadatas_Operation,
-		Variables: &__VulnHasMetadatasInput{
-			Vulnerabilities: vulnerabilities,
-			VulnMetadatas:   vulnMetadatas,
-		},
-	}
-	var err error
-
-	var data VulnHasMetadatasResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -24,6 +25,11 @@ func (r *mutationResolver) IngestHasMetadata(ctx context.Context, subject model.
 		return "", err
 	}
 	return ingestedHasMetadata.ID, err
+}
+
+// IngestBulkHasMetadata is the resolver for the ingestBulkHasMetadata field.
+func (r *mutationResolver) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
+	panic(fmt.Errorf("not implemented: IngestBulkHasMetadata - ingestBulkHasMetadata"))
 }
 
 // HasMetadata is the resolver for the HasMetadata field.

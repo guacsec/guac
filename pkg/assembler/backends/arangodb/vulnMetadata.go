@@ -213,11 +213,11 @@ func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerab
 	}
 }
 
-func (c *arangoClient) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+func (c *arangoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
-	for i := range vulnerabilityMetadatas {
-		listOfValues = append(listOfValues, getVulnMetadataQueryValues(vulnerabilities[i], *vulnerabilityMetadatas[i]))
+	for i := range vulnerabilityMetadataList {
+		listOfValues = append(listOfValues, getVulnMetadataQueryValues(vulnerabilities[i], *vulnerabilityMetadataList[i]))
 	}
 
 	var documents []string

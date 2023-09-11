@@ -1311,7 +1311,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 				t.Fatalf("Could not ingest vulnerabilities: %a", err)
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestVulnerabilityMetadatas(ctx, o.Vulns, o.VulnMetadatas)
+				_, err := b.IngestBulkVulnerabilityMetadata(ctx, o.Vulns, o.VulnMetadatas)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
