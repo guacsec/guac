@@ -176,7 +176,7 @@ require (
 require (
 	entgo.io/contrib v0.4.5
 	entgo.io/ent v0.12.4-0.20230702151415-1ec75238037c
-	github.com/99designs/gqlgen v0.17.36
+	github.com/99designs/gqlgen v0.17.37
 	github.com/CycloneDX/cyclonedx-go v0.7.1
 	github.com/DATA-DOG/go-txdb v0.1.7
 	github.com/Khan/genqlient v0.6.0
