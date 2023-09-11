@@ -45,15 +45,19 @@ func TestCertifyBad(t *testing.T) {
 		CB    *model.CertifyBadInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		InSrc        []*model.SourceInputSpec
-		InArt        []*model.ArtifactInputSpec
-		Calls        []call
-		Query        *model.CertifyBadSpec
-		ExpCB        []*model.CertifyBad
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name          string
+		InPkg         []*model.PkgInputSpec
+		InSrc         []*model.SourceInputSpec
+		InArt         []*model.ArtifactInputSpec
+		Calls         []call
+		Query         *model.CertifyBadSpec
+		QueryID       bool
+		QueryPkgID    bool
+		QuerySourceID bool
+		QueryArtID    bool
+		ExpCB         []*model.CertifyBad
+		ExpIngestErr  bool
+		ExpQueryErr   bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -263,6 +267,7 @@ func TestCertifyBad(t *testing.T) {
 					},
 				},
 			},
+			QueryPkgID: true,
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P4out,
@@ -331,6 +336,7 @@ func TestCertifyBad(t *testing.T) {
 					},
 				},
 			},
+			QuerySourceID: true,
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.S2out,
@@ -404,6 +410,7 @@ func TestCertifyBad(t *testing.T) {
 					},
 				},
 			},
+			QueryArtID: true,
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.A2out,
@@ -558,6 +565,7 @@ func TestCertifyBad(t *testing.T) {
 					},
 				},
 			},
+			QueryID: true,
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.A2out,
@@ -612,12 +620,12 @@ func TestCertifyBad(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query ID" {
+				if test.QueryID {
 					test.Query = &model.CertifyBadSpec{
 						ID: ptrfrom.String(found.ID),
 					}
 				}
-				if test.Name == "Query on Package version ID" {
+				if test.QueryPkgID {
 					if _, ok := found.Subject.(*model.Package); ok {
 						test.Query = &model.CertifyBadSpec{
 							Subject: &model.PackageSourceOrArtifactSpec{
@@ -628,7 +636,7 @@ func TestCertifyBad(t *testing.T) {
 						}
 					}
 				}
-				if test.Name == "Query on Source ID" {
+				if test.QuerySourceID {
 					if _, ok := found.Subject.(*model.Source); ok {
 						test.Query = &model.CertifyBadSpec{
 							Subject: &model.PackageSourceOrArtifactSpec{
@@ -639,7 +647,7 @@ func TestCertifyBad(t *testing.T) {
 						}
 					}
 				}
-				if test.Name == "Query on Artifact ID" {
+				if test.QueryArtID {
 					if _, ok := found.Subject.(*model.Artifact); ok {
 						test.Query = &model.CertifyBadSpec{
 							Subject: &model.PackageSourceOrArtifactSpec{

@@ -53,6 +53,10 @@ func TestVEX(t *testing.T) {
 		InVuln       []*model.VulnerabilityInputSpec
 		Calls        []call
 		Query        *model.CertifyVEXStatementSpec
+		QueryID      bool
+		QueryPkgID   bool
+		QueryArtID   bool
+		QueryVulnID  bool
 		ExpVEX       []*model.CertifyVEXStatement
 		ExpIngestErr bool
 		ExpQueryErr  bool
@@ -272,6 +276,7 @@ func TestVEX(t *testing.T) {
 					},
 				},
 			},
+			QueryPkgID: true,
 			ExpVEX: []*model.CertifyVEXStatement{
 				{
 					Subject: testdata.P2out,
@@ -377,6 +382,7 @@ func TestVEX(t *testing.T) {
 					},
 				},
 			},
+			QueryArtID: true,
 			ExpVEX: []*model.CertifyVEXStatement{
 				{
 					Subject: testdata.A2out,
@@ -515,6 +521,7 @@ func TestVEX(t *testing.T) {
 					},
 				},
 			},
+			QueryVulnID: true,
 			ExpVEX: []*model.CertifyVEXStatement{
 				{
 					Subject: testdata.P1out,
@@ -726,9 +733,7 @@ func TestVEX(t *testing.T) {
 					},
 				},
 			},
-			Query: &model.CertifyVEXStatementSpec{
-				ID: ptrfrom.String("8"),
-			},
+			QueryID: true,
 			ExpVEX: []*model.CertifyVEXStatement{
 				{
 					Subject: testdata.P1out,
@@ -873,12 +878,12 @@ func TestVEX(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.CertifyVEXStatementSpec{
 						ID: ptrfrom.String(found.ID),
 					}
 				}
-				if test.Name == "Query on Package ID" {
+				if test.QueryPkgID {
 					if _, ok := found.Subject.(*model.Package); ok {
 						test.Query = &model.CertifyVEXStatementSpec{
 							Subject: &model.PackageOrArtifactSpec{
@@ -889,7 +894,7 @@ func TestVEX(t *testing.T) {
 						}
 					}
 				}
-				if test.Name == "Query on Artifact ID" {
+				if test.QueryArtID {
 					if _, ok := found.Subject.(*model.Artifact); ok {
 						test.Query = &model.CertifyVEXStatementSpec{
 							Subject: &model.PackageOrArtifactSpec{
@@ -900,7 +905,7 @@ func TestVEX(t *testing.T) {
 						}
 					}
 				}
-				if test.Name == "Query on Vulnerability ID" {
+				if test.QueryVulnID {
 					test.Query = &model.CertifyVEXStatementSpec{
 						Vulnerability: &model.VulnerabilitySpec{
 							ID: ptrfrom.String(found.Vulnerability.ID),

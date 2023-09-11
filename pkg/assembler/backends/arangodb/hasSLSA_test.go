@@ -49,14 +49,17 @@ func TestHasSLSA(t *testing.T) {
 		SLSA *model.SLSAInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InArt        []*model.ArtifactInputSpec
-		InBld        []*model.BuilderInputSpec
-		Calls        []call
-		Query        *model.HasSLSASpec
-		ExpHS        []*model.HasSlsa
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name           string
+		InArt          []*model.ArtifactInputSpec
+		InBld          []*model.BuilderInputSpec
+		Calls          []call
+		Query          *model.HasSLSASpec
+		QueryID        bool
+		QuerySubjectID bool
+		QueryBuilderID bool
+		ExpHS          []*model.HasSlsa
+		ExpIngestErr   bool
+		ExpQueryErr    bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -320,6 +323,7 @@ func TestHasSLSA(t *testing.T) {
 					SLSA: &model.SLSAInputSpec{},
 				},
 			},
+			QuerySubjectID: true,
 			ExpHS: []*model.HasSlsa{
 				{
 					Subject: testdata.A3out,
@@ -420,6 +424,7 @@ func TestHasSLSA(t *testing.T) {
 					SLSA: &model.SLSAInputSpec{},
 				},
 			},
+			QueryBuilderID: true,
 			ExpHS: []*model.HasSlsa{
 				{
 					Subject: testdata.A1out,
@@ -455,6 +460,7 @@ func TestHasSLSA(t *testing.T) {
 					SLSA: &model.SLSAInputSpec{},
 				},
 			},
+			QueryID: true,
 			ExpHS: []*model.HasSlsa{
 				{
 					Subject: testdata.A1out,
@@ -537,19 +543,19 @@ func TestHasSLSA(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.HasSLSASpec{
 						ID: ptrfrom.String(found.ID),
 					}
 				}
-				if test.Name == "Query on Subject ID" {
+				if test.QuerySubjectID {
 					test.Query = &model.HasSLSASpec{
 						Subject: &model.ArtifactSpec{
 							ID: ptrfrom.String(found.Subject.ID),
 						},
 					}
 				}
-				if test.Name == "Query on Builder ID" {
+				if test.QueryBuilderID {
 					test.Query = &model.HasSLSASpec{
 						BuiltBy: &model.BuilderSpec{
 							ID: ptrfrom.String(found.Slsa.BuiltBy.ID),

@@ -65,6 +65,9 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		Calls        []call
 		ExpVuln      []*model.CertifyVuln
 		Query        *model.CertifyVulnSpec
+		QueryID      bool
+		QueryPkgID   bool
+		QueryVulnID  bool
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
@@ -261,6 +264,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					},
 				},
 			},
+			QueryVulnID: true,
 			ExpVuln: []*model.CertifyVuln{
 				{
 					Package: testdata.P2out,
@@ -291,6 +295,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					},
 				},
 			},
+			QueryID: true,
 			ExpVuln: []*model.CertifyVuln{
 				{
 					Package: testdata.P2out,
@@ -562,6 +567,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					},
 				},
 			},
+			QueryPkgID: true,
 			ExpVuln: []*model.CertifyVuln{
 				{
 					Package: testdata.P3out,
@@ -950,19 +956,19 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query ID" {
+				if test.QueryID {
 					test.Query = &model.CertifyVulnSpec{
 						ID: ptrfrom.String(record.ID),
 					}
 				}
-				if test.Name == "Query on Package ID" {
+				if test.QueryPkgID {
 					test.Query = &model.CertifyVulnSpec{
 						Package: &model.PkgSpec{
 							ID: ptrfrom.String(record.Package.Namespaces[0].Names[0].Versions[0].ID),
 						},
 					}
 				}
-				if test.Name == "Query on Vulnerability ID" {
+				if test.QueryVulnID {
 					test.Query = &model.CertifyVulnSpec{
 						Vulnerability: &model.VulnerabilitySpec{
 							ID: ptrfrom.String(record.Vulnerability.ID),

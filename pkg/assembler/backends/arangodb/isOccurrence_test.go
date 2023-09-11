@@ -68,15 +68,19 @@ func TestOccurrence(t *testing.T) {
 		Occurrence *model.IsOccurrenceInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		InSrc        []*model.SourceInputSpec
-		InArt        []*model.ArtifactInputSpec
-		Calls        []call
-		Query        *model.IsOccurrenceSpec
-		ExpOcc       []*model.IsOccurrence
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name          string
+		InPkg         []*model.PkgInputSpec
+		InSrc         []*model.SourceInputSpec
+		InArt         []*model.ArtifactInputSpec
+		Calls         []call
+		Query         *model.IsOccurrenceSpec
+		QueryID       bool
+		QueryPkgID    bool
+		QuerySourceID bool
+		QueryArtID    bool
+		ExpOcc        []*model.IsOccurrence
+		ExpIngestErr  bool
+		ExpQueryErr   bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -236,6 +240,7 @@ func TestOccurrence(t *testing.T) {
 					},
 				},
 			},
+			QueryArtID: true,
 			ExpOcc: []*model.IsOccurrence{
 				{
 					Subject:       testdata.P1out,
@@ -307,6 +312,7 @@ func TestOccurrence(t *testing.T) {
 					},
 				},
 			},
+			QueryPkgID: true,
 			ExpOcc: []*model.IsOccurrence{
 				{
 					Subject:       testdata.P4out,
@@ -378,6 +384,7 @@ func TestOccurrence(t *testing.T) {
 					},
 				},
 			},
+			QuerySourceID: true,
 			ExpOcc: []*model.IsOccurrence{
 				{
 					Subject:       testdata.S1out,
@@ -421,6 +428,7 @@ func TestOccurrence(t *testing.T) {
 					},
 				},
 			},
+			QueryID: true,
 			ExpOcc: []*model.IsOccurrence{
 				{
 					Subject:       testdata.P1out,
@@ -523,12 +531,12 @@ func TestOccurrence(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.IsOccurrenceSpec{
 						ID: ptrfrom.String(found.ID),
 					}
 				}
-				if test.Name == "Query on Package ID" {
+				if test.QueryPkgID {
 					if _, ok := found.Subject.(*model.Package); ok {
 						test.Query = &model.IsOccurrenceSpec{
 							Subject: &model.PackageOrSourceSpec{
@@ -539,7 +547,7 @@ func TestOccurrence(t *testing.T) {
 						}
 					}
 				}
-				if test.Name == "Query on Source ID" {
+				if test.QuerySourceID {
 					if _, ok := found.Subject.(*model.Source); ok {
 						test.Query = &model.IsOccurrenceSpec{
 							Subject: &model.PackageOrSourceSpec{
@@ -550,7 +558,7 @@ func TestOccurrence(t *testing.T) {
 						}
 					}
 				}
-				if test.Name == "Query on Artifact ID" {
+				if test.QueryArtID {
 					test.Query = &model.IsOccurrenceSpec{
 						Artifact: &model.ArtifactSpec{
 							ID: ptrfrom.String(found.Artifact.ID),

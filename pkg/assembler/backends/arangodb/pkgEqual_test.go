@@ -46,13 +46,16 @@ func TestPkgEqual(t *testing.T) {
 		HE *model.PkgEqualInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		Calls        []call
-		Query        *model.PkgEqualSpec
-		ExpHE        []*model.PkgEqual
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name                string
+		InPkg               []*model.PkgInputSpec
+		Calls               []call
+		Query               *model.PkgEqualSpec
+		ExpHE               []*model.PkgEqual
+		QueryID             bool
+		QueryPkgID          bool
+		QuerySecondaryPkgID bool
+		ExpIngestErr        bool
+		ExpQueryErr         bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -153,6 +156,7 @@ func TestPkgEqual(t *testing.T) {
 					},
 				},
 			},
+			QueryPkgID: true,
 			ExpHE: []*model.PkgEqual{
 				{
 					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
@@ -187,6 +191,7 @@ func TestPkgEqual(t *testing.T) {
 					},
 				},
 			},
+			QuerySecondaryPkgID: true,
 			ExpHE: []*model.PkgEqual{
 				{
 					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
@@ -524,6 +529,7 @@ func TestPkgEqual(t *testing.T) {
 					},
 				},
 			},
+			QueryID: true,
 			ExpHE: []*model.PkgEqual{
 				{
 					Packages:      []*model.Package{testdata.P1out, testdata.P3out},
@@ -581,19 +587,19 @@ func TestPkgEqual(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.PkgEqualSpec{
 						ID: ptrfrom.String(found.ID),
 					}
 				}
-				if test.Name == "Query on pkg ID" {
+				if test.QueryPkgID {
 					test.Query = &model.PkgEqualSpec{
 						Packages: []*model.PkgSpec{{
 							ID: ptrfrom.String(found.Packages[0].Namespaces[0].Names[0].Versions[0].ID),
 						}},
 					}
 				}
-				if test.Name == "Query on secondary pkg ID" {
+				if test.QuerySecondaryPkgID {
 					test.Query = &model.PkgEqualSpec{
 						Packages: []*model.PkgSpec{
 							{

@@ -49,6 +49,8 @@ func TestVulnEqual(t *testing.T) {
 		InVuln       []*model.VulnerabilityInputSpec
 		Calls        []call
 		Query        *model.VulnEqualSpec
+		QueryID      bool
+		QueryVulnID  bool
 		ExpVulnEqual []*model.VulnEqual
 		ExpIngestErr bool
 		ExpQueryErr  bool
@@ -221,6 +223,7 @@ func TestVulnEqual(t *testing.T) {
 					},
 				},
 			},
+			QueryVulnID: true,
 			ExpVulnEqual: []*model.VulnEqual{
 				{
 					Vulnerabilities: []*model.Vulnerability{
@@ -519,9 +522,7 @@ func TestVulnEqual(t *testing.T) {
 					},
 				},
 			},
-			Query: &model.VulnEqualSpec{
-				ID: ptrfrom.String("8"),
-			},
+			QueryID: true,
 			ExpVulnEqual: []*model.VulnEqual{
 				{
 					Vulnerabilities: []*model.Vulnerability{
@@ -606,12 +607,12 @@ func TestVulnEqual(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.VulnEqualSpec{
 						ID: ptrfrom.String(found.ID),
 					}
 				}
-				if test.Name == "Query on vulnerability IDs" {
+				if test.QueryVulnID {
 					test.Query = &model.VulnEqualSpec{
 						Vulnerabilities: []*model.VulnerabilitySpec{
 							{

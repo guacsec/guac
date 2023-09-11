@@ -49,6 +49,9 @@ func TestHasSBOM(t *testing.T) {
 		InArt        []*model.ArtifactInputSpec
 		Calls        []call
 		Query        *model.HasSBOMSpec
+		QueryID      bool
+		QueryPkgID   bool
+		QueryArtID   bool
 		ExpHS        []*model.HasSbom
 		ExpIngestErr bool
 		ExpQueryErr  bool
@@ -212,6 +215,7 @@ func TestHasSBOM(t *testing.T) {
 					},
 				},
 			},
+			QueryPkgID: true,
 			ExpHS: []*model.HasSbom{
 				{
 					Subject: testdata.P2out,
@@ -293,6 +297,7 @@ func TestHasSBOM(t *testing.T) {
 					},
 				},
 			},
+			QueryArtID: true,
 			ExpHS: []*model.HasSbom{
 				{
 					Subject: testdata.A2out,
@@ -483,6 +488,7 @@ func TestHasSBOM(t *testing.T) {
 					},
 				},
 			},
+			QueryID: true,
 			ExpHS: []*model.HasSbom{
 				{
 					Subject:          testdata.P1out,
@@ -540,12 +546,12 @@ func TestHasSBOM(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.HasSBOMSpec{
 						ID: ptrfrom.String(found.ID),
 					}
 				}
-				if test.Name == "Query on Package ID" {
+				if test.QueryPkgID {
 					if _, ok := found.Subject.(*model.Package); ok {
 						test.Query = &model.HasSBOMSpec{
 							Subject: &model.PackageOrArtifactSpec{
@@ -556,7 +562,7 @@ func TestHasSBOM(t *testing.T) {
 						}
 					}
 				}
-				if test.Name == "Query on Artifact ID" {
+				if test.QueryArtID {
 					if _, ok := found.Subject.(*model.Artifact); ok {
 						test.Query = &model.HasSBOMSpec{
 							Subject: &model.PackageOrArtifactSpec{

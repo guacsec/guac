@@ -19,7 +19,6 @@ package arangodb
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -52,13 +51,16 @@ func TestIsDependency(t *testing.T) {
 		ID *model.IsDependencyInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		Calls        []call
-		Query        *model.IsDependencySpec
-		ExpID        []*model.IsDependency
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name          string
+		InPkg         []*model.PkgInputSpec
+		Calls         []call
+		Query         *model.IsDependencySpec
+		QueryID       bool
+		QueryPkgID    bool
+		QueryDepPkgID bool
+		ExpID         []*model.IsDependency
+		ExpIngestErr  bool
+		ExpQueryErr   bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -607,6 +609,7 @@ func TestIsDependency(t *testing.T) {
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
+			QueryID: true,
 			ExpID: []*model.IsDependency{
 				{
 					Package:          testdata.P1out,
@@ -822,6 +825,7 @@ func TestIsDependency(t *testing.T) {
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
+			QueryPkgID: true,
 			ExpID: []*model.IsDependency{
 				{
 					Package:          testdata.P4out,
@@ -846,6 +850,7 @@ func TestIsDependency(t *testing.T) {
 					ID: &model.IsDependencyInputSpec{},
 				},
 			},
+			QueryDepPkgID: true,
 			ExpID: []*model.IsDependency{
 				{
 					Package:          testdata.P2out,
@@ -859,9 +864,6 @@ func TestIsDependency(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if test.Name == "Query on pkg" {
-				fmt.Print("here")
-			}
 			for _, a := range test.InPkg {
 				if _, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
@@ -875,19 +877,19 @@ func TestIsDependency(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.IsDependencySpec{
 						ID: ptrfrom.String(found.ID),
 					}
 				}
-				if test.Name == "Query on pkg ID" {
+				if test.QueryPkgID {
 					test.Query = &model.IsDependencySpec{
 						Package: &model.PkgSpec{
 							ID: ptrfrom.String(found.Package.Namespaces[0].Names[0].Versions[0].ID),
 						},
 					}
 				}
-				if test.Name == "Query on dep pkg ID" {
+				if test.QueryDepPkgID {
 					test.Query = &model.IsDependencySpec{
 						DependentPackage: &model.PkgSpec{
 							ID: ptrfrom.String(found.DependentPackage.Namespaces[0].Names[0].Versions[0].ID),

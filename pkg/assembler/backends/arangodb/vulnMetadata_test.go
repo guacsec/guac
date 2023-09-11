@@ -61,6 +61,8 @@ func TestIngestVulnMetadata(t *testing.T) {
 		Calls        []call
 		ExpVuln      []*model.VulnerabilityMetadata
 		Query        *model.VulnerabilityMetadataSpec
+		QueryID      bool
+		QueryVulnID  bool
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
@@ -190,6 +192,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 					},
 				},
 			},
+			QueryVulnID: true,
 			ExpVuln: []*model.VulnerabilityMetadata{
 				{
 					Vulnerability: &model.Vulnerability{
@@ -300,6 +303,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 					},
 				},
 			},
+			QueryID: true,
 			ExpVuln: []*model.VulnerabilityMetadata{
 				{
 					Vulnerability: &model.Vulnerability{
@@ -987,7 +991,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
-				if test.Name == "Query on Vulnerability ID" {
+				if test.QueryVulnID {
 					test.Query = &model.VulnerabilityMetadataSpec{
 						Vulnerability: &model.VulnerabilitySpec{
 							ID: ptrfrom.String(ingestedVuln.VulnerabilityIDs[0].ID),
@@ -1004,7 +1008,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.VulnerabilityMetadataSpec{
 						ID: ptrfrom.String(record),
 					}
