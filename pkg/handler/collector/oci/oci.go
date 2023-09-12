@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
+	"github.com/regclient/regclient/scheme"
 	"github.com/regclient/regclient/types/manifest"
 	"github.com/regclient/regclient/types/ref"
 )
@@ -207,6 +208,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	}
 
 	digest := manifest.GetDigest(m)
+
 	digestFormatted := fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded())
 	suffixList := []string{"att", "sbom"}
 	for _, suffix := range suffixList {
@@ -219,6 +221,21 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 				return fmt.Errorf("failed retrieving artifact blobs from registry fallback artifacts: %w", err)
 			}
 			o.checkedDigest[repo] = append(o.checkedDigest[repo], digestTag)
+		}
+	}
+
+	referrerOpts := []scheme.ReferrerOpts{}
+	referrerOpts = append(referrerOpts, scheme.WithReferrerAT("application/spdx+json"))
+
+	referrerList, err := rc.ReferrerList(ctx, image, referrerOpts...)
+	if err != nil {
+		return err
+	}
+	for _, referrerDesc := range referrerList.Descriptors {
+		imageTag := fmt.Sprintf("%v@%v", repo, referrerDesc.Digest.String())
+		err = fetchOCIArtifactBlobs(ctx, rc, imageTag, docChannel)
+		if err != nil {
+			return err
 		}
 	}
 
