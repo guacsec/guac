@@ -182,8 +182,6 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 // Note: fetchOCIArtifacts currently does not re-check if a new sbom or attestation get reuploaded during polling with the same image digest.
 // A workaround for this would be to run the collector again with a specific tag without polling and ingest like normal
 func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *regclient.RegClient, image ref.Ref, docChannel chan<- *processor.Document) error {
-	logger := logging.FromContext(ctx)
-
 	// attempt to request only the headers, avoids Docker Hub rate limits
 	m, err := rc.ManifestHead(ctx, image)
 	if err != nil {
@@ -216,56 +214,64 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 		// check to see if the digest + suffix has already been collected
 		if !contains(o.checkedDigest[repo], digestTag) {
 			imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
-			r, err := ref.New(imageTag)
+			err = fetchOCIArtifactBlobs(ctx, rc, imageTag, docChannel)
 			if err != nil {
-				return err
-			}
-
-			// if `.att` or `.sbom`` do not exist for specified digest
-			// log error and continue
-			m, err = rc.ManifestGet(ctx, r)
-			if err != nil {
-				// this is a normal behavior, not an error when the digest does not have an attestation
-				// explicitly logging it as info to avoid call-stack when logging
-				logger.Infof("unable to get manifest for %v: %v", imageTag, err)
-				continue
-			}
-
-			// go through layers in reverse
-			mi, ok := m.(manifest.Imager)
-			if !ok {
-				return fmt.Errorf("reference is not a known image media type")
-			}
-			layers, err := mi.GetLayers()
-			if err != nil {
-				return err
-			}
-			for i := len(layers) - 1; i >= 0; i-- {
-				if ctx.Err() != nil {
-					return ctx.Err()
-				}
-				blob, err := rc.BlobGet(ctx, r, layers[i])
-				if err != nil {
-					return fmt.Errorf("failed pulling layer %d: %w", i, err)
-				}
-				btr1, err := blob.RawBody()
-				if err != nil {
-					return err
-				}
-
-				doc := &processor.Document{
-					Blob:   btr1,
-					Type:   processor.DocumentUnknown,
-					Format: processor.FormatUnknown,
-					SourceInformation: processor.SourceInformation{
-						Collector: string(OCICollector),
-						Source:    imageTag,
-					},
-				}
-				docChannel <- doc
+				return fmt.Errorf("failed retrieving artifact blobs from registry fallback artifacts: %w", err)
 			}
 			o.checkedDigest[repo] = append(o.checkedDigest[repo], digestTag)
 		}
+	}
+
+	return nil
+}
+
+func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifact string, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
+	r, err := ref.New(artifact)
+	if err != nil {
+		return err
+	}
+
+	m, err := rc.ManifestGet(ctx, r)
+	if err != nil {
+		// this is a normal behavior, not an error when the digest does not have an attestation
+		// explicitly logging it as info to avoid call-stack when logging
+		logger.Infof("unable to get manifest for %v: %v", artifact, err)
+		return nil
+	}
+
+	// go through layers in reverse
+	mi, ok := m.(manifest.Imager)
+	if !ok {
+		return fmt.Errorf("reference is not a known image media type")
+	}
+	layers, err := mi.GetLayers()
+	if err != nil {
+		return err
+	}
+	for i := len(layers) - 1; i >= 0; i-- {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		blob, err := rc.BlobGet(ctx, r, layers[i])
+		if err != nil {
+			return fmt.Errorf("failed pulling layer %d: %w", i, err)
+		}
+		btr1, err := blob.RawBody()
+		if err != nil {
+			return err
+		}
+
+		doc := &processor.Document{
+			Blob:   btr1,
+			Type:   processor.DocumentUnknown,
+			Format: processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{
+				Collector: string(OCICollector),
+				Source:    artifact,
+			},
+		}
+		docChannel <- doc
 	}
 
 	return nil
