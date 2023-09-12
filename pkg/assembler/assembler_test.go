@@ -138,6 +138,13 @@ func TestIngestPredicates(t *testing.T) {
 					},
 				},
 				{
+					Src:      k8sSource,
+					Artifact: rootFileArtifact,
+					IsOccurrence: &generated.IsOccurrenceInputSpec{
+						Justification: "spdx file with checksum",
+					},
+				},
+				{
 					Pkg:      rootFilePack,
 					Artifact: rootFileArtifact,
 					IsOccurrence: &generated.IsOccurrenceInputSpec{
@@ -148,6 +155,15 @@ func TestIngestPredicates(t *testing.T) {
 			HasSBOM: []HasSBOMIngest{
 				{
 					Pkg: topLevelPack,
+					HasSBOM: &generated.HasSBOMInputSpec{
+						Uri:              "TestSource",
+						Algorithm:        "sha256",
+						Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
+						DownloadLocation: "TestSource",
+					},
+				},
+				{
+					Artifact: rootFileArtifact,
 					HasSBOM: &generated.HasSBOMInputSpec{
 						Uri:              "TestSource",
 						Algorithm:        "sha256",
@@ -381,6 +397,60 @@ func TestIngestPredicates(t *testing.T) {
 					},
 					VulnEqual: &generated.VulnEqualInputSpec{
 						Justification: "Decoded OSV data",
+					},
+				},
+			},
+			PointOfContact: []PointOfContactIngest{
+				{
+					Pkg: topLevelPack,
+					PkgMatchFlag: generated.MatchFlags{
+						Pkg: generated.PkgMatchTypeSpecificVersion,
+					},
+					//generated.PkgMatchTypeSpecificVersion,
+					PointOfContact: &generated.PointOfContactInputSpec{
+						Justification: "bad package",
+					},
+				},
+				{
+					Src: k8sSource,
+					PointOfContact: &generated.PointOfContactInputSpec{
+						Justification: "bad source",
+					},
+				},
+				{
+					Artifact: &generated.ArtifactInputSpec{
+						Algorithm: "sha256",
+						Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+					},
+					PointOfContact: &generated.PointOfContactInputSpec{
+						Justification: "bad artifact",
+					},
+				},
+			},
+			HasMetadata: []HasMetadataIngest{
+				{
+					Pkg: topLevelPack,
+					PkgMatchFlag: generated.MatchFlags{
+						Pkg: generated.PkgMatchTypeSpecificVersion,
+					},
+					//generated.PkgMatchTypeSpecificVersion,
+					HasMetadata: &generated.HasMetadataInputSpec{
+						Justification: "bad package",
+					},
+				},
+				{
+					Src: k8sSource,
+					HasMetadata: &generated.HasMetadataInputSpec{
+						Justification: "bad source",
+					},
+				},
+				{
+					Artifact: &generated.ArtifactInputSpec{
+						Algorithm: "sha256",
+						Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+					},
+					HasMetadata: &generated.HasMetadataInputSpec{
+						Justification: "bad artifact",
 					},
 				},
 			},

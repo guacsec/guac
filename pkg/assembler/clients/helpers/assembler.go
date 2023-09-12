@@ -153,6 +153,13 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			logger.Infof("assembling HasMetadata: %v", len(p.HasMetadata))
+			for _, hm := range p.HasMetadata {
+				if err := ingestHasMetadata(ctx, gqlclient, hm); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			for _, hb := range p.HasSBOM {
 				if err := ingestHasSBOM(ctx, gqlclient, hb); err != nil {
@@ -311,6 +318,23 @@ func ingestPointOfContact(ctx context.Context, client graphql.Client, poc assemb
 		return err
 	}
 	_, err := model.PointOfContactArtifact(ctx, client, *poc.Artifact, *poc.PointOfContact)
+	return err
+}
+
+func ingestHasMetadata(ctx context.Context, client graphql.Client, hm assembler.HasMetadataIngest) error {
+	if err := validatePackageSourceOrArtifactInput(hm.Pkg, hm.Src, hm.Artifact, "hasMetadata"); err != nil {
+		return fmt.Errorf("input validation failed for hasMetadata: %w", err)
+	}
+
+	if hm.Pkg != nil {
+		_, err := model.HasMetadataPkg(ctx, client, *hm.Pkg, hm.PkgMatchFlag, *hm.HasMetadata)
+		return err
+	}
+	if hm.Src != nil {
+		_, err := model.HasMetadataSrc(ctx, client, *hm.Src, *hm.HasMetadata)
+		return err
+	}
+	_, err := model.HasMetadataArtifact(ctx, client, *hm.Artifact, *hm.HasMetadata)
 	return err
 }
 

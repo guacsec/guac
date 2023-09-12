@@ -50,3 +50,40 @@ mutation HasMetadataArtifact(
     hasMetadata: $hasMetadata
   )
 }
+
+
+# Defines the GraphQL operations to bulk ingest a HasMetadata into GUAC
+
+mutation HasMetadataPkgs(
+  $pkgs: [PkgInputSpec!]!
+  $pkgMatchType: MatchFlags!
+  $hasMetadataList: [HasMetadataInputSpec!]!
+) {
+  ingestBulkHasMetadata(
+    subjects: { packages: $pkgs }
+    pkgMatchType: $pkgMatchType
+    hasMetadataList: $hasMetadataList
+  )
+}
+
+mutation HasMetadataSrcs(
+  $sources: [SourceInputSpec!]!
+  $hasMetadataList: [HasMetadataInputSpec!]!
+) {
+  ingestBulkHasMetadata(
+    subjects: { sources: $sources }
+    pkgMatchType: { pkg: ALL_VERSIONS }
+    hasMetadataList: $hasMetadataList
+  )
+}
+
+mutation HasMetadataArtifacts(
+  $artifacts: [ArtifactInputSpec!]!
+  $hasMetadataList: [HasMetadataInputSpec!]!
+) {
+  ingestBulkHasMetadata(
+    subjects: { artifacts: $artifacts }
+    pkgMatchType: { pkg: ALL_VERSIONS }
+    hasMetadataList: $hasMetadataList
+  )
+}

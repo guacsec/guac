@@ -150,12 +150,17 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 
 			// TODO: add bulk ingestion for PointOfContact
-			logger.Infof("assembling PointOfContact: %v", len(p.CertifyGood))
+			logger.Infof("assembling PointOfContact: %v", len(p.PointOfContact))
 			for _, poc := range p.PointOfContact {
 				if err := ingestPointOfContact(ctx, gqlclient, poc); err != nil {
 					return fmt.Errorf("ingestPointOfContact failed with error: %w", err)
 
 				}
+			}
+
+			logger.Infof("assembling HasMetadata: %v", len(p.HasMetadata))
+			if err := ingestBulkHasMetadata(ctx, gqlclient, p.HasMetadata); err != nil {
+				return fmt.Errorf("ingestBulkHasMetadata failed with error: %w", err)
 			}
 
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
@@ -289,7 +294,7 @@ func ingestVulnMetadatas(ctx context.Context, client graphql.Client, vm []assemb
 		vulnMetadataList = append(vulnMetadataList, *ingest.VulnMetadata)
 	}
 	if len(vm) > 0 {
-		_, err := model.VulnHasMetadatas(ctx, client, vulnerabilities, vulnMetadataList)
+		_, err := model.BulkVulnHasMetadata(ctx, client, vulnerabilities, vulnMetadataList)
 		if err != nil {
 			return fmt.Errorf("VulnHasMetadatas failed with error: %w", err)
 		}
@@ -458,6 +463,62 @@ func ingestHasSBOMs(ctx context.Context, client graphql.Client, v []assembler.Ha
 		_, err := model.HasSBOMPkgs(ctx, client, pkgs, pkgSBOMs)
 		if err != nil {
 			return fmt.Errorf("hasSBOMPkgs failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestBulkHasMetadata(ctx context.Context, client graphql.Client, v []assembler.HasMetadataIngest) error {
+	var pkgVersions []model.PkgInputSpec
+	var pkgNames []model.PkgInputSpec
+	var sources []model.SourceInputSpec
+	var artifacts []model.ArtifactInputSpec
+	var pkgVersionHasMetadata []model.HasMetadataInputSpec
+	var pkgNameHasMetadata []model.HasMetadataInputSpec
+	var srcHasMetadata []model.HasMetadataInputSpec
+	var artHasMetadata []model.HasMetadataInputSpec
+	for _, ingest := range v {
+		if err := validatePackageSourceOrArtifactInput(ingest.Pkg, ingest.Src, ingest.Artifact, "ingestBulkHasMetadata"); err != nil {
+			return fmt.Errorf("input validation failed for ingestBulkHasMetadata: %w", err)
+		}
+		if ingest.Pkg != nil {
+			if ingest.PkgMatchFlag.Pkg == model.PkgMatchTypeSpecificVersion {
+				pkgVersions = append(pkgVersions, *ingest.Pkg)
+				pkgVersionHasMetadata = append(pkgVersionHasMetadata, *ingest.HasMetadata)
+			} else {
+				pkgNames = append(pkgNames, *ingest.Pkg)
+				pkgNameHasMetadata = append(pkgNameHasMetadata, *ingest.HasMetadata)
+			}
+		} else if ingest.Src != nil {
+			sources = append(sources, *ingest.Src)
+			srcHasMetadata = append(srcHasMetadata, *ingest.HasMetadata)
+		} else {
+			artifacts = append(artifacts, *ingest.Artifact)
+			artHasMetadata = append(artHasMetadata, *ingest.HasMetadata)
+		}
+	}
+	if len(pkgVersions) > 0 {
+		_, err := model.HasMetadataPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionHasMetadata)
+		if err != nil {
+			return fmt.Errorf("HasMetadataPkgs - specific version failed with error: %w", err)
+		}
+	}
+	if len(pkgNames) > 0 {
+		_, err := model.HasMetadataPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameHasMetadata)
+		if err != nil {
+			return fmt.Errorf("HasMetadataPkgs - all versions failed with error: %w", err)
+		}
+	}
+	if len(sources) > 0 {
+		_, err := model.HasMetadataSrcs(ctx, client, sources, srcHasMetadata)
+		if err != nil {
+			return fmt.Errorf("HasMetadataSrcs failed with error: %w", err)
+		}
+	}
+	if len(artifacts) > 0 {
+		_, err := model.HasMetadataArtifacts(ctx, client, artifacts, artHasMetadata)
+		if err != nil {
+			return fmt.Errorf("HasMetadataArtifacts failed with error: %w", err)
 		}
 	}
 	return nil

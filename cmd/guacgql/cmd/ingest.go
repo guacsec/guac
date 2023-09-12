@@ -605,7 +605,7 @@ func bulkIngestVulnerabilityMetadata(ctx context.Context, client graphql.Client)
 		if _, err := model.IngestVulnerabilities(ctx, client, ingest.vulns); err != nil {
 			logger.Errorf("Error in ingesting vulnerabilities: %v\n", err)
 		}
-		if _, err := model.VulnHasMetadatas(ctx, client, ingest.vulns, ingest.vulnerabilityMetadataList); err != nil {
+		if _, err := model.BulkVulnHasMetadata(ctx, client, ingest.vulns, ingest.vulnerabilityMetadataList); err != nil {
 			logger.Errorf("Error in ingesting VulnHasMetadatas: %v\n", err)
 		}
 	}

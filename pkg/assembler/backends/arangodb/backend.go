@@ -99,6 +99,14 @@ const (
 	hashEqualSubjectArtEdgesStr string = "hashEqualSubjectArtEdges"
 	hashEqualsStr               string = "hashEquals"
 
+	// hasMetadata collection
+
+	hasMetadataPkgVersionEdgesStr string = "hasMetadataPkgVersionEdges"
+	hasMetadataPkgNameEdgesStr    string = "hasMetadataPkgNameEdges"
+	hasMetadataSrcEdgesStr        string = "hasMetadataSrcEdges"
+	hasMetadataArtEdgesStr        string = "hasMetadataArtEdges"
+	hasMetadataStr                string = "hasMetadataCollection"
+
 	// hasSBOM collection
 
 	hasSBOMPkgEdgesStr string = "hasSBOMPkgEdges"
@@ -120,7 +128,7 @@ const (
 	// vulnMetadata collection
 
 	vulnMetadataEdgesStr string = "vulnMetadataEdges"
-	vulnMetadatasStr     string = "vulnMetadatas"
+	vulnMetadataStr      string = "vulnMetadataCollection"
 
 	// vulnEquals collections
 
@@ -359,6 +367,27 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		hashEqualSubjectArtEdges.From = []string{artifactsStr}
 		hashEqualSubjectArtEdges.To = []string{hashEqualsStr}
 
+		// setup hasMetadata collections
+		var hasMetadataPkgVersionEdges driver.EdgeDefinition
+		hasMetadataPkgVersionEdges.Collection = hasMetadataPkgVersionEdgesStr
+		hasMetadataPkgVersionEdges.From = []string{pkgVersionsStr}
+		hasMetadataPkgVersionEdges.To = []string{hasMetadataStr}
+
+		var hasMetadataPkgNameEdges driver.EdgeDefinition
+		hasMetadataPkgNameEdges.Collection = hasMetadataPkgNameEdgesStr
+		hasMetadataPkgNameEdges.From = []string{pkgNamesStr}
+		hasMetadataPkgNameEdges.To = []string{hasMetadataStr}
+
+		var hasMetadataArtEdges driver.EdgeDefinition
+		hasMetadataArtEdges.Collection = hasMetadataArtEdgesStr
+		hasMetadataArtEdges.From = []string{artifactsStr}
+		hasMetadataArtEdges.To = []string{hasMetadataStr}
+
+		var hasMetadataSrcEdges driver.EdgeDefinition
+		hasMetadataSrcEdges.Collection = hasMetadataSrcEdgesStr
+		hasMetadataSrcEdges.From = []string{srcNamesStr}
+		hasMetadataSrcEdges.To = []string{hasMetadataStr}
+
 		// setup hasSBOM collections
 		var hasSBOMPkgEdges driver.EdgeDefinition
 		hasSBOMPkgEdges.Collection = hasSBOMPkgEdgesStr
@@ -401,7 +430,7 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var vulnMetadataEdges driver.EdgeDefinition
 		vulnMetadataEdges.Collection = vulnMetadataEdgesStr
 		vulnMetadataEdges.From = []string{vulnerabilitiesStr}
-		vulnMetadataEdges.To = []string{vulnMetadatasStr}
+		vulnMetadataEdges.To = []string{vulnMetadataStr}
 
 		// setup vulnEqual collections
 		var vulnEqualVulnEdges driver.EdgeDefinition
@@ -482,7 +511,8 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
 			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges,
-			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges}
+			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges, hasMetadataPkgVersionEdges, hasMetadataPkgNameEdges,
+			hasMetadataArtEdges, hasMetadataSrcEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -557,7 +587,7 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "justification"}, true, "byPkgIDArtIDJust"); err != nil {
+		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "justification", "origin"}, true, "byPkgIDArtIDOriginJust"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 

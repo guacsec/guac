@@ -47,7 +47,7 @@ func (c *arangoClient) VulnerabilityMetadata(ctx context.Context, vulnerabilityM
 
 	} else {
 		values := map[string]any{}
-		arangoQueryBuilder = newForQuery(vulnMetadatasStr, "vulnMetadata")
+		arangoQueryBuilder = newForQuery(vulnMetadataStr, "vulnMetadata")
 		err := setVulnMetadataMatchValues(arangoQueryBuilder, vulnerabilityMetadataSpec, values)
 		if err != nil {
 			return nil, fmt.Errorf("setting match values for vuln metadata resulted in error: %w", err)
@@ -174,7 +174,7 @@ func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerab
 	  LET vulnMetadata = FIRST(
 		  UPSERT { vulnerabilityID:firstVuln.vulnDoc._id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin } 
 			  INSERT { vulnerabilityID:firstVuln.vulnDoc._id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin } 
-			  UPDATE {} IN vulnMetadatas
+			  UPDATE {} IN vulnMetadataCollection
 			  RETURN NEW
 	  )
 				  
@@ -213,11 +213,11 @@ func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerab
 	}
 }
 
-func (c *arangoClient) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+func (c *arangoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
-	for i := range vulnerabilityMetadatas {
-		listOfValues = append(listOfValues, getVulnMetadataQueryValues(vulnerabilities[i], *vulnerabilityMetadatas[i]))
+	for i := range vulnerabilityMetadataList {
+		listOfValues = append(listOfValues, getVulnMetadataQueryValues(vulnerabilities[i], *vulnerabilityMetadataList[i]))
 	}
 
 	var documents []string
@@ -261,7 +261,7 @@ func (c *arangoClient) IngestVulnerabilityMetadatas(ctx context.Context, vulnera
 	  LET vulnMetadata = FIRST(
 		  UPSERT { vulnerabilityID:firstVuln.vulnDoc._id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin } 
 			  INSERT { vulnerabilityID:firstVuln.vulnDoc._id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin } 
-			  UPDATE {} IN vulnMetadatas
+			  UPDATE {} IN vulnMetadataCollection
 			  RETURN NEW
 	  )
 				  

@@ -230,10 +230,10 @@ func TestIngestVulnerabilityMetadatas(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestVulnerabilityMetadatas(ctx, gomock.Any(), o.VulnMetadatas).
+					IngestBulkVulnerabilityMetadata(ctx, gomock.Any(), o.VulnMetadatas).
 					Return([]string{}, nil).
 					Times(times)
-				_, err := r.Mutation().IngestVulnerabilityMetadatas(ctx, o.Vulns, o.VulnMetadatas)
+				_, err := r.Mutation().IngestBulkVulnerabilityMetadata(ctx, o.Vulns, o.VulnMetadatas)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

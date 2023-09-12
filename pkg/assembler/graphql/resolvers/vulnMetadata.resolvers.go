@@ -31,11 +31,11 @@ func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vuln
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)}, vulnerabilityMetadata)
 }
 
-// IngestVulnerabilityMetadatas is the resolver for the ingestVulnerabilityMetadatas field.
-func (r *mutationResolver) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+// IngestBulkVulnerabilityMetadata is the resolver for the ingestBulkVulnerabilityMetadata field.
+func (r *mutationResolver) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	funcName := "IngestVulnerabilityMetadatas"
-	if len(vulnerabilities) != len(vulnerabilityMetadatas) {
-		return []string{}, gqlerror.Errorf("%v :: uneven vulnerabilities and vulnerabilityMetadatas for ingestion", funcName)
+	if len(vulnerabilities) != len(vulnerabilityMetadataList) {
+		return []string{}, gqlerror.Errorf("%v :: uneven vulnerabilities and vulnerabilityMetadata for ingestion", funcName)
 	}
 
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
@@ -58,7 +58,7 @@ func (r *mutationResolver) IngestVulnerabilityMetadatas(ctx context.Context, vul
 		}
 		lowercaseVulnInputList = append(lowercaseVulnInputList, &lowercaseVulnInput)
 	}
-	return r.Backend.IngestVulnerabilityMetadatas(ctx, lowercaseVulnInputList, vulnerabilityMetadatas)
+	return r.Backend.IngestBulkVulnerabilityMetadata(ctx, lowercaseVulnInputList, vulnerabilityMetadataList)
 }
 
 // VulnerabilityMetadata is the resolver for the vulnerabilityMetadata field.

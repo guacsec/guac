@@ -52,10 +52,10 @@ func (n *vulnerabilityMetadataLink) BuildModelNode(c *demoClient) (model.Node, e
 }
 
 // Ingest VulnerabilityMetadata
-func (c *demoClient) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+func (c *demoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	var modelVulnMetadataIDList []string
-	for i := range vulnerabilityMetadatas {
-		vulnMetadata, err := c.IngestVulnerabilityMetadata(ctx, *vulnerabilities[i], *vulnerabilityMetadatas[i])
+	for i := range vulnerabilityMetadataList {
+		vulnMetadata, err := c.IngestVulnerabilityMetadata(ctx, *vulnerabilities[i], *vulnerabilityMetadataList[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestVulnerabilityMetadata failed with err: %v", err)
 		}

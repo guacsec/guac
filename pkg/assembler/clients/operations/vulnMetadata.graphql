@@ -29,12 +29,12 @@ mutation VulnHasMetadata(
 
 # Defines the GraphQL operations to bulk ingest metadata for a vulnerability into GUAC
 
-mutation VulnHasMetadatas(
+mutation BulkVulnHasMetadata(
   $vulnerabilities: [VulnerabilityInputSpec!]!, 
-  $vulnMetadatas: [VulnerabilityMetadataInputSpec!]!
+  $vulnerabilityMetadataList: [VulnerabilityMetadataInputSpec!]!
   ) {
-  ingestVulnerabilityMetadatas(
+  ingestBulkVulnerabilityMetadata(
     vulnerabilities: $vulnerabilities, 
-    vulnerabilityMetadatas: $vulnMetadatas
+    vulnerabilityMetadataList: $vulnerabilityMetadataList
   )
 }
