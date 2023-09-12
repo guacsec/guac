@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
@@ -65,6 +66,18 @@ func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.BuilderInpu
 		return nil, errors.Wrap(err, funcName)
 	}
 	return toModelBuilder(record.Unwrap()), nil
+}
+
+func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
+	var modelBuilders []*model.Builder
+	for _, builder := range builders {
+		modelBuilder, err := b.IngestBuilder(ctx, builder)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestBuilders failed with err: %v", err)
+		}
+		modelBuilders = append(modelBuilders, modelBuilder)
+	}
+	return modelBuilders, nil
 }
 
 func upsertBuilder(ctx context.Context, client *ent.Tx, spec *model.BuilderInputSpec) (*ent.Builder, error) {
