@@ -17,8 +17,11 @@ package open_vex
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+
+	"github.com/guacsec/guac/pkg/logging"
+
+	json "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -74,7 +77,7 @@ func (c *openVEXParser) GetIdentities(ctx context.Context) []common.TrustInforma
 }
 
 func (c *openVEXParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return c.identifierStrings, fmt.Errorf("not yet implemented")
 }
 
 func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInputSpec, vexStatement *vex.Statement, status string) *[]assembler.VexIngest {
@@ -104,7 +107,10 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 		ingest.VexData = &vd
 		ingest.Vulnerability = vulnInput
 
-		ingest.Pkg, _ = helpers.PurlToPkg(p)
+		var err error
+		if ingest.Pkg, err = helpers.PurlToPkg(p); err != nil {
+			return nil
+		}
 
 		*vi = append(*vi, *ingest)
 	}
@@ -112,7 +118,8 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 	return vi
 }
 
-func (c *openVEXParser) GetPredicates(_ context.Context) *assembler.IngestPredicates {
+func (c *openVEXParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
+	logger := logging.FromContext(ctx)
 	rv := &assembler.IngestPredicates{}
 	var vis []assembler.VexIngest
 	var cvs []assembler.CertifyVulnIngest
@@ -120,11 +127,13 @@ func (c *openVEXParser) GetPredicates(_ context.Context) *assembler.IngestPredic
 	for _, s := range c.openVex.Statements {
 		vuln, err := helpers.CreateVulnInput(s.Vulnerability)
 		if err != nil {
-			return nil
+			logger.Errorf("failed to create vulnerability input: %v", err)
+			continue
 		}
 
 		vi := c.generateVexIngest(vuln, &s, string(s.Status))
 		if vi == nil {
+			logger.Errorf("failed to generate vex ingest")
 			continue
 		}
 

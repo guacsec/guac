@@ -176,8 +176,11 @@ func Test_openVEXParser_GetIdentifiers(t *testing.T) {
 		want    *common.IdentifierStrings
 		wantErr bool
 	}{
-		name:    "default case",
-		want:    nil,
+		name: "default case",
+		fields: fields{
+			identifierStrings: &common.IdentifierStrings{},
+		},
+		want:    &common.IdentifierStrings{},
 		wantErr: true,
 	}
 	c := &openVEXParser{
