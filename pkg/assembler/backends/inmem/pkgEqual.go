@@ -165,23 +165,18 @@ func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) (
 	}
 
 	var search []uint32
-	foundOne := false
 	for _, p := range filter.Packages {
-		if !foundOne {
-			exactPackage, err := c.exactPackageVersion(p)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-			}
-			if exactPackage != nil {
-				search = append(search, exactPackage.pkgEquals...)
-				foundOne = true
-				break
-			}
+		pkgs, err := c.findPackageVersion(p)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		for _, pkg := range pkgs {
+			search = append(search, pkg.pkgEquals...)
 		}
 	}
 
 	var out []*model.PkgEqual
-	if foundOne {
+	if len(search) > 0 {
 		for _, id := range search {
 			link, err := byID[*pkgEqualStruct](id, c)
 			if err != nil {

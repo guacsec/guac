@@ -744,6 +744,21 @@ func noMatchQualifiers(filter *model.PkgSpec, v map[string]string) bool {
 }
 
 func (c *demoClient) exactPackageVersion(filter *model.PkgSpec) (*pkgVersionNode, error) {
+	pkgs, err := c.findPackageVersion(filter)
+	if err != nil {
+		return nil, gqlerror.Errorf("No package version matches spec %v", err)
+	}
+	switch len(pkgs) {
+	case 0:
+		return nil, nil
+	case 1:
+		return pkgs[0], nil
+	default:
+		return nil, gqlerror.Errorf("More than one package version matches spec")
+	}
+}
+
+func (c *demoClient) findPackageVersion(filter *model.PkgSpec) ([]*pkgVersionNode, error) {
 	if filter == nil {
 		return nil, nil
 	}
@@ -755,10 +770,11 @@ func (c *demoClient) exactPackageVersion(filter *model.PkgSpec) (*pkgVersionNode
 		id := uint32(id64)
 		if node, ok := c.index[id]; ok {
 			if c, ok := node.(*pkgVersionNode); ok {
-				return c, nil
+				return []*pkgVersionNode{c}, nil
 			}
 		}
 	}
+	out := make([]*pkgVersionNode, 0)
 	if filter.Type != nil && filter.Namespace != nil && filter.Name != nil && filter.Version != nil {
 		tp, ok := c.packages[*filter.Type]
 		if !ok {
@@ -774,15 +790,15 @@ func (c *demoClient) exactPackageVersion(filter *model.PkgSpec) (*pkgVersionNode
 		}
 		for _, v := range nm.versions {
 			if *filter.Version != v.version ||
-				filter.Subpath == nil ||
-				noMatchInput(filter.Subpath, v.subpath) ||
+				//filter.Subpath == nil ||
+				noMatch(filter.Subpath, v.subpath) ||
 				noMatchQualifiers(filter, v.qualifiers) {
 				continue
 			}
-			return v, nil
+			out = append(out, v)
 		}
 	}
-	return nil, nil
+	return out, nil
 }
 
 func (c *demoClient) exactPackageName(filter *model.PkgSpec) (*pkgVersionStruct, error) {
