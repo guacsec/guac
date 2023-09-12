@@ -679,7 +679,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 		InArt        []*model.ArtifactInputSpec
 		Calls        []call
 		Query        *model.HasMetadataSpec
-		ExpCB        []*model.HasMetadata
+		ExpHM        []*model.HasMetadata
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
@@ -704,7 +704,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Query: &model.HasMetadataSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       p1out,
 					Justification: "test justification",
@@ -715,7 +715,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Name:  "HappyPath All Version",
 			InPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{
-				call{
+				{
 					Sub: model.PackageSourceOrArtifactInputs{
 						Packages: []*model.PkgInputSpec{p1},
 					},
@@ -732,7 +732,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Query: &model.HasMetadataSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       p1outName,
 					Justification: "test justification",
@@ -763,7 +763,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Query: &model.HasMetadataSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       p1out,
 					Justification: "test justification",
@@ -809,7 +809,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					},
 				},
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       p2out,
 					Justification: "test justification",
@@ -855,7 +855,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					},
 				},
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       s2out,
 					Justification: "test justification",
@@ -898,7 +898,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					},
 				},
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       a2out,
 					Justification: "test justification",
@@ -947,7 +947,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpCB, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpHM, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

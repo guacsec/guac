@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -861,7 +863,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 		InArt        []*model.ArtifactInputSpec
 		Calls        []call
 		Query        *model.HasMetadataSpec
-		ExpCB        []*model.HasMetadata
+		ExpHM        []*model.HasMetadata
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
@@ -886,7 +888,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Query: &model.HasMetadataSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -914,7 +916,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Query: &model.HasMetadataSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -947,9 +949,14 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 				},
 			},
 			Query: &model.HasMetadataSpec{
-				Justification: ptrfrom.String("test justification"),
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String("2.11.1"),
+						Subpath: ptrfrom.String("saved_model_cli.py"),
+					},
+				},
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       testdata.P3out,
 					Justification: "test justification",
@@ -962,12 +969,12 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P4},
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P4},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -995,13 +1002,15 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Query: &model.HasMetadataSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
-						Version: ptrfrom.String("2.11.1"),
+						Type:      ptrfrom.String("conan"),
+						Namespace: ptrfrom.String("openssl.org"),
+						Name:      ptrfrom.String("openssl"),
 					},
 				},
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
-					Subject:       testdata.P2out,
+					Subject:       testdata.P4out,
 					Justification: "test justification",
 				},
 			},
@@ -1045,7 +1054,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					},
 				},
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       testdata.S2out,
 					Justification: "test justification",
@@ -1088,7 +1097,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					},
 				},
 			},
-			ExpCB: []*model.HasMetadata{
+			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
@@ -1132,7 +1141,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpCB, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpHM, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
