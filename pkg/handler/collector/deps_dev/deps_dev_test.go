@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
+	pb "github.com/guacsec/guac/pkg/handler/collector/deps_dev/internal"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -295,4 +296,38 @@ func toPurlSource(purlValues []string) datasource.CollectSource {
 		panic(err)
 	}
 	return ds
+}
+
+func TestProjectKey(t *testing.T) {
+	testCases := []struct {
+		name     string
+		links    []*pb.Link
+		expected *pb.ProjectKey
+	}{
+		{
+			name: "source repo link exists",
+			links: []*pb.Link{
+				{Label: "SOURCE_REPO", Url: "https://github.com/org/repo"},
+			},
+			expected: &pb.ProjectKey{Id: "github.com/org/repo"},
+		},
+		{
+			name: "no source repo link",
+			links: []*pb.Link{
+				{Label: "DOCS", Url: "https://docs.example.com"},
+			},
+			expected: nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		d := &depsCollector{}
+		t.Run(tc.name, func(t *testing.T) {
+			version := &pb.Version{Links: tc.links}
+			key := d.projectKey(version)
+			if key.GetId() != tc.expected.GetId() {
+				t.Errorf("Expected %v, got %v", tc.expected, key)
+			}
+		})
+	}
 }

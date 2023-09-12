@@ -20,6 +20,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -67,6 +68,9 @@ type depsCollector struct {
 	interval          time.Duration
 	checkedPurls      map[string]*PackageComponent
 	ingestedSource    map[string]*model.SourceInputSpec
+	projectInfoMap    map[string]*pb.Project
+	versions          map[string]*pb.Version
+	dependencies      map[string]*pb.Dependencies
 }
 
 func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) (*depsCollector, error) {
@@ -95,6 +99,9 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		interval:          interval,
 		checkedPurls:      map[string]*PackageComponent{},
 		ingestedSource:    map[string]*model.SourceInputSpec{},
+		projectInfoMap:    map[string]*pb.Project{},
+		versions:          map[string]*pb.Version{},
+		dependencies:      map[string]*pb.Dependencies{},
 	}, nil
 }
 
@@ -126,12 +133,112 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 	if err != nil {
 		return fmt.Errorf("unable to retrieve datasource: %w", err)
 	}
+	err = d.getAllDependencies(ctx, ds.PurlDataSources)
+	if err != nil {
+		return fmt.Errorf("failed to get all dependencies: %w", err)
+	}
 	for _, purl := range ds.PurlDataSources {
 		err := d.fetchDependencies(ctx, purl.Value, docChannel)
 		if err != nil {
 			return fmt.Errorf("failed to fetch dependencies: %w", err)
 		}
 	}
+	return nil
+}
+
+// getAllDependencies gets all the dependencies for the purls provided in a concurrent manner.
+func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasource.Source) error {
+	// channels to signal when the project and version info have been fetched
+	projectDone := make(chan bool)
+	versionDone := make(chan bool)
+
+	// channels to send the inputs to the goroutines
+	projectChan := make(chan *pb.ProjectKey)
+	versionChan := make(chan *pb.VersionKey)
+	logger := logging.FromContext(ctx)
+
+	// these goroutines will be used to version info concurrently
+	go func() {
+		// this go routine has to be before the next go routine as it will be pushing into the project channel
+		// for each version that is fetched from the version channel it will check if the project has to be fetched
+		d.versions = d.getVersions(ctx, versionChan, projectChan) // the results are the stored in the versions map
+		versionDone <- true
+	}()
+
+	// these goroutines will be used to fetch the projects concurrently
+	go func() {
+		// this sets up the goroutine to fetch the projects concurrently for each input
+		d.projectInfoMap = d.getProjects(ctx, projectChan) // the results are the stored in the projectInfoMap map
+		// posts to the projectDone channel to signal that all projects have been fetched
+		projectDone <- true
+	}()
+
+	// TODO: Concurrently fetch the dependencies for each purl
+	for _, p := range purls {
+		purl := p.Value
+		packageInput, err := helpers.PurlToPkg(purl)
+		if err != nil {
+			logger.Infof("failed to parse purl to pkg: %s", purl)
+			return nil
+		}
+
+		// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
+		if *packageInput.Version == "" {
+			logger.Infof("purl does not contain version, skipping deps.dev query: %s", purl)
+			return nil
+		}
+
+		// Make an RPC Request. The returned result is a stream of
+		// DependenciesResponse structs.
+		versionKey, err := getVersionKey(packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version)
+		if err != nil {
+			logger.Infof("failed to getVersionKey with the following error: %v", err)
+			return nil
+		}
+		// send the version key to the version channel
+		versionChan <- versionKey
+
+		dependenciesReq := &pb.GetDependenciesRequest{
+			VersionKey: versionKey,
+		}
+
+		deps, err := d.client.GetDependencies(ctx, dependenciesReq)
+		if err != nil {
+			logger.Debugf("failed to get dependencies %v", err)
+			return nil
+		}
+		d.dependencies[versionKey.String()] = deps
+
+		for i, node := range deps.Nodes {
+			// the nodes of the dependency graph. The first node is the root of the graph, which is captured above so skip.
+			if i == 0 {
+				continue
+			}
+			pkgtype := ""
+			if node.VersionKey.System.String() == goUpperCase {
+				pkgtype = golang
+			} else {
+				pkgtype = strings.ToLower(node.VersionKey.System.String())
+			}
+
+			depPurl := "pkg:" + pkgtype + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
+			depPackageInput, err := helpers.PurlToPkg(depPurl)
+			if err != nil {
+				logger.Infof("unable to parse purl: %v, error: %v", depPurl, err)
+				continue
+			}
+			depsVersionKey, err := getVersionKey(depPackageInput.Type, depPackageInput.Namespace, depPackageInput.Name, depPackageInput.Version)
+			if err != nil {
+				logger.Infof("failed to getVersionKey with the following error: %v", err)
+				continue
+			}
+			versionChan <- depsVersionKey
+		}
+	}
+	close(versionChan)
+	<-versionDone
+	close(projectChan)
+	<-projectDone
 	return nil
 }
 
@@ -175,11 +282,17 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	dependenciesReq := &pb.GetDependenciesRequest{
 		VersionKey: versionKey,
 	}
-
-	deps, err := d.client.GetDependencies(ctx, dependenciesReq)
-	if err != nil {
-		logger.Debugf("failed to get dependencies", err)
-		return nil
+	var deps *pb.Dependencies
+	if _, ok := d.dependencies[versionKey.String()]; ok {
+		deps = d.dependencies[versionKey.String()]
+	} else {
+		logger.Debugf("The version key was not found in the map: %v", versionKey)
+		deps, err = d.client.GetDependencies(ctx, dependenciesReq)
+		if err != nil {
+			logger.Debugf("failed to get dependencies: %v", err)
+			return nil
+		}
+		d.dependencies[versionKey.String()] = deps
 	}
 
 	dependencyNodes := []*PackageComponent{}
@@ -275,10 +388,15 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 	versionReq := &pb.GetVersionRequest{
 		VersionKey: versionKey,
 	}
-
-	versionResponse, err := d.client.GetVersion(ctx, versionReq)
-	if err != nil {
-		return fmt.Errorf("failed to get version information: err: %w", err)
+	var versionResponse *pb.Version
+	if _, ok := d.versions[versionKey.String()]; ok {
+		versionResponse = d.versions[versionKey.String()]
+	} else {
+		logger.Debugf("The version key was not found in the map: %v", versionKey)
+		versionResponse, err = d.client.GetVersion(ctx, versionReq)
+		if err != nil {
+			return fmt.Errorf("failed to get version information: %w", err)
+		}
 	}
 
 	for _, link := range versionResponse.Links {
@@ -303,11 +421,16 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 					Id: strings.TrimSuffix(src.Namespace, "/") + "/" + src.Name,
 				},
 			}
-
-			project, err := d.client.GetProject(ctx, projectReq)
-			if err != nil {
-				logger.Debugf("unable to get project for: %v, error: %v", projectReq.ProjectKey.Id, err)
-				continue
+			var project *pb.Project
+			if _, ok := d.projectInfoMap[projectReq.ProjectKey.String()]; ok {
+				project = d.projectInfoMap[projectReq.ProjectKey.String()]
+			} else {
+				logger.Debugf("The project key was not found in the map: %v", projectReq.ProjectKey)
+				project, err = d.client.GetProject(ctx, projectReq)
+				if err != nil {
+					logger.Debugf("unable to get project for: %v, error: %v", projectReq.ProjectKey.Id, err)
+					continue
+				}
 			}
 			if project.Scorecard != nil {
 				pkgComponent.Scorecard = &model.ScorecardInputSpec{}
@@ -380,4 +503,111 @@ func parseSystem(name string) (pb.System, error) {
 // Type returns the collector type
 func (d *depsCollector) Type() string {
 	return DepsCollector
+}
+
+// getProjects fetches project info concurrently for a channel of Inputs.
+// It returns a map of project URL to project info.
+func (d *depsCollector) getProjects(ctx context.Context, inputChannel <-chan *pb.ProjectKey) map[string]*pb.Project {
+	projectMap := sync.Map{}
+	var waitGroup sync.WaitGroup
+
+	for input := range inputChannel {
+		go func(input *pb.ProjectKey) {
+			defer waitGroup.Done()
+
+			project, fetchErr := d.getProject(ctx, input)
+			if fetchErr != nil {
+				return
+			}
+			projectMap.Store(input, project)
+		}(input)
+		waitGroup.Add(1)
+	}
+
+	waitGroup.Wait() // wait for all goroutines to finish
+	projectMapCopy := make(map[string]*pb.Project)
+	projectMap.Range(func(projectURL, projectInfo interface{}) bool {
+		key := projectURL.(*pb.ProjectKey) //nolint:forcetypeassert
+		projectKey := key.String()
+		projectMapCopy[projectKey] = projectInfo.(*pb.Project) //nolint:forcetypeassert
+		return true
+	})
+	return projectMapCopy
+}
+
+// getVersions fetches version info concurrently for a channel of Inputs.
+// It returns a map of version URL to version info.
+func (d *depsCollector) getVersions(ctx context.Context, inputs <-chan *pb.VersionKey,
+	projectChan chan *pb.ProjectKey,
+) map[string]*pb.Version {
+	// this function also sends the project key to the projectChan
+	versionsMap := sync.Map{}
+	var wg sync.WaitGroup
+
+	for input := range inputs {
+		input := input
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			packageVersion, err := d.getVersion(ctx, input)
+			if err != nil {
+				// TODO - when metrics are added, add a metric for this
+				return
+			}
+			projectKey := d.projectKey(packageVersion)
+			// if projectKey is nil, it means that the packageVersion does not have a source repo
+			if projectKey != nil {
+				// send the project key to the projectChan to be fetched concurrently
+				projectChan <- projectKey
+			}
+			versionsMap.Store(input, packageVersion)
+		}()
+	}
+
+	wg.Wait()
+	versionMapCopy := make(map[string]*pb.Version)
+	versionsMap.Range(func(packageName, versionInfo interface{}) bool {
+		key := packageName.(*pb.VersionKey) //nolint:forcetypeassert
+		pName := key.String()
+		versionMapCopy[pName] = versionInfo.(*pb.Version) //nolint:forcetypeassert
+		return true
+	})
+	return versionMapCopy
+}
+
+// getProject fetches project info for a given project URL.
+func (d *depsCollector) getProject(ctx context.Context, v *pb.ProjectKey) (*pb.Project, error) {
+	return d.client.GetProject(ctx, &pb.GetProjectRequest{
+		ProjectKey: v,
+	})
+}
+
+// getVersions fetches version info from deps.dev.
+func (d *depsCollector) getVersion(ctx context.Context, v *pb.VersionKey) (*pb.Version, error) {
+	return d.client.GetVersion(ctx, &pb.GetVersionRequest{
+		VersionKey: v,
+	})
+}
+
+func (d *depsCollector) projectKey(versionResponse *pb.Version) *pb.ProjectKey {
+	// There will be a link with the label "SOURCE_REPO" which will contain the source URL.
+	// There cannot be more than one link with the same label.
+	for _, link := range versionResponse.Links {
+		if link.Label == sourceRepo {
+			src, err := helpers.VcsToSrc(link.Url)
+			if err != nil {
+				continue
+			}
+
+			projectReq := &pb.GetProjectRequest{
+				ProjectKey: &pb.ProjectKey{
+					Id: strings.TrimSuffix(src.Namespace, "/") + "/" + src.Name,
+				},
+			}
+			return projectReq.ProjectKey
+		}
+	}
+	return nil
 }
