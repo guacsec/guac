@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 	"time"
 
@@ -37,6 +38,12 @@ import (
 type ociOptions struct {
 	graphqlEndpoint string
 	dataSource      datasource.CollectSource
+	csubAddr        string
+}
+
+type ociRegistryOptions struct {
+	graphqlEndpoint string
+	registry        string
 	csubAddr        string
 }
 
@@ -61,6 +68,75 @@ var ociCmd = &cobra.Command{
 		// Register collector
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, false, 10*time.Minute)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
+		if err != nil {
+			logger.Errorf("unable to register oci collector: %v", err)
+		}
+
+		// initialize collectsub client
+		csubClient, err := csub_client.NewClient(opts.csubAddr)
+		if err != nil {
+			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
+			csubClient = nil
+		} else {
+			defer csubClient.Close()
+		}
+
+		totalNum := 0
+		gotErr := false
+		// Set emit function to go through the entire pipeline
+		emit := func(d *processor.Document) error {
+			totalNum += 1
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+
+			if err != nil {
+				gotErr = true
+				return fmt.Errorf("unable to ingest document: %w", err)
+			}
+			return nil
+		}
+
+		// Collect
+		errHandler := func(err error) bool {
+			if err == nil {
+				logger.Info("collector ended gracefully")
+				return true
+			}
+			logger.Errorf("collector ended with error: %v", err)
+			return false
+		}
+		if err := collector.Collect(ctx, emit, errHandler); err != nil {
+			logger.Fatal(err)
+		}
+
+		if gotErr {
+			logger.Fatalf("completed ingestion with errors")
+		} else {
+			logger.Infof("completed ingesting %v documents", totalNum)
+		}
+	},
+}
+
+var ociRegistryCmd = &cobra.Command{
+	Use:   "registry [flags] registry",
+	Short: "takes an OCI registry with catalog capability and downloads sbom and attestation stored in OCI to add to GUAC graph",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+
+		opts, err := validateOCIRegistryFlags(
+			viper.GetString("gql-addr"),
+			viper.GetString("csub-addr"),
+			args)
+		if err != nil {
+			fmt.Printf("unable to validate flags: %v\n", err)
+			_ = cmd.Help()
+			os.Exit(1)
+		}
+
+		// Register collector
+		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.registry, false, 30*time.Second)
+		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
@@ -138,6 +214,28 @@ func validateOCIFlags(gqlEndpoint string, csubAddr string, args []string) (ociOp
 	return opts, nil
 }
 
+// TODO(ridwanhoq): refactor common logic with validateOCIFlags
+func validateOCIRegistryFlags(gqlEndpoint string, csubAddr string, args []string) (ociRegistryOptions, error) {
+	var opts ociRegistryOptions
+	opts.graphqlEndpoint = gqlEndpoint
+	opts.csubAddr = csubAddr
+
+	// else direct CLI call, no polling
+	if len(args) != 1 {
+		return opts, fmt.Errorf("expected exactly one argument for registry, got %v", len(args))
+	}
+
+	registry := args[0]
+	// validate that the supplied registry is a valid hostname
+	_, err := net.LookupHost(registry)
+	if err != nil {
+		return opts, fmt.Errorf("%s is not a valid hostname: %w", registry, err)
+	}
+	opts.registry = registry
+	return opts, nil
+}
+
 func init() {
 	collectCmd.AddCommand(ociCmd)
+	collectCmd.AddCommand(ociRegistryCmd)
 }

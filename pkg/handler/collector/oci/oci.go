@@ -292,3 +292,11 @@ func hasNoTag(r ref.Ref) bool {
 	// included.
 	return r.Tag == "latest" && r.Digest == "" && !strings.HasSuffix(r.Reference, "latest")
 }
+
+func getRegClientOptions() []regclient.Opt {
+	rcOpts := []regclient.Opt{}
+	rcOpts = append(rcOpts, regclient.WithDockerCreds())
+	rcOpts = append(rcOpts, regclient.WithDockerCerts())
+	rcOpts = append(rcOpts, regclient.WithUserAgent(version.UserAgent))
+	return rcOpts
+}

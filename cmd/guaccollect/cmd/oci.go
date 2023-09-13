@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 	"time"
 
@@ -36,6 +37,15 @@ import (
 type ociOptions struct {
 	// datasource for the collector
 	dataSource datasource.CollectSource
+	// address for NATS connection
+	natsAddr string
+	// run as poll collector
+	poll bool
+}
+
+type ociRegistryOptions struct {
+	// registry to collect from
+	registry string
 	// address for NATS connection
 	natsAddr string
 	// run as poll collector
@@ -68,6 +78,40 @@ var ociCmd = &cobra.Command{
 		// the CollectSources so that there isn't a long delay from adding new data sources.
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 30*time.Second)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
+		if err != nil {
+			logger.Errorf("unable to register oci collector: %v", err)
+		}
+
+		initializeNATsandCollector(ctx, opts.natsAddr)
+	},
+}
+
+var ociRegistryCmd = &cobra.Command{
+	Use:   "registry [flags] registry",
+	Short: "takes an OCI registry with catalog capability and downloads sbom and attestation stored in OCI to add to GUAC graph",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+
+		opts, err := validateOCIRegistryFlags(
+			viper.GetString("nats-addr"),
+			viper.GetString("csub-addr"),
+			viper.GetBool("use-csub"),
+			viper.GetBool("service-poll"),
+			args)
+		if err != nil {
+			fmt.Printf("unable to validate flags: %v\n", err)
+			_ = cmd.Help()
+			os.Exit(1)
+		}
+
+		// Register collector
+		// TODO(lumjjb): Return this to a longer duration (~10 minutes) so as to not keep hitting
+		// the OCI server. This will require adding triggers to get new repos as they come up from
+		// the CollectSources so that there isn't a long delay from adding new data sources.
+		ociRegistryCollector := oci.NewOCIRegistryCollector(ctx, opts.registry, opts.poll, 30*time.Second)
+		err = collector.RegisterDocumentCollector(ociRegistryCollector, oci.OCIRegistryCollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
@@ -116,6 +160,27 @@ func validateOCIFlags(natsAddr string, csubAddr string, useCsub bool, poll bool,
 	return opts, nil
 }
 
+// TODO(ridwanhoq): refactor common logic with validateOCIFlags
+func validateOCIRegistryFlags(natsAddr string, csubAddr string, useCsub bool, poll bool, args []string) (ociRegistryOptions, error) {
+	var opts ociRegistryOptions
+	opts.natsAddr = natsAddr
+	opts.poll = poll
+
+	if len(args) != 1 {
+		return opts, fmt.Errorf("expected exactly one argument for registry")
+	}
+
+	registry := args[0]
+	// validate that the supplied registry is a valid hostname
+	_, err := net.LookupHost(registry)
+	if err != nil {
+		return opts, fmt.Errorf("%s is not a valid hostname: %w", registry, err)
+	}
+	opts.registry = registry
+	return opts, nil
+}
+
 func init() {
 	rootCmd.AddCommand(ociCmd)
+	rootCmd.AddCommand(ociRegistryCmd)
 }
