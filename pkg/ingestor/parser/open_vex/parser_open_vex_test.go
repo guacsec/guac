@@ -164,36 +164,55 @@ func Test_openVEXParser_GetIdentifiers(t *testing.T) {
 	type fields struct {
 		doc               *processor.Document
 		identifierStrings *common.IdentifierStrings
-		openVex           *vex.VEX
-	}
-	type args struct {
-		ctx context.Context
 	}
 	test := struct {
 		name    string
 		fields  fields
-		args    args
+		ctx     context.Context
 		want    *common.IdentifierStrings
 		wantErr bool
 	}{
 		name: "default case",
 		fields: fields{
+			doc: &processor.Document{
+				Blob:   testdata.NotAffectedOpenVEXExample,
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentOpenVEX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
 			identifierStrings: &common.IdentifierStrings{},
 		},
-		want:    &common.IdentifierStrings{},
+		ctx: context.Background(),
+		want: &common.IdentifierStrings{
+			PurlStrings: []string{
+				"pkg:oci/git@sha256:23a264e6e429852221a963e9f17338ba3f5796dc7086e46439a6f4482cf6e0cb",
+			},
+		},
 		wantErr: true,
 	}
-	c := &openVEXParser{
-		doc:               test.fields.doc,
-		identifierStrings: test.fields.identifierStrings,
-		openVex:           test.fields.openVex,
+
+	c := NewOpenVEXParser()
+
+	err := c.Parse(test.ctx, test.fields.doc)
+	if err != nil {
+		t.Errorf("Parse() error = %v, wantErr %v", err, false)
+		return
 	}
-	got, err := c.GetIdentifiers(test.args.ctx)
+
+	_ = c.GetPredicates(test.ctx)
+
+	got, err := c.GetIdentifiers(test.ctx)
 	if (err != nil) != test.wantErr {
 		t.Errorf("GetIdentifiers() error = %v, wantErr %v", err, test.wantErr)
 		return
 	}
-	if !reflect.DeepEqual(got, test.want) {
-		t.Errorf("GetIdentifiers() got = %v, want %v", got, test.want)
+	if d := cmp.Diff(test.want, got, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+		t.Errorf("csaf.GetPredicate mismatch values (+got, -expected): %s", d)
 	}
+	//if !reflect.DeepEqual(got, test.want) {
+	//	t.Errorf("GetIdentifiers() got = %v, want %v", got, test.want)
+	//}
 }

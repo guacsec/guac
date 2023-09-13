@@ -110,6 +110,8 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 			return nil
 		}
 
+		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, p)
+
 		*vi = append(*vi, *ingest)
 	}
 
