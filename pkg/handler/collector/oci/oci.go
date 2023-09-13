@@ -209,6 +209,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 
 	digest := manifest.GetDigest(m)
 
+	// check for fallback artifacts
 	digestFormatted := fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded())
 	suffixList := []string{"att", "sbom"}
 	for _, suffix := range suffixList {
@@ -224,6 +225,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 		}
 	}
 
+	// check for referenced artifacts
 	referrerOpts := []scheme.ReferrerOpts{}
 	referrerOpts = append(referrerOpts, scheme.WithReferrerAT("application/spdx+json"))
 
