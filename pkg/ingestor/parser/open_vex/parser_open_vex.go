@@ -90,8 +90,6 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 
 		ingest := &assembler.VexIngest{}
 
-		// TODO: Include the vex version
-
 		if vexStatus, ok := vexStatusMap[status]; ok {
 			vd.Status = vexStatus
 		}
