@@ -297,13 +297,13 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Package != nil {
-		exactPackage, err := c.exactPackageVersion(filter.Subject.Package)
+		pkgs, err := c.findPackageVersion(filter.Subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
-		if exactPackage != nil {
-			search = append(search, exactPackage.occurrences...)
-			foundOne = true
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.occurrences...)
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Source != nil {
