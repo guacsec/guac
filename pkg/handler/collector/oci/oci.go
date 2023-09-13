@@ -526,3 +526,11 @@ func hasNoDigest(r ref.Ref) bool {
 func hasNoIdentifier(r ref.Ref) bool {
 	return hasNoTag(r) && hasNoDigest(r)
 }
+
+func getRegClientOptions() []regclient.Opt {
+	rcOpts := []regclient.Opt{}
+	rcOpts = append(rcOpts, regclient.WithDockerCreds())
+	rcOpts = append(rcOpts, regclient.WithDockerCerts())
+	rcOpts = append(rcOpts, regclient.WithUserAgent(version.UserAgent))
+	return rcOpts
+}
