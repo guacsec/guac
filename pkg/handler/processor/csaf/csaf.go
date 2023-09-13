@@ -16,12 +16,15 @@
 package csaf
 
 import (
-	"encoding/json"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/openvex/go-vex/pkg/csaf"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // CSAFProcessor processes CSAF documents.
 // Currently only supports CSAF 2.0

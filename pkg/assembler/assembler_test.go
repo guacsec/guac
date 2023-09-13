@@ -17,10 +17,11 @@ package assembler
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -28,6 +29,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func TestIngestPredicates(t *testing.T) {
 	ctx := context.Background()

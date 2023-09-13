@@ -18,14 +18,16 @@
 package backend
 
 import (
-	"encoding/json"
 	"strconv"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/exp/slices"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func (s *Suite) TestPkgEqual() {
 	type call struct {

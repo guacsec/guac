@@ -17,10 +17,11 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
@@ -30,6 +31,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type csubClientOptions struct {
 	addr string

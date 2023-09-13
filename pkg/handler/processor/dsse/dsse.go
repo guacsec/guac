@@ -17,12 +17,15 @@ package dsse
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type dssePayloadType string
 
