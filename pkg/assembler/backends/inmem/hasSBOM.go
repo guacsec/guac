@@ -219,13 +219,13 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	var search []uint32
 	foundOne := false
 	if filter != nil && filter.Subject != nil && filter.Subject.Package != nil {
-		exactPackage, err := c.exactPackageVersion(filter.Subject.Package)
+		pkgs, err := c.findPackageVersion(filter.Subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
-		if exactPackage != nil {
-			search = exactPackage.hasSBOMs
-			foundOne = true
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.hasSBOMs...)
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Artifact != nil {

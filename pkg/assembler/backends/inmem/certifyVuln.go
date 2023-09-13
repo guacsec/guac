@@ -197,13 +197,13 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	var search []uint32
 	foundOne := false
 	if filter != nil && filter.Package != nil {
-		exactPackage, err := c.exactPackageVersion(filter.Package)
+		pkgs, err := c.findPackageVersion(filter.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
-		if exactPackage != nil {
-			search = append(search, exactPackage.certifyVulnLinks...)
-			foundOne = true
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.certifyVulnLinks...)
 		}
 	}
 	if !foundOne && filter != nil && filter.Vulnerability != nil &&

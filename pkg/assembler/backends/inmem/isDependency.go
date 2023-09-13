@@ -183,38 +183,34 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 	var search []uint32
 	foundOne := false
 	if filter != nil && filter.Package != nil {
-		exactPackage, err := c.exactPackageVersion(filter.Package)
+		pkgs, err := c.findPackageVersion(filter.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
-		if exactPackage != nil {
-			search = append(search, exactPackage.isDependencyLinks...)
-			foundOne = true
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.isDependencyLinks...)
 		}
 	}
 	if !foundOne && filter != nil && filter.DependentPackage != nil {
-		var exactPackageLinks []uint32
 		if filter.DependentPackage.Version == nil {
 			exactPackage, err := c.exactPackageName(filter.DependentPackage)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if exactPackage != nil {
-				exactPackageLinks = exactPackage.isDependencyLinks
+				search = append(search, exactPackage.isDependencyLinks...)
+				foundOne = true
 			}
 		} else {
-			exactPackage, err := c.exactPackageVersion(filter.Package)
+			pkgs, err := c.findPackageVersion(filter.Package)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			if exactPackage != nil {
-				exactPackageLinks = exactPackage.isDependencyLinks
+			foundOne = len(pkgs) > 0
+			for _, pkg := range pkgs {
+				search = append(search, pkg.isDependencyLinks...)
 			}
-		}
-
-		if exactPackageLinks != nil {
-			search = append(search, exactPackageLinks...)
-			foundOne = true
 		}
 	}
 
