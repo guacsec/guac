@@ -88,7 +88,7 @@ func (c *csafParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 }
 
 func (c *csafParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return c.identifierStrings, nil
 }
 
 // findPurl searches the given CSAF product tree recursively to find the

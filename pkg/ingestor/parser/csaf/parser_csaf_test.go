@@ -20,6 +20,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+
 	"github.com/openvex/go-vex/pkg/csaf"
 
 	"github.com/google/go-cmp/cmp"
@@ -222,5 +224,43 @@ func Test_findPurl(t *testing.T) {
 				t.Errorf("findPurl() = %v, want %v", got, test.want)
 			}
 		})
+	}
+}
+
+func Test_csafParser_GetIdentifiers(t *testing.T) {
+	type fields struct {
+		doc               *processor.Document
+		identifierStrings *common.IdentifierStrings
+		csaf              *csaf.CSAF
+	}
+	type args struct {
+		ctx context.Context
+	}
+	test := struct {
+		name    string
+		fields  fields
+		args    args
+		want    *common.IdentifierStrings
+		wantErr bool
+	}{
+		name: "default test",
+		fields: fields{
+			identifierStrings: &common.IdentifierStrings{},
+		},
+		want: &common.IdentifierStrings{},
+	}
+
+	c := &csafParser{
+		doc:               test.fields.doc,
+		identifierStrings: test.fields.identifierStrings,
+		csaf:              test.fields.csaf,
+	}
+	got, err := c.GetIdentifiers(test.args.ctx)
+	if (err != nil) != test.wantErr {
+		t.Errorf("GetIdentifiers() error = %v, wantErr %v", err, test.wantErr)
+		return
+	}
+	if !reflect.DeepEqual(got, test.want) {
+		t.Errorf("GetIdentifiers() got = %v, want %v", got, test.want)
 	}
 }
