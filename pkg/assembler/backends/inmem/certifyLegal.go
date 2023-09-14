@@ -66,30 +66,6 @@ func (n *certifyLegalStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 func (c *demoClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
-	// FIXME move to resolver
-	// valuesDefined := 0
-	// if len(subjects.Packages) > 0 {
-	// 	if len(subjects.Packages) != len(artifacts) {
-	// 		return nil, gqlerror.Errorf("uneven packages and artifacts for ingestion")
-	// 	}
-	// 	if len(subjects.Packages) != len(occurrences) {
-	// 		return nil, gqlerror.Errorf("uneven packages and occurrence for ingestion")
-	// 	}
-	// 	valuesDefined = valuesDefined + 1
-	// }
-	// if len(subjects.Sources) > 0 {
-	// 	if len(subjects.Sources) != len(artifacts) {
-	// 		return nil, gqlerror.Errorf("uneven Sources and artifacts for ingestion")
-	// 	}
-	// 	if len(subjects.Sources) != len(occurrences) {
-	// 		return nil, gqlerror.Errorf("uneven Sources and occurrence for ingestion")
-	// 	}
-	// 	valuesDefined = valuesDefined + 1
-	// }
-	// if valuesDefined != 1 {
-	// 	return nil, gqlerror.Errorf("must specify at most packages or sources for %v", "IngestOccurrences")
-	// }
-
 	var rv []*model.CertifyLegal
 
 	for i, v := range certifyLegals {
@@ -119,10 +95,6 @@ func (c *demoClient) IngestCertifyLegal(ctx context.Context, subject model.Packa
 
 func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec, readOnly bool) (*model.CertifyLegal, error) {
 	funcName := "IngestCertifyLegal"
-	// FIXME move to resolver
-	// if err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence"); err != nil {
-	// 	return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	// }
 
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
@@ -286,12 +258,6 @@ func (c *demoClient) convLegal(in *certifyLegalStruct) (*model.CertifyLegal, err
 
 func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
 	funcName := "CertifyLegal"
-	// FIXME move to resolver
-	// if filter != nil {
-	// 	if err := helper.ValidatePackageOrSourceQueryFilter(filter.Subject); err != nil {
-	// 		return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-	// 	}
-	// }
 
 	c.m.RLock()
 	defer c.m.RUnlock()
