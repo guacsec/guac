@@ -20163,6 +20163,17 @@ func (v *PointOfContactArtifactResponse) GetIngestPointOfContact() string {
 	return v.IngestPointOfContact
 }
 
+// PointOfContactArtifactsResponse is returned by PointOfContactArtifacts on success.
+type PointOfContactArtifactsResponse struct {
+	// Adds bulk PointOfContact attestations to a package, source or artifact. The returned array of IDs can be a an array of empty string.
+	IngestPointOfContacts []string `json:"ingestPointOfContacts"`
+}
+
+// GetIngestPointOfContacts returns PointOfContactArtifactsResponse.IngestPointOfContacts, and is useful for accessing the field via an interface.
+func (v *PointOfContactArtifactsResponse) GetIngestPointOfContacts() []string {
+	return v.IngestPointOfContacts
+}
+
 // PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
 type PointOfContactInputSpec struct {
 	Email         string    `json:"email"`
@@ -20200,6 +20211,17 @@ type PointOfContactPkgResponse struct {
 // GetIngestPointOfContact returns PointOfContactPkgResponse.IngestPointOfContact, and is useful for accessing the field via an interface.
 func (v *PointOfContactPkgResponse) GetIngestPointOfContact() string { return v.IngestPointOfContact }
 
+// PointOfContactPkgsResponse is returned by PointOfContactPkgs on success.
+type PointOfContactPkgsResponse struct {
+	// Adds bulk PointOfContact attestations to a package, source or artifact. The returned array of IDs can be a an array of empty string.
+	IngestPointOfContacts []string `json:"ingestPointOfContacts"`
+}
+
+// GetIngestPointOfContacts returns PointOfContactPkgsResponse.IngestPointOfContacts, and is useful for accessing the field via an interface.
+func (v *PointOfContactPkgsResponse) GetIngestPointOfContacts() []string {
+	return v.IngestPointOfContacts
+}
+
 // PointOfContactSrcResponse is returned by PointOfContactSrc on success.
 type PointOfContactSrcResponse struct {
 	// Adds a PointOfContact attestation to a package, source or artifact. The returned ID can be empty string.
@@ -20208,6 +20230,17 @@ type PointOfContactSrcResponse struct {
 
 // GetIngestPointOfContact returns PointOfContactSrcResponse.IngestPointOfContact, and is useful for accessing the field via an interface.
 func (v *PointOfContactSrcResponse) GetIngestPointOfContact() string { return v.IngestPointOfContact }
+
+// PointOfContactSrcsResponse is returned by PointOfContactSrcs on success.
+type PointOfContactSrcsResponse struct {
+	// Adds bulk PointOfContact attestations to a package, source or artifact. The returned array of IDs can be a an array of empty string.
+	IngestPointOfContacts []string `json:"ingestPointOfContacts"`
+}
+
+// GetIngestPointOfContacts returns PointOfContactSrcsResponse.IngestPointOfContacts, and is useful for accessing the field via an interface.
+func (v *PointOfContactSrcsResponse) GetIngestPointOfContacts() []string {
+	return v.IngestPointOfContacts
+}
 
 // SLSAForArtifactResponse is returned by SLSAForArtifact on success.
 type SLSAForArtifactResponse struct {
@@ -21768,6 +21801,20 @@ func (v *__PointOfContactArtifactInput) GetPointOfContact() PointOfContactInputS
 	return v.PointOfContact
 }
 
+// __PointOfContactArtifactsInput is used internally by genqlient
+type __PointOfContactArtifactsInput struct {
+	Artifacts       []ArtifactInputSpec       `json:"artifacts"`
+	PointOfContacts []PointOfContactInputSpec `json:"pointOfContacts"`
+}
+
+// GetArtifacts returns __PointOfContactArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
+func (v *__PointOfContactArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+
+// GetPointOfContacts returns __PointOfContactArtifactsInput.PointOfContacts, and is useful for accessing the field via an interface.
+func (v *__PointOfContactArtifactsInput) GetPointOfContacts() []PointOfContactInputSpec {
+	return v.PointOfContacts
+}
+
 // __PointOfContactPkgInput is used internally by genqlient
 type __PointOfContactPkgInput struct {
 	Pkg            PkgInputSpec            `json:"pkg"`
@@ -21786,6 +21833,24 @@ func (v *__PointOfContactPkgInput) GetPointOfContact() PointOfContactInputSpec {
 	return v.PointOfContact
 }
 
+// __PointOfContactPkgsInput is used internally by genqlient
+type __PointOfContactPkgsInput struct {
+	Pkgs            []PkgInputSpec            `json:"pkgs"`
+	PkgMatchType    MatchFlags                `json:"pkgMatchType"`
+	PointOfContacts []PointOfContactInputSpec `json:"pointOfContacts"`
+}
+
+// GetPkgs returns __PointOfContactPkgsInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__PointOfContactPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetPkgMatchType returns __PointOfContactPkgsInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__PointOfContactPkgsInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
+
+// GetPointOfContacts returns __PointOfContactPkgsInput.PointOfContacts, and is useful for accessing the field via an interface.
+func (v *__PointOfContactPkgsInput) GetPointOfContacts() []PointOfContactInputSpec {
+	return v.PointOfContacts
+}
+
 // __PointOfContactSrcInput is used internally by genqlient
 type __PointOfContactSrcInput struct {
 	Source         SourceInputSpec         `json:"source"`
@@ -21798,6 +21863,20 @@ func (v *__PointOfContactSrcInput) GetSource() SourceInputSpec { return v.Source
 // GetPointOfContact returns __PointOfContactSrcInput.PointOfContact, and is useful for accessing the field via an interface.
 func (v *__PointOfContactSrcInput) GetPointOfContact() PointOfContactInputSpec {
 	return v.PointOfContact
+}
+
+// __PointOfContactSrcsInput is used internally by genqlient
+type __PointOfContactSrcsInput struct {
+	Sources         []SourceInputSpec         `json:"sources"`
+	PointOfContacts []PointOfContactInputSpec `json:"pointOfContacts"`
+}
+
+// GetSources returns __PointOfContactSrcsInput.Sources, and is useful for accessing the field via an interface.
+func (v *__PointOfContactSrcsInput) GetSources() []SourceInputSpec { return v.Sources }
+
+// GetPointOfContacts returns __PointOfContactSrcsInput.PointOfContacts, and is useful for accessing the field via an interface.
+func (v *__PointOfContactSrcsInput) GetPointOfContacts() []PointOfContactInputSpec {
+	return v.PointOfContacts
 }
 
 // __SLSAForArtifactInput is used internally by genqlient
@@ -26477,6 +26556,41 @@ func PointOfContactArtifact(
 	return &data, err
 }
 
+// The query or mutation executed by PointOfContactArtifacts.
+const PointOfContactArtifacts_Operation = `
+mutation PointOfContactArtifacts ($artifacts: [ArtifactInputSpec!]!, $pointOfContacts: [PointOfContactInputSpec!]!) {
+	ingestPointOfContacts(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContacts: $pointOfContacts)
+}
+`
+
+func PointOfContactArtifacts(
+	ctx context.Context,
+	client graphql.Client,
+	artifacts []ArtifactInputSpec,
+	pointOfContacts []PointOfContactInputSpec,
+) (*PointOfContactArtifactsResponse, error) {
+	req := &graphql.Request{
+		OpName: "PointOfContactArtifacts",
+		Query:  PointOfContactArtifacts_Operation,
+		Variables: &__PointOfContactArtifactsInput{
+			Artifacts:       artifacts,
+			PointOfContacts: pointOfContacts,
+		},
+	}
+	var err error
+
+	var data PointOfContactArtifactsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by PointOfContactPkg.
 const PointOfContactPkg_Operation = `
 mutation PointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $pointOfContact: PointOfContactInputSpec!) {
@@ -26514,6 +26628,43 @@ func PointOfContactPkg(
 	return &data, err
 }
 
+// The query or mutation executed by PointOfContactPkgs.
+const PointOfContactPkgs_Operation = `
+mutation PointOfContactPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $pointOfContacts: [PointOfContactInputSpec!]!) {
+	ingestPointOfContacts(subjects: {packages:$pkgs}, pkgMatchType: $pkgMatchType, pointOfContacts: $pointOfContacts)
+}
+`
+
+func PointOfContactPkgs(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	pkgMatchType MatchFlags,
+	pointOfContacts []PointOfContactInputSpec,
+) (*PointOfContactPkgsResponse, error) {
+	req := &graphql.Request{
+		OpName: "PointOfContactPkgs",
+		Query:  PointOfContactPkgs_Operation,
+		Variables: &__PointOfContactPkgsInput{
+			Pkgs:            pkgs,
+			PkgMatchType:    pkgMatchType,
+			PointOfContacts: pointOfContacts,
+		},
+	}
+	var err error
+
+	var data PointOfContactPkgsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 // The query or mutation executed by PointOfContactSrc.
 const PointOfContactSrc_Operation = `
 mutation PointOfContactSrc ($source: SourceInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
@@ -26538,6 +26689,41 @@ func PointOfContactSrc(
 	var err error
 
 	var data PointOfContactSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by PointOfContactSrcs.
+const PointOfContactSrcs_Operation = `
+mutation PointOfContactSrcs ($sources: [SourceInputSpec!]!, $pointOfContacts: [PointOfContactInputSpec!]!) {
+	ingestPointOfContacts(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContacts: $pointOfContacts)
+}
+`
+
+func PointOfContactSrcs(
+	ctx context.Context,
+	client graphql.Client,
+	sources []SourceInputSpec,
+	pointOfContacts []PointOfContactInputSpec,
+) (*PointOfContactSrcsResponse, error) {
+	req := &graphql.Request{
+		OpName: "PointOfContactSrcs",
+		Query:  PointOfContactSrcs_Operation,
+		Variables: &__PointOfContactSrcsInput{
+			Sources:         sources,
+			PointOfContacts: pointOfContacts,
+		},
+	}
+	var err error
+
+	var data PointOfContactSrcsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

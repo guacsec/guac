@@ -695,6 +695,21 @@ func (mr *MockBackendMockRecorder) IngestPointOfContact(ctx, subject, pkgMatchTy
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestPointOfContact", reflect.TypeOf((*MockBackend)(nil).IngestPointOfContact), ctx, subject, pkgMatchType, pointOfContact)
 }
 
+// IngestPointOfContacts mocks base method.
+func (m *MockBackend) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestPointOfContacts", ctx, subjects, pkgMatchType, pointOfContacts)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestPointOfContacts indicates an expected call of IngestPointOfContacts.
+func (mr *MockBackendMockRecorder) IngestPointOfContacts(ctx, subjects, pkgMatchType, pointOfContacts interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestPointOfContacts", reflect.TypeOf((*MockBackend)(nil).IngestPointOfContacts), ctx, subjects, pkgMatchType, pointOfContacts)
+}
+
 // IngestSLSA mocks base method.
 func (m *MockBackend) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
 	m.ctrl.T.Helper()

@@ -50,3 +50,39 @@ mutation PointOfContactArtifact(
     pointOfContact: $pointOfContact
   )
 }
+
+# Defines the GraphQL operations to bulk ingest a PointOfContact into GUAC
+
+mutation PointOfContactPkgs(
+  $pkgs: [PkgInputSpec!]!
+  $pkgMatchType: MatchFlags!
+  $pointOfContacts: [PointOfContactInputSpec!]!
+) {
+  ingestPointOfContacts(
+    subjects: { packages: $pkgs }
+    pkgMatchType: $pkgMatchType
+    pointOfContacts: $pointOfContacts
+  )
+}
+
+mutation PointOfContactSrcs(
+  $sources: [SourceInputSpec!]!
+  $pointOfContacts: [PointOfContactInputSpec!]!
+) {
+  ingestPointOfContacts(
+    subjects: { sources: $sources }
+    pkgMatchType: { pkg: ALL_VERSIONS }
+    pointOfContacts: $pointOfContacts
+  )
+}
+
+mutation PointOfContactArtifacts(
+  $artifacts: [ArtifactInputSpec!]!
+  $pointOfContacts: [PointOfContactInputSpec!]!
+) {
+  ingestPointOfContacts(
+    subjects: { artifacts: $artifacts }
+    pkgMatchType: { pkg: ALL_VERSIONS }
+    pointOfContacts: $pointOfContacts
+  )
+}

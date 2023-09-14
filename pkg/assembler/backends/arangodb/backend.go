@@ -107,6 +107,14 @@ const (
 	hasMetadataArtEdgesStr        string = "hasMetadataArtEdges"
 	hasMetadataStr                string = "hasMetadataCollection"
 
+	// pointOfContact collection
+
+	pointOfContactPkgVersionEdgesStr string = "pointOfContactPkgVersionEdges"
+	pointOfContactPkgNameEdgesStr    string = "pointOfContactPkgNameEdges"
+	pointOfContactSrcEdgesStr        string = "pointOfContactSrcEdges"
+	pointOfContactArtEdgesStr        string = "pointOfContactArtEdges"
+	pointOfContactStr                string = "pointOfContacts"
+
 	// hasSBOM collection
 
 	hasSBOMPkgEdgesStr string = "hasSBOMPkgEdges"
@@ -388,6 +396,27 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		hasMetadataSrcEdges.From = []string{srcNamesStr}
 		hasMetadataSrcEdges.To = []string{hasMetadataStr}
 
+		// setup pointOfContact collections
+		var pointOfContactPkgVersionEdges driver.EdgeDefinition
+		pointOfContactPkgVersionEdges.Collection = pointOfContactPkgVersionEdgesStr
+		pointOfContactPkgVersionEdges.From = []string{pkgVersionsStr}
+		pointOfContactPkgVersionEdges.To = []string{pointOfContactStr}
+
+		var pointOfContactPkgNameEdges driver.EdgeDefinition
+		pointOfContactPkgNameEdges.Collection = pointOfContactPkgNameEdgesStr
+		pointOfContactPkgNameEdges.From = []string{pkgNamesStr}
+		pointOfContactPkgNameEdges.To = []string{pointOfContactStr}
+
+		var pointOfContactArtEdges driver.EdgeDefinition
+		pointOfContactArtEdges.Collection = pointOfContactArtEdgesStr
+		pointOfContactArtEdges.From = []string{artifactsStr}
+		pointOfContactArtEdges.To = []string{pointOfContactStr}
+
+		var pointOfContactSrcEdges driver.EdgeDefinition
+		pointOfContactSrcEdges.Collection = pointOfContactSrcEdgesStr
+		pointOfContactSrcEdges.From = []string{srcNamesStr}
+		pointOfContactSrcEdges.To = []string{pointOfContactStr}
+
 		// setup hasSBOM collections
 		var hasSBOMPkgEdges driver.EdgeDefinition
 		hasSBOMPkgEdges.Collection = hasSBOMPkgEdgesStr
@@ -512,7 +541,8 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
 			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges,
 			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges, hasMetadataPkgVersionEdges, hasMetadataPkgNameEdges,
-			hasMetadataArtEdges, hasMetadataSrcEdges}
+			hasMetadataArtEdges, hasMetadataSrcEdges, pointOfContactPkgVersionEdges, pointOfContactPkgNameEdges,
+			pointOfContactArtEdges, pointOfContactSrcEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
