@@ -131,7 +131,7 @@ func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.Packa
 	for _, lis := range declaredLicenses {
 		l, ok := c.licenses[licenseKey(lis.Name, lis.ListVersion)]
 		if !ok {
-			return nil, gqlerror.Errorf("%v :: License not found %s", funcName, lis.Name)
+			return nil, gqlerror.Errorf("%v :: License not found %q", funcName, licenseKey(lis.Name, lis.ListVersion))
 		}
 		dec = append(dec, l.id)
 	}
@@ -140,7 +140,7 @@ func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.Packa
 	for _, lis := range discoveredLicenses {
 		l, ok := c.licenses[licenseKey(lis.Name, lis.ListVersion)]
 		if !ok {
-			return nil, gqlerror.Errorf("%v :: License not found %s", funcName, lis.Name)
+			return nil, gqlerror.Errorf("%v :: License not found %q", funcName, licenseKey(lis.Name, lis.ListVersion))
 		}
 		dis = append(dis, l.id)
 	}
