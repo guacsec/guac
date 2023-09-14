@@ -231,7 +231,6 @@ func Test_csafParser_GetIdentifiers(t *testing.T) {
 	type fields struct {
 		doc               *processor.Document
 		identifierStrings *common.IdentifierStrings
-		csaf              *csaf.CSAF
 	}
 	test := struct {
 		name    string
