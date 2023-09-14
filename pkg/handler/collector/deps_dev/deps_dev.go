@@ -133,10 +133,14 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 	if err != nil {
 		return fmt.Errorf("unable to retrieve datasource: %w", err)
 	}
+	start := time.Now()
 	err = d.getAllDependencies(ctx, ds.PurlDataSources)
 	if err != nil {
 		return fmt.Errorf("failed to get all dependencies: %w", err)
 	}
+	elapsed := time.Since(start)
+	// this is to know how long it takes to get all the dependencies for testing purposes
+	fmt.Printf("time taken to get all dependencies: %v \n", elapsed) // TODO: remove this when metrics are added
 	for _, purl := range ds.PurlDataSources {
 		err := d.fetchDependencies(ctx, purl.Value, docChannel)
 		if err != nil {
