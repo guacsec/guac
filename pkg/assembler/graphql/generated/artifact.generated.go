@@ -36,6 +36,7 @@ type MutationResolver interface {
 	IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error)
 	IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error)
 	IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error)
+	IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error)
 	IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (string, error)
 	IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]string, error)
 	IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error)
@@ -993,6 +994,39 @@ func (ec *executionContext) field_Mutation_ingestPointOfContact_args(ctx context
 		}
 	}
 	args["pointOfContact"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestPointOfContacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PackageSourceOrArtifactInputs
+	if tmp, ok := rawArgs["subjects"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
+		arg0, err = ec.unmarshalNPackageSourceOrArtifactInputs2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputs(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subjects"] = arg0
+	var arg1 model.MatchFlags
+	if tmp, ok := rawArgs["pkgMatchType"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgMatchType"))
+		arg1, err = ec.unmarshalNMatchFlags2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMatchFlags(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkgMatchType"] = arg1
+	var arg2 []*model.PointOfContactInputSpec
+	if tmp, ok := rawArgs["pointOfContacts"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContacts"))
+		arg2, err = ec.unmarshalNPointOfContactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pointOfContacts"] = arg2
 	return args, nil
 }
 
@@ -2884,6 +2918,61 @@ func (ec *executionContext) fieldContext_Mutation_ingestPointOfContact(ctx conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestPointOfContact_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestPointOfContacts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestPointOfContacts(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestPointOfContacts(rctx, fc.Args["subjects"].(model.PackageSourceOrArtifactInputs), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["pointOfContacts"].([]*model.PointOfContactInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestPointOfContacts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestPointOfContacts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6622,6 +6711,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "ingestPointOfContact":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestPointOfContact(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestPointOfContacts":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestPointOfContacts(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

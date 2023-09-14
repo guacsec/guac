@@ -25,6 +25,34 @@ func (r *mutationResolver) IngestPointOfContact(ctx context.Context, subject mod
 	return ingestedPOC.ID, err
 }
 
+// IngestPointOfContacts is the resolver for the ingestPointOfContacts field.
+func (r *mutationResolver) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error) {
+	funcName := "IngestPointOfContacts"
+	valuesDefined := 0
+	if len(subjects.Packages) > 0 {
+		if len(subjects.Packages) != len(pointOfContacts) {
+			return []string{}, gqlerror.Errorf("%v :: uneven packages and pointOfContacts for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Artifacts) > 0 {
+		if len(subjects.Artifacts) != len(pointOfContacts) {
+			return []string{}, gqlerror.Errorf("%v :: uneven artifacts and pointOfContacts for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if len(subjects.Sources) > 0 {
+		if len(subjects.Sources) != len(pointOfContacts) {
+			return []string{}, gqlerror.Errorf("%v :: uneven sources and pointOfContacts for ingestion", funcName)
+		}
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return []string{}, gqlerror.Errorf("%v :: must specify at most packages, artifacts or sources", funcName)
+	}
+	return r.Backend.IngestPointOfContacts(ctx, subjects, &pkgMatchType, pointOfContacts)
+}
+
 // PointOfContact is the resolver for the PointOfContact field.
 func (r *queryResolver) PointOfContact(ctx context.Context, pointOfContactSpec model.PointOfContactSpec) ([]*model.PointOfContact, error) {
 	if err := helper.ValidatePackageSourceOrArtifactQueryFilter(pointOfContactSpec.Subject); err != nil {

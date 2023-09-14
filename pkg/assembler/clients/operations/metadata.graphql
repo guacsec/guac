@@ -51,7 +51,6 @@ mutation HasMetadataArtifact(
   )
 }
 
-
 # Defines the GraphQL operations to bulk ingest a HasMetadata into GUAC
 
 mutation HasMetadataPkgs(

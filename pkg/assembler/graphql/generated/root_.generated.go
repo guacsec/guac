@@ -211,6 +211,7 @@ type ComplexityRoot struct {
 		IngestPkgEqual                  func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
 		IngestPkgEquals                 func(childComplexity int, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) int
 		IngestPointOfContact            func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
+		IngestPointOfContacts           func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) int
 		IngestSLSAs                     func(childComplexity int, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) int
 		IngestScorecard                 func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
 		IngestScorecards                func(childComplexity int, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) int
@@ -1427,6 +1428,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
+
+	case "Mutation.ingestPointOfContacts":
+		if e.complexity.Mutation.IngestPointOfContacts == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestPointOfContacts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestPointOfContacts(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["pointOfContacts"].([]*model.PointOfContactInputSpec)), true
 
 	case "Mutation.ingestSLSAs":
 		if e.complexity.Mutation.IngestSLSAs == nil {
@@ -3617,6 +3630,12 @@ extend type Mutation {
     pkgMatchType: MatchFlags!
     pointOfContact: PointOfContactInputSpec!
   ): ID!
+  "Adds bulk PointOfContact attestations to a package, source or artifact. The returned array of IDs can be a an array of empty string."
+  ingestPointOfContacts(
+    subjects: PackageSourceOrArtifactInputs!
+    pkgMatchType: MatchFlags!
+    pointOfContacts: [PointOfContactInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
