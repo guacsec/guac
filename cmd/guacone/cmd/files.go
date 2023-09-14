@@ -145,6 +145,7 @@ var filesCmd = &cobra.Command{
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)
 			}
+			totalSuccess += 1
 			return nil
 		}
 
