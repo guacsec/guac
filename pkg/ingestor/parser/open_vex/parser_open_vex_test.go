@@ -191,7 +191,6 @@ func Test_openVEXParser_GetIdentifiers(t *testing.T) {
 				"pkg:oci/git@sha256:23a264e6e429852221a963e9f17338ba3f5796dc7086e46439a6f4482cf6e0cb",
 			},
 		},
-		wantErr: true,
 	}
 
 	c := NewOpenVEXParser()
@@ -212,7 +211,4 @@ func Test_openVEXParser_GetIdentifiers(t *testing.T) {
 	if d := cmp.Diff(test.want, got, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
 		t.Errorf("csaf.GetPredicate mismatch values (+got, -expected): %s", d)
 	}
-	//if !reflect.DeepEqual(got, test.want) {
-	//	t.Errorf("GetIdentifiers() got = %v, want %v", got, test.want)
-	//}
 }

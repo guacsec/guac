@@ -77,7 +77,7 @@ func (c *openVEXParser) GetIdentities(ctx context.Context) []common.TrustInforma
 }
 
 func (c *openVEXParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return c.identifierStrings, fmt.Errorf("not yet implemented")
+	return c.identifierStrings, nil
 }
 
 func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInputSpec, vexStatement *vex.Statement, status string) *[]assembler.VexIngest {
