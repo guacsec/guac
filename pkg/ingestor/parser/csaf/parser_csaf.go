@@ -253,6 +253,7 @@ func (c *csafParser) generateVexIngest(ctx context.Context, vulnInput *generated
 
 	vi.VexData = &vd
 	vi.Vulnerability = vulnInput
+	c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, product_id)
 
 	pkg, err := c.findPkgSpec(ctx, product_id)
 	if err != nil {

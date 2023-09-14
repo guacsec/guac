@@ -233,34 +233,84 @@ func Test_csafParser_GetIdentifiers(t *testing.T) {
 		identifierStrings *common.IdentifierStrings
 		csaf              *csaf.CSAF
 	}
-	type args struct {
-		ctx context.Context
-	}
 	test := struct {
 		name    string
 		fields  fields
-		args    args
+		ctx     context.Context
 		want    *common.IdentifierStrings
 		wantErr bool
 	}{
 		name: "default test",
 		fields: fields{
+			doc: &processor.Document{
+				Blob:   testdata.CsafExampleRedHat,
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentCsaf,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
 			identifierStrings: &common.IdentifierStrings{},
 		},
-		want: &common.IdentifierStrings{},
+		ctx: context.Background(),
+		want: &common.IdentifierStrings{
+			PurlStrings: []string{
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.src",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-7.el8_6.x86_64",
+			},
+		},
 	}
 
-	c := &csafParser{
-		doc:               test.fields.doc,
-		identifierStrings: test.fields.identifierStrings,
-		csaf:              test.fields.csaf,
+	c := NewCsafParser()
+
+	err := c.Parse(test.ctx, test.fields.doc)
+	if err != nil {
+		t.Errorf("Parse() error = %v", err)
+		return
 	}
-	got, err := c.GetIdentifiers(test.args.ctx)
+
+	_ = c.GetPredicates(test.ctx)
+
+	got, err := c.GetIdentifiers(test.ctx)
 	if (err != nil) != test.wantErr {
 		t.Errorf("GetIdentifiers() error = %v, wantErr %v", err, test.wantErr)
 		return
 	}
-	if !reflect.DeepEqual(got, test.want) {
-		t.Errorf("GetIdentifiers() got = %v, want %v", got, test.want)
+	if d := cmp.Diff(test.want, got, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+		t.Errorf("csaf.GetPredicate mismatch values (+got, -expected): %s", d)
 	}
 }
