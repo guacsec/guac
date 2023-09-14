@@ -20,13 +20,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/google/go-cmp/cmp"
 	"github.com/openvex/go-vex/pkg/vex"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
 
 func Test_openVEXParser_Parse(t *testing.T) {
@@ -134,7 +134,6 @@ func Test_openVEXParser_GetPredicates(t *testing.T) {
 
 func Test_openVEXParser_GetIdentities(t *testing.T) {
 	type fields struct {
-		doc               *processor.Document
 		identifierStrings *common.IdentifierStrings
 		openVex           *vex.VEX
 	}
@@ -151,7 +150,6 @@ func Test_openVEXParser_GetIdentities(t *testing.T) {
 		want: nil,
 	}
 	c := &openVEXParser{
-		doc:               test.fields.doc,
 		identifierStrings: test.fields.identifierStrings,
 		openVex:           test.fields.openVex,
 	}

@@ -17,18 +17,16 @@ package open_vex
 
 import (
 	"context"
-	"fmt"
-
-	"github.com/guacsec/guac/pkg/logging"
 
 	json "github.com/json-iterator/go"
+	"github.com/openvex/go-vex/pkg/vex"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-	"github.com/openvex/go-vex/pkg/vex"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 var (
@@ -49,7 +47,6 @@ var (
 )
 
 type openVEXParser struct {
-	doc               *processor.Document
 	identifierStrings *common.IdentifierStrings
 	openVex           *vex.VEX
 }
@@ -62,13 +59,7 @@ func NewOpenVEXParser() common.DocumentParser {
 
 // Parse breaks out the document into the graph components
 func (c *openVEXParser) Parse(ctx context.Context, doc *processor.Document) error {
-	c.doc = doc
-	err := json.Unmarshal(doc.Blob, &c.openVex)
-	if err != nil {
-		return fmt.Errorf("failed to parse OpenVEX: %w", err)
-	}
-
-	return nil
+	return json.Unmarshal(doc.Blob, &c.openVex)
 }
 
 // GetIdentities gets the identity node from the document if they exist
@@ -80,15 +71,15 @@ func (c *openVEXParser) GetIdentifiers(ctx context.Context) (*common.IdentifierS
 	return c.identifierStrings, nil
 }
 
-func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInputSpec, vexStatement *vex.Statement, status string) *[]assembler.VexIngest {
-	vi := &[]assembler.VexIngest{}
+func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInputSpec, vexStatement *vex.Statement, status string) ([]assembler.VexIngest, error) {
+	var vi []assembler.VexIngest
 
 	for _, p := range vexStatement.Products {
 		vd := generated.VexStatementInputSpec{}
 		vd.KnownSince = *c.openVex.Metadata.Timestamp
 		vd.Origin = c.openVex.Metadata.ID
 
-		ingest := &assembler.VexIngest{}
+		ingest := assembler.VexIngest{}
 
 		if vexStatus, ok := vexStatusMap[status]; ok {
 			vd.Status = vexStatus
@@ -107,20 +98,20 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 
 		var err error
 		if ingest.Pkg, err = helpers.PurlToPkg(p); err != nil {
-			return nil
+			return nil, err
 		}
 
 		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, p)
 
-		*vi = append(*vi, *ingest)
+		vi = append(vi, ingest)
 	}
 
-	return vi
+	return vi, nil
 }
 
 func (c *openVEXParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
-	rv := &assembler.IngestPredicates{}
+
 	var vis []assembler.VexIngest
 	var cvs []assembler.CertifyVulnIngest
 
@@ -131,13 +122,13 @@ func (c *openVEXParser) GetPredicates(ctx context.Context) *assembler.IngestPred
 			continue
 		}
 
-		vi := c.generateVexIngest(vuln, &s, string(s.Status))
-		if vi == nil {
-			logger.Errorf("failed to generate vex ingest")
+		vi, err := c.generateVexIngest(vuln, &s, string(s.Status))
+		if err != nil {
+			logger.Errorf("failed to generate vex ingest: %v", err)
 			continue
 		}
 
-		for _, ingest := range *vi {
+		for _, ingest := range vi {
 			vis = append(vis, ingest)
 
 			if s.Status == vex.StatusAffected || s.Status == vex.StatusUnderInvestigation {
@@ -154,8 +145,8 @@ func (c *openVEXParser) GetPredicates(ctx context.Context) *assembler.IngestPred
 		}
 	}
 
-	rv.Vex = vis
-	rv.CertifyVuln = cvs
-
-	return rv
+	return &assembler.IngestPredicates{
+		Vex:         vis,
+		CertifyVuln: cvs,
+	}
 }
