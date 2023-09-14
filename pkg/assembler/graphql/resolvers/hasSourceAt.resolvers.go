@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -17,6 +18,11 @@ func (r *mutationResolver) IngestHasSourceAt(ctx context.Context, pkg model.PkgI
 		return "", err
 	}
 	return ingestedHasSourceAt.ID, err
+}
+
+// IngestHasSourceAts is the resolver for the ingestHasSourceAts field.
+func (r *mutationResolver) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
+	panic(fmt.Errorf("not implemented: IngestHasSourceAts - ingestHasSourceAts"))
 }
 
 // HasSourceAt is the resolver for the HasSourceAt field.
