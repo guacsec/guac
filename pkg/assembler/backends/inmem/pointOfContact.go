@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -61,6 +62,11 @@ func (n *pointOfContactLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest PointOfContact
+
+func (c *demoClient) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error) {
+	return nil, fmt.Errorf("not implemented: IngestPointOfContacts")
+}
+
 func (c *demoClient) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
 	return c.ingestPointOfContact(ctx, subject, pkgMatchType, pointOfContact, true)
 }

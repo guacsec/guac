@@ -29,3 +29,7 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 func (c *arangoClient) PointOfContact(ctx context.Context, pointOfContactSpec *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
 	return nil, fmt.Errorf("not implemented: PointOfContact")
 }
+
+func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error) {
+	return nil, fmt.Errorf("not implemented: IngestPointOfContacts")
+}
