@@ -252,7 +252,7 @@ func getPkgHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 			'timestamp': hasMetadata.timestamp,
 			'justification': hasMetadata.justification,
 			'collector': hasMetadata.collector,
-		'origin': hasMetadata.origin
+			'origin': hasMetadata.origin
 		  }`)
 	}
 
