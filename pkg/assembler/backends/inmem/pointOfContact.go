@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -64,7 +63,33 @@ func (n *pointOfContactLink) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest PointOfContact
 
 func (c *demoClient) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error) {
-	return nil, fmt.Errorf("not implemented: IngestPointOfContacts")
+	var modelPointOfContactIDs []string
+
+	for i := range pointOfContacts {
+		var pointOfContact *model.PointOfContact
+		var err error
+		if len(subjects.Packages) > 0 {
+			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
+			pointOfContact, err = c.IngestPointOfContact(ctx, subject, pkgMatchType, *pointOfContacts[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestPointOfContact failed with err: %v", err)
+			}
+		} else if len(subjects.Sources) > 0 {
+			subject := model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
+			pointOfContact, err = c.IngestPointOfContact(ctx, subject, pkgMatchType, *pointOfContacts[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestPointOfContact failed with err: %v", err)
+			}
+		} else {
+			subject := model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
+			pointOfContact, err = c.IngestPointOfContact(ctx, subject, pkgMatchType, *pointOfContacts[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestPointOfContact failed with err: %v", err)
+			}
+		}
+		modelPointOfContactIDs = append(modelPointOfContactIDs, pointOfContact.ID)
+	}
+	return modelPointOfContactIDs, nil
 }
 
 func (c *demoClient) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {

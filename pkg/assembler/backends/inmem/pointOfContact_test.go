@@ -666,6 +666,302 @@ func TestPointOfContact(t *testing.T) {
 	}
 }
 
+func TestIngestPointOfContacts(t *testing.T) {
+	type call struct {
+		Sub   model.PackageSourceOrArtifactInputs
+		Match *model.MatchFlags
+		PC    []*model.PointOfContactInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		Query        *model.PointOfContactSpec
+		ExpPC        []*model.PointOfContact
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpPC: []*model.PointOfContact{
+				{
+					Subject:       p1out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "HappyPath All Version",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeAllVersions,
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpPC: []*model.PointOfContact{
+				{
+					Subject:       p1outName,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Ingest same twice",
+			InPkg: []*model.PkgInputSpec{p3},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p3, p3},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String("2.11.1"),
+						Subpath: ptrfrom.String("saved_model_cli.py"),
+					},
+				},
+			},
+			ExpPC: []*model.PointOfContact{
+				{
+					Subject:       p3out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{p1, p4},
+			InSrc: []*model.SourceInputSpec{s1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p4},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s1},
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Type:      ptrfrom.String("conan"),
+						Namespace: ptrfrom.String("openssl.org"),
+						Name:      ptrfrom.String("openssl"),
+					},
+				},
+			},
+			ExpPC: []*model.PointOfContact{
+				{
+					Subject:       p4out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Source",
+			InPkg: []*model.PkgInputSpec{p1},
+			InSrc: []*model.SourceInputSpec{s1, s2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s2, s2},
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Source: &model.SourceSpec{
+						Name: ptrfrom.String("bobsrepo"),
+					},
+				},
+			},
+			ExpPC: []*model.PointOfContact{
+				{
+					Subject:       s2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Artifact",
+			InSrc: []*model.SourceInputSpec{s1},
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Artifacts: []*model.ArtifactInputSpec{a1, a2},
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s1},
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Artifact: &model.ArtifactSpec{
+						Algorithm: ptrfrom.String("sha1"),
+					},
+				},
+			},
+			ExpPC: []*model.PointOfContact{
+				{
+					Subject:       a2out,
+					Justification: "test justification",
+				},
+			},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	ctx := context.Background()
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			b, err := backends.Get("inmem", nil, nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestPointOfContacts(ctx, o.Sub, o.Match, o.PC)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.PointOfContact(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpPC, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestPointOfContactNeighbors(t *testing.T) {
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput

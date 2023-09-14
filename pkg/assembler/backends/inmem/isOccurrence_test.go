@@ -162,6 +162,19 @@ var p4 = &model.PkgInputSpec{
 	Name:      "openssl",
 	Version:   ptrfrom.String("3.0.3"),
 }
+var p4out = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name: "openssl",
+			Versions: []*model.PackageVersion{{
+				Version:    "3.0.3",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
+}
 var p4outName = &model.Package{
 	Type: "conan",
 	Namespaces: []*model.PackageNamespace{{
