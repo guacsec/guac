@@ -161,7 +161,7 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 	versionChan := make(chan *pb.VersionKey)
 	logger := logging.FromContext(ctx)
 
-	// these goroutines will be used to version info concurrently
+	// the projectChan and versionChan are used to send the project key and version key to the respective channels
 	go func() {
 		// this go routine has to be before the next go routine as it will be pushing into the project channel
 		// for each version that is fetched from the version channel it will check if the project has to be fetched
@@ -169,6 +169,7 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 		versionDone <- true
 	}()
 
+	// the project channel is used to send the project key to the project channel
 	// these goroutines will be used to fetch the projects concurrently
 	go func() {
 		// this sets up the goroutine to fetch the projects concurrently for each input
@@ -187,8 +188,8 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 		}
 
 		// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
-		if *packageInput.Version == "" {
-			logger.Infof("purl does not contain version, skipping deps.dev query: %s", purl)
+		if packageInput != nil && *packageInput.Version == "" {
+			logger.Debugf("purl does not contain version, skipping deps.dev query: %s", purl)
 			return nil
 		}
 
@@ -196,7 +197,7 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 		// DependenciesResponse structs.
 		versionKey, err := getVersionKey(packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version)
 		if err != nil {
-			logger.Infof("failed to getVersionKey with the following error: %v", err)
+			logger.Debugf("failed to getVersionKey with the following error: %v", err)
 			return nil
 		}
 		// send the version key to the version channel
@@ -228,12 +229,12 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 			depPurl := "pkg:" + pkgtype + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
 			depPackageInput, err := helpers.PurlToPkg(depPurl)
 			if err != nil {
-				logger.Infof("unable to parse purl: %v, error: %v", depPurl, err)
+				logger.Debugf("unable to parse purl: %v, error: %v", depPurl, err)
 				continue
 			}
 			depsVersionKey, err := getVersionKey(depPackageInput.Type, depPackageInput.Namespace, depPackageInput.Name, depPackageInput.Version)
 			if err != nil {
-				logger.Infof("failed to getVersionKey with the following error: %v", err)
+				logger.Debugf("failed to getVersionKey with the following error: %v", err)
 				continue
 			}
 			versionChan <- depsVersionKey
