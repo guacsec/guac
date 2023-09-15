@@ -18,6 +18,7 @@ package open_vex
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	json "github.com/json-iterator/go"
 	"github.com/openvex/go-vex/pkg/vex"
@@ -27,23 +28,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-)
-
-var (
-	justificationsMap = map[string]generated.VexJustification{
-		"component_not_present":                             generated.VexJustificationComponentNotPresent,
-		"vulnerable_code_not_present":                       generated.VexJustificationVulnerableCodeNotPresent,
-		"vulnerable_code_not_in_execute_path":               generated.VexJustificationVulnerableCodeNotInExecutePath,
-		"vulnerable_code_cannot_be_controlled_by_adversary": generated.VexJustificationVulnerableCodeCannotBeControlledByAdversary,
-		"inline_mitigations_already_exist":                  generated.VexJustificationInlineMitigationsAlreadyExist,
-	}
-
-	vexStatusMap = map[string]generated.VexStatus{
-		"not_affected":        generated.VexStatusNotAffected,
-		"affected":            generated.VexStatusAffected,
-		"fixed":               generated.VexStatusFixed,
-		"under_investigation": generated.VexStatusUnderInvestigation,
-	}
 )
 
 type openVEXParser struct {
@@ -116,8 +100,10 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 
 		ingest := assembler.VexIngest{}
 
-		if vexStatus, ok := vexStatusMap[status]; ok {
-			vd.Status = vexStatus
+		for _, vexStatus := range vex.Statuses() {
+			if vexStatus == status {
+				vd.Status = generated.VexStatus(strings.ToUpper(vexStatus))
+			}
 		}
 
 		if vd.Status == generated.VexStatusNotAffected {
@@ -126,7 +112,11 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 			vd.Statement = vexStatement.ActionStatement
 		}
 
-		vd.VexJustification = justificationsMap[string(vexStatement.Justification)]
+		for _, justification := range vex.Justifications() {
+			if justification == string(vexStatement.Justification) {
+				vd.VexJustification = generated.VexJustification(strings.ToUpper(justification))
+			}
+		}
 
 		ingest.VexData = &vd
 		ingest.Vulnerability = vulnInput
