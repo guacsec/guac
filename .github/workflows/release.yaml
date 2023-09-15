@@ -72,7 +72,8 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean
+          # use .goreleaser-nightly.yaml for nightly build; otherwise use the default
+          args: ${{ contains( github.ref, 'nightly' ) && 'release --clean -f .goreleaser-nightly.yaml' || 'release --clean' }} 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_CONTEXT: default
