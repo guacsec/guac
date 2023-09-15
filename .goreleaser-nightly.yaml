@@ -1,0 +1,228 @@
+# GoReleaser config for Nightly Release
+# This is replicated from .goreleaser.yaml with specific release parameters
+# (at the bottom of the file) for night release.
+
+---
+project_name: guac
+
+env:
+  - CGO_ENABLED=0
+  - PKG=github.com/guacsec/guac/pkg/version
+
+dockers:
+  # see details at https://goreleaser.com/customization/docker/
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
+    dockerfile: dockerfiles/Dockerfile.goreleaser
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--builder={{ .Env.DOCKER_CONTEXT }}"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-arm64"
+    dockerfile: dockerfiles/Dockerfile.goreleaser
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--builder={{ .Env.DOCKER_CONTEXT }}"
+
+docker_manifests:
+  # Spe
+  - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:nightly"
+    image_templates:
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-arm64"
+
+docker_signs:
+  - cmd: cosign
+    artifacts: all
+    output: true
+    args:
+      - "sign"
+      - "--a"
+      - "git_sha={{.FullCommit}}"
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}@${digest}"
+      - "--yes"
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - main: ./cmd/guaccollect
+    id: guaccollect
+    binary: guaccollect-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      # See https://goreleaser.com/customization/templates/#common-fields for field definitions
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    # goos: [ 'darwin', 'linux', 'windows' ] - default
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+  - main: ./cmd/guaccsub
+    id: guaccsub
+    binary: guaccsub-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+  - main: ./cmd/guacgql
+    id: guacgql
+    binary: guacgql-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+  - main: ./cmd/guacingest
+    id: guacingest
+    binary: guacingest-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+  - main: ./cmd/guacone
+    id: guacone
+    binary: guacone-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+
+universal_binaries:
+  - replace: true
+    name_template: guacone
+    id: guacone
+    ids:
+      - guacone
+  - replace: true
+    name_template: guacingest
+    id: guacingest
+    ids:
+      - guacingest
+  - replace: true
+    name_template: guaccsub
+    id: guaccsub
+    ids:
+      - guaccsub
+  - replace: true
+    name_template: guaccollect
+    id: guaccollect
+    ids:
+      - guaccollect
+  - replace: true
+    name_template: guacgql
+    id: guacgql
+    ids:
+      - guacgql
+
+sboms:
+  - id: bins
+    artifacts: binary
+    documents:
+      - "${artifact}.spdx.sbom.json"
+
+signs:
+  - id: guac-cosign-keyless
+    artifacts: checksum
+    signature: "${artifact}-keyless.sig"
+    certificate: "${artifact}-keyless.pem"
+    cmd: cosign
+    args:
+      - "sign-blob"
+      - "--yes"
+      - "--output-signature"
+      - "${artifact}-keyless.sig"
+      - "--output-certificate"
+      - "${artifact}-keyless.pem"
+      - "${artifact}"
+    output: true
+
+archives:
+  - format: binary
+    name_template: "{{ .Binary }}"
+    allow_different_binary_count: true
+
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+
+snapshot:
+  name_template: SNAPSHOT-{{ .ShortCommit }}
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+# Anything above this line should be identical to .goreleaser.yaml 
+# EXCEPT - dockers.docker_manifests.name_template
+# The following are specifically for nightly build
+# Without Goreleaser Pro, we have to replicate this config file for different builds
+release:
+  prerelease: true
+  mode: replace
+  make_latest: false
+
+# The lines beneath this are called `modelines`. See `:help modeline`
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj

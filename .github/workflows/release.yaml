@@ -28,6 +28,9 @@ permissions:
   packages: write # To publish container images to GHCR
   id-token: write # needed for signing the images with GitHub OIDC Token
 
+env:
+  NIGHTLY_RELEASE_TAG_REF: refs/tags/v0.0.0-nightly
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
@@ -72,7 +75,8 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean
+          # use .goreleaser-nightly.yaml for nightly build; otherwise use the default
+          args: ${{ github.ref == env.NIGHTLY_RELEASE_TAG_REF && 'release --clean -f .goreleaser-nightly.yaml' || 'release --clean' }} 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_CONTEXT: default
@@ -155,7 +159,8 @@ jobs:
     runs-on: ubuntu-latest
     name: generate compose tarball
     needs: [goreleaser]
-    if: startsWith(github.ref, 'refs/tags/')
+    # Unable to use env.NIGHTLY_RELEASE_TAG_REF here
+    if:  startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/tags/v0.0.0-nightly'
     steps:
       - name: Checkout code
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # tag=v3
