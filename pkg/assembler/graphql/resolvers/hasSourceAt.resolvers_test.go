@@ -1,116 +1,115 @@
-package resolvers
+package resolvers_test
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/guacsec/guac/internal/testing/mocks"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 )
 
-func Test_mutationResolver_IngestHasSourceAt(t *testing.T) {
-	type fields struct {
-		Resolver *Resolver
-	}
-	type args struct {
-		ctx          context.Context
-		pkg          model.PkgInputSpec
-		pkgMatchType model.MatchFlags
-		source       model.SourceInputSpec
-		hasSourceAt  model.HasSourceAtInputSpec
+func TestIngestHasSourceAts(t *testing.T) {
+	type call struct {
+		Pkgs       []*model.PkgInputSpec
+		Match      model.MatchFlags
+		Sources    []*model.SourceInputSpec
+		HasSources []*model.HasSourceAtInputSpec
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    string
-		wantErr bool
+		Name         string
+		Calls        []call
+		ExpIngestErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			Name: "Ingest without source",
+			Calls: []call{
+				{
+					Pkgs: []*model.PkgInputSpec{testdata.P2},
+					Match: model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					Sources:    []*model.SourceInputSpec{},
+					HasSources: []*model.HasSourceAtInputSpec{{}},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "Ingest missing pkg",
+			Calls: []call{
+				{
+					Pkgs: []*model.PkgInputSpec{},
+					Match: model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					Sources:    []*model.SourceInputSpec{testdata.S1},
+					HasSources: []*model.HasSourceAtInputSpec{{}},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "Ingest without hasSource",
+			Calls: []call{
+				{
+					Pkgs: []*model.PkgInputSpec{testdata.P2},
+					Match: model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					Sources:    []*model.SourceInputSpec{testdata.S1},
+					HasSources: []*model.HasSourceAtInputSpec{},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "Happy path",
+			Calls: []call{
+				{
+					Pkgs: []*model.PkgInputSpec{testdata.P2, testdata.P1},
+					Match: model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					Sources: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+					HasSources: []*model.HasSourceAtInputSpec{
+						{
+							Justification: "test",
+						},
+						{
+							Justification: "test",
+						},
+					},
+				},
+			},
+			ExpIngestErr: false,
+		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &mutationResolver{
-				Resolver: tt.fields.Resolver,
-			}
-			got, err := r.IngestHasSourceAt(tt.args.ctx, tt.args.pkg, tt.args.pkgMatchType, tt.args.source, tt.args.hasSourceAt)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("mutationResolver.IngestHasSourceAt() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("mutationResolver.IngestHasSourceAt() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_mutationResolver_IngestHasSourceAts(t *testing.T) {
-	type fields struct {
-		Resolver *Resolver
-	}
-	type args struct {
-		ctx          context.Context
-		pkgs         []*model.PkgInputSpec
-		pkgMatchType model.MatchFlags
-		sources      []*model.SourceInputSpec
-		hasSourceAts []*model.HasSourceAtInputSpec
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    []string
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &mutationResolver{
-				Resolver: tt.fields.Resolver,
-			}
-			got, err := r.IngestHasSourceAts(tt.args.ctx, tt.args.pkgs, tt.args.pkgMatchType, tt.args.sources, tt.args.hasSourceAts)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("mutationResolver.IngestHasSourceAts() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("mutationResolver.IngestHasSourceAts() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_queryResolver_HasSourceAt(t *testing.T) {
-	type fields struct {
-		Resolver *Resolver
-	}
-	type args struct {
-		ctx             context.Context
-		hasSourceAtSpec model.HasSourceAtSpec
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    []*model.HasSourceAt
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &queryResolver{
-				Resolver: tt.fields.Resolver,
-			}
-			got, err := r.HasSourceAt(tt.args.ctx, tt.args.hasSourceAtSpec)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("queryResolver.HasSourceAt() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("queryResolver.HasSourceAt() = %v, want %v", got, tt.want)
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			b := mocks.NewMockBackend(ctrl)
+			r := resolvers.Resolver{Backend: b}
+			for _, o := range test.Calls {
+				times := 1
+				if test.ExpIngestErr {
+					times = 0
+				}
+				b.
+					EXPECT().
+					IngestHasSourceAts(ctx, o.Pkgs, gomock.Any(), gomock.Any(), o.HasSources).
+					Return([]string{}, nil).
+					Times(times)
+				_, err := r.Mutation().IngestHasSourceAts(ctx, o.Pkgs, o.Match, o.Sources, o.HasSources)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
 			}
 		})
 	}
