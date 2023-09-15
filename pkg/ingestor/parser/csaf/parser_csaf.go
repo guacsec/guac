@@ -301,6 +301,19 @@ func (c *csafParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 						VulnData:      &vulnData,
 					}
 					cvs = append(cvs, cv)
+				} else if status == "known_not_affected" || status == "fixed" {
+					vulnData := generated.ScanMetadataInput{
+						TimeScanned: c.csaf.Document.Tracking.CurrentReleaseDate,
+					}
+					noVuln := generated.VulnerabilityInputSpec{
+						Type: "NoVuln",
+					}
+					cv := assembler.CertifyVulnIngest{
+						Pkg:           vi.Pkg,
+						Vulnerability: &noVuln,
+						VulnData:      &vulnData,
+					}
+					cvs = append(cvs, cv)
 				}
 				vis = append(vis, *vi)
 			}
