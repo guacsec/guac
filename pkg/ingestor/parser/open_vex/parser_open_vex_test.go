@@ -21,8 +21,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/openvex/go-vex/pkg/vex"
-
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -135,7 +133,6 @@ func Test_openVEXParser_GetPredicates(t *testing.T) {
 func Test_openVEXParser_GetIdentities(t *testing.T) {
 	type fields struct {
 		identifierStrings *common.IdentifierStrings
-		openVex           *vex.VEX
 	}
 	type args struct {
 		ctx context.Context
@@ -151,7 +148,6 @@ func Test_openVEXParser_GetIdentities(t *testing.T) {
 	}
 	c := &openVEXParser{
 		identifierStrings: test.fields.identifierStrings,
-		openVex:           test.fields.openVex,
 	}
 	if got := c.GetIdentities(test.args.ctx); !reflect.DeepEqual(got, test.want) {
 		t.Errorf("GetIdentities() = %v, want %v", got, test.want)
