@@ -888,18 +888,6 @@ func getPreloadString(prefix, name string) string {
 	return name
 }
 
-// Retrieval read-only queries for evidence trees
-
-func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
-	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
-}
-
-// Mutations for evidence trees (read-write queries, assume software trees ingested)
-
-func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
-	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
-}
-
 // Topological queries: queries where node connectivity matters more than node type
 func (c *arangoClient) Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error) {
 	panic(fmt.Errorf("not implemented: Neighbors - Neighbors"))
