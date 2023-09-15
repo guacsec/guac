@@ -54,12 +54,13 @@ type cyclonedxParser struct {
 	packageArtifacts  map[string][]*model.ArtifactInputSpec
 	identifierStrings *common.IdentifierStrings
 	cdxBom            *cdx.BOM
+	vulnData          vulnData
 }
 
 type vulnData struct {
-	VulnMetadata []assembler.VulnMetadataIngest
-	CertifyVuln  []assembler.CertifyVulnIngest
-	Vex          []assembler.VexIngest
+	vulnMetadata []assembler.VulnMetadataIngest
+	certifyVuln  []assembler.CertifyVulnIngest
+	vex          []assembler.VexIngest
 }
 
 func NewCycloneDXParser() common.DocumentParser {
@@ -82,6 +83,9 @@ func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) er
 		return err
 	}
 	if err := c.getPackages(cdxBom); err != nil {
+		return err
+	}
+	if err := c.getVulnerabilities(ctx, cdxBom); err != nil {
 		return err
 	}
 
@@ -256,13 +260,9 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 		}
 	}
 
-	v := c.getVulnerabilities(ctx, c.cdxBom)
-	if v != nil {
-		preds.Vex = v.Vex
-		preds.CertifyVuln = v.CertifyVuln
-		preds.VulnMetadata = v.VulnMetadata
-	}
-
+	preds.Vex = c.vulnData.vex
+	preds.VulnMetadata = c.vulnData.vulnMetadata
+	preds.CertifyVuln = c.vulnData.certifyVuln
 	if c.cdxBom.Dependencies == nil {
 		return preds
 	}
@@ -296,31 +296,37 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	return preds
 }
 
-func (c *cyclonedxParser) getVulnerabilities(ctx context.Context, cdxBom *cdx.BOM) *vulnData {
+func (c *cyclonedxParser) getVulnerabilities(ctx context.Context, cdxBom *cdx.BOM) error {
+	logger := logging.FromContext(ctx)
 	if cdxBom.Vulnerabilities == nil {
+		logger.Info("no vulnerabilities found in CycloneDX BOM")
 		return nil
 	}
 
-	var vInfo vulnData
 	var status model.VexStatus
 	var justification model.VexJustification
 	var publishedTime time.Time
-	layout := "2006-01-02T15:04:05.000Z"
 	for _, vulnerability := range *c.cdxBom.Vulnerabilities {
 		vuln, err := asmhelpers.CreateVulnInput(vulnerability.ID)
 		if err != nil {
-			return nil
+			return err
 		}
 
 		if vexStatus, ok := vexStatusMap[vulnerability.Analysis.State]; ok {
 			status = vexStatus
+		} else {
+			logger.Debugf("unknown vulnerability status %s", vulnerability.Analysis.State)
+			status = "UNKNOWN"
 		}
 
 		if vexJustification, ok := justificationsMap[vulnerability.Analysis.Justification]; ok {
 			justification = vexJustification
+		} else {
+			logger.Debugf("unknown vulnerability justification %s", vulnerability.Analysis.Justification)
+			justification = "UNKNOWN"
 		}
 
-		time, err := time.Parse(layout, vulnerability.Published)
+		time, err := time.Parse(time.RFC3339, vulnerability.Published)
 		if err == nil {
 			publishedTime = time
 		}
@@ -330,15 +336,16 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context, cdxBom *cdx.BO
 			VexJustification: justification,
 			KnownSince:       publishedTime,
 			Statement:        vulnerability.Analysis.Detail,
-			StatusNotes:      fmt.Sprintf("%s:%s", string(vulnerability.Analysis.State), string(vulnerability.Analysis.Justification)),
+			StatusNotes:      fmt.Sprintf("%s:%s", string(status), string(justification)),
 		}
 
 		for _, affect := range *vulnerability.Affects {
 			vi := c.getAffectedPackages(ctx, vuln, vd, affect)
 			if vi == nil {
+				logger.Debugf("failed to get affected packages for vulnerability %s", vulnerability.ID)
 				continue
 			}
-			vInfo.Vex = append(vInfo.Vex, *vi...)
+			c.vulnData.vex = append(c.vulnData.vex, *vi...)
 
 			for _, v := range *vi {
 				if status == model.VexStatusAffected || status == model.VexStatusUnderInvestigation {
@@ -349,7 +356,7 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context, cdxBom *cdx.BO
 						},
 						Pkg: v.Pkg,
 					}
-					vInfo.CertifyVuln = append(vInfo.CertifyVuln, cv)
+					c.vulnData.certifyVuln = append(c.vulnData.certifyVuln, cv)
 				}
 			}
 		}
@@ -363,11 +370,11 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context, cdxBom *cdx.BO
 					Timestamp:  publishedTime,
 				},
 			}
-			vInfo.VulnMetadata = append(vInfo.VulnMetadata, vm)
+			c.vulnData.vulnMetadata = append(c.vulnData.vulnMetadata, vm)
 		}
 	}
 
-	return &vInfo
+	return nil
 }
 
 // Get package name and range versions to create package input spec for the affected packages.
@@ -378,14 +385,14 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 	if affectsObj.Ref != "" {
 		pkgRef = affectsObj.Ref
 	} else {
-		logger.Warnf("[cdx vex] package reference not found")
+		logger.Debugf("[cdx vex] package reference not found")
 		return nil
 	}
 
 	// split ref using # as delimiter.
 	pkgRefInfo := strings.Split(pkgRef, "#")
 	if len(pkgRefInfo) != 2 {
-		logger.Warnf("[cdx vex] malformed package reference: %q", affectsObj.Ref)
+		logger.Debugf("[cdx vex] malformed package reference: %q", affectsObj.Ref)
 		return nil
 	}
 	pkgURL := pkgRefInfo[1]
@@ -394,7 +401,7 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 	if affectsObj.Range == nil {
 		pkg, err := asmhelpers.PurlToPkg(pkgURL)
 		if err != nil {
-			logger.Warnf("[cdx vex] unable to create package input spec: %v", err)
+			logger.Debugf("[cdx vex] unable to create package input spec: %v", err)
 			return nil
 		}
 
@@ -405,7 +412,7 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 	// split pkgURL using @ as delimiter.
 	pkgURLInfo := strings.Split(pkgURL, "@")
 	if len(pkgURLInfo) != 2 {
-		logger.Warnf("[cdx vex] malformed package url info: %q", pkgURL)
+		logger.Debugf("[cdx vex] malformed package url info: %q", pkgURL)
 		return nil
 	}
 
@@ -423,7 +430,7 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 
 		pkg, err := asmhelpers.PurlToPkg(fmt.Sprintf("%s@%s", pkgName, affect.Version))
 		if err != nil {
-			logger.Warnf("[cdx vex] unable to create package input spec from purl: %v", err)
+			logger.Debugf("[cdx vex] unable to create package input spec from purl: %v", err)
 			return nil
 		}
 		vi.Pkg = pkg
