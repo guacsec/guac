@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
@@ -105,6 +106,18 @@ func (b *EntBackend) IngestScorecard(ctx context.Context, source model.SourceInp
 	}
 
 	return toModelCertifyScorecard(csc), nil
+}
+
+func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
+	var modelScorecards []*model.CertifyScorecard
+	for i, sc := range scorecards {
+		modelScorecard, err := b.IngestScorecard(ctx, *sources[i], *sc)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestScorecards failed with err: %v", err)
+		}
+		modelScorecards = append(modelScorecards, modelScorecard)
+	}
+	return modelScorecards, nil
 }
 
 func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.SourceInputSpec, scorecardInput model.ScorecardInputSpec) (*ent.CertifyScorecard, error) {
