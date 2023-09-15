@@ -20,6 +20,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+
 	"github.com/openvex/go-vex/pkg/csaf"
 
 	"github.com/google/go-cmp/cmp"
@@ -222,5 +224,92 @@ func Test_findPurl(t *testing.T) {
 				t.Errorf("findPurl() = %v, want %v", got, test.want)
 			}
 		})
+	}
+}
+
+func Test_csafParser_GetIdentifiers(t *testing.T) {
+	type fields struct {
+		doc               *processor.Document
+		identifierStrings *common.IdentifierStrings
+	}
+	test := struct {
+		name    string
+		fields  fields
+		ctx     context.Context
+		want    *common.IdentifierStrings
+		wantErr bool
+	}{
+		name: "default test",
+		fields: fields{
+			doc: &processor.Document{
+				Blob:   testdata.CsafExampleRedHat,
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentCsaf,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			identifierStrings: &common.IdentifierStrings{},
+		},
+		ctx: context.Background(),
+		want: &common.IdentifierStrings{
+			PurlStrings: []string{
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.src",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-debuginfo-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-debugsource-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-devel-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.i686",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-libs-debuginfo-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.aarch64",
+				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.ppc64le",
+				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.s390x",
+				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-7.el8_6.x86_64",
+			},
+		},
+	}
+
+	c := NewCsafParser()
+
+	err := c.Parse(test.ctx, test.fields.doc)
+	if err != nil {
+		t.Errorf("Parse() error = %v", err)
+		return
+	}
+
+	_ = c.GetPredicates(test.ctx)
+
+	got, err := c.GetIdentifiers(test.ctx)
+	if (err != nil) != test.wantErr {
+		t.Errorf("GetIdentifiers() error = %v, wantErr %v", err, test.wantErr)
+		return
+	}
+	if d := cmp.Diff(test.want, got, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+		t.Errorf("csaf.GetPredicate mismatch values (+got, -expected): %s", d)
 	}
 }
