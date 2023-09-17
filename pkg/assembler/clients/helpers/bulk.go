@@ -134,13 +134,9 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 
 			}
 
-			// TODO(pxp928): add bulk ingestion for HasSourceAt
 			logger.Infof("assembling HasSourceAt: %v", len(p.HasSourceAt))
-			for _, hsa := range p.HasSourceAt {
-				if err := hasSourceAt(ctx, gqlclient, hsa); err != nil {
-					logger.Errorf("hasSourceAt failed with error: %v", err)
-
-				}
+			if err := ingestHasSourceAts(ctx, gqlclient, p.HasSourceAt); err != nil {
+				return fmt.Errorf("ingestHasSourceAts failed with error: %w", err)
 			}
 
 			logger.Infof("assembling CertifyBad: %v", len(p.CertifyBad))
@@ -330,6 +326,39 @@ func ingestVulnEquals(ctx context.Context, client graphql.Client, ve []assembler
 		_, err := model.IngestVulnEquals(ctx, client, vulnerabilities, equalVulnerabilities, vulnEqualList)
 		if err != nil {
 			return fmt.Errorf("IngestVulnEquals failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestHasSourceAts(ctx context.Context, client graphql.Client, hs []assembler.HasSourceAtIngest) error {
+	var pkgVersions []model.PkgInputSpec
+	var pkgNames []model.PkgInputSpec
+	var pkgVersionSources []model.SourceInputSpec
+	var pkgNameSources []model.SourceInputSpec
+	var pkgVersionHasSourceAt []model.HasSourceAtInputSpec
+	var pkgNameHasSourceAt []model.HasSourceAtInputSpec
+	for _, ingest := range hs {
+		if ingest.PkgMatchFlag.Pkg == model.PkgMatchTypeSpecificVersion {
+			pkgVersions = append(pkgVersions, *ingest.Pkg)
+			pkgVersionSources = append(pkgVersionSources, *ingest.Src)
+			pkgVersionHasSourceAt = append(pkgVersionHasSourceAt, *ingest.HasSourceAt)
+		} else {
+			pkgNames = append(pkgNames, *ingest.Pkg)
+			pkgNameSources = append(pkgNameSources, *ingest.Src)
+			pkgNameHasSourceAt = append(pkgNameHasSourceAt, *ingest.HasSourceAt)
+		}
+	}
+	if len(pkgVersions) > 0 {
+		_, err := model.IngestHasSourceAts(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionSources, pkgVersionHasSourceAt)
+		if err != nil {
+			return fmt.Errorf("IngestHasSourceAts - specific version failed with error: %w", err)
+		}
+	}
+	if len(pkgNames) > 0 {
+		_, err := model.IngestHasSourceAts(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameSources, pkgNameHasSourceAt)
+		if err != nil {
+			return fmt.Errorf("IngestHasSourceAts - all versions failed with error: %w", err)
 		}
 	}
 	return nil

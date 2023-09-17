@@ -37,12 +37,12 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 		arangoQueryBuilder.forOutBound(hasSourceAtPkgVersionEdgesStr, "hasSourceAt", "pVersion")
 		setHasSourceAtMatchValues(arangoQueryBuilder, hasSourceAtSpec, values)
 
-		pkgVersionHasMetadata, err := getPkgHasSourceAtForQuery(ctx, c, arangoQueryBuilder, values, true)
+		pkgVersionHasSourceAt, err := getPkgHasSourceAtForQuery(ctx, c, arangoQueryBuilder, values, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve package version hasSourceAt with error: %w", err)
 		}
 
-		combinedHasSourceAt = append(combinedHasSourceAt, pkgVersionHasMetadata...)
+		combinedHasSourceAt = append(combinedHasSourceAt, pkgVersionHasSourceAt...)
 
 		if hasSourceAtSpec.Package.ID == nil {
 			// pkgName hasSourceAt
@@ -51,12 +51,12 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 			arangoQueryBuilder.forOutBound(hasSourceAtPkgNameEdgesStr, "hasSourceAt", "pName")
 			setHasSourceAtMatchValues(arangoQueryBuilder, hasSourceAtSpec, values)
 
-			pkgNameHasMetadata, err := getPkgHasSourceAtForQuery(ctx, c, arangoQueryBuilder, values, false)
+			pkgNameHasSourceAt, err := getPkgHasSourceAtForQuery(ctx, c, arangoQueryBuilder, values, false)
 			if err != nil {
 				return nil, fmt.Errorf("failed to retrieve package name hasSourceAt with error: %w", err)
 			}
 
-			combinedHasSourceAt = append(combinedHasSourceAt, pkgNameHasMetadata...)
+			combinedHasSourceAt = append(combinedHasSourceAt, pkgNameHasSourceAt...)
 		}
 
 		return combinedHasSourceAt, nil
@@ -72,11 +72,11 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
 
-		pkgVersionHasMetadata, err := getPkgHasSourceAtForQuery(ctx, c, arangoQueryBuilder, values, true)
+		pkgVersionHasSourceAt, err := getPkgHasSourceAtForQuery(ctx, c, arangoQueryBuilder, values, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve package version hasSourceAt  with error: %w", err)
 		}
-		combinedHasSourceAt = append(combinedHasSourceAt, pkgVersionHasMetadata...)
+		combinedHasSourceAt = append(combinedHasSourceAt, pkgVersionHasSourceAt...)
 
 		// pkgName hasSourceAt
 		values = map[string]any{}
@@ -86,11 +86,11 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 		arangoQueryBuilder.forInBound(pkgHasNameStr, "pNs", "pName")
 		arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "pType", "pNs")
 
-		pkgNameHasMetadata, err := getPkgHasSourceAtForQuery(ctx, c, arangoQueryBuilder, values, false)
+		pkgNameHasSourceAt, err := getPkgHasSourceAtForQuery(ctx, c, arangoQueryBuilder, values, false)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve package name hasSourceAt  with error: %w", err)
 		}
-		combinedHasSourceAt = append(combinedHasSourceAt, pkgNameHasMetadata...)
+		combinedHasSourceAt = append(combinedHasSourceAt, pkgNameHasSourceAt...)
 
 		return combinedHasSourceAt, nil
 	}
@@ -168,8 +168,8 @@ func getPkgHasSourceAtForQuery(ctx context.Context, c *arangoClient, arangoQuery
 
 func setHasSourceAtMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSourceAtSpec *model.HasSourceAtSpec, queryValues map[string]any) {
 	if hasSourceAtSpec.ID != nil {
-		arangoQueryBuilder.filter("hasSourceAt", "_id", "==", "@id")
-		queryValues["id"] = *hasSourceAtSpec.ID
+		arangoQueryBuilder.filter("hasSourceAt", "_id", "==", "@hasSourceAtId")
+		queryValues["hasSourceAtId"] = *hasSourceAtSpec.ID
 	}
 	if hasSourceAtSpec.KnownSince != nil {
 		arangoQueryBuilder.filter("hasSourceAt", knownSinceStr, ">=", "@"+knownSinceStr)
@@ -205,7 +205,7 @@ func setHasSourceAtMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSource
 			arangoQueryBuilder.filter("sName", "tag", "==", "@srcTag")
 			queryValues["srcTag"] = *hasSourceAtSpec.Source.Tag
 		}
-		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sNs", "sName")
+		arangoQueryBuilder.forInBound(srcHasNameStr, "sNs", "sName")
 		if hasSourceAtSpec.Source.Namespace != nil {
 			arangoQueryBuilder.filter("sNs", "namespace", "==", "@srcNamespace")
 			queryValues["srcNamespace"] = *hasSourceAtSpec.Source.Namespace
@@ -213,11 +213,11 @@ func setHasSourceAtMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSource
 		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sType", "sNs")
 		if hasSourceAtSpec.Source.Type != nil {
 			arangoQueryBuilder.filter("sType", "type", "==", "@srcType")
-			queryValues["srcType"] = *hasSourceAtSpec.Source.Namespace
+			queryValues["srcType"] = *hasSourceAtSpec.Source.Type
 		}
 	} else {
 		arangoQueryBuilder.forOutBound(hasSourceAtEdgesStr, "sName", "hasSourceAt")
-		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sNs", "sName")
+		arangoQueryBuilder.forInBound(srcHasNameStr, "sNs", "sName")
 		arangoQueryBuilder.forInBound(srcHasNamespaceStr, "sType", "sNs")
 	}
 }
@@ -392,8 +392,8 @@ func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInput
 			)
 			  
 			  LET hasSourceAt = FIRST(
-				  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, key:@key, value:@value, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
-					  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, key:@key, value:@value, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
+				  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
+					  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
 					  UPDATE {} IN hasSourceAts
 					  RETURN NEW
 			  )
@@ -715,13 +715,10 @@ func getHasSourceAtFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 	for _, createdValue := range createdValues {
 		var pkg *model.Package = nil
 		var src *model.Source = nil
-		if createdValue.PkgVersion != nil {
-			pkg = generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
-				createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-		} else if createdValue.SrcName != nil {
-			src = generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
-				createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
-		}
+		pkg = generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+			createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+		src = generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
+			createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
 
 		hasSourceAt := &model.HasSourceAt{
 			ID:            createdValue.HasSourceAtID,
