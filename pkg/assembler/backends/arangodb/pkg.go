@@ -22,6 +22,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -413,32 +414,35 @@ func setPkgVersionMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any
 }
 
 func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
-	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
-	// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
-	fields := getPreloads(ctx)
 
-	nameRequired := false
-	namespaceRequired := false
-	versionRequired := false
-	for _, f := range fields {
-		if f == namespaces {
-			namespaceRequired = true
-		}
-		if f == names {
-			nameRequired = true
-		}
-		if f == versions {
-			versionRequired = true
-		}
-	}
+	if _, ok := ctx.Value("graphql").(graphql.OperationContext); ok {
+		// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
+		// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
+		// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
+		fields := getPreloads(ctx)
 
-	if !namespaceRequired && !nameRequired && !versionRequired {
-		return c.packagesType(ctx, pkgSpec)
-	} else if namespaceRequired && !nameRequired && !versionRequired {
-		return c.packagesNamespace(ctx, pkgSpec)
-	} else if nameRequired && !versionRequired {
-		return c.packagesName(ctx, pkgSpec)
+		nameRequired := false
+		namespaceRequired := false
+		versionRequired := false
+		for _, f := range fields {
+			if f == namespaces {
+				namespaceRequired = true
+			}
+			if f == names {
+				nameRequired = true
+			}
+			if f == versions {
+				versionRequired = true
+			}
+		}
+
+		if !namespaceRequired && !nameRequired && !versionRequired {
+			return c.packagesType(ctx, pkgSpec)
+		} else if namespaceRequired && !nameRequired && !versionRequired {
+			return c.packagesNamespace(ctx, pkgSpec)
+		} else if nameRequired && !versionRequired {
+			return c.packagesName(ctx, pkgSpec)
+		}
 	}
 
 	values := map[string]any{}
@@ -457,8 +461,6 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 		"subpath": pVersion.subpath,
 		"qualifier_list": pVersion.qualifier_list
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Packages")
 	if err != nil {
@@ -483,8 +485,6 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 		"type_id": pType._id,
 		"type": pType.type
 	}`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "packagesType")
 	if err != nil {
@@ -535,8 +535,6 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 		"namespace_id": pNs._id,
 		"namespace": pNs.namespace
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "packagesNamespace")
 	if err != nil {
@@ -607,8 +605,6 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 		"name_id": pName._id,
 		"name": pName.name
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "packagesName")
 	if err != nil {
@@ -683,7 +679,7 @@ func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, e
 				return nil, fmt.Errorf("failed to get packages from cursor: %w", err)
 			}
 		} else {
-			var pkgQualifiers []*model.PackageQualifier
+			pkgQualifiers := []*model.PackageQualifier{}
 			if doc.QualifierList != nil {
 				pkgQualifiers = getCollectedPackageQualifiers(doc.QualifierList)
 			}
@@ -753,7 +749,7 @@ func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, e
 }
 
 func getCollectedPackageQualifiers(qualifierList []string) []*model.PackageQualifier {
-	var qualifiers []*model.PackageQualifier
+	qualifiers := []*model.PackageQualifier{}
 	for i := range qualifierList {
 		if i%2 == 0 {
 			key := qualifierList[i]
@@ -770,7 +766,7 @@ func getCollectedPackageQualifiers(qualifierList []string) []*model.PackageQuali
 
 func generateModelPackage(pkgTypeID, pkgType, namespaceID, namespaceStr, nameID, nameStr string, versionID, versionValue, subPathValue *string, qualifiersValue []string) *model.Package {
 	var version *model.PackageVersion = nil
-	if versionValue != nil && subPathValue != nil && qualifiersValue != nil {
+	if versionValue != nil && subPathValue != nil {
 		qualifiers := getCollectedPackageQualifiers(qualifiersValue)
 		version = &model.PackageVersion{
 			ID:         *versionID,
@@ -780,7 +776,7 @@ func generateModelPackage(pkgTypeID, pkgType, namespaceID, namespaceStr, nameID,
 		}
 	}
 
-	var versions []*model.PackageVersion
+	versions := []*model.PackageVersion{}
 	if version != nil {
 		versions = append(versions, version)
 	}

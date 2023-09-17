@@ -25,7 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// Internal data: link between equal vulnerabilities (isVulnerability)
+// Internal data: link between equal vulnerabilities (vulnEqual)
 type vulnerabilityEqualList []*vulnerabilityEqualLink
 type vulnerabilityEqualLink struct {
 	id              uint32
@@ -49,6 +49,7 @@ func (n *vulnerabilityEqualLink) BuildModelNode(c *demoClient) (model.Node, erro
 	return c.convVulnEqual(n)
 }
 
+
 // Ingest IsVulnerability
 func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	model, err := c.ingestVulnEqual(ctx, vulnerability, otherVulnerability, vulnEqual, true)
@@ -56,6 +57,19 @@ func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.Vu
 		return "", err
 	}
 	return model.ID, err
+
+// Ingest IngestVulnEqual
+
+func (c *demoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+	var modelHashEqualsIDs []string
+	for i := range vulnEquals {
+		vulnEqual, err := c.IngestVulnEqual(ctx, *vulnerabilities[i], *otherVulnerabilities[i], *vulnEquals[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestVulnEqual failed with err: %v", err)
+		}
+		modelHashEqualsIDs = append(modelHashEqualsIDs, vulnEqual.ID)
+	}
+	return modelHashEqualsIDs, nil
 }
 
 func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec, readOnly bool) (*model.VulnEqual, error) {
@@ -132,7 +146,7 @@ func (c *demoClient) convVulnEqual(in *vulnerabilityEqualLink) (*model.VulnEqual
 	return out, nil
 }
 
-// Query IsVulnerability
+// Query VulnEqual
 func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 	funcName := "VulnEqual"
 	c.m.RLock()

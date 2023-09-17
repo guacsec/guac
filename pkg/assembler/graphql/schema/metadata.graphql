@@ -92,4 +92,10 @@ extend type Mutation {
     pkgMatchType: MatchFlags!
     hasMetadata: HasMetadataInputSpec!
   ): ID!
+  "Adds bulk metadata about a package, source or artifact. The returned array of IDs can be a an array of empty string."
+  ingestBulkHasMetadata(
+    subjects: PackageSourceOrArtifactInputs!
+    pkgMatchType: MatchFlags!
+    hasMetadataList: [HasMetadataInputSpec!]!
+  ): [ID!]!
 }

@@ -156,12 +156,12 @@ func (cv *CertifyVex) Vulnerability(ctx context.Context) (*VulnerabilityType, er
 	return result, err
 }
 
-func (cv *CertifyVuln) Vulnerability(ctx context.Context) (*VulnerabilityType, error) {
+func (cv *CertifyVuln) Vulnerability(ctx context.Context) (*VulnerabilityID, error) {
 	result, err := cv.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
 		result, err = cv.QueryVulnerability().Only(ctx)
 	}
-	return result, MaskNotFound(err)
+	return result, err
 }
 
 func (cv *CertifyVuln) Package(ctx context.Context) (*PackageVersion, error) {
@@ -180,12 +180,20 @@ func (d *Dependency) Package(ctx context.Context) (*PackageVersion, error) {
 	return result, err
 }
 
-func (d *Dependency) DependentPackage(ctx context.Context) (*PackageName, error) {
-	result, err := d.Edges.DependentPackageOrErr()
+func (d *Dependency) DependentPackageName(ctx context.Context) (*PackageName, error) {
+	result, err := d.Edges.DependentPackageNameOrErr()
 	if IsNotLoaded(err) {
-		result, err = d.QueryDependentPackage().Only(ctx)
+		result, err = d.QueryDependentPackageName().Only(ctx)
 	}
-	return result, err
+	return result, MaskNotFound(err)
+}
+
+func (d *Dependency) DependentPackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := d.Edges.DependentPackageVersionOrErr()
+	if IsNotLoaded(err) {
+		result, err = d.QueryDependentPackageVersion().Only(ctx)
+	}
+	return result, MaskNotFound(err)
 }
 
 func (hsa *HasSourceAt) PackageVersion(ctx context.Context) (*PackageVersion, error) {
@@ -464,10 +472,34 @@ func (st *SourceType) Namespaces(ctx context.Context) (result []*SourceNamespace
 	return result, err
 }
 
+func (ve *VulnEqual) VulnerabilityIds(ctx context.Context) (result []*VulnerabilityID, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = ve.NamedVulnerabilityIds(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = ve.Edges.VulnerabilityIdsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = ve.QueryVulnerabilityIds().All(ctx)
+	}
+	return result, err
+}
+
 func (vi *VulnerabilityID) Type(ctx context.Context) (*VulnerabilityType, error) {
 	result, err := vi.Edges.TypeOrErr()
 	if IsNotLoaded(err) {
 		result, err = vi.QueryType().Only(ctx)
+	}
+	return result, err
+}
+
+func (vi *VulnerabilityID) VulnEquals(ctx context.Context) (result []*VulnEqual, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = vi.NamedVulnEquals(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = vi.Edges.VulnEqualsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = vi.QueryVulnEquals().All(ctx)
 	}
 	return result, err
 }

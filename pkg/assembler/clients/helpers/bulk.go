@@ -38,7 +38,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				collectedPackages = append(collectedPackages, *v)
 			}
 			if err := ingestPackages(ctx, gqlclient, collectedPackages); err != nil {
-				return fmt.Errorf("ingestPackages failed with error: %w", err)
+				logger.Errorf("ingestPackages failed with error: %v", err)
 			}
 
 			sources := p.GetSources(ctx)
@@ -50,7 +50,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				collectedSources = append(collectedSources, *v)
 			}
 			if err := ingestSources(ctx, gqlclient, collectedSources); err != nil {
-				return fmt.Errorf("ingestSources failed with error: %w", err)
+				logger.Errorf("ingestSources failed with error: %v", err)
 			}
 
 			artifacts := p.GetArtifacts(ctx)
@@ -61,13 +61,13 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				collectedArtifacts = append(collectedArtifacts, *v)
 			}
 			if err := ingestArtifacts(ctx, gqlclient, collectedArtifacts); err != nil {
-				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
+				logger.Errorf("ingestArtifacts failed with error: %v", err)
 			}
 
 			materials := p.GetMaterials(ctx)
 			logger.Infof("assembling Materials (Artifact): %v", len(materials))
 			if err := ingestArtifacts(ctx, gqlclient, materials); err != nil {
-				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
+				logger.Errorf("ingestArtifacts failed with error: %v", err)
 			}
 
 			builders := p.GetBuilders(ctx)
@@ -78,7 +78,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				collectedBuilders = append(collectedBuilders, *v)
 			}
 			if err := ingestBuilders(ctx, gqlclient, collectedBuilders); err != nil {
-				return fmt.Errorf("ingestBuilders failed with error: %w", err)
+				logger.Errorf("ingestBuilders failed with error: %v", err)
 			}
 
 			vulns := p.GetVulnerabilities(ctx)
@@ -89,100 +89,105 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				collectedVulns = append(collectedVulns, *v)
 			}
 			if err := ingestVulnerabilities(ctx, gqlclient, collectedVulns); err != nil {
-				return fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
+				logger.Errorf("ingestVulnerabilities failed with error: %v", err)
+			}
+
+			licenses := p.GetLicenses(ctx)
+			logger.Infof("assembling Licenses: %v", len(licenses))
+			if err := ingestLicenses(ctx, gqlclient, licenses); err != nil {
+				logger.Errorf("ingestLicenses failed with error: %v", err)
 			}
 
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			if err := ingestCertifyScorecards(ctx, gqlclient, p.CertifyScorecard); err != nil {
-				return fmt.Errorf("ingestCertifyScorecards failed with error: %w", err)
+				logger.Errorf("ingestCertifyScorecards failed with error: %v", err)
 			}
 
 			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
 			if err := ingestIsDependencies(ctx, gqlclient, p.IsDependency); err != nil {
-				return fmt.Errorf("ingestIsDependencies failed with error: %w", err)
+				logger.Errorf("ingestIsDependencies failed with error: %v", err)
 			}
 
 			logger.Infof("assembling IsOccurrence: %v", len(p.IsOccurrence))
 			if err := ingestIsOccurrences(ctx, gqlclient, p.IsOccurrence); err != nil {
-				return fmt.Errorf("ingestIsOccurrences failed with error: %w", err)
+				logger.Errorf("ingestIsOccurrences failed with error: %v", err)
 			}
 
 			logger.Infof("assembling HasSLSA: %v", len(p.HasSlsa))
 			if err := ingestHasSLSAs(ctx, gqlclient, p.HasSlsa); err != nil {
-				return fmt.Errorf("ingestHasSLSAs failed with error: %w", err)
+				logger.Errorf("ingestHasSLSAs failed with error: %v", err)
 			}
 
 			logger.Infof("assembling CertifyVuln: %v", len(p.CertifyVuln))
 			if err := ingestCertifyVulns(ctx, gqlclient, p.CertifyVuln); err != nil {
-				return fmt.Errorf("ingestCertifyVulns failed with error: %w", err)
+				logger.Errorf("ingestCertifyVulns failed with error: %v", err)
 			}
 
 			logger.Infof("assembling VulnMetadata: %v", len(p.VulnMetadata))
 			if err := ingestVulnMetadatas(ctx, gqlclient, p.VulnMetadata); err != nil {
-				return fmt.Errorf("ingestVulnMetadatas failed with error: %w", err)
+				logger.Errorf("ingestVulnMetadatas failed with error: %v", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for IsVuln
 			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
-			for _, iv := range p.VulnEqual {
-				if err := ingestVulnEqual(ctx, gqlclient, iv); err != nil {
-					return fmt.Errorf("ingestIsVuln failed with error: %w", err)
+			if err := ingestVulnEquals(ctx, gqlclient, p.VulnEqual); err != nil {
+				logger.Errorf("ingestVulnEquals failed with error: %v", err)
 
-				}
 			}
 
 			// TODO(pxp928): add bulk ingestion for HasSourceAt
 			logger.Infof("assembling HasSourceAt: %v", len(p.HasSourceAt))
 			for _, hsa := range p.HasSourceAt {
 				if err := hasSourceAt(ctx, gqlclient, hsa); err != nil {
-					return fmt.Errorf("hasSourceAt failed with error: %w", err)
+					logger.Errorf("hasSourceAt failed with error: %v", err)
 
 				}
 			}
 
 			logger.Infof("assembling CertifyBad: %v", len(p.CertifyBad))
 			if err := ingestCertifyBads(ctx, gqlclient, p.CertifyBad); err != nil {
-				return fmt.Errorf("ingestCertifyBads failed with error: %w", err)
+				logger.Errorf("ingestCertifyBads failed with error: %v", err)
 
 			}
 
 			logger.Infof("assembling CertifyGood: %v", len(p.CertifyGood))
 			if err := ingestCertifyGoods(ctx, gqlclient, p.CertifyGood); err != nil {
-				return fmt.Errorf("ingestCertifyGoods failed with error: %w", err)
+				logger.Errorf("ingestCertifyGoods failed with error: %v", err)
 
 			}
 
-			// TODO: add bulk ingestion for PointOfContact
-			logger.Infof("assembling PointOfContact: %v", len(p.CertifyGood))
-			for _, poc := range p.PointOfContact {
-				if err := ingestPointOfContact(ctx, gqlclient, poc); err != nil {
-					return fmt.Errorf("ingestPointOfContact failed with error: %w", err)
+			logger.Infof("assembling PointOfContact: %v", len(p.PointOfContact))
+			if err := ingestPointOfContacts(ctx, gqlclient, p.PointOfContact); err != nil {
+				logger.Errorf("ingestPointOfContacts failed with error: %v", err)
+			}
 
-				}
+			logger.Infof("assembling HasMetadata: %v", len(p.HasMetadata))
+			if err := ingestBulkHasMetadata(ctx, gqlclient, p.HasMetadata); err != nil {
+				logger.Errorf("ingestBulkHasMetadata failed with error: %v", err)
 			}
 
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			if err := ingestHasSBOMs(ctx, gqlclient, p.HasSBOM); err != nil {
-				return fmt.Errorf("ingestHasSBOMs failed with error: %w", err)
+				logger.Errorf("ingestHasSBOMs failed with error: %v", err)
 			}
 
 			logger.Infof("assembling VEX : %v", len(p.Vex))
 			if err := ingestVEXs(ctx, gqlclient, p.Vex); err != nil {
-				return fmt.Errorf("ingestVEXs failed with error: %w", err)
+				logger.Errorf("ingestVEXs failed with error: %v", err)
 			}
 
 			logger.Infof("assembling HashEqual : %v", len(p.HashEqual))
 			if err := ingestHashEquals(ctx, gqlclient, p.HashEqual); err != nil {
-				return fmt.Errorf("ingestHashEquals failed with error: %w", err)
+				logger.Errorf("ingestHashEquals failed with error: %v", err)
 			}
 
-			// TODO(pxp928): add bulk ingestion for PkgEqual
 			logger.Infof("assembling PkgEqual : %v", len(p.PkgEqual))
-			for _, equal := range p.PkgEqual {
-				if err := ingestPkgEqual(ctx, gqlclient, equal); err != nil {
-					return fmt.Errorf("ingestPkgEqual failed with error: %w", err)
+			if err := ingestPkgEquals(ctx, gqlclient, p.PkgEqual); err != nil {
+				logger.Errorf("ingestPkgEquals failed with error: %v", err)
+			}
 
-				}
+			logger.Infof("assembling CertifyLegal : %v", len(p.CertifyLegal))
+			if err := ingestCertifyLegals(ctx, gqlclient, p.CertifyLegal); err != nil {
+				logger.Errorf("ingestCertifyLegals failed with error: %v", err)
 			}
 		}
 		return nil
@@ -225,6 +230,14 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client, v []model
 	_, err := model.IngestVulnerabilities(ctx, client, v)
 	if err != nil {
 		return fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
+	}
+	return nil
+}
+
+func ingestLicenses(ctx context.Context, client graphql.Client, v []model.LicenseInputSpec) error {
+	_, err := model.IngestLicenses(ctx, client, v)
+	if err != nil {
+		return fmt.Errorf("ingestLicenses failed with error: %w", err)
 	}
 	return nil
 }
@@ -296,9 +309,27 @@ func ingestVulnMetadatas(ctx context.Context, client graphql.Client, vm []assemb
 		vulnMetadataList = append(vulnMetadataList, *ingest.VulnMetadata)
 	}
 	if len(vm) > 0 {
-		_, err := model.VulnHasMetadatas(ctx, client, vulnerabilities, vulnMetadataList)
+		_, err := model.BulkVulnHasMetadata(ctx, client, vulnerabilities, vulnMetadataList)
 		if err != nil {
 			return fmt.Errorf("VulnHasMetadatas failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestVulnEquals(ctx context.Context, client graphql.Client, ve []assembler.VulnEqualIngest) error {
+	var vulnerabilities []model.VulnerabilityInputSpec
+	var equalVulnerabilities []model.VulnerabilityInputSpec
+	var vulnEqualList []model.VulnEqualInputSpec
+	for _, ingest := range ve {
+		vulnerabilities = append(vulnerabilities, *ingest.Vulnerability)
+		equalVulnerabilities = append(equalVulnerabilities, *ingest.EqualVulnerability)
+		vulnEqualList = append(vulnEqualList, *ingest.VulnEqual)
+	}
+	if len(ve) > 0 {
+		_, err := model.IngestVulnEquals(ctx, client, vulnerabilities, equalVulnerabilities, vulnEqualList)
+		if err != nil {
+			return fmt.Errorf("IngestVulnEquals failed with error: %w", err)
 		}
 	}
 	return nil
@@ -380,6 +411,24 @@ func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assemb
 	return nil
 }
 
+func ingestPkgEquals(ctx context.Context, client graphql.Client, v []assembler.PkgEqualIngest) error {
+	var packages []model.PkgInputSpec
+	var equalPackages []model.PkgInputSpec
+	var pkgEquals []model.PkgEqualInputSpec
+	for _, ingest := range v {
+		packages = append(packages, *ingest.Pkg)
+		equalPackages = append(equalPackages, *ingest.EqualPkg)
+		pkgEquals = append(pkgEquals, *ingest.PkgEqual)
+	}
+	if len(v) > 0 {
+		_, err := model.IngestPkgEquals(ctx, client, packages, equalPackages, pkgEquals)
+		if err != nil {
+			return fmt.Errorf("PkgEquals failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
 func ingestHashEquals(ctx context.Context, client graphql.Client, v []assembler.HashEqualIngest) error {
 	var artifacts []model.ArtifactInputSpec
 	var equalArtifacts []model.ArtifactInputSpec
@@ -390,7 +439,7 @@ func ingestHashEquals(ctx context.Context, client graphql.Client, v []assembler.
 		hashEquals = append(hashEquals, *ingest.HashEqual)
 	}
 	if len(v) > 0 {
-		_, err := model.HashEquals(ctx, client, artifacts, equalArtifacts, hashEquals)
+		_, err := model.IngestHashEquals(ctx, client, artifacts, equalArtifacts, hashEquals)
 		if err != nil {
 			return fmt.Errorf("HashEquals failed with error: %w", err)
 		}
@@ -429,6 +478,118 @@ func ingestHasSBOMs(ctx context.Context, client graphql.Client, v []assembler.Ha
 		_, err := model.HasSBOMPkgs(ctx, client, pkgs, pkgSBOMs)
 		if err != nil {
 			return fmt.Errorf("hasSBOMPkgs failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestPointOfContacts(ctx context.Context, client graphql.Client, poc []assembler.PointOfContactIngest) error {
+	var pkgVersions []model.PkgInputSpec
+	var pkgNames []model.PkgInputSpec
+	var sources []model.SourceInputSpec
+	var artifacts []model.ArtifactInputSpec
+	var pkgVersionPOC []model.PointOfContactInputSpec
+	var pkgNamePOC []model.PointOfContactInputSpec
+	var srcPOC []model.PointOfContactInputSpec
+	var artPOC []model.PointOfContactInputSpec
+	for _, ingest := range poc {
+		if err := validatePackageSourceOrArtifactInput(ingest.Pkg, ingest.Src, ingest.Artifact, "ingestPointOfContacts"); err != nil {
+			return fmt.Errorf("input validation failed for ingestPointOfContacts: %w", err)
+		}
+		if ingest.Pkg != nil {
+			if ingest.PkgMatchFlag.Pkg == model.PkgMatchTypeSpecificVersion {
+				pkgVersions = append(pkgVersions, *ingest.Pkg)
+				pkgVersionPOC = append(pkgVersionPOC, *ingest.PointOfContact)
+			} else {
+				pkgNames = append(pkgNames, *ingest.Pkg)
+				pkgNamePOC = append(pkgNamePOC, *ingest.PointOfContact)
+			}
+		} else if ingest.Src != nil {
+			sources = append(sources, *ingest.Src)
+			srcPOC = append(srcPOC, *ingest.PointOfContact)
+		} else {
+			artifacts = append(artifacts, *ingest.Artifact)
+			artPOC = append(artPOC, *ingest.PointOfContact)
+		}
+	}
+	if len(pkgVersions) > 0 {
+		_, err := model.PointOfContactPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionPOC)
+		if err != nil {
+			return fmt.Errorf("HasMetadataPkgs - specific version failed with error: %w", err)
+		}
+	}
+	if len(pkgNames) > 0 {
+		_, err := model.PointOfContactPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNamePOC)
+		if err != nil {
+			return fmt.Errorf("HasMetadataPkgs - all versions failed with error: %w", err)
+		}
+	}
+	if len(sources) > 0 {
+		_, err := model.PointOfContactSrcs(ctx, client, sources, srcPOC)
+		if err != nil {
+			return fmt.Errorf("HasMetadataSrcs failed with error: %w", err)
+		}
+	}
+	if len(artifacts) > 0 {
+		_, err := model.PointOfContactArtifacts(ctx, client, artifacts, artPOC)
+		if err != nil {
+			return fmt.Errorf("HasMetadataArtifacts failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestBulkHasMetadata(ctx context.Context, client graphql.Client, v []assembler.HasMetadataIngest) error {
+	var pkgVersions []model.PkgInputSpec
+	var pkgNames []model.PkgInputSpec
+	var sources []model.SourceInputSpec
+	var artifacts []model.ArtifactInputSpec
+	var pkgVersionHasMetadata []model.HasMetadataInputSpec
+	var pkgNameHasMetadata []model.HasMetadataInputSpec
+	var srcHasMetadata []model.HasMetadataInputSpec
+	var artHasMetadata []model.HasMetadataInputSpec
+	for _, ingest := range v {
+		if err := validatePackageSourceOrArtifactInput(ingest.Pkg, ingest.Src, ingest.Artifact, "ingestBulkHasMetadata"); err != nil {
+			return fmt.Errorf("input validation failed for ingestBulkHasMetadata: %w", err)
+		}
+		if ingest.Pkg != nil {
+			if ingest.PkgMatchFlag.Pkg == model.PkgMatchTypeSpecificVersion {
+				pkgVersions = append(pkgVersions, *ingest.Pkg)
+				pkgVersionHasMetadata = append(pkgVersionHasMetadata, *ingest.HasMetadata)
+			} else {
+				pkgNames = append(pkgNames, *ingest.Pkg)
+				pkgNameHasMetadata = append(pkgNameHasMetadata, *ingest.HasMetadata)
+			}
+		} else if ingest.Src != nil {
+			sources = append(sources, *ingest.Src)
+			srcHasMetadata = append(srcHasMetadata, *ingest.HasMetadata)
+		} else {
+			artifacts = append(artifacts, *ingest.Artifact)
+			artHasMetadata = append(artHasMetadata, *ingest.HasMetadata)
+		}
+	}
+	if len(pkgVersions) > 0 {
+		_, err := model.HasMetadataPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionHasMetadata)
+		if err != nil {
+			return fmt.Errorf("HasMetadataPkgs - specific version failed with error: %w", err)
+		}
+	}
+	if len(pkgNames) > 0 {
+		_, err := model.HasMetadataPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameHasMetadata)
+		if err != nil {
+			return fmt.Errorf("HasMetadataPkgs - all versions failed with error: %w", err)
+		}
+	}
+	if len(sources) > 0 {
+		_, err := model.HasMetadataSrcs(ctx, client, sources, srcHasMetadata)
+		if err != nil {
+			return fmt.Errorf("HasMetadataSrcs failed with error: %w", err)
+		}
+	}
+	if len(artifacts) > 0 {
+		_, err := model.HasMetadataArtifacts(ctx, client, artifacts, artHasMetadata)
+		if err != nil {
+			return fmt.Errorf("HasMetadataArtifacts failed with error: %w", err)
 		}
 	}
 	return nil
@@ -582,6 +743,51 @@ func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembl
 		_, err := model.IsOccurrencesPkg(ctx, client, pkgs, pkgArtifacts, pkgOccurrences)
 		if err != nil {
 			return fmt.Errorf("isOccurrencesPkg failed with error: %w", err)
+		}
+	}
+	return nil
+}
+
+func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembler.CertifyLegalIngest) error {
+	var pkgs []model.PkgInputSpec
+	var sources []model.SourceInputSpec
+	var pkgDec [][]model.LicenseInputSpec
+	var pkgDis [][]model.LicenseInputSpec
+	var pkgCL []model.CertifyLegalInputSpec
+	var srcDec [][]model.LicenseInputSpec
+	var srcDis [][]model.LicenseInputSpec
+	var srcCL []model.CertifyLegalInputSpec
+	for _, ingest := range v {
+
+		if ingest.Pkg != nil && ingest.Src != nil {
+			return fmt.Errorf("unable to create CertifyLegal with both Src and Pkg subject specified")
+		}
+		if ingest.Pkg == nil && ingest.Src == nil {
+			return fmt.Errorf("unable to create CertifyLegal without either Src and Pkg subject specified")
+		}
+
+		if ingest.Pkg != nil {
+			pkgs = append(pkgs, *ingest.Pkg)
+			pkgDec = append(pkgDec, ingest.Declared)
+			pkgDis = append(pkgDis, ingest.Discovered)
+			pkgCL = append(pkgCL, *ingest.CertifyLegal)
+		} else {
+			sources = append(sources, *ingest.Src)
+			srcDec = append(srcDec, ingest.Declared)
+			srcDis = append(srcDis, ingest.Discovered)
+			srcCL = append(srcCL, *ingest.CertifyLegal)
+		}
+	}
+	if len(sources) > 0 {
+		_, err := model.CertifyLegalSrcs(ctx, client, sources, srcDec, srcDis, srcCL)
+		if err != nil {
+			return fmt.Errorf("certifyLegalSrc failed with error: %w", err)
+		}
+	}
+	if len(pkgs) > 0 {
+		_, err := model.CertifyLegalPkgs(ctx, client, pkgs, pkgDec, pkgDis, pkgCL)
+		if err != nil {
+			return fmt.Errorf("certifyLegalPkg failed with error: %w", err)
 		}
 	}
 	return nil

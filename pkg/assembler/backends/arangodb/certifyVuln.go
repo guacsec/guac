@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -89,8 +90,6 @@ func getPkgCertifyVulnForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'origin': certifyVuln.origin
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVuln")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyVuln: %w", err)
@@ -106,43 +105,53 @@ func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVu
 		queryValues["id"] = *certifyVulnSpec.ID
 	}
 	if certifyVulnSpec.TimeScanned != nil {
-		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+timeScannedStr)
-		queryValues[timeScannedStr] = certifyVulnSpec.TimeScanned
+		arangoQueryBuilder.filter("certifyVuln", timeScannedStr, "==", "@"+timeScannedStr)
+		queryValues[timeScannedStr] = *certifyVulnSpec.TimeScanned
 	}
 	if certifyVulnSpec.DbURI != nil {
-		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+dbUriStr)
-		queryValues[dbUriStr] = certifyVulnSpec.DbURI
+		arangoQueryBuilder.filter("certifyVuln", dbUriStr, "==", "@"+dbUriStr)
+		queryValues[dbUriStr] = *certifyVulnSpec.DbURI
 	}
 	if certifyVulnSpec.DbVersion != nil {
-		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+dbVersionStr)
-		queryValues[dbVersionStr] = certifyVulnSpec.DbVersion
+		arangoQueryBuilder.filter("certifyVuln", dbVersionStr, "==", "@"+dbVersionStr)
+		queryValues[dbVersionStr] = *certifyVulnSpec.DbVersion
 	}
 	if certifyVulnSpec.ScannerURI != nil {
-		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+scannerUriStr)
-		queryValues[scannerUriStr] = certifyVulnSpec.ScannerURI
+		arangoQueryBuilder.filter("certifyVuln", scannerUriStr, "==", "@"+scannerUriStr)
+		queryValues[scannerUriStr] = *certifyVulnSpec.ScannerURI
 	}
 	if certifyVulnSpec.ScannerVersion != nil {
-		arangoQueryBuilder.filter("certifyVuln", justification, "==", "@"+scannerVersionStr)
-		queryValues[scannerVersionStr] = certifyVulnSpec.ScannerVersion
+		arangoQueryBuilder.filter("certifyVuln", scannerVersionStr, "==", "@"+scannerVersionStr)
+		queryValues[scannerVersionStr] = *certifyVulnSpec.ScannerVersion
 	}
 	if certifyVulnSpec.Origin != nil {
 		arangoQueryBuilder.filter("certifyVuln", origin, "==", "@"+origin)
-		queryValues[origin] = certifyVulnSpec.Origin
+		queryValues[origin] = *certifyVulnSpec.Origin
 	}
 	if certifyVulnSpec.Collector != nil {
 		arangoQueryBuilder.filter("certifyVuln", collector, "==", "@"+collector)
-		queryValues[collector] = certifyVulnSpec.Collector
+		queryValues[collector] = *certifyVulnSpec.Collector
 	}
 	if certifyVulnSpec.Vulnerability != nil {
+
+		if certifyVulnSpec.Vulnerability.NoVuln != nil && *certifyVulnSpec.Vulnerability.NoVuln {
+			certifyVulnSpec.Vulnerability.Type = ptrfrom.String(noVulnType)
+			certifyVulnSpec.Vulnerability.VulnerabilityID = ptrfrom.String("")
+		}
+
 		arangoQueryBuilder.forOutBound(certifyVulnEdgesStr, "vVulnID", "certifyVuln")
+		if certifyVulnSpec.Vulnerability.ID != nil {
+			arangoQueryBuilder.filter("vVulnID", "_id", "==", "@id")
+			queryValues["id"] = *certifyVulnSpec.Vulnerability.ID
+		}
 		if certifyVulnSpec.Vulnerability.VulnerabilityID != nil {
 			arangoQueryBuilder.filter("vVulnID", "vulnerabilityID", "==", "@vulnerabilityID")
-			queryValues["vulnerabilityID"] = *certifyVulnSpec.Vulnerability.VulnerabilityID
+			queryValues["vulnerabilityID"] = strings.ToLower(*certifyVulnSpec.Vulnerability.VulnerabilityID)
 		}
 		arangoQueryBuilder.forInBound(vulnHasVulnerabilityIDStr, "vType", "vVulnID")
 		if certifyVulnSpec.Vulnerability.Type != nil {
 			arangoQueryBuilder.filter("vType", "type", "==", "@vulnType")
-			queryValues["vulnType"] = *certifyVulnSpec.Vulnerability.Type
+			queryValues["vulnType"] = strings.ToLower(*certifyVulnSpec.Vulnerability.Type)
 		}
 	} else {
 		arangoQueryBuilder.forOutBound(certifyVulnEdgesStr, "vVulnID", "certifyVuln")
@@ -163,10 +172,10 @@ func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.Vul
 	}
 
 	values[timeScannedStr] = certifyVuln.TimeScanned
-	values[dbUriStr] = certifyVuln.TimeScanned
-	values[dbVersionStr] = certifyVuln.TimeScanned
-	values[scannerUriStr] = certifyVuln.TimeScanned
-	values[scannerVersionStr] = certifyVuln.TimeScanned
+	values[dbUriStr] = certifyVuln.DbURI
+	values[dbVersionStr] = certifyVuln.DbVersion
+	values[scannerUriStr] = certifyVuln.ScannerURI
+	values[scannerVersionStr] = certifyVuln.ScannerVersion
 	values[origin] = certifyVuln.Origin
 	values[collector] = certifyVuln.Collector
 

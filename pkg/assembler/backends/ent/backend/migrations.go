@@ -36,7 +36,7 @@ type BackendOptions struct {
 }
 
 // SetupBackend sets up the ent backend, preparing the database and returning a client
-func SetupBackend(ctx context.Context, options BackendOptions) (*ent.Client, error) {
+func SetupBackend(ctx context.Context, options *BackendOptions) (*ent.Client, error) {
 	logger := logging.FromContext(ctx)
 
 	driver := dialect.Postgres

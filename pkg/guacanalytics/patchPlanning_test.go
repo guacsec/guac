@@ -28,7 +28,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	"github.com/guacsec/guac/pkg/assembler/backends"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
@@ -1067,7 +1068,7 @@ func ingestPkgEqual(ctx context.Context, client graphql.Client, graph assembler.
 			return fmt.Errorf("error in ingesting EqualPkg for PkgEqual: %v\n", err)
 		}
 
-		_, err = model.PkgEqual(ctx, client, *ingest.Pkg, *ingest.EqualPkg, *ingest.PkgEqual)
+		_, err = model.IngestPkgEqual(ctx, client, *ingest.Pkg, *ingest.EqualPkg, *ingest.PkgEqual)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting PkgEqual: %v\n", err)
@@ -1090,7 +1091,7 @@ func ingestHashEqual(ctx context.Context, client graphql.Client, graph assembler
 			return fmt.Errorf("error in ingesting EqualArtifact for HashEqual: %v\n", err)
 		}
 
-		_, err = model.HashEqual(ctx, client, *ingest.Artifact, *ingest.EqualArtifact, *ingest.HashEqual)
+		_, err = model.IngestHashEqual(ctx, client, *ingest.Artifact, *ingest.EqualArtifact, *ingest.HashEqual)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting HashEqual: %v\n", err)
@@ -1699,8 +1700,7 @@ func startTestServer() (*http.Server, error) {
 
 func getGraphqlTestServer() (*handler.Server, error) {
 	var topResolver resolvers.Resolver
-	args := inmem.DemoCredentials{}
-	backend, err := inmem.GetBackend(&args)
+	backend, err := backends.Get("inmem", nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating inmem backend: %w", err)
 	}

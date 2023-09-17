@@ -20,8 +20,10 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -38,18 +40,21 @@ type spdxParser struct {
 	doc                 *processor.Document
 	packagePackages     map[string][]*model.PkgInputSpec
 	packageArtifacts    map[string][]*model.ArtifactInputSpec
+	packageLegals       map[string][]*model.CertifyLegalInputSpec
 	filePackages        map[string][]*model.PkgInputSpec
 	fileArtifacts       map[string][]*model.ArtifactInputSpec
 	topLevelPackages    map[string][]*model.PkgInputSpec
 	identifierStrings   *common.IdentifierStrings
 	spdxDoc             *spdx.Document
 	topLevelIsHeuristic bool
+	timeScanned         time.Time
 }
 
 func NewSpdxParser() common.DocumentParser {
 	return &spdxParser{
 		packagePackages:     map[string][]*model.PkgInputSpec{},
 		packageArtifacts:    map[string][]*model.ArtifactInputSpec{},
+		packageLegals:       map[string][]*model.CertifyLegalInputSpec{},
 		filePackages:        map[string][]*model.PkgInputSpec{},
 		fileArtifacts:       map[string][]*model.ArtifactInputSpec{},
 		topLevelPackages:    map[string][]*model.PkgInputSpec{},
@@ -65,6 +70,14 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("failed to parse SPDX document: %w", err)
 	}
 	s.spdxDoc = spdxDoc
+	if spdxDoc.CreationInfo == nil {
+		return fmt.Errorf("SPDC documentd missing required \"creationInfo\" section.")
+	}
+	time, err := time.Parse(time.RFC3339, spdxDoc.CreationInfo.Created)
+	if err != nil {
+		return fmt.Errorf("SPDX document had invalid created time %q : %w", spdxDoc.CreationInfo.Created, err)
+	}
+	s.timeScanned = time
 	if err := s.getPackages(); err != nil {
 		return err
 	}
@@ -135,6 +148,23 @@ func (s *spdxParser) getPackages() error {
 			s.packageArtifacts[string(pac.PackageSPDXIdentifier)] = append(s.packageArtifacts[string(pac.PackageSPDXIdentifier)], artifact)
 		}
 
+		if pac.PackageLicenseDeclared != "" ||
+			pac.PackageLicenseConcluded != "" ||
+			pac.PackageCopyrightText != "" {
+			cl := &model.CertifyLegalInputSpec{
+				DeclaredLicense:   pac.PackageLicenseDeclared,
+				DiscoveredLicense: pac.PackageLicenseConcluded,
+				Attribution:       pac.PackageCopyrightText,
+				Justification:     "Found in SPDX document.",
+				TimeScanned:       s.timeScanned,
+			}
+			if pac.PackageLicenseComments != "" {
+				cl.Justification = fmt.Sprintf("%s : %s", cl.Justification, pac.PackageLicenseComments)
+			}
+			s.packageLegals[string(pac.PackageSPDXIdentifier)] = append(
+				s.packageLegals[string(pac.PackageSPDXIdentifier)], cl)
+		}
+
 	}
 
 	// If there is no top level Spdx Id that can be derived from the relationships, we take a best guess for the SpdxId.
@@ -157,6 +187,9 @@ func (s *spdxParser) getFiles() error {
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range file.Checksums {
+			if isEmptyChecksum(checksum.Value) {
+				continue
+			}
 			// for each file create a package for each of them so they can be referenced as a dependency
 			purl := asmhelpers.GuacFilePurl(strings.ToLower(string(checksum.Algorithm)), checksum.Value, &file.FileName)
 			pkg, err := asmhelpers.PurlToPkg(purl)
@@ -169,6 +202,7 @@ func (s *spdxParser) getFiles() error {
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
+
 			s.fileArtifacts[string(file.FileSPDXIdentifier)] = append(s.fileArtifacts[string(file.FileSPDXIdentifier)], artifact)
 		}
 	}
@@ -292,7 +326,61 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 	}
 
+	for id, cls := range s.packageLegals {
+		for _, cl := range cls {
+			dec := common.ParseLicenses(cl.DeclaredLicense, s.spdxDoc.CreationInfo.LicenseListVersion)
+			dis := common.ParseLicenses(cl.DiscoveredLicense, s.spdxDoc.CreationInfo.LicenseListVersion)
+			for i := range dec {
+				o, n := fixLicense(ctx, &dec[i], s.spdxDoc.OtherLicenses)
+				if o != "" {
+					exp := strings.ReplaceAll(cl.DeclaredLicense, o, n)
+					cl.DeclaredLicense = exp
+				}
+			}
+			for i := range dis {
+				o, n := fixLicense(ctx, &dis[i], s.spdxDoc.OtherLicenses)
+				if o != "" {
+					exp := strings.ReplaceAll(cl.DiscoveredLicense, o, n)
+					cl.DiscoveredLicense = exp
+				}
+			}
+			for _, pkg := range s.packagePackages[id] {
+				cli := assembler.CertifyLegalIngest{
+					Pkg:          pkg,
+					Declared:     dec,
+					Discovered:   dis,
+					CertifyLegal: cl,
+				}
+				preds.CertifyLegal = append(preds.CertifyLegal, cli)
+			}
+		}
+	}
+
 	return preds
+}
+
+func fixLicense(ctx context.Context, l *generated.LicenseInputSpec, ol []*spdx.OtherLicense) (string, string) {
+	logger := logging.FromContext(ctx)
+	if !strings.HasPrefix(l.Name, "LicenseRef-") {
+		return "", ""
+	}
+	oldName := l.Name
+	l.ListVersion = nil
+	found := false
+	for _, o := range ol {
+		if o.LicenseIdentifier == l.Name {
+			l.Inline = &o.ExtractedText
+			found = true
+			break
+		}
+	}
+	if !found {
+		logger.Error("License identifier %q not found in OtherLicenses", l.Name)
+		s := "Not found"
+		l.Inline = &s
+	}
+	l.Name = common.HashLicense(*l.Inline)
+	return oldName, l.Name
 }
 
 func isDependency(rel string) bool {
@@ -323,4 +411,20 @@ func getJustification(r *spdx.Relationship) string {
 		s += fmt.Sprintf("with comment: %s", r.RelationshipComment)
 	}
 	return s
+}
+
+func isEmptyChecksum(v string) bool {
+	return map[string]bool{
+		// all 0 hash
+		"0000000000000000000000000000000000000000":                         true,
+		"0000000000000000000000000000000000000000000000000000000000000000": true,
+		// sha1 empty file
+		"da39a3ee5e6b4b0d3255bfef95601890afd80709": true,
+		// sha256 empty file
+		"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": true,
+		// sha512 empty file
+		"cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e": true,
+		// TODO: add the same for other SPDX hash algorithms available
+		// ref: https://github.com/guacsec/guac/issues/1229
+	}[v]
 }

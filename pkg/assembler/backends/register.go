@@ -13,19 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package arangodb
+package backends
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"golang.org/x/exp/maps"
 )
 
-func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
-	return nil, fmt.Errorf("not implemented: IngestHasMetadata")
+type GBFunc func(context.Context, BackendArgs) (Backend, error)
+
+var getBackend map[string]GBFunc
+
+func init() {
+	getBackend = make(map[string]GBFunc)
 }
 
-func (c *arangoClient) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
-	return nil, fmt.Errorf("not implemented: HasMetadata")
+func Register(name string, gb GBFunc) {
+	getBackend[name] = gb
+}
+
+func Get(name string, ctx context.Context, args BackendArgs) (Backend, error) {
+	return getBackend[name](ctx, args)
+}
+
+func List() []string {
+	return maps.Keys(getBackend)
 }

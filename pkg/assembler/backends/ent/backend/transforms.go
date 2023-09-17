@@ -180,10 +180,22 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 	var depPkg *model.Package
 	if backrefs {
 		pkg = toModelPackage(backReferencePackageVersion(id.Edges.Package))
-		depPkg = toModelPackage(backReferencePackageName(id.Edges.DependentPackage))
+		if id.Edges.DependentPackageName != nil {
+			depPkg = toModelPackage(backReferencePackageName(id.Edges.DependentPackageName))
+			// in this case, the expected response is package name with an empty package version array
+			depPkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
+		} else {
+			depPkg = toModelPackage(backReferencePackageVersion(id.Edges.DependentPackageVersion))
+		}
 	} else {
 		pkg = toModelPackage(id.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
-		depPkg = toModelPackage(id.Edges.DependentPackage.Edges.Namespace.Edges.Package)
+		if id.Edges.DependentPackageName != nil {
+			depPkg = toModelPackage(id.Edges.DependentPackageName.Edges.Namespace.Edges.Package)
+			// in this case, the expected response is package name with an empty package version array
+			depPkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
+		} else {
+			depPkg = toModelPackage(id.Edges.DependentPackageVersion.Edges.Name.Edges.Namespace.Edges.Package)
+		}
 	}
 
 	return &model.IsDependency{

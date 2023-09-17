@@ -56,6 +56,8 @@ type Tx struct {
 	SourceNamespace *SourceNamespaceClient
 	// SourceType is the client for interacting with the SourceType builders.
 	SourceType *SourceTypeClient
+	// VulnEqual is the client for interacting with the VulnEqual builders.
+	VulnEqual *VulnEqualClient
 	// VulnerabilityID is the client for interacting with the VulnerabilityID builders.
 	VulnerabilityID *VulnerabilityIDClient
 	// VulnerabilityType is the client for interacting with the VulnerabilityType builders.
@@ -213,6 +215,7 @@ func (tx *Tx) init() {
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)
 	tx.SourceType = NewSourceTypeClient(tx.config)
+	tx.VulnEqual = NewVulnEqualClient(tx.config)
 	tx.VulnerabilityID = NewVulnerabilityIDClient(tx.config)
 	tx.VulnerabilityType = NewVulnerabilityTypeClient(tx.config)
 }

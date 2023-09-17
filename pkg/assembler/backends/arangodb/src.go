@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -300,23 +301,25 @@ func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *a
 func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
-	fields := getPreloads(ctx)
+	if _, ok := ctx.Value("graphql").(graphql.OperationContext); ok {
+		fields := getPreloads(ctx)
 
-	nameRequired := false
-	namespaceRequired := false
-	for _, f := range fields {
-		if f == namespaces {
-			namespaceRequired = true
+		nameRequired := false
+		namespaceRequired := false
+		for _, f := range fields {
+			if f == namespaces {
+				namespaceRequired = true
+			}
+			if f == names {
+				nameRequired = true
+			}
 		}
-		if f == names {
-			nameRequired = true
-		}
-	}
 
-	if !namespaceRequired && !nameRequired {
-		return c.sourcesType(ctx, sourceSpec)
-	} else if !nameRequired {
-		return c.sourcesNamespace(ctx, sourceSpec)
+		if !namespaceRequired && !nameRequired {
+			return c.sourcesType(ctx, sourceSpec)
+		} else if !nameRequired {
+			return c.sourcesNamespace(ctx, sourceSpec)
+		}
 	}
 
 	values := map[string]any{}
@@ -334,8 +337,6 @@ func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec
 		"commit": sName.commit,
 		"tag": sName.tag
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Sources")
 	if err != nil {
@@ -360,8 +361,6 @@ func (c *arangoClient) sourcesType(ctx context.Context, sourceSpec *model.Source
 		"type_id": sType._id,
 		"type": sType.type
 	}`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "sourcesType")
 	if err != nil {
@@ -412,8 +411,6 @@ func (c *arangoClient) sourcesNamespace(ctx context.Context, sourceSpec *model.S
 		"namespace_id": sNs._id,
 		"namespace": sNs.namespace
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "sourcesNamespace")
 	if err != nil {

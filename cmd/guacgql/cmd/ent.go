@@ -13,19 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package neo4j
+//go:build !(386 || arm || mips)
+
+package cmd
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/backends"
+	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 )
 
-func (c *neo4jClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
-	return nil, fmt.Errorf("not implemented: IngestHasMetadata")
+func init() {
+	if getOpts == nil {
+		getOpts = make(map[string]optsFunc)
+	}
+	getOpts[ent] = getEnt
 }
 
-func (c *neo4jClient) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
-	return nil, fmt.Errorf("not implemented: HasMetadata")
+func getEnt() backends.BackendArgs {
+	return &entbackend.BackendOptions{
+		DriverName:  flags.dbDriver,
+		Address:     flags.dbAddress,
+		Debug:       flags.dbDebug,
+		AutoMigrate: flags.dbMigrate,
+	}
 }

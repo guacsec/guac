@@ -750,7 +750,7 @@ func noMatchQualifiers(filter *model.PkgSpec, v map[string]string) bool {
 	return false
 }
 
-func (c *demoClient) exactPackageVersion(filter *model.PkgSpec) (*pkgVersionNode, error) {
+func (c *demoClient) findPackageVersion(filter *model.PkgSpec) ([]*pkgVersionNode, error) {
 	if filter == nil {
 		return nil, nil
 	}
@@ -762,10 +762,11 @@ func (c *demoClient) exactPackageVersion(filter *model.PkgSpec) (*pkgVersionNode
 		id := uint32(id64)
 		if node, ok := c.index[id]; ok {
 			if c, ok := node.(*pkgVersionNode); ok {
-				return c, nil
+				return []*pkgVersionNode{c}, nil
 			}
 		}
 	}
+	out := make([]*pkgVersionNode, 0)
 	if filter.Type != nil && filter.Namespace != nil && filter.Name != nil && filter.Version != nil {
 		tp, ok := c.packages[*filter.Type]
 		if !ok {
@@ -781,14 +782,14 @@ func (c *demoClient) exactPackageVersion(filter *model.PkgSpec) (*pkgVersionNode
 		}
 		for _, v := range nm.versions {
 			if *filter.Version != v.version ||
-				noMatchInput(filter.Subpath, v.subpath) ||
+				noMatch(filter.Subpath, v.subpath) ||
 				noMatchQualifiers(filter, v.qualifiers) {
 				continue
 			}
-			return v, nil
+			out = append(out, v)
 		}
 	}
-	return nil, nil
+	return out, nil
 }
 
 func (c *demoClient) exactPackageName(filter *model.PkgSpec) (*pkgVersionStruct, error) {

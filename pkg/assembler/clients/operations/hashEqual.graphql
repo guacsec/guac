@@ -17,7 +17,7 @@
 
 # Defines the GraphQL operations to certify that two artifacts are identical
 
-mutation HashEqual(
+mutation IngestHashEqual(
   $artifact: ArtifactInputSpec!
   $otherArtifact: ArtifactInputSpec!
   $hashEqual: HashEqualInputSpec!
@@ -31,7 +31,7 @@ mutation HashEqual(
 
 # Defines the GraphQL operations to bulk ingest hasEqual information into GUAC
 
-mutation HashEquals(
+mutation IngestHashEquals(
   $artifacts: [ArtifactInputSpec!]!
   $otherArtifacts: [ArtifactInputSpec!]!
   $hashEquals: [HashEqualInputSpec!]!

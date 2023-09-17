@@ -64,4 +64,10 @@ extend type Mutation {
     otherPackage: PkgInputSpec!
     pkgEqual: PkgEqualInputSpec!
   ): ID!
+  "Bulk ingest mapping between packages. The returned array of IDs can be a an array of empty string."
+  ingestPkgEquals(
+    pkgs: [PkgInputSpec!]!
+    otherPackages: [PkgInputSpec!]!
+    pkgEquals: [PkgEqualInputSpec!]!
+  ): [ID!]!
 }

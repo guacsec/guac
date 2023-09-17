@@ -99,6 +99,22 @@ const (
 	hashEqualSubjectArtEdgesStr string = "hashEqualSubjectArtEdges"
 	hashEqualsStr               string = "hashEquals"
 
+	// hasMetadata collection
+
+	hasMetadataPkgVersionEdgesStr string = "hasMetadataPkgVersionEdges"
+	hasMetadataPkgNameEdgesStr    string = "hasMetadataPkgNameEdges"
+	hasMetadataSrcEdgesStr        string = "hasMetadataSrcEdges"
+	hasMetadataArtEdgesStr        string = "hasMetadataArtEdges"
+	hasMetadataStr                string = "hasMetadataCollection"
+
+	// pointOfContact collection
+
+	pointOfContactPkgVersionEdgesStr string = "pointOfContactPkgVersionEdges"
+	pointOfContactPkgNameEdgesStr    string = "pointOfContactPkgNameEdges"
+	pointOfContactSrcEdgesStr        string = "pointOfContactSrcEdges"
+	pointOfContactArtEdgesStr        string = "pointOfContactArtEdges"
+	pointOfContactStr                string = "pointOfContacts"
+
 	// hasSBOM collection
 
 	hasSBOMPkgEdgesStr string = "hasSBOMPkgEdges"
@@ -116,6 +132,23 @@ const (
 	certifyVulnPkgEdgesStr string = "certifyVulnPkgEdges"
 	certifyVulnEdgesStr    string = "certifyVulnEdges"
 	certifyVulnsStr        string = "certifyVulns"
+
+	// vulnMetadata collection
+
+	vulnMetadataEdgesStr string = "vulnMetadataEdges"
+	vulnMetadataStr      string = "vulnMetadataCollection"
+
+	// vulnEquals collections
+
+	vulnEqualVulnEdgesStr        string = "vulnEqualVulnEdges"
+	vulnEqualSubjectVulnEdgesStr string = "vulnEqualSubjectVulnEdges"
+	vulnEqualsStr                string = "vulnEquals"
+
+	// pkgEquals collections
+
+	pkgEqualPkgEdgesStr        string = "pkgEqualPkgEdges"
+	pkgEqualSubjectPkgEdgesStr string = "pkgEqualSubjectPkgEdges"
+	pkgEqualsStr               string = "pkgEquals"
 
 	// certifyScorecard collection
 
@@ -156,6 +189,10 @@ type arangoClient struct {
 	graph  driver.Graph
 }
 
+func init() {
+	backends.Register("arango", getBackend)
+}
+
 func arangoDBConnect(address, user, password string) (driver.Client, error) {
 	conn, err := arangodbdriverhttp.NewConnection(arangodbdriverhttp.ConnectionConfig{
 		Endpoints: []string{address},
@@ -175,7 +212,35 @@ func arangoDBConnect(address, user, password string) (driver.Client, error) {
 	return client, nil
 }
 
-func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {
+func deleteDatabase(ctx context.Context, args backends.BackendArgs) error {
+	config, ok := args.(*ArangoConfig)
+	if !ok {
+		return fmt.Errorf("failed to assert arango config from backend args")
+	}
+	arangodbClient, err := arangoDBConnect(config.DBAddr, config.User, config.Pass)
+	if err != nil {
+		return fmt.Errorf("failed to connect to arango DB %s database with error: %w", config.DBAddr, err)
+	}
+	var db driver.Database
+	// check if database exists
+	dbExists, err := arangodbClient.DatabaseExists(ctx, "guac_db")
+	if err != nil {
+		return fmt.Errorf("failed to check %s database with error: %w", config.DBAddr, err)
+	}
+	if dbExists {
+		db, err = arangodbClient.Database(ctx, "guac_db")
+		if err != nil {
+			return fmt.Errorf("failed to connect %s database with error: %w", config.DBAddr, err)
+		}
+		err = db.Remove(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to delete %s database with error: %w", config.DBAddr, err)
+		}
+	}
+	return nil
+}
+
+func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backend, error) {
 	config, ok := args.(*ArangoConfig)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert arango config from backend args")
@@ -310,6 +375,48 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		hashEqualSubjectArtEdges.From = []string{artifactsStr}
 		hashEqualSubjectArtEdges.To = []string{hashEqualsStr}
 
+		// setup hasMetadata collections
+		var hasMetadataPkgVersionEdges driver.EdgeDefinition
+		hasMetadataPkgVersionEdges.Collection = hasMetadataPkgVersionEdgesStr
+		hasMetadataPkgVersionEdges.From = []string{pkgVersionsStr}
+		hasMetadataPkgVersionEdges.To = []string{hasMetadataStr}
+
+		var hasMetadataPkgNameEdges driver.EdgeDefinition
+		hasMetadataPkgNameEdges.Collection = hasMetadataPkgNameEdgesStr
+		hasMetadataPkgNameEdges.From = []string{pkgNamesStr}
+		hasMetadataPkgNameEdges.To = []string{hasMetadataStr}
+
+		var hasMetadataArtEdges driver.EdgeDefinition
+		hasMetadataArtEdges.Collection = hasMetadataArtEdgesStr
+		hasMetadataArtEdges.From = []string{artifactsStr}
+		hasMetadataArtEdges.To = []string{hasMetadataStr}
+
+		var hasMetadataSrcEdges driver.EdgeDefinition
+		hasMetadataSrcEdges.Collection = hasMetadataSrcEdgesStr
+		hasMetadataSrcEdges.From = []string{srcNamesStr}
+		hasMetadataSrcEdges.To = []string{hasMetadataStr}
+
+		// setup pointOfContact collections
+		var pointOfContactPkgVersionEdges driver.EdgeDefinition
+		pointOfContactPkgVersionEdges.Collection = pointOfContactPkgVersionEdgesStr
+		pointOfContactPkgVersionEdges.From = []string{pkgVersionsStr}
+		pointOfContactPkgVersionEdges.To = []string{pointOfContactStr}
+
+		var pointOfContactPkgNameEdges driver.EdgeDefinition
+		pointOfContactPkgNameEdges.Collection = pointOfContactPkgNameEdgesStr
+		pointOfContactPkgNameEdges.From = []string{pkgNamesStr}
+		pointOfContactPkgNameEdges.To = []string{pointOfContactStr}
+
+		var pointOfContactArtEdges driver.EdgeDefinition
+		pointOfContactArtEdges.Collection = pointOfContactArtEdgesStr
+		pointOfContactArtEdges.From = []string{artifactsStr}
+		pointOfContactArtEdges.To = []string{pointOfContactStr}
+
+		var pointOfContactSrcEdges driver.EdgeDefinition
+		pointOfContactSrcEdges.Collection = pointOfContactSrcEdgesStr
+		pointOfContactSrcEdges.From = []string{srcNamesStr}
+		pointOfContactSrcEdges.To = []string{pointOfContactStr}
+
 		// setup hasSBOM collections
 		var hasSBOMPkgEdges driver.EdgeDefinition
 		hasSBOMPkgEdges.Collection = hasSBOMPkgEdgesStr
@@ -343,11 +450,38 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		certifyVulnPkgEdges.From = []string{pkgVersionsStr}
 		certifyVulnPkgEdges.To = []string{certifyVulnsStr}
 
-		// setup certifyVuln collections
 		var certifyVulnEdges driver.EdgeDefinition
 		certifyVulnEdges.Collection = certifyVulnEdgesStr
 		certifyVulnEdges.From = []string{certifyVulnsStr}
 		certifyVulnEdges.To = []string{vulnerabilitiesStr}
+
+		// setup vulnMetadata collections
+		var vulnMetadataEdges driver.EdgeDefinition
+		vulnMetadataEdges.Collection = vulnMetadataEdgesStr
+		vulnMetadataEdges.From = []string{vulnerabilitiesStr}
+		vulnMetadataEdges.To = []string{vulnMetadataStr}
+
+		// setup vulnEqual collections
+		var vulnEqualVulnEdges driver.EdgeDefinition
+		vulnEqualVulnEdges.Collection = vulnEqualVulnEdgesStr
+		vulnEqualVulnEdges.From = []string{vulnEqualsStr}
+		vulnEqualVulnEdges.To = []string{vulnerabilitiesStr}
+
+		var vulnEqualSubjectVulnEdges driver.EdgeDefinition
+		vulnEqualSubjectVulnEdges.Collection = vulnEqualSubjectVulnEdgesStr
+		vulnEqualSubjectVulnEdges.From = []string{vulnerabilitiesStr}
+		vulnEqualSubjectVulnEdges.To = []string{vulnEqualsStr}
+
+		// setup pkgEqual collections
+		var pkgEqualPkgEdges driver.EdgeDefinition
+		pkgEqualPkgEdges.Collection = pkgEqualPkgEdgesStr
+		pkgEqualPkgEdges.From = []string{pkgEqualsStr}
+		pkgEqualPkgEdges.To = []string{pkgVersionsStr}
+
+		var pkgEqualSubjectPkgEdges driver.EdgeDefinition
+		pkgEqualSubjectPkgEdges.Collection = pkgEqualSubjectPkgEdgesStr
+		pkgEqualSubjectPkgEdges.From = []string{pkgVersionsStr}
+		pkgEqualSubjectPkgEdges.To = []string{pkgEqualsStr}
 
 		// setup certifyScorecard collections
 		var certifyScorecardSrcEdges driver.EdgeDefinition
@@ -405,7 +539,10 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
 			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
-			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges}
+			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges,
+			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges, hasMetadataPkgVersionEdges, hasMetadataPkgNameEdges,
+			hasMetadataArtEdges, hasMetadataSrcEdges, pointOfContactPkgVersionEdges, pointOfContactPkgNameEdges,
+			pointOfContactArtEdges, pointOfContactSrcEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -436,7 +573,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for vulnerabilities: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID"}, true, "byArtIDEqualArtID"); err != nil {
+		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID", "justification"}, true, "byArtIDEqualArtIDJust"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
 		}
 
@@ -480,12 +617,8 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "origin"}, true, "byPkgIDArtIDOrigin"); err != nil {
+		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "justification", "origin"}, true, "byPkgIDArtIDOriginJust"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"digest"}, true, "byDigest"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hasSBOMs: %w", err)
 		}
 
 		// GUAC key indices for package
@@ -761,23 +894,10 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
 
-func (c *arangoClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
-	panic(fmt.Errorf("not implemented: VulnEqual"))
-}
-func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
-	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
-}
-
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
-}
-func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestVulnEqual"))
-}
-func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type

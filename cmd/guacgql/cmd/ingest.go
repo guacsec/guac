@@ -605,7 +605,7 @@ func bulkIngestVulnerabilityMetadata(ctx context.Context, client graphql.Client)
 		if _, err := model.IngestVulnerabilities(ctx, client, ingest.vulns); err != nil {
 			logger.Errorf("Error in ingesting vulnerabilities: %v\n", err)
 		}
-		if _, err := model.VulnHasMetadatas(ctx, client, ingest.vulns, ingest.vulnerabilityMetadataList); err != nil {
+		if _, err := model.BulkVulnHasMetadata(ctx, client, ingest.vulns, ingest.vulnerabilityMetadataList); err != nil {
 			logger.Errorf("Error in ingesting VulnHasMetadatas: %v\n", err)
 		}
 	}
@@ -1255,7 +1255,7 @@ func ingestPkgEqual(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestPackage(ctx, client, ingest.depPkg); err != nil {
 			logger.Errorf("Error in ingesting dependency package: %v\n", err)
 		}
-		if _, err := model.PkgEqual(ctx, client, ingest.pkg, ingest.depPkg, ingest.pkgEqual); err != nil {
+		if _, err := model.IngestPkgEqual(ctx, client, ingest.pkg, ingest.depPkg, ingest.pkgEqual); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}
@@ -1957,7 +1957,7 @@ func ingestHashEqual(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestArtifact(ctx, client, ingest.equalArtifact); err != nil {
 			logger.Errorf("Error in ingesting equal artifact: %v\n", err)
 		}
-		if _, err := model.HashEqual(ctx, client, ingest.artifact, ingest.equalArtifact, ingest.hashEqual); err != nil {
+		if _, err := model.IngestHashEqual(ctx, client, ingest.artifact, ingest.equalArtifact, ingest.hashEqual); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}
@@ -2241,7 +2241,7 @@ func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestVulnerability(ctx, client, *ingest.otherVuln); err != nil {
 			logger.Errorf("Error in ingesting other vuln: %v\n", err)
 		}
-		if _, err := model.VulnEqual(ctx, client, *ingest.vuln, *ingest.otherVuln, ingest.vulnEqual); err != nil {
+		if _, err := model.IngestVulnEqual(ctx, client, *ingest.vuln, *ingest.otherVuln, ingest.vulnEqual); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 

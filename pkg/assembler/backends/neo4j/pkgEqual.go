@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
@@ -255,4 +256,8 @@ func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec
 		return nil, err
 	}
 	return result.(*model.PkgEqual), nil
+}
+
+func (c *neo4jClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
+	return nil, fmt.Errorf("not implemented - IngestPkgEquals")
 }

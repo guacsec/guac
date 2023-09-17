@@ -43,17 +43,20 @@ func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.C
 
 			combinedCertifyGood = append(combinedCertifyGood, pkgVersionCertifyGoods...)
 
-			// pkgName certifyGood
-			arangoQueryBuilder = setPkgNameMatchValues(certifyGoodSpec.Subject.Package, values)
-			arangoQueryBuilder.forOutBound(certifyGoodPkgNameEdgesStr, "certifyGood", "pName")
-			setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
+			if certifyGoodSpec.Subject.Package.ID == nil {
+				// pkgName certifyGood
+				values = map[string]any{}
+				arangoQueryBuilder = setPkgNameMatchValues(certifyGoodSpec.Subject.Package, values)
+				arangoQueryBuilder.forOutBound(certifyGoodPkgNameEdgesStr, "certifyGood", "pName")
+				setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
 
-			pkgNameCertifyGoods, err := getPkgCertifyGoodForQuery(ctx, c, arangoQueryBuilder, values, false)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve package name certifyGood with error: %w", err)
+				pkgNameCertifyGoods, err := getPkgCertifyGoodForQuery(ctx, c, arangoQueryBuilder, values, false)
+				if err != nil {
+					return nil, fmt.Errorf("failed to retrieve package name certifyGood with error: %w", err)
+				}
+
+				combinedCertifyGood = append(combinedCertifyGood, pkgNameCertifyGoods...)
 			}
-
-			combinedCertifyGood = append(combinedCertifyGood, pkgNameCertifyGoods...)
 		}
 		if certifyGoodSpec.Subject.Source != nil {
 			values := map[string]any{}
@@ -101,6 +104,7 @@ func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.C
 		combinedCertifyGood = append(combinedCertifyGood, pkgVersionCertifyGoods...)
 
 		// pkgName certifyGood
+		values = map[string]any{}
 		arangoQueryBuilder = newForQuery(certifyGoodsStr, "certifyGood")
 		setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
 		arangoQueryBuilder.forInBound(certifyGoodPkgNameEdgesStr, "pName", "certifyGood")
@@ -114,6 +118,7 @@ func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.C
 		combinedCertifyGood = append(combinedCertifyGood, pkgNameCertifyGoods...)
 
 		// get sources
+		values = map[string]any{}
 		arangoQueryBuilder = newForQuery(certifyGoodsStr, "certifyGood")
 		setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
 		arangoQueryBuilder.forInBound(certifyGoodSrcEdgesStr, "sName", "certifyGood")
@@ -127,6 +132,7 @@ func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.C
 		combinedCertifyGood = append(combinedCertifyGood, srcCertifyGoods...)
 
 		// get artifacts
+		values = map[string]any{}
 		arangoQueryBuilder = newForQuery(certifyGoodsStr, "certifyGood")
 		setCertifyGoodMatchValues(arangoQueryBuilder, certifyGoodSpec, values)
 		arangoQueryBuilder.forInBound(certifyGoodArtEdgesStr, "art", "certifyGood")
@@ -160,8 +166,6 @@ func getSrcCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'origin': certifyGood.origin
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "certifyGood")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyGood: %w", err)
@@ -184,8 +188,6 @@ func getArtCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'collector': certifyGood.collector,
 		'origin': certifyGood.origin
 	  }`)
-
-	fmt.Println(arangoQueryBuilder.string())
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "certifyGood")
 	if err != nil {
@@ -236,8 +238,6 @@ func getPkgCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		  }`)
 	}
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "certifyGood")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for certifyGood: %w", err)
@@ -254,15 +254,15 @@ func setCertifyGoodMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyGo
 	}
 	if certifyGoodSpec.Justification != nil {
 		arangoQueryBuilder.filter("certifyGood", justification, "==", "@"+justification)
-		queryValues[justification] = certifyGoodSpec.Justification
+		queryValues[justification] = *certifyGoodSpec.Justification
 	}
 	if certifyGoodSpec.Origin != nil {
 		arangoQueryBuilder.filter("certifyGood", origin, "==", "@"+origin)
-		queryValues[origin] = certifyGoodSpec.Origin
+		queryValues[origin] = *certifyGoodSpec.Origin
 	}
 	if certifyGoodSpec.Collector != nil {
 		arangoQueryBuilder.filter("certifyGood", collector, "==", "@"+collector)
-		queryValues[collector] = certifyGoodSpec.Collector
+		queryValues[collector] = *certifyGoodSpec.Collector
 	}
 }
 

@@ -273,6 +273,18 @@ func (f SourceTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SourceTypeMutation", m)
 }
 
+// The VulnEqualFunc type is an adapter to allow the use of ordinary
+// function as VulnEqual mutator.
+type VulnEqualFunc func(context.Context, *ent.VulnEqualMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VulnEqualFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VulnEqualMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VulnEqualMutation", m)
+}
+
 // The VulnerabilityIDFunc type is an adapter to allow the use of ordinary
 // function as VulnerabilityID mutator.
 type VulnerabilityIDFunc func(context.Context, *ent.VulnerabilityIDMutation) (ent.Value, error)

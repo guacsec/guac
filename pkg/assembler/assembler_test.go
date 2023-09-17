@@ -84,6 +84,7 @@ func TestIngestPredicates(t *testing.T) {
 		wantMaterials []generated.ArtifactInputSpec
 		wantBuilder   []*generated.BuilderInputSpec
 		wantVuln      []*generated.VulnerabilityInputSpec
+		wantLicense   []generated.LicenseInputSpec
 	}{{
 		name: "get nouns",
 		field: IngestPredicates{
@@ -138,6 +139,13 @@ func TestIngestPredicates(t *testing.T) {
 					},
 				},
 				{
+					Src:      k8sSource,
+					Artifact: rootFileArtifact,
+					IsOccurrence: &generated.IsOccurrenceInputSpec{
+						Justification: "spdx file with checksum",
+					},
+				},
+				{
 					Pkg:      rootFilePack,
 					Artifact: rootFileArtifact,
 					IsOccurrence: &generated.IsOccurrenceInputSpec{
@@ -148,6 +156,15 @@ func TestIngestPredicates(t *testing.T) {
 			HasSBOM: []HasSBOMIngest{
 				{
 					Pkg: topLevelPack,
+					HasSBOM: &generated.HasSBOMInputSpec{
+						Uri:              "TestSource",
+						Algorithm:        "sha256",
+						Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
+						DownloadLocation: "TestSource",
+					},
+				},
+				{
+					Artifact: rootFileArtifact,
 					HasSBOM: &generated.HasSBOMInputSpec{
 						Uri:              "TestSource",
 						Algorithm:        "sha256",
@@ -384,6 +401,60 @@ func TestIngestPredicates(t *testing.T) {
 					},
 				},
 			},
+			PointOfContact: []PointOfContactIngest{
+				{
+					Pkg: topLevelPack,
+					PkgMatchFlag: generated.MatchFlags{
+						Pkg: generated.PkgMatchTypeSpecificVersion,
+					},
+					//generated.PkgMatchTypeSpecificVersion,
+					PointOfContact: &generated.PointOfContactInputSpec{
+						Justification: "bad package",
+					},
+				},
+				{
+					Src: k8sSource,
+					PointOfContact: &generated.PointOfContactInputSpec{
+						Justification: "bad source",
+					},
+				},
+				{
+					Artifact: &generated.ArtifactInputSpec{
+						Algorithm: "sha256",
+						Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+					},
+					PointOfContact: &generated.PointOfContactInputSpec{
+						Justification: "bad artifact",
+					},
+				},
+			},
+			HasMetadata: []HasMetadataIngest{
+				{
+					Pkg: topLevelPack,
+					PkgMatchFlag: generated.MatchFlags{
+						Pkg: generated.PkgMatchTypeSpecificVersion,
+					},
+					//generated.PkgMatchTypeSpecificVersion,
+					HasMetadata: &generated.HasMetadataInputSpec{
+						Justification: "bad package",
+					},
+				},
+				{
+					Src: k8sSource,
+					HasMetadata: &generated.HasMetadataInputSpec{
+						Justification: "bad source",
+					},
+				},
+				{
+					Artifact: &generated.ArtifactInputSpec{
+						Algorithm: "sha256",
+						Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+					},
+					HasMetadata: &generated.HasMetadataInputSpec{
+						Justification: "bad artifact",
+					},
+				},
+			},
 			CertifyBad: []CertifyBadIngest{
 				{
 					Pkg: topLevelPack,
@@ -557,6 +628,60 @@ func TestIngestPredicates(t *testing.T) {
 					},
 				},
 			},
+			CertifyLegal: []CertifyLegalIngest{
+				{
+					Pkg: maven,
+					Declared: []generated.LicenseInputSpec{
+						{
+							Name:        "asdf",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+					},
+					Discovered: []generated.LicenseInputSpec{
+						{
+							Name:        "asdf",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+						{
+							Name:        "qwer",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+					},
+					CertifyLegal: &generated.CertifyLegalInputSpec{
+						DeclaredLicense:   "asdf",
+						DiscoveredLicense: "asdf AND qwer",
+						Attribution:       "Copyright Jeff",
+						Justification:     "Scanner foo",
+						TimeScanned:       toTime("2022-10-06"),
+					},
+				},
+				{
+					Pkg: openSSL,
+					Declared: []generated.LicenseInputSpec{
+						{
+							Name:        "qwer",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+					},
+					Discovered: []generated.LicenseInputSpec{
+						{
+							Name:        "qwer",
+							ListVersion: ptrfrom.String("1.2.3"),
+						},
+						{
+							Name:   "LicenseRef-123",
+							Inline: ptrfrom.String("This is the license text."),
+						},
+					},
+					CertifyLegal: &generated.CertifyLegalInputSpec{
+						DeclaredLicense:   "qwer",
+						DiscoveredLicense: "qwer AND LicenseRef-123",
+						Attribution:       "Copyright Jeff",
+						Justification:     "Scanner foo",
+						TimeScanned:       toTime("2022-10-06"),
+					},
+				},
+			},
 		},
 		wantPkg:    []*generated.PkgInputSpec{rootFilePack, maven, openSSL, openSSLWithQualifier, topLevelPack, baselayoutPack, baselayoutdataPack, worldFilePack},
 		wantSource: []*generated.SourceInputSpec{k8sSource},
@@ -663,6 +788,20 @@ func TestIngestPredicates(t *testing.T) {
 				VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
 			},
 		},
+		wantLicense: []generated.LicenseInputSpec{
+			{
+				Name:        "qwer",
+				ListVersion: ptrfrom.String("1.2.3"),
+			},
+			{
+				Name:        "asdf",
+				ListVersion: ptrfrom.String("1.2.3"),
+			},
+			{
+				Name:   "LicenseRef-123",
+				Inline: ptrfrom.String("This is the license text."),
+			},
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -705,6 +844,12 @@ func TestIngestPredicates(t *testing.T) {
 			}
 			if diff := cmp.Diff(tt.wantVuln, gotVulns, cmpopts.SortSlices(vulnSort)); diff != "" {
 				t.Errorf("Unexpected gotVulns results. (-want +got):\n%s", diff)
+			}
+
+			gotLicenses := i.GetLicenses(ctx)
+			licSort := func(a, b generated.LicenseInputSpec) bool { return a.Name < b.Name }
+			if diff := cmp.Diff(tt.wantLicense, gotLicenses, cmpopts.SortSlices(licSort)); diff != "" {
+				t.Errorf("Unexpected GetLicenses results. (-want +got):\n%s", diff)
 			}
 		})
 	}

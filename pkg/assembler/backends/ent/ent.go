@@ -34,6 +34,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
@@ -118,6 +119,7 @@ func checkColumn(table, column string) error {
 			sourcename.Table:        sourcename.ValidColumn,
 			sourcenamespace.Table:   sourcenamespace.ValidColumn,
 			sourcetype.Table:        sourcetype.ValidColumn,
+			vulnequal.Table:         vulnequal.ValidColumn,
 			vulnerabilityid.Table:   vulnerabilityid.ValidColumn,
 			vulnerabilitytype.Table: vulnerabilitytype.ValidColumn,
 		})

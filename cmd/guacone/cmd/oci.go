@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/oci"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/regclient/regclient/types/ref"
 	"github.com/spf13/cobra"
@@ -73,44 +74,17 @@ var ociCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		// Get pipeline of components
-		processorFunc := getProcessor(ctx)
-		ingestorFunc := getIngestor(ctx)
-		collectSubEmitFunc := getCollectSubEmit(ctx, csubClient)
-		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
-
 		totalNum := 0
 		gotErr := false
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			start := time.Now()
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
 
-			docTree, err := processorFunc(d)
 			if err != nil {
 				gotErr = true
-				return fmt.Errorf("unable to process doc: %v, format: %v, document: %v", err, d.Format, d.Type)
+				return fmt.Errorf("unable to ingest document: %w", err)
 			}
-
-			predicates, idstrings, err := ingestorFunc(docTree)
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to ingest doc tree: %v", err)
-			}
-
-			err = collectSubEmitFunc(idstrings)
-			if err != nil {
-				logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
-			}
-
-			err = assemblerFunc(predicates)
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to assemble graphs: %v", err)
-			}
-			t := time.Now()
-			elapsed := t.Sub(start)
-			logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
 			return nil
 		}
 

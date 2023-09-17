@@ -28,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
@@ -76,6 +77,18 @@ func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.ArtifactInput
 	}
 
 	return toModelHasSLSA(att), nil
+}
+
+func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
+	var modelHasSlsas []*model.HasSlsa
+	for i, slsa := range slsaList {
+		modelHasSlsa, err := b.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsa)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestSLSAs failed with err: %v", err)
+		}
+		modelHasSlsas = append(modelHasSlsas, modelHasSlsa)
+	}
+	return modelHasSlsas, nil
 }
 
 func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*ent.SLSAAttestation, error) {
@@ -139,15 +152,19 @@ func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInput
 }
 
 func toSLSAInputPredicate(rows []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
-	preds := make([]*model.SLSAPredicate, len(rows))
-	for i, row := range rows {
-		preds[i] = &model.SLSAPredicate{
-			Key:   row.Key,
-			Value: row.Value,
+	if len(rows) > 0 {
+		preds := make([]*model.SLSAPredicate, len(rows))
+		for i, row := range rows {
+			preds[i] = &model.SLSAPredicate{
+				Key:   row.Key,
+				Value: row.Value,
+			}
 		}
-	}
 
-	return preds
+		return preds
+	} else {
+		return nil
+	}
 }
 
 func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {

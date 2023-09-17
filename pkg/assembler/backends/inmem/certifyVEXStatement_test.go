@@ -23,7 +23,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"golang.org/x/exp/slices"
 )
@@ -326,69 +326,6 @@ func TestVEX(t *testing.T) {
 			},
 		},
 		{
-			Name:   "Query on noVuln",
-			InPkg:  []*model.PkgInputSpec{p1},
-			InVuln: []*model.VulnerabilityInputSpec{o1, o2, c1, noVulnInput},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: o1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: o2,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: c1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: noVulnInput,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			Query: &model.CertifyVEXStatementSpec{
-				Vulnerability: &model.VulnerabilitySpec{
-					Type: ptrfrom.String("noVuln"),
-				},
-			},
-			ExpVEX: []*model.CertifyVEXStatement{
-				{
-					Subject: p1out,
-					Vulnerability: &model.Vulnerability{
-						Type:             "novuln",
-						VulnerabilityIDs: []*model.VulnerabilityID{noVulnOut},
-					},
-					VexJustification: "test justification",
-					KnownSince:       time.Unix(1e9, 0),
-				},
-			},
-		},
-		{
 			Name:   "Query on Status",
 			InPkg:  []*model.PkgInputSpec{p1},
 			InVuln: []*model.VulnerabilityInputSpec{c1, o1},
@@ -662,39 +599,6 @@ func TestVEX(t *testing.T) {
 			},
 		},
 		{
-			Name:   "Ingest noVuln",
-			InPkg:  []*model.PkgInputSpec{p1},
-			InVuln: []*model.VulnerabilityInputSpec{noVulnInput},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: noVulnInput,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			Query: &model.CertifyVEXStatementSpec{
-				Vulnerability: &model.VulnerabilitySpec{
-					Type: ptrfrom.String("noVuln"),
-				},
-			},
-			ExpVEX: []*model.CertifyVEXStatement{
-				{
-					Subject: p1out,
-					Vulnerability: &model.Vulnerability{
-						Type:             "novuln",
-						VulnerabilityIDs: []*model.VulnerabilityID{noVulnOut},
-					},
-					VexJustification: "test justification",
-					KnownSince:       time.Unix(1e9, 0),
-				},
-			},
-		},
-		{
 			Name:   "Ingest without sub",
 			InVuln: []*model.VulnerabilityInputSpec{o1},
 			Calls: []call{
@@ -756,7 +660,7 @@ func TestVEX(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := inmem.GetBackend(nil)
+			b, err := backends.Get("inmem", nil, nil)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -1120,7 +1024,7 @@ func TestVEXBulkIngest(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := inmem.GetBackend(nil)
+			b, err := backends.Get("inmem", nil, nil)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -1233,7 +1137,7 @@ func TestVEXNeighbors(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := inmem.GetBackend(nil)
+			b, err := backends.Get("inmem", nil, nil)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

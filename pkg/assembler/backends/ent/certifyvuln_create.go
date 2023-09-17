@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 )
 
 // CertifyVulnCreate is the builder for creating a CertifyVuln entity.
@@ -27,14 +27,6 @@ type CertifyVulnCreate struct {
 // SetVulnerabilityID sets the "vulnerability_id" field.
 func (cvc *CertifyVulnCreate) SetVulnerabilityID(i int) *CertifyVulnCreate {
 	cvc.mutation.SetVulnerabilityID(i)
-	return cvc
-}
-
-// SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
-func (cvc *CertifyVulnCreate) SetNillableVulnerabilityID(i *int) *CertifyVulnCreate {
-	if i != nil {
-		cvc.SetVulnerabilityID(*i)
-	}
 	return cvc
 }
 
@@ -86,8 +78,8 @@ func (cvc *CertifyVulnCreate) SetCollector(s string) *CertifyVulnCreate {
 	return cvc
 }
 
-// SetVulnerability sets the "vulnerability" edge to the VulnerabilityType entity.
-func (cvc *CertifyVulnCreate) SetVulnerability(v *VulnerabilityType) *CertifyVulnCreate {
+// SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
+func (cvc *CertifyVulnCreate) SetVulnerability(v *VulnerabilityID) *CertifyVulnCreate {
 	return cvc.SetVulnerabilityID(v.ID)
 }
 
@@ -130,6 +122,9 @@ func (cvc *CertifyVulnCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cvc *CertifyVulnCreate) check() error {
+	if _, ok := cvc.mutation.VulnerabilityID(); !ok {
+		return &ValidationError{Name: "vulnerability_id", err: errors.New(`ent: missing required field "CertifyVuln.vulnerability_id"`)}
+	}
 	if _, ok := cvc.mutation.PackageID(); !ok {
 		return &ValidationError{Name: "package_id", err: errors.New(`ent: missing required field "CertifyVuln.package_id"`)}
 	}
@@ -153,6 +148,9 @@ func (cvc *CertifyVulnCreate) check() error {
 	}
 	if _, ok := cvc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyVuln.collector"`)}
+	}
+	if _, ok := cvc.mutation.VulnerabilityID(); !ok {
+		return &ValidationError{Name: "vulnerability", err: errors.New(`ent: missing required edge "CertifyVuln.vulnerability"`)}
 	}
 	if _, ok := cvc.mutation.PackageID(); !ok {
 		return &ValidationError{Name: "package", err: errors.New(`ent: missing required edge "CertifyVuln.package"`)}
@@ -220,13 +218,13 @@ func (cvc *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) 
 			Columns: []string{certifyvuln.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.VulnerabilityID = &nodes[0]
+		_node.VulnerabilityID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := cvc.mutation.PackageIDs(); len(nodes) > 0 {
@@ -307,12 +305,6 @@ func (u *CertifyVulnUpsert) SetVulnerabilityID(v int) *CertifyVulnUpsert {
 // UpdateVulnerabilityID sets the "vulnerability_id" field to the value that was provided on create.
 func (u *CertifyVulnUpsert) UpdateVulnerabilityID() *CertifyVulnUpsert {
 	u.SetExcluded(certifyvuln.FieldVulnerabilityID)
-	return u
-}
-
-// ClearVulnerabilityID clears the value of the "vulnerability_id" field.
-func (u *CertifyVulnUpsert) ClearVulnerabilityID() *CertifyVulnUpsert {
-	u.SetNull(certifyvuln.FieldVulnerabilityID)
 	return u
 }
 
@@ -463,13 +455,6 @@ func (u *CertifyVulnUpsertOne) SetVulnerabilityID(v int) *CertifyVulnUpsertOne {
 func (u *CertifyVulnUpsertOne) UpdateVulnerabilityID() *CertifyVulnUpsertOne {
 	return u.Update(func(s *CertifyVulnUpsert) {
 		s.UpdateVulnerabilityID()
-	})
-}
-
-// ClearVulnerabilityID clears the value of the "vulnerability_id" field.
-func (u *CertifyVulnUpsertOne) ClearVulnerabilityID() *CertifyVulnUpsertOne {
-	return u.Update(func(s *CertifyVulnUpsert) {
-		s.ClearVulnerabilityID()
 	})
 }
 
@@ -795,13 +780,6 @@ func (u *CertifyVulnUpsertBulk) SetVulnerabilityID(v int) *CertifyVulnUpsertBulk
 func (u *CertifyVulnUpsertBulk) UpdateVulnerabilityID() *CertifyVulnUpsertBulk {
 	return u.Update(func(s *CertifyVulnUpsert) {
 		s.UpdateVulnerabilityID()
-	})
-}
-
-// ClearVulnerabilityID clears the value of the "vulnerability_id" field.
-func (u *CertifyVulnUpsertBulk) ClearVulnerabilityID() *CertifyVulnUpsertBulk {
-	return u.Update(func(s *CertifyVulnUpsert) {
-		s.ClearVulnerabilityID()
 	})
 }
 

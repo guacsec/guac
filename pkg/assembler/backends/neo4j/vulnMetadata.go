@@ -26,8 +26,8 @@ func (c *neo4jClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerabi
 	return "", fmt.Errorf("not implemented - IngestVulnerabilityMetadata")
 }
 
-func (c *neo4jClient) IngestVulnerabilityMetadatas(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
-	return []string{""}, fmt.Errorf("not implemented - IngestVulnerabilityMetadata")
+func (c *neo4jClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+	return []string{""}, fmt.Errorf("not implemented - IngestBulkVulnerabilityMetadata")
 }
 
 func (c *neo4jClient) VulnerabilityMetadata(ctx context.Context, vulnerabilityMetadataSpec *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {

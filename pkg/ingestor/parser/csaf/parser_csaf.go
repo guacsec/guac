@@ -88,9 +88,14 @@ func (c *csafParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 }
 
 func (c *csafParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return c.identifierStrings, nil
 }
 
+// findPurl searches the given CSAF product tree recursively to find the
+// purl for the specified product reference.
+//
+// It recursively calls itself on each child branch of the tree in a
+// depth first search manner if the nodes name isn't equal to product_ref.
 func findPurl(ctx context.Context, tree csaf.ProductBranch, product_ref string) *string {
 	return findPurlSearch(ctx, tree, product_ref, make(map[string]bool))
 }
@@ -115,10 +120,24 @@ func findPurlSearch(ctx context.Context, tree csaf.ProductBranch, product_ref st
 	return nil
 }
 
+// findProductRef searches for a product reference string for the given product ID
+// by recursively traversing the CSAF product tree.
+//
+// findProductRefSearch was seperated from findProductRef so that the code can use
+// a visited map and avoid infinite recursion.
+//
+// It returns a pointer to the product reference string if found,
+// otherwise nil.
 func findProductRef(ctx context.Context, tree csaf.ProductBranch, product_id string) *string {
 	return findProductRefSearch(ctx, tree, product_id, make(map[visitedProductRef]bool))
 }
 
+// findProductRefSearch recursively searches the product tree for a product
+// reference matching the given product ID. It does this with a visited map to
+// avoid infinite recursion.
+//
+// It returns a pointer to the product reference string if found,
+// otherwise nil.
 func findProductRefSearch(ctx context.Context, tree csaf.ProductBranch, product_id string, visited map[visitedProductRef]bool) *string {
 	if visited[visitedProductRef{tree.Product.Name, tree.Product.ID, tree.Name, tree.Category}] {
 		return nil
@@ -140,6 +159,10 @@ func findProductRefSearch(ctx context.Context, tree csaf.ProductBranch, product_
 	return nil
 }
 
+// findActionStatement searches the given Vulnerability tree to find the action statement
+// for the product with the given product_id. If a matching product is found, it returns
+// a pointer to the Details string for the Remediation.
+// If no matching product is found, it returns nil.
 func findActionStatement(tree *csaf.Vulnerability, product_id string) *string {
 	for _, r := range tree.Remediations {
 		for _, p := range r.ProductIDs {
@@ -151,6 +174,10 @@ func findActionStatement(tree *csaf.Vulnerability, product_id string) *string {
 	return nil
 }
 
+// findImpactStatement searches the given Vulnerability tree to find the impact statement
+// for the product with the given product_id. If a matching product is found, it returns
+// a pointer to the Details string for the Threat.
+// If no matching product is found, it returns nil.
 func findImpactStatement(tree *csaf.Vulnerability, product_id string) *string {
 	for _, t := range tree.Threats {
 		if t.Category == "impact" {
@@ -164,6 +191,9 @@ func findImpactStatement(tree *csaf.Vulnerability, product_id string) *string {
 	return nil
 }
 
+// findPkgSpec finds the package specification for the product with the
+// given ID in the CSAF document. It returns a pointer to the package
+// specification if found, otherwise an error.
 func (c *csafParser) findPkgSpec(ctx context.Context, product_id string) (*generated.PkgInputSpec, error) {
 	pref := findProductRef(ctx, c.csaf.ProductTree, product_id)
 	if pref == nil {
@@ -178,6 +208,11 @@ func (c *csafParser) findPkgSpec(ctx context.Context, product_id string) (*gener
 	return helpers.PurlToPkg(*purl)
 }
 
+// generateVexIngest generates a VEX ingest object from a CSAF vulnerability and other input data.
+//
+// The function maps CSAF data into a VEX ingest object for adding to the vulnerability graph.
+// It then tries to find the package for the product ID to add to ingest.
+// If it can't be found, it then returns nil, otherwise it returns a pointer to the VEX ingest object.
 func (c *csafParser) generateVexIngest(ctx context.Context, vulnInput *generated.VulnerabilityInputSpec, csafVuln *csaf.Vulnerability, status string, product_id string) *assembler.VexIngest {
 	logger := logging.FromContext(ctx)
 	vi := &assembler.VexIngest{}
@@ -218,6 +253,7 @@ func (c *csafParser) generateVexIngest(ctx context.Context, vulnInput *generated
 
 	vi.VexData = &vd
 	vi.Vulnerability = vulnInput
+	c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, product_id)
 
 	pkg, err := c.findPkgSpec(ctx, product_id)
 	if err != nil {
@@ -229,43 +265,42 @@ func (c *csafParser) generateVexIngest(ctx context.Context, vulnInput *generated
 	return vi
 }
 
+// GetPredicates generates the VEX and CertifyVuln predicates for the CSAF document.
+//
+// It returns a pointer to an assembler.IngestPredicates struct containing the
+// generated VEX and CertifyVuln predicates.
 func (c *csafParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	rv := &assembler.IngestPredicates{}
 	var vis []assembler.VexIngest
 	var cvs []assembler.CertifyVulnIngest
 
-	if len(c.csaf.Vulnerabilities) > 0 {
+	for _, v := range c.csaf.Vulnerabilities {
+		vuln, err := helpers.CreateVulnInput(v.CVE)
+		if err != nil {
+			return nil
+		}
 
-		for _, v := range c.csaf.Vulnerabilities {
-			vuln, err := helpers.CreateVulnInput(v.CVE)
-			if err != nil {
-				return nil
-			}
-
-			statuses := []string{"fixed", "known_not_affected", "known_affected", "first_affected", "first_fixed", "last_affected", "recommended", "under_investigation"}
-			for _, status := range statuses {
-				products := v.ProductStatus[status]
-				if len(products) > 0 {
-					for _, product := range products {
-						vi := c.generateVexIngest(ctx, vuln, &v, status, product)
-						if vi == nil {
-							continue
-						}
-
-						if status == "known_affected" || status == "under_investigation" {
-							vulnData := generated.ScanMetadataInput{
-								TimeScanned: c.csaf.Document.Tracking.CurrentReleaseDate,
-							}
-							cv := assembler.CertifyVulnIngest{
-								Pkg:           vi.Pkg,
-								Vulnerability: vuln,
-								VulnData:      &vulnData,
-							}
-							cvs = append(cvs, cv)
-						}
-						vis = append(vis, *vi)
-					}
+		statuses := []string{"fixed", "known_not_affected", "known_affected", "first_affected", "first_fixed", "last_affected", "recommended", "under_investigation"}
+		for _, status := range statuses {
+			products := v.ProductStatus[status]
+			for _, product := range products {
+				vi := c.generateVexIngest(ctx, vuln, &v, status, product)
+				if vi == nil {
+					continue
 				}
+
+				if status == "known_affected" || status == "under_investigation" {
+					vulnData := generated.ScanMetadataInput{
+						TimeScanned: c.csaf.Document.Tracking.CurrentReleaseDate,
+					}
+					cv := assembler.CertifyVulnIngest{
+						Pkg:           vi.Pkg,
+						Vulnerability: vuln,
+						VulnData:      &vulnData,
+					}
+					cvs = append(cvs, cv)
+				}
+				vis = append(vis, *vi)
 			}
 		}
 	}

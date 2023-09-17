@@ -130,8 +130,6 @@ func getPkgVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder 
 		'origin': certifyVex.origin  
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVEXStatement")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyVEXStatement: %w", err)
@@ -165,8 +163,6 @@ func getArtifactVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBui
 		'origin': certifyVex.origin  
 	}`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVEXStatement")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for CertifyVEXStatement: %w", err)
@@ -183,42 +179,46 @@ func setVexMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVexSpec *m
 	}
 	if certifyVexSpec.Status != nil {
 		arangoQueryBuilder.filter("certifyVex", statusStr, "==", "@"+statusStr)
-		queryValues[statusStr] = certifyVexSpec.Status
+		queryValues[statusStr] = *certifyVexSpec.Status
 	}
 	if certifyVexSpec.VexJustification != nil {
 		arangoQueryBuilder.filter("certifyVex", vexJustificationStr, "==", "@"+vexJustificationStr)
-		queryValues[vexJustificationStr] = certifyVexSpec.VexJustification
+		queryValues[vexJustificationStr] = *certifyVexSpec.VexJustification
 	}
 	if certifyVexSpec.Statement != nil {
 		arangoQueryBuilder.filter("certifyVex", statementStr, "==", "@"+statementStr)
-		queryValues[statementStr] = certifyVexSpec.Statement
+		queryValues[statementStr] = *certifyVexSpec.Statement
 	}
 	if certifyVexSpec.StatusNotes != nil {
 		arangoQueryBuilder.filter("certifyVex", statusNotesStr, "==", "@"+statusNotesStr)
-		queryValues[statusNotesStr] = certifyVexSpec.StatusNotes
+		queryValues[statusNotesStr] = *certifyVexSpec.StatusNotes
 	}
 	if certifyVexSpec.KnownSince != nil {
 		arangoQueryBuilder.filter("certifyVex", knownSinceStr, "==", "@"+knownSinceStr)
-		queryValues[knownSinceStr] = certifyVexSpec.KnownSince
+		queryValues[knownSinceStr] = *certifyVexSpec.KnownSince
 	}
 	if certifyVexSpec.Origin != nil {
 		arangoQueryBuilder.filter("certifyVex", origin, "==", "@"+origin)
-		queryValues[origin] = certifyVexSpec.Origin
+		queryValues[origin] = *certifyVexSpec.Origin
 	}
 	if certifyVexSpec.Collector != nil {
 		arangoQueryBuilder.filter("certifyVex", collector, "==", "@"+collector)
-		queryValues[collector] = certifyVexSpec.Collector
+		queryValues[collector] = *certifyVexSpec.Collector
 	}
 	if certifyVexSpec.Vulnerability != nil {
 		arangoQueryBuilder.forOutBound(certifyVexVulnEdgesStr, "vVulnID", "certifyVex")
+		if certifyVexSpec.Vulnerability.ID != nil {
+			arangoQueryBuilder.filter("vVulnID", "_id", "==", "@id")
+			queryValues["id"] = *certifyVexSpec.Vulnerability.ID
+		}
 		if certifyVexSpec.Vulnerability.VulnerabilityID != nil {
 			arangoQueryBuilder.filter("vVulnID", "vulnerabilityID", "==", "@vulnerabilityID")
-			queryValues["vulnerabilityID"] = *certifyVexSpec.Vulnerability.VulnerabilityID
+			queryValues["vulnerabilityID"] = strings.ToLower(*certifyVexSpec.Vulnerability.VulnerabilityID)
 		}
 		arangoQueryBuilder.forInBound(vulnHasVulnerabilityIDStr, "vType", "vVulnID")
 		if certifyVexSpec.Vulnerability.Type != nil {
 			arangoQueryBuilder.filter("vType", "type", "==", "@vulnType")
-			queryValues["vulnType"] = *certifyVexSpec.Vulnerability.Type
+			queryValues["vulnType"] = strings.ToLower(*certifyVexSpec.Vulnerability.Type)
 		}
 	} else {
 		arangoQueryBuilder.forOutBound(certifyVexVulnEdgesStr, "vVulnID", "certifyVex")

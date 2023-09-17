@@ -34,6 +34,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -70,6 +71,7 @@ const (
 	TypeSourceName        = "SourceName"
 	TypeSourceNamespace   = "SourceNamespace"
 	TypeSourceType        = "SourceType"
+	TypeVulnEqual         = "VulnEqual"
 	TypeVulnerabilityID   = "VulnerabilityID"
 	TypeVulnerabilityType = "VulnerabilityType"
 )
@@ -4666,7 +4668,7 @@ func (m *CertifyVulnMutation) VulnerabilityID() (r int, exists bool) {
 // OldVulnerabilityID returns the old "vulnerability_id" field's value of the CertifyVuln entity.
 // If the CertifyVuln object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyVulnMutation) OldVulnerabilityID(ctx context.Context) (v *int, err error) {
+func (m *CertifyVulnMutation) OldVulnerabilityID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldVulnerabilityID is only allowed on UpdateOne operations")
 	}
@@ -4680,22 +4682,9 @@ func (m *CertifyVulnMutation) OldVulnerabilityID(ctx context.Context) (v *int, e
 	return oldValue.VulnerabilityID, nil
 }
 
-// ClearVulnerabilityID clears the value of the "vulnerability_id" field.
-func (m *CertifyVulnMutation) ClearVulnerabilityID() {
-	m.vulnerability = nil
-	m.clearedFields[certifyvuln.FieldVulnerabilityID] = struct{}{}
-}
-
-// VulnerabilityIDCleared returns if the "vulnerability_id" field was cleared in this mutation.
-func (m *CertifyVulnMutation) VulnerabilityIDCleared() bool {
-	_, ok := m.clearedFields[certifyvuln.FieldVulnerabilityID]
-	return ok
-}
-
 // ResetVulnerabilityID resets all changes to the "vulnerability_id" field.
 func (m *CertifyVulnMutation) ResetVulnerabilityID() {
 	m.vulnerability = nil
-	delete(m.clearedFields, certifyvuln.FieldVulnerabilityID)
 }
 
 // SetPackageID sets the "package_id" field.
@@ -4986,14 +4975,14 @@ func (m *CertifyVulnMutation) ResetCollector() {
 	m.collector = nil
 }
 
-// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityType entity.
+// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
 func (m *CertifyVulnMutation) ClearVulnerability() {
 	m.clearedvulnerability = true
 }
 
-// VulnerabilityCleared reports if the "vulnerability" edge to the VulnerabilityType entity was cleared.
+// VulnerabilityCleared reports if the "vulnerability" edge to the VulnerabilityID entity was cleared.
 func (m *CertifyVulnMutation) VulnerabilityCleared() bool {
-	return m.VulnerabilityIDCleared() || m.clearedvulnerability
+	return m.clearedvulnerability
 }
 
 // VulnerabilityIDs returns the "vulnerability" edge IDs in the mutation.
@@ -5257,11 +5246,7 @@ func (m *CertifyVulnMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CertifyVulnMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(certifyvuln.FieldVulnerabilityID) {
-		fields = append(fields, certifyvuln.FieldVulnerabilityID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -5274,11 +5259,6 @@ func (m *CertifyVulnMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CertifyVulnMutation) ClearField(name string) error {
-	switch name {
-	case certifyvuln.FieldVulnerabilityID:
-		m.ClearVulnerabilityID()
-		return nil
-	}
 	return fmt.Errorf("unknown CertifyVuln nullable field %s", name)
 }
 
@@ -5412,22 +5392,24 @@ func (m *CertifyVulnMutation) ResetEdge(name string) error {
 // DependencyMutation represents an operation that mutates the Dependency nodes in the graph.
 type DependencyMutation struct {
 	config
-	op                       Op
-	typ                      string
-	id                       *int
-	version_range            *string
-	dependency_type          *dependency.DependencyType
-	justification            *string
-	origin                   *string
-	collector                *string
-	clearedFields            map[string]struct{}
-	_package                 *int
-	cleared_package          bool
-	dependent_package        *int
-	cleareddependent_package bool
-	done                     bool
-	oldValue                 func(context.Context) (*Dependency, error)
-	predicates               []predicate.Dependency
+	op                               Op
+	typ                              string
+	id                               *int
+	version_range                    *string
+	dependency_type                  *dependency.DependencyType
+	justification                    *string
+	origin                           *string
+	collector                        *string
+	clearedFields                    map[string]struct{}
+	_package                         *int
+	cleared_package                  bool
+	dependent_package_name           *int
+	cleareddependent_package_name    bool
+	dependent_package_version        *int
+	cleareddependent_package_version bool
+	done                             bool
+	oldValue                         func(context.Context) (*Dependency, error)
+	predicates                       []predicate.Dependency
 }
 
 var _ ent.Mutation = (*DependencyMutation)(nil)
@@ -5564,40 +5546,102 @@ func (m *DependencyMutation) ResetPackageID() {
 	m._package = nil
 }
 
-// SetDependentPackageID sets the "dependent_package_id" field.
-func (m *DependencyMutation) SetDependentPackageID(i int) {
-	m.dependent_package = &i
+// SetDependentPackageNameID sets the "dependent_package_name_id" field.
+func (m *DependencyMutation) SetDependentPackageNameID(i int) {
+	m.dependent_package_name = &i
 }
 
-// DependentPackageID returns the value of the "dependent_package_id" field in the mutation.
-func (m *DependencyMutation) DependentPackageID() (r int, exists bool) {
-	v := m.dependent_package
+// DependentPackageNameID returns the value of the "dependent_package_name_id" field in the mutation.
+func (m *DependencyMutation) DependentPackageNameID() (r int, exists bool) {
+	v := m.dependent_package_name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDependentPackageID returns the old "dependent_package_id" field's value of the Dependency entity.
+// OldDependentPackageNameID returns the old "dependent_package_name_id" field's value of the Dependency entity.
 // If the Dependency object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DependencyMutation) OldDependentPackageID(ctx context.Context) (v int, err error) {
+func (m *DependencyMutation) OldDependentPackageNameID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDependentPackageID is only allowed on UpdateOne operations")
+		return v, errors.New("OldDependentPackageNameID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDependentPackageID requires an ID field in the mutation")
+		return v, errors.New("OldDependentPackageNameID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDependentPackageID: %w", err)
+		return v, fmt.Errorf("querying old value for OldDependentPackageNameID: %w", err)
 	}
-	return oldValue.DependentPackageID, nil
+	return oldValue.DependentPackageNameID, nil
 }
 
-// ResetDependentPackageID resets all changes to the "dependent_package_id" field.
-func (m *DependencyMutation) ResetDependentPackageID() {
-	m.dependent_package = nil
+// ClearDependentPackageNameID clears the value of the "dependent_package_name_id" field.
+func (m *DependencyMutation) ClearDependentPackageNameID() {
+	m.dependent_package_name = nil
+	m.clearedFields[dependency.FieldDependentPackageNameID] = struct{}{}
+}
+
+// DependentPackageNameIDCleared returns if the "dependent_package_name_id" field was cleared in this mutation.
+func (m *DependencyMutation) DependentPackageNameIDCleared() bool {
+	_, ok := m.clearedFields[dependency.FieldDependentPackageNameID]
+	return ok
+}
+
+// ResetDependentPackageNameID resets all changes to the "dependent_package_name_id" field.
+func (m *DependencyMutation) ResetDependentPackageNameID() {
+	m.dependent_package_name = nil
+	delete(m.clearedFields, dependency.FieldDependentPackageNameID)
+}
+
+// SetDependentPackageVersionID sets the "dependent_package_version_id" field.
+func (m *DependencyMutation) SetDependentPackageVersionID(i int) {
+	m.dependent_package_version = &i
+}
+
+// DependentPackageVersionID returns the value of the "dependent_package_version_id" field in the mutation.
+func (m *DependencyMutation) DependentPackageVersionID() (r int, exists bool) {
+	v := m.dependent_package_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDependentPackageVersionID returns the old "dependent_package_version_id" field's value of the Dependency entity.
+// If the Dependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DependencyMutation) OldDependentPackageVersionID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDependentPackageVersionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDependentPackageVersionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDependentPackageVersionID: %w", err)
+	}
+	return oldValue.DependentPackageVersionID, nil
+}
+
+// ClearDependentPackageVersionID clears the value of the "dependent_package_version_id" field.
+func (m *DependencyMutation) ClearDependentPackageVersionID() {
+	m.dependent_package_version = nil
+	m.clearedFields[dependency.FieldDependentPackageVersionID] = struct{}{}
+}
+
+// DependentPackageVersionIDCleared returns if the "dependent_package_version_id" field was cleared in this mutation.
+func (m *DependencyMutation) DependentPackageVersionIDCleared() bool {
+	_, ok := m.clearedFields[dependency.FieldDependentPackageVersionID]
+	return ok
+}
+
+// ResetDependentPackageVersionID resets all changes to the "dependent_package_version_id" field.
+func (m *DependencyMutation) ResetDependentPackageVersionID() {
+	m.dependent_package_version = nil
+	delete(m.clearedFields, dependency.FieldDependentPackageVersionID)
 }
 
 // SetVersionRange sets the "version_range" field.
@@ -5806,30 +5850,56 @@ func (m *DependencyMutation) ResetPackage() {
 	m.cleared_package = false
 }
 
-// ClearDependentPackage clears the "dependent_package" edge to the PackageName entity.
-func (m *DependencyMutation) ClearDependentPackage() {
-	m.cleareddependent_package = true
+// ClearDependentPackageName clears the "dependent_package_name" edge to the PackageName entity.
+func (m *DependencyMutation) ClearDependentPackageName() {
+	m.cleareddependent_package_name = true
 }
 
-// DependentPackageCleared reports if the "dependent_package" edge to the PackageName entity was cleared.
-func (m *DependencyMutation) DependentPackageCleared() bool {
-	return m.cleareddependent_package
+// DependentPackageNameCleared reports if the "dependent_package_name" edge to the PackageName entity was cleared.
+func (m *DependencyMutation) DependentPackageNameCleared() bool {
+	return m.DependentPackageNameIDCleared() || m.cleareddependent_package_name
 }
 
-// DependentPackageIDs returns the "dependent_package" edge IDs in the mutation.
+// DependentPackageNameIDs returns the "dependent_package_name" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// DependentPackageID instead. It exists only for internal usage by the builders.
-func (m *DependencyMutation) DependentPackageIDs() (ids []int) {
-	if id := m.dependent_package; id != nil {
+// DependentPackageNameID instead. It exists only for internal usage by the builders.
+func (m *DependencyMutation) DependentPackageNameIDs() (ids []int) {
+	if id := m.dependent_package_name; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetDependentPackage resets all changes to the "dependent_package" edge.
-func (m *DependencyMutation) ResetDependentPackage() {
-	m.dependent_package = nil
-	m.cleareddependent_package = false
+// ResetDependentPackageName resets all changes to the "dependent_package_name" edge.
+func (m *DependencyMutation) ResetDependentPackageName() {
+	m.dependent_package_name = nil
+	m.cleareddependent_package_name = false
+}
+
+// ClearDependentPackageVersion clears the "dependent_package_version" edge to the PackageVersion entity.
+func (m *DependencyMutation) ClearDependentPackageVersion() {
+	m.cleareddependent_package_version = true
+}
+
+// DependentPackageVersionCleared reports if the "dependent_package_version" edge to the PackageVersion entity was cleared.
+func (m *DependencyMutation) DependentPackageVersionCleared() bool {
+	return m.DependentPackageVersionIDCleared() || m.cleareddependent_package_version
+}
+
+// DependentPackageVersionIDs returns the "dependent_package_version" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DependentPackageVersionID instead. It exists only for internal usage by the builders.
+func (m *DependencyMutation) DependentPackageVersionIDs() (ids []int) {
+	if id := m.dependent_package_version; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDependentPackageVersion resets all changes to the "dependent_package_version" edge.
+func (m *DependencyMutation) ResetDependentPackageVersion() {
+	m.dependent_package_version = nil
+	m.cleareddependent_package_version = false
 }
 
 // Where appends a list predicates to the DependencyMutation builder.
@@ -5866,12 +5936,15 @@ func (m *DependencyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DependencyMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m._package != nil {
 		fields = append(fields, dependency.FieldPackageID)
 	}
-	if m.dependent_package != nil {
-		fields = append(fields, dependency.FieldDependentPackageID)
+	if m.dependent_package_name != nil {
+		fields = append(fields, dependency.FieldDependentPackageNameID)
+	}
+	if m.dependent_package_version != nil {
+		fields = append(fields, dependency.FieldDependentPackageVersionID)
 	}
 	if m.version_range != nil {
 		fields = append(fields, dependency.FieldVersionRange)
@@ -5898,8 +5971,10 @@ func (m *DependencyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case dependency.FieldPackageID:
 		return m.PackageID()
-	case dependency.FieldDependentPackageID:
-		return m.DependentPackageID()
+	case dependency.FieldDependentPackageNameID:
+		return m.DependentPackageNameID()
+	case dependency.FieldDependentPackageVersionID:
+		return m.DependentPackageVersionID()
 	case dependency.FieldVersionRange:
 		return m.VersionRange()
 	case dependency.FieldDependencyType:
@@ -5921,8 +5996,10 @@ func (m *DependencyMutation) OldField(ctx context.Context, name string) (ent.Val
 	switch name {
 	case dependency.FieldPackageID:
 		return m.OldPackageID(ctx)
-	case dependency.FieldDependentPackageID:
-		return m.OldDependentPackageID(ctx)
+	case dependency.FieldDependentPackageNameID:
+		return m.OldDependentPackageNameID(ctx)
+	case dependency.FieldDependentPackageVersionID:
+		return m.OldDependentPackageVersionID(ctx)
 	case dependency.FieldVersionRange:
 		return m.OldVersionRange(ctx)
 	case dependency.FieldDependencyType:
@@ -5949,12 +6026,19 @@ func (m *DependencyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPackageID(v)
 		return nil
-	case dependency.FieldDependentPackageID:
+	case dependency.FieldDependentPackageNameID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDependentPackageID(v)
+		m.SetDependentPackageNameID(v)
+		return nil
+	case dependency.FieldDependentPackageVersionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDependentPackageVersionID(v)
 		return nil
 	case dependency.FieldVersionRange:
 		v, ok := value.(string)
@@ -6023,7 +6107,14 @@ func (m *DependencyMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *DependencyMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(dependency.FieldDependentPackageNameID) {
+		fields = append(fields, dependency.FieldDependentPackageNameID)
+	}
+	if m.FieldCleared(dependency.FieldDependentPackageVersionID) {
+		fields = append(fields, dependency.FieldDependentPackageVersionID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -6036,6 +6127,14 @@ func (m *DependencyMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *DependencyMutation) ClearField(name string) error {
+	switch name {
+	case dependency.FieldDependentPackageNameID:
+		m.ClearDependentPackageNameID()
+		return nil
+	case dependency.FieldDependentPackageVersionID:
+		m.ClearDependentPackageVersionID()
+		return nil
+	}
 	return fmt.Errorf("unknown Dependency nullable field %s", name)
 }
 
@@ -6046,8 +6145,11 @@ func (m *DependencyMutation) ResetField(name string) error {
 	case dependency.FieldPackageID:
 		m.ResetPackageID()
 		return nil
-	case dependency.FieldDependentPackageID:
-		m.ResetDependentPackageID()
+	case dependency.FieldDependentPackageNameID:
+		m.ResetDependentPackageNameID()
+		return nil
+	case dependency.FieldDependentPackageVersionID:
+		m.ResetDependentPackageVersionID()
 		return nil
 	case dependency.FieldVersionRange:
 		m.ResetVersionRange()
@@ -6070,12 +6172,15 @@ func (m *DependencyMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DependencyMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m._package != nil {
 		edges = append(edges, dependency.EdgePackage)
 	}
-	if m.dependent_package != nil {
-		edges = append(edges, dependency.EdgeDependentPackage)
+	if m.dependent_package_name != nil {
+		edges = append(edges, dependency.EdgeDependentPackageName)
+	}
+	if m.dependent_package_version != nil {
+		edges = append(edges, dependency.EdgeDependentPackageVersion)
 	}
 	return edges
 }
@@ -6088,8 +6193,12 @@ func (m *DependencyMutation) AddedIDs(name string) []ent.Value {
 		if id := m._package; id != nil {
 			return []ent.Value{*id}
 		}
-	case dependency.EdgeDependentPackage:
-		if id := m.dependent_package; id != nil {
+	case dependency.EdgeDependentPackageName:
+		if id := m.dependent_package_name; id != nil {
+			return []ent.Value{*id}
+		}
+	case dependency.EdgeDependentPackageVersion:
+		if id := m.dependent_package_version; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -6098,7 +6207,7 @@ func (m *DependencyMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DependencyMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -6110,12 +6219,15 @@ func (m *DependencyMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DependencyMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleared_package {
 		edges = append(edges, dependency.EdgePackage)
 	}
-	if m.cleareddependent_package {
-		edges = append(edges, dependency.EdgeDependentPackage)
+	if m.cleareddependent_package_name {
+		edges = append(edges, dependency.EdgeDependentPackageName)
+	}
+	if m.cleareddependent_package_version {
+		edges = append(edges, dependency.EdgeDependentPackageVersion)
 	}
 	return edges
 }
@@ -6126,8 +6238,10 @@ func (m *DependencyMutation) EdgeCleared(name string) bool {
 	switch name {
 	case dependency.EdgePackage:
 		return m.cleared_package
-	case dependency.EdgeDependentPackage:
-		return m.cleareddependent_package
+	case dependency.EdgeDependentPackageName:
+		return m.cleareddependent_package_name
+	case dependency.EdgeDependentPackageVersion:
+		return m.cleareddependent_package_version
 	}
 	return false
 }
@@ -6139,8 +6253,11 @@ func (m *DependencyMutation) ClearEdge(name string) error {
 	case dependency.EdgePackage:
 		m.ClearPackage()
 		return nil
-	case dependency.EdgeDependentPackage:
-		m.ClearDependentPackage()
+	case dependency.EdgeDependentPackageName:
+		m.ClearDependentPackageName()
+		return nil
+	case dependency.EdgeDependentPackageVersion:
+		m.ClearDependentPackageVersion()
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency unique edge %s", name)
@@ -6153,8 +6270,11 @@ func (m *DependencyMutation) ResetEdge(name string) error {
 	case dependency.EdgePackage:
 		m.ResetPackage()
 		return nil
-	case dependency.EdgeDependentPackage:
-		m.ResetDependentPackage()
+	case dependency.EdgeDependentPackageName:
+		m.ResetDependentPackageName()
+		return nil
+	case dependency.EdgeDependentPackageVersion:
+		m.ResetDependentPackageVersion()
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency edge %s", name)
@@ -15386,19 +15506,549 @@ func (m *SourceTypeMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown SourceType edge %s", name)
 }
 
+// VulnEqualMutation represents an operation that mutates the VulnEqual nodes in the graph.
+type VulnEqualMutation struct {
+	config
+	op                       Op
+	typ                      string
+	id                       *int
+	justification            *string
+	origin                   *string
+	collector                *string
+	clearedFields            map[string]struct{}
+	vulnerability_ids        map[int]struct{}
+	removedvulnerability_ids map[int]struct{}
+	clearedvulnerability_ids bool
+	done                     bool
+	oldValue                 func(context.Context) (*VulnEqual, error)
+	predicates               []predicate.VulnEqual
+}
+
+var _ ent.Mutation = (*VulnEqualMutation)(nil)
+
+// vulnequalOption allows management of the mutation configuration using functional options.
+type vulnequalOption func(*VulnEqualMutation)
+
+// newVulnEqualMutation creates new mutation for the VulnEqual entity.
+func newVulnEqualMutation(c config, op Op, opts ...vulnequalOption) *VulnEqualMutation {
+	m := &VulnEqualMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeVulnEqual,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withVulnEqualID sets the ID field of the mutation.
+func withVulnEqualID(id int) vulnequalOption {
+	return func(m *VulnEqualMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *VulnEqual
+		)
+		m.oldValue = func(ctx context.Context) (*VulnEqual, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().VulnEqual.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withVulnEqual sets the old VulnEqual of the mutation.
+func withVulnEqual(node *VulnEqual) vulnequalOption {
+	return func(m *VulnEqualMutation) {
+		m.oldValue = func(context.Context) (*VulnEqual, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m VulnEqualMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m VulnEqualMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *VulnEqualMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *VulnEqualMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().VulnEqual.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetJustification sets the "justification" field.
+func (m *VulnEqualMutation) SetJustification(s string) {
+	m.justification = &s
+}
+
+// Justification returns the value of the "justification" field in the mutation.
+func (m *VulnEqualMutation) Justification() (r string, exists bool) {
+	v := m.justification
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJustification returns the old "justification" field's value of the VulnEqual entity.
+// If the VulnEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VulnEqualMutation) OldJustification(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJustification is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJustification requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJustification: %w", err)
+	}
+	return oldValue.Justification, nil
+}
+
+// ResetJustification resets all changes to the "justification" field.
+func (m *VulnEqualMutation) ResetJustification() {
+	m.justification = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *VulnEqualMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *VulnEqualMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the VulnEqual entity.
+// If the VulnEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VulnEqualMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *VulnEqualMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *VulnEqualMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *VulnEqualMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the VulnEqual entity.
+// If the VulnEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VulnEqualMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *VulnEqualMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by ids.
+func (m *VulnEqualMutation) AddVulnerabilityIDIDs(ids ...int) {
+	if m.vulnerability_ids == nil {
+		m.vulnerability_ids = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.vulnerability_ids[ids[i]] = struct{}{}
+	}
+}
+
+// ClearVulnerabilityIds clears the "vulnerability_ids" edge to the VulnerabilityID entity.
+func (m *VulnEqualMutation) ClearVulnerabilityIds() {
+	m.clearedvulnerability_ids = true
+}
+
+// VulnerabilityIdsCleared reports if the "vulnerability_ids" edge to the VulnerabilityID entity was cleared.
+func (m *VulnEqualMutation) VulnerabilityIdsCleared() bool {
+	return m.clearedvulnerability_ids
+}
+
+// RemoveVulnerabilityIDIDs removes the "vulnerability_ids" edge to the VulnerabilityID entity by IDs.
+func (m *VulnEqualMutation) RemoveVulnerabilityIDIDs(ids ...int) {
+	if m.removedvulnerability_ids == nil {
+		m.removedvulnerability_ids = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.vulnerability_ids, ids[i])
+		m.removedvulnerability_ids[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedVulnerabilityIds returns the removed IDs of the "vulnerability_ids" edge to the VulnerabilityID entity.
+func (m *VulnEqualMutation) RemovedVulnerabilityIdsIDs() (ids []int) {
+	for id := range m.removedvulnerability_ids {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// VulnerabilityIdsIDs returns the "vulnerability_ids" edge IDs in the mutation.
+func (m *VulnEqualMutation) VulnerabilityIdsIDs() (ids []int) {
+	for id := range m.vulnerability_ids {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetVulnerabilityIds resets all changes to the "vulnerability_ids" edge.
+func (m *VulnEqualMutation) ResetVulnerabilityIds() {
+	m.vulnerability_ids = nil
+	m.clearedvulnerability_ids = false
+	m.removedvulnerability_ids = nil
+}
+
+// Where appends a list predicates to the VulnEqualMutation builder.
+func (m *VulnEqualMutation) Where(ps ...predicate.VulnEqual) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the VulnEqualMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *VulnEqualMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.VulnEqual, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *VulnEqualMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *VulnEqualMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (VulnEqual).
+func (m *VulnEqualMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *VulnEqualMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.justification != nil {
+		fields = append(fields, vulnequal.FieldJustification)
+	}
+	if m.origin != nil {
+		fields = append(fields, vulnequal.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, vulnequal.FieldCollector)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *VulnEqualMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case vulnequal.FieldJustification:
+		return m.Justification()
+	case vulnequal.FieldOrigin:
+		return m.Origin()
+	case vulnequal.FieldCollector:
+		return m.Collector()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *VulnEqualMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case vulnequal.FieldJustification:
+		return m.OldJustification(ctx)
+	case vulnequal.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case vulnequal.FieldCollector:
+		return m.OldCollector(ctx)
+	}
+	return nil, fmt.Errorf("unknown VulnEqual field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VulnEqualMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case vulnequal.FieldJustification:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJustification(v)
+		return nil
+	case vulnequal.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case vulnequal.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VulnEqual field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *VulnEqualMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *VulnEqualMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VulnEqualMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown VulnEqual numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *VulnEqualMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *VulnEqualMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *VulnEqualMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown VulnEqual nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *VulnEqualMutation) ResetField(name string) error {
+	switch name {
+	case vulnequal.FieldJustification:
+		m.ResetJustification()
+		return nil
+	case vulnequal.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case vulnequal.FieldCollector:
+		m.ResetCollector()
+		return nil
+	}
+	return fmt.Errorf("unknown VulnEqual field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *VulnEqualMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.vulnerability_ids != nil {
+		edges = append(edges, vulnequal.EdgeVulnerabilityIds)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *VulnEqualMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case vulnequal.EdgeVulnerabilityIds:
+		ids := make([]ent.Value, 0, len(m.vulnerability_ids))
+		for id := range m.vulnerability_ids {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *VulnEqualMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedvulnerability_ids != nil {
+		edges = append(edges, vulnequal.EdgeVulnerabilityIds)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *VulnEqualMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case vulnequal.EdgeVulnerabilityIds:
+		ids := make([]ent.Value, 0, len(m.removedvulnerability_ids))
+		for id := range m.removedvulnerability_ids {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *VulnEqualMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedvulnerability_ids {
+		edges = append(edges, vulnequal.EdgeVulnerabilityIds)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *VulnEqualMutation) EdgeCleared(name string) bool {
+	switch name {
+	case vulnequal.EdgeVulnerabilityIds:
+		return m.clearedvulnerability_ids
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *VulnEqualMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown VulnEqual unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *VulnEqualMutation) ResetEdge(name string) error {
+	switch name {
+	case vulnequal.EdgeVulnerabilityIds:
+		m.ResetVulnerabilityIds()
+		return nil
+	}
+	return fmt.Errorf("unknown VulnEqual edge %s", name)
+}
+
 // VulnerabilityIDMutation represents an operation that mutates the VulnerabilityID nodes in the graph.
 type VulnerabilityIDMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	vulnerability_id *string
-	clearedFields    map[string]struct{}
-	_type            *int
-	cleared_type     bool
-	done             bool
-	oldValue         func(context.Context) (*VulnerabilityID, error)
-	predicates       []predicate.VulnerabilityID
+	op                 Op
+	typ                string
+	id                 *int
+	vulnerability_id   *string
+	clearedFields      map[string]struct{}
+	_type              *int
+	cleared_type       bool
+	vuln_equals        map[int]struct{}
+	removedvuln_equals map[int]struct{}
+	clearedvuln_equals bool
+	done               bool
+	oldValue           func(context.Context) (*VulnerabilityID, error)
+	predicates         []predicate.VulnerabilityID
 }
 
 var _ ent.Mutation = (*VulnerabilityIDMutation)(nil)
@@ -15597,6 +16247,60 @@ func (m *VulnerabilityIDMutation) ResetType() {
 	m.cleared_type = false
 }
 
+// AddVulnEqualIDs adds the "vuln_equals" edge to the VulnEqual entity by ids.
+func (m *VulnerabilityIDMutation) AddVulnEqualIDs(ids ...int) {
+	if m.vuln_equals == nil {
+		m.vuln_equals = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.vuln_equals[ids[i]] = struct{}{}
+	}
+}
+
+// ClearVulnEquals clears the "vuln_equals" edge to the VulnEqual entity.
+func (m *VulnerabilityIDMutation) ClearVulnEquals() {
+	m.clearedvuln_equals = true
+}
+
+// VulnEqualsCleared reports if the "vuln_equals" edge to the VulnEqual entity was cleared.
+func (m *VulnerabilityIDMutation) VulnEqualsCleared() bool {
+	return m.clearedvuln_equals
+}
+
+// RemoveVulnEqualIDs removes the "vuln_equals" edge to the VulnEqual entity by IDs.
+func (m *VulnerabilityIDMutation) RemoveVulnEqualIDs(ids ...int) {
+	if m.removedvuln_equals == nil {
+		m.removedvuln_equals = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.vuln_equals, ids[i])
+		m.removedvuln_equals[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedVulnEquals returns the removed IDs of the "vuln_equals" edge to the VulnEqual entity.
+func (m *VulnerabilityIDMutation) RemovedVulnEqualsIDs() (ids []int) {
+	for id := range m.removedvuln_equals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// VulnEqualsIDs returns the "vuln_equals" edge IDs in the mutation.
+func (m *VulnerabilityIDMutation) VulnEqualsIDs() (ids []int) {
+	for id := range m.vuln_equals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetVulnEquals resets all changes to the "vuln_equals" edge.
+func (m *VulnerabilityIDMutation) ResetVulnEquals() {
+	m.vuln_equals = nil
+	m.clearedvuln_equals = false
+	m.removedvuln_equals = nil
+}
+
 // Where appends a list predicates to the VulnerabilityIDMutation builder.
 func (m *VulnerabilityIDMutation) Where(ps ...predicate.VulnerabilityID) {
 	m.predicates = append(m.predicates, ps...)
@@ -15750,9 +16454,12 @@ func (m *VulnerabilityIDMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *VulnerabilityIDMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m._type != nil {
 		edges = append(edges, vulnerabilityid.EdgeType)
+	}
+	if m.vuln_equals != nil {
+		edges = append(edges, vulnerabilityid.EdgeVulnEquals)
 	}
 	return edges
 }
@@ -15765,27 +16472,47 @@ func (m *VulnerabilityIDMutation) AddedIDs(name string) []ent.Value {
 		if id := m._type; id != nil {
 			return []ent.Value{*id}
 		}
+	case vulnerabilityid.EdgeVulnEquals:
+		ids := make([]ent.Value, 0, len(m.vuln_equals))
+		for id := range m.vuln_equals {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *VulnerabilityIDMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedvuln_equals != nil {
+		edges = append(edges, vulnerabilityid.EdgeVulnEquals)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *VulnerabilityIDMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case vulnerabilityid.EdgeVulnEquals:
+		ids := make([]ent.Value, 0, len(m.removedvuln_equals))
+		for id := range m.removedvuln_equals {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *VulnerabilityIDMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleared_type {
 		edges = append(edges, vulnerabilityid.EdgeType)
+	}
+	if m.clearedvuln_equals {
+		edges = append(edges, vulnerabilityid.EdgeVulnEquals)
 	}
 	return edges
 }
@@ -15796,6 +16523,8 @@ func (m *VulnerabilityIDMutation) EdgeCleared(name string) bool {
 	switch name {
 	case vulnerabilityid.EdgeType:
 		return m.cleared_type
+	case vulnerabilityid.EdgeVulnEquals:
+		return m.clearedvuln_equals
 	}
 	return false
 }
@@ -15817,6 +16546,9 @@ func (m *VulnerabilityIDMutation) ResetEdge(name string) error {
 	switch name {
 	case vulnerabilityid.EdgeType:
 		m.ResetType()
+		return nil
+	case vulnerabilityid.EdgeVulnEquals:
+		m.ResetVulnEquals()
 		return nil
 	}
 	return fmt.Errorf("unknown VulnerabilityID edge %s", name)

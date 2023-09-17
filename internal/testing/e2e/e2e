@@ -36,6 +36,8 @@ popd
 echo @@@@ Starting up guac server in background
 go run "${GUAC_DIR}/cmd/guacgql" &
 
+sleep 15
+
 echo @@@@ Ingesting guac-data into server
 go run "${GUAC_DIR}/cmd/guacone" collect files "${GUAC_DIR}/guac-data/docs/"
 

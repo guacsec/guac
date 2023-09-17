@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/arangodb/go-driver"
@@ -120,8 +121,6 @@ func getHashEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuild
 				'origin': hashEqual.origin
 			}`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HashEqual")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HashEqual: %w", err)
@@ -138,24 +137,30 @@ func setHashEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, hashEqualSp
 	}
 	if hashEqualSpec.Justification != nil {
 		arangoQueryBuilder.filter("hashEqual", justification, "==", "@"+justification)
-		queryValues[justification] = hashEqualSpec.Justification
+		queryValues[justification] = *hashEqualSpec.Justification
 	}
 	if hashEqualSpec.Origin != nil {
 		arangoQueryBuilder.filter("hashEqual", origin, "==", "@"+origin)
-		queryValues[origin] = hashEqualSpec.Origin
+		queryValues[origin] = *hashEqualSpec.Origin
 	}
 	if hashEqualSpec.Collector != nil {
 		arangoQueryBuilder.filter("hashEqual", collector, "==", "@"+collector)
-		queryValues[collector] = hashEqualSpec.Collector
+		queryValues[collector] = *hashEqualSpec.Collector
 	}
 }
 
 func getHashEqualQueryValues(artifact *model.ArtifactInputSpec, equalArtifact *model.ArtifactInputSpec, hashEqual *model.HashEqualInputSpec) map[string]any {
+
+	artifacts := []model.ArtifactInputSpec{*artifact, *equalArtifact}
+	sort.SliceStable(artifacts, func(i, j int) bool {
+		return artifacts[i].Digest < artifacts[j].Digest
+	})
+
 	values := map[string]any{}
-	values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
-	values["art_digest"] = strings.ToLower(artifact.Digest)
-	values["equal_algorithm"] = strings.ToLower(equalArtifact.Algorithm)
-	values["equal_digest"] = strings.ToLower(equalArtifact.Digest)
+	values["art_algorithm"] = strings.ToLower(artifacts[0].Algorithm)
+	values["art_digest"] = strings.ToLower(artifacts[0].Digest)
+	values["equal_algorithm"] = strings.ToLower(artifacts[1].Algorithm)
+	values["equal_digest"] = strings.ToLower(artifacts[1].Digest)
 	values["justification"] = strings.ToLower(hashEqual.Justification)
 	values["collector"] = strings.ToLower(hashEqual.Collector)
 	values["origin"] = strings.ToLower(hashEqual.Origin)
@@ -286,7 +291,7 @@ func getHashEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model
 	type collectedData struct {
 		Artifact      *model.Artifact `json:"artifact"`
 		EqualArtifact *model.Artifact `json:"equalArtifact"`
-		HashEqualId   string          `json:"hashEqual"`
+		HashEqualId   string          `json:"hashEqual_id"`
 		Justification string          `json:"justification"`
 		Collector     string          `json:"collector"`
 		Origin        string          `json:"origin"`

@@ -25,7 +25,7 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -161,6 +161,19 @@ var p4 = &model.PkgInputSpec{
 	Namespace: ptrfrom.String("openssl.org"),
 	Name:      "openssl",
 	Version:   ptrfrom.String("3.0.3"),
+}
+var p4out = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name: "openssl",
+			Versions: []*model.PackageVersion{{
+				Version:    "3.0.3",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
 }
 var p4outName = &model.Package{
 	Type: "conan",
@@ -536,7 +549,7 @@ func TestOccurrence(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := inmem.GetBackend(nil)
+			b, err := backends.Get("inmem", nil, nil)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -650,7 +663,7 @@ func TestIngestOccurrences(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := inmem.GetBackend(nil)
+			b, err := backends.Get("inmem", nil, nil)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -759,7 +772,7 @@ func TestOccurrenceNeighbors(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := inmem.GetBackend(nil)
+			b, err := backends.Get("inmem", nil, nil)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

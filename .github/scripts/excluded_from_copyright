@@ -172,6 +172,13 @@
 ./pkg/assembler/backends/ent/sourcetype_query.go
 ./pkg/assembler/backends/ent/sourcetype_update.go
 ./pkg/assembler/backends/ent/tx.go
+./pkg/assembler/backends/ent/vulnequal/where.go
+./pkg/assembler/backends/ent/vulnequal/vulnequal.go
+./pkg/assembler/backends/ent/vulnequal_delete.go
+./pkg/assembler/backends/ent/vulnequal_create.go
+./pkg/assembler/backends/ent/vulnequal_update.go
+./pkg/assembler/backends/ent/vulnequal.go
+./pkg/assembler/backends/ent/vulnequal_query.go
 ./pkg/assembler/backends/ent/vulnerabilityid.go
 ./pkg/assembler/backends/ent/vulnerabilityid/vulnerabilityid.go
 ./pkg/assembler/backends/ent/vulnerabilityid/where.go

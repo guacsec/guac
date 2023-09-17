@@ -36,6 +36,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
@@ -89,6 +90,8 @@ type Client struct {
 	SourceNamespace *SourceNamespaceClient
 	// SourceType is the client for interacting with the SourceType builders.
 	SourceType *SourceTypeClient
+	// VulnEqual is the client for interacting with the VulnEqual builders.
+	VulnEqual *VulnEqualClient
 	// VulnerabilityID is the client for interacting with the VulnerabilityID builders.
 	VulnerabilityID *VulnerabilityIDClient
 	// VulnerabilityType is the client for interacting with the VulnerabilityType builders.
@@ -130,6 +133,7 @@ func (c *Client) init() {
 	c.SourceName = NewSourceNameClient(c.config)
 	c.SourceNamespace = NewSourceNamespaceClient(c.config)
 	c.SourceType = NewSourceTypeClient(c.config)
+	c.VulnEqual = NewVulnEqualClient(c.config)
 	c.VulnerabilityID = NewVulnerabilityIDClient(c.config)
 	c.VulnerabilityType = NewVulnerabilityTypeClient(c.config)
 }
@@ -236,6 +240,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		SourceName:        NewSourceNameClient(cfg),
 		SourceNamespace:   NewSourceNamespaceClient(cfg),
 		SourceType:        NewSourceTypeClient(cfg),
+		VulnEqual:         NewVulnEqualClient(cfg),
 		VulnerabilityID:   NewVulnerabilityIDClient(cfg),
 		VulnerabilityType: NewVulnerabilityTypeClient(cfg),
 	}, nil
@@ -279,6 +284,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		SourceName:        NewSourceNameClient(cfg),
 		SourceNamespace:   NewSourceNamespaceClient(cfg),
 		SourceType:        NewSourceTypeClient(cfg),
+		VulnEqual:         NewVulnEqualClient(cfg),
 		VulnerabilityID:   NewVulnerabilityIDClient(cfg),
 		VulnerabilityType: NewVulnerabilityTypeClient(cfg),
 	}, nil
@@ -314,7 +320,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual,
 		c.IsVulnerability, c.Occurrence, c.PackageName, c.PackageNamespace,
 		c.PackageType, c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard,
-		c.SourceName, c.SourceNamespace, c.SourceType, c.VulnerabilityID,
+		c.SourceName, c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
 		c.VulnerabilityType,
 	} {
 		n.Use(hooks...)
@@ -329,7 +335,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual,
 		c.IsVulnerability, c.Occurrence, c.PackageName, c.PackageNamespace,
 		c.PackageType, c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard,
-		c.SourceName, c.SourceNamespace, c.SourceType, c.VulnerabilityID,
+		c.SourceName, c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
 		c.VulnerabilityType,
 	} {
 		n.Intercept(interceptors...)
@@ -383,6 +389,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SourceNamespace.mutate(ctx, m)
 	case *SourceTypeMutation:
 		return c.SourceType.mutate(ctx, m)
+	case *VulnEqualMutation:
+		return c.VulnEqual.mutate(ctx, m)
 	case *VulnerabilityIDMutation:
 		return c.VulnerabilityID.mutate(ctx, m)
 	case *VulnerabilityTypeMutation:
@@ -1450,13 +1458,13 @@ func (c *CertifyVulnClient) GetX(ctx context.Context, id int) *CertifyVuln {
 }
 
 // QueryVulnerability queries the vulnerability edge of a CertifyVuln.
-func (c *CertifyVulnClient) QueryVulnerability(cv *CertifyVuln) *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: c.config}).Query()
+func (c *CertifyVulnClient) QueryVulnerability(cv *CertifyVuln) *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := cv.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvuln.Table, certifyvuln.FieldID, id),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvuln.VulnerabilityTable, certifyvuln.VulnerabilityColumn),
 		)
 		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
@@ -1615,15 +1623,31 @@ func (c *DependencyClient) QueryPackage(d *Dependency) *PackageVersionQuery {
 	return query
 }
 
-// QueryDependentPackage queries the dependent_package edge of a Dependency.
-func (c *DependencyClient) QueryDependentPackage(d *Dependency) *PackageNameQuery {
+// QueryDependentPackageName queries the dependent_package_name edge of a Dependency.
+func (c *DependencyClient) QueryDependentPackageName(d *Dependency) *PackageNameQuery {
 	query := (&PackageNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := d.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(dependency.Table, dependency.FieldID, id),
 			sqlgraph.To(packagename.Table, packagename.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageTable, dependency.DependentPackageColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageNameTable, dependency.DependentPackageNameColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDependentPackageVersion queries the dependent_package_version edge of a Dependency.
+func (c *DependencyClient) QueryDependentPackageVersion(d *Dependency) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dependency.Table, dependency.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageVersionTable, dependency.DependentPackageVersionColumn),
 		)
 		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil
@@ -3756,6 +3780,140 @@ func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (V
 	}
 }
 
+// VulnEqualClient is a client for the VulnEqual schema.
+type VulnEqualClient struct {
+	config
+}
+
+// NewVulnEqualClient returns a client for the VulnEqual from the given config.
+func NewVulnEqualClient(c config) *VulnEqualClient {
+	return &VulnEqualClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `vulnequal.Hooks(f(g(h())))`.
+func (c *VulnEqualClient) Use(hooks ...Hook) {
+	c.hooks.VulnEqual = append(c.hooks.VulnEqual, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `vulnequal.Intercept(f(g(h())))`.
+func (c *VulnEqualClient) Intercept(interceptors ...Interceptor) {
+	c.inters.VulnEqual = append(c.inters.VulnEqual, interceptors...)
+}
+
+// Create returns a builder for creating a VulnEqual entity.
+func (c *VulnEqualClient) Create() *VulnEqualCreate {
+	mutation := newVulnEqualMutation(c.config, OpCreate)
+	return &VulnEqualCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of VulnEqual entities.
+func (c *VulnEqualClient) CreateBulk(builders ...*VulnEqualCreate) *VulnEqualCreateBulk {
+	return &VulnEqualCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for VulnEqual.
+func (c *VulnEqualClient) Update() *VulnEqualUpdate {
+	mutation := newVulnEqualMutation(c.config, OpUpdate)
+	return &VulnEqualUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VulnEqualClient) UpdateOne(ve *VulnEqual) *VulnEqualUpdateOne {
+	mutation := newVulnEqualMutation(c.config, OpUpdateOne, withVulnEqual(ve))
+	return &VulnEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VulnEqualClient) UpdateOneID(id int) *VulnEqualUpdateOne {
+	mutation := newVulnEqualMutation(c.config, OpUpdateOne, withVulnEqualID(id))
+	return &VulnEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for VulnEqual.
+func (c *VulnEqualClient) Delete() *VulnEqualDelete {
+	mutation := newVulnEqualMutation(c.config, OpDelete)
+	return &VulnEqualDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VulnEqualClient) DeleteOne(ve *VulnEqual) *VulnEqualDeleteOne {
+	return c.DeleteOneID(ve.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VulnEqualClient) DeleteOneID(id int) *VulnEqualDeleteOne {
+	builder := c.Delete().Where(vulnequal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VulnEqualDeleteOne{builder}
+}
+
+// Query returns a query builder for VulnEqual.
+func (c *VulnEqualClient) Query() *VulnEqualQuery {
+	return &VulnEqualQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVulnEqual},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a VulnEqual entity by its id.
+func (c *VulnEqualClient) Get(ctx context.Context, id int) (*VulnEqual, error) {
+	return c.Query().Where(vulnequal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VulnEqualClient) GetX(ctx context.Context, id int) *VulnEqual {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryVulnerabilityIds queries the vulnerability_ids edge of a VulnEqual.
+func (c *VulnEqualClient) QueryVulnerabilityIds(ve *VulnEqual) *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ve.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vulnequal.Table, vulnequal.FieldID, id),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, vulnequal.VulnerabilityIdsTable, vulnequal.VulnerabilityIdsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ve.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *VulnEqualClient) Hooks() []Hook {
+	return c.hooks.VulnEqual
+}
+
+// Interceptors returns the client interceptors.
+func (c *VulnEqualClient) Interceptors() []Interceptor {
+	return c.inters.VulnEqual
+}
+
+func (c *VulnEqualClient) mutate(ctx context.Context, m *VulnEqualMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VulnEqualCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VulnEqualUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VulnEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VulnEqualDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown VulnEqual mutation op: %q", m.Op())
+	}
+}
+
 // VulnerabilityIDClient is a client for the VulnerabilityID schema.
 type VulnerabilityIDClient struct {
 	config
@@ -3858,6 +4016,22 @@ func (c *VulnerabilityIDClient) QueryType(vi *VulnerabilityID) *VulnerabilityTyp
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, vulnerabilityid.TypeTable, vulnerabilityid.TypeColumn),
+		)
+		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVulnEquals queries the vuln_equals edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryVulnEquals(vi *VulnerabilityID) *VulnEqualQuery {
+	query := (&VulnEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := vi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
+			sqlgraph.To(vulnequal.Table, vulnequal.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, vulnerabilityid.VulnEqualsTable, vulnerabilityid.VulnEqualsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
 		return fromV, nil
@@ -4030,14 +4204,14 @@ type (
 		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard, CertifyVex,
 		CertifyVuln, Dependency, HasSourceAt, HashEqual, IsVulnerability, Occurrence,
 		PackageName, PackageNamespace, PackageType, PackageVersion, PkgEqual,
-		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType,
+		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
 		VulnerabilityID, VulnerabilityType []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard, CertifyVex,
 		CertifyVuln, Dependency, HasSourceAt, HashEqual, IsVulnerability, Occurrence,
 		PackageName, PackageNamespace, PackageType, PackageVersion, PkgEqual,
-		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType,
+		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
 		VulnerabilityID, VulnerabilityType []ent.Interceptor
 	}
 )

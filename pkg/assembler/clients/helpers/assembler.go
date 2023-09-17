@@ -76,6 +76,14 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			licenses := p.GetLicenses(ctx)
+			logger.Infof("assembling License: %v", len(licenses))
+			for _, v := range licenses {
+				if err := ingestLicense(ctx, gqlclient, &v); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			for _, v := range p.CertifyScorecard {
 				if err := ingestCertifyScorecard(ctx, gqlclient, v); err != nil {
@@ -153,6 +161,13 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			logger.Infof("assembling HasMetadata: %v", len(p.HasMetadata))
+			for _, hm := range p.HasMetadata {
+				if err := ingestHasMetadata(ctx, gqlclient, hm); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			for _, hb := range p.HasSBOM {
 				if err := ingestHasSBOM(ctx, gqlclient, hb); err != nil {
@@ -177,6 +192,13 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 			logger.Infof("assembling PkgEqual : %v", len(p.PkgEqual))
 			for _, equal := range p.PkgEqual {
 				if err := ingestPkgEqual(ctx, gqlclient, equal); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling CertifyLegal : %v", len(p.CertifyLegal))
+			for _, cl := range p.CertifyLegal {
+				if err := ingestCertifyLegal(ctx, gqlclient, cl); err != nil {
 					return err
 				}
 			}
@@ -207,6 +229,11 @@ func ingestBuilder(ctx context.Context, client graphql.Client, v *model.BuilderI
 
 func ingestVulnerability(ctx context.Context, client graphql.Client, v *model.VulnerabilityInputSpec) error {
 	_, err := model.IngestVulnerability(ctx, client, *v)
+	return err
+}
+
+func ingestLicense(ctx context.Context, client graphql.Client, l *model.LicenseInputSpec) error {
+	_, err := model.IngestLicense(ctx, client, *l)
 	return err
 }
 
@@ -254,7 +281,7 @@ func ingestVulnEqual(ctx context.Context, client graphql.Client, ve assembler.Vu
 		return fmt.Errorf("unable to create VulnEqual without equal vulnerability")
 	}
 
-	_, err := model.VulnEqual(ctx, client, *ve.Vulnerability, *ve.EqualVulnerability, *ve.VulnEqual)
+	_, err := model.IngestVulnEqual(ctx, client, *ve.Vulnerability, *ve.EqualVulnerability, *ve.VulnEqual)
 	return err
 }
 
@@ -314,6 +341,23 @@ func ingestPointOfContact(ctx context.Context, client graphql.Client, poc assemb
 	return err
 }
 
+func ingestHasMetadata(ctx context.Context, client graphql.Client, hm assembler.HasMetadataIngest) error {
+	if err := validatePackageSourceOrArtifactInput(hm.Pkg, hm.Src, hm.Artifact, "hasMetadata"); err != nil {
+		return fmt.Errorf("input validation failed for hasMetadata: %w", err)
+	}
+
+	if hm.Pkg != nil {
+		_, err := model.HasMetadataPkg(ctx, client, *hm.Pkg, hm.PkgMatchFlag, *hm.HasMetadata)
+		return err
+	}
+	if hm.Src != nil {
+		_, err := model.HasMetadataSrc(ctx, client, *hm.Src, *hm.HasMetadata)
+		return err
+	}
+	_, err := model.HasMetadataArtifact(ctx, client, *hm.Artifact, *hm.HasMetadata)
+	return err
+}
+
 func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasSBOMIngest) error {
 	if hb.Pkg != nil && hb.Artifact != nil {
 		return fmt.Errorf("unable to create hasSBOM with both Pkg and Src subject specified")
@@ -370,7 +414,7 @@ func ingestPkgEqual(ctx context.Context, client graphql.Client, v assembler.PkgE
 	if v.EqualPkg == nil {
 		return fmt.Errorf("unable to create pkgEqual without EqualPkg")
 	}
-	_, err := model.PkgEqual(ctx, client, *v.Pkg, *v.EqualPkg, *v.PkgEqual)
+	_, err := model.IngestPkgEqual(ctx, client, *v.Pkg, *v.EqualPkg, *v.PkgEqual)
 	return err
 }
 
@@ -381,7 +425,23 @@ func ingestHashEqual(ctx context.Context, client graphql.Client, v assembler.Has
 	if v.EqualArtifact == nil {
 		return fmt.Errorf("unable to create HashEqual without equal artifact")
 	}
-	_, err := model.HashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
+	_, err := model.IngestHashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
+	return err
+}
+
+func ingestCertifyLegal(ctx context.Context, client graphql.Client, v assembler.CertifyLegalIngest) error {
+	if v.Pkg != nil && v.Src != nil {
+		return fmt.Errorf("unable to create CertifyLegal with both Src and Pkg subject specified")
+	}
+	if v.Pkg == nil && v.Src == nil {
+		return fmt.Errorf("unable to create CertifyLegal without either Src and Pkg subject specified")
+	}
+
+	if v.Src != nil {
+		_, err := model.CertifyLegalSrc(ctx, client, *v.Src, v.Declared, v.Discovered, *v.CertifyLegal)
+		return err
+	}
+	_, err := model.CertifyLegalPkg(ctx, client, *v.Pkg, v.Declared, v.Discovered, *v.CertifyLegal)
 	return err
 }
 

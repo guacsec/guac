@@ -79,6 +79,7 @@ func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model
 		combinedOccurrence = append(combinedOccurrence, pkgIsOccurrences...)
 
 		// get sources
+		values = map[string]any{}
 		arangoQueryBuilder = newForQuery(isOccurrencesStr, "isOccurrence")
 		setIsOccurrenceMatchValues(arangoQueryBuilder, isOccurrenceSpec, values)
 		arangoQueryBuilder.forInBound(isOccurrenceSubjectSrcEdgesStr, "sName", "isOccurrence")
@@ -119,8 +120,6 @@ func getSrcOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'origin': isOccurrence.origin
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsOccurrence")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for IsOccurrence: %w", err)
@@ -156,8 +155,6 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'origin': isOccurrence.origin
 	  }`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsOccurrence")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for IsOccurrence: %w", err)
@@ -174,15 +171,15 @@ func setIsOccurrenceMatchValues(arangoQueryBuilder *arangoQueryBuilder, isOccurr
 	}
 	if isOccurrenceSpec.Justification != nil {
 		arangoQueryBuilder.filter("isOccurrence", justification, "==", "@"+justification)
-		queryValues[justification] = isOccurrenceSpec.Justification
+		queryValues[justification] = *isOccurrenceSpec.Justification
 	}
 	if isOccurrenceSpec.Origin != nil {
 		arangoQueryBuilder.filter("isOccurrence", origin, "==", "@"+origin)
-		queryValues[origin] = isOccurrenceSpec.Origin
+		queryValues[origin] = *isOccurrenceSpec.Origin
 	}
 	if isOccurrenceSpec.Collector != nil {
 		arangoQueryBuilder.filter("isOccurrence", collector, "==", "@"+collector)
-		queryValues[collector] = isOccurrenceSpec.Collector
+		queryValues[collector] = *isOccurrenceSpec.Collector
 	}
 	arangoQueryBuilder.forOutBound(isOccurrenceArtEdgesStr, "art", "isOccurrence")
 	if isOccurrenceSpec.Artifact != nil {
@@ -636,10 +633,11 @@ func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mo
 		}
 
 		isOccurrence := &model.IsOccurrence{
-			ID:        createdValue.IsOccurrenceID,
-			Artifact:  createdValue.Artifact,
-			Origin:    createdValue.Collector,
-			Collector: createdValue.Origin,
+			ID:            createdValue.IsOccurrenceID,
+			Artifact:      createdValue.Artifact,
+			Justification: createdValue.Justification,
+			Origin:        createdValue.Collector,
+			Collector:     createdValue.Origin,
 		}
 		if pkg != nil {
 			isOccurrence.Subject = pkg

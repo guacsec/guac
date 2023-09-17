@@ -13,19 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package arangodb
+//go:build !(386 || arm || mips)
 
-import (
-	"context"
-	"fmt"
+package backend
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-)
+import "github.com/guacsec/guac/pkg/assembler/backends"
 
-func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
-	return nil, fmt.Errorf("not implemented: IngestPointOfContact")
-}
-
-func (c *arangoClient) PointOfContact(ctx context.Context, pointOfContactSpec *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
-	return nil, fmt.Errorf("not implemented: PointOfContact")
+func init() {
+	backends.Register("ent", getBackend)
 }

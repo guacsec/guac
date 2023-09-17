@@ -35,6 +35,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/hashicorp/go-multierror"
@@ -111,6 +112,9 @@ func (n *SourceNamespace) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *SourceType) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *VulnEqual) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *VulnerabilityID) IsNode() {}
@@ -432,6 +436,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.SourceType.Query().
 			Where(sourcetype.ID(id))
 		query, err := query.CollectFields(ctx, "SourceType")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case vulnequal.Table:
+		query := c.VulnEqual.Query().
+			Where(vulnequal.ID(id))
+		query, err := query.CollectFields(ctx, "VulnEqual")
 		if err != nil {
 			return nil, err
 		}
@@ -877,6 +893,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.SourceType.Query().
 			Where(sourcetype.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "SourceType")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case vulnequal.Table:
+		query := c.VulnEqual.Query().
+			Where(vulnequal.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "VulnEqual")
 		if err != nil {
 			return nil, err
 		}

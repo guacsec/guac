@@ -72,6 +72,9 @@ type SourceNamespace func(*sql.Selector)
 // SourceType is the predicate function for sourcetype builders.
 type SourceType func(*sql.Selector)
 
+// VulnEqual is the predicate function for vulnequal builders.
+type VulnEqual func(*sql.Selector)
+
 // VulnerabilityID is the predicate function for vulnerabilityid builders.
 type VulnerabilityID func(*sql.Selector)
 

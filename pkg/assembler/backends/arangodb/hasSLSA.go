@@ -65,8 +65,6 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 		'origin': hasSLSA.origin
 	}`)
 
-	fmt.Println(arangoQueryBuilder.string())
-
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSlsa")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query for HasSlsa: %w", err)
@@ -78,7 +76,6 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 
 func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *model.HasSLSASpec, queryValues map[string]any) {
 
-	// currently not filtering on builtFrom (artifacts). Is that a real usecase?
 	arangoQueryBuilder.forOutBound(hasSLSASubjectArtEdgesStr, "hasSLSA", "art")
 	if hasSLSASpec.ID != nil {
 		arangoQueryBuilder.filter("hasSLSA", "_id", "==", "@id")
@@ -86,7 +83,7 @@ func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *
 	}
 	if hasSLSASpec.BuildType != nil {
 		arangoQueryBuilder.filter("hasSLSA", buildTypeStr, "==", "@"+buildTypeStr)
-		queryValues[buildTypeStr] = hasSLSASpec.BuildType
+		queryValues[buildTypeStr] = *hasSLSASpec.BuildType
 	}
 	if len(hasSLSASpec.Predicate) > 0 {
 		predicateValues := getPredicateValuesFromFilter(hasSLSASpec.Predicate)
@@ -95,7 +92,7 @@ func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *
 	}
 	if hasSLSASpec.SlsaVersion != nil {
 		arangoQueryBuilder.filter("hasSLSA", slsaVersionStr, "==", "@"+slsaVersionStr)
-		queryValues[slsaVersionStr] = hasSLSASpec.SlsaVersion
+		queryValues[slsaVersionStr] = *hasSLSASpec.SlsaVersion
 	}
 	if hasSLSASpec.StartedOn != nil {
 		arangoQueryBuilder.filter("hasSLSA", startedOnStr, "==", "@"+startedOnStr)
@@ -107,16 +104,22 @@ func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *
 	}
 	if hasSLSASpec.Origin != nil {
 		arangoQueryBuilder.filter("hasSLSA", origin, "==", "@"+origin)
-		queryValues[origin] = hasSLSASpec.Origin
+		queryValues[origin] = *hasSLSASpec.Origin
 	}
 	if hasSLSASpec.Collector != nil {
 		arangoQueryBuilder.filter("hasSLSA", collector, "==", "@"+collector)
-		queryValues[collector] = hasSLSASpec.Collector
+		queryValues[collector] = *hasSLSASpec.Collector
 	}
 	arangoQueryBuilder.forOutBound(hasSLSABuiltByEdgesStr, "build", "hasSLSA")
 	if hasSLSASpec.BuiltBy != nil {
-		arangoQueryBuilder.filter("build", "uri", "==", "@uri")
-		queryValues["uri"] = hasSLSASpec.BuiltBy.URI
+		if hasSLSASpec.BuiltBy.ID != nil {
+			arangoQueryBuilder.filter("build", "_id", "==", "@id")
+			queryValues["id"] = *hasSLSASpec.BuiltBy.ID
+		}
+		if hasSLSASpec.BuiltBy.URI != nil {
+			arangoQueryBuilder.filter("build", "uri", "==", "@uri")
+			queryValues["uri"] = *hasSLSASpec.BuiltBy.URI
+		}
 	}
 }
 
@@ -170,8 +173,16 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 	values["buildFromKeyList"] = builtFromKeyList
 	values[buildTypeStr] = slsa.BuildType
 	values[slsaVersionStr] = slsa.SlsaVersion
-	values[startedOnStr] = slsa.StartedOn.UTC()
-	values[finishedOnStr] = slsa.FinishedOn.UTC()
+	if slsa.StartedOn != nil {
+		values[startedOnStr] = slsa.StartedOn.UTC()
+	} else {
+		values[startedOnStr] = time.Unix(0, 0).UTC()
+	}
+	if slsa.FinishedOn != nil {
+		values[finishedOnStr] = slsa.FinishedOn.UTC()
+	} else {
+		values[finishedOnStr] = time.Unix(0, 0).UTC()
+	}
 	values[origin] = slsa.Origin
 	values[collector] = slsa.Collector
 
@@ -401,10 +412,16 @@ func getHasSLSAFromCursor(c *arangoClient, ctx context.Context, cursor driver.Cu
 				BuildType:     createdValue.BuildType,
 				SlsaPredicate: getCollectedPredicates(createdValue.SlsaPredicate),
 				SlsaVersion:   createdValue.SlsaVersion,
-				StartedOn:     createdValue.StartedOn,
-				FinishedOn:    createdValue.FinishedOn,
 				Origin:        createdValue.Origin,
 				Collector:     createdValue.Collector,
+			}
+
+			if !createdValue.StartedOn.Equal(time.Unix(0, 0).UTC()) {
+				slsa.StartedOn = createdValue.StartedOn
+			}
+
+			if !createdValue.FinishedOn.Equal(time.Unix(0, 0).UTC()) {
+				slsa.FinishedOn = createdValue.FinishedOn
 			}
 
 			hasSLSA := &model.HasSlsa{

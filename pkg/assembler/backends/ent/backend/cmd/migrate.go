@@ -25,7 +25,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	_, err := backend.SetupBackend(ctx, backend.BackendOptions{
+	_, err := backend.SetupBackend(ctx, &backend.BackendOptions{
 		AutoMigrate: true,
 		DriverName:  dialect.Postgres,
 		Address:     "postgres://localhost:5432/guac?sslmode=disable",

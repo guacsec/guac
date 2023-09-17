@@ -46,7 +46,7 @@ func TestIngestCertifyVulns(t *testing.T) {
 				{
 					Pkgs:         []*model.PkgInputSpec{testdata.P2},
 					Vulns:        []*model.VulnerabilityInputSpec{},
-					CertifyVulns: []*model.ScanMetadataInput{&model.ScanMetadataInput{}},
+					CertifyVulns: []*model.ScanMetadataInput{{}},
 				},
 			},
 			ExpIngestErr: true,
@@ -57,7 +57,23 @@ func TestIngestCertifyVulns(t *testing.T) {
 				{
 					Pkgs:         []*model.PkgInputSpec{},
 					Vulns:        []*model.VulnerabilityInputSpec{},
-					CertifyVulns: []*model.ScanMetadataInput{&model.ScanMetadataInput{}},
+					CertifyVulns: []*model.ScanMetadataInput{{}},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "Ingest vulnerability cve with novulnID",
+			Calls: []call{
+				{
+					Pkgs: []*model.PkgInputSpec{testdata.P2},
+					Vulns: []*model.VulnerabilityInputSpec{
+						{
+							Type:            "cve",
+							VulnerabilityID: "",
+						},
+					},
+					CertifyVulns: []*model.ScanMetadataInput{{}},
 				},
 			},
 			ExpIngestErr: true,
