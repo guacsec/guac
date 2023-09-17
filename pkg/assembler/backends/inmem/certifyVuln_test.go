@@ -622,7 +622,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 				if err != nil {
 					return
 				}
-				ids[i] = record.ID
+				ids[i] = record
 			}
 			if test.Query != nil {
 				if test.Query.ID != nil {
