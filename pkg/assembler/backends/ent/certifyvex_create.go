@@ -697,12 +697,16 @@ func (u *CertifyVexUpsertOne) IDX(ctx context.Context) int {
 // CertifyVexCreateBulk is the builder for creating many CertifyVex entities in bulk.
 type CertifyVexCreateBulk struct {
 	config
+	err      error
 	builders []*CertifyVexCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the CertifyVex entities in the database.
 func (cvcb *CertifyVexCreateBulk) Save(ctx context.Context) ([]*CertifyVex, error) {
+	if cvcb.err != nil {
+		return nil, cvcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(cvcb.builders))
 	nodes := make([]*CertifyVex, len(cvcb.builders))
 	mutators := make([]Mutator, len(cvcb.builders))
@@ -1016,6 +1020,9 @@ func (u *CertifyVexUpsertBulk) UpdateCollector() *CertifyVexUpsertBulk {
 
 // Exec executes the query.
 func (u *CertifyVexUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CertifyVexCreateBulk instead", i)
