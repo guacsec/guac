@@ -300,6 +300,8 @@ type arangoClient struct {
 	client driver.Client
 	db     driver.Database
 	graph  driver.Graph
+	// TODO Remove once https://github.com/guacsec/guac/issues/1197 is done
+	backends.Backend
 }
 
 func init() {

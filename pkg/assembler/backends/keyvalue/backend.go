@@ -183,6 +183,8 @@ type demoClient struct {
 	id uint32
 	m  sync.RWMutex
 	kv kv.Store
+	// TODO Remove once https://github.com/guacsec/guac/issues/1196 is done
+	backends.Backend
 }
 
 func getBackend(ctx context.Context, opts backends.BackendArgs) (backends.Backend, error) {
