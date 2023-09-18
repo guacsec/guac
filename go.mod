@@ -201,7 +201,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.21
 	github.com/nats-io/nats.go v1.28.0
-	github.com/openvex/go-vex v0.2.0
+	github.com/openvex/go-vex v0.2.1
 	github.com/ossf/scorecard/v4 v4.12.0
 	github.com/package-url/packageurl-go v0.1.1
 	github.com/pkg/errors v0.9.1
@@ -216,5 +216,3 @@ require (
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-replace github.com/openvex/go-vex => github.com/openvex/go-vex v0.2.1-0.20230519031452-e31eaf94ec95
