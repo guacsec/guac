@@ -103,6 +103,8 @@ type demoClient struct {
 	vexs                   vexList
 	vulnerabilityEquals    vulnerabilityEqualList
 	vulnerabilityMetadatas vulnerabilityMetadataList
+	// TODO Remove once https://github.com/guacsec/guac/issues/1196 is done
+	backends.Backend
 }
 
 func getBackend(_ context.Context, _ backends.BackendArgs) (backends.Backend, error) {
