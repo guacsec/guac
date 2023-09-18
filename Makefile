@@ -12,7 +12,7 @@ LOCAL_IMAGE_NAME ?= local-organic-guac
 .DEFAULT_GOAL := build
 
 .PHONY: all
-all: test cover fmt lint build generate dirty
+all: test cover fmt lint build generate
 
 # Run the unit tests
 .PHONY: test
@@ -98,7 +98,7 @@ build_bins:
 # Build bins and copy to ./bin to align with docs
 # Separate build_bins as its own target to ensure (workaround) goreleaser finish writing dist/artifacts.json
 .PHONY: build
-build: check-goreleaser-tool-check build_bins
+build: check-goreleaser-tool-check build_bins generate dirty
 	@mkdir -p bin
 	@echo "$(shell cat dist/artifacts.json | jq '.[]| { path: .path, name: .extra.ID } | join(" ")' -r)" | xargs -n 2 sh -c 'cp $$0 ./bin/$$1'
 	@echo "\nThe guac bins are available in ./bin"
