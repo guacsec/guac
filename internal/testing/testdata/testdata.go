@@ -18,8 +18,9 @@ package testdata
 import (
 	_ "embed"
 	"encoding/base64"
-	"encoding/json"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -137,6 +138,8 @@ var (
 	//go:embed exampledata/ingest_predicates.json
 	IngestPredicatesExample []byte
 
+	// json format
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// CycloneDX VEX testdata unaffected
 	pkg, _   = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.10.0?type=jar")
 	vulnSpec = &generated.VulnerabilityInputSpec{

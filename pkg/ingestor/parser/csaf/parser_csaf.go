@@ -17,8 +17,9 @@ package csaf
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -31,6 +32,7 @@ import (
 )
 
 var (
+	json              = jsoniter.ConfigCompatibleWithStandardLibrary
 	justificationsMap = map[string]generated.VexJustification{
 		"component_not_present":                             generated.VexJustificationComponentNotPresent,
 		"vulnerable_code_not_present":                       generated.VexJustificationVulnerableCodeNotPresent,

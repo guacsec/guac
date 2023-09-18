@@ -17,11 +17,12 @@ package cyclonedx
 
 import (
 	"context"
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"reflect"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
 	"github.com/guacsec/guac/pkg/assembler"
@@ -31,6 +32,8 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const topCdxPurlGuac string = "pkg:guac/cdx/"
 
