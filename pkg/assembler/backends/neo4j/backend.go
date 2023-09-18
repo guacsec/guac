@@ -49,6 +49,8 @@ type Neo4jConfig struct {
 
 type neo4jClient struct {
 	driver neo4j.Driver
+	// TODO Remove once https://github.com/guacsec/guac/issues/1199 is done
+	backends.Backend
 }
 
 func init() {
@@ -70,7 +72,7 @@ func getBackend(_ context.Context, args backends.BackendArgs) (backends.Backend,
 		driver.Close()
 		return nil, err
 	}
-	client := &neo4jClient{driver}
+	client := &neo4jClient{driver: driver}
 	/* if config.TestData {
 		err = registerAllPackages(client)
 		if err != nil {
