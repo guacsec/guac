@@ -17,11 +17,12 @@ package osv
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
@@ -32,6 +33,8 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/version"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	URI         string = "osv.dev"

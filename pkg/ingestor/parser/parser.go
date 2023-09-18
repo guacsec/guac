@@ -17,8 +17,9 @@ package parser
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 
 	uuid "github.com/gofrs/uuid"
 
@@ -37,6 +38,8 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 	"github.com/guacsec/guac/pkg/logging"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func init() {
 	_ = RegisterDocumentParser(dsse.NewDSSEParser, processor.DocumentDSSE)

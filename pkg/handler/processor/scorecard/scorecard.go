@@ -16,12 +16,15 @@
 package scorecard
 
 import (
-	"encoding/json"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // ScorecardProcessor processes Scorecard documents.
 // Currently only supports JSON Scorecard documents

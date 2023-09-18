@@ -55,6 +55,20 @@ func (n *srcMapLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest HasSourceAt
+
+func (c *demoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType *model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
+	var modelHasMetadataIDs []string
+
+	for i := range hasSourceAts {
+		hasMetadata, err := c.IngestHasSourceAt(ctx, *pkgs[i], *pkgMatchType, *sources[i], *hasSourceAts[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestHasSourceAt failed with err: %v", err)
+		}
+		modelHasMetadataIDs = append(modelHasMetadataIDs, hasMetadata.ID)
+	}
+	return modelHasMetadataIDs, nil
+}
+
 func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	return c.ingestHasSourceAt(ctx, packageArg, pkgMatchType, source, hasSourceAt, true)
 }

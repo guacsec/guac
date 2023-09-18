@@ -286,7 +286,7 @@ func ingestVulnEqual(ctx context.Context, client graphql.Client, ve assembler.Vu
 }
 
 func hasSourceAt(ctx context.Context, client graphql.Client, hsa assembler.HasSourceAtIngest) error {
-	_, err := model.HasSourceAt(ctx, client, *hsa.Pkg, hsa.PkgMatchFlag, *hsa.Src, *hsa.HasSourceAt)
+	_, err := model.IngestHasSourceAt(ctx, client, *hsa.Pkg, hsa.PkgMatchFlag, *hsa.Src, *hsa.HasSourceAt)
 	return err
 }
 

@@ -2156,7 +2156,7 @@ func ingestHasSourceAt(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestSource(ctx, client, ingest.source); err != nil {
 			logger.Errorf("Error in ingesting source: %v\n", err)
 		}
-		if _, err := model.HasSourceAt(ctx, client, ingest.pkg, ingest.pkgMatchType, ingest.source, ingest.hasSourceAt); err != nil {
+		if _, err := model.IngestHasSourceAt(ctx, client, ingest.pkg, ingest.pkgMatchType, ingest.source, ingest.hasSourceAt); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}
@@ -2921,7 +2921,7 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 		if _, err := model.IsOccurrencePkg(ctx, client, ingest.depPkgWithVersion, ingest.art, ingest.occurrence); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
-		if _, err := model.HasSourceAt(ctx, client, ingest.depPkgWithVersion, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, ingest.source, ingest.hasSourceAt); err != nil {
+		if _, err := model.IngestHasSourceAt(ctx, client, ingest.depPkgWithVersion, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, ingest.source, ingest.hasSourceAt); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 		if _, err := model.IsOccurrenceSrc(ctx, client, ingest.source, ingest.sourceArt, ingest.sourceOccurrence); err != nil {

@@ -19,7 +19,7 @@ import (
 	"bytes"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/spdx/tools-golang/json"
+	jsonReader "github.com/spdx/tools-golang/json"
 )
 
 type spdxTypeGuesser struct{}
@@ -27,7 +27,7 @@ type spdxTypeGuesser struct{}
 func (_ *spdxTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	switch format {
 	case processor.FormatJSON:
-		spdxDoc, err := json.Read(bytes.NewReader(blob))
+		spdxDoc, err := jsonReader.Read(bytes.NewReader(blob))
 		if err == nil {
 			// This is set to check for DocumentNamespace since there seem to
 			// be some SBOMs in the wild that don't use certain fields like

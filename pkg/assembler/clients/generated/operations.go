@@ -7403,15 +7403,6 @@ func (v *HasSourceAtInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns HasSourceAtInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HasSourceAtInputSpec) GetCollector() string { return v.Collector }
 
-// HasSourceAtResponse is returned by HasSourceAt on success.
-type HasSourceAtResponse struct {
-	// Adds a certification that a package (PackageName or PackageVersion) is built from the source. The returned ID can be empty string.
-	IngestHasSourceAt string `json:"ingestHasSourceAt"`
-}
-
-// GetIngestHasSourceAt returns HasSourceAtResponse.IngestHasSourceAt, and is useful for accessing the field via an interface.
-func (v *HasSourceAtResponse) GetIngestHasSourceAt() string { return v.IngestHasSourceAt }
-
 // HashEqualInputSpec represents the input to certify that packages are similar.
 type HashEqualInputSpec struct {
 	Justification string `json:"justification"`
@@ -7463,6 +7454,24 @@ type IngestBuildersResponse struct {
 
 // GetIngestBuilders returns IngestBuildersResponse.IngestBuilders, and is useful for accessing the field via an interface.
 func (v *IngestBuildersResponse) GetIngestBuilders() []string { return v.IngestBuilders }
+
+// IngestHasSourceAtResponse is returned by IngestHasSourceAt on success.
+type IngestHasSourceAtResponse struct {
+	// Adds a certification that a package (PackageName or PackageVersion) is built from the source. The returned ID can be empty string.
+	IngestHasSourceAt string `json:"ingestHasSourceAt"`
+}
+
+// GetIngestHasSourceAt returns IngestHasSourceAtResponse.IngestHasSourceAt, and is useful for accessing the field via an interface.
+func (v *IngestHasSourceAtResponse) GetIngestHasSourceAt() string { return v.IngestHasSourceAt }
+
+// IngestHasSourceAtsResponse is returned by IngestHasSourceAts on success.
+type IngestHasSourceAtsResponse struct {
+	// Bulk ingestion of certifications that a package (PackageName or PackageVersion) is built from the source. The returned array of IDs can be a an array of empty string.
+	IngestHasSourceAts []string `json:"ingestHasSourceAts"`
+}
+
+// GetIngestHasSourceAts returns IngestHasSourceAtsResponse.IngestHasSourceAts, and is useful for accessing the field via an interface.
+func (v *IngestHasSourceAtsResponse) GetIngestHasSourceAts() []string { return v.IngestHasSourceAts }
 
 // IngestHashEqualResponse is returned by IngestHashEqual on success.
 type IngestHashEqualResponse struct {
@@ -21369,26 +21378,6 @@ func (v *__HasSBOMPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
 // GetHasSBOMs returns __HasSBOMPkgsInput.HasSBOMs, and is useful for accessing the field via an interface.
 func (v *__HasSBOMPkgsInput) GetHasSBOMs() []HasSBOMInputSpec { return v.HasSBOMs }
 
-// __HasSourceAtInput is used internally by genqlient
-type __HasSourceAtInput struct {
-	Pkg          PkgInputSpec         `json:"pkg"`
-	PkgMatchType MatchFlags           `json:"pkgMatchType"`
-	Source       SourceInputSpec      `json:"source"`
-	HasSourceAt  HasSourceAtInputSpec `json:"hasSourceAt"`
-}
-
-// GetPkg returns __HasSourceAtInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__HasSourceAtInput) GetPkg() PkgInputSpec { return v.Pkg }
-
-// GetPkgMatchType returns __HasSourceAtInput.PkgMatchType, and is useful for accessing the field via an interface.
-func (v *__HasSourceAtInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
-
-// GetSource returns __HasSourceAtInput.Source, and is useful for accessing the field via an interface.
-func (v *__HasSourceAtInput) GetSource() SourceInputSpec { return v.Source }
-
-// GetHasSourceAt returns __HasSourceAtInput.HasSourceAt, and is useful for accessing the field via an interface.
-func (v *__HasSourceAtInput) GetHasSourceAt() HasSourceAtInputSpec { return v.HasSourceAt }
-
 // __IngestArtifactInput is used internally by genqlient
 type __IngestArtifactInput struct {
 	Artifact ArtifactInputSpec `json:"artifact"`
@@ -21420,6 +21409,46 @@ type __IngestBuildersInput struct {
 
 // GetBuilders returns __IngestBuildersInput.Builders, and is useful for accessing the field via an interface.
 func (v *__IngestBuildersInput) GetBuilders() []BuilderInputSpec { return v.Builders }
+
+// __IngestHasSourceAtInput is used internally by genqlient
+type __IngestHasSourceAtInput struct {
+	Pkg          PkgInputSpec         `json:"pkg"`
+	PkgMatchType MatchFlags           `json:"pkgMatchType"`
+	Source       SourceInputSpec      `json:"source"`
+	HasSourceAt  HasSourceAtInputSpec `json:"hasSourceAt"`
+}
+
+// GetPkg returns __IngestHasSourceAtInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__IngestHasSourceAtInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetPkgMatchType returns __IngestHasSourceAtInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__IngestHasSourceAtInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
+
+// GetSource returns __IngestHasSourceAtInput.Source, and is useful for accessing the field via an interface.
+func (v *__IngestHasSourceAtInput) GetSource() SourceInputSpec { return v.Source }
+
+// GetHasSourceAt returns __IngestHasSourceAtInput.HasSourceAt, and is useful for accessing the field via an interface.
+func (v *__IngestHasSourceAtInput) GetHasSourceAt() HasSourceAtInputSpec { return v.HasSourceAt }
+
+// __IngestHasSourceAtsInput is used internally by genqlient
+type __IngestHasSourceAtsInput struct {
+	Pkgs         []PkgInputSpec         `json:"pkgs"`
+	PkgMatchType MatchFlags             `json:"pkgMatchType"`
+	Sources      []SourceInputSpec      `json:"sources"`
+	HasSourceAts []HasSourceAtInputSpec `json:"hasSourceAts"`
+}
+
+// GetPkgs returns __IngestHasSourceAtsInput.Pkgs, and is useful for accessing the field via an interface.
+func (v *__IngestHasSourceAtsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+
+// GetPkgMatchType returns __IngestHasSourceAtsInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__IngestHasSourceAtsInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
+
+// GetSources returns __IngestHasSourceAtsInput.Sources, and is useful for accessing the field via an interface.
+func (v *__IngestHasSourceAtsInput) GetSources() []SourceInputSpec { return v.Sources }
+
+// GetHasSourceAts returns __IngestHasSourceAtsInput.HasSourceAts, and is useful for accessing the field via an interface.
+func (v *__IngestHasSourceAtsInput) GetHasSourceAts() []HasSourceAtInputSpec { return v.HasSourceAts }
 
 // __IngestHashEqualInput is used internally by genqlient
 type __IngestHashEqualInput struct {
@@ -23532,45 +23561,6 @@ func HasSBOMPkgs(
 	return &data, err
 }
 
-// The query or mutation executed by HasSourceAt.
-const HasSourceAt_Operation = `
-mutation HasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
-	ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt)
-}
-`
-
-func HasSourceAt(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	pkgMatchType MatchFlags,
-	source SourceInputSpec,
-	hasSourceAt HasSourceAtInputSpec,
-) (*HasSourceAtResponse, error) {
-	req := &graphql.Request{
-		OpName: "HasSourceAt",
-		Query:  HasSourceAt_Operation,
-		Variables: &__HasSourceAtInput{
-			Pkg:          pkg,
-			PkgMatchType: pkgMatchType,
-			Source:       source,
-			HasSourceAt:  hasSourceAt,
-		},
-	}
-	var err error
-
-	var data HasSourceAtResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
 // The query or mutation executed by IngestArtifact.
 const IngestArtifact_Operation = `
 mutation IngestArtifact ($artifact: ArtifactInputSpec!) {
@@ -23692,6 +23682,84 @@ func IngestBuilders(
 	var err error
 
 	var data IngestBuildersResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestHasSourceAt.
+const IngestHasSourceAt_Operation = `
+mutation IngestHasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
+	ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt)
+}
+`
+
+func IngestHasSourceAt(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	pkgMatchType MatchFlags,
+	source SourceInputSpec,
+	hasSourceAt HasSourceAtInputSpec,
+) (*IngestHasSourceAtResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestHasSourceAt",
+		Query:  IngestHasSourceAt_Operation,
+		Variables: &__IngestHasSourceAtInput{
+			Pkg:          pkg,
+			PkgMatchType: pkgMatchType,
+			Source:       source,
+			HasSourceAt:  hasSourceAt,
+		},
+	}
+	var err error
+
+	var data IngestHasSourceAtResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by IngestHasSourceAts.
+const IngestHasSourceAts_Operation = `
+mutation IngestHasSourceAts ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $sources: [SourceInputSpec!]!, $hasSourceAts: [HasSourceAtInputSpec!]!) {
+	ingestHasSourceAts(pkgs: $pkgs, pkgMatchType: $pkgMatchType, sources: $sources, hasSourceAts: $hasSourceAts)
+}
+`
+
+func IngestHasSourceAts(
+	ctx context.Context,
+	client graphql.Client,
+	pkgs []PkgInputSpec,
+	pkgMatchType MatchFlags,
+	sources []SourceInputSpec,
+	hasSourceAts []HasSourceAtInputSpec,
+) (*IngestHasSourceAtsResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestHasSourceAts",
+		Query:  IngestHasSourceAts_Operation,
+		Variables: &__IngestHasSourceAtsInput{
+			Pkgs:         pkgs,
+			PkgMatchType: pkgMatchType,
+			Sources:      sources,
+			HasSourceAts: hasSourceAts,
+		},
+	}
+	var err error
+
+	var data IngestHasSourceAtsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

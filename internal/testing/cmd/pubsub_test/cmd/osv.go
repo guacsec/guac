@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"

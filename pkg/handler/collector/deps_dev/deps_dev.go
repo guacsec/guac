@@ -18,10 +18,11 @@ package deps_dev
 import (
 	"context"
 	"crypto/x509"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
@@ -33,6 +34,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	DepsCollector = "deps.dev"
