@@ -540,12 +540,16 @@ func (u *OccurrenceUpsertOne) IDX(ctx context.Context) int {
 // OccurrenceCreateBulk is the builder for creating many Occurrence entities in bulk.
 type OccurrenceCreateBulk struct {
 	config
+	err      error
 	builders []*OccurrenceCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Occurrence entities in the database.
 func (ocb *OccurrenceCreateBulk) Save(ctx context.Context) ([]*Occurrence, error) {
+	if ocb.err != nil {
+		return nil, ocb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ocb.builders))
 	nodes := make([]*Occurrence, len(ocb.builders))
 	mutators := make([]Mutator, len(ocb.builders))
@@ -803,6 +807,9 @@ func (u *OccurrenceUpsertBulk) ClearPackageID() *OccurrenceUpsertBulk {
 
 // Exec executes the query.
 func (u *OccurrenceUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the OccurrenceCreateBulk instead", i)
