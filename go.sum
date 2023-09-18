@@ -497,8 +497,8 @@ github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3I
 github.com/opencontainers/image-spec v1.1.0-rc3 h1:fzg1mXZFj8YdPeNkRXMg+zb88BFV0Ys52cJydRwBkb8=
 github.com/opencontainers/image-spec v1.1.0-rc3/go.mod h1:X4pATf0uXsnn3g5aiGIsVnJBR4mxhKzfwmvK/B2NTm8=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
-github.com/openvex/go-vex v0.2.1 h1:OiZlTwYnT7jQjv68JRk+CmEcz+YAQhNQkJxg6kSkvuc=
-github.com/openvex/go-vex v0.2.1/go.mod h1:BkkoLLIZxS5D8yDKM9pe6eRDHF00H2PuqNBnOxaExz0=
+github.com/openvex/go-vex v0.2.5 h1:41utdp2rHgAGCsG+UbjmfMG5CWQxs15nGqir1eRgSrQ=
+github.com/openvex/go-vex v0.2.5/go.mod h1:j+oadBxSUELkrKh4NfNb+BPo77U3q7gdKME88IO/0Wo=
 github.com/ossf/scorecard/v4 v4.12.0 h1:fEk45FVb9/Xj6ehMQM5StmzVQvLyYtXlnjeY/EHHyr0=
 github.com/ossf/scorecard/v4 v4.12.0/go.mod h1:iIomr5tcWRa3xTseaBSgTZ3YwPCubX+4mc/5APag9S8=
 github.com/package-url/packageurl-go v0.1.1 h1:KTRE0bK3sKbFKAk3yy63DpeskU7Cvs/x/Da5l+RtzyU=
