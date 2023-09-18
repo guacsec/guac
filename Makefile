@@ -12,7 +12,7 @@ LOCAL_IMAGE_NAME ?= local-organic-guac
 .DEFAULT_GOAL := build
 
 .PHONY: all
-all: test cover fmt lint build generate
+all: test cover fmt lint build generate dirty
 
 # Run the unit tests
 .PHONY: test
@@ -188,6 +188,14 @@ check-mockgen-tool-check:
 check-goreleaser-tool-check:
 	@if ! command -v goreleaser >/dev/null 2>&1; then \
 		echo "goreleaser is not installed. Please install goreleaser and try again."; \
+		exit 1; \
+	fi
+
+.PHONY: dirty
+dirty:
+	@echo "Checking for uncommitted changes"
+	@if ! git diff-index --quiet HEAD --; then \
+		echo "There are uncommitted changes. Please commit or stash them and try again."; \
 		exit 1; \
 	fi
 
