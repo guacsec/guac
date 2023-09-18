@@ -594,12 +594,16 @@ func (u *HasSourceAtUpsertOne) IDX(ctx context.Context) int {
 // HasSourceAtCreateBulk is the builder for creating many HasSourceAt entities in bulk.
 type HasSourceAtCreateBulk struct {
 	config
+	err      error
 	builders []*HasSourceAtCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the HasSourceAt entities in the database.
 func (hsacb *HasSourceAtCreateBulk) Save(ctx context.Context) ([]*HasSourceAt, error) {
+	if hsacb.err != nil {
+		return nil, hsacb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(hsacb.builders))
 	nodes := make([]*HasSourceAt, len(hsacb.builders))
 	mutators := make([]Mutator, len(hsacb.builders))
@@ -871,6 +875,9 @@ func (u *HasSourceAtUpsertBulk) UpdateCollector() *HasSourceAtUpsertBulk {
 
 // Exec executes the query.
 func (u *HasSourceAtUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the HasSourceAtCreateBulk instead", i)

@@ -17,11 +17,12 @@ package neptune
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -29,6 +30,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const neptuneServiceName = "neptune-db"
 

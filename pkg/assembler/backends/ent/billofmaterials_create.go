@@ -596,12 +596,16 @@ func (u *BillOfMaterialsUpsertOne) IDX(ctx context.Context) int {
 // BillOfMaterialsCreateBulk is the builder for creating many BillOfMaterials entities in bulk.
 type BillOfMaterialsCreateBulk struct {
 	config
+	err      error
 	builders []*BillOfMaterialsCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the BillOfMaterials entities in the database.
 func (bomcb *BillOfMaterialsCreateBulk) Save(ctx context.Context) ([]*BillOfMaterials, error) {
+	if bomcb.err != nil {
+		return nil, bomcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(bomcb.builders))
 	nodes := make([]*BillOfMaterials, len(bomcb.builders))
 	mutators := make([]Mutator, len(bomcb.builders))
@@ -887,6 +891,9 @@ func (u *BillOfMaterialsUpsertBulk) UpdateCollector() *BillOfMaterialsUpsertBulk
 
 // Exec executes the query.
 func (u *BillOfMaterialsUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BillOfMaterialsCreateBulk instead", i)

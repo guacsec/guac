@@ -121,6 +121,13 @@ const (
 	hasSBOMArtEdgesStr string = "hasSBOMArtEdges"
 	hasSBOMsStr        string = "hasSBOMs"
 
+	// hasSourceAt collection
+
+	hasSourceAtPkgVersionEdgesStr string = "hasSourceAtPkgVersionEdges"
+	hasSourceAtPkgNameEdgesStr    string = "hasSourceAtPkgNameEdges"
+	hasSourceAtEdgesStr           string = "hasSourceAtEdges"
+	hasSourceAtsStr               string = "hasSourceAts"
+
 	// certifyVex collection
 
 	certifyVexPkgEdgesStr  string = "certifyVexPkgEdges"
@@ -129,6 +136,7 @@ const (
 	certifyVEXsStr         string = "certifyVEXs"
 
 	// certifyVuln collection
+
 	certifyVulnPkgEdgesStr string = "certifyVulnPkgEdges"
 	certifyVulnEdgesStr    string = "certifyVulnEdges"
 	certifyVulnsStr        string = "certifyVulns"
@@ -428,6 +436,22 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		hasSBOMArtEdges.From = []string{artifactsStr}
 		hasSBOMArtEdges.To = []string{hasSBOMsStr}
 
+		// setup hasSourceAt collections
+		var hasSourceAtPkgVersionEdges driver.EdgeDefinition
+		hasSourceAtPkgVersionEdges.Collection = hasSourceAtPkgVersionEdgesStr
+		hasSourceAtPkgVersionEdges.From = []string{pkgVersionsStr}
+		hasSourceAtPkgVersionEdges.To = []string{hasSourceAtsStr}
+
+		var hasSourceAtPkgNameEdges driver.EdgeDefinition
+		hasSourceAtPkgNameEdges.Collection = hasSourceAtPkgNameEdgesStr
+		hasSourceAtPkgNameEdges.From = []string{pkgNamesStr}
+		hasSourceAtPkgNameEdges.To = []string{hasSourceAtsStr}
+
+		var hasSourceAtEdges driver.EdgeDefinition
+		hasSourceAtEdges.Collection = hasSourceAtEdgesStr
+		hasSourceAtEdges.From = []string{hasSourceAtsStr}
+		hasSourceAtEdges.To = []string{srcNamesStr}
+
 		// setup certifyVex collections
 		var certifyVexPkgEdges driver.EdgeDefinition
 		certifyVexPkgEdges.Collection = certifyVexPkgEdgesStr
@@ -542,7 +566,7 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges,
 			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges, hasMetadataPkgVersionEdges, hasMetadataPkgNameEdges,
 			hasMetadataArtEdges, hasMetadataSrcEdges, pointOfContactPkgVersionEdges, pointOfContactPkgNameEdges,
-			pointOfContactArtEdges, pointOfContactSrcEdges}
+			pointOfContactArtEdges, pointOfContactSrcEdges, hasSourceAtEdges, hasSourceAtPkgVersionEdges, hasSourceAtPkgNameEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -886,18 +910,6 @@ func getPreloadString(prefix, name string) string {
 		return prefix + "." + name
 	}
 	return name
-}
-
-// Retrieval read-only queries for evidence trees
-
-func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
-	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
-}
-
-// Mutations for evidence trees (read-write queries, assume software trees ingested)
-
-func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
-	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type

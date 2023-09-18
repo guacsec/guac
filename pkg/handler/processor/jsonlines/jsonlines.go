@@ -16,12 +16,15 @@
 package jsonlines
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type JsonLinesProcessor struct{}
 

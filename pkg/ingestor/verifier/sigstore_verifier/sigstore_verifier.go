@@ -19,8 +19,9 @@ import (
 	"bytes"
 	"context"
 	"crypto"
-	"encoding/json"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/ingestor/key"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
@@ -29,6 +30,8 @@ import (
 	"github.com/sigstore/sigstore/pkg/signature"
 	sig_dsse "github.com/sigstore/sigstore/pkg/signature/dsse"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type sigstoreVerifier struct {
 }
