@@ -200,6 +200,7 @@ type ComplexityRoot struct {
 		IngestHasSBOMs                  func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
 		IngestHasSbom                   func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt               func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
+		IngestHasSourceAts              func(childComplexity int, pkgs []*model.PkgInputSpec, pkgMatchType model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) int
 		IngestHashEqual                 func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestHashEquals                func(childComplexity int, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) int
 		IngestLicense                   func(childComplexity int, license *model.LicenseInputSpec) int
@@ -1296,6 +1297,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestHasSourceAt(childComplexity, args["pkg"].(model.PkgInputSpec), args["pkgMatchType"].(model.MatchFlags), args["source"].(model.SourceInputSpec), args["hasSourceAt"].(model.HasSourceAtInputSpec)), true
+
+	case "Mutation.ingestHasSourceAts":
+		if e.complexity.Mutation.IngestHasSourceAts == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHasSourceAts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHasSourceAts(childComplexity, args["pkgs"].([]*model.PkgInputSpec), args["pkgMatchType"].(model.MatchFlags), args["sources"].([]*model.SourceInputSpec), args["hasSourceAts"].([]*model.HasSourceAtInputSpec)), true
 
 	case "Mutation.ingestHashEqual":
 		if e.complexity.Mutation.IngestHashEqual == nil {
@@ -3938,6 +3951,13 @@ extend type Mutation {
     source: SourceInputSpec!
     hasSourceAt: HasSourceAtInputSpec!
   ): ID!
+  "Bulk ingestion of certifications that a package (PackageName or PackageVersion) is built from the source. The returned array of IDs can be a an array of empty string."
+  ingestHasSourceAts(
+    pkgs: [PkgInputSpec!]!
+    pkgMatchType: MatchFlags!
+    sources: [SourceInputSpec!]!
+    hasSourceAts: [HasSourceAtInputSpec!]!
+  ):[ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hashEqual.graphql", Input: `#
