@@ -42,7 +42,7 @@ jobs:
         ports:
           - 7687:7687
       postgres:
-        image: postgres
+        image: postgres:15.4
         env:
           POSTGRES_USER: guac
           POSTGRES_PASSWORD: guac
