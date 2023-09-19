@@ -2143,6 +2143,80 @@ var (
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 
+	// OpenVEX
+
+	//go:embed exampledata/open-vex-not-affected.json
+	NotAffectedOpenVEXExample []byte
+
+	NotAffectedOpenVexIngest = []assembler.VexIngest{
+		{
+			Pkg: &generated.PkgInputSpec{
+				Name:      "git",
+				Version:   strP("sha256:23a264e6e429852221a963e9f17338ba3f5796dc7086e46439a6f4482cf6e0cb"),
+				Namespace: strP(""),
+				Type:      "oci",
+				Subpath:   strP(""),
+			},
+			Artifact: nil,
+			Vulnerability: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-2023-12345",
+			},
+			VexData: &generated.VexStatementInputSpec{
+				KnownSince:       parseRfc3339("2023-01-09T21:23:03.579712389-06:00"),
+				Origin:           "https://openvex.dev/docs/public/vex-a06f9de1ad1b1e555a33b2d0c1e7e6ecc4dc1800ff457c61ea09d8e97670d2a3",
+				VexJustification: generated.VexJustificationInlineMitigationsAlreadyExist,
+				Status:           generated.VexStatusNotAffected,
+				Statement:        "Included git is mitigated against CVE-2023-12345 !",
+			},
+		},
+	}
+
+	//go:embed exampledata/open-vex-affected.json
+	AffectedOpenVex []byte
+
+	AffectedOpenVexIngest = []assembler.VexIngest{
+		{
+			Pkg: &generated.PkgInputSpec{
+				Name:      "bash",
+				Version:   strP("1.0.0"),
+				Namespace: strP("wolfi"),
+				Type:      "apk",
+				Subpath:   strP(""),
+			},
+			Artifact: nil,
+			Vulnerability: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-1234-5678",
+			},
+			VexData: &generated.VexStatementInputSpec{
+				KnownSince: parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
+				Origin:     "merged-vex-67124ea942ef30e1f42f3f2bf405fbbc4f5a56e6e87684fc5cd957212fa3e025",
+				Status:     generated.VexStatusAffected,
+				Statement:  "This is a test action statement",
+			},
+		},
+	}
+
+	AffectedOpenVEXCertifyVulnIngest = []assembler.CertifyVulnIngest{
+		{
+			Pkg: &generated.PkgInputSpec{
+				Name:      "bash",
+				Version:   strP("1.0.0"),
+				Namespace: strP("wolfi"),
+				Type:      "apk",
+				Subpath:   strP(""),
+			},
+			Vulnerability: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-1234-5678",
+			},
+			VulnData: &generated.ScanMetadataInput{
+				TimeScanned: parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
+			},
+		},
+	}
+
 	// CSAF
 	//go:embed exampledata/rhsa-csaf.json
 	CsafExampleRedHat []byte
