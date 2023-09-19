@@ -16,8 +16,6 @@
 package guesser
 
 import (
-	json "github.com/json-iterator/go"
-
 	"github.com/openvex/go-vex/pkg/vex"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
