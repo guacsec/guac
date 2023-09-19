@@ -477,48 +477,6 @@ func (s *Suite) TestCertifyBad() {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Ingest with two subjects",
-			InSrc: []*model.SourceInputSpec{s1},
-			InArt: []*model.ArtifactInputSpec{a1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source:   s1,
-						Artifact: a1,
-					},
-					CB: &model.CertifyBadInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name:  "Query with two subjects",
-			InSrc: []*model.SourceInputSpec{s1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source: s1,
-					},
-					CB: &model.CertifyBadInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.CertifyBadSpec{
-				Subject: &model.PackageSourceOrArtifactSpec{
-					Package: &model.PkgSpec{
-						Version: ptrfrom.String("2.11.1"),
-					},
-					Artifact: &model.ArtifactSpec{
-						Algorithm: ptrfrom.String("asdf"),
-					},
-				},
-			},
-			ExpQueryErr: true,
-		},
-		{
 			Name:  "Query bad ID",
 			InSrc: []*model.SourceInputSpec{s1},
 			Calls: []call{
@@ -603,6 +561,292 @@ func (s *Suite) TestCertifyBad() {
 				return
 			}
 			if diff := cmp.Diff(test.ExpCB, got, ignoreID, ignoreEmptySlices); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func (s *Suite) TestIngestCertifyBads() {
+	type call struct {
+		Sub   model.PackageSourceOrArtifactInputs
+		Match *model.MatchFlags
+		CB    []*model.CertifyBadInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		Query        *model.CertifyBadSpec
+		ExpCB        []*model.CertifyBad
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpCB: []*model.CertifyBad{
+				&model.CertifyBad{
+					Subject:       p1out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "HappyPath All Version",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				call{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeAllVersions,
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpCB: []*model.CertifyBad{
+				&model.CertifyBad{
+					Subject:       p1outName,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Ingest same twice",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpCB: []*model.CertifyBad{
+				&model.CertifyBad{
+					Subject:       p1out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{p1, p2},
+			InSrc: []*model.SourceInputSpec{s1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p2},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s1},
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String("2.11.1"),
+					},
+				},
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       p2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Source",
+			InPkg: []*model.PkgInputSpec{p1},
+			InSrc: []*model.SourceInputSpec{s1, s2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s2, s2},
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Source: &model.SourceSpec{
+						Name: ptrfrom.String("bobsrepo"),
+					},
+				},
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       s2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Artifact",
+			InSrc: []*model.SourceInputSpec{s1},
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Artifacts: []*model.ArtifactInputSpec{a1, a2},
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s1},
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Artifact: &model.ArtifactSpec{
+						Algorithm: ptrfrom.String("sha1"),
+					},
+				},
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       a2out,
+					Justification: "test justification",
+				},
+			},
+		},
+	}
+	ctx := s.Ctx
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestCertifyBads(ctx, o.Sub, o.Match, o.CB)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.CertifyBad(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpCB, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -1061,48 +1305,6 @@ func (s *Suite) TestCertifyGood() {
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Ingest with two subjects",
-			InSrc: []*model.SourceInputSpec{s1},
-			InArt: []*model.ArtifactInputSpec{a1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source:   s1,
-						Artifact: a1,
-					},
-					CG: &model.CertifyGoodInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name:  "Query with two subjects",
-			InSrc: []*model.SourceInputSpec{s1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source: s1,
-					},
-					CG: &model.CertifyGoodInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.CertifyGoodSpec{
-				Subject: &model.PackageSourceOrArtifactSpec{
-					Package: &model.PkgSpec{
-						Version: ptrfrom.String("2.11.1"),
-					},
-					Artifact: &model.ArtifactSpec{
-						Algorithm: ptrfrom.String("asdf"),
-					},
-				},
-			},
-			ExpQueryErr: true,
-		},
-		{
 			Name:  "Query good ID",
 			InSrc: []*model.SourceInputSpec{s1},
 			Calls: []call{
@@ -1185,6 +1387,292 @@ func (s *Suite) TestCertifyGood() {
 				return
 			}
 			if diff := cmp.Diff(test.ExpCG, got, ignoreID, ignoreEmptySlices); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func (s *Suite) TestIngestCertifyGoods() {
+	type call struct {
+		Sub   model.PackageSourceOrArtifactInputs
+		Match *model.MatchFlags
+		CG    []*model.CertifyGoodInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		Query        *model.CertifyGoodSpec
+		ExpCG        []*model.CertifyGood
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       p1out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "HappyPath All Version",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeAllVersions,
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       p1outName,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Ingest same twice",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       p1out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{p1, p2},
+			InSrc: []*model.SourceInputSpec{s1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p2},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s1},
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String("2.11.1"),
+					},
+				},
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       p2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Source",
+			InPkg: []*model.PkgInputSpec{p1},
+			InSrc: []*model.SourceInputSpec{s1, s2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s2, s2},
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Source: &model.SourceSpec{
+						Name: ptrfrom.String("bobsrepo"),
+					},
+				},
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       s2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Artifact",
+			InSrc: []*model.SourceInputSpec{s1},
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Artifacts: []*model.ArtifactInputSpec{a1, a2},
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s1},
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Artifact: &model.ArtifactSpec{
+						Algorithm: ptrfrom.String("sha1"),
+					},
+				},
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       a2out,
+					Justification: "test justification",
+				},
+			},
+		},
+	}
+	ctx := s.Ctx
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestCertifyGoods(ctx, o.Sub, o.Match, o.CG)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.CertifyGood(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpCG, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
