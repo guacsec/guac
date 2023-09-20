@@ -31,7 +31,7 @@ func (c *arangoClient) Neighbors(ctx context.Context, source string, usingOnly [
 }
 
 func (c *arangoClient) Node(ctx context.Context, source string) (model.Node, error) {
-	return c.buildPackageResponse(ctx, source, nil)
+	panic(fmt.Errorf("not implemented: Neighbors"))
 }
 
 func (c *arangoClient) Nodes(ctx context.Context, ids []string) ([]model.Node, error) {

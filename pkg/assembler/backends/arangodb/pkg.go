@@ -667,83 +667,6 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 	return packages, nil
 }
 
-// Builds a model.Package to send as GraphQL response, starting from id.
-// The optional filter allows restricting output (on selection operations).
-func (c *arangoClient) buildPackageResponse(ctx context.Context, id string, filter *model.PkgSpec) (*model.Package, error) {
-	if filter != nil && filter.ID != nil {
-		if *filter.ID != id {
-			return nil, fmt.Errorf("ID does not match filter")
-		}
-	}
-
-	idSplit := strings.Split(id, "/")
-	if len(idSplit) != 2 {
-		return nil, fmt.Errorf("invalid ID: %s", id)
-	}
-
-	pvl := []*model.PackageVersion{}
-	if idSplit[0] == pkgVersionsStr {
-		var foundPkgVersion *model.PackageVersion
-		var err error
-
-		foundPkgVersion, id, err = c.queryPkgVersionNodeByID(ctx, id, filter)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get pkg version node by ID with error: %w", err)
-		}
-		pvl = append(pvl, foundPkgVersion)
-	}
-
-	idSplit = strings.Split(id, "/")
-	if len(idSplit) != 2 {
-		return nil, fmt.Errorf("invalid ID: %s", id)
-	}
-
-	pnl := []*model.PackageName{}
-	if idSplit[0] == pkgNamesStr {
-		var foundPkgName *model.PackageName
-		var err error
-
-		foundPkgName, id, err = c.queryPkgNameNodeByID(ctx, id, filter, pvl)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get pkg name node by ID with error: %w", err)
-		}
-		pnl = append(pnl, foundPkgName)
-	}
-
-	idSplit = strings.Split(id, "/")
-	if len(idSplit) != 2 {
-		return nil, fmt.Errorf("invalid ID: %s", id)
-	}
-
-	pnsl := []*model.PackageNamespace{}
-	if idSplit[0] == pkgNamespacesStr {
-		var foundPkgNamespace *model.PackageNamespace
-		var err error
-
-		foundPkgNamespace, id, err = c.queryPkgNamespaceNodeByID(ctx, id, filter, pnl)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get pkg namespace node by ID with error: %w", err)
-		}
-		pnsl = append(pnsl, foundPkgNamespace)
-	}
-
-	idSplit = strings.Split(id, "/")
-	if len(idSplit) != 2 {
-		return nil, fmt.Errorf("invalid ID: %s", id)
-	}
-
-	var p *model.Package
-	if idSplit[0] == pkgTypesStr {
-		var err error
-
-		p, err = c.queryPkgTypeNodeByID(ctx, id, filter, pnsl)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get pkg type node by ID with error: %w", err)
-		}
-	}
-	return p, nil
-}
-
 func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, error) {
 
 	pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
@@ -896,6 +819,83 @@ func removeInvalidCharFromProperty(key string) string {
 	// neo4j does not accept "." in its properties. If the qualifier contains a "." that must
 	// be replaced by an "-"
 	return strings.ReplaceAll(key, ".", "_")
+}
+
+// Builds a model.Package to send as GraphQL response, starting from id.
+// The optional filter allows restricting output (on selection operations).
+func (c *arangoClient) buildPackageResponseFromID(ctx context.Context, id string, filter *model.PkgSpec) (*model.Package, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	pvl := []*model.PackageVersion{}
+	if idSplit[0] == pkgVersionsStr {
+		var foundPkgVersion *model.PackageVersion
+		var err error
+
+		foundPkgVersion, id, err = c.queryPkgVersionNodeByID(ctx, id, filter)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pkg version node by ID with error: %w", err)
+		}
+		pvl = append(pvl, foundPkgVersion)
+	}
+
+	idSplit = strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	pnl := []*model.PackageName{}
+	if idSplit[0] == pkgNamesStr {
+		var foundPkgName *model.PackageName
+		var err error
+
+		foundPkgName, id, err = c.queryPkgNameNodeByID(ctx, id, filter, pvl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pkg name node by ID with error: %w", err)
+		}
+		pnl = append(pnl, foundPkgName)
+	}
+
+	idSplit = strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	pnsl := []*model.PackageNamespace{}
+	if idSplit[0] == pkgNamespacesStr {
+		var foundPkgNamespace *model.PackageNamespace
+		var err error
+
+		foundPkgNamespace, id, err = c.queryPkgNamespaceNodeByID(ctx, id, filter, pnl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pkg namespace node by ID with error: %w", err)
+		}
+		pnsl = append(pnsl, foundPkgNamespace)
+	}
+
+	idSplit = strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	var p *model.Package
+	if idSplit[0] == pkgTypesStr {
+		var err error
+
+		p, err = c.queryPkgTypeNodeByID(ctx, id, filter, pnsl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pkg type node by ID with error: %w", err)
+		}
+	}
+	return p, nil
 }
 
 func (c *arangoClient) queryPkgVersionNodeByID(ctx context.Context, id string, filter *model.PkgSpec) (*model.PackageVersion, string, error) {
