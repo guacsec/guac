@@ -42,6 +42,37 @@ func TestHasSLSA(t *testing.T) {
 	}
 	testTime := time.Unix(1e9+5, 0)
 	testTime2 := time.Unix(1e9, 0)
+	startTime := time.Now()
+	finishTime := time.Now().Add(10 * time.Second)
+	inputPredicate := []*model.SLSAPredicateInputSpec{
+		{
+			Key:   "buildDefinition.externalParameters.repository",
+			Value: "https://github.com/octocat/hello-world",
+		},
+		{
+			Key:   "buildDefinition.externalParameters.ref",
+			Value: "refs/heads/main",
+		},
+		{
+			Key:   "buildDefinition.resolvedDependencies.uri",
+			Value: "git+https://github.com/octocat/hello-world@refs/heads/main",
+		},
+	}
+
+	slsaPredicate := []*model.SLSAPredicate{
+		{
+			Key:   "buildDefinition.externalParameters.ref",
+			Value: "refs/heads/main",
+		},
+		{
+			Key:   "buildDefinition.externalParameters.repository",
+			Value: "https://github.com/octocat/hello-world",
+		},
+		{
+			Key:   "buildDefinition.resolvedDependencies.uri",
+			Value: "git+https://github.com/octocat/hello-world@refs/heads/main",
+		},
+	}
 	type call struct {
 		Sub  *model.ArtifactInputSpec
 		BF   []*model.ArtifactInputSpec
@@ -61,6 +92,75 @@ func TestHasSLSA(t *testing.T) {
 		ExpIngestErr   bool
 		ExpQueryErr    bool
 	}{
+		{
+			Name: "unknown",
+			InArt: []*model.ArtifactInputSpec{
+				{
+					Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+					Algorithm: "sha1",
+				},
+				{
+					Digest:    "0123456789abcdef0000000fedcba9876543210",
+					Algorithm: "sha1",
+				},
+			},
+			InBld: []*model.BuilderInputSpec{
+				{
+					URI: "https://github.com/BuildPythonWheel/HubHostedActions@v1",
+				},
+			},
+			Calls: []call{
+				{
+					Sub: &model.ArtifactInputSpec{
+						Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+						Algorithm: "sha1",
+					},
+					BF: []*model.ArtifactInputSpec{{
+						Digest:    "0123456789abcdef0000000fedcba9876543210",
+						Algorithm: "sha1",
+					}},
+					BB: &model.BuilderInputSpec{
+						URI: "https://github.com/BuildPythonWheel/HubHostedActions@v1",
+					},
+					SLSA: &model.SLSAInputSpec{
+						BuildType:     "Test:SLSA",
+						SlsaPredicate: inputPredicate,
+						SlsaVersion:   "v1",
+						StartedOn:     &startTime,
+						FinishedOn:    &finishTime,
+						Origin:        "Demo ingestion",
+						Collector:     "Demo ingestion",
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuildType: ptrfrom.String("Test:SLSA"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: &model.Artifact{
+						Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+						Algorithm: "sha1",
+					},
+					Slsa: &model.Slsa{
+						BuiltBy: &model.Builder{
+							URI: "https://github.com/BuildPythonWheel/HubHostedActions@v1",
+						},
+						BuiltFrom: []*model.Artifact{{
+							Digest:    "0123456789abcdef0000000fedcba9876543210",
+							Algorithm: "sha1",
+						}},
+						BuildType:     "Test:SLSA",
+						SlsaPredicate: slsaPredicate,
+						SlsaVersion:   "v1",
+						StartedOn:     &startTime,
+						FinishedOn:    &finishTime,
+						Origin:        "Demo ingestion",
+						Collector:     "Demo ingestion",
+					},
+				},
+			},
+		},
 		{
 			Name:  "HappyPath",
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
