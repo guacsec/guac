@@ -17,7 +17,6 @@ package arangodb
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -197,8 +196,6 @@ type arangoClient struct {
 	db     driver.Database
 	graph  driver.Graph
 }
-
-var errNotFound = errors.New("not found")
 
 func init() {
 	backends.Register("arango", getBackend)

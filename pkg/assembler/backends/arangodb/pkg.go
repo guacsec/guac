@@ -40,21 +40,19 @@ type dbPkgVersion struct {
 }
 
 type dbPkgName struct {
-	TypeID      string  `json:"type_id"`
-	PkgType     string  `json:"type"`
-	NamespaceID string  `json:"namespace_id"`
-	Namespace   string  `json:"namespace"`
-	NameID      string  `json:"name_id"`
-	Name        string  `json:"name"`
-	Parent      *string `json:"_parent"`
+	TypeID      string `json:"type_id"`
+	PkgType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
+	NameID      string `json:"name_id"`
+	Name        string `json:"name"`
 }
 
 type dbPkgNamespace struct {
-	TypeID      string  `json:"type_id"`
-	PkgType     string  `json:"type"`
-	NamespaceID string  `json:"namespace_id"`
-	Namespace   string  `json:"namespace"`
-	Parent      *string `json:"_parent"`
+	TypeID      string `json:"type_id"`
+	PkgType     string `json:"type"`
+	NamespaceID string `json:"namespace_id"`
+	Namespace   string `json:"namespace"`
 }
 
 type dbPkgType struct {

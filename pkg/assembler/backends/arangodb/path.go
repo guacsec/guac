@@ -18,6 +18,7 @@ package arangodb
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -31,7 +32,17 @@ func (c *arangoClient) Neighbors(ctx context.Context, source string, usingOnly [
 }
 
 func (c *arangoClient) Node(ctx context.Context, source string) (model.Node, error) {
-	panic(fmt.Errorf("not implemented: Neighbors"))
+	idSplit := strings.Split(source, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", source)
+	}
+	switch idSplit[0] {
+	case pkgVersionsStr, pkgNamesStr, pkgNamespacesStr, pkgTypesStr:
+		return c.buildPackageResponseFromID(ctx, source, nil)
+	case srcNamesStr, srcNamespacesStr, srcTypesStr:
+		return c.buildSourceResponseFromID(ctx, source, nil)
+	}
+	return nil, nil
 }
 
 func (c *arangoClient) Nodes(ctx context.Context, ids []string) ([]model.Node, error) {

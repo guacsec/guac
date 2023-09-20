@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -866,7 +868,7 @@ func Test_buildPackageResponseFromID(t *testing.T) {
 			}
 			got, err := b.(*arangoClient).buildPackageResponseFromID(ctx, ingestedPkg.Namespaces[0].Names[0].Versions[0].ID, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.Packages() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.buildPackageResponseFromID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
