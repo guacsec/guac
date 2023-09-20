@@ -468,10 +468,10 @@ func (s *Suite) TestHashEqual() {
 			}
 			artifactIDs := make([]string, len(test.InArt))
 			for i, a := range test.InArt {
-				if v, err := b.IngestArtifact(ctx, a); err != nil {
+				if v, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					artifactIDs[i] = v.ID
+					artifactIDs[i] = v
 				}
 			}
 
