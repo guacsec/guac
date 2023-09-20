@@ -563,12 +563,16 @@ func (u *PackageVersionUpsertOne) IDX(ctx context.Context) int {
 // PackageVersionCreateBulk is the builder for creating many PackageVersion entities in bulk.
 type PackageVersionCreateBulk struct {
 	config
+	err      error
 	builders []*PackageVersionCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the PackageVersion entities in the database.
 func (pvcb *PackageVersionCreateBulk) Save(ctx context.Context) ([]*PackageVersion, error) {
+	if pvcb.err != nil {
+		return nil, pvcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(pvcb.builders))
 	nodes := make([]*PackageVersion, len(pvcb.builders))
 	mutators := make([]Mutator, len(pvcb.builders))
@@ -806,6 +810,9 @@ func (u *PackageVersionUpsertBulk) UpdateHash() *PackageVersionUpsertBulk {
 
 // Exec executes the query.
 func (u *PackageVersionUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the PackageVersionCreateBulk instead", i)

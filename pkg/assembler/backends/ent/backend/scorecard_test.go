@@ -449,3 +449,183 @@ func (s *Suite) TestCertifyScorecard() {
 		})
 	}
 }
+
+func (s *Suite) TestIngestScorecards() {
+	type call struct {
+		Src []*model.SourceInputSpec
+		SC  []*model.ScorecardInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InSrc        []*model.SourceInputSpec
+		Calls        []call
+		Query        *model.CertifyScorecardSpec
+		ExpSC        []*model.CertifyScorecard
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InSrc: []*model.SourceInputSpec{s1},
+			Calls: []call{
+				{
+					Src: []*model.SourceInputSpec{s1},
+					SC: []*model.ScorecardInputSpec{
+						{
+							Origin: "test origin",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyScorecardSpec{
+				Origin: ptrfrom.String("test origin"),
+			},
+			ExpSC: []*model.CertifyScorecard{
+				{
+					Source: s1out,
+					Scorecard: &model.Scorecard{
+						Checks: []*model.ScorecardCheck{},
+						Origin: "test origin",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Ingest same",
+			InSrc: []*model.SourceInputSpec{s1},
+			Calls: []call{
+				{
+					Src: []*model.SourceInputSpec{s1, s1},
+					SC: []*model.ScorecardInputSpec{
+						{
+							Origin: "test origin",
+						},
+						{
+							Origin: "test origin",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyScorecardSpec{
+				Origin: ptrfrom.String("test origin"),
+			},
+			ExpSC: []*model.CertifyScorecard{
+				{
+					Source: s1out,
+					Scorecard: &model.Scorecard{
+						Checks: []*model.ScorecardCheck{},
+						Origin: "test origin",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Query multiple",
+			InSrc: []*model.SourceInputSpec{s1},
+			Calls: []call{
+				{
+					Src: []*model.SourceInputSpec{s1, s1, s1},
+					SC: []*model.ScorecardInputSpec{
+						{
+							Origin: "test origin one",
+						},
+						{
+							AggregateScore: 4.4,
+							Origin:         "test origin two",
+						},
+						{
+							AggregateScore: 4.9,
+							Origin:         "test origin two",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyScorecardSpec{
+				Origin: ptrfrom.String("test origin two"),
+			},
+			ExpSC: []*model.CertifyScorecard{
+				{
+					Source: s1out,
+					Scorecard: &model.Scorecard{
+						Checks:         []*model.ScorecardCheck{},
+						AggregateScore: 4.4,
+						Origin:         "test origin two",
+					},
+				},
+				{
+					Source: s1out,
+					Scorecard: &model.Scorecard{
+						Checks:         []*model.ScorecardCheck{},
+						AggregateScore: 4.9,
+						Origin:         "test origin two",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Query Source",
+			InSrc: []*model.SourceInputSpec{s1, s2},
+			Calls: []call{
+				{
+					Src: []*model.SourceInputSpec{s1, s2},
+					SC: []*model.ScorecardInputSpec{
+						{
+							Origin: "test origin",
+						},
+						{
+							Origin: "test origin",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyScorecardSpec{
+				Source: &model.SourceSpec{
+					Namespace: ptrfrom.String("github.com/jeff"),
+				},
+			},
+			ExpSC: []*model.CertifyScorecard{
+				{
+					Source: s1out,
+					Scorecard: &model.Scorecard{
+						Checks: []*model.ScorecardCheck{},
+						Origin: "test origin",
+					},
+				},
+			},
+		},
+	}
+	ctx := s.Ctx
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestScorecards(ctx, o.Src, o.SC)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+			got, err := b.Scorecards(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpSC, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

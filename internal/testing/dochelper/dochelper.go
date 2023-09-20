@@ -16,14 +16,17 @@
 package dochelper
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"time"
 
+	jsoniter "github.com/json-iterator/go"
+
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func existAndPop(nodes []*processor.DocumentNode, n *processor.DocumentNode) bool {
 	for i, nn := range nodes {

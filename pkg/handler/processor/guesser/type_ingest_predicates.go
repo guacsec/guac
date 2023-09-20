@@ -16,7 +16,6 @@
 package guesser
 
 import (
-	"encoding/json"
 	"reflect"
 
 	"github.com/guacsec/guac/pkg/assembler"

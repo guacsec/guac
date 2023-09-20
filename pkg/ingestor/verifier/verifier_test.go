@@ -18,10 +18,11 @@ package verifier
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"reflect"
 	"strings"
 	"testing"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -31,6 +32,7 @@ import (
 )
 
 var (
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// Taken from: https://slsa.dev/provenance/v0.1#example
 	ite6SLSA = `
 	{

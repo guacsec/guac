@@ -66,4 +66,11 @@ extend type Mutation {
     source: SourceInputSpec!
     hasSourceAt: HasSourceAtInputSpec!
   ): ID!
+  "Bulk ingestion of certifications that a package (PackageName or PackageVersion) is built from the source. The returned array of IDs can be a an array of empty string."
+  ingestHasSourceAts(
+    pkgs: [PkgInputSpec!]!
+    pkgMatchType: MatchFlags!
+    sources: [SourceInputSpec!]!
+    hasSourceAts: [HasSourceAtInputSpec!]!
+  ):[ID!]!
 }

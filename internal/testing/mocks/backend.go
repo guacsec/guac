@@ -530,6 +530,21 @@ func (mr *MockBackendMockRecorder) IngestHasSourceAt(ctx, pkg, pkgMatchType, sou
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestHasSourceAt", reflect.TypeOf((*MockBackend)(nil).IngestHasSourceAt), ctx, pkg, pkgMatchType, source, hasSourceAt)
 }
 
+// IngestHasSourceAts mocks base method.
+func (m *MockBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType *model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IngestHasSourceAts", ctx, pkgs, pkgMatchType, sources, hasSourceAts)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IngestHasSourceAts indicates an expected call of IngestHasSourceAts.
+func (mr *MockBackendMockRecorder) IngestHasSourceAts(ctx, pkgs, pkgMatchType, sources, hasSourceAts interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestHasSourceAts", reflect.TypeOf((*MockBackend)(nil).IngestHasSourceAts), ctx, pkgs, pkgMatchType, sources, hasSourceAts)
+}
+
 // IngestHashEqual mocks base method.
 func (m *MockBackend) IngestHashEqual(ctx context.Context, artifact, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 	m.ctrl.T.Helper()

@@ -16,12 +16,15 @@
 package guesser
 
 import (
-	"encoding/json"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/in-toto/in-toto-golang/in_toto"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type ite6TypeGuesser struct{}
 

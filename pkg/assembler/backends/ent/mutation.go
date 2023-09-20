@@ -1235,6 +1235,7 @@ func (m *BillOfMaterialsMutation) ResetCollector() {
 // ClearPackage clears the "package" edge to the PackageVersion entity.
 func (m *BillOfMaterialsMutation) ClearPackage() {
 	m.cleared_package = true
+	m.clearedFields[billofmaterials.FieldPackageID] = struct{}{}
 }
 
 // PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
@@ -1261,6 +1262,7 @@ func (m *BillOfMaterialsMutation) ResetPackage() {
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
 func (m *BillOfMaterialsMutation) ClearArtifact() {
 	m.clearedartifact = true
+	m.clearedFields[billofmaterials.FieldArtifactID] = struct{}{}
 }
 
 // ArtifactCleared reports if the "artifact" edge to the Artifact entity was cleared.
@@ -2528,6 +2530,7 @@ func (m *CertificationMutation) ResetCollector() {
 // ClearSource clears the "source" edge to the SourceName entity.
 func (m *CertificationMutation) ClearSource() {
 	m.clearedsource = true
+	m.clearedFields[certification.FieldSourceID] = struct{}{}
 }
 
 // SourceCleared reports if the "source" edge to the SourceName entity was cleared.
@@ -2554,6 +2557,7 @@ func (m *CertificationMutation) ResetSource() {
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
 func (m *CertificationMutation) ClearPackageVersion() {
 	m.clearedpackage_version = true
+	m.clearedFields[certification.FieldPackageVersionID] = struct{}{}
 }
 
 // PackageVersionCleared reports if the "package_version" edge to the PackageVersion entity was cleared.
@@ -2585,6 +2589,7 @@ func (m *CertificationMutation) SetAllVersionsID(id int) {
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
 func (m *CertificationMutation) ClearAllVersions() {
 	m.clearedall_versions = true
+	m.clearedFields[certification.FieldPackageNameID] = struct{}{}
 }
 
 // AllVersionsCleared reports if the "all_versions" edge to the PackageName entity was cleared.
@@ -2619,6 +2624,7 @@ func (m *CertificationMutation) ResetAllVersions() {
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
 func (m *CertificationMutation) ClearArtifact() {
 	m.clearedartifact = true
+	m.clearedFields[certification.FieldArtifactID] = struct{}{}
 }
 
 // ArtifactCleared reports if the "artifact" edge to the Artifact entity was cleared.
@@ -3239,6 +3245,7 @@ func (m *CertifyScorecardMutation) ResetScorecardID() {
 // ClearScorecard clears the "scorecard" edge to the Scorecard entity.
 func (m *CertifyScorecardMutation) ClearScorecard() {
 	m.clearedscorecard = true
+	m.clearedFields[certifyscorecard.FieldScorecardID] = struct{}{}
 }
 
 // ScorecardCleared reports if the "scorecard" edge to the Scorecard entity was cleared.
@@ -3265,6 +3272,7 @@ func (m *CertifyScorecardMutation) ResetScorecard() {
 // ClearSource clears the "source" edge to the SourceName entity.
 func (m *CertifyScorecardMutation) ClearSource() {
 	m.clearedsource = true
+	m.clearedFields[certifyscorecard.FieldSourceID] = struct{}{}
 }
 
 // SourceCleared reports if the "source" edge to the SourceName entity was cleared.
@@ -4043,6 +4051,7 @@ func (m *CertifyVexMutation) ResetCollector() {
 // ClearPackage clears the "package" edge to the PackageVersion entity.
 func (m *CertifyVexMutation) ClearPackage() {
 	m.cleared_package = true
+	m.clearedFields[certifyvex.FieldPackageID] = struct{}{}
 }
 
 // PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
@@ -4069,6 +4078,7 @@ func (m *CertifyVexMutation) ResetPackage() {
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
 func (m *CertifyVexMutation) ClearArtifact() {
 	m.clearedartifact = true
+	m.clearedFields[certifyvex.FieldArtifactID] = struct{}{}
 }
 
 // ArtifactCleared reports if the "artifact" edge to the Artifact entity was cleared.
@@ -4095,6 +4105,7 @@ func (m *CertifyVexMutation) ResetArtifact() {
 // ClearVulnerability clears the "vulnerability" edge to the VulnerabilityType entity.
 func (m *CertifyVexMutation) ClearVulnerability() {
 	m.clearedvulnerability = true
+	m.clearedFields[certifyvex.FieldVulnerabilityID] = struct{}{}
 }
 
 // VulnerabilityCleared reports if the "vulnerability" edge to the VulnerabilityType entity was cleared.
@@ -4978,6 +4989,7 @@ func (m *CertifyVulnMutation) ResetCollector() {
 // ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
 func (m *CertifyVulnMutation) ClearVulnerability() {
 	m.clearedvulnerability = true
+	m.clearedFields[certifyvuln.FieldVulnerabilityID] = struct{}{}
 }
 
 // VulnerabilityCleared reports if the "vulnerability" edge to the VulnerabilityID entity was cleared.
@@ -5004,6 +5016,7 @@ func (m *CertifyVulnMutation) ResetVulnerability() {
 // ClearPackage clears the "package" edge to the PackageVersion entity.
 func (m *CertifyVulnMutation) ClearPackage() {
 	m.cleared_package = true
+	m.clearedFields[certifyvuln.FieldPackageID] = struct{}{}
 }
 
 // PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
@@ -5827,6 +5840,7 @@ func (m *DependencyMutation) ResetCollector() {
 // ClearPackage clears the "package" edge to the PackageVersion entity.
 func (m *DependencyMutation) ClearPackage() {
 	m.cleared_package = true
+	m.clearedFields[dependency.FieldPackageID] = struct{}{}
 }
 
 // PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
@@ -5853,6 +5867,7 @@ func (m *DependencyMutation) ResetPackage() {
 // ClearDependentPackageName clears the "dependent_package_name" edge to the PackageName entity.
 func (m *DependencyMutation) ClearDependentPackageName() {
 	m.cleareddependent_package_name = true
+	m.clearedFields[dependency.FieldDependentPackageNameID] = struct{}{}
 }
 
 // DependentPackageNameCleared reports if the "dependent_package_name" edge to the PackageName entity was cleared.
@@ -5879,6 +5894,7 @@ func (m *DependencyMutation) ResetDependentPackageName() {
 // ClearDependentPackageVersion clears the "dependent_package_version" edge to the PackageVersion entity.
 func (m *DependencyMutation) ClearDependentPackageVersion() {
 	m.cleareddependent_package_version = true
+	m.clearedFields[dependency.FieldDependentPackageVersionID] = struct{}{}
 }
 
 // DependentPackageVersionCleared reports if the "dependent_package_version" edge to the PackageVersion entity was cleared.
@@ -6681,6 +6697,7 @@ func (m *HasSourceAtMutation) ResetCollector() {
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
 func (m *HasSourceAtMutation) ClearPackageVersion() {
 	m.clearedpackage_version = true
+	m.clearedFields[hassourceat.FieldPackageVersionID] = struct{}{}
 }
 
 // PackageVersionCleared reports if the "package_version" edge to the PackageVersion entity was cleared.
@@ -6712,6 +6729,7 @@ func (m *HasSourceAtMutation) SetAllVersionsID(id int) {
 // ClearAllVersions clears the "all_versions" edge to the PackageName entity.
 func (m *HasSourceAtMutation) ClearAllVersions() {
 	m.clearedall_versions = true
+	m.clearedFields[hassourceat.FieldPackageNameID] = struct{}{}
 }
 
 // AllVersionsCleared reports if the "all_versions" edge to the PackageName entity was cleared.
@@ -6746,6 +6764,7 @@ func (m *HasSourceAtMutation) ResetAllVersions() {
 // ClearSource clears the "source" edge to the SourceName entity.
 func (m *HasSourceAtMutation) ClearSource() {
 	m.clearedsource = true
+	m.clearedFields[hassourceat.FieldSourceID] = struct{}{}
 }
 
 // SourceCleared reports if the "source" edge to the SourceName entity was cleared.
@@ -7957,6 +7976,7 @@ func (m *IsVulnerabilityMutation) ResetCollector() {
 // ClearOsv clears the "osv" edge to the VulnerabilityType entity.
 func (m *IsVulnerabilityMutation) ClearOsv() {
 	m.clearedosv = true
+	m.clearedFields[isvulnerability.FieldOsvID] = struct{}{}
 }
 
 // OsvCleared reports if the "osv" edge to the VulnerabilityType entity was cleared.
@@ -7983,6 +8003,7 @@ func (m *IsVulnerabilityMutation) ResetOsv() {
 // ClearVulnerability clears the "vulnerability" edge to the VulnerabilityType entity.
 func (m *IsVulnerabilityMutation) ClearVulnerability() {
 	m.clearedvulnerability = true
+	m.clearedFields[isvulnerability.FieldVulnerabilityID] = struct{}{}
 }
 
 // VulnerabilityCleared reports if the "vulnerability" edge to the VulnerabilityType entity was cleared.
@@ -8664,6 +8685,7 @@ func (m *OccurrenceMutation) ResetPackageID() {
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
 func (m *OccurrenceMutation) ClearArtifact() {
 	m.clearedartifact = true
+	m.clearedFields[occurrence.FieldArtifactID] = struct{}{}
 }
 
 // ArtifactCleared reports if the "artifact" edge to the Artifact entity was cleared.
@@ -8690,6 +8712,7 @@ func (m *OccurrenceMutation) ResetArtifact() {
 // ClearPackage clears the "package" edge to the PackageVersion entity.
 func (m *OccurrenceMutation) ClearPackage() {
 	m.cleared_package = true
+	m.clearedFields[occurrence.FieldPackageID] = struct{}{}
 }
 
 // PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
@@ -8716,6 +8739,7 @@ func (m *OccurrenceMutation) ResetPackage() {
 // ClearSource clears the "source" edge to the SourceName entity.
 func (m *OccurrenceMutation) ClearSource() {
 	m.clearedsource = true
+	m.clearedFields[occurrence.FieldSourceID] = struct{}{}
 }
 
 // SourceCleared reports if the "source" edge to the SourceName entity was cleared.
@@ -9274,6 +9298,7 @@ func (m *PackageNameMutation) ResetName() {
 // ClearNamespace clears the "namespace" edge to the PackageNamespace entity.
 func (m *PackageNameMutation) ClearNamespace() {
 	m.clearednamespace = true
+	m.clearedFields[packagename.FieldNamespaceID] = struct{}{}
 }
 
 // NamespaceCleared reports if the "namespace" edge to the PackageNamespace entity was cleared.
@@ -9795,6 +9820,7 @@ func (m *PackageNamespaceMutation) ResetNamespace() {
 // ClearPackage clears the "package" edge to the PackageType entity.
 func (m *PackageNamespaceMutation) ClearPackage() {
 	m.cleared_package = true
+	m.clearedFields[packagenamespace.FieldPackageID] = struct{}{}
 }
 
 // PackageCleared reports if the "package" edge to the PackageType entity was cleared.
@@ -10882,6 +10908,7 @@ func (m *PackageVersionMutation) ResetHash() {
 // ClearName clears the "name" edge to the PackageName entity.
 func (m *PackageVersionMutation) ClearName() {
 	m.clearedname = true
+	m.clearedFields[packageversion.FieldNameID] = struct{}{}
 }
 
 // NameCleared reports if the "name" edge to the PackageName entity was cleared.
@@ -12611,6 +12638,7 @@ func (m *SLSAAttestationMutation) ResetBuiltFrom() {
 // ClearBuiltBy clears the "built_by" edge to the Builder entity.
 func (m *SLSAAttestationMutation) ClearBuiltBy() {
 	m.clearedbuilt_by = true
+	m.clearedFields[slsaattestation.FieldBuiltByID] = struct{}{}
 }
 
 // BuiltByCleared reports if the "built_by" edge to the Builder entity was cleared.
@@ -12637,6 +12665,7 @@ func (m *SLSAAttestationMutation) ResetBuiltBy() {
 // ClearSubject clears the "subject" edge to the Artifact entity.
 func (m *SLSAAttestationMutation) ClearSubject() {
 	m.clearedsubject = true
+	m.clearedFields[slsaattestation.FieldSubjectID] = struct{}{}
 }
 
 // SubjectCleared reports if the "subject" edge to the Artifact entity was cleared.
@@ -14174,6 +14203,7 @@ func (m *SourceNameMutation) ResetNamespaceID() {
 // ClearNamespace clears the "namespace" edge to the SourceNamespace entity.
 func (m *SourceNameMutation) ClearNamespace() {
 	m.clearednamespace = true
+	m.clearedFields[sourcename.FieldNamespaceID] = struct{}{}
 }
 
 // NamespaceCleared reports if the "namespace" edge to the SourceNamespace entity was cleared.
@@ -14749,6 +14779,7 @@ func (m *SourceNamespaceMutation) SetSourceTypeID(id int) {
 // ClearSourceType clears the "source_type" edge to the SourceType entity.
 func (m *SourceNamespaceMutation) ClearSourceType() {
 	m.clearedsource_type = true
+	m.clearedFields[sourcenamespace.FieldSourceID] = struct{}{}
 }
 
 // SourceTypeCleared reports if the "source_type" edge to the SourceType entity was cleared.
@@ -16224,6 +16255,7 @@ func (m *VulnerabilityIDMutation) ResetTypeID() {
 // ClearType clears the "type" edge to the VulnerabilityType entity.
 func (m *VulnerabilityIDMutation) ClearType() {
 	m.cleared_type = true
+	m.clearedFields[vulnerabilityid.FieldTypeID] = struct{}{}
 }
 
 // TypeCleared reports if the "type" edge to the VulnerabilityType entity was cleared.

@@ -606,12 +606,16 @@ func (u *CertifyVulnUpsertOne) IDX(ctx context.Context) int {
 // CertifyVulnCreateBulk is the builder for creating many CertifyVuln entities in bulk.
 type CertifyVulnCreateBulk struct {
 	config
+	err      error
 	builders []*CertifyVulnCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the CertifyVuln entities in the database.
 func (cvcb *CertifyVulnCreateBulk) Save(ctx context.Context) ([]*CertifyVuln, error) {
+	if cvcb.err != nil {
+		return nil, cvcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(cvcb.builders))
 	nodes := make([]*CertifyVuln, len(cvcb.builders))
 	mutators := make([]Mutator, len(cvcb.builders))
@@ -897,6 +901,9 @@ func (u *CertifyVulnUpsertBulk) UpdateCollector() *CertifyVulnUpsertBulk {
 
 // Exec executes the query.
 func (u *CertifyVulnUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CertifyVulnCreateBulk instead", i)

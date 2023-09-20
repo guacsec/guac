@@ -16,8 +16,6 @@
 package guesser
 
 import (
-	"encoding/json"
-
 	"github.com/guacsec/guac/pkg/handler/processor"
 	sc "github.com/ossf/scorecard/v4/pkg"
 )

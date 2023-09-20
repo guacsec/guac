@@ -17,9 +17,10 @@ package inmem_test
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
 	"testing"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/exp/slices"
@@ -28,6 +29,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func convNode(n model.Node) hasID {
 	// All nodes have a json "id"

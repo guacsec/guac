@@ -17,13 +17,16 @@ package cdx_vex
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type CdxVexProcessor struct{}
 

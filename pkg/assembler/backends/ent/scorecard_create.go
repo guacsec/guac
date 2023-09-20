@@ -559,12 +559,16 @@ func (u *ScorecardUpsertOne) IDX(ctx context.Context) int {
 // ScorecardCreateBulk is the builder for creating many Scorecard entities in bulk.
 type ScorecardCreateBulk struct {
 	config
+	err      error
 	builders []*ScorecardCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Scorecard entities in the database.
 func (scb *ScorecardCreateBulk) Save(ctx context.Context) ([]*Scorecard, error) {
+	if scb.err != nil {
+		return nil, scb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(scb.builders))
 	nodes := make([]*Scorecard, len(scb.builders))
 	mutators := make([]Mutator, len(scb.builders))
@@ -830,6 +834,9 @@ func (u *ScorecardUpsertBulk) UpdateCollector() *ScorecardUpsertBulk {
 
 // Exec executes the query.
 func (u *ScorecardUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ScorecardCreateBulk instead", i)
