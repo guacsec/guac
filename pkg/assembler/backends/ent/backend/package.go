@@ -130,11 +130,6 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
 func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
-	return upsertPackageIDDoNothing(ctx, client, pkg)
-	//return upsertPackageIDIgnore(ctx, client, pkg)
-}
-
-func upsertPackageIDDoNothing(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
 
 	pkgID, err := client.PackageType.Create().
 		SetType(pkg.Type).
@@ -229,65 +224,6 @@ func upsertPackageIDDoNothing(ctx context.Context, client *ent.Tx, pkg model.Pkg
 		Only(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "get package version")
-	}
-
-	return pv, nil
-}
-
-func upsertPackageIDIgnore(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
-
-	pkgID, err := client.PackageType.Create().
-		SetType(pkg.Type).
-		OnConflict(sql.ConflictColumns(packagetype.FieldType)).
-		Ignore().
-		ID(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "upsert package node")
-	}
-
-	nsID, err := client.PackageNamespace.Create().
-		SetPackageID(pkgID).
-		SetNamespace(valueOrDefault(pkg.Namespace, "")).
-		OnConflict(sql.ConflictColumns(packagenamespace.FieldNamespace, packagenamespace.FieldPackageID)).
-		Ignore().
-		ID(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "upsert package namespace")
-	}
-
-	nameID, err := client.PackageName.Create().
-		SetNamespaceID(nsID).
-		SetName(pkg.Name).
-		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespaceID)).
-		Ignore().
-		ID(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "upsert package name")
-	}
-
-	id, err := client.PackageVersion.Create().
-		SetNameID(nameID).
-		SetNillableVersion(pkg.Version).
-		SetSubpath(ptrWithDefault(pkg.Subpath, "")).
-		SetQualifiers(normalizeInputQualifiers(pkg.Qualifiers)).
-		SetHash(versionHashFromInputSpec(pkg)).
-		OnConflict(
-			sql.ConflictColumns(
-				packageversion.FieldHash,
-				packageversion.FieldNameID,
-			),
-		).
-		Ignore().
-		ID(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "upsert package version")
-	}
-
-	pv, err := client.PackageVersion.Query().Where(packageversion.ID(id)).
-		WithName(withPackageNameTree()).
-		Only(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "upsert package version")
 	}
 
 	return pv, nil
