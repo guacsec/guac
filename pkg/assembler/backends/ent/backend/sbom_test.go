@@ -499,7 +499,7 @@ func (s *Suite) Test_HasSBOM() {
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					s.T().Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -766,7 +766,7 @@ func (s *Suite) TestIngestHasSBOMs() {
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}

@@ -66,10 +66,10 @@ func (s *Suite) TestNode() {
 
 			ids := make([]string, 0, len(test.Expected))
 			for _, inA := range test.InArt {
-				if a, err := b.IngestArtifact(ctx, inA); err != nil {
+				if a, err := b.IngestArtifactID(ctx, inA); err != nil {
 					s.T().Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					ids = append(ids, a.ID)
+					ids = append(ids, a)
 				}
 			}
 
@@ -113,22 +113,21 @@ func (s *Suite) TestNodes() {
 		be, err := GetBackend(s.Client)
 		s.Require().NoError(err)
 
-		v, err := be.IngestArtifact(s.Ctx, a1)
-		s.Require().NoError(err)
+	v, err := be.IngestArtifactID(s.Ctx, a1)
+	s.Require().NoError(err)
 
 		p, err := be.IngestPackage(s.Ctx, *p4)
 		s.Require().NoError(err)
 
-		nodes, err := be.Nodes(s.Ctx, []string{v.ID, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
-		s.Require().NoError(err)
-		if diff := cmp.Diff(a1out, nodes[0], ignoreID, ignoreEmptySlices); diff != "" {
-			s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
-		}
-		if diff := cmp.Diff(p4outNamespace, nodes[1], ignoreID, ignoreEmptySlices); diff != "" {
-			s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
-		}
-		if diff := cmp.Diff(p4out, nodes[2], ignoreID, ignoreEmptySlices); diff != "" {
-			s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
-		}
-	})
+	nodes, err := be.Nodes(s.Ctx, []string{v, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
+	s.Require().NoError(err)
+	if diff := cmp.Diff(a1out, nodes[0], ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(p4outNamespace, nodes[1], ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(p4out, nodes[2], ignoreID, ignoreEmptySlices); diff != "" {
+		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+	}
 }
