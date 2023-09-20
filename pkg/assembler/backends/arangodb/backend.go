@@ -912,20 +912,6 @@ func getPreloadString(prefix, name string) string {
 	return name
 }
 
-// Topological queries: queries where node connectivity matters more than node type
-func (c *arangoClient) Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: Neighbors - Neighbors"))
-}
-func (c *arangoClient) Node(ctx context.Context, node string) (model.Node, error) {
-	panic(fmt.Errorf("not implemented: Node - Node"))
-}
-func (c *arangoClient) Nodes(ctx context.Context, nodes []string) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: Nodes - Nodes"))
-}
-func (c *arangoClient) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: Path - Path"))
-}
-
 func (c *arangoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
 	panic(fmt.Errorf("not implemented: Licenses"))
 }

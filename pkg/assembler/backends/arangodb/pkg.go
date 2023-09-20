@@ -818,3 +818,323 @@ func removeInvalidCharFromProperty(key string) string {
 	// be replaced by an "-"
 	return strings.ReplaceAll(key, ".", "_")
 }
+
+// Builds a model.Package to send as GraphQL response, starting from id.
+// The optional filter allows restricting output (on selection operations).
+func (c *arangoClient) buildPackageResponseFromID(ctx context.Context, id string, filter *model.PkgSpec) (*model.Package, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	pvl := []*model.PackageVersion{}
+	if idSplit[0] == pkgVersionsStr {
+		var foundPkgVersion *model.PackageVersion
+		var err error
+
+		foundPkgVersion, id, err = c.queryPkgVersionNodeByID(ctx, id, filter)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pkg version node by ID with error: %w", err)
+		}
+		pvl = append(pvl, foundPkgVersion)
+	}
+
+	idSplit = strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	pnl := []*model.PackageName{}
+	if idSplit[0] == pkgNamesStr {
+		var foundPkgName *model.PackageName
+		var err error
+
+		foundPkgName, id, err = c.queryPkgNameNodeByID(ctx, id, filter, pvl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pkg name node by ID with error: %w", err)
+		}
+		pnl = append(pnl, foundPkgName)
+	}
+
+	idSplit = strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	pnsl := []*model.PackageNamespace{}
+	if idSplit[0] == pkgNamespacesStr {
+		var foundPkgNamespace *model.PackageNamespace
+		var err error
+
+		foundPkgNamespace, id, err = c.queryPkgNamespaceNodeByID(ctx, id, filter, pnl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pkg namespace node by ID with error: %w", err)
+		}
+		pnsl = append(pnsl, foundPkgNamespace)
+	}
+
+	idSplit = strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	var p *model.Package
+	if idSplit[0] == pkgTypesStr {
+		var err error
+
+		p, err = c.queryPkgTypeNodeByID(ctx, id, filter, pnsl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pkg type node by ID with error: %w", err)
+		}
+	}
+	return p, nil
+}
+
+func (c *arangoClient) queryPkgVersionNodeByID(ctx context.Context, id string, filter *model.PkgSpec) (*model.PackageVersion, string, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pkgVersionsStr, "pVersion")
+	arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+	values["id"] = id
+	if filter != nil {
+		if filter.Version != nil {
+			arangoQueryBuilder.filter("pVersion", "version", "==", "@version")
+			values["version"] = *filter.Version
+		}
+		if filter.Subpath != nil {
+			arangoQueryBuilder.filter("pVersion", "subpath", "==", "@subpath")
+			values["subpath"] = *filter.Subpath
+		}
+		if filter.MatchOnlyEmptyQualifiers != nil {
+			if !*filter.MatchOnlyEmptyQualifiers {
+				if len(filter.Qualifiers) > 0 {
+					arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
+					values["qualifier"] = getQualifiers(filter.Qualifiers)
+				}
+			} else {
+				arangoQueryBuilder.filterLength("pVersion", "qualifier_list", "==", 0)
+			}
+		} else {
+			if len(filter.Qualifiers) > 0 {
+				arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
+				values["qualifier"] = getQualifiers(filter.Qualifiers)
+			}
+		}
+	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'version_id': pVersion._id,
+		'version': pVersion.version,
+		'subpath': pVersion.subpath,
+		'qualifier_list': pVersion.qualifier_list,
+		'parent': pVersion._parent
+  	}`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryPkgVersionNodeByID")
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to query for package version: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type parsedPkgVersion struct {
+		VersionID     string   `json:"version_id"`
+		Version       string   `json:"version"`
+		Subpath       string   `json:"subpath"`
+		QualifierList []string `json:"qualifier_list"`
+		Parent        string   `json:"parent"`
+	}
+
+	var collectedValues []parsedPkgVersion
+	for {
+		var doc parsedPkgVersion
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, "", fmt.Errorf("failed to package version from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, "", fmt.Errorf("number of package version nodes found for ID: %s is greater than one", id)
+	}
+
+	return &model.PackageVersion{
+		ID:         collectedValues[0].VersionID,
+		Version:    collectedValues[0].Version,
+		Subpath:    collectedValues[0].Subpath,
+		Qualifiers: getCollectedPackageQualifiers(collectedValues[0].QualifierList),
+	}, collectedValues[0].Parent, nil
+}
+
+func (c *arangoClient) queryPkgNameNodeByID(ctx context.Context, id string, filter *model.PkgSpec, pvl []*model.PackageVersion) (*model.PackageName, string, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
+	arangoQueryBuilder.filter("pName", "_id", "==", "@id")
+	values["id"] = id
+
+	if filter != nil && filter.Name != nil {
+		arangoQueryBuilder.filter("pName", "name", "==", "@name")
+		values["name"] = *filter.Name
+	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		'name_id': pName._id,
+		'name': pName.name,
+		'parent': pName._parent
+  	}`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryPkgNameNodeByID")
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to query for package name: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type parsedPkgName struct {
+		NameID string `json:"name_id"`
+		Name   string `json:"name"`
+		Parent string `json:"parent"`
+	}
+
+	var collectedValues []parsedPkgName
+	for {
+		var doc parsedPkgName
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, "", fmt.Errorf("failed to package name from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, "", fmt.Errorf("number of package name nodes found for ID: %s is greater than one", id)
+	}
+
+	return &model.PackageName{
+		ID:       collectedValues[0].NameID,
+		Name:     collectedValues[0].Name,
+		Versions: pvl,
+	}, collectedValues[0].Parent, nil
+}
+
+func (c *arangoClient) queryPkgNamespaceNodeByID(ctx context.Context, id string, filter *model.PkgSpec, pnl []*model.PackageName) (*model.PackageNamespace, string, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pkgNamespacesStr, "pNs")
+	arangoQueryBuilder.filter("pNs", "_id", "==", "@id")
+	values["id"] = id
+
+	if filter != nil && filter.Namespace != nil {
+		arangoQueryBuilder.filter("pNs", "namespace", "==", "@namespace")
+		values["namespace"] = *filter.Namespace
+	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"namespace_id": pNs._id,
+		"namespace": pNs.namespace,
+		'parent': pNs._parent
+  	}`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryPkgNamespaceNodeByID")
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to query for package namespace: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type parsedPkgNamespace struct {
+		NamespaceID string `json:"namespace_id"`
+		Namespace   string `json:"namespace"`
+		Parent      string `json:"parent"`
+	}
+
+	var collectedValues []parsedPkgNamespace
+	for {
+		var doc parsedPkgNamespace
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, "", fmt.Errorf("failed to package namespace from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, "", fmt.Errorf("number of package namespace nodes found for ID: %s is greater than one", id)
+	}
+
+	return &model.PackageNamespace{
+		ID:        collectedValues[0].NamespaceID,
+		Namespace: collectedValues[0].Namespace,
+		Names:     pnl,
+	}, collectedValues[0].Parent, nil
+}
+
+func (c *arangoClient) queryPkgTypeNodeByID(ctx context.Context, id string, filter *model.PkgSpec, pnsl []*model.PackageNamespace) (*model.Package, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pkgTypesStr, "pType")
+	arangoQueryBuilder.filter("pType", "_id", "==", "@id")
+	values["id"] = id
+
+	if filter != nil && filter.Type != nil {
+		arangoQueryBuilder.filter("pType", "type", "==", "@pkgType")
+		values["pkgType"] = *filter.Type
+	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"type_id": pType._id,
+		"type": pType.type,
+  	}`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryPkgTypeNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for package type: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type parsedPkgType struct {
+		TypeID  string `json:"type_id"`
+		PkgType string `json:"type"`
+	}
+
+	var collectedValues []parsedPkgType
+	for {
+		var doc parsedPkgType
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to package type from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of package type nodes found for ID: %s is greater than one", id)
+	}
+
+	return &model.Package{
+		ID:         collectedValues[0].TypeID,
+		Type:       collectedValues[0].PkgType,
+		Namespaces: pnsl,
+	}, nil
+}
