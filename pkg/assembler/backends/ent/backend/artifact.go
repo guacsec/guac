@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
@@ -62,44 +63,40 @@ func toLowerPtr(s *string) *string {
 	return &lower
 }
 
-func (b *EntBackend) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	return b.IngestArtifacts(ctx, materials)
-}
-
-func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+func (b *EntBackend) IngestArtifactIDs(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
 	funcName := "IngestArtifacts"
-	records, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Artifacts, error) {
+	records, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := ingestArtifacts(ctx, client, artifacts)
 		if err != nil {
 			return nil, err
 		}
 
-		return &slc, nil
+		return slc, nil
 	})
 
 	if err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return collect(*records, toModelArtifact), nil
+	return *records, nil
 }
 
-func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.ArtifactInputSpec) (*model.Artifact, error) {
-	records, err := b.IngestArtifacts(ctx, []*model.ArtifactInputSpec{art})
+func (b *EntBackend) IngestArtifactID(ctx context.Context, art *model.ArtifactInputSpec) (string, error) {
+	records, err := b.IngestArtifactIDs(ctx, []*model.ArtifactInputSpec{art})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if len(records) == 0 {
-		return nil, Errorf("no records returned")
+		return "", Errorf("no records returned")
 	}
 
 	return records[0], nil
 }
 
-func ingestArtifacts(ctx context.Context, client *ent.Tx, artifacts []*model.ArtifactInputSpec) (ent.Artifacts, error) {
+func ingestArtifacts(ctx context.Context, client *ent.Tx, artifacts []*model.ArtifactInputSpec) (*[]string, error) {
 	batches := chunk(artifacts, 100)
-	results := make(ent.Artifacts, 0)
+	ids := make([]int, 0)
 
 	for _, artifacts := range batches {
 		creates := make([]*ent.ArtifactCreate, len(artifacts))
@@ -124,12 +121,16 @@ func ingestArtifacts(ctx context.Context, client *ent.Tx, artifacts []*model.Art
 			predicates[i] = artifactQueryInputPredicates(*art)
 		}
 
-		newRecords, err := client.Artifact.Query().Where(artifact.Or(predicates...)).All(ctx)
+		newRecords, err := client.Artifact.Query().Where(artifact.Or(predicates...)).IDs(ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		results = append(results, newRecords...)
+		ids = append(ids, newRecords...)
 	}
-	return results, nil
+	result := make([]string, len(ids))
+	for i := range ids {
+		result[i] = strconv.Itoa(ids[i])
+	}
+	return &result, nil
 }

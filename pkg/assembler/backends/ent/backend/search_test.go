@@ -39,7 +39,7 @@ func (s *Suite) Test_FindSoftware() {
 	}
 
 	for _, art := range []*model.ArtifactInputSpec{a1} {
-		if _, err := b.IngestArtifact(s.Ctx, art); err != nil {
+		if _, err := b.IngestArtifactID(s.Ctx, art); err != nil {
 			s.NoError(err)
 		}
 	}
