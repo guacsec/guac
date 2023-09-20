@@ -147,7 +147,8 @@ type HasSBOMIngest struct {
 	Pkg      *generated.PkgInputSpec      `json:"pkg,omitempty"`
 	Artifact *generated.ArtifactInputSpec `json:"artifact,omitempty"`
 
-	HasSBOM *generated.HasSBOMInputSpec `json:"hasSbom,omitempty"`
+	HasSBOM  *generated.HasSBOMInputSpec         `json:"hasSbom,omitempty"`
+	Includes *generated.HasSBOMIncludesInputSpec `json:"includes,omitempty"`
 }
 
 type VexIngest struct {

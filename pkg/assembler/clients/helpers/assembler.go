@@ -30,11 +30,14 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
+			var packageAndArtifactIDs []string
 			packages := p.GetPackages(ctx)
 			logger.Infof("assembling Package: %v", len(packages))
 			for _, v := range packages {
-				if err := ingestPackage(ctx, gqlclient, v); err != nil {
+				if id, err := ingestPackage(ctx, gqlclient, v); err != nil {
 					return err
+				} else {
+					packageAndArtifactIDs = append(packageAndArtifactIDs, *id)
 				}
 			}
 
@@ -49,15 +52,19 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 			artifacts := p.GetArtifacts(ctx)
 			logger.Infof("assembling Artifact: %v", len(artifacts))
 			for _, v := range artifacts {
-				if err := ingestArtifact(ctx, gqlclient, v); err != nil {
+				if id, err := ingestArtifact(ctx, gqlclient, v); err != nil {
 					return err
+				} else {
+					packageAndArtifactIDs = append(packageAndArtifactIDs, *id)
 				}
 			}
 
 			materials := p.GetMaterials(ctx)
 			logger.Infof("assembling Materials (Artifact): %v", len(materials))
-			if err := ingestArtifacts(ctx, gqlclient, materials); err != nil {
+			if ids, err := ingestArtifacts(ctx, gqlclient, materials); err != nil {
 				return err
+			} else {
+				packageAndArtifactIDs = append(packageAndArtifactIDs, ids...)
 			}
 
 			builders := p.GetBuilders(ctx)
@@ -91,17 +98,23 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			var isDependenciesIDs []string
 			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
 			for _, v := range p.IsDependency {
-				if err := ingestIsDependency(ctx, gqlclient, v); err != nil {
+				if id, err := ingestIsDependency(ctx, gqlclient, v); err != nil {
 					return err
+				} else {
+					isDependenciesIDs = append(isDependenciesIDs, *id)
 				}
 			}
 
+			var isOccurrencesIDs []string
 			logger.Infof("assembling IsOccurrence: %v", len(p.IsOccurrence))
 			for _, v := range p.IsOccurrence {
-				if err := ingestIsOccurrence(ctx, gqlclient, v); err != nil {
+				if id, err := ingestIsOccurrence(ctx, gqlclient, v); err != nil {
 					return err
+				} else {
+					isOccurrencesIDs = append(isOccurrencesIDs, *id)
 				}
 			}
 
@@ -168,8 +181,15 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			includes := model.HasSBOMIncludesInputSpec{
+				Software:     packageAndArtifactIDs,
+				Dependencies: isDependenciesIDs,
+				Occurrences:  isOccurrencesIDs,
+			}
+
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			for _, hb := range p.HasSBOM {
+				hb.Includes = &includes
 				if err := ingestHasSBOM(ctx, gqlclient, hb); err != nil {
 					return err
 				}
@@ -207,9 +227,12 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	}
 }
 
-func ingestPackage(ctx context.Context, client graphql.Client, v *model.PkgInputSpec) error {
-	_, err := model.IngestPackage(ctx, client, *v)
-	return err
+func ingestPackage(ctx context.Context, client graphql.Client, v *model.PkgInputSpec) (*string, error) {
+	if result, err := model.IngestPackage(ctx, client, *v); err != nil {
+		return nil, err
+	} else {
+		return &result.IngestPackage.PackageVersionID, nil
+	}
 }
 
 func ingestSource(ctx context.Context, client graphql.Client, v *model.SourceInputSpec) error {
@@ -217,9 +240,12 @@ func ingestSource(ctx context.Context, client graphql.Client, v *model.SourceInp
 	return err
 }
 
-func ingestArtifact(ctx context.Context, client graphql.Client, v *model.ArtifactInputSpec) error {
-	_, err := model.IngestArtifact(ctx, client, *v)
-	return err
+func ingestArtifact(ctx context.Context, client graphql.Client, v *model.ArtifactInputSpec) (*string, error) {
+	if result, err := model.IngestArtifact(ctx, client, *v); err != nil {
+		return nil, err
+	} else {
+		return &result.IngestArtifact, err
+	}
 }
 
 func ingestBuilder(ctx context.Context, client graphql.Client, v *model.BuilderInputSpec) error {
@@ -242,25 +268,34 @@ func ingestCertifyScorecard(ctx context.Context, client graphql.Client, v assemb
 	return err
 }
 
-func ingestIsDependency(ctx context.Context, client graphql.Client, v assembler.IsDependencyIngest) error {
-	_, err := model.IsDependency(ctx, client, *v.Pkg, *v.DepPkg, v.DepPkgMatchFlag, *v.IsDependency)
-	return err
+func ingestIsDependency(ctx context.Context, client graphql.Client, v assembler.IsDependencyIngest) (*string, error) {
+	if response, err := model.IsDependency(ctx, client, *v.Pkg, *v.DepPkg, v.DepPkgMatchFlag, *v.IsDependency); err != nil {
+		return nil, err
+	} else {
+		return &response.IngestDependency, nil
+	}
 }
 
-func ingestIsOccurrence(ctx context.Context, client graphql.Client, v assembler.IsOccurrenceIngest) error {
+func ingestIsOccurrence(ctx context.Context, client graphql.Client, v assembler.IsOccurrenceIngest) (*string, error) {
 	if v.Pkg != nil && v.Src != nil {
-		return fmt.Errorf("unable to create IsOccurrence with both Src and Pkg subject specified")
+		return nil, fmt.Errorf("unable to create IsOccurrence with both Src and Pkg subject specified")
 	}
 	if v.Pkg == nil && v.Src == nil {
-		return fmt.Errorf("unable to create IsOccurrence without either Src and Pkg subject specified")
+		return nil, fmt.Errorf("unable to create IsOccurrence without either Src and Pkg subject specified")
 	}
 
 	if v.Src != nil {
-		_, err := model.IsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurrence)
-		return err
+		if result, err := model.IsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurrence); err != nil {
+			return nil, err
+		} else {
+			return &result.IngestOccurrence, nil
+		}
 	}
-	_, err := model.IsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurrence)
-	return err
+	if result, err := model.IsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurrence); err != nil {
+		return nil, err
+	} else {
+		return &result.IngestOccurrence, err
+	}
 }
 
 func ingestHasSlsa(ctx context.Context, client graphql.Client, v assembler.HasSlsaIngest) error {
@@ -367,10 +402,10 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasS
 	}
 
 	if hb.Pkg != nil {
-		_, err := model.HasSBOMPkg(ctx, client, *hb.Pkg, *hb.HasSBOM)
+		_, err := model.HasSBOMPkg(ctx, client, *hb.Pkg, *hb.HasSBOM, *hb.Includes)
 		return err
 	}
-	_, err := model.HasSBOMArtifact(ctx, client, *hb.Artifact, *hb.HasSBOM)
+	_, err := model.HasSBOMArtifact(ctx, client, *hb.Artifact, *hb.HasSBOM, *hb.Includes)
 	return err
 }
 

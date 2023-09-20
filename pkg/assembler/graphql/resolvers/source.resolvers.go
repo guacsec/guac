@@ -6,30 +6,37 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/guacsec/guac/pkg/assembler/graphql/helpers"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestSource is the resolver for the ingestSource field.
-func (r *mutationResolver) IngestSource(ctx context.Context, source model.SourceInputSpec) (string, error) {
+func (r *mutationResolver) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
 	ingestedSource, err := r.Backend.IngestSource(ctx, source)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return ingestedSource.ID, err
+	results := helpers.GetSourceAsIds([]*model.Source{ingestedSource})
+	if len(results) != 1 {
+		return nil, fmt.Errorf("could no derive correct package ID information for ingested packages, expected to return 1 but have %d", len(results))
+	}
+	return results[0], nil
 }
 
 // IngestSources is the resolver for the ingestSources field.
-func (r *mutationResolver) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
 	ingestedSources, err := r.Backend.IngestSources(ctx, sources)
-	ingestedSourcesIDS := []string{}
 	if err == nil {
-		for _, source := range ingestedSources {
-			ingestedSourcesIDS = append(ingestedSourcesIDS, source.ID)
+		results := helpers.GetSourceAsIds(ingestedSources)
+		if len(results) != len(ingestedSources) {
+			return nil, fmt.Errorf("could no derive correct package ID information for ingested packages, expected to return 1 but have %d", len(results))
 		}
+		return results, nil
 	}
-	return ingestedSourcesIDS, err
+	return nil, err
 }
 
 // Sources is the resolver for the sources field.

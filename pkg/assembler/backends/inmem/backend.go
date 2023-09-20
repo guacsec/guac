@@ -20,6 +20,9 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"reflect"
+	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -200,4 +203,63 @@ func unlock(m *sync.RWMutex, readOnly bool) {
 	} else {
 		m.Unlock()
 	}
+}
+
+func parseIDs(ids []string) ([]uint32, error) {
+	keys := make([]uint32, 0, len(ids))
+	for _, id := range ids {
+		if key, err := parseID(id); err != nil {
+			return nil, err
+		} else {
+			keys = append(keys, key)
+		}
+	}
+	return keys, nil
+}
+
+func parseID(id string) (uint32, error) {
+	id64, err := strconv.ParseUint(id, 10, 32)
+	return uint32(id64), err
+}
+
+func sortAndRemoveDups(ids []uint32) []uint32 {
+	numIDs := len(ids)
+	if numIDs > 1 {
+		slices.Sort(ids)
+		nextIndex := 1
+		for index := 1; index < numIDs; index++ {
+			currentVal := ids[index]
+			if ids[index-1] != currentVal {
+				ids[nextIndex] = currentVal
+				nextIndex++
+			}
+		}
+		ids = ids[:nextIndex]
+	}
+	return ids
+}
+
+func (c *demoClient) getPackageVersionAndArtifacts(pkgOrArt []uint32) (pkgs []uint32, arts []uint32, err error) {
+	for _, id := range pkgOrArt {
+		switch entry := c.index[id].(type) {
+		case *pkgVersionNode:
+			pkgs = append(pkgs, entry.id)
+		case *artStruct:
+			arts = append(arts, entry.id)
+		default:
+			return nil, nil, fmt.Errorf("unexpected type in package or artifact list: %s", reflect.TypeOf(entry))
+		}
+	}
+
+	return
+}
+
+// IDs should be sorted
+func (c *demoClient) isIDPresent(id string, linkIDs []uint32) bool {
+	linkID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return false
+	}
+	_, found := slices.BinarySearch[[]uint32](linkIDs, uint32(linkID))
+	return found
 }

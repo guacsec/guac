@@ -384,3 +384,55 @@ func (c *demoClient) addOccIfMatch(out []*model.IsOccurrence,
 	}
 	return append(out, o), nil
 }
+
+func (c *demoClient) matchOccurrences(filters []*model.IsOccurrenceSpec, occLinkIDs []uint32 /*, pkgs []uint32, artifacts []uint32*/) bool {
+	var occLinks []*isOccurrenceStruct
+	if len(filters) > 0 {
+		for _, occLinkID := range occLinkIDs {
+			link, err := byID[*isOccurrenceStruct](occLinkID, c)
+			if err != nil {
+				return false
+			}
+			occLinks = append(occLinks, link)
+		}
+
+		for _, filter := range filters {
+			if filter == nil {
+				continue
+			}
+			if filter.ID != nil {
+				// Check by ID if present
+				if !c.isIDPresent(*filter.ID, occLinkIDs) {
+					return false
+				}
+			} else {
+				// Otherwise match spec information
+				match := false
+				for _, link := range occLinks {
+					if !noMatch(filter.Justification, link.justification) &&
+						!noMatch(filter.Origin, link.origin) &&
+						!noMatch(filter.Collector, link.collector) &&
+						c.matchArtifacts([]*model.ArtifactSpec{filter.Artifact}, []uint32{link.artifact}) {
+
+						if filter.Subject != nil {
+							if filter.Subject.Package != nil && !c.matchPackages([]*model.PkgSpec{filter.Subject.Package}, []uint32{link.pkg}) {
+								continue
+							} else if filter.Subject.Source != nil {
+								src, err := c.exactSource(filter.Subject.Source)
+								if err != nil || src == nil {
+									continue
+								}
+							}
+						}
+						match = true
+						break
+					}
+				}
+				if !match {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}

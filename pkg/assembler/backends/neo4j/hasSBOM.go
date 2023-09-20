@@ -187,10 +187,10 @@ func generateModelHasSBOM(subject model.PackageOrArtifact, uri, origin, collecto
 	return &hasSBOM
 }
 
-func (c *neo4jClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
+func (c *neo4jClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (*model.HasSbom, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSbom - IngestHasSbom"))
 }
 
-func (c *neo4jClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
+func (c *neo4jClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]*model.HasSbom, error) {
 	return []*model.HasSbom{}, fmt.Errorf("not implemented: IngestHasSBOMs")
 }

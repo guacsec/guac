@@ -725,6 +725,62 @@ func getPackageIDFromInput(c *demoClient, input model.PkgInputSpec, pkgMatchType
 	return packageID, nil
 }
 
+func (c *demoClient) matchPackages(filter []*model.PkgSpec, pkgs []uint32) bool {
+	pkgs = slices.Clone(pkgs)
+	pkgs = sortAndRemoveDups(pkgs)
+
+	for _, pvSpec := range filter {
+		if pvSpec != nil {
+			if pvSpec.ID != nil {
+				// Check by ID if present
+				if !c.isIDPresent(*pvSpec.ID, pkgs) {
+					return false
+				}
+			} else {
+				// Otherwise match spec information
+				match := false
+				for _, pkgId := range pkgs {
+					id := pkgId
+					pkgVersion, err := byID[*pkgVersionNode](id, c)
+					if err == nil {
+						if noMatch(pvSpec.Subpath, pkgVersion.subpath) || noMatchQualifiers(pvSpec, pkgVersion.qualifiers) || noMatch(pvSpec.Version, pkgVersion.version) {
+							continue
+						}
+						id = pkgVersion.parent
+					}
+					pkgName, err := byID[*pkgVersionStruct](id, c)
+					if err == nil {
+						if noMatch(pvSpec.Name, pkgName.name) {
+							continue
+						}
+						id = pkgName.parent
+					}
+					pkgNamespace, err := byID[*pkgNameStruct](id, c)
+					if err == nil {
+						if noMatch(pvSpec.Namespace, pkgNamespace.namespace) {
+							continue
+						}
+						id = pkgNamespace.parent
+					}
+					pkgType, err := byID[*pkgNamespaceStruct](id, c)
+					if err == nil {
+						if noMatch(pvSpec.Type, pkgType.typeKey) {
+							continue
+						} else {
+							match = true
+							break
+						}
+					}
+				}
+				if !match {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
+
 func getCollectedPackageQualifiers(qualifierMap map[string]string) []*model.PackageQualifier {
 	qualifiers := []*model.PackageQualifier{}
 	for key, val := range qualifierMap {
@@ -755,7 +811,7 @@ func getQualifiersFromFilter(qualifiersSpec []*model.PackageQualifierSpec) map[s
 		return qualifiersMap
 	}
 	for _, kv := range qualifiersSpec {
-		qualifiersMap[kv.Key] = *kv.Value
+		qualifiersMap[kv.Key] = nilToEmpty(kv.Value)
 	}
 	return qualifiersMap
 }

@@ -18,13 +18,21 @@
 # Ingest Source
 
 mutation IngestSource($source: SourceInputSpec!) {
-  ingestSource(source: $source)
+  ingestSource(source: $source) {
+    sourceTypeID
+    sourceNamespaceID
+    sourceNameID
+  }
 }
 
 # Bulk Ingest Sources
 
 mutation IngestSources($sources: [SourceInputSpec!]!) {
-  ingestSources(sources: $sources)
+  ingestSources(sources: $sources) {
+    sourceTypeID
+    sourceNamespaceID
+    sourceNameID
+  }
 }
 
 # Exposes GraphQL queries to retrieve GUAC sources

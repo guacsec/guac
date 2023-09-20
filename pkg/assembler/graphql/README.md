@@ -31,3 +31,7 @@ project.
 ## GraphQL Examples
 
 - `examples`: queries used to test the backend, from the playground
+
+## GraphQL Helpers
+
+- `helpers`: utility functions used within the graphql resolvers

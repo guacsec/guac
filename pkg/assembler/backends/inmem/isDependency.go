@@ -297,19 +297,7 @@ func (c *demoClient) buildIsDependency(link *isDependencyLink, filter *model.IsD
 func (c *demoClient) addDepIfMatch(out []*model.IsDependency,
 	filter *model.IsDependencySpec, link *isDependencyLink) (
 	[]*model.IsDependency, error) {
-	if filter != nil && noMatch(filter.Justification, link.justification) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.VersionRange, link.versionRange) {
-		return out, nil
-	}
-	if filter != nil && filter.DependencyType != nil && *filter.DependencyType != link.dependencyType {
+	if noMatchIsDep(filter, link) {
 		return out, nil
 	}
 
@@ -321,4 +309,56 @@ func (c *demoClient) addDepIfMatch(out []*model.IsDependency,
 		return out, nil
 	}
 	return append(out, foundIsDependency), nil
+}
+
+func noMatchIsDep(filter *model.IsDependencySpec, link *isDependencyLink) bool {
+	if filter != nil {
+		return noMatch(filter.Justification, link.justification) ||
+			noMatch(filter.Origin, link.origin) ||
+			noMatch(filter.Collector, link.collector) ||
+			noMatch(filter.VersionRange, link.versionRange) ||
+			(filter.DependencyType != nil && *filter.DependencyType != link.dependencyType)
+	} else {
+		return false
+	}
+}
+
+func (c *demoClient) matchDependencies(filters []*model.IsDependencySpec, depLinkIDs []uint32) bool {
+	var depLinks []*isDependencyLink
+	if len(filters) > 0 {
+		for _, depLinkID := range depLinkIDs {
+			link, err := byID[*isDependencyLink](depLinkID, c)
+			if err != nil {
+				return false
+			}
+			depLinks = append(depLinks, link)
+		}
+
+		for _, filter := range filters {
+			if filter == nil {
+				continue
+			}
+			if filter.ID != nil {
+				// Check by ID if present
+				if !c.isIDPresent(*filter.ID, depLinkIDs) {
+					return false
+				}
+			} else {
+				// Otherwise match spec information
+				match := false
+				for _, depLink := range depLinks {
+					if !noMatchIsDep(filter, depLink) &&
+						(filter.Package == nil || c.matchPackages([]*model.PkgSpec{filter.Package}, []uint32{depLink.packageID})) &&
+						(filter.DependencyPackage == nil || c.matchPackages([]*model.PkgSpec{filter.DependencyPackage}, []uint32{depLink.depPackageID})) {
+						match = true
+						break
+					}
+				}
+				if !match {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }

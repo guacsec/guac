@@ -35,6 +35,12 @@ type HasSBOM {
   collector: String!
   "Timestamp for SBOM creation"
   knownSince: Time!
+  "Included packages and artifacts"
+  includedSoftware: [PackageOrArtifact!]!
+  "Included dependencies"
+  includedDependencies: [IsDependency!]!
+  "Included occurrences"
+  includedOccurrences: [IsOccurrence!]!
 }
 
 """
@@ -55,9 +61,18 @@ input HasSBOMSpec {
   origin: String
   collector: String
   knownSince: Time
+  includedSoftware: [PackageOrArtifactSpec]!
+  includedDependencies: [IsDependencySpec]!
+  includedOccurrences: [IsOccurrenceSpec]!
 }
 
-"HasSBOMInputSpec is the same as HasSBOM but for mutation input."
+input HasSBOMIncludesInputSpec {
+  software: [ID!]!
+  dependencies: [ID!]!
+  occurrences: [ID!]!
+}
+
+"HasSBOMInputSpec is similar to HasSBOM but for mutation input."
 input HasSBOMInputSpec {
   uri: String!
   algorithm: String!
@@ -78,10 +93,12 @@ extend type Mutation {
   ingestHasSBOM(
     subject: PackageOrArtifactInput!
     hasSBOM: HasSBOMInputSpec!
+    includes: HasSBOMIncludesInputSpec!
   ): ID!
   "Bulk ingest that package or artifact has an SBOM. The returned array of IDs can be a an array of empty string."
   ingestHasSBOMs(
     subjects: PackageOrArtifactInputs!
     hasSBOMs: [HasSBOMInputSpec!]!
+    includes: [HasSBOMIncludesInputSpec!]!
   ): [ID!]!
 }

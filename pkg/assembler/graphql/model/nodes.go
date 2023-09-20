@@ -449,11 +449,23 @@ type HasSbom struct {
 	Collector string `json:"collector"`
 	// Timestamp for SBOM creation
 	KnownSince time.Time `json:"knownSince"`
+	// Included packages and artifacts
+	IncludedSoftware []PackageOrArtifact `json:"includedSoftware"`
+	// Included dependencies
+	IncludedDependencies []*IsDependency `json:"includedDependencies"`
+	// Included occurrences
+	IncludedOccurrences []*IsOccurrence `json:"includedOccurrences"`
 }
 
 func (HasSbom) IsNode() {}
 
-// HasSBOMInputSpec is the same as HasSBOM but for mutation input.
+type HasSBOMIncludesInputSpec struct {
+	Software     []string `json:"software"`
+	Dependencies []string `json:"dependencies"`
+	Occurrences  []string `json:"occurrences"`
+}
+
+// HasSBOMInputSpec is similar to HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
 	URI              string    `json:"uri"`
 	Algorithm        string    `json:"algorithm"`
@@ -471,15 +483,18 @@ type HasSBOMInputSpec struct {
 // If KnownSince is specified, the returned value will be after or equal to the specified time.
 // Any nodes time that is before KnownSince is excluded.
 type HasSBOMSpec struct {
-	ID               *string                `json:"id,omitempty"`
-	Subject          *PackageOrArtifactSpec `json:"subject,omitempty"`
-	URI              *string                `json:"uri,omitempty"`
-	Algorithm        *string                `json:"algorithm,omitempty"`
-	Digest           *string                `json:"digest,omitempty"`
-	DownloadLocation *string                `json:"downloadLocation,omitempty"`
-	Origin           *string                `json:"origin,omitempty"`
-	Collector        *string                `json:"collector,omitempty"`
-	KnownSince       *time.Time             `json:"knownSince,omitempty"`
+	ID                   *string                  `json:"id,omitempty"`
+	Subject              *PackageOrArtifactSpec   `json:"subject,omitempty"`
+	URI                  *string                  `json:"uri,omitempty"`
+	Algorithm            *string                  `json:"algorithm,omitempty"`
+	Digest               *string                  `json:"digest,omitempty"`
+	DownloadLocation     *string                  `json:"downloadLocation,omitempty"`
+	Origin               *string                  `json:"origin,omitempty"`
+	Collector            *string                  `json:"collector,omitempty"`
+	KnownSince           *time.Time               `json:"knownSince,omitempty"`
+	IncludedSoftware     []*PackageOrArtifactSpec `json:"includedSoftware"`
+	IncludedDependencies []*IsDependencySpec      `json:"includedDependencies"`
+	IncludedOccurrences  []*IsOccurrenceSpec      `json:"includedOccurrences"`
 }
 
 // HasSLSA records that a subject node has a SLSA attestation.
@@ -748,6 +763,14 @@ func (Package) IsPackageOrArtifact() {}
 func (Package) IsPackageOrSource() {}
 
 func (Package) IsNode() {}
+
+// The IDs of the ingested package
+type PackageIDs struct {
+	PackageTypeID      string `json:"packageTypeID"`
+	PackageNamespaceID string `json:"packageNamespaceID"`
+	PackageNameID      string `json:"packageNameID"`
+	PackageVersionID   string `json:"packageVersionID"`
+}
 
 // PackageName is a name for packages.
 //
@@ -1255,6 +1278,13 @@ func (Source) IsPackageOrSource() {}
 
 func (Source) IsNode() {}
 
+// The IDs of the ingested pacsourcekage
+type SourceIDs struct {
+	SourceTypeID      string `json:"sourceTypeID"`
+	SourceNamespaceID string `json:"sourceNamespaceID"`
+	SourceNameID      string `json:"sourceNameID"`
+}
+
 // SourceInputSpec specifies a source for mutations.
 //
 // This is different than SourceSpec because we want to encode that all fields
@@ -1651,6 +1681,9 @@ const (
 	EdgeHasMetadataSource                Edge = "HAS_METADATA_SOURCE"
 	EdgeHasSbomArtifact                  Edge = "HAS_SBOM_ARTIFACT"
 	EdgeHasSbomPackage                   Edge = "HAS_SBOM_PACKAGE"
+	EdgeHasSbomIncludedSoftware          Edge = "HAS_SBOM_INCLUDED_SOFTWARE"
+	EdgeHasSbomIncludedDependencies      Edge = "HAS_SBOM_INCLUDED_DEPENDENCIES"
+	EdgeHasSbomIncludedOccurrences       Edge = "HAS_SBOM_INCLUDED_OCCURRENCES"
 	EdgeHasSlsaBuiltBy                   Edge = "HAS_SLSA_BUILT_BY"
 	EdgeHasSlsaMaterials                 Edge = "HAS_SLSA_MATERIALS"
 	EdgeHasSlsaSubject                   Edge = "HAS_SLSA_SUBJECT"
@@ -1725,6 +1758,9 @@ var AllEdge = []Edge{
 	EdgeHasMetadataSource,
 	EdgeHasSbomArtifact,
 	EdgeHasSbomPackage,
+	EdgeHasSbomIncludedSoftware,
+	EdgeHasSbomIncludedDependencies,
+	EdgeHasSbomIncludedOccurrences,
 	EdgeHasSlsaBuiltBy,
 	EdgeHasSlsaMaterials,
 	EdgeHasSlsaSubject,
@@ -1744,7 +1780,7 @@ var AllEdge = []Edge{
 
 func (e Edge) IsValid() bool {
 	switch e {
-	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasMetadata, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeLicenseCertifyLegal, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyLegal, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasMetadata, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyLegal, EdgeSourceCertifyScorecard, EdgeSourceHasMetadata, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourcePointOfContact, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgeVulnerabilityVulnMetadata, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyLegalLicense, EdgeCertifyLegalPackage, EdgeCertifyLegalSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementPackage, EdgeCertifyVexStatementVulnerability, EdgeCertifyVulnPackage, EdgeCertifyVulnVulnerability, EdgeHashEqualArtifact, EdgeHasMetadataArtifact, EdgeHasMetadataPackage, EdgeHasMetadataSource, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgePkgEqualPackage, EdgePointOfContactArtifact, EdgePointOfContactPackage, EdgePointOfContactSource, EdgeVulnEqualVulnerability, EdgeVulnMetadataVulnerability:
+	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasMetadata, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeLicenseCertifyLegal, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyLegal, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasMetadata, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyLegal, EdgeSourceCertifyScorecard, EdgeSourceHasMetadata, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourcePointOfContact, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgeVulnerabilityVulnMetadata, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyLegalLicense, EdgeCertifyLegalPackage, EdgeCertifyLegalSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementPackage, EdgeCertifyVexStatementVulnerability, EdgeCertifyVulnPackage, EdgeCertifyVulnVulnerability, EdgeHashEqualArtifact, EdgeHasMetadataArtifact, EdgeHasMetadataPackage, EdgeHasMetadataSource, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSbomIncludedSoftware, EdgeHasSbomIncludedDependencies, EdgeHasSbomIncludedOccurrences, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgePkgEqualPackage, EdgePointOfContactArtifact, EdgePointOfContactPackage, EdgePointOfContactSource, EdgeVulnEqualVulnerability, EdgeVulnMetadataVulnerability:
 		return true
 	}
 	return false

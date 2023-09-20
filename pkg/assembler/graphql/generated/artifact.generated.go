@@ -37,8 +37,8 @@ type MutationResolver interface {
 	IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error)
 	IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error)
 	IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error)
-	IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (string, error)
-	IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]string, error)
+	IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error)
+	IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error)
 	IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error)
 	IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error)
 	IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error)
@@ -53,12 +53,12 @@ type MutationResolver interface {
 	IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error)
 	IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error)
 	IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error)
-	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (string, error)
-	IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error)
+	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error)
+	IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error)
 	IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error)
 	IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error)
-	IngestSource(ctx context.Context, source model.SourceInputSpec) (string, error)
-	IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]string, error)
+	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error)
+	IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error)
 	IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error)
 	IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error)
 	IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error)
@@ -638,6 +638,15 @@ func (ec *executionContext) field_Mutation_ingestHasSBOM_args(ctx context.Contex
 		}
 	}
 	args["hasSBOM"] = arg1
+	var arg2 model.HasSBOMIncludesInputSpec
+	if tmp, ok := rawArgs["includes"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includes"))
+		arg2, err = ec.unmarshalNHasSBOMIncludesInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includes"] = arg2
 	return args, nil
 }
 
@@ -662,6 +671,15 @@ func (ec *executionContext) field_Mutation_ingestHasSBOMs_args(ctx context.Conte
 		}
 	}
 	args["hasSBOMs"] = arg1
+	var arg2 []*model.HasSBOMIncludesInputSpec
+	if tmp, ok := rawArgs["includes"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includes"))
+		arg2, err = ec.unmarshalNHasSBOMIncludesInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMIncludesInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includes"] = arg2
 	return args, nil
 }
 
@@ -3036,7 +3054,7 @@ func (ec *executionContext) _Mutation_ingestHasSBOM(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestHasSbom(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["hasSBOM"].(model.HasSBOMInputSpec))
+		return ec.resolvers.Mutation().IngestHasSbom(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["hasSBOM"].(model.HasSBOMInputSpec), fc.Args["includes"].(model.HasSBOMIncludesInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3091,7 +3109,7 @@ func (ec *executionContext) _Mutation_ingestHasSBOMs(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestHasSBOMs(rctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["hasSBOMs"].([]*model.HasSBOMInputSpec))
+		return ec.resolvers.Mutation().IngestHasSBOMs(rctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["hasSBOMs"].([]*model.HasSBOMInputSpec), fc.Args["includes"].([]*model.HasSBOMIncludesInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3928,9 +3946,9 @@ func (ec *executionContext) _Mutation_ingestPackage(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.PackageIDs)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNPackageIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageIDs(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestPackage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3940,7 +3958,17 @@ func (ec *executionContext) fieldContext_Mutation_ingestPackage(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			switch field.Name {
+			case "packageTypeID":
+				return ec.fieldContext_PackageIDs_packageTypeID(ctx, field)
+			case "packageNamespaceID":
+				return ec.fieldContext_PackageIDs_packageNamespaceID(ctx, field)
+			case "packageNameID":
+				return ec.fieldContext_PackageIDs_packageNameID(ctx, field)
+			case "packageVersionID":
+				return ec.fieldContext_PackageIDs_packageVersionID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PackageIDs", field.Name)
 		},
 	}
 	defer func() {
@@ -3983,9 +4011,9 @@ func (ec *executionContext) _Mutation_ingestPackages(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.([]*model.PackageIDs)
 	fc.Result = res
-	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalNPackageIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageIDsᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestPackages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3995,7 +4023,17 @@ func (ec *executionContext) fieldContext_Mutation_ingestPackages(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			switch field.Name {
+			case "packageTypeID":
+				return ec.fieldContext_PackageIDs_packageTypeID(ctx, field)
+			case "packageNamespaceID":
+				return ec.fieldContext_PackageIDs_packageNamespaceID(ctx, field)
+			case "packageNameID":
+				return ec.fieldContext_PackageIDs_packageNameID(ctx, field)
+			case "packageVersionID":
+				return ec.fieldContext_PackageIDs_packageVersionID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PackageIDs", field.Name)
 		},
 	}
 	defer func() {
@@ -4148,9 +4186,9 @@ func (ec *executionContext) _Mutation_ingestSource(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.SourceIDs)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNSourceIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceIDs(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestSource(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4160,7 +4198,15 @@ func (ec *executionContext) fieldContext_Mutation_ingestSource(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			switch field.Name {
+			case "sourceTypeID":
+				return ec.fieldContext_SourceIDs_sourceTypeID(ctx, field)
+			case "sourceNamespaceID":
+				return ec.fieldContext_SourceIDs_sourceNamespaceID(ctx, field)
+			case "sourceNameID":
+				return ec.fieldContext_SourceIDs_sourceNameID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SourceIDs", field.Name)
 		},
 	}
 	defer func() {
@@ -4203,9 +4249,9 @@ func (ec *executionContext) _Mutation_ingestSources(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.([]*model.SourceIDs)
 	fc.Result = res
-	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalNSourceIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceIDsᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestSources(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4215,7 +4261,15 @@ func (ec *executionContext) fieldContext_Mutation_ingestSources(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			switch field.Name {
+			case "sourceTypeID":
+				return ec.fieldContext_SourceIDs_sourceTypeID(ctx, field)
+			case "sourceNamespaceID":
+				return ec.fieldContext_SourceIDs_sourceNamespaceID(ctx, field)
+			case "sourceNameID":
+				return ec.fieldContext_SourceIDs_sourceNameID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SourceIDs", field.Name)
 		},
 	}
 	defer func() {
@@ -5238,6 +5292,12 @@ func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, fiel
 				return ec.fieldContext_HasSBOM_collector(ctx, field)
 			case "knownSince":
 				return ec.fieldContext_HasSBOM_knownSince(ctx, field)
+			case "includedSoftware":
+				return ec.fieldContext_HasSBOM_includedSoftware(ctx, field)
+			case "includedDependencies":
+				return ec.fieldContext_HasSBOM_includedDependencies(ctx, field)
+			case "includedOccurrences":
+				return ec.fieldContext_HasSBOM_includedOccurrences(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HasSBOM", field.Name)
 		},
