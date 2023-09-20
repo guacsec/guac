@@ -217,7 +217,7 @@ func (s *Suite) TestOccurrenceHappyPath() {
 		_, err = be.IngestPackage(s.Ctx, *p1)
 		s.Require().NoError(err)
 
-		_, err = be.IngestArtifact(s.Ctx, a1)
+		_, err = be.IngestArtifactID(s.Ctx, a1)
 		s.Require().NoError(err)
 
 		occ, err := be.IngestOccurrence(s.Ctx,
@@ -567,7 +567,7 @@ func (s *Suite) TestOccurrence() {
 			s.Require().NoError(err, "Could not instantiate testing backend")
 
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					s.T().Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
