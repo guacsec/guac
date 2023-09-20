@@ -41,6 +41,8 @@ func (c *arangoClient) Node(ctx context.Context, nodeID string) (model.Node, err
 		return c.buildPackageResponseFromID(ctx, nodeID, nil)
 	case srcNamesStr, srcNamespacesStr, srcTypesStr:
 		return c.buildSourceResponseFromID(ctx, nodeID, nil)
+	case vulnerabilitiesStr, vulnTypesStr:
+		return c.buildVulnResponseByID(ctx, nodeID, nil)
 	}
 	return nil, nil
 }
