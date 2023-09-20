@@ -23,28 +23,28 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func (c *arangoClient) Path(ctx context.Context, source string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
+func (c *arangoClient) Path(ctx context.Context, startNodeID string, targetNodeID string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
 	panic(fmt.Errorf("not implemented: Path"))
 }
 
-func (c *arangoClient) Neighbors(ctx context.Context, source string, usingOnly []model.Edge) ([]model.Node, error) {
+func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly []model.Edge) ([]model.Node, error) {
 	panic(fmt.Errorf("not implemented: Neighbors"))
 }
 
-func (c *arangoClient) Node(ctx context.Context, source string) (model.Node, error) {
-	idSplit := strings.Split(source, "/")
+func (c *arangoClient) Node(ctx context.Context, nodeID string) (model.Node, error) {
+	idSplit := strings.Split(nodeID, "/")
 	if len(idSplit) != 2 {
-		return nil, fmt.Errorf("invalid ID: %s", source)
+		return nil, fmt.Errorf("invalid ID: %s", nodeID)
 	}
 	switch idSplit[0] {
 	case pkgVersionsStr, pkgNamesStr, pkgNamespacesStr, pkgTypesStr:
-		return c.buildPackageResponseFromID(ctx, source, nil)
+		return c.buildPackageResponseFromID(ctx, nodeID, nil)
 	case srcNamesStr, srcNamespacesStr, srcTypesStr:
-		return c.buildSourceResponseFromID(ctx, source, nil)
+		return c.buildSourceResponseFromID(ctx, nodeID, nil)
 	}
 	return nil, nil
 }
 
-func (c *arangoClient) Nodes(ctx context.Context, ids []string) ([]model.Node, error) {
+func (c *arangoClient) Nodes(ctx context.Context, nodeIDs []string) ([]model.Node, error) {
 	panic(fmt.Errorf("not implemented: Nodes"))
 }
