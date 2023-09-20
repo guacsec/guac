@@ -416,12 +416,16 @@ func (u *ArtifactUpsertOne) IDX(ctx context.Context) int {
 // ArtifactCreateBulk is the builder for creating many Artifact entities in bulk.
 type ArtifactCreateBulk struct {
 	config
+	err      error
 	builders []*ArtifactCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Artifact entities in the database.
 func (acb *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
+	if acb.err != nil {
+		return nil, acb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(acb.builders))
 	nodes := make([]*Artifact, len(acb.builders))
 	mutators := make([]Mutator, len(acb.builders))
@@ -609,6 +613,9 @@ func (u *ArtifactUpsertBulk) UpdateDigest() *ArtifactUpsertBulk {
 
 // Exec executes the query.
 func (u *ArtifactUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ArtifactCreateBulk instead", i)
