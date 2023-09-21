@@ -41,7 +41,7 @@ dockers:
       - "--builder={{ .Env.DOCKER_CONTEXT }}"
 
 docker_manifests:
-  - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:nightly"
+  - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}"
     image_templates:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-arm64"
@@ -214,7 +214,6 @@ changelog:
       - "^test:"
 
 # Anything above this line should be identical to .goreleaser.yaml 
-# EXCEPT - dockers.docker_manifests.name_template
 # The following are specifically for nightly build
 # Without Goreleaser Pro, we have to replicate this config file for different builds
 release:
