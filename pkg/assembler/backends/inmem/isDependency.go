@@ -192,9 +192,9 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 			search = append(search, pkg.isDependencyLinks...)
 		}
 	}
-	if !foundOne && filter != nil && filter.DependentPackage != nil {
-		if filter.DependentPackage.Version == nil {
-			exactPackage, err := c.exactPackageName(filter.DependentPackage)
+	if !foundOne && filter != nil && filter.DependencyPackage != nil {
+		if filter.DependencyPackage.Version == nil {
+			exactPackage, err := c.exactPackageName(filter.DependencyPackage)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -254,9 +254,9 @@ func (c *demoClient) buildIsDependency(link *isDependencyLink, filter *model.IsD
 			return nil, err
 		}
 	}
-	if filter != nil && filter.DependentPackage != nil {
-		depPkgFilter := &model.PkgSpec{Type: filter.DependentPackage.Type, Namespace: filter.DependentPackage.Namespace,
-			Name: filter.DependentPackage.Name}
+	if filter != nil && filter.DependencyPackage != nil {
+		depPkgFilter := &model.PkgSpec{Type: filter.DependencyPackage.Type, Namespace: filter.DependencyPackage.Namespace,
+			Name: filter.DependencyPackage.Name}
 		dep, err = c.buildPackageResponse(link.depPackageID, depPkgFilter)
 		if err != nil {
 			return nil, err
@@ -282,14 +282,14 @@ func (c *demoClient) buildIsDependency(link *isDependencyLink, filter *model.IsD
 	}
 
 	foundIsDependency := model.IsDependency{
-		ID:               nodeID(link.id),
-		Package:          p,
-		DependentPackage: dep,
-		VersionRange:     link.versionRange,
-		DependencyType:   link.dependencyType,
-		Justification:    link.justification,
-		Origin:           link.origin,
-		Collector:        link.collector,
+		ID:                nodeID(link.id),
+		Package:           p,
+		DependencyPackage: dep,
+		VersionRange:      link.versionRange,
+		DependencyType:    link.dependencyType,
+		Justification:     link.justification,
+		Origin:            link.origin,
+		Collector:         link.collector,
 	}
 	return &foundIsDependency, nil
 }

@@ -568,7 +568,7 @@ type IsDependency struct {
 	// Package that has the dependency
 	Package *Package `json:"package"`
 	// Package for the dependency; MUST be PackageName or PackageVersion
-	DependentPackage *Package `json:"dependentPackage"`
+	DependencyPackage *Package `json:"dependencyPackage"`
 	// Version range for the dependency link, required if depedentPackage points to PackageName
 	VersionRange string `json:"versionRange"`
 	// Type of dependency
@@ -598,16 +598,16 @@ type IsDependencyInputSpec struct {
 // To obtain the list of dependency packages, caller must fill in the package
 // field.
 //
-// Dependent packages must be defined at PackageName, not PackageVersion.
+// Dependency packages must be defined at PackageName, not PackageVersion.
 type IsDependencySpec struct {
-	ID               *string         `json:"id,omitempty"`
-	Package          *PkgSpec        `json:"package,omitempty"`
-	DependentPackage *PkgSpec        `json:"dependentPackage,omitempty"`
-	VersionRange     *string         `json:"versionRange,omitempty"`
-	DependencyType   *DependencyType `json:"dependencyType,omitempty"`
-	Justification    *string         `json:"justification,omitempty"`
-	Origin           *string         `json:"origin,omitempty"`
-	Collector        *string         `json:"collector,omitempty"`
+	ID                *string         `json:"id,omitempty"`
+	Package           *PkgSpec        `json:"package,omitempty"`
+	DependencyPackage *PkgSpec        `json:"dependencyPackage,omitempty"`
+	VersionRange      *string         `json:"versionRange,omitempty"`
+	DependencyType    *DependencyType `json:"dependencyType,omitempty"`
+	Justification     *string         `json:"justification,omitempty"`
+	Origin            *string         `json:"origin,omitempty"`
+	Collector         *string         `json:"collector,omitempty"`
 }
 
 // IsOccurrence is an attestation to link an artifact to a package or source.

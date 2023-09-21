@@ -241,7 +241,7 @@ func exploreIsDependencyFromDepPkg(ctx context.Context, gqlClient graphql.Client
 	}
 
 	path = append(path, isDependency.Id)
-	targetDepPkgVersion := len(isDependency.DependentPackage.Namespaces[0].Names[0].Versions) > 0
+	targetDepPkgVersion := len(isDependency.DependencyPackage.Namespaces[0].Names[0].Versions) > 0
 
 	if !targetDepPkgVersion {
 		doesRangeInclude, err := depversion.DoesRangeInclude(q.nowNode.nodeVersions, isDependency.VersionRange)

@@ -5494,8 +5494,8 @@ func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context,
 				return ec.fieldContext_IsDependency_id(ctx, field)
 			case "package":
 				return ec.fieldContext_IsDependency_package(ctx, field)
-			case "dependentPackage":
-				return ec.fieldContext_IsDependency_dependentPackage(ctx, field)
+			case "dependencyPackage":
+				return ec.fieldContext_IsDependency_dependencyPackage(ctx, field)
 			case "versionRange":
 				return ec.fieldContext_IsDependency_versionRange(ctx, field)
 			case "dependencyType":

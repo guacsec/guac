@@ -3740,7 +3740,7 @@ type AllIsDependencyTree struct {
 	// Package that has the dependency
 	Package AllIsDependencyTreePackage `json:"package"`
 	// Package for the dependency; MUST be PackageName or PackageVersion
-	DependentPackage AllIsDependencyTreeDependentPackage `json:"dependentPackage"`
+	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
 	// Type of dependency
 	DependencyType DependencyType `json:"dependencyType"`
 	// Version range for the dependency link, required if depedentPackage points to PackageName
@@ -3760,9 +3760,9 @@ func (v *AllIsDependencyTree) GetJustification() string { return v.Justification
 // GetPackage returns AllIsDependencyTree.Package, and is useful for accessing the field via an interface.
 func (v *AllIsDependencyTree) GetPackage() AllIsDependencyTreePackage { return v.Package }
 
-// GetDependentPackage returns AllIsDependencyTree.DependentPackage, and is useful for accessing the field via an interface.
-func (v *AllIsDependencyTree) GetDependentPackage() AllIsDependencyTreeDependentPackage {
-	return v.DependentPackage
+// GetDependencyPackage returns AllIsDependencyTree.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *AllIsDependencyTree) GetDependencyPackage() AllIsDependencyTreeDependencyPackage {
+	return v.DependencyPackage
 }
 
 // GetDependencyType returns AllIsDependencyTree.DependencyType, and is useful for accessing the field via an interface.
@@ -3777,7 +3777,7 @@ func (v *AllIsDependencyTree) GetOrigin() string { return v.Origin }
 // GetCollector returns AllIsDependencyTree.Collector, and is useful for accessing the field via an interface.
 func (v *AllIsDependencyTree) GetCollector() string { return v.Collector }
 
-// AllIsDependencyTreeDependentPackage includes the requested fields of the GraphQL type Package.
+// AllIsDependencyTreeDependencyPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
 //
 // Package represents the root of the package trie/tree.
@@ -3794,32 +3794,32 @@ func (v *AllIsDependencyTree) GetCollector() string { return v.Collector }
 //
 // Since this node is at the root of the package trie, it is named Package, not
 // PackageType.
-type AllIsDependencyTreeDependentPackage struct {
+type AllIsDependencyTreeDependencyPackage struct {
 	AllPkgTree `json:"-"`
 }
 
-// GetId returns AllIsDependencyTreeDependentPackage.Id, and is useful for accessing the field via an interface.
-func (v *AllIsDependencyTreeDependentPackage) GetId() string { return v.AllPkgTree.Id }
+// GetId returns AllIsDependencyTreeDependencyPackage.Id, and is useful for accessing the field via an interface.
+func (v *AllIsDependencyTreeDependencyPackage) GetId() string { return v.AllPkgTree.Id }
 
-// GetType returns AllIsDependencyTreeDependentPackage.Type, and is useful for accessing the field via an interface.
-func (v *AllIsDependencyTreeDependentPackage) GetType() string { return v.AllPkgTree.Type }
+// GetType returns AllIsDependencyTreeDependencyPackage.Type, and is useful for accessing the field via an interface.
+func (v *AllIsDependencyTreeDependencyPackage) GetType() string { return v.AllPkgTree.Type }
 
-// GetNamespaces returns AllIsDependencyTreeDependentPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *AllIsDependencyTreeDependentPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+// GetNamespaces returns AllIsDependencyTreeDependencyPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *AllIsDependencyTreeDependencyPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
 	return v.AllPkgTree.Namespaces
 }
 
-func (v *AllIsDependencyTreeDependentPackage) UnmarshalJSON(b []byte) error {
+func (v *AllIsDependencyTreeDependencyPackage) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
 		return nil
 	}
 
 	var firstPass struct {
-		*AllIsDependencyTreeDependentPackage
+		*AllIsDependencyTreeDependencyPackage
 		graphql.NoUnmarshalJSON
 	}
-	firstPass.AllIsDependencyTreeDependentPackage = v
+	firstPass.AllIsDependencyTreeDependencyPackage = v
 
 	err := json.Unmarshal(b, &firstPass)
 	if err != nil {
@@ -3834,7 +3834,7 @@ func (v *AllIsDependencyTreeDependentPackage) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type __premarshalAllIsDependencyTreeDependentPackage struct {
+type __premarshalAllIsDependencyTreeDependencyPackage struct {
 	Id string `json:"id"`
 
 	Type string `json:"type"`
@@ -3842,7 +3842,7 @@ type __premarshalAllIsDependencyTreeDependentPackage struct {
 	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
 }
 
-func (v *AllIsDependencyTreeDependentPackage) MarshalJSON() ([]byte, error) {
+func (v *AllIsDependencyTreeDependencyPackage) MarshalJSON() ([]byte, error) {
 	premarshaled, err := v.__premarshalJSON()
 	if err != nil {
 		return nil, err
@@ -3850,8 +3850,8 @@ func (v *AllIsDependencyTreeDependentPackage) MarshalJSON() ([]byte, error) {
 	return json.Marshal(premarshaled)
 }
 
-func (v *AllIsDependencyTreeDependentPackage) __premarshalJSON() (*__premarshalAllIsDependencyTreeDependentPackage, error) {
-	var retval __premarshalAllIsDependencyTreeDependentPackage
+func (v *AllIsDependencyTreeDependencyPackage) __premarshalJSON() (*__premarshalAllIsDependencyTreeDependencyPackage, error) {
+	var retval __premarshalAllIsDependencyTreeDependencyPackage
 
 	retval.Id = v.AllPkgTree.Id
 	retval.Type = v.AllPkgTree.Type
@@ -9241,9 +9241,9 @@ func (v *NeighborsNeighborsIsDependency) GetPackage() AllIsDependencyTreePackage
 	return v.AllIsDependencyTree.Package
 }
 
-// GetDependentPackage returns NeighborsNeighborsIsDependency.DependentPackage, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsIsDependency) GetDependentPackage() AllIsDependencyTreeDependentPackage {
-	return v.AllIsDependencyTree.DependentPackage
+// GetDependencyPackage returns NeighborsNeighborsIsDependency.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetDependencyPackage() AllIsDependencyTreeDependencyPackage {
+	return v.AllIsDependencyTree.DependencyPackage
 }
 
 // GetDependencyType returns NeighborsNeighborsIsDependency.DependencyType, and is useful for accessing the field via an interface.
@@ -9298,7 +9298,7 @@ type __premarshalNeighborsNeighborsIsDependency struct {
 
 	Package AllIsDependencyTreePackage `json:"package"`
 
-	DependentPackage AllIsDependencyTreeDependentPackage `json:"dependentPackage"`
+	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
 
 	DependencyType DependencyType `json:"dependencyType"`
 
@@ -9324,7 +9324,7 @@ func (v *NeighborsNeighborsIsDependency) __premarshalJSON() (*__premarshalNeighb
 	retval.Id = v.AllIsDependencyTree.Id
 	retval.Justification = v.AllIsDependencyTree.Justification
 	retval.Package = v.AllIsDependencyTree.Package
-	retval.DependentPackage = v.AllIsDependencyTree.DependentPackage
+	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
 	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
@@ -12609,9 +12609,9 @@ func (v *NodeNodeIsDependency) GetPackage() AllIsDependencyTreePackage {
 	return v.AllIsDependencyTree.Package
 }
 
-// GetDependentPackage returns NodeNodeIsDependency.DependentPackage, and is useful for accessing the field via an interface.
-func (v *NodeNodeIsDependency) GetDependentPackage() AllIsDependencyTreeDependentPackage {
-	return v.AllIsDependencyTree.DependentPackage
+// GetDependencyPackage returns NodeNodeIsDependency.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *NodeNodeIsDependency) GetDependencyPackage() AllIsDependencyTreeDependencyPackage {
+	return v.AllIsDependencyTree.DependencyPackage
 }
 
 // GetDependencyType returns NodeNodeIsDependency.DependencyType, and is useful for accessing the field via an interface.
@@ -12662,7 +12662,7 @@ type __premarshalNodeNodeIsDependency struct {
 
 	Package AllIsDependencyTreePackage `json:"package"`
 
-	DependentPackage AllIsDependencyTreeDependentPackage `json:"dependentPackage"`
+	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
 
 	DependencyType DependencyType `json:"dependencyType"`
 
@@ -12688,7 +12688,7 @@ func (v *NodeNodeIsDependency) __premarshalJSON() (*__premarshalNodeNodeIsDepend
 	retval.Id = v.AllIsDependencyTree.Id
 	retval.Justification = v.AllIsDependencyTree.Justification
 	retval.Package = v.AllIsDependencyTree.Package
-	retval.DependentPackage = v.AllIsDependencyTree.DependentPackage
+	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
 	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
@@ -15061,9 +15061,9 @@ func (v *NodesNodesIsDependency) GetPackage() AllIsDependencyTreePackage {
 	return v.AllIsDependencyTree.Package
 }
 
-// GetDependentPackage returns NodesNodesIsDependency.DependentPackage, and is useful for accessing the field via an interface.
-func (v *NodesNodesIsDependency) GetDependentPackage() AllIsDependencyTreeDependentPackage {
-	return v.AllIsDependencyTree.DependentPackage
+// GetDependencyPackage returns NodesNodesIsDependency.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *NodesNodesIsDependency) GetDependencyPackage() AllIsDependencyTreeDependencyPackage {
+	return v.AllIsDependencyTree.DependencyPackage
 }
 
 // GetDependencyType returns NodesNodesIsDependency.DependencyType, and is useful for accessing the field via an interface.
@@ -15114,7 +15114,7 @@ type __premarshalNodesNodesIsDependency struct {
 
 	Package AllIsDependencyTreePackage `json:"package"`
 
-	DependentPackage AllIsDependencyTreeDependentPackage `json:"dependentPackage"`
+	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
 
 	DependencyType DependencyType `json:"dependencyType"`
 
@@ -15140,7 +15140,7 @@ func (v *NodesNodesIsDependency) __premarshalJSON() (*__premarshalNodesNodesIsDe
 	retval.Id = v.AllIsDependencyTree.Id
 	retval.Justification = v.AllIsDependencyTree.Justification
 	retval.Package = v.AllIsDependencyTree.Package
-	retval.DependentPackage = v.AllIsDependencyTree.DependentPackage
+	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
 	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
@@ -18511,9 +18511,9 @@ func (v *PathPathIsDependency) GetPackage() AllIsDependencyTreePackage {
 	return v.AllIsDependencyTree.Package
 }
 
-// GetDependentPackage returns PathPathIsDependency.DependentPackage, and is useful for accessing the field via an interface.
-func (v *PathPathIsDependency) GetDependentPackage() AllIsDependencyTreeDependentPackage {
-	return v.AllIsDependencyTree.DependentPackage
+// GetDependencyPackage returns PathPathIsDependency.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetDependencyPackage() AllIsDependencyTreeDependencyPackage {
+	return v.AllIsDependencyTree.DependencyPackage
 }
 
 // GetDependencyType returns PathPathIsDependency.DependencyType, and is useful for accessing the field via an interface.
@@ -18564,7 +18564,7 @@ type __premarshalPathPathIsDependency struct {
 
 	Package AllIsDependencyTreePackage `json:"package"`
 
-	DependentPackage AllIsDependencyTreeDependentPackage `json:"dependentPackage"`
+	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
 
 	DependencyType DependencyType `json:"dependencyType"`
 
@@ -18590,7 +18590,7 @@ func (v *PathPathIsDependency) __premarshalJSON() (*__premarshalPathPathIsDepend
 	retval.Id = v.AllIsDependencyTree.Id
 	retval.Justification = v.AllIsDependencyTree.Justification
 	retval.Package = v.AllIsDependencyTree.Package
-	retval.DependentPackage = v.AllIsDependencyTree.DependentPackage
+	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
 	retval.DependencyType = v.AllIsDependencyTree.DependencyType
 	retval.VersionRange = v.AllIsDependencyTree.VersionRange
 	retval.Origin = v.AllIsDependencyTree.Origin
@@ -24712,7 +24712,7 @@ fragment AllIsDependencyTree on IsDependency {
 	package {
 		... AllPkgTree
 	}
-	dependentPackage {
+	dependencyPackage {
 		... AllPkgTree
 	}
 	dependencyType
@@ -25171,7 +25171,7 @@ fragment AllIsDependencyTree on IsDependency {
 	package {
 		... AllPkgTree
 	}
-	dependentPackage {
+	dependencyPackage {
 		... AllPkgTree
 	}
 	dependencyType
@@ -25628,7 +25628,7 @@ fragment AllIsDependencyTree on IsDependency {
 	package {
 		... AllPkgTree
 	}
-	dependentPackage {
+	dependencyPackage {
 		... AllPkgTree
 	}
 	dependencyType
@@ -26314,7 +26314,7 @@ fragment AllIsDependencyTree on IsDependency {
 	package {
 		... AllPkgTree
 	}
-	dependentPackage {
+	dependencyPackage {
 		... AllPkgTree
 	}
 	dependencyType

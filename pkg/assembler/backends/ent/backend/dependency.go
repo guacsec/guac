@@ -39,16 +39,16 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 		optionalPredicate(spec.Origin, dependency.Origin),
 		optionalPredicate(spec.Collector, dependency.Collector),
 	)
-	if spec.DependentPackage != nil {
-		if spec.DependentPackage.Version == nil {
+	if spec.DependencyPackage != nil {
+		if spec.DependencyPackage.Version == nil {
 			query.Where(
 				dependency.Or(
-					dependency.HasDependentPackageNameWith(packageNameQuery(spec.DependentPackage)),
-					dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependentPackage)),
+					dependency.HasDependentPackageNameWith(packageNameQuery(spec.DependencyPackage)),
+					dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependencyPackage)),
 				),
 			)
 		} else {
-			query.Where(dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependentPackage)))
+			query.Where(dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependencyPackage)))
 		}
 	}
 	if spec.Package != nil {
