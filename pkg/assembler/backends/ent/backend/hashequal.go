@@ -67,7 +67,7 @@ func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.Ar
 	for i := range hashEquals {
 		he, err := b.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestHashEquals failed with err: %v", err)
+			return nil, gqlerror.Errorf("IngestHashEquals failed for elements #%v with err: %v", i, err)
 		}
 		result = append(result, he)
 	}
