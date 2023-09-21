@@ -78,7 +78,7 @@ func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.Packa
 		}
 		cb, err := b.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestPkgEquals failed with err: %v", err)
+			return nil, gqlerror.Errorf("IngestCertifyBads failed with err: %v", err)
 		}
 		result = append(result, cb)
 	}
@@ -110,7 +110,7 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 		}
 		cg, err := b.IngestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i])
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestPkgEquals failed with err: %v", err)
+			return nil, gqlerror.Errorf("IngestCertifyGoods failed with err: %v", err)
 		}
 		result = append(result, cg)
 	}
