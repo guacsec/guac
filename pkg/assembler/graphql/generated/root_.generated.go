@@ -153,14 +153,14 @@ type ComplexityRoot struct {
 	}
 
 	IsDependency struct {
-		Collector        func(childComplexity int) int
-		DependencyType   func(childComplexity int) int
-		DependentPackage func(childComplexity int) int
-		ID               func(childComplexity int) int
-		Justification    func(childComplexity int) int
-		Origin           func(childComplexity int) int
-		Package          func(childComplexity int) int
-		VersionRange     func(childComplexity int) int
+		Collector         func(childComplexity int) int
+		DependencyPackage func(childComplexity int) int
+		DependencyType    func(childComplexity int) int
+		ID                func(childComplexity int) int
+		Justification     func(childComplexity int) int
+		Origin            func(childComplexity int) int
+		Package           func(childComplexity int) int
+		VersionRange      func(childComplexity int) int
 	}
 
 	IsOccurrence struct {
@@ -939,19 +939,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsDependency.Collector(childComplexity), true
 
+	case "IsDependency.dependencyPackage":
+		if e.complexity.IsDependency.DependencyPackage == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.DependencyPackage(childComplexity), true
+
 	case "IsDependency.dependencyType":
 		if e.complexity.IsDependency.DependencyType == nil {
 			break
 		}
 
 		return e.complexity.IsDependency.DependencyType(childComplexity), true
-
-	case "IsDependency.dependentPackage":
-		if e.complexity.IsDependency.DependentPackage == nil {
-			break
-		}
-
-		return e.complexity.IsDependency.DependentPackage(childComplexity), true
 
 	case "IsDependency.id":
 		if e.complexity.IsDependency.ID == nil {
@@ -4063,13 +4063,13 @@ enum DependencyType {
   UNKNOWN
 }
 
-"IsDependency is an attestation to record that a package depends on another."
+"IsDependency is an attestation to record that a package depends on another. "
 type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST be PackageName or PackageVersion"
-  dependentPackage: Package!
+  "Package for the dependency; MUST be PackageName or PackageVersion "
+  dependencyPackage: Package!
   "Version range for the dependency link, required if depedentPackage points to PackageName"
   versionRange: String!
   "Type of dependency"
@@ -4088,12 +4088,12 @@ IsDependencySpec allows filtering the list of dependencies to return.
 To obtain the list of dependency packages, caller must fill in the package
 field.
 
-Dependent packages must be defined at PackageName, not PackageVersion.
+Dependency packages must be defined at PackageName, not PackageVersion.
 """
 input IsDependencySpec {
   id: ID
   package: PkgSpec
-  dependentPackage: PkgSpec
+  dependencyPackage: PkgSpec
   versionRange: String
   dependencyType: DependencyType
   justification: String

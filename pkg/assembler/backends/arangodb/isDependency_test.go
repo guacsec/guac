@@ -80,9 +80,9 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P1out,
-					DependentPackage: testdata.P2outName,
-					Justification:    "test justification",
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+					Justification:     "test justification",
 				},
 			},
 		},
@@ -112,9 +112,9 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P1out,
-					DependentPackage: testdata.P2outName,
-					Justification:    "test justification",
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+					Justification:     "test justification",
 				},
 			},
 		},
@@ -144,9 +144,9 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P1out,
-					DependentPackage: testdata.P2outName,
-					Justification:    "test justification",
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+					Justification:     "test justification",
 				},
 			},
 		},
@@ -176,9 +176,9 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P1out,
-					DependentPackage: testdata.P2outName,
-					Justification:    "test justification one",
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+					Justification:     "test justification one",
 				},
 			},
 		},
@@ -207,8 +207,8 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P2outName,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P2outName,
 				},
 			},
 		},
@@ -230,14 +230,14 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Name: ptrfrom.String("openssl"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P4outName,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P4outName,
 				},
 			},
 		},
@@ -259,14 +259,14 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Type: ptrfrom.String("conan"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P4outName,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P4outName,
 				},
 			},
 		},
@@ -288,14 +288,14 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Namespace: ptrfrom.String("openssl.org"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P4outName,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P4outName,
 				},
 			},
 		},
@@ -317,14 +317,14 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Version: ptrfrom.String("3.0.3"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P4out,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P4out,
 				},
 			},
 		},
@@ -346,14 +346,14 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Subpath: ptrfrom.String("saved_model_cli.py"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P3out,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P3out,
 				},
 			},
 		},
@@ -375,18 +375,18 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					MatchOnlyEmptyQualifiers: ptrfrom.Bool(true),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P4out,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P4out,
 				},
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P3out,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P3out,
 				},
 			},
 		},
@@ -408,7 +408,7 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					MatchOnlyEmptyQualifiers: ptrfrom.Bool(false),
 					Qualifiers: []*model.PackageQualifierSpec{
 						{
@@ -420,8 +420,8 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P5out,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P5out,
 				},
 			},
 		},
@@ -443,7 +443,7 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Qualifiers: []*model.PackageQualifierSpec{
 						{
 							Key:   "test",
@@ -454,8 +454,8 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P5out,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P5out,
 				},
 			},
 		},
@@ -489,8 +489,8 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P5out,
-					DependentPackage: testdata.P2out,
+					Package:           testdata.P5out,
+					DependencyPackage: testdata.P2out,
 				},
 			},
 		},
@@ -519,8 +519,8 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P3out,
-					DependentPackage: testdata.P1outName,
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P1outName,
 				},
 			},
 		},
@@ -545,14 +545,14 @@ func TestIsDependency(t *testing.T) {
 				Package: &model.PkgSpec{
 					Subpath: ptrfrom.String("saved_model_cli.py"),
 				},
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Name: ptrfrom.String("openssl"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P3out,
-					DependentPackage: testdata.P4outName,
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P4outName,
 				},
 			},
 		},
@@ -612,8 +612,8 @@ func TestIsDependency(t *testing.T) {
 			QueryID: true,
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P1out,
-					DependentPackage: testdata.P2outName,
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
 				},
 			},
 		},
@@ -643,9 +643,9 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P1out,
-					DependentPackage: testdata.P1outName,
-					VersionRange:     "1-3",
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P1outName,
+					VersionRange:      "1-3",
 				},
 			},
 		},
@@ -675,9 +675,9 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P1outName,
-					DependencyType:   model.DependencyTypeIndirect,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P1outName,
+					DependencyType:    model.DependencyTypeIndirect,
 				},
 			},
 		},
@@ -730,17 +730,17 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P3out,
-					DependentPackage: testdata.P2out,
-					Justification:    "test justification",
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P2out,
+					Justification:     "test justification",
 				},
 				{
-					Package:          testdata.P3out,
-					DependentPackage: testdata.P4outName,
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P4outName,
 				},
 				{
-					Package:          testdata.P3out,
-					DependentPackage: testdata.P1outName,
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P1outName,
 				},
 			},
 		},
@@ -758,16 +758,16 @@ func TestIsDependency(t *testing.T) {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Name: ptrfrom.String("openssl"),
 				},
 				Justification: ptrfrom.String("test justification name only"),
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P3out,
-					DependentPackage: testdata.P4outName,
-					Justification:    "test justification name only",
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P4outName,
+					Justification:     "test justification name only",
 				},
 			},
 		},
@@ -797,14 +797,14 @@ func TestIsDependency(t *testing.T) {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P3out,
-					DependentPackage: testdata.P2out,
-					Justification:    "test justification return specific",
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P2out,
+					Justification:     "test justification return specific",
 				},
 				{
-					Package:          testdata.P3out,
-					DependentPackage: testdata.P2outName,
-					Justification:    "test justification return specific",
+					Package:           testdata.P3out,
+					DependencyPackage: testdata.P2outName,
+					Justification:     "test justification return specific",
 				},
 			},
 		},
@@ -828,8 +828,8 @@ func TestIsDependency(t *testing.T) {
 			QueryPkgID: true,
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P4out,
-					DependentPackage: testdata.P2out,
+					Package:           testdata.P4out,
+					DependencyPackage: testdata.P2out,
 				},
 			},
 		},
@@ -853,8 +853,8 @@ func TestIsDependency(t *testing.T) {
 			QueryDepPkgID: true,
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P4out,
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P4out,
 				},
 			},
 		},
@@ -891,8 +891,8 @@ func TestIsDependency(t *testing.T) {
 				}
 				if test.QueryDepPkgID {
 					test.Query = &model.IsDependencySpec{
-						DependentPackage: &model.PkgSpec{
-							ID: ptrfrom.String(found.DependentPackage.Namespaces[0].Names[0].Versions[0].ID),
+						DependencyPackage: &model.PkgSpec{
+							ID: ptrfrom.String(found.DependencyPackage.Namespaces[0].Names[0].Versions[0].ID),
 						},
 					}
 				}
@@ -954,14 +954,14 @@ func TestIsDependencies(t *testing.T) {
 			}},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P1out,
-					DependentPackage: testdata.P2outName,
-					Justification:    "test justification",
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+					Justification:     "test justification",
 				},
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P4outName,
-					Justification:    "test justification",
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P4outName,
+					Justification:     "test justification",
 				},
 			},
 		},
@@ -983,14 +983,14 @@ func TestIsDependencies(t *testing.T) {
 			}},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          testdata.P1out,
-					DependentPackage: testdata.P2out,
-					Justification:    "test justification",
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2out,
+					Justification:     "test justification",
 				},
 				{
-					Package:          testdata.P2out,
-					DependentPackage: testdata.P4out,
-					Justification:    "test justification",
+					Package:           testdata.P2out,
+					DependencyPackage: testdata.P4out,
+					Justification:     "test justification",
 				},
 			},
 		},

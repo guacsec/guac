@@ -27,13 +27,13 @@ enum DependencyType {
   UNKNOWN
 }
 
-"IsDependency is an attestation to record that a package depends on another."
+"IsDependency is an attestation to record that a package depends on another. "
 type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST be PackageName or PackageVersion"
-  dependentPackage: Package!
+  "Package for the dependency; MUST be PackageName or PackageVersion "
+  dependencyPackage: Package!
   "Version range for the dependency link, required if depedentPackage points to PackageName"
   versionRange: String!
   "Type of dependency"
@@ -52,12 +52,12 @@ IsDependencySpec allows filtering the list of dependencies to return.
 To obtain the list of dependency packages, caller must fill in the package
 field.
 
-Dependent packages must be defined at PackageName, not PackageVersion.
+Dependency packages must be defined at PackageName, not PackageVersion.
 """
 input IsDependencySpec {
   id: ID
   package: PkgSpec
-  dependentPackage: PkgSpec
+  dependencyPackage: PkgSpec
   versionRange: String
   dependencyType: DependencyType
   justification: String

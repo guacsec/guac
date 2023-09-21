@@ -30,12 +30,12 @@ const (
 )
 
 func checkPkgNameDependency(isDependencySpec *model.IsDependencySpec) bool {
-	if isDependencySpec.DependentPackage != nil {
-		if isDependencySpec.DependentPackage.ID != nil ||
-			isDependencySpec.DependentPackage.Version != nil ||
-			isDependencySpec.DependentPackage.Subpath != nil ||
-			isDependencySpec.DependentPackage.Qualifiers != nil ||
-			isDependencySpec.DependentPackage.MatchOnlyEmptyQualifiers != nil {
+	if isDependencySpec.DependencyPackage != nil {
+		if isDependencySpec.DependencyPackage.ID != nil ||
+			isDependencySpec.DependencyPackage.Version != nil ||
+			isDependencySpec.DependencyPackage.Subpath != nil ||
+			isDependencySpec.DependencyPackage.Qualifiers != nil ||
+			isDependencySpec.DependencyPackage.MatchOnlyEmptyQualifiers != nil {
 			return false
 		}
 	}
@@ -221,66 +221,66 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 		arangoQueryBuilder.filter("isDependency", collector, "==", "@"+collector)
 		queryValues[collector] = *isDependencySpec.Collector
 	}
-	if isDependencySpec.DependentPackage != nil {
+	if isDependencySpec.DependencyPackage != nil {
 		if !queryDepPkgVersion {
 			arangoQueryBuilder.forOutBound(isDependencyDepPkgNameEdgesStr, "depName", "isDependency")
-			if isDependencySpec.DependentPackage.Name != nil {
+			if isDependencySpec.DependencyPackage.Name != nil {
 				arangoQueryBuilder.filter("depName", "name", "==", "@depName")
-				queryValues["depName"] = *isDependencySpec.DependentPackage.Name
+				queryValues["depName"] = *isDependencySpec.DependencyPackage.Name
 			}
 			arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
-			if isDependencySpec.DependentPackage.Namespace != nil {
+			if isDependencySpec.DependencyPackage.Namespace != nil {
 				arangoQueryBuilder.filter("depNamespace", "namespace", "==", "@depNamespace")
-				queryValues["depNamespace"] = *isDependencySpec.DependentPackage.Namespace
+				queryValues["depNamespace"] = *isDependencySpec.DependencyPackage.Namespace
 			}
 			arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
-			if isDependencySpec.DependentPackage.Type != nil {
+			if isDependencySpec.DependencyPackage.Type != nil {
 				arangoQueryBuilder.filter("depType", "type", "==", "@depType")
-				queryValues["depType"] = *isDependencySpec.DependentPackage.Type
+				queryValues["depType"] = *isDependencySpec.DependencyPackage.Type
 			}
 		} else {
 			arangoQueryBuilder.forOutBound(isDependencyDepPkgVersionEdgesStr, "depVersion", "isDependency")
-			if isDependencySpec.DependentPackage.ID != nil {
+			if isDependencySpec.DependencyPackage.ID != nil {
 				arangoQueryBuilder.filter("depVersion", "_id", "==", "@depVersionID")
-				queryValues["depVersionID"] = *isDependencySpec.DependentPackage.ID
+				queryValues["depVersionID"] = *isDependencySpec.DependencyPackage.ID
 			}
-			if isDependencySpec.DependentPackage.Version != nil {
+			if isDependencySpec.DependencyPackage.Version != nil {
 				arangoQueryBuilder.filter("depVersion", "version", "==", "@depVersionValue")
-				queryValues["depVersionValue"] = *isDependencySpec.DependentPackage.Version
+				queryValues["depVersionValue"] = *isDependencySpec.DependencyPackage.Version
 			}
-			if isDependencySpec.DependentPackage.Subpath != nil {
+			if isDependencySpec.DependencyPackage.Subpath != nil {
 				arangoQueryBuilder.filter("depVersion", "subpath", "==", "@depSubpath")
-				queryValues["depSubpath"] = *isDependencySpec.DependentPackage.Subpath
+				queryValues["depSubpath"] = *isDependencySpec.DependencyPackage.Subpath
 			}
-			if isDependencySpec.DependentPackage.MatchOnlyEmptyQualifiers != nil {
-				if !*isDependencySpec.DependentPackage.MatchOnlyEmptyQualifiers {
-					if len(isDependencySpec.DependentPackage.Qualifiers) > 0 {
+			if isDependencySpec.DependencyPackage.MatchOnlyEmptyQualifiers != nil {
+				if !*isDependencySpec.DependencyPackage.MatchOnlyEmptyQualifiers {
+					if len(isDependencySpec.DependencyPackage.Qualifiers) > 0 {
 						arangoQueryBuilder.filter("depVersion", "qualifier_list", "==", "@depQualifier")
-						queryValues["depQualifier"] = getQualifiers(isDependencySpec.DependentPackage.Qualifiers)
+						queryValues["depQualifier"] = getQualifiers(isDependencySpec.DependencyPackage.Qualifiers)
 					}
 				} else {
 					arangoQueryBuilder.filterLength("depVersion", "qualifier_list", "==", 0)
 				}
 			} else {
-				if len(isDependencySpec.DependentPackage.Qualifiers) > 0 {
+				if len(isDependencySpec.DependencyPackage.Qualifiers) > 0 {
 					arangoQueryBuilder.filter("depVersion", "qualifier_list", "==", "@depQualifier")
-					queryValues["depQualifier"] = getQualifiers(isDependencySpec.DependentPackage.Qualifiers)
+					queryValues["depQualifier"] = getQualifiers(isDependencySpec.DependencyPackage.Qualifiers)
 				}
 			}
 			arangoQueryBuilder.forInBound(pkgHasVersionStr, "depName", "depVersion")
-			if isDependencySpec.DependentPackage.Name != nil {
+			if isDependencySpec.DependencyPackage.Name != nil {
 				arangoQueryBuilder.filter("depName", "name", "==", "@depName")
-				queryValues["depName"] = *isDependencySpec.DependentPackage.Name
+				queryValues["depName"] = *isDependencySpec.DependencyPackage.Name
 			}
 			arangoQueryBuilder.forInBound(pkgHasNameStr, "depNamespace", "depName")
-			if isDependencySpec.DependentPackage.Namespace != nil {
+			if isDependencySpec.DependencyPackage.Namespace != nil {
 				arangoQueryBuilder.filter("depNamespace", "namespace", "==", "@depNamespace")
-				queryValues["depNamespace"] = *isDependencySpec.DependentPackage.Namespace
+				queryValues["depNamespace"] = *isDependencySpec.DependencyPackage.Namespace
 			}
 			arangoQueryBuilder.forInBound(pkgHasNamespaceStr, "depType", "depNamespace")
-			if isDependencySpec.DependentPackage.Type != nil {
+			if isDependencySpec.DependencyPackage.Type != nil {
 				arangoQueryBuilder.filter("depType", "type", "==", "@depType")
-				queryValues["depType"] = *isDependencySpec.DependentPackage.Type
+				queryValues["depType"] = *isDependencySpec.DependencyPackage.Type
 			}
 		}
 	} else {
@@ -813,14 +813,14 @@ func getIsDependencyFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mo
 		}
 
 		isDependency := &model.IsDependency{
-			ID:               createdValue.IsDependencyID,
-			Package:          pkg,
-			DependentPackage: depPkg,
-			VersionRange:     createdValue.VersionRange,
-			DependencyType:   dependencyTypeEnum,
-			Justification:    createdValue.Justification,
-			Origin:           createdValue.Collector,
-			Collector:        createdValue.Origin,
+			ID:                createdValue.IsDependencyID,
+			Package:           pkg,
+			DependencyPackage: depPkg,
+			VersionRange:      createdValue.VersionRange,
+			DependencyType:    dependencyTypeEnum,
+			Justification:     createdValue.Justification,
+			Origin:            createdValue.Collector,
+			Collector:         createdValue.Origin,
 		}
 		isDependencyList = append(isDependencyList, isDependency)
 	}

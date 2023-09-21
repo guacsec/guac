@@ -199,14 +199,14 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 	}
 
 	return &model.IsDependency{
-		ID:               nodeID(id.ID),
-		Package:          pkg,
-		DependentPackage: depPkg,
-		VersionRange:     id.VersionRange,
-		DependencyType:   dependencyTypeFromEnum(id.DependencyType),
-		Justification:    id.Justification,
-		Origin:           id.Origin,
-		Collector:        id.Collector,
+		ID:                nodeID(id.ID),
+		Package:           pkg,
+		DependencyPackage: depPkg,
+		VersionRange:      id.VersionRange,
+		DependencyType:    dependencyTypeFromEnum(id.DependencyType),
+		Justification:     id.Justification,
+		Origin:            id.Origin,
+		Collector:         id.Collector,
 	}
 }
 
