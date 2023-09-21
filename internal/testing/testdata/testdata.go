@@ -2190,10 +2190,11 @@ var (
 				VulnerabilityID: "cve-1234-5678",
 			},
 			VexData: &generated.VexStatementInputSpec{
-				KnownSince: parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
-				Origin:     "merged-vex-67124ea942ef30e1f42f3f2bf405fbbc4f5a56e6e87684fc5cd957212fa3e025",
-				Status:     generated.VexStatusAffected,
-				Statement:  "This is a test action statement",
+				KnownSince:       parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
+				Origin:           "merged-vex-67124ea942ef30e1f42f3f2bf405fbbc4f5a56e6e87684fc5cd957212fa3e025",
+				Status:           generated.VexStatusAffected,
+				VexJustification: generated.VexJustificationNotProvided,
+				Statement:        "This is a test action statement",
 			},
 		},
 	}

@@ -34,6 +34,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/dsse"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/guacsec/guac/pkg/handler/processor/ite6"
+	"github.com/guacsec/guac/pkg/handler/processor/open_vex"
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
 	"github.com/guacsec/guac/pkg/logging"
@@ -53,6 +54,7 @@ func init() {
 	_ = RegisterDocumentProcessor(&dsse.DSSEProcessor{}, processor.DocumentDSSE)
 	_ = RegisterDocumentProcessor(&spdx.SPDXProcessor{}, processor.DocumentSPDX)
 	_ = RegisterDocumentProcessor(&csaf.CSAFProcessor{}, processor.DocumentCsaf)
+	_ = RegisterDocumentProcessor(&open_vex.OpenVEXProcessor{}, processor.DocumentOpenVEX)
 	_ = RegisterDocumentProcessor(&scorecard.ScorecardProcessor{}, processor.DocumentScorecard)
 	_ = RegisterDocumentProcessor(&cyclonedx.CycloneDXProcessor{}, processor.DocumentCycloneDX)
 	_ = RegisterDocumentProcessor(&deps_dev.DepsDev{}, processor.DocumentDepsDev)
