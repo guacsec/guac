@@ -932,3 +932,42 @@ func getCertifyBadFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 	}
 	return certifyBadList, nil
 }
+
+func (c *arangoClient) buildCertifyBadByID(ctx context.Context, id string, filter *model.CertifyBadSpec) (*model.CertifyBad, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	pvl := []*model.PackageVersion{}
+	if idSplit[0] == certifyBadsStr {
+		var foundPkgVersion *model.PackageVersion
+		var err error
+
+		foundPkgVersion, id, err = c.queryPkgVersionNodeByID(ctx, id, filter)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pkg version node by ID with error: %w", err)
+		}
+		pvl = append(pvl, foundPkgVersion)
+	}
+
+	idSplit = strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	certifyBad := model.CertifyBad{
+		ID:            nodeID(link.id),
+		Subject:       subj,
+		Justification: link.justification,
+		Origin:        link.origin,
+		Collector:     link.collector,
+	}
+	return &certifyBad, nil
+}

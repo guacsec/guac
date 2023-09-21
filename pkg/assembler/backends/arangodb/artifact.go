@@ -23,6 +23,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -270,4 +271,35 @@ func getArtifacts(ctx context.Context, cursor driver.Cursor) ([]*model.Artifact,
 		}
 	}
 	return createdArtifacts, nil
+}
+
+func (c *arangoClient) buildArtifactResponseByID(ctx context.Context, id string, filter *model.ArtifactSpec) (*model.Artifact, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == artifactsStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.ArtifactSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		foundArtifacts, err := c.Artifacts(ctx, filter)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get artifact node by ID with error: %w", err)
+		}
+		if len(foundArtifacts) != 1 {
+			return nil, fmt.Errorf("number of artifact nodes found for ID: %s is greater than one", id)
+		}
+		return foundArtifacts[0], nil
+	}
+	return nil, nil
 }

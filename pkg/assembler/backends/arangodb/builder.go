@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -157,4 +158,35 @@ func getBuilders(ctx context.Context, cursor driver.Cursor) ([]*model.Builder, e
 		}
 	}
 	return createdBuilders, nil
+}
+
+func (c *arangoClient) buildBuilderResponseByID(ctx context.Context, id string, filter *model.BuilderSpec) (*model.Builder, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == buildersStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.BuilderSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		foundBuilders, err := c.Builders(ctx, filter)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get builder node by ID with error: %w", err)
+		}
+		if len(foundBuilders) != 1 {
+			return nil, fmt.Errorf("number of builder nodes found for ID: %s is greater than one", id)
+		}
+		return foundBuilders[0], nil
+	}
+	return nil, nil
 }

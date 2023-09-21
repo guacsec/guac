@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -246,6 +244,64 @@ func Test_Builders(t *testing.T) {
 				return
 			}
 			slices.SortFunc(got, lessBuilder)
+			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_buildBuilderResponseByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	tests := []struct {
+		name         string
+		builderInput *model.BuilderInputSpec
+		want         *model.Builder
+		wantErr      bool
+	}{{
+		name: "HubHostedActions",
+		builderInput: &model.BuilderInputSpec{
+			URI: "https://github.com/CreateFork/HubHostedActions@v1",
+		},
+		want: &model.Builder{
+			URI: "https://github.com/CreateFork/HubHostedActions@v1",
+		},
+		wantErr: false,
+	}, {
+		name: "chains",
+		builderInput: &model.BuilderInputSpec{
+			URI: "https://tekton.dev/chains/v2",
+		},
+		want: &model.Builder{
+			URI: "https://tekton.dev/chains/v2",
+		},
+		wantErr: false,
+	}}
+
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ingestedBuilder, err := b.IngestBuilder(ctx, tt.builderInput)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			got, err := b.(*arangoClient).buildBuilderResponseByID(ctx, ingestedBuilder.ID, nil)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("arangoClient.buildPackageResponseFromID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
