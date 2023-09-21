@@ -36,6 +36,7 @@ type CertifyGood {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -55,6 +56,7 @@ input CertifyGoodSpec {
   justification: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 """
@@ -64,6 +66,7 @@ input CertifyGoodInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 extend type Query {

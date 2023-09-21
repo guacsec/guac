@@ -18,6 +18,7 @@ package inmem
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -34,6 +35,7 @@ type badLink struct {
 	justification string
 	origin        string
 	collector     string
+	knownSince    time.Time
 }
 
 func (n *badLink) ID() uint32 { return n.id }
@@ -157,7 +159,8 @@ func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.Package
 			subjectMatch = true
 		}
 		if subjectMatch && certifyBad.Justification == v.justification &&
-			certifyBad.Origin == v.origin && certifyBad.Collector == v.collector {
+			certifyBad.Origin == v.origin && certifyBad.Collector == v.collector &&
+			certifyBad.KnownSince.Equal(v.knownSince) {
 
 			collectedCertifyBadLink = *v
 			duplicate = true
@@ -180,6 +183,7 @@ func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.Package
 			justification: certifyBad.Justification,
 			origin:        certifyBad.Origin,
 			collector:     certifyBad.Collector,
+			knownSince:    certifyBad.KnownSince,
 		}
 		c.index[collectedCertifyBadLink.id] = &collectedCertifyBadLink
 		c.certifyBads = append(c.certifyBads, &collectedCertifyBadLink)
@@ -282,14 +286,13 @@ func (c *demoClient) addCBIfMatch(out []*model.CertifyBad,
 	filter *model.CertifyBadSpec, link *badLink) (
 	[]*model.CertifyBad, error) {
 
-	if filter != nil && noMatch(filter.Justification, link.justification) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
-		return out, nil
+	if filter != nil {
+		if noMatch(filter.Justification, link.justification) ||
+			noMatch(filter.Collector, link.collector) ||
+			noMatch(filter.Origin, link.origin) ||
+			(filter.KnownSince != nil && filter.KnownSince.After(link.knownSince)) {
+			return out, nil
+		}
 	}
 
 	foundCertifyBad, err := c.buildCertifyBad(link, filter, false)

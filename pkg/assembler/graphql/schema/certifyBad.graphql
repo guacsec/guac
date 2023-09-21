@@ -75,6 +75,7 @@ type CertifyBad {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -94,6 +95,7 @@ input CertifyBadSpec {
   justification: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 """
@@ -104,6 +106,7 @@ input CertifyBadInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """

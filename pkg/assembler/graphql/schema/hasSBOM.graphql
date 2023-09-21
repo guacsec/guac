@@ -33,6 +33,8 @@ type HasSBOM {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Timestamp for SBOM creation"
+  knownSince: Time!
 }
 
 """
@@ -49,6 +51,7 @@ input HasSBOMSpec {
   downloadLocation: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 "HasSBOMInputSpec is the same as HasSBOM but for mutation input."
@@ -59,6 +62,7 @@ input HasSBOMInputSpec {
   downloadLocation: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 extend type Query {

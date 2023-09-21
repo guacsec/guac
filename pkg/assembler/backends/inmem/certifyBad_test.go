@@ -19,6 +19,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -28,6 +29,8 @@ import (
 )
 
 func TestCertifyBad(t *testing.T) {
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
@@ -167,6 +170,43 @@ func TestCertifyBad(t *testing.T) {
 				&model.CertifyBad{
 					Subject:       p1out,
 					Justification: "test justification one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: p1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						KnownSince: timeAfterOneSecond,
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: p1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						KnownSince: curTime,
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				KnownSince: &timeAfterOneSecond,
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:    p1out,
+					KnownSince: time.Time{},
 				},
 			},
 		},

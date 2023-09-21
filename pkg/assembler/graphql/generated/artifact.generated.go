@@ -4735,6 +4735,8 @@ func (ec *executionContext) fieldContext_Query_CertifyBad(ctx context.Context, f
 				return ec.fieldContext_CertifyBad_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyBad_collector(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_CertifyBad_knownSince(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyBad", field.Name)
 		},
@@ -4802,6 +4804,8 @@ func (ec *executionContext) fieldContext_Query_CertifyGood(ctx context.Context, 
 				return ec.fieldContext_CertifyGood_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyGood_collector(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_CertifyGood_knownSince(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyGood", field.Name)
 		},
@@ -5232,6 +5236,8 @@ func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, fiel
 				return ec.fieldContext_HasSBOM_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_HasSBOM_collector(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_HasSBOM_knownSince(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HasSBOM", field.Name)
 		},

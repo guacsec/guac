@@ -107,6 +107,7 @@ type CertifyBad struct {
 	Justification string                  `json:"justification"`
 	Origin        string                  `json:"origin"`
 	Collector     string                  `json:"collector"`
+	KnownSince    time.Time               `json:"knownSince"`
 }
 
 func (CertifyBad) IsNode() {}
@@ -114,9 +115,10 @@ func (CertifyBad) IsNode() {}
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
 type CertifyBadInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
@@ -134,6 +136,7 @@ type CertifyBadSpec struct {
 	Justification *string                      `json:"justification,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
+	KnownSince    *time.Time                   `json:"knownSince,omitempty"`
 }
 
 // CertifyGood is an attestation that a package, source, or artifact is considered
@@ -153,15 +156,17 @@ type CertifyGood struct {
 	Justification string                  `json:"justification"`
 	Origin        string                  `json:"origin"`
 	Collector     string                  `json:"collector"`
+	KnownSince    time.Time               `json:"knownSince"`
 }
 
 func (CertifyGood) IsNode() {}
 
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
@@ -179,6 +184,7 @@ type CertifyGoodSpec struct {
 	Justification *string                      `json:"justification,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
+	KnownSince    *time.Time                   `json:"knownSince,omitempty"`
 }
 
 // CertifyLegal is an attestation to attach legal information to a package or source.
@@ -435,18 +441,21 @@ type HasSbom struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Timestamp for SBOM creation
+	KnownSince time.Time `json:"knownSince"`
 }
 
 func (HasSbom) IsNode() {}
 
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
-	URI              string `json:"uri"`
-	Algorithm        string `json:"algorithm"`
-	Digest           string `json:"digest"`
-	DownloadLocation string `json:"downloadLocation"`
-	Origin           string `json:"origin"`
-	Collector        string `json:"collector"`
+	URI              string    `json:"uri"`
+	Algorithm        string    `json:"algorithm"`
+	Digest           string    `json:"digest"`
+	DownloadLocation string    `json:"downloadLocation"`
+	Origin           string    `json:"origin"`
+	Collector        string    `json:"collector"`
+	KnownSince       time.Time `json:"knownSince"`
 }
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
@@ -461,6 +470,7 @@ type HasSBOMSpec struct {
 	DownloadLocation *string                `json:"downloadLocation,omitempty"`
 	Origin           *string                `json:"origin,omitempty"`
 	Collector        *string                `json:"collector,omitempty"`
+	KnownSince       *time.Time             `json:"knownSince,omitempty"`
 }
 
 // HasSLSA records that a subject node has a SLSA attestation.

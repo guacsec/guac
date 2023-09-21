@@ -6060,9 +6060,10 @@ func (v *CertifyBadArtifactsResponse) GetIngestCertifyBads() []string { return v
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
 type CertifyBadInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // GetJustification returns CertifyBadInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -6073,6 +6074,9 @@ func (v *CertifyBadInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns CertifyBadInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyBadInputSpec) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns CertifyBadInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // CertifyBadPkgResponse is returned by CertifyBadPkg on success.
 type CertifyBadPkgResponse struct {
@@ -6107,6 +6111,7 @@ type CertifyBadSpec struct {
 	Justification *string                      `json:"justification"`
 	Origin        *string                      `json:"origin"`
 	Collector     *string                      `json:"collector"`
+	KnownSince    *time.Time                   `json:"knownSince"`
 }
 
 // GetId returns CertifyBadSpec.Id, and is useful for accessing the field via an interface.
@@ -6123,6 +6128,9 @@ func (v *CertifyBadSpec) GetOrigin() *string { return v.Origin }
 
 // GetCollector returns CertifyBadSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyBadSpec) GetCollector() *string { return v.Collector }
+
+// GetKnownSince returns CertifyBadSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadSpec) GetKnownSince() *time.Time { return v.KnownSince }
 
 // CertifyBadSrcResponse is returned by CertifyBadSrc on success.
 type CertifyBadSrcResponse struct {
@@ -6273,9 +6281,10 @@ func (v *CertifyGoodArtifactsResponse) GetIngestCertifyGoods() []string { return
 
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // GetJustification returns CertifyGoodInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -6286,6 +6295,9 @@ func (v *CertifyGoodInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns CertifyGoodInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyGoodInputSpec) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns CertifyGoodInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // CertifyGoodPkgResponse is returned by CertifyGoodPkg on success.
 type CertifyGoodPkgResponse struct {
@@ -7339,12 +7351,13 @@ func (v *HasSBOMArtifactsResponse) GetIngestHasSBOMs() []string { return v.Inges
 
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
-	Uri              string `json:"uri"`
-	Algorithm        string `json:"algorithm"`
-	Digest           string `json:"digest"`
-	DownloadLocation string `json:"downloadLocation"`
-	Origin           string `json:"origin"`
-	Collector        string `json:"collector"`
+	Uri              string    `json:"uri"`
+	Algorithm        string    `json:"algorithm"`
+	Digest           string    `json:"digest"`
+	DownloadLocation string    `json:"downloadLocation"`
+	Origin           string    `json:"origin"`
+	Collector        string    `json:"collector"`
+	KnownSince       time.Time `json:"knownSince"`
 }
 
 // GetUri returns HasSBOMInputSpec.Uri, and is useful for accessing the field via an interface.
@@ -7364,6 +7377,9 @@ func (v *HasSBOMInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns HasSBOMInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns HasSBOMInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSBOMInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // HasSBOMPkgResponse is returned by HasSBOMPkg on success.
 type HasSBOMPkgResponse struct {
