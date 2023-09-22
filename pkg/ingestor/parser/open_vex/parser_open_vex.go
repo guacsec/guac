@@ -67,7 +67,7 @@ func (c *openVEXParser) Parse(ctx context.Context, doc *processor.Document) erro
 	}
 
 	for _, s := range openVex.Statements {
-		vuln, err := helpers.CreateVulnInput(s.Vulnerability)
+		vuln, err := helpers.CreateVulnInput(string(s.Vulnerability.Name))
 		if err != nil {
 			return fmt.Errorf("failed to create vulnerability input: %w", err)
 		}
@@ -132,11 +132,11 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 		ingest.Vulnerability = vulnInput
 
 		var err error
-		if ingest.Pkg, err = helpers.PurlToPkg(p); err != nil {
+		if ingest.Pkg, err = helpers.PurlToPkg(p.ID); err != nil {
 			return nil, err
 		}
 
-		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, p)
+		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, p.ID)
 
 		vi = append(vi, ingest)
 	}

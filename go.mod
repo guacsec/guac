@@ -201,7 +201,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.21
 	github.com/nats-io/nats.go v1.28.0
-	github.com/openvex/go-vex v0.2.1
+	github.com/openvex/go-vex v0.2.5
 	github.com/ossf/scorecard/v4 v4.12.0
 	github.com/package-url/packageurl-go v0.1.1
 	github.com/pkg/errors v0.9.1
