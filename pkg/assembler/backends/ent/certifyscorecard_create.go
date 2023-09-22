@@ -332,12 +332,16 @@ func (u *CertifyScorecardUpsertOne) IDX(ctx context.Context) int {
 // CertifyScorecardCreateBulk is the builder for creating many CertifyScorecard entities in bulk.
 type CertifyScorecardCreateBulk struct {
 	config
+	err      error
 	builders []*CertifyScorecardCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the CertifyScorecard entities in the database.
 func (cscb *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifyScorecard, error) {
+	if cscb.err != nil {
+		return nil, cscb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(cscb.builders))
 	nodes := make([]*CertifyScorecard, len(cscb.builders))
 	mutators := make([]Mutator, len(cscb.builders))
@@ -525,6 +529,9 @@ func (u *CertifyScorecardUpsertBulk) UpdateScorecardID() *CertifyScorecardUpsert
 
 // Exec executes the query.
 func (u *CertifyScorecardUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CertifyScorecardCreateBulk instead", i)

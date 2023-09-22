@@ -17,7 +17,6 @@ package arangodb
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -112,8 +111,14 @@ func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *
 	}
 	arangoQueryBuilder.forOutBound(hasSLSABuiltByEdgesStr, "build", "hasSLSA")
 	if hasSLSASpec.BuiltBy != nil {
-		arangoQueryBuilder.filter("build", "uri", "==", "@uri")
-		queryValues["uri"] = *hasSLSASpec.BuiltBy.URI
+		if hasSLSASpec.BuiltBy.ID != nil {
+			arangoQueryBuilder.filter("build", "_id", "==", "@id")
+			queryValues["id"] = *hasSLSASpec.BuiltBy.ID
+		}
+		if hasSLSASpec.BuiltBy.URI != nil {
+			arangoQueryBuilder.filter("build", "uri", "==", "@uri")
+			queryValues["uri"] = *hasSLSASpec.BuiltBy.URI
+		}
 	}
 }
 
@@ -139,7 +144,7 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 	values["algorithm"] = strings.ToLower(subject.Algorithm)
 	values["digest"] = strings.ToLower(subject.Digest)
 
-	values["uri"] = strings.ToLower(builtBy.URI)
+	values["uri"] = builtBy.URI
 	// To ensure consistency, always sort the checks by key
 	predicateMap := map[string]string{}
 	var keys []string
@@ -160,7 +165,7 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 	for _, bf := range builtFrom {
 		builtFromIDList = append(builtFromIDList, bf.ID)
 		splitID := strings.Split(bf.ID, "/")
-		builtFromKeyList = append(builtFromKeyList, splitID[0])
+		builtFromKeyList = append(builtFromKeyList, splitID[1])
 	}
 
 	values[builtFromStr] = builtFromIDList

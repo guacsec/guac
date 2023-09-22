@@ -16,7 +16,7 @@
 package guesser
 
 import (
-	"encoding/json"
+	jsonValidator "encoding/json"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -27,7 +27,7 @@ type jsonLinesFormatGuesser struct{}
 func (_ *jsonLinesFormatGuesser) GuessFormat(blob []byte) processor.FormatType {
 	lines := strings.Split(strings.TrimSpace(string(blob)), "\n")
 	for _, line := range lines {
-		if !json.Valid([]byte(strings.TrimSpace(line))) {
+		if !jsonValidator.Valid([]byte(strings.TrimSpace(line))) {
 			return processor.FormatUnknown
 		}
 	}

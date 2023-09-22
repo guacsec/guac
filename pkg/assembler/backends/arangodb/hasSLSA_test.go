@@ -42,6 +42,37 @@ func TestHasSLSA(t *testing.T) {
 	}
 	testTime := time.Unix(1e9+5, 0)
 	testTime2 := time.Unix(1e9, 0)
+	startTime := time.Now()
+	finishTime := time.Now().Add(10 * time.Second)
+	inputPredicate := []*model.SLSAPredicateInputSpec{
+		{
+			Key:   "buildDefinition.externalParameters.repository",
+			Value: "https://github.com/octocat/hello-world",
+		},
+		{
+			Key:   "buildDefinition.externalParameters.ref",
+			Value: "refs/heads/main",
+		},
+		{
+			Key:   "buildDefinition.resolvedDependencies.uri",
+			Value: "git+https://github.com/octocat/hello-world@refs/heads/main",
+		},
+	}
+
+	slsaPredicate := []*model.SLSAPredicate{
+		{
+			Key:   "buildDefinition.externalParameters.ref",
+			Value: "refs/heads/main",
+		},
+		{
+			Key:   "buildDefinition.externalParameters.repository",
+			Value: "https://github.com/octocat/hello-world",
+		},
+		{
+			Key:   "buildDefinition.resolvedDependencies.uri",
+			Value: "git+https://github.com/octocat/hello-world@refs/heads/main",
+		},
+	}
 	type call struct {
 		Sub  *model.ArtifactInputSpec
 		BF   []*model.ArtifactInputSpec
@@ -49,15 +80,87 @@ func TestHasSLSA(t *testing.T) {
 		SLSA *model.SLSAInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InArt        []*model.ArtifactInputSpec
-		InBld        []*model.BuilderInputSpec
-		Calls        []call
-		Query        *model.HasSLSASpec
-		ExpHS        []*model.HasSlsa
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name           string
+		InArt          []*model.ArtifactInputSpec
+		InBld          []*model.BuilderInputSpec
+		Calls          []call
+		Query          *model.HasSLSASpec
+		QueryID        bool
+		QuerySubjectID bool
+		QueryBuilderID bool
+		ExpHS          []*model.HasSlsa
+		ExpIngestErr   bool
+		ExpQueryErr    bool
 	}{
+		{
+			Name: "unknown",
+			InArt: []*model.ArtifactInputSpec{
+				{
+					Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+					Algorithm: "sha1",
+				},
+				{
+					Digest:    "0123456789abcdef0000000fedcba9876543210",
+					Algorithm: "sha1",
+				},
+			},
+			InBld: []*model.BuilderInputSpec{
+				{
+					URI: "https://github.com/BuildPythonWheel/HubHostedActions@v1",
+				},
+			},
+			Calls: []call{
+				{
+					Sub: &model.ArtifactInputSpec{
+						Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+						Algorithm: "sha1",
+					},
+					BF: []*model.ArtifactInputSpec{{
+						Digest:    "0123456789abcdef0000000fedcba9876543210",
+						Algorithm: "sha1",
+					}},
+					BB: &model.BuilderInputSpec{
+						URI: "https://github.com/BuildPythonWheel/HubHostedActions@v1",
+					},
+					SLSA: &model.SLSAInputSpec{
+						BuildType:     "Test:SLSA",
+						SlsaPredicate: inputPredicate,
+						SlsaVersion:   "v1",
+						StartedOn:     &startTime,
+						FinishedOn:    &finishTime,
+						Origin:        "Demo ingestion",
+						Collector:     "Demo ingestion",
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuildType: ptrfrom.String("Test:SLSA"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: &model.Artifact{
+						Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+						Algorithm: "sha1",
+					},
+					Slsa: &model.Slsa{
+						BuiltBy: &model.Builder{
+							URI: "https://github.com/BuildPythonWheel/HubHostedActions@v1",
+						},
+						BuiltFrom: []*model.Artifact{{
+							Digest:    "0123456789abcdef0000000fedcba9876543210",
+							Algorithm: "sha1",
+						}},
+						BuildType:     "Test:SLSA",
+						SlsaPredicate: slsaPredicate,
+						SlsaVersion:   "v1",
+						StartedOn:     &startTime,
+						FinishedOn:    &finishTime,
+						Origin:        "Demo ingestion",
+						Collector:     "Demo ingestion",
+					},
+				},
+			},
+		},
 		{
 			Name:  "HappyPath",
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
@@ -303,6 +406,35 @@ func TestHasSLSA(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on Subject ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub:  testdata.A1,
+					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BB:   testdata.B1,
+					SLSA: &model.SLSAInputSpec{},
+				},
+				{
+					Sub:  testdata.A3,
+					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BB:   testdata.B1,
+					SLSA: &model.SLSAInputSpec{},
+				},
+			},
+			QuerySubjectID: true,
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A3out,
+					Slsa: &model.Slsa{
+						BuiltBy:   testdata.B1out,
+						BuiltFrom: []*model.Artifact{testdata.A2out},
+					},
+				},
+			},
+		},
+		{
 			Name:  "Query on Materials",
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3, testdata.A4},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
@@ -375,6 +507,42 @@ func TestHasSLSA(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on Builder ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
+			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
+			Calls: []call{
+				{
+					Sub:  testdata.A1,
+					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BB:   testdata.B1,
+					SLSA: &model.SLSAInputSpec{},
+				},
+				{
+					Sub:  testdata.A3,
+					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BB:   testdata.B2,
+					SLSA: &model.SLSAInputSpec{},
+				},
+			},
+			QueryBuilderID: true,
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:   testdata.B2out,
+						BuiltFrom: []*model.Artifact{testdata.A2out},
+					},
+				},
+				{
+					Subject: testdata.A3out,
+					Slsa: &model.Slsa{
+						BuiltBy:   testdata.B2out,
+						BuiltFrom: []*model.Artifact{testdata.A2out},
+					},
+				},
+			},
+		},
+		{
 			Name:  "Query on ID",
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
@@ -392,6 +560,7 @@ func TestHasSLSA(t *testing.T) {
 					SLSA: &model.SLSAInputSpec{},
 				},
 			},
+			QueryID: true,
 			ExpHS: []*model.HasSlsa{
 				{
 					Subject: testdata.A1out,
@@ -474,9 +643,23 @@ func TestHasSLSA(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query on ID" {
+				if test.QueryID {
 					test.Query = &model.HasSLSASpec{
 						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.QuerySubjectID {
+					test.Query = &model.HasSLSASpec{
+						Subject: &model.ArtifactSpec{
+							ID: ptrfrom.String(found.Subject.ID),
+						},
+					}
+				}
+				if test.QueryBuilderID {
+					test.Query = &model.HasSLSASpec{
+						BuiltBy: &model.BuilderSpec{
+							ID: ptrfrom.String(found.Slsa.BuiltBy.ID),
+						},
 					}
 				}
 			}

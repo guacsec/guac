@@ -144,7 +144,7 @@ fragment AllIsDependencyTree on IsDependency {
   package {
     ...AllPkgTree
   }
-  dependentPackage {
+  dependencyPackage {
     ...AllPkgTree
   }
   dependencyType

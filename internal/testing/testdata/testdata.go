@@ -19,7 +19,10 @@ import (
 	_ "embed"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -137,6 +140,8 @@ var (
 	//go:embed exampledata/ingest_predicates.json
 	IngestPredicatesExample []byte
 
+	// json format
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// CycloneDX VEX testdata unaffected
 	pkg, _   = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.10.0?type=jar")
 	vulnSpec = &generated.VulnerabilityInputSpec{
@@ -151,7 +156,7 @@ var (
 				Status:           generated.VexStatusNotAffected,
 				VexJustification: generated.VexJustificationVulnerableCodeNotInExecutePath,
 				Statement:        "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly.",
-				StatusNotes:      "not_affected:code_not_reachable",
+				StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusNotAffected, generated.VexJustificationVulnerableCodeNotInExecutePath),
 				KnownSince:       parseUTCTime("2020-12-03T00:00:00.000Z"),
 			},
 		},
@@ -182,51 +187,40 @@ var (
 			},
 		},
 	}
+	CycloneDXUnAffectedPredicates = assembler.IngestPredicates{
+		VulnMetadata: CycloneDXUnAffectedVulnMetadata,
+		Vex:          CycloneDXUnAffectedVexIngest,
+	}
 
-	// CycloneDX VEX testdata in triage
-	pkg1, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.4")
-	pkg2, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.6")
-
-	vulnSpecAffected = &generated.VulnerabilityInputSpec{
+	// CycloneDX VEX testdata affected packages.
+	VulnSpecAffected = &generated.VulnerabilityInputSpec{
 		Type:            "cve",
 		VulnerabilityID: "cve-2021-44228",
 	}
-	vexDataAffected = &generated.VexStatementInputSpec{
-		Status:      generated.VexStatusAffected,
-		Statement:   "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
-		StatusNotes: "exploitable:",
-	}
-	CycloneDXAffectedVexIngest = []assembler.VexIngest{
-		{
-			Pkg:           pkg1,
-			Vulnerability: vulnSpecAffected,
-			VexData:       vexDataAffected,
-		},
-		{
-			Pkg:           pkg2,
-			Vulnerability: vulnSpecAffected,
-			VexData:       vexDataAffected,
-		},
+	VexDataAffected = &generated.VexStatementInputSpec{
+		Status:           generated.VexStatusAffected,
+		VexJustification: generated.VexJustificationNotProvided,
+		Statement:        "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
+		StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusAffected, generated.VexJustificationNotProvided),
 	}
 	CycloneDXAffectedVulnMetadata = []assembler.VulnMetadataIngest{
 		{
-			Vulnerability: vulnSpecAffected,
+			Vulnerability: VulnSpecAffected,
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 10,
 			},
 		},
 	}
-	CycloneDXAffectedCertifyVuln = []assembler.CertifyVulnIngest{
+
+	topLevelPkg, _     = asmhelpers.PurlToPkg("pkg:guac/cdx/ABC")
+	HasSBOMVexAffected = []assembler.HasSBOMIngest{
 		{
-			Pkg:           pkg1,
-			Vulnerability: vulnSpecAffected,
-			VulnData:      &generated.ScanMetadataInput{},
-		},
-		{
-			Pkg:           pkg2,
-			Vulnerability: vulnSpecAffected,
-			VulnData:      &generated.ScanMetadataInput{},
+			Pkg: topLevelPkg,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Algorithm: "sha256",
+				Digest:    "eb62836ed6339a2d57f66d2e42509718fd480a1befea83f925e918444c369114",
+			},
 		},
 	}
 
@@ -734,10 +728,77 @@ var (
 		},
 	}
 
+	SpdxCertifyLegal = []assembler.CertifyLegalIngest{
+		{
+			Pkg: baselayoutPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			Discovered: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense:   "GPL-2.0-only",
+				DiscoveredLicense: "GPL-2.0-only",
+				Justification:     "Found in SPDX document.",
+				TimeScanned:       parseRfc3339("2022-09-24T17:27:55.556104Z"),
+			},
+		},
+		{
+			Pkg: baselayoutdataPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			Discovered: []model.LicenseInputSpec{
+				{
+					Name:        "GPL-2.0-only",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense:   "GPL-2.0-only",
+				DiscoveredLicense: "GPL-2.0-only",
+				Justification:     "Found in SPDX document.",
+				TimeScanned:       parseRfc3339("2022-09-24T17:27:55.556104Z"),
+			},
+		},
+		{
+			Pkg: keysPack,
+			Declared: []model.LicenseInputSpec{
+				{
+					Name:        "MIT",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			Discovered: []model.LicenseInputSpec{
+				{
+					Name:        "MIT",
+					ListVersion: ptrfrom.String("3.18"),
+				},
+			},
+			CertifyLegal: &model.CertifyLegalInputSpec{
+				DeclaredLicense:   "MIT",
+				DiscoveredLicense: "MIT",
+				Justification:     "Found in SPDX document.",
+				TimeScanned:       parseRfc3339("2022-09-24T17:27:55.556104Z"),
+			},
+		},
+	}
+
 	SpdxIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: SpdxDeps,
 		IsOccurrence: SpdxOccurences,
 		HasSBOM:      SpdxHasSBOM,
+		CertifyLegal: SpdxCertifyLegal,
 	}
 
 	// CycloneDX Testdata
@@ -2073,6 +2134,81 @@ var (
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 
+	// OpenVEX
+
+	//go:embed exampledata/open-vex-not-affected.json
+	NotAffectedOpenVEXExample []byte
+
+	NotAffectedOpenVexIngest = []assembler.VexIngest{
+		{
+			Pkg: &generated.PkgInputSpec{
+				Name:      "git",
+				Version:   strP("sha256:23a264e6e429852221a963e9f17338ba3f5796dc7086e46439a6f4482cf6e0cb"),
+				Namespace: strP(""),
+				Type:      "oci",
+				Subpath:   strP(""),
+			},
+			Artifact: nil,
+			Vulnerability: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-2023-12345",
+			},
+			VexData: &generated.VexStatementInputSpec{
+				KnownSince:       parseRfc3339("2023-01-09T21:23:03.579712389-06:00"),
+				Origin:           "https://openvex.dev/docs/public/vex-a06f9de1ad1b1e555a33b2d0c1e7e6ecc4dc1800ff457c61ea09d8e97670d2a3",
+				VexJustification: generated.VexJustificationInlineMitigationsAlreadyExist,
+				Status:           generated.VexStatusNotAffected,
+				Statement:        "Included git is mitigated against CVE-2023-12345 !",
+			},
+		},
+	}
+
+	//go:embed exampledata/open-vex-affected.json
+	AffectedOpenVex []byte
+
+	AffectedOpenVexIngest = []assembler.VexIngest{
+		{
+			Pkg: &generated.PkgInputSpec{
+				Name:      "bash",
+				Version:   strP("1.0.0"),
+				Namespace: strP("wolfi"),
+				Type:      "apk",
+				Subpath:   strP(""),
+			},
+			Artifact: nil,
+			Vulnerability: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-1234-5678",
+			},
+			VexData: &generated.VexStatementInputSpec{
+				KnownSince:       parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
+				Origin:           "merged-vex-67124ea942ef30e1f42f3f2bf405fbbc4f5a56e6e87684fc5cd957212fa3e025",
+				Status:           generated.VexStatusAffected,
+				VexJustification: generated.VexJustificationNotProvided,
+				Statement:        "This is a test action statement",
+			},
+		},
+	}
+
+	AffectedOpenVEXCertifyVulnIngest = []assembler.CertifyVulnIngest{
+		{
+			Pkg: &generated.PkgInputSpec{
+				Name:      "bash",
+				Version:   strP("1.0.0"),
+				Namespace: strP("wolfi"),
+				Type:      "apk",
+				Subpath:   strP(""),
+			},
+			Vulnerability: &generated.VulnerabilityInputSpec{
+				Type:            "cve",
+				VulnerabilityID: "cve-1234-5678",
+			},
+			VulnData: &generated.ScanMetadataInput{
+				TimeScanned: parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
+			},
+		},
+	}
+
 	// CSAF
 	//go:embed exampledata/rhsa-csaf.json
 	CsafExampleRedHat []byte
@@ -2613,6 +2749,8 @@ var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.SortSlices(packageQualifierInputSpecLess),
 	cmpopts.SortSlices(psaInputSpecLess),
 	cmpopts.SortSlices(slsaPredicateInputSpecLess),
+	cmpopts.SortSlices(certifyLegalInputSpecLess),
+	cmpopts.SortSlices(licenseInputSpecLess),
 }
 
 func certifyScorecardLess(e1, e2 assembler.CertifyScorecardIngest) bool {
@@ -2636,6 +2774,14 @@ func psaInputSpecLess(e1, e2 model.ArtifactInputSpec) bool {
 }
 
 func slsaPredicateInputSpecLess(e1, e2 model.SLSAPredicateInputSpec) bool {
+	return gLess(e1, e2)
+}
+
+func certifyLegalInputSpecLess(e1, e2 assembler.CertifyLegalIngest) bool {
+	return gLess(e1, e2)
+}
+
+func licenseInputSpecLess(e1, e2 generated.LicenseInputSpec) bool {
 	return gLess(e1, e2)
 }
 

@@ -21,12 +21,15 @@ package ingest_predicates
 
 import (
 	"context"
-	"encoding/json"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type ingestPredicatesParser struct {
 	preds assembler.IngestPredicates

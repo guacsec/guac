@@ -36,7 +36,7 @@
       },
       "affects": [
         {
-          "ref": "urn:cdx:3e671687-395b-41f5-a30f-a58921a69b79/1#pkg:maven/com.fasterxml.jackson.core/jackson-databind@",
+          "ref": "urn:cdx:3e671687-395b-41f5-a30f-a58921a69b79/1#product-ABC",
           "versions": [
             {
               "version": "2.4",

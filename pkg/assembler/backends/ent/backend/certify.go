@@ -23,8 +23,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type certificationInputSpec interface {
@@ -54,10 +54,6 @@ func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 }
 
 func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	funcName := "IngestCertifyBad"
-	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject"); err != nil {
-		return nil, Errorf("%v ::  %s", funcName, err)
-	}
 
 	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
@@ -69,11 +65,27 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 	return toModelCertifyBad(certRecord), nil
 }
 
-func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-	funcName := "IngestCertifyGood"
-	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject"); err != nil {
-		return nil, Errorf("%v ::  %s", funcName, err)
+func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
+	var result []*model.CertifyBad
+	for i := range certifyBads {
+		var subject model.PackageSourceOrArtifactInput
+		if len(subjects.Packages) > 0 {
+			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
+		} else if len(subjects.Artifacts) > 0 {
+			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
+		} else {
+			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
+		}
+		cb, err := b.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestCertifyBads failed with err: %v", err)
+		}
+		result = append(result, cb)
 	}
+	return result, nil
+}
+
+func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
 
 	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
@@ -85,12 +97,27 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 	return toModelCertifyGood(certRecord), nil
 }
 
-func queryCertifications(ctx context.Context, client *ent.Client, typ certification.Type, filter *model.CertifyBadSpec) ([]*ent.Certification, error) {
-	if filter != nil {
-		if err := helper.ValidatePackageSourceOrArtifactQueryFilter(filter.Subject); err != nil {
-			return nil, err
+func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
+	var result []*model.CertifyGood
+	for i := range certifyGoods {
+		var subject model.PackageSourceOrArtifactInput
+		if len(subjects.Packages) > 0 {
+			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
+		} else if len(subjects.Artifacts) > 0 {
+			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
+		} else {
+			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
 		}
+		cg, err := b.IngestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestCertifyGoods failed with err: %v", err)
+		}
+		result = append(result, cg)
 	}
+	return result, nil
+}
+
+func queryCertifications(ctx context.Context, client *ent.Client, typ certification.Type, filter *model.CertifyBadSpec) ([]*ent.Certification, error) {
 
 	query := []predicate.Certification{
 		certification.TypeEQ(typ),
@@ -239,7 +266,10 @@ func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
 	case v.Edges.PackageVersion != nil:
 		sub = toModelPackage(backReferencePackageVersion(v.Edges.PackageVersion))
 	case v.Edges.AllVersions != nil:
-		sub = toModelPackage(backReferencePackageName(v.Edges.AllVersions))
+		pkg := toModelPackage(backReferencePackageName(v.Edges.AllVersions))
+		// in this case, the expected response is package name with an empty package version array
+		pkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
+		sub = pkg
 	case v.Edges.Artifact != nil:
 		sub = toModelArtifact(v.Edges.Artifact)
 	}
@@ -262,7 +292,10 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 	case v.Edges.PackageVersion != nil:
 		sub = toModelPackage(backReferencePackageVersion(v.Edges.PackageVersion))
 	case v.Edges.AllVersions != nil:
-		sub = toModelPackage(backReferencePackageName(v.Edges.AllVersions))
+		pkg := toModelPackage(backReferencePackageName(v.Edges.AllVersions))
+		// in this case, the expected response is package name with an empty package version array
+		pkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
+		sub = pkg
 	case v.Edges.Artifact != nil:
 		sub = toModelArtifact(v.Edges.Artifact)
 	}

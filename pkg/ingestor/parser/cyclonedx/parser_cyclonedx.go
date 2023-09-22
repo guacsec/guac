@@ -17,12 +17,13 @@ package cyclonedx
 
 import (
 	"context"
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"reflect"
 	"strings"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
 
@@ -33,6 +34,8 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const topCdxPurlGuac string = "pkg:guac/cdx/"
 
@@ -315,22 +318,16 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context, cdxBom *cdx.BO
 		if vexStatus, ok := vexStatusMap[vulnerability.Analysis.State]; ok {
 			status = vexStatus
 		} else {
-			logger.Debugf("unknown vulnerability status %s", vulnerability.Analysis.State)
-			status = "UNKNOWN"
+			status = "NOT_PROVIDED"
 		}
 
 		if vexJustification, ok := justificationsMap[vulnerability.Analysis.Justification]; ok {
 			justification = vexJustification
 		} else {
-			logger.Debugf("unknown vulnerability justification %s", vulnerability.Analysis.Justification)
-			justification = "UNKNOWN"
+			justification = model.VexJustificationNotProvided
 		}
 
-		time, err := time.Parse(time.RFC3339, vulnerability.Published)
-		if err == nil {
-			publishedTime = time
-		}
-
+		publishedTime, _ = time.Parse(time.RFC3339, vulnerability.Published)
 		vd := model.VexStatementInputSpec{
 			Status:           status,
 			VexJustification: justification,
@@ -380,43 +377,32 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context, cdxBom *cdx.BO
 // Get package name and range versions to create package input spec for the affected packages.
 func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *model.VulnerabilityInputSpec, vexData model.VexStatementInputSpec, affectsObj cdx.Affects) *[]assembler.VexIngest {
 	logger := logging.FromContext(ctx)
-	var pkgRef string
-	// TODO: retrieve purl from metadata if present - https://github.com/guacsec/guac/blob/main/pkg/ingestor/parser/cyclonedx/parser_cyclonedx.go#L76
-	if affectsObj.Ref != "" {
-		pkgRef = affectsObj.Ref
-	} else {
-		logger.Debugf("[cdx vex] package reference not found")
-		return nil
-	}
+	pkgRef := affectsObj.Ref
 
 	// split ref using # as delimiter.
 	pkgRefInfo := strings.Split(pkgRef, "#")
 	if len(pkgRefInfo) != 2 {
-		logger.Debugf("[cdx vex] malformed package reference: %q", affectsObj.Ref)
+		logger.Debugf("[cdx vex] malformed affected-package reference: %q", affectsObj.Ref)
 		return nil
 	}
-	pkgURL := pkgRefInfo[1]
+	pkdIdentifier := pkgRefInfo[1]
 
-	// multiple package versions do not exist, resolve to using ref directly.
-	if affectsObj.Range == nil {
-		pkg, err := asmhelpers.PurlToPkg(pkgURL)
+	// check whether the ref contains a purl
+	if strings.Contains(pkdIdentifier, "pkg:") {
+		pkg, err := asmhelpers.PurlToPkg(pkdIdentifier)
 		if err != nil {
 			logger.Debugf("[cdx vex] unable to create package input spec: %v", err)
 			return nil
 		}
-
-		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkgURL)
+		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkdIdentifier)
 		return &[]assembler.VexIngest{{VexData: &vexData, Vulnerability: vulnInput, Pkg: pkg}}
 	}
 
-	// split pkgURL using @ as delimiter.
-	pkgURLInfo := strings.Split(pkgURL, "@")
-	if len(pkgURLInfo) != 2 {
-		logger.Debugf("[cdx vex] malformed package url info: %q", pkgURL)
+	if affectsObj.Range == nil {
+		logger.Debugf("[cdx vex] no range versions found for package ref %q", pkgRef)
 		return nil
 	}
 
-	pkgName := pkgURLInfo[0]
 	var viList []assembler.VexIngest
 	for _, affect := range *affectsObj.Range {
 		// TODO: Handle package range versions (see - https://github.com/CycloneDX/bom-examples/blob/master/VEX/CISA-Use-Cases/Case-8/vex.json#L42)
@@ -428,14 +414,16 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 			Vulnerability: vulnInput,
 		}
 
-		pkg, err := asmhelpers.PurlToPkg(fmt.Sprintf("%s@%s", pkgName, affect.Version))
+		// create guac specific identifier string using affected package name and version.
+		pkgID := guacCDXPkgPurl(pkdIdentifier, affect.Version, "", false)
+		pkg, err := asmhelpers.PurlToPkg(pkgID)
 		if err != nil {
-			logger.Debugf("[cdx vex] unable to create package input spec from purl: %v", err)
-			return nil
+			logger.Debugf("[cdx vex] unable to create package input spec from guac pkg purl: %v", err)
+			continue
 		}
 		vi.Pkg = pkg
 		viList = append(viList, *vi)
-		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkgURL)
+		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkgID)
 	}
 
 	return &viList

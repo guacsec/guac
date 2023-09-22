@@ -26,7 +26,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func (s *Suite) TestHashEquals() {
+func (s *Suite) TestHashEqual() {
 	type call struct {
 		A1 *model.ArtifactInputSpec
 		A2 *model.ArtifactInputSpec
@@ -513,6 +513,273 @@ func (s *Suite) TestHashEquals() {
 				}
 			}
 
+			got, err := b.HashEqual(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			less := func(a, b *model.Artifact) bool { return a.Digest < b.Digest }
+			for _, he := range got {
+				slices.SortFunc(he.Artifacts, less)
+			}
+			for _, he := range test.ExpHE {
+				slices.SortFunc(he.Artifacts, less)
+			}
+			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func (s *Suite) TestIngestHashEquals() {
+	type call struct {
+		A1 []*model.ArtifactInputSpec
+		A2 []*model.ArtifactInputSpec
+		HE []*model.HashEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		Query        *model.HashEqualSpec
+		ExpHE        []*model.HashEqual
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			Calls: []call{
+				{
+					A1: []*model.ArtifactInputSpec{a1},
+					A2: []*model.ArtifactInputSpec{a2},
+					HE: []*model.HashEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts:     []*model.Artifact{a1out, a2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Ingest same, different order",
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			Calls: []call{
+				{
+					A1: []*model.ArtifactInputSpec{a1, a2},
+					A2: []*model.ArtifactInputSpec{a2, a1},
+					HE: []*model.HashEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts:     []*model.Artifact{a1out, a2out},
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Justification",
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			Calls: []call{
+				{
+					A1: []*model.ArtifactInputSpec{a1, a1},
+					A2: []*model.ArtifactInputSpec{a2, a2},
+					HE: []*model.HashEqualInputSpec{
+						{
+							Justification: "test justification one",
+						},
+						{
+							Justification: "test justification two",
+						},
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				Justification: ptrfrom.String("test justification one"),
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts:     []*model.Artifact{a1out, a2out},
+					Justification: "test justification one",
+				},
+			},
+		},
+		{
+			Name:  "Query on artifact",
+			InArt: []*model.ArtifactInputSpec{a1, a2, a3},
+			Calls: []call{
+				{
+					A1: []*model.ArtifactInputSpec{a1, a1},
+					A2: []*model.ArtifactInputSpec{a2, a3},
+					HE: []*model.HashEqualInputSpec{
+						{},
+						{},
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				Artifacts: []*model.ArtifactSpec{{
+					ID: ptrfrom.String("9"),
+				}},
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts: []*model.Artifact{a1out, a3out},
+				},
+			},
+		},
+		{
+			Name:  "Query on artifact multiple",
+			InArt: []*model.ArtifactInputSpec{a1, a2, a3},
+			Calls: []call{
+				{
+					A1: []*model.ArtifactInputSpec{a1, a1},
+					A2: []*model.ArtifactInputSpec{a2, a3},
+					HE: []*model.HashEqualInputSpec{
+						{},
+						{},
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				Artifacts: []*model.ArtifactSpec{{
+					ID: ptrfrom.String("10"),
+				}},
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts: []*model.Artifact{a1out, a2out},
+				},
+				{
+					Artifacts: []*model.Artifact{a1out, a3out},
+				},
+			},
+		},
+		{
+			Name:  "Query on artifact algo",
+			InArt: []*model.ArtifactInputSpec{a1, a2, a3},
+			Calls: []call{
+				{
+					A1: []*model.ArtifactInputSpec{a1, a1},
+					A2: []*model.ArtifactInputSpec{a2, a3},
+					HE: []*model.HashEqualInputSpec{
+						{},
+						{},
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				Artifacts: []*model.ArtifactSpec{{
+					Algorithm: ptrfrom.String("sha1"),
+				}},
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts: []*model.Artifact{a1out, a2out},
+				},
+			},
+		},
+		{
+			Name:  "Query on artifact algo and hash",
+			InArt: []*model.ArtifactInputSpec{a1, a2, a3},
+			Calls: []call{
+				{
+					A1: []*model.ArtifactInputSpec{a1, a1},
+					A2: []*model.ArtifactInputSpec{a2, a3},
+					HE: []*model.HashEqualInputSpec{
+						{},
+						{},
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				Artifacts: []*model.ArtifactSpec{{
+					Algorithm: ptrfrom.String("sha1"),
+					Digest:    ptrfrom.String("7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
+				}},
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts: []*model.Artifact{a1out, a2out},
+				},
+			},
+		},
+		{
+			Name:  "Query on both artifacts",
+			InArt: []*model.ArtifactInputSpec{a1, a2, a3},
+			Calls: []call{
+				{
+					A1: []*model.ArtifactInputSpec{a1, a2},
+					A2: []*model.ArtifactInputSpec{a2, a3},
+					HE: []*model.HashEqualInputSpec{
+						{},
+						{},
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				Artifacts: []*model.ArtifactSpec{
+					{
+						Algorithm: ptrfrom.String("sha1"),
+						Digest:    ptrfrom.String("7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
+					},
+					{
+						ID: ptrfrom.String("21"),
+					},
+				},
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts: []*model.Artifact{a2out, a3out},
+				},
+			},
+		},
+	}
+	ctx := s.Ctx
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				_, err := b.IngestHashEquals(ctx, o.A1, o.A2, o.HE)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
 			got, err := b.HashEqual(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)

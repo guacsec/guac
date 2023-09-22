@@ -365,3 +365,86 @@ func Test_SourceNamespaces(t *testing.T) {
 		})
 	}
 }
+
+func Test_buildSourceResponseFromID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	tests := []struct {
+		name       string
+		srcInput   *model.SourceInputSpec
+		srcFilter  *model.SourceSpec
+		idInFilter bool
+		want       *model.Source
+		wantErr    bool
+	}{{
+		name:     "myrepo with tag",
+		srcInput: testdata.S1,
+		srcFilter: &model.SourceSpec{
+			Name: ptrfrom.String("myrepo"),
+		},
+		idInFilter: false,
+		want:       testdata.S1out,
+		wantErr:    false,
+	}, {
+		name:     "myrepo with tag, ID search",
+		srcInput: testdata.S1,
+		srcFilter: &model.SourceSpec{
+			Name: ptrfrom.String("myrepo"),
+		},
+		idInFilter: true,
+		want:       testdata.S1out,
+		wantErr:    false,
+	}, {
+		name:     "bobsrepo with commit",
+		srcInput: testdata.S4,
+		srcFilter: &model.SourceSpec{
+			Namespace: ptrfrom.String("github.com/bob"),
+			Commit:    ptrfrom.String("5e7c41f"),
+		},
+		idInFilter: false,
+		want:       testdata.S4out,
+		wantErr:    false,
+	}, {
+		name:     "bobsrepo with commit, type search",
+		srcInput: testdata.S4,
+		srcFilter: &model.SourceSpec{
+			Type:      ptrfrom.String("svn"),
+			Namespace: ptrfrom.String("github.com/bob"),
+			Commit:    ptrfrom.String("5e7c41f"),
+		},
+		idInFilter: false,
+		want:       testdata.S4out,
+		wantErr:    false,
+	}}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ingestedPkg, err := b.IngestSource(ctx, *tt.srcInput)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.idInFilter {
+				tt.srcFilter.ID = &ingestedPkg.Namespaces[0].Names[0].ID
+			}
+			got, err := b.(*arangoClient).buildSourceResponseFromID(ctx, ingestedPkg.Namespaces[0].Names[0].ID, tt.srcFilter)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("arangoClient.buildSourceResponseFromID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

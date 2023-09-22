@@ -17,10 +17,11 @@ package scorecard
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -28,6 +29,8 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type scorecardParser struct {
 	scorecardPredicates []*model.ScorecardInputSpec

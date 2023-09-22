@@ -20,8 +20,10 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -38,18 +40,21 @@ type spdxParser struct {
 	doc                 *processor.Document
 	packagePackages     map[string][]*model.PkgInputSpec
 	packageArtifacts    map[string][]*model.ArtifactInputSpec
+	packageLegals       map[string][]*model.CertifyLegalInputSpec
 	filePackages        map[string][]*model.PkgInputSpec
 	fileArtifacts       map[string][]*model.ArtifactInputSpec
 	topLevelPackages    map[string][]*model.PkgInputSpec
 	identifierStrings   *common.IdentifierStrings
 	spdxDoc             *spdx.Document
 	topLevelIsHeuristic bool
+	timeScanned         time.Time
 }
 
 func NewSpdxParser() common.DocumentParser {
 	return &spdxParser{
 		packagePackages:     map[string][]*model.PkgInputSpec{},
 		packageArtifacts:    map[string][]*model.ArtifactInputSpec{},
+		packageLegals:       map[string][]*model.CertifyLegalInputSpec{},
 		filePackages:        map[string][]*model.PkgInputSpec{},
 		fileArtifacts:       map[string][]*model.ArtifactInputSpec{},
 		topLevelPackages:    map[string][]*model.PkgInputSpec{},
@@ -65,6 +70,14 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("failed to parse SPDX document: %w", err)
 	}
 	s.spdxDoc = spdxDoc
+	if spdxDoc.CreationInfo == nil {
+		return fmt.Errorf("SPDC documentd missing required \"creationInfo\" section.")
+	}
+	time, err := time.Parse(time.RFC3339, spdxDoc.CreationInfo.Created)
+	if err != nil {
+		return fmt.Errorf("SPDX document had invalid created time %q : %w", spdxDoc.CreationInfo.Created, err)
+	}
+	s.timeScanned = time
 	if err := s.getPackages(); err != nil {
 		return err
 	}
@@ -133,6 +146,23 @@ func (s *spdxParser) getPackages() error {
 				Digest:    checksum.Value,
 			}
 			s.packageArtifacts[string(pac.PackageSPDXIdentifier)] = append(s.packageArtifacts[string(pac.PackageSPDXIdentifier)], artifact)
+		}
+
+		if pac.PackageLicenseDeclared != "" ||
+			pac.PackageLicenseConcluded != "" ||
+			pac.PackageCopyrightText != "" {
+			cl := &model.CertifyLegalInputSpec{
+				DeclaredLicense:   pac.PackageLicenseDeclared,
+				DiscoveredLicense: pac.PackageLicenseConcluded,
+				Attribution:       pac.PackageCopyrightText,
+				Justification:     "Found in SPDX document.",
+				TimeScanned:       s.timeScanned,
+			}
+			if pac.PackageLicenseComments != "" {
+				cl.Justification = fmt.Sprintf("%s : %s", cl.Justification, pac.PackageLicenseComments)
+			}
+			s.packageLegals[string(pac.PackageSPDXIdentifier)] = append(
+				s.packageLegals[string(pac.PackageSPDXIdentifier)], cl)
 		}
 
 	}
@@ -296,7 +326,61 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 	}
 
+	for id, cls := range s.packageLegals {
+		for _, cl := range cls {
+			dec := common.ParseLicenses(cl.DeclaredLicense, s.spdxDoc.CreationInfo.LicenseListVersion)
+			dis := common.ParseLicenses(cl.DiscoveredLicense, s.spdxDoc.CreationInfo.LicenseListVersion)
+			for i := range dec {
+				o, n := fixLicense(ctx, &dec[i], s.spdxDoc.OtherLicenses)
+				if o != "" {
+					exp := strings.ReplaceAll(cl.DeclaredLicense, o, n)
+					cl.DeclaredLicense = exp
+				}
+			}
+			for i := range dis {
+				o, n := fixLicense(ctx, &dis[i], s.spdxDoc.OtherLicenses)
+				if o != "" {
+					exp := strings.ReplaceAll(cl.DiscoveredLicense, o, n)
+					cl.DiscoveredLicense = exp
+				}
+			}
+			for _, pkg := range s.packagePackages[id] {
+				cli := assembler.CertifyLegalIngest{
+					Pkg:          pkg,
+					Declared:     dec,
+					Discovered:   dis,
+					CertifyLegal: cl,
+				}
+				preds.CertifyLegal = append(preds.CertifyLegal, cli)
+			}
+		}
+	}
+
 	return preds
+}
+
+func fixLicense(ctx context.Context, l *generated.LicenseInputSpec, ol []*spdx.OtherLicense) (string, string) {
+	logger := logging.FromContext(ctx)
+	if !strings.HasPrefix(l.Name, "LicenseRef-") {
+		return "", ""
+	}
+	oldName := l.Name
+	l.ListVersion = nil
+	found := false
+	for _, o := range ol {
+		if o.LicenseIdentifier == l.Name {
+			l.Inline = &o.ExtractedText
+			found = true
+			break
+		}
+	}
+	if !found {
+		logger.Error("License identifier %q not found in OtherLicenses", l.Name)
+		s := "Not found"
+		l.Inline = &s
+	}
+	l.Name = common.HashLicense(*l.Inline)
+	return oldName, l.Name
 }
 
 func isDependency(rel string) bool {

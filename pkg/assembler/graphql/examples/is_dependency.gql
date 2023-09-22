@@ -22,7 +22,7 @@ fragment allIsDependencyTree on IsDependency {
       }
     }
   }
-  dependentPackage {
+  dependencyPackage {
     id
     type
     namespaces {

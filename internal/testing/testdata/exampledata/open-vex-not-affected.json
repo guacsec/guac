@@ -1,0 +1,27 @@
+{
+    "@context": "https://openvex.dev/ns",
+    "@id": "https://openvex.dev/docs/public/vex-a06f9de1ad1b1e555a33b2d0c1e7e6ecc4dc1800ff457c61ea09d8e97670d2a3",
+    "author": "Wolfi J. Inkinson",
+    "role": "Senior VEXing Engineer",
+    "timestamp": "2023-01-09T21:23:03.579712389-06:00",
+    "version": 1,
+    "statements": [
+        {
+            "vulnerability": {
+                "name": "CVE-2023-12345"
+            },
+            "products": [
+                {
+                    "@id": "pkg:oci/git@sha256:23a264e6e429852221a963e9f17338ba3f5796dc7086e46439a6f4482cf6e0cb",
+                    "subcomponents": [
+                        { "@id": "pkg:apk/alpine/git@2.38.1-r0?arch=x86_64" },
+                        { "@id": "pkg:apk/alpine/git@2.38.1-r0?arch=ppc64le" }
+                    ]
+                }
+            ],
+            "status": "not_affected",
+            "justification": "inline_mitigations_already_exist",
+            "impact_statement": "Included git is mitigated against CVE-2023-12345 !"
+        }
+    ]
+}

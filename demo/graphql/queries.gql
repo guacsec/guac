@@ -54,7 +54,7 @@ fragment allIsDependencyTree on IsDependency {
   package {
     ...allPkgTree
   }
-  dependentPackage {
+  dependencyPackage {
     ...allPkgTree
   }
   origin
@@ -63,7 +63,7 @@ fragment allIsDependencyTree on IsDependency {
 
 query IsDependencyQ1 {
   IsDependency(isDependencySpec: { package: { type: "guac", namespace: "cdx/docker.io/library", name: "consul" }}) {
-    dependentPackage {
+    dependencyPackage {
       type
       namespaces {
         namespace
@@ -78,7 +78,7 @@ query IsDependencyQ1 {
 query IsDependencyQ2 {
   IsDependency(isDependencySpec: {
     package: { type: "guac", namespace: "cdx/docker.io/library", name: "consul" }
-    dependentPackage: { type: "golang", namespace: "github.com/sirupsen", name: "logrus" }
+    dependencyPackage: { type: "golang", namespace: "github.com/sirupsen", name: "logrus" }
   }) {
     ...allIsDependencyTree
   }

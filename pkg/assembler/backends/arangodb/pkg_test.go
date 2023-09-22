@@ -814,3 +814,66 @@ func Test_IngestPackages(t *testing.T) {
 		})
 	}
 }
+
+func Test_buildPackageResponseFromID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	tests := []struct {
+		name       string
+		pkgInput   *model.PkgInputSpec
+		pkgFilter  *model.PkgSpec
+		idInFilter bool
+		want       *model.Package
+		wantErr    bool
+	}{{
+		name:     "tensorflow empty version, ID search",
+		pkgInput: testdata.P3,
+		pkgFilter: &model.PkgSpec{
+			Name:    ptrfrom.String("tensorflow"),
+			Subpath: ptrfrom.String("saved_model_cli.py"),
+		},
+		idInFilter: true,
+		want:       testdata.P3out,
+		wantErr:    false,
+	}, {
+		name:     "openssl with match empty qualifiers",
+		pkgInput: testdata.P4,
+		pkgFilter: &model.PkgSpec{
+			Name:                     ptrfrom.String("openssl"),
+			Namespace:                ptrfrom.String("openssl.org"),
+			Version:                  ptrfrom.String("3.0.3"),
+			MatchOnlyEmptyQualifiers: ptrfrom.Bool(true),
+		},
+		idInFilter: true,
+		want:       testdata.P4out,
+		wantErr:    false,
+	}}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			got, err := b.(*arangoClient).buildPackageResponseFromID(ctx, ingestedPkg.Namespaces[0].Names[0].Versions[0].ID, tt.pkgFilter)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("arangoClient.buildPackageResponseFromID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

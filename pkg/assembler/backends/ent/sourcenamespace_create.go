@@ -348,12 +348,16 @@ func (u *SourceNamespaceUpsertOne) IDX(ctx context.Context) int {
 // SourceNamespaceCreateBulk is the builder for creating many SourceNamespace entities in bulk.
 type SourceNamespaceCreateBulk struct {
 	config
+	err      error
 	builders []*SourceNamespaceCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the SourceNamespace entities in the database.
 func (sncb *SourceNamespaceCreateBulk) Save(ctx context.Context) ([]*SourceNamespace, error) {
+	if sncb.err != nil {
+		return nil, sncb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(sncb.builders))
 	nodes := make([]*SourceNamespace, len(sncb.builders))
 	mutators := make([]Mutator, len(sncb.builders))
@@ -541,6 +545,9 @@ func (u *SourceNamespaceUpsertBulk) UpdateSourceID() *SourceNamespaceUpsertBulk 
 
 // Exec executes the query.
 func (u *SourceNamespaceUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the SourceNamespaceCreateBulk instead", i)

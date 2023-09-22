@@ -18,9 +18,11 @@ package spdx
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -42,20 +44,21 @@ func Test_spdxParser(t *testing.T) {
 		doc            *processor.Document
 		wantPredicates *assembler.IngestPredicates
 		wantErr        bool
-	}{{
-		name: "valid big SPDX document",
-		doc: &processor.Document{
-			Blob:   testdata.SpdxExampleAlpine,
-			Format: processor.FormatJSON,
-			Type:   processor.DocumentSPDX,
-			SourceInformation: processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
+	}{
+		{
+			name: "valid big SPDX document",
+			doc: &processor.Document{
+				Blob:   testdata.SpdxExampleAlpine,
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
 			},
+			wantPredicates: &testdata.SpdxIngestionPredicates,
+			wantErr:        false,
 		},
-		wantPredicates: &testdata.SpdxIngestionPredicates,
-		wantErr:        false,
-	},
 		{
 			name: "SPDX with DESCRIBES relationship populates pUrl from described element",
 			additionalOpts: []cmp.Option{
@@ -67,6 +70,7 @@ func Test_spdxParser(t *testing.T) {
 			"spdxVersion": "SPDX-2.3",
 			"SPDXID":"SPDXRef-DOCUMENT",
 			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+			"creationInfo": { "created": "2023-01-01T01:01:01.00Z" },
 			"packages":[
 				{
 					"SPDXID":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
@@ -114,6 +118,7 @@ func Test_spdxParser(t *testing.T) {
 			"spdxVersion": "SPDX-2.3",
 			"SPDXID":"SPDXRef-DOCUMENT",
 			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+			"creationInfo": { "created": "2022-09-24T17:27:55.556104Z" },
 			"packages":[
 				{
 					"SPDXID":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
@@ -178,6 +183,7 @@ func Test_spdxParser(t *testing.T) {
 		"spdxVersion": "SPDX-2.3",
 		"SPDXID":"SPDXRef-DOCUMENT",
 		"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+		"creationInfo": { "created": "2022-09-24T17:27:55.556104Z" },
 		"packages":[
 				{
 					"SPDXID":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
@@ -225,6 +231,7 @@ func Test_spdxParser(t *testing.T) {
 		"spdxVersion": "SPDX-2.3",
 		"SPDXID":"SPDXRef-DOCUMENT",
 		"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+		"creationInfo": { "created": "2022-09-24T17:27:55.556104Z" },
 		"relationships":[
 			{
 				"spdxElementId":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
@@ -262,6 +269,7 @@ func Test_spdxParser(t *testing.T) {
 				"SPDXRef-6dcd47a4-bfcb-47d7-8ee4-60b6dc4861a8"
 			],
 			"name":"test-sbom",
+			"creationInfo": { "created": "2022-09-24T17:27:55.556104Z" },
 			"packages":[
 				{
 					"SPDXID": "SPDXRef-8c5bc68a-d747-48de-b737-bc9703c330e7",
@@ -339,6 +347,7 @@ func Test_spdxParser(t *testing.T) {
 			"SPDXID":"SPDXRef-DOCUMENT",
 			"spdxVersion": "SPDX-2.2",
 			"name":"testsbom",
+			"creationInfo": { "created": "2022-09-24T17:27:55.556104Z" },
 			"files":[
 				{
 				  "fileName": "file1",
@@ -436,6 +445,7 @@ func Test_spdxParser(t *testing.T) {
 			"SPDXID":"SPDXRef-DOCUMENT",
 			"spdxVersion": "SPDX-2.2",
 			"name":"testsbom",
+			"creationInfo": { "created": "2022-09-24T17:27:55.556104Z" },
 			"files":[
 				{
 				  "fileName": "file1",
@@ -537,6 +547,237 @@ func Test_spdxParser(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "SPDX with complex license expression",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.IngestPredicates{},
+					"HasSBOM", "IsDependency", "IsOccurrence")},
+			doc: &processor.Document{
+				Blob: []byte(`
+{
+  "SPDXID":"SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.2",
+  "name":"testsbom",
+  "creationInfo": {
+    "created": "2022-09-24T17:27:55.556104Z",
+    "licenseListVersion": "1.2.3"
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-35085779bdf473bb",
+      "name": "mypackage",
+      "licenseConcluded": "NOASSERTION",
+      "description": "Alpine base dir structure and init scripts",
+      "downloadLocation": "https://git.alpinelinux.org/cgit/aports/tree/main/alpine-baselayout",
+      "filesAnalyzed": false,
+      "licenseDeclared": "(BSD-3-Clause OR BSD-2-Clause) AND Apache-2.0",
+      "copyrightText": "Copyright (c) 2022 Authors of MyPackage",
+      "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+      "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+      "versionInfo": "3.2.0-r22"
+    }
+  ]
+}
+	`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				CertifyLegal: []assembler.CertifyLegalIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "mypackage",
+							Version:   ptrfrom.String("3.2.0-r22"),
+							Subpath:   ptrfrom.String(""),
+						},
+						Declared: []generated.LicenseInputSpec{
+							{
+								Name:        "BSD-3-Clause",
+								ListVersion: ptrfrom.String("1.2.3"),
+							},
+							{
+								Name:        "BSD-2-Clause",
+								ListVersion: ptrfrom.String("1.2.3"),
+							},
+							{
+								Name:        "Apache-2.0",
+								ListVersion: ptrfrom.String("1.2.3"),
+							},
+						},
+						Discovered: []generated.LicenseInputSpec{
+							{
+								Name:        "NOASSERTION",
+								ListVersion: ptrfrom.String("1.2.3"),
+							},
+						},
+						CertifyLegal: &generated.CertifyLegalInputSpec{
+							DeclaredLicense:   "(BSD-3-Clause OR BSD-2-Clause) AND Apache-2.0",
+							DiscoveredLicense: "NOASSERTION",
+							Attribution:       "Copyright (c) 2022 Authors of MyPackage",
+							Justification:     "Found in SPDX document.",
+							TimeScanned:       parseRfc3339("2022-09-24T17:27:55.556104Z"),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX with differing licenses",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.IngestPredicates{},
+					"HasSBOM", "IsDependency", "IsOccurrence")},
+			doc: &processor.Document{
+				Blob: []byte(`
+{
+  "SPDXID":"SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.2",
+  "name":"testsbom",
+  "creationInfo": {
+    "created": "2022-09-24T17:27:55.556104Z",
+    "licenseListVersion": "1.2.3"
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-35085779bdf473bb",
+      "name": "mypackage",
+      "licenseConcluded": "MIT AND GPL-2.0-only",
+      "description": "Alpine base dir structure and init scripts",
+      "downloadLocation": "https://git.alpinelinux.org/cgit/aports/tree/main/alpine-baselayout",
+      "filesAnalyzed": false,
+      "licenseDeclared": "MIT",
+      "copyrightText": "Copyright (c) 2022 Authors of MyPackage",
+      "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+      "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+      "versionInfo": "3.2.0-r22",
+      "licenseComments": "Scanned with ScanCode"
+    }
+  ]
+}
+	`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				CertifyLegal: []assembler.CertifyLegalIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "mypackage",
+							Version:   ptrfrom.String("3.2.0-r22"),
+							Subpath:   ptrfrom.String(""),
+						},
+						Declared: []generated.LicenseInputSpec{
+							{
+								Name:        "MIT",
+								ListVersion: ptrfrom.String("1.2.3"),
+							},
+						},
+						Discovered: []generated.LicenseInputSpec{
+							{
+								Name:        "MIT",
+								ListVersion: ptrfrom.String("1.2.3"),
+							},
+							{
+								Name:        "GPL-2.0-only",
+								ListVersion: ptrfrom.String("1.2.3"),
+							},
+						},
+						CertifyLegal: &generated.CertifyLegalInputSpec{
+							DeclaredLicense:   "MIT",
+							DiscoveredLicense: "MIT AND GPL-2.0-only",
+							Attribution:       "Copyright (c) 2022 Authors of MyPackage",
+							Justification:     "Found in SPDX document. : Scanned with ScanCode",
+							TimeScanned:       parseRfc3339("2022-09-24T17:27:55.556104Z"),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX with custom licenses",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.IngestPredicates{},
+					"HasSBOM", "IsDependency", "IsOccurrence")},
+			doc: &processor.Document{
+				Blob: []byte(`
+{
+  "SPDXID":"SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.2",
+  "name":"testsbom",
+  "creationInfo": {
+    "created": "2022-09-24T17:27:55.556104Z",
+    "licenseListVersion": "1.2.3"
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-35085779bdf473bb",
+      "name": "mypackage",
+      "description": "Alpine base dir structure and init scripts",
+      "downloadLocation": "https://git.alpinelinux.org/cgit/aports/tree/main/alpine-baselayout",
+      "filesAnalyzed": false,
+      "licenseDeclared": "LicenseRef-Custom",
+      "copyrightText": "Copyright (c) 2022 Authors of MyPackage",
+      "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+      "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+      "versionInfo": "3.2.0-r22"
+    }
+  ],
+  "hasExtractedLicensingInfos": [
+    {
+      "licenseId": "LicenseRef-Custom",
+      "extractedText": "Redistribution and use of the this code or any derivative works are permitted provided that the following conditions are met...",
+      "name": "Custom License"
+    }
+  ]
+}
+`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				CertifyLegal: []assembler.CertifyLegalIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "mypackage",
+							Version:   ptrfrom.String("3.2.0-r22"),
+							Subpath:   ptrfrom.String(""),
+						},
+						Declared: []generated.LicenseInputSpec{
+							{
+								Name:   "LicenseRef-2ba8ded3",
+								Inline: ptrfrom.String("Redistribution and use of the this code or any derivative works are permitted provided that the following conditions are met..."),
+							},
+						},
+						CertifyLegal: &generated.CertifyLegalInputSpec{
+							DeclaredLicense: "LicenseRef-2ba8ded3",
+							Attribution:     "Copyright (c) 2022 Authors of MyPackage",
+							Justification:   "Found in SPDX document.",
+							TimeScanned:     parseRfc3339("2022-09-24T17:27:55.556104Z"),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -557,4 +798,12 @@ func Test_spdxParser(t *testing.T) {
 			}
 		})
 	}
+}
+
+func parseRfc3339(s string) time.Time {
+	time, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		panic(err)
+	}
+	return time
 }

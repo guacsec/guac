@@ -44,11 +44,11 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 	selectedPkg := isDependencySpec.Package
 	var dependentPkg *model.PkgSpec = nil
 	depMatchOnlyEmptyQualifiers := false
-	if isDependencySpec.DependentPackage != nil {
+	if isDependencySpec.DependencyPackage != nil {
 		dependentPkg = &model.PkgSpec{
-			Type:      isDependencySpec.DependentPackage.Type,
-			Namespace: isDependencySpec.DependentPackage.Namespace,
-			Name:      isDependencySpec.DependentPackage.Name,
+			Type:      isDependencySpec.DependencyPackage.Type,
+			Namespace: isDependencySpec.DependencyPackage.Namespace,
+			Name:      isDependencySpec.DependencyPackage.Name,
 			// remove version, subpath and set qualifiers to empty list
 			Qualifiers: []*model.PackageQualifierSpec{},
 			// setting to default value of false as package version is not checked for dependent packages
@@ -112,12 +112,12 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				}
 
 				isDependency := &model.IsDependency{
-					Package:          pkg,
-					DependentPackage: depPkg,
-					VersionRange:     isDependencyNode.Props[versionRange].(string),
-					DependencyType:   dependencyTypeEnum,
-					Origin:           isDependencyNode.Props[origin].(string),
-					Collector:        isDependencyNode.Props[collector].(string),
+					Package:           pkg,
+					DependencyPackage: depPkg,
+					VersionRange:      isDependencyNode.Props[versionRange].(string),
+					DependencyType:    dependencyTypeEnum,
+					Origin:            isDependencyNode.Props[origin].(string),
+					Collector:         isDependencyNode.Props[collector].(string),
 				}
 				collectedIsDependency = append(collectedIsDependency, isDependency)
 			}
@@ -253,12 +253,12 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 			}
 
 			isDependency := &model.IsDependency{
-				Package:          pkg,
-				DependentPackage: depPkg,
-				VersionRange:     isDependencyNode.Props[versionRange].(string),
-				DependencyType:   dependencyTypeEnum,
-				Origin:           isDependencyNode.Props[origin].(string),
-				Collector:        isDependencyNode.Props[collector].(string),
+				Package:           pkg,
+				DependencyPackage: depPkg,
+				VersionRange:      isDependencyNode.Props[versionRange].(string),
+				DependencyType:    dependencyTypeEnum,
+				Origin:            isDependencyNode.Props[origin].(string),
+				Collector:         isDependencyNode.Props[collector].(string),
 			}
 
 			return isDependency, nil

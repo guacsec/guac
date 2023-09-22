@@ -97,4 +97,10 @@ extend type Mutation {
     pkgMatchType: MatchFlags!
     pointOfContact: PointOfContactInputSpec!
   ): ID!
+  "Adds bulk PointOfContact attestations to a package, source or artifact. The returned array of IDs can be a an array of empty string."
+  ingestPointOfContacts(
+    subjects: PackageSourceOrArtifactInputs!
+    pkgMatchType: MatchFlags!
+    pointOfContacts: [PointOfContactInputSpec!]!
+  ): [ID!]!
 }

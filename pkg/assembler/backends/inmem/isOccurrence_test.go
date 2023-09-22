@@ -17,9 +17,10 @@ package inmem_test
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
 	"testing"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/exp/slices"
@@ -28,6 +29,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func convNode(n model.Node) hasID {
 	// All nodes have a json "id"
@@ -161,6 +164,19 @@ var p4 = &model.PkgInputSpec{
 	Namespace: ptrfrom.String("openssl.org"),
 	Name:      "openssl",
 	Version:   ptrfrom.String("3.0.3"),
+}
+var p4out = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name: "openssl",
+			Versions: []*model.PackageVersion{{
+				Version:    "3.0.3",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
 }
 var p4outName = &model.Package{
 	Type: "conan",

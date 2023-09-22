@@ -29,3 +29,7 @@ func (c *neo4jClient) IngestPointOfContact(ctx context.Context, subject model.Pa
 func (c *neo4jClient) PointOfContact(ctx context.Context, pointOfContactSpec *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
 	return nil, fmt.Errorf("not implemented: PointOfContact")
 }
+
+func (c *neo4jClient) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error) {
+	return nil, fmt.Errorf("not implemented: IngestPointOfContacts")
+}
