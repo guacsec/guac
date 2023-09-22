@@ -125,7 +125,7 @@ var osvCmd = &cobra.Command{
 		}
 		wg.Wait()
 
-		err = ingestor.BulkIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+		err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 		if err != nil {
 			gotErr = true
 			logger.Errorf("unable to ingest documents: %v", err)

@@ -69,7 +69,7 @@ func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, 
 	return nil
 }
 
-func BulkIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
+func MergedIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
 	logger := logging.FromContext(ctx)
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
@@ -92,8 +92,23 @@ func BulkIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoint
 			return fmt.Errorf("unable to ingest doc tree: %v", err)
 		}
 		for i := range preds {
+			predicates[0].CertifyScorecard = append(predicates[0].CertifyScorecard, preds[i].CertifyScorecard...)
+			predicates[0].IsDependency = append(predicates[0].IsDependency, preds[i].IsDependency...)
+			predicates[0].IsOccurrence = append(predicates[0].IsOccurrence, preds[i].IsOccurrence...)
+			predicates[0].HasSlsa = append(predicates[0].HasSlsa, preds[i].HasSlsa...)
 			predicates[0].CertifyVuln = append(predicates[0].CertifyVuln, preds[i].CertifyVuln...)
 			predicates[0].VulnEqual = append(predicates[0].VulnEqual, preds[i].VulnEqual...)
+			predicates[0].HasSourceAt = append(predicates[0].HasSourceAt, preds[i].HasSourceAt...)
+			predicates[0].CertifyBad = append(predicates[0].CertifyBad, preds[i].CertifyBad...)
+			predicates[0].CertifyGood = append(predicates[0].CertifyGood, preds[i].CertifyGood...)
+			predicates[0].HasSBOM = append(predicates[0].HasSBOM, preds[i].HasSBOM...)
+			predicates[0].HashEqual = append(predicates[0].HashEqual, preds[i].HashEqual...)
+			predicates[0].PkgEqual = append(predicates[0].PkgEqual, preds[i].PkgEqual...)
+			predicates[0].Vex = append(predicates[0].Vex, preds[i].Vex...)
+			predicates[0].PointOfContact = append(predicates[0].PointOfContact, preds[i].PointOfContact...)
+			predicates[0].VulnMetadata = append(predicates[0].VulnMetadata, preds[i].VulnMetadata...)
+			predicates[0].HasMetadata = append(predicates[0].HasMetadata, preds[i].HasMetadata...)
+			predicates[0].CertifyLegal = append(predicates[0].CertifyLegal, preds[i].CertifyLegal...)
 		}
 		idstrings = append(idstrings, idstrs...)
 	}
