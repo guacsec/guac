@@ -19,8 +19,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gofrs/uuid"
 	jsoniter "github.com/json-iterator/go"
-	uuid "github.com/gofrs/uuid"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/emitter"
