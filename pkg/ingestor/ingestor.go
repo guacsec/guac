@@ -69,6 +69,50 @@ func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, 
 	return nil
 }
 
+func BulkIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
+	logger := logging.FromContext(ctx)
+	// Get pipeline of components
+	processorFunc := GetProcessor(ctx)
+	ingestorFunc := GetIngestor(ctx)
+	collectSubEmitFunc := GetCollectSubEmit(ctx, csubClient)
+	assemblerFunc := GetAssembler(ctx, graphqlEndpoint)
+
+	start := time.Now()
+
+	var predicates = make([]assembler.IngestPredicates, 1)
+	var idstrings []*parser_common.IdentifierStrings
+	for _, d := range docs {
+		docTree, err := processorFunc(d)
+		if err != nil {
+			return fmt.Errorf("unable to process doc: %v, format: %v, document: %v", err, d.Format, d.Type)
+		}
+
+		preds, idstrs, err := ingestorFunc(docTree)
+		if err != nil {
+			return fmt.Errorf("unable to ingest doc tree: %v", err)
+		}
+		for i := range preds {
+			predicates[0].CertifyVuln = append(predicates[0].CertifyVuln, preds[i].CertifyVuln...)
+			predicates[0].VulnEqual = append(predicates[0].VulnEqual, preds[i].VulnEqual...)
+		}
+		idstrings = append(idstrings, idstrs...)
+	}
+
+	err := collectSubEmitFunc(idstrings)
+	if err != nil {
+		logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
+	}
+
+	err = assemblerFunc(predicates)
+	if err != nil {
+		return fmt.Errorf("unable to assemble graphs: %v", err)
+	}
+	t := time.Now()
+	elapsed := t.Sub(start)
+	logger.Infof("[%v] completed docs %+v", elapsed, len(docs))
+	return nil
+}
+
 func GetProcessor(ctx context.Context) func(*processor.Document) (processor.DocumentTree, error) {
 	return func(d *processor.Document) (processor.DocumentTree, error) {
 		return process.Process(ctx, d)
