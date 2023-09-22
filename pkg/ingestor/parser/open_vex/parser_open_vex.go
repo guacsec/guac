@@ -118,6 +118,8 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 
 		if vexStatus, ok := vexStatusMap[vex.Status(status)]; ok {
 			vd.Status = vexStatus
+		} else {
+			return nil, fmt.Errorf("invalid status for openVEX: %s", status)
 		}
 
 		if vd.Status == generated.VexStatusNotAffected {
@@ -126,7 +128,11 @@ func (c *openVEXParser) generateVexIngest(vulnInput *generated.VulnerabilityInpu
 			vd.Statement = vexStatement.ActionStatement
 		}
 
-		vd.VexJustification = justificationsMap[vexStatement.Justification]
+		if just, ok := justificationsMap[vexStatement.Justification]; ok {
+			vd.VexJustification = just
+		} else {
+			vd.VexJustification = generated.VexJustificationNotProvided
+		}
 
 		ingest.VexData = &vd
 		ingest.Vulnerability = vulnInput
