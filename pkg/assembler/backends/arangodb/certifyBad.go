@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -945,29 +946,112 @@ func (c *arangoClient) buildCertifyBadByID(ctx context.Context, id string, filte
 		return nil, fmt.Errorf("invalid ID: %s", id)
 	}
 
-	pvl := []*model.PackageVersion{}
 	if idSplit[0] == certifyBadsStr {
-		var foundPkgVersion *model.PackageVersion
-		var err error
-
-		foundPkgVersion, id, err = c.queryPkgVersionNodeByID(ctx, id, filter)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get pkg version node by ID with error: %w", err)
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.CertifyBadSpec{
+				ID: ptrfrom.String(id),
+			}
 		}
-		pvl = append(pvl, foundPkgVersion)
+		return c.queryCertifyBadNodeByID(ctx, filter)
+	}
+	return nil, nil
+}
+
+func (c *arangoClient) queryCertifyBadNodeByID(ctx context.Context, filter *model.CertifyBadSpec) (*model.CertifyBad, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(certifyBadsStr, "certifyBad")
+	setCertifyBadMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN certifyBad`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryCertifyBadNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for certifyBad: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbCertifyBad struct {
+		CertifyBadID  string  `json:"_id"`
+		PackageID     *string `json:"packageID"`
+		SourceID      *string `json:"sourceID"`
+		ArtifactID    *string `json:"artifactID"`
+		Justification string  `json:"justification"`
+		Collector     string  `json:"collector"`
+		Origin        string  `json:"origin"`
 	}
 
-	idSplit = strings.Split(id, "/")
-	if len(idSplit) != 2 {
-		return nil, fmt.Errorf("invalid ID: %s", id)
+	var collectedValues []dbCertifyBad
+	for {
+		var doc dbCertifyBad
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to certifyBad from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
 	}
 
-	certifyBad := model.CertifyBad{
-		ID:            nodeID(link.id),
-		Subject:       subj,
-		Justification: link.justification,
-		Origin:        link.origin,
-		Collector:     link.collector,
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of certifyBad nodes found for ID: %s is greater than one", *filter.ID)
 	}
-	return &certifyBad, nil
+
+	certifyBad := &model.CertifyBad{
+		ID:            collectedValues[0].CertifyBadID,
+		Justification: collectedValues[0].Justification,
+		Origin:        collectedValues[0].Origin,
+		Collector:     collectedValues[0].Collector,
+	}
+
+	if collectedValues[0].PackageID != nil {
+		var builtPackage *model.Package
+		if filter.Subject != nil && filter.Subject.Package != nil {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Subject.Package)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		} else {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		}
+		certifyBad.Subject = builtPackage
+	} else if collectedValues[0].SourceID != nil {
+		var builtSource *model.Source
+		if filter.Subject != nil && filter.Subject.Source != nil {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, filter.Subject.Source)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		} else {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		}
+		certifyBad.Subject = builtSource
+	} else if collectedValues[0].ArtifactID != nil {
+		var builtArtifact *model.Artifact
+		if filter.Subject != nil && filter.Subject.Source != nil {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, filter.Subject.Artifact)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		} else {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		}
+		certifyBad.Subject = builtArtifact
+	} else {
+		return nil, fmt.Errorf("failed to get subject from certifyBad")
+	}
+	return certifyBad, nil
 }
