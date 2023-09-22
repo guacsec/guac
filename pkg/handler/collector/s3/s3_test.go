@@ -20,16 +20,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guacsec/guac/pkg/handler/collector"
-	"github.com/guacsec/guac/pkg/handler/collector/s3/bucket"
-	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
-	"github.com/guacsec/guac/pkg/handler/processor"
 	"io"
 	"os"
 	"os/signal"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/guacsec/guac/pkg/handler/collector"
+	"github.com/guacsec/guac/pkg/handler/collector/s3/bucket"
+	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
+	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 // Test message

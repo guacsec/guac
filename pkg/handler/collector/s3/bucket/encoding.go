@@ -16,8 +16,9 @@
 package bucket
 
 import (
-	"github.com/guacsec/guac/pkg/handler/processor"
 	"strings"
+
+	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 const (

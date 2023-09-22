@@ -18,13 +18,14 @@ package s3
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+	"sync"
+
 	"github.com/guacsec/guac/pkg/handler/collector/s3/bucket"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"os"
-	"strings"
-	"sync"
 )
 
 const (

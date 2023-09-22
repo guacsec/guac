@@ -19,9 +19,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/segmentio/kafka-go"
-	"strings"
 )
 
 type KafkaProvider struct {
