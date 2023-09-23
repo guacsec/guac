@@ -27,7 +27,7 @@ name: Nightly Release
 on:
   workflow_dispatch: # testing only, trigger manually to test it works
   schedule:
-    - cron: '44 4 * * *'   #UTC
+    - cron: '44 4 1 1 *'   #UTC
 
 env:
   NIGHTLY_RELEASE_TAG: v0-nightly   #goreleaser enforces semver on tags
