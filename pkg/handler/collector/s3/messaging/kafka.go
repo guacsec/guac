@@ -81,7 +81,7 @@ func NewKafkaProvider(mpConfig MessageProviderConfig) (KafkaProvider, error) {
 func (k KafkaProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	logger := logging.FromContext(ctx)
 
-	m, err := k.reader.ReadMessage(context.Background())
+	m, err := k.reader.ReadMessage(ctx)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -90,7 +90,7 @@ func (k KafkaProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	msg := KafkaMessage{}
 	err = json.Unmarshal(m.Value, &msg)
 	if err != nil {
-		return msg, fmt.Errorf("error parsing JSON: %v", err)
+		return msg, fmt.Errorf("error parsing JSON: %w", err)
 	}
 
 	return msg, err
@@ -100,7 +100,7 @@ func (k KafkaProvider) Close(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 
 	if err := k.reader.Close(); err != nil {
-		logger.Errorf("failed to close reader:", err)
+		logger.Errorf("failed to close reader: %v", err)
 		return err
 	}
 

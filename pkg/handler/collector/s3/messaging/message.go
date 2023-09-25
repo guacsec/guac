@@ -62,6 +62,6 @@ func (mb MpBuilder) GetMessageProvider(config MessageProviderConfig) (MessagePro
 	}
 }
 
-func GetDefaultMessageProviderBuilder() (MessageProviderBuilder, error) {
-	return MpBuilder{}, nil
+func GetDefaultMessageProviderBuilder() MessageProviderBuilder {
+	return MpBuilder{}
 }

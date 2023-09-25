@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -108,7 +109,7 @@ func TestQueuesSplit(t *testing.T) {
 	ctx := context.Background()
 
 	sigChan := make(chan os.Signal, 1)
-	s3Collector, _ := NewS3Collector(S3CollectorConfig{
+	s3Collector := NewS3Collector(S3CollectorConfig{
 		Queues:        "q1,q2",
 		MpBuilder:     TestMpBuilder{},
 		BucketBuilder: TestBucketBuilder{},
@@ -149,7 +150,7 @@ func TestQueuesSplit(t *testing.T) {
 		}
 	}()
 	time.Sleep(5 * time.Second)
-	signal.Notify(sigChan, os.Interrupt)
+	signal.Notify(sigChan, syscall.SIGINT)
 
 	w.Close()
 	os.Stdout = oldStdout // restoring the real stdout

@@ -19,7 +19,10 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/guacsec/guac/pkg/cli"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/s3"
@@ -28,7 +31,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/sync/errgroup"
 )
 
 // s3Options flags for configuring the command
@@ -52,12 +54,26 @@ var s3Cmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		s3Opts, err := validateS3Opts(s3Opts.s3hostname, s3Opts.s3port, s3Opts.mp, s3Opts.mpHostname, s3Opts.mpPort, s3Opts.queues, s3Opts.region)
+		//s3Opts, err := validateS3Opts(s3Opts.s3hostname, s3Opts.s3port, s3Opts.mp, s3Opts.mpHostname, s3Opts.mpPort, s3Opts.queues, s3Opts.region)
+		s3Opts, err := validateS3Opts(
+			viper.GetString("s3-host"),
+			viper.GetString("s3-port"),
+			viper.GetString("s3-mp"),
+			viper.GetString("s3-mp-host"),
+			viper.GetString("s3-mp-port"),
+			viper.GetString("s3-queues"),
+			viper.GetString("s3-region"),
+		)
 		if err != nil {
+			logger.Errorf("failed to validate flags: %v", err)
+			_ = cmd.Help()
 			os.Exit(1)
 		}
 
-		s3Collector, err := s3.NewS3Collector(s3.S3CollectorConfig{
+		signals := make(chan os.Signal, 1)
+		signal.Notify(signals, syscall.SIGINT)
+
+		s3Collector := s3.NewS3Collector(s3.S3CollectorConfig{
 			S3Host:              s3Opts.s3hostname,
 			S3Port:              s3Opts.s3port,
 			MessageProvider:     s3Opts.mp,
@@ -65,14 +81,10 @@ var s3Cmd = &cobra.Command{
 			MessageProviderPort: s3Opts.mpPort,
 			Queues:              s3Opts.queues,
 			Region:              s3Opts.region,
+			SigChan:             signals,
 		})
-		if err != nil {
-			logger.Errorf("unable to create s3 collector: %v", err)
-			os.Exit(1)
-		}
 
-		err = collector.RegisterDocumentCollector(s3Collector, s3.S3CollectorType)
-		if err != nil {
+		if err := collector.RegisterDocumentCollector(s3Collector, s3.S3CollectorType); err != nil {
 			logger.Errorf("unable to register s3 collector: %v\n", err)
 			os.Exit(1)
 		}
@@ -87,9 +99,8 @@ var s3Cmd = &cobra.Command{
 
 		errFound := false
 
-		_, s3ctx := errgroup.WithContext(ctx)
 		emit := func(d *processor.Document) error {
-			err := ingestor.Ingest(s3ctx, d, viper.GetString("gql-addr"), csubClient)
+			err := ingestor.Ingest(ctx, d, viper.GetString("gql-addr"), csubClient)
 
 			if err != nil {
 				errFound = true
@@ -143,12 +154,16 @@ func validateS3Opts(s3hostname string, s3port string, mp string, mpHostname stri
 }
 
 func init() {
-	s3Cmd.Flags().StringVarP(&s3Opts.s3hostname, "s3-host", "", "", "hostname for s3")
-	s3Cmd.Flags().StringVarP(&s3Opts.s3port, "s3-port", "", "", "port for s3")
-	s3Cmd.Flags().StringVarP(&s3Opts.mp, "mp", "m", "", "message provider (sqs or kafka, defaults to kafka)")
-	s3Cmd.Flags().StringVarP(&s3Opts.mpHostname, "mp-host", "", "", "hostname for the message provider (sqs/kafka)")
-	s3Cmd.Flags().StringVarP(&s3Opts.mpPort, "mp-port", "", "", "port for the message provider (sqs/kafka)")
-	s3Cmd.Flags().StringVarP(&s3Opts.queues, "queues", "", "", "comma-separated list of queue/topic names")
-	s3Cmd.Flags().StringVarP(&s3Opts.region, "region", "", "us-east-1", "aws region, defaults to us-east-1")
+	set, err := cli.BuildFlags([]string{"s3-host", "s3-port", "s3-mp", "s3-mp-host", "s3-mp-port", "s3-queues", "s3-region"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
+		os.Exit(1)
+	}
+	s3Cmd.Flags().AddFlagSet(set)
+	if err := viper.BindPFlags(s3Cmd.Flags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %s", err)
+		os.Exit(1)
+	}
+
 	collectCmd.AddCommand(s3Cmd)
 }

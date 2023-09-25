@@ -49,11 +49,11 @@ type S3CollectorConfig struct {
 	SigChan             chan os.Signal                   // optional
 }
 
-func NewS3Collector(cfg S3CollectorConfig) (*S3Collector, error) {
+func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
 	s3collector := &S3Collector{
 		config: cfg,
 	}
-	return s3collector, nil
+	return s3collector
 }
 
 func (s S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
@@ -62,11 +62,28 @@ func (s S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *p
 	downloader := getDownloader(s)
 	sigChan := s.config.SigChan
 
+	cancelCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	// Send cancellation in case of receiving SIGINT
+	go func(cancel context.CancelFunc) {
+		<-sigChan
+		cancel()
+	}(cancel)
+
 	var wg sync.WaitGroup
 	for _, queue := range queues {
 		wg.Add(1)
 
-		go func(queue string) {
+		go func(wg *sync.WaitGroup, cncCtx context.Context, queue string) {
+			defer wg.Done()
+
+			defer func() {
+				if r := recover(); r != nil {
+					fmt.Println("recovered from panic:", r)
+				}
+			}()
+
 			mp, err := getMessageProvider(s, queue)
 			if err != nil {
 				logger.Errorf("error getting message provider for queue %v: %v", queue, err)
@@ -75,11 +92,11 @@ func (s S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *p
 
 			for {
 				select {
-				case <-sigChan:
+				case <-cncCtx.Done():
 					logger.Infof("Shutting down collector for queue %s...\n", queue)
-					break
+					return
 				default:
-					m, err := mp.ReceiveMessage(ctx)
+					m, err := mp.ReceiveMessage(cncCtx)
 					if err != nil {
 						logger.Infof("error while receiving message, skipping: %v\n", err)
 						continue
@@ -99,15 +116,16 @@ func (s S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *p
 					item, err := m.GetItem()
 					if err != nil {
 						logger.Errorf("skipping message: %v\n", err)
+						continue
 					}
 
-					blob, err := downloader.DownloadFile(ctx, bucketName, item)
+					blob, err := downloader.DownloadFile(cncCtx, bucketName, item)
 					if err != nil {
 						logger.Errorf("could not download item %v, skipping: %v", item, err)
 						continue
 					}
 
-					enc, err := downloader.GetEncoding(ctx, bucketName, item)
+					enc, err := downloader.GetEncoding(cncCtx, bucketName, item)
 					if err != nil {
 						logger.Errorf("could not get encoding for item %v, skipping: %v", item, err)
 						continue
@@ -127,7 +145,7 @@ func (s S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *p
 				}
 			}
 
-		}(queue)
+		}(&wg, cancelCtx, queue)
 	}
 
 	wg.Wait()
@@ -141,9 +159,9 @@ func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider,
 	if s.config.MpBuilder != nil {
 		mpBuilder = s.config.MpBuilder
 	} else {
-		mpBuilder, err = messaging.GetDefaultMessageProviderBuilder()
+		mpBuilder = messaging.GetDefaultMessageProviderBuilder()
 		if err != nil {
-			return nil, fmt.Errorf("error getting message provider: %v", err)
+			return nil, fmt.Errorf("error getting message provider: %w", err)
 		}
 	}
 

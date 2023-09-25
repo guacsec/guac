@@ -89,7 +89,7 @@ func NewSqsProvider(mpConfig MessageProviderConfig) (SqsProvider, error) {
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		return SqsProvider{}, fmt.Errorf("error loading AWS SDK config: %v", err)
+		return SqsProvider{}, fmt.Errorf("error loading AWS SDK config: %w", err)
 	}
 
 	client := sqs.NewFromConfig(cfg, func(o *sqs.Options) {
@@ -118,36 +118,41 @@ func (s SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	}
 
 	for {
-		receiveOutput, err := s.client.ReceiveMessage(ctx, receiveInput)
-		if err != nil {
-			fmt.Printf("error receiving message, skipping: %v\n", err)
-			continue
-		}
-
-		messages := receiveOutput.Messages
-		if len(messages) > 0 {
-			message := receiveOutput.Messages[0]
-			logger.Debugf("Received message: %v\n", *message.Body)
-
-			var msg SqsMessage
-			err := json.Unmarshal([]byte(*message.Body), &msg)
+		select {
+		case <-ctx.Done():
+			return SqsMessage{}, nil
+		default:
+			receiveOutput, err := s.client.ReceiveMessage(ctx, receiveInput)
 			if err != nil {
-				fmt.Println("Error:", err)
-				return SqsMessage{}, err
+				fmt.Printf("error receiving message, skipping: %v\n", err)
+				continue
 			}
 
-			// Delete the received message from the queue (stardard sqs procedure)
-			deleteInput := &sqs.DeleteMessageInput{
-				QueueUrl:      &addr,
-				ReceiptHandle: message.ReceiptHandle,
-			}
-			_, err = s.client.DeleteMessage(context.TODO(), deleteInput)
-			if err != nil {
-				logger.Errorf("error deleting message: %v\n", err)
-			}
-			logger.Debugf("Message deleted from the queue")
+			messages := receiveOutput.Messages
+			if len(messages) > 0 {
+				message := receiveOutput.Messages[0]
+				logger.Debugf("Received message: %v\n", *message.Body)
 
-			return msg, nil
+				var msg SqsMessage
+				err := json.Unmarshal([]byte(*message.Body), &msg)
+				if err != nil {
+					logger.Errorf("error unmarshalling message: %v", err)
+					return SqsMessage{}, err
+				}
+
+				// Delete the received message from the queue (stardard sqs procedure)
+				deleteInput := &sqs.DeleteMessageInput{
+					QueueUrl:      &addr,
+					ReceiptHandle: message.ReceiptHandle,
+				}
+				_, err = s.client.DeleteMessage(context.TODO(), deleteInput)
+				if err != nil {
+					logger.Errorf("error deleting message: %v\n", err)
+				}
+				logger.Debugf("Message deleted from the queue")
+
+				return msg, nil
+			}
 		}
 	}
 }

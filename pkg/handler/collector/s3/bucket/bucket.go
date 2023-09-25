@@ -59,7 +59,7 @@ func GetDefaultBucket(hostname string, port string, region string) Bucket {
 func (d S3Bucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("error loading AWS SDK config: %v", err)
+		return nil, fmt.Errorf("error loading AWS SDK config: %w", err)
 	}
 
 	addr := fmt.Sprintf("http://%s:%s/%s/", d.hostname, d.port, bucket)
@@ -77,23 +77,23 @@ func (d S3Bucket) DownloadFile(ctx context.Context, bucket string, item string) 
 
 	resp, err := client.GetObject(ctx, input)
 	if err != nil {
-		return nil, fmt.Errorf("unable to download file: %v", err)
+		return nil, fmt.Errorf("unable to download file: %w", err)
 	}
 	defer resp.Body.Close()
 
 	buf := new(bytes.Buffer)
 	n, err := io.Copy(buf, resp.Body)
 	if err != nil || n == 0 {
-		return nil, fmt.Errorf("unable to read file contents: %v", err)
+		return nil, fmt.Errorf("unable to read file contents: %w", err)
 	}
 
-	return buf.Bytes(), err
+	return buf.Bytes(), nil
 }
 
 func (d S3Bucket) GetEncoding(ctx context.Context, bucket string, item string) (string, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
-		return "", fmt.Errorf("error loading AWS SDK config: %v", err)
+		return "", fmt.Errorf("error loading AWS SDK config: %w", err)
 	}
 
 	addr := fmt.Sprintf("http://%s:%s/%s/", d.hostname, d.port, bucket)
@@ -105,7 +105,7 @@ func (d S3Bucket) GetEncoding(ctx context.Context, bucket string, item string) (
 
 	headObject, err := client.HeadObject(context.Background(), &s3.HeadObjectInput{Bucket: aws.String(bucket), Key: aws.String(item)})
 	if err != nil {
-		return "", fmt.Errorf("could not get head object: %v", err)
+		return "", fmt.Errorf("could not get head object: %w", err)
 	}
 
 	if headObject.ContentEncoding == nil {
