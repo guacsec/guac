@@ -19,6 +19,7 @@ package backend
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -70,6 +71,56 @@ func (s *Suite) TestIngestBuilder() {
 	}
 }
 
+func (s *Suite) TestIngestBuilderID() {
+	tests := []struct {
+		name         string
+		builderInput *model.BuilderInputSpec
+		want         *model.Builder
+		wantErr      bool
+	}{{
+		name: "HubHostedActions",
+		builderInput: &model.BuilderInputSpec{
+			URI: "https://github.com/CreateFork/HubHostedActions@v1",
+		},
+		want: &model.Builder{
+			URI: "https://github.com/CreateFork/HubHostedActions@v1",
+		},
+		wantErr: false,
+	}, {
+		name: "chains",
+		builderInput: &model.BuilderInputSpec{
+			URI: "https://tekton.dev/chains/v2",
+		},
+		want: &model.Builder{
+			URI: "https://tekton.dev/chains/v2",
+		},
+		wantErr: false,
+	}}
+	ctx := s.Ctx
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("GetBackend() error = %v", err)
+			}
+			got, err := b.IngestBuilderID(ctx, tt.builderInput)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			id, err := strconv.Atoi(got)
+			if err != nil {
+				t.Errorf("Unexpected ID result. (id):\n%v", id)
+			}
+			if len(got) < 10 && id == 0 {
+				diff := cmp.Diff(tt.want, got, ignoreID)
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func (s *Suite) TestIngestBuilders() {
 	tests := []struct {
 		name          string
@@ -108,6 +159,51 @@ func (s *Suite) TestIngestBuilders() {
 				return
 			}
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func (s *Suite) TestIngestBuildersIDs() {
+	tests := []struct {
+		name          string
+		builderInputs []*model.BuilderInputSpec
+		want          []*model.Builder
+		wantErr       bool
+	}{{
+		name: "HubHostedActions",
+		builderInputs: []*model.BuilderInputSpec{
+			{
+				URI: "https://github.com/CreateFork/HubHostedActions@v1",
+			},
+			{
+				URI: "https://tekton.dev/chains/v2",
+			}},
+		want: []*model.Builder{
+			{
+				URI: "https://github.com/CreateFork/HubHostedActions@v1",
+			},
+			{
+				URI: "https://tekton.dev/chains/v2",
+			}},
+		wantErr: false,
+	}}
+	ctx := s.Ctx
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			got, err := b.IngestBuilderIDs(ctx, tt.builderInputs)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if len(got) != len(tt.want) {
+				diff := cmp.Diff(tt.want, got, ignoreID)
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

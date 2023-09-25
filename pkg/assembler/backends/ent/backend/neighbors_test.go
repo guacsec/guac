@@ -66,18 +66,18 @@ func (s *Suite) TestNode() {
 
 			ids := make([]string, 0, len(test.Expected))
 			for _, inA := range test.InArt {
-				if a, err := b.IngestArtifact(ctx, inA); err != nil {
+				if a, err := b.IngestArtifactID(ctx, inA); err != nil {
 					s.T().Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					ids = append(ids, a.ID)
+					ids = append(ids, a)
 				}
 			}
 
 			for _, inP := range test.InPkg {
-				if p, err := b.IngestPackage(ctx, *inP); err != nil {
+				if id, err := b.IngestPackageID(ctx, *inP); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				} else {
-					ids = append(ids, p.ID)
+					ids = append(ids, id)
 				}
 			}
 
@@ -112,13 +112,15 @@ func (s *Suite) TestNodes() {
 	be, err := GetBackend(s.Client)
 	s.Require().NoError(err)
 
-	v, err := be.IngestArtifact(s.Ctx, a1)
+	v, err := be.IngestArtifactID(s.Ctx, a1)
 	s.Require().NoError(err)
 
-	p, err := be.IngestPackage(s.Ctx, *p4)
+	id, err := be.IngestPackageID(s.Ctx, *p4)
 	s.Require().NoError(err)
-
-	nodes, err := be.Nodes(s.Ctx, []string{v.ID, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
+	pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
+	s.Require().NoError(err)
+	p := pkgs[0]
+	nodes, err := be.Nodes(s.Ctx, []string{v, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
 	s.Require().NoError(err)
 	if diff := cmp.Diff(a1out, nodes[0], ignoreID, ignoreEmptySlices); diff != "" {
 		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)

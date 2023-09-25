@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	"log"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -173,6 +174,17 @@ func (b *EntBackend) IngestSource(ctx context.Context, src model.SourceInputSpec
 	}
 
 	return toModelSource(backReferenceSourceName(sourceName.Unwrap())), nil
+}
+
+func (b *EntBackend) IngestSourceID(ctx context.Context, source model.SourceInputSpec) (string, error) {
+	sourceName, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SourceName, error) {
+		return upsertSource(ctx, ent.TxFromContext(ctx), source)
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return strconv.Itoa(sourceName.ID), nil
 }
 
 func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec) (*ent.SourceName, error) {

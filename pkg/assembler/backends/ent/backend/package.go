@@ -22,6 +22,7 @@ import (
 	stdsql "database/sql"
 	"fmt"
 	"sort"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -99,20 +100,20 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	return collect(pkgs, toModelPackage), nil
 }
 
-func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
+func (b *EntBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error) {
 	// FIXME: (ivanvanderbyl) This will be suboptimal because we can't batch insert relations with upserts. See Readme.
-	models := make([]*model.Package, len(pkgs))
+	pkgsID := make([]string, len(pkgs))
 	for i, pkg := range pkgs {
-		p, err := b.IngestPackage(ctx, *pkg)
+		p, err := b.IngestPackageID(ctx, *pkg)
 		if err != nil {
 			return nil, err
 		}
-		models[i] = p
+		pkgsID[i] = p
 	}
-	return models, nil
+	return pkgsID, nil
 }
 
-func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
+func (b *EntBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec) (string, error) {
 	pkgVersion, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.PackageVersion, error) {
 		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), pkg)
 		if err != nil {
@@ -121,10 +122,10 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 		return p, nil
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelPackage(backReferencePackageVersion(pkgVersion.Unwrap())), nil
+	return strconv.Itoa(pkgVersion.ID), nil
 }
 
 // upsertPackage is a helper function to create or update a package node and its associated edges.

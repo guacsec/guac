@@ -213,7 +213,7 @@ func (s *Suite) TestOccurrenceHappyPath() {
 	be, err := GetBackend(s.Client)
 	s.Require().NoError(err)
 
-	_, err = be.IngestPackage(s.Ctx, *p1)
+	_, err = be.IngestPackageID(s.Ctx, *p1)
 	s.Require().NoError(err)
 
 	_, err = be.IngestArtifact(s.Ctx, a1)
@@ -571,7 +571,7 @@ func (s *Suite) TestOccurrence() {
 			}
 
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				}
 			}

@@ -27,7 +27,7 @@ func (s *Suite) Test_FindSoftware() {
 	s.NoError(err)
 
 	for _, p := range []*model.PkgInputSpec{p1, p2, p3} {
-		if _, err := b.IngestPackage(s.Ctx, *p); err != nil {
+		if _, err := b.IngestPackageID(s.Ctx, *p); err != nil {
 			s.NoError(err)
 		}
 	}

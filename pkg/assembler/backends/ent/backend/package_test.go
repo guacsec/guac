@@ -204,7 +204,7 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 
 }
 
-func (s *Suite) Test_IngestPackages() {
+func (s *Suite) Test_IngestPackagesID() {
 	ctx := s.Ctx
 	tests := []struct {
 		name      string
@@ -222,12 +222,14 @@ func (s *Suite) Test_IngestPackages() {
 			c, err := GetBackend(s.Client)
 			s.NoError(err)
 
-			got, err := c.IngestPackages(ctx, tt.pkgInputs)
+			got, err := c.IngestPackageIDs(ctx, tt.pkgInputs)
 			if (err != nil) != tt.wantErr {
 				s.T().Errorf("demoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+
+			if len(got) != 4 || (got[0] == got[1] || got[1] == got[2] || got[2] == got[3]) {
+				diff := cmp.Diff(tt.want, got, ignoreID)
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -305,13 +307,14 @@ func (s *Suite) Test_Packages() {
 			t := s.T()
 			be, err := GetBackend(s.Client)
 			s.NoError(err)
-			ingestedPkg, err := be.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgID, err := be.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if tt.idInFilter && ingestedPkg != nil {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+
+			if tt.idInFilter && ingestedPkgID != "" {
+				tt.pkgFilter.ID = &ingestedPkgID
 			}
 			got, err := be.Packages(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
