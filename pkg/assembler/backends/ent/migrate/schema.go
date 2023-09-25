@@ -475,6 +475,45 @@ var (
 			},
 		},
 	}
+	// LicensesColumns holds the columns for the "licenses" table.
+	LicensesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "inline", Type: field.TypeString, Nullable: true},
+		{Name: "list_version", Type: field.TypeString, Nullable: true},
+	}
+	// LicensesTable holds the schema information for the "licenses" table.
+	LicensesTable = &schema.Table{
+		Name:       "licenses",
+		Columns:    LicensesColumns,
+		PrimaryKey: []*schema.Column{LicensesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "license_name_inline_list_version",
+				Unique:  true,
+				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[2], LicensesColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "inline IS NOT NULL AND list_version IS NOT NULL",
+				},
+			},
+			{
+				Name:    "license_name_list_version",
+				Unique:  true,
+				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "inline IS NULL AND list_version IS NOT NULL",
+				},
+			},
+			{
+				Name:    "license_name_inline",
+				Unique:  true,
+				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "inline IS NOT NULL AND list_version IS NULL",
+				},
+			},
+		},
+	}
 	// OccurrencesColumns holds the columns for the "occurrences" table.
 	OccurrencesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -968,6 +1007,7 @@ var (
 		HasSourceAtsTable,
 		HashEqualsTable,
 		IsVulnerabilitiesTable,
+		LicensesTable,
 		OccurrencesTable,
 		PackageNamesTable,
 		PackageNamespacesTable,

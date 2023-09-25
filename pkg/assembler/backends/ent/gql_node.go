@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -79,6 +80,9 @@ func (n *HashEqual) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *IsVulnerability) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *License) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *Occurrence) IsNode() {}
@@ -304,6 +308,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.IsVulnerability.Query().
 			Where(isvulnerability.ID(id))
 		query, err := query.CollectFields(ctx, "IsVulnerability")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case license.Table:
+		query := c.License.Query().
+			Where(license.ID(id))
+		query, err := query.CollectFields(ctx, "License")
 		if err != nil {
 			return nil, err
 		}
@@ -717,6 +733,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.IsVulnerability.Query().
 			Where(isvulnerability.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "IsVulnerability")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case license.Table:
+		query := c.License.Query().
+			Where(license.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "License")
 		if err != nil {
 			return nil, err
 		}

@@ -39,6 +39,9 @@ type HashEqual func(*sql.Selector)
 // IsVulnerability is the predicate function for isvulnerability builders.
 type IsVulnerability func(*sql.Selector)
 
+// License is the predicate function for license builders.
+type License func(*sql.Selector)
+
 // Occurrence is the predicate function for occurrence builders.
 type Occurrence func(*sql.Selector)
 

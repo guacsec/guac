@@ -87,6 +87,13 @@
 ./pkg/assembler/backends/ent/isvulnerability_delete.go
 ./pkg/assembler/backends/ent/isvulnerability_query.go
 ./pkg/assembler/backends/ent/isvulnerability_update.go
+./pkg/assembler/backends/ent/license/where.go
+./pkg/assembler/backends/ent/license/license.go
+./pkg/assembler/backends/ent/license_query.go
+./pkg/assembler/backends/ent/license.go
+./pkg/assembler/backends/ent/license_create.go
+./pkg/assembler/backends/ent/license_delete.go
+./pkg/assembler/backends/ent/license_update.go
 ./pkg/assembler/backends/ent/migrate/migrate.go
 ./pkg/assembler/backends/ent/migrate/schema.go
 ./pkg/assembler/backends/ent/mutation.go

@@ -18,6 +18,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -1346,6 +1347,80 @@ type isvulnerabilityPaginateArgs struct {
 
 func newIsVulnerabilityPaginateArgs(rv map[string]any) *isvulnerabilityPaginateArgs {
 	args := &isvulnerabilityPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (l *LicenseQuery) CollectFields(ctx context.Context, satisfies ...string) (*LicenseQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return l, nil
+	}
+	if err := l.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return l, nil
+}
+
+func (l *LicenseQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(license.Columns))
+		selectedFields = []string{license.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "name":
+			if _, ok := fieldSeen[license.FieldName]; !ok {
+				selectedFields = append(selectedFields, license.FieldName)
+				fieldSeen[license.FieldName] = struct{}{}
+			}
+		case "inline":
+			if _, ok := fieldSeen[license.FieldInline]; !ok {
+				selectedFields = append(selectedFields, license.FieldInline)
+				fieldSeen[license.FieldInline] = struct{}{}
+			}
+		case "listVersion":
+			if _, ok := fieldSeen[license.FieldListVersion]; !ok {
+				selectedFields = append(selectedFields, license.FieldListVersion)
+				fieldSeen[license.FieldListVersion] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		l.Select(selectedFields...)
+	}
+	return nil
+}
+
+type licensePaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []LicensePaginateOption
+}
+
+func newLicensePaginateArgs(rv map[string]any) *licensePaginateArgs {
+	args := &licensePaginateArgs{}
 	if rv == nil {
 		return args
 	}
