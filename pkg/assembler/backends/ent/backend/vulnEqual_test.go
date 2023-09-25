@@ -318,7 +318,7 @@ func (s *Suite) TestVulnEqual() {
 						},
 						&model.Vulnerability{
 							Type:             "cve",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
 						},
 					},
 					Justification: "test justification",
@@ -331,7 +331,7 @@ func (s *Suite) TestVulnEqual() {
 						},
 						&model.Vulnerability{
 							Type:             "cve",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
 						},
 					},
 					Justification: "test justification",
