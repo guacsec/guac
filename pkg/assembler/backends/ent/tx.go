@@ -34,6 +34,8 @@ type Tx struct {
 	HashEqual *HashEqualClient
 	// IsVulnerability is the client for interacting with the IsVulnerability builders.
 	IsVulnerability *IsVulnerabilityClient
+	// License is the client for interacting with the License builders.
+	License *LicenseClient
 	// Occurrence is the client for interacting with the Occurrence builders.
 	Occurrence *OccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
@@ -204,6 +206,7 @@ func (tx *Tx) init() {
 	tx.HasSourceAt = NewHasSourceAtClient(tx.config)
 	tx.HashEqual = NewHashEqualClient(tx.config)
 	tx.IsVulnerability = NewIsVulnerabilityClient(tx.config)
+	tx.License = NewLicenseClient(tx.config)
 	tx.Occurrence = NewOccurrenceClient(tx.config)
 	tx.PackageName = NewPackageNameClient(tx.config)
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)

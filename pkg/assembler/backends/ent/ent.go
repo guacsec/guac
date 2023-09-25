@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -108,6 +109,7 @@ func checkColumn(table, column string) error {
 			hassourceat.Table:       hassourceat.ValidColumn,
 			hashequal.Table:         hashequal.ValidColumn,
 			isvulnerability.Table:   isvulnerability.ValidColumn,
+			license.Table:           license.ValidColumn,
 			occurrence.Table:        occurrence.ValidColumn,
 			packagename.Table:       packagename.ValidColumn,
 			packagenamespace.Table:  packagenamespace.ValidColumn,

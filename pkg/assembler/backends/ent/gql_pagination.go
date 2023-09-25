@@ -22,6 +22,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -2822,6 +2823,252 @@ func (iv *IsVulnerability) ToEdge(order *IsVulnerabilityOrder) *IsVulnerabilityE
 	return &IsVulnerabilityEdge{
 		Node:   iv,
 		Cursor: order.Field.toCursor(iv),
+	}
+}
+
+// LicenseEdge is the edge representation of License.
+type LicenseEdge struct {
+	Node   *License `json:"node"`
+	Cursor Cursor   `json:"cursor"`
+}
+
+// LicenseConnection is the connection containing edges to License.
+type LicenseConnection struct {
+	Edges      []*LicenseEdge `json:"edges"`
+	PageInfo   PageInfo       `json:"pageInfo"`
+	TotalCount int            `json:"totalCount"`
+}
+
+func (c *LicenseConnection) build(nodes []*License, pager *licensePager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *License
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *License {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *License {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*LicenseEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &LicenseEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// LicensePaginateOption enables pagination customization.
+type LicensePaginateOption func(*licensePager) error
+
+// WithLicenseOrder configures pagination ordering.
+func WithLicenseOrder(order *LicenseOrder) LicensePaginateOption {
+	if order == nil {
+		order = DefaultLicenseOrder
+	}
+	o := *order
+	return func(pager *licensePager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultLicenseOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithLicenseFilter configures pagination filter.
+func WithLicenseFilter(filter func(*LicenseQuery) (*LicenseQuery, error)) LicensePaginateOption {
+	return func(pager *licensePager) error {
+		if filter == nil {
+			return errors.New("LicenseQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type licensePager struct {
+	reverse bool
+	order   *LicenseOrder
+	filter  func(*LicenseQuery) (*LicenseQuery, error)
+}
+
+func newLicensePager(opts []LicensePaginateOption, reverse bool) (*licensePager, error) {
+	pager := &licensePager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultLicenseOrder
+	}
+	return pager, nil
+}
+
+func (p *licensePager) applyFilter(query *LicenseQuery) (*LicenseQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *licensePager) toCursor(l *License) Cursor {
+	return p.order.Field.toCursor(l)
+}
+
+func (p *licensePager) applyCursors(query *LicenseQuery, after, before *Cursor) (*LicenseQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultLicenseOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *licensePager) applyOrder(query *LicenseQuery) *LicenseQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultLicenseOrder.Field {
+		query = query.Order(DefaultLicenseOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *licensePager) orderExpr(query *LicenseQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultLicenseOrder.Field {
+			b.Comma().Ident(DefaultLicenseOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to License.
+func (l *LicenseQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...LicensePaginateOption,
+) (*LicenseConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newLicensePager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if l, err = pager.applyFilter(l); err != nil {
+		return nil, err
+	}
+	conn := &LicenseConnection{Edges: []*LicenseEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = l.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if l, err = pager.applyCursors(l, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		l.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := l.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	l = pager.applyOrder(l)
+	nodes, err := l.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// LicenseOrderField defines the ordering field of License.
+type LicenseOrderField struct {
+	// Value extracts the ordering value from the given License.
+	Value    func(*License) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) license.OrderOption
+	toCursor func(*License) Cursor
+}
+
+// LicenseOrder defines the ordering of License.
+type LicenseOrder struct {
+	Direction OrderDirection     `json:"direction"`
+	Field     *LicenseOrderField `json:"field"`
+}
+
+// DefaultLicenseOrder is the default ordering of License.
+var DefaultLicenseOrder = &LicenseOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &LicenseOrderField{
+		Value: func(l *License) (ent.Value, error) {
+			return l.ID, nil
+		},
+		column: license.FieldID,
+		toTerm: license.ByID,
+		toCursor: func(l *License) Cursor {
+			return Cursor{ID: l.ID}
+		},
+	},
+}
+
+// ToEdge converts License into LicenseEdge.
+func (l *License) ToEdge(order *LicenseOrder) *LicenseEdge {
+	if order == nil {
+		order = DefaultLicenseOrder
+	}
+	return &LicenseEdge{
+		Node:   l,
+		Cursor: order.Field.toCursor(l),
 	}
 }
 
