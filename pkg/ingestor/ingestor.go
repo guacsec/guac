@@ -80,6 +80,7 @@ func MergedIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoi
 	start := time.Now()
 
 	var predicates = make([]assembler.IngestPredicates, 1)
+	totalPredicates := 0
 	var idstrings []*parser_common.IdentifierStrings
 	for _, d := range docs {
 		docTree, err := processorFunc(d)
@@ -109,6 +110,17 @@ func MergedIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoi
 			predicates[0].VulnMetadata = append(predicates[0].VulnMetadata, preds[i].VulnMetadata...)
 			predicates[0].HasMetadata = append(predicates[0].HasMetadata, preds[i].HasMetadata...)
 			predicates[0].CertifyLegal = append(predicates[0].CertifyLegal, preds[i].CertifyLegal...)
+			totalPredicates += 1
+			// enough predicates have been collected, worth sending them to GraphQL server
+			if totalPredicates == 5000 {
+				err = assemblerFunc(predicates)
+				if err != nil {
+					return fmt.Errorf("unable to assemble graphs: %v", err)
+				}
+				// reset counter and predicates
+				totalPredicates = 0
+				predicates[0] = assembler.IngestPredicates{}
+			}
 		}
 		idstrings = append(idstrings, idstrs...)
 	}
