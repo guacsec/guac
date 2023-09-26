@@ -16,6 +16,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
@@ -102,6 +103,7 @@ func checkColumn(table, column string) error {
 			billofmaterials.Table:   billofmaterials.ValidColumn,
 			builder.Table:           builder.ValidColumn,
 			certification.Table:     certification.ValidColumn,
+			certifylegal.Table:      certifylegal.ValidColumn,
 			certifyscorecard.Table:  certifyscorecard.ValidColumn,
 			certifyvex.Table:        certifyvex.ValidColumn,
 			certifyvuln.Table:       certifyvuln.ValidColumn,

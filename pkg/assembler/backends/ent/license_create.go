@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 )
 
@@ -53,6 +54,36 @@ func (lc *LicenseCreate) SetNillableListVersion(s *string) *LicenseCreate {
 		lc.SetListVersion(*s)
 	}
 	return lc
+}
+
+// AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by IDs.
+func (lc *LicenseCreate) AddDeclaredInCertifyLegalIDs(ids ...int) *LicenseCreate {
+	lc.mutation.AddDeclaredInCertifyLegalIDs(ids...)
+	return lc
+}
+
+// AddDeclaredInCertifyLegals adds the "declared_in_certify_legals" edges to the CertifyLegal entity.
+func (lc *LicenseCreate) AddDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return lc.AddDeclaredInCertifyLegalIDs(ids...)
+}
+
+// AddDiscoveredInCertifyLegalIDs adds the "discovered_in_certify_legals" edge to the CertifyLegal entity by IDs.
+func (lc *LicenseCreate) AddDiscoveredInCertifyLegalIDs(ids ...int) *LicenseCreate {
+	lc.mutation.AddDiscoveredInCertifyLegalIDs(ids...)
+	return lc
+}
+
+// AddDiscoveredInCertifyLegals adds the "discovered_in_certify_legals" edges to the CertifyLegal entity.
+func (lc *LicenseCreate) AddDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return lc.AddDiscoveredInCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the LicenseMutation object of the builder.
@@ -135,6 +166,38 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 	if value, ok := lc.mutation.ListVersion(); ok {
 		_spec.SetField(license.FieldListVersion, field.TypeString, value)
 		_node.ListVersion = &value
+	}
+	if nodes := lc.mutation.DeclaredInCertifyLegalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   license.DeclaredInCertifyLegalsTable,
+			Columns: license.DeclaredInCertifyLegalsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := lc.mutation.DiscoveredInCertifyLegalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   license.DiscoveredInCertifyLegalsTable,
+			Columns: license.DiscoveredInCertifyLegalsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

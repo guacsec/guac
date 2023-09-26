@@ -20,6 +20,8 @@ type Tx struct {
 	Builder *BuilderClient
 	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
+	// CertifyLegal is the client for interacting with the CertifyLegal builders.
+	CertifyLegal *CertifyLegalClient
 	// CertifyScorecard is the client for interacting with the CertifyScorecard builders.
 	CertifyScorecard *CertifyScorecardClient
 	// CertifyVex is the client for interacting with the CertifyVex builders.
@@ -199,6 +201,7 @@ func (tx *Tx) init() {
 	tx.BillOfMaterials = NewBillOfMaterialsClient(tx.config)
 	tx.Builder = NewBuilderClient(tx.config)
 	tx.Certification = NewCertificationClient(tx.config)
+	tx.CertifyLegal = NewCertifyLegalClient(tx.config)
 	tx.CertifyScorecard = NewCertifyScorecardClient(tx.config)
 	tx.CertifyVex = NewCertifyVexClient(tx.config)
 	tx.CertifyVuln = NewCertifyVulnClient(tx.config)

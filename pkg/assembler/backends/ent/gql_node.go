@@ -17,6 +17,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
@@ -59,6 +60,9 @@ func (n *Builder) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *Certification) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *CertifyLegal) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *CertifyScorecard) IsNode() {}
@@ -224,6 +228,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.Certification.Query().
 			Where(certification.ID(id))
 		query, err := query.CollectFields(ctx, "Certification")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case certifylegal.Table:
+		query := c.CertifyLegal.Query().
+			Where(certifylegal.ID(id))
+		query, err := query.CollectFields(ctx, "CertifyLegal")
 		if err != nil {
 			return nil, err
 		}
@@ -621,6 +637,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.Certification.Query().
 			Where(certification.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "Certification")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case certifylegal.Table:
+		query := c.CertifyLegal.Query().
+			Where(certifylegal.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "CertifyLegal")
 		if err != nil {
 			return nil, err
 		}

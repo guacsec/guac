@@ -15,6 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
@@ -54,6 +55,7 @@ const (
 	TypeBillOfMaterials   = "BillOfMaterials"
 	TypeBuilder           = "Builder"
 	TypeCertification     = "Certification"
+	TypeCertifyLegal      = "CertifyLegal"
 	TypeCertifyScorecard  = "CertifyScorecard"
 	TypeCertifyVex        = "CertifyVex"
 	TypeCertifyVuln       = "CertifyVuln"
@@ -3056,6 +3058,1184 @@ func (m *CertificationMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Certification edge %s", name)
+}
+
+// CertifyLegalMutation represents an operation that mutates the CertifyLegal nodes in the graph.
+type CertifyLegalMutation struct {
+	config
+	op                         Op
+	typ                        string
+	id                         *int
+	declared_license           *string
+	discovered_license         *string
+	attribution                *string
+	justification              *string
+	time_scanned               *time.Time
+	origin                     *string
+	collector                  *string
+	declared_licenses_hash     *string
+	discovered_licenses_hash   *string
+	clearedFields              map[string]struct{}
+	_package                   *int
+	cleared_package            bool
+	source                     *int
+	clearedsource              bool
+	declared_licenses          map[int]struct{}
+	removeddeclared_licenses   map[int]struct{}
+	cleareddeclared_licenses   bool
+	discovered_licenses        map[int]struct{}
+	removeddiscovered_licenses map[int]struct{}
+	cleareddiscovered_licenses bool
+	done                       bool
+	oldValue                   func(context.Context) (*CertifyLegal, error)
+	predicates                 []predicate.CertifyLegal
+}
+
+var _ ent.Mutation = (*CertifyLegalMutation)(nil)
+
+// certifylegalOption allows management of the mutation configuration using functional options.
+type certifylegalOption func(*CertifyLegalMutation)
+
+// newCertifyLegalMutation creates new mutation for the CertifyLegal entity.
+func newCertifyLegalMutation(c config, op Op, opts ...certifylegalOption) *CertifyLegalMutation {
+	m := &CertifyLegalMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCertifyLegal,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCertifyLegalID sets the ID field of the mutation.
+func withCertifyLegalID(id int) certifylegalOption {
+	return func(m *CertifyLegalMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CertifyLegal
+		)
+		m.oldValue = func(ctx context.Context) (*CertifyLegal, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CertifyLegal.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCertifyLegal sets the old CertifyLegal of the mutation.
+func withCertifyLegal(node *CertifyLegal) certifylegalOption {
+	return func(m *CertifyLegalMutation) {
+		m.oldValue = func(context.Context) (*CertifyLegal, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CertifyLegalMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CertifyLegalMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CertifyLegalMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CertifyLegalMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CertifyLegal.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPackageID sets the "package_id" field.
+func (m *CertifyLegalMutation) SetPackageID(i int) {
+	m._package = &i
+}
+
+// PackageID returns the value of the "package_id" field in the mutation.
+func (m *CertifyLegalMutation) PackageID() (r int, exists bool) {
+	v := m._package
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageID returns the old "package_id" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldPackageID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageID: %w", err)
+	}
+	return oldValue.PackageID, nil
+}
+
+// ClearPackageID clears the value of the "package_id" field.
+func (m *CertifyLegalMutation) ClearPackageID() {
+	m._package = nil
+	m.clearedFields[certifylegal.FieldPackageID] = struct{}{}
+}
+
+// PackageIDCleared returns if the "package_id" field was cleared in this mutation.
+func (m *CertifyLegalMutation) PackageIDCleared() bool {
+	_, ok := m.clearedFields[certifylegal.FieldPackageID]
+	return ok
+}
+
+// ResetPackageID resets all changes to the "package_id" field.
+func (m *CertifyLegalMutation) ResetPackageID() {
+	m._package = nil
+	delete(m.clearedFields, certifylegal.FieldPackageID)
+}
+
+// SetSourceID sets the "source_id" field.
+func (m *CertifyLegalMutation) SetSourceID(i int) {
+	m.source = &i
+}
+
+// SourceID returns the value of the "source_id" field in the mutation.
+func (m *CertifyLegalMutation) SourceID() (r int, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceID returns the old "source_id" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldSourceID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceID: %w", err)
+	}
+	return oldValue.SourceID, nil
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (m *CertifyLegalMutation) ClearSourceID() {
+	m.source = nil
+	m.clearedFields[certifylegal.FieldSourceID] = struct{}{}
+}
+
+// SourceIDCleared returns if the "source_id" field was cleared in this mutation.
+func (m *CertifyLegalMutation) SourceIDCleared() bool {
+	_, ok := m.clearedFields[certifylegal.FieldSourceID]
+	return ok
+}
+
+// ResetSourceID resets all changes to the "source_id" field.
+func (m *CertifyLegalMutation) ResetSourceID() {
+	m.source = nil
+	delete(m.clearedFields, certifylegal.FieldSourceID)
+}
+
+// SetDeclaredLicense sets the "declared_license" field.
+func (m *CertifyLegalMutation) SetDeclaredLicense(s string) {
+	m.declared_license = &s
+}
+
+// DeclaredLicense returns the value of the "declared_license" field in the mutation.
+func (m *CertifyLegalMutation) DeclaredLicense() (r string, exists bool) {
+	v := m.declared_license
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeclaredLicense returns the old "declared_license" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldDeclaredLicense(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeclaredLicense is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeclaredLicense requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeclaredLicense: %w", err)
+	}
+	return oldValue.DeclaredLicense, nil
+}
+
+// ResetDeclaredLicense resets all changes to the "declared_license" field.
+func (m *CertifyLegalMutation) ResetDeclaredLicense() {
+	m.declared_license = nil
+}
+
+// SetDiscoveredLicense sets the "discovered_license" field.
+func (m *CertifyLegalMutation) SetDiscoveredLicense(s string) {
+	m.discovered_license = &s
+}
+
+// DiscoveredLicense returns the value of the "discovered_license" field in the mutation.
+func (m *CertifyLegalMutation) DiscoveredLicense() (r string, exists bool) {
+	v := m.discovered_license
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscoveredLicense returns the old "discovered_license" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldDiscoveredLicense(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDiscoveredLicense is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDiscoveredLicense requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscoveredLicense: %w", err)
+	}
+	return oldValue.DiscoveredLicense, nil
+}
+
+// ResetDiscoveredLicense resets all changes to the "discovered_license" field.
+func (m *CertifyLegalMutation) ResetDiscoveredLicense() {
+	m.discovered_license = nil
+}
+
+// SetAttribution sets the "attribution" field.
+func (m *CertifyLegalMutation) SetAttribution(s string) {
+	m.attribution = &s
+}
+
+// Attribution returns the value of the "attribution" field in the mutation.
+func (m *CertifyLegalMutation) Attribution() (r string, exists bool) {
+	v := m.attribution
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttribution returns the old "attribution" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldAttribution(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttribution is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttribution requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttribution: %w", err)
+	}
+	return oldValue.Attribution, nil
+}
+
+// ResetAttribution resets all changes to the "attribution" field.
+func (m *CertifyLegalMutation) ResetAttribution() {
+	m.attribution = nil
+}
+
+// SetJustification sets the "justification" field.
+func (m *CertifyLegalMutation) SetJustification(s string) {
+	m.justification = &s
+}
+
+// Justification returns the value of the "justification" field in the mutation.
+func (m *CertifyLegalMutation) Justification() (r string, exists bool) {
+	v := m.justification
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJustification returns the old "justification" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldJustification(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJustification is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJustification requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJustification: %w", err)
+	}
+	return oldValue.Justification, nil
+}
+
+// ResetJustification resets all changes to the "justification" field.
+func (m *CertifyLegalMutation) ResetJustification() {
+	m.justification = nil
+}
+
+// SetTimeScanned sets the "time_scanned" field.
+func (m *CertifyLegalMutation) SetTimeScanned(t time.Time) {
+	m.time_scanned = &t
+}
+
+// TimeScanned returns the value of the "time_scanned" field in the mutation.
+func (m *CertifyLegalMutation) TimeScanned() (r time.Time, exists bool) {
+	v := m.time_scanned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimeScanned returns the old "time_scanned" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldTimeScanned(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTimeScanned is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTimeScanned requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimeScanned: %w", err)
+	}
+	return oldValue.TimeScanned, nil
+}
+
+// ResetTimeScanned resets all changes to the "time_scanned" field.
+func (m *CertifyLegalMutation) ResetTimeScanned() {
+	m.time_scanned = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *CertifyLegalMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *CertifyLegalMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *CertifyLegalMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *CertifyLegalMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *CertifyLegalMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *CertifyLegalMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
+func (m *CertifyLegalMutation) SetDeclaredLicensesHash(s string) {
+	m.declared_licenses_hash = &s
+}
+
+// DeclaredLicensesHash returns the value of the "declared_licenses_hash" field in the mutation.
+func (m *CertifyLegalMutation) DeclaredLicensesHash() (r string, exists bool) {
+	v := m.declared_licenses_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeclaredLicensesHash returns the old "declared_licenses_hash" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldDeclaredLicensesHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeclaredLicensesHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeclaredLicensesHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeclaredLicensesHash: %w", err)
+	}
+	return oldValue.DeclaredLicensesHash, nil
+}
+
+// ResetDeclaredLicensesHash resets all changes to the "declared_licenses_hash" field.
+func (m *CertifyLegalMutation) ResetDeclaredLicensesHash() {
+	m.declared_licenses_hash = nil
+}
+
+// SetDiscoveredLicensesHash sets the "discovered_licenses_hash" field.
+func (m *CertifyLegalMutation) SetDiscoveredLicensesHash(s string) {
+	m.discovered_licenses_hash = &s
+}
+
+// DiscoveredLicensesHash returns the value of the "discovered_licenses_hash" field in the mutation.
+func (m *CertifyLegalMutation) DiscoveredLicensesHash() (r string, exists bool) {
+	v := m.discovered_licenses_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscoveredLicensesHash returns the old "discovered_licenses_hash" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldDiscoveredLicensesHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDiscoveredLicensesHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDiscoveredLicensesHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscoveredLicensesHash: %w", err)
+	}
+	return oldValue.DiscoveredLicensesHash, nil
+}
+
+// ResetDiscoveredLicensesHash resets all changes to the "discovered_licenses_hash" field.
+func (m *CertifyLegalMutation) ResetDiscoveredLicensesHash() {
+	m.discovered_licenses_hash = nil
+}
+
+// ClearPackage clears the "package" edge to the PackageVersion entity.
+func (m *CertifyLegalMutation) ClearPackage() {
+	m.cleared_package = true
+	m.clearedFields[certifylegal.FieldPackageID] = struct{}{}
+}
+
+// PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
+func (m *CertifyLegalMutation) PackageCleared() bool {
+	return m.PackageIDCleared() || m.cleared_package
+}
+
+// PackageIDs returns the "package" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageID instead. It exists only for internal usage by the builders.
+func (m *CertifyLegalMutation) PackageIDs() (ids []int) {
+	if id := m._package; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackage resets all changes to the "package" edge.
+func (m *CertifyLegalMutation) ResetPackage() {
+	m._package = nil
+	m.cleared_package = false
+}
+
+// ClearSource clears the "source" edge to the SourceName entity.
+func (m *CertifyLegalMutation) ClearSource() {
+	m.clearedsource = true
+	m.clearedFields[certifylegal.FieldSourceID] = struct{}{}
+}
+
+// SourceCleared reports if the "source" edge to the SourceName entity was cleared.
+func (m *CertifyLegalMutation) SourceCleared() bool {
+	return m.SourceIDCleared() || m.clearedsource
+}
+
+// SourceIDs returns the "source" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SourceID instead. It exists only for internal usage by the builders.
+func (m *CertifyLegalMutation) SourceIDs() (ids []int) {
+	if id := m.source; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSource resets all changes to the "source" edge.
+func (m *CertifyLegalMutation) ResetSource() {
+	m.source = nil
+	m.clearedsource = false
+}
+
+// AddDeclaredLicenseIDs adds the "declared_licenses" edge to the License entity by ids.
+func (m *CertifyLegalMutation) AddDeclaredLicenseIDs(ids ...int) {
+	if m.declared_licenses == nil {
+		m.declared_licenses = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.declared_licenses[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDeclaredLicenses clears the "declared_licenses" edge to the License entity.
+func (m *CertifyLegalMutation) ClearDeclaredLicenses() {
+	m.cleareddeclared_licenses = true
+}
+
+// DeclaredLicensesCleared reports if the "declared_licenses" edge to the License entity was cleared.
+func (m *CertifyLegalMutation) DeclaredLicensesCleared() bool {
+	return m.cleareddeclared_licenses
+}
+
+// RemoveDeclaredLicenseIDs removes the "declared_licenses" edge to the License entity by IDs.
+func (m *CertifyLegalMutation) RemoveDeclaredLicenseIDs(ids ...int) {
+	if m.removeddeclared_licenses == nil {
+		m.removeddeclared_licenses = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.declared_licenses, ids[i])
+		m.removeddeclared_licenses[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDeclaredLicenses returns the removed IDs of the "declared_licenses" edge to the License entity.
+func (m *CertifyLegalMutation) RemovedDeclaredLicensesIDs() (ids []int) {
+	for id := range m.removeddeclared_licenses {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DeclaredLicensesIDs returns the "declared_licenses" edge IDs in the mutation.
+func (m *CertifyLegalMutation) DeclaredLicensesIDs() (ids []int) {
+	for id := range m.declared_licenses {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDeclaredLicenses resets all changes to the "declared_licenses" edge.
+func (m *CertifyLegalMutation) ResetDeclaredLicenses() {
+	m.declared_licenses = nil
+	m.cleareddeclared_licenses = false
+	m.removeddeclared_licenses = nil
+}
+
+// AddDiscoveredLicenseIDs adds the "discovered_licenses" edge to the License entity by ids.
+func (m *CertifyLegalMutation) AddDiscoveredLicenseIDs(ids ...int) {
+	if m.discovered_licenses == nil {
+		m.discovered_licenses = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.discovered_licenses[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDiscoveredLicenses clears the "discovered_licenses" edge to the License entity.
+func (m *CertifyLegalMutation) ClearDiscoveredLicenses() {
+	m.cleareddiscovered_licenses = true
+}
+
+// DiscoveredLicensesCleared reports if the "discovered_licenses" edge to the License entity was cleared.
+func (m *CertifyLegalMutation) DiscoveredLicensesCleared() bool {
+	return m.cleareddiscovered_licenses
+}
+
+// RemoveDiscoveredLicenseIDs removes the "discovered_licenses" edge to the License entity by IDs.
+func (m *CertifyLegalMutation) RemoveDiscoveredLicenseIDs(ids ...int) {
+	if m.removeddiscovered_licenses == nil {
+		m.removeddiscovered_licenses = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.discovered_licenses, ids[i])
+		m.removeddiscovered_licenses[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDiscoveredLicenses returns the removed IDs of the "discovered_licenses" edge to the License entity.
+func (m *CertifyLegalMutation) RemovedDiscoveredLicensesIDs() (ids []int) {
+	for id := range m.removeddiscovered_licenses {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DiscoveredLicensesIDs returns the "discovered_licenses" edge IDs in the mutation.
+func (m *CertifyLegalMutation) DiscoveredLicensesIDs() (ids []int) {
+	for id := range m.discovered_licenses {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDiscoveredLicenses resets all changes to the "discovered_licenses" edge.
+func (m *CertifyLegalMutation) ResetDiscoveredLicenses() {
+	m.discovered_licenses = nil
+	m.cleareddiscovered_licenses = false
+	m.removeddiscovered_licenses = nil
+}
+
+// Where appends a list predicates to the CertifyLegalMutation builder.
+func (m *CertifyLegalMutation) Where(ps ...predicate.CertifyLegal) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CertifyLegalMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CertifyLegalMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CertifyLegal, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CertifyLegalMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CertifyLegalMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CertifyLegal).
+func (m *CertifyLegalMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CertifyLegalMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m._package != nil {
+		fields = append(fields, certifylegal.FieldPackageID)
+	}
+	if m.source != nil {
+		fields = append(fields, certifylegal.FieldSourceID)
+	}
+	if m.declared_license != nil {
+		fields = append(fields, certifylegal.FieldDeclaredLicense)
+	}
+	if m.discovered_license != nil {
+		fields = append(fields, certifylegal.FieldDiscoveredLicense)
+	}
+	if m.attribution != nil {
+		fields = append(fields, certifylegal.FieldAttribution)
+	}
+	if m.justification != nil {
+		fields = append(fields, certifylegal.FieldJustification)
+	}
+	if m.time_scanned != nil {
+		fields = append(fields, certifylegal.FieldTimeScanned)
+	}
+	if m.origin != nil {
+		fields = append(fields, certifylegal.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, certifylegal.FieldCollector)
+	}
+	if m.declared_licenses_hash != nil {
+		fields = append(fields, certifylegal.FieldDeclaredLicensesHash)
+	}
+	if m.discovered_licenses_hash != nil {
+		fields = append(fields, certifylegal.FieldDiscoveredLicensesHash)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CertifyLegalMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case certifylegal.FieldPackageID:
+		return m.PackageID()
+	case certifylegal.FieldSourceID:
+		return m.SourceID()
+	case certifylegal.FieldDeclaredLicense:
+		return m.DeclaredLicense()
+	case certifylegal.FieldDiscoveredLicense:
+		return m.DiscoveredLicense()
+	case certifylegal.FieldAttribution:
+		return m.Attribution()
+	case certifylegal.FieldJustification:
+		return m.Justification()
+	case certifylegal.FieldTimeScanned:
+		return m.TimeScanned()
+	case certifylegal.FieldOrigin:
+		return m.Origin()
+	case certifylegal.FieldCollector:
+		return m.Collector()
+	case certifylegal.FieldDeclaredLicensesHash:
+		return m.DeclaredLicensesHash()
+	case certifylegal.FieldDiscoveredLicensesHash:
+		return m.DiscoveredLicensesHash()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CertifyLegalMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case certifylegal.FieldPackageID:
+		return m.OldPackageID(ctx)
+	case certifylegal.FieldSourceID:
+		return m.OldSourceID(ctx)
+	case certifylegal.FieldDeclaredLicense:
+		return m.OldDeclaredLicense(ctx)
+	case certifylegal.FieldDiscoveredLicense:
+		return m.OldDiscoveredLicense(ctx)
+	case certifylegal.FieldAttribution:
+		return m.OldAttribution(ctx)
+	case certifylegal.FieldJustification:
+		return m.OldJustification(ctx)
+	case certifylegal.FieldTimeScanned:
+		return m.OldTimeScanned(ctx)
+	case certifylegal.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case certifylegal.FieldCollector:
+		return m.OldCollector(ctx)
+	case certifylegal.FieldDeclaredLicensesHash:
+		return m.OldDeclaredLicensesHash(ctx)
+	case certifylegal.FieldDiscoveredLicensesHash:
+		return m.OldDiscoveredLicensesHash(ctx)
+	}
+	return nil, fmt.Errorf("unknown CertifyLegal field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CertifyLegalMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case certifylegal.FieldPackageID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageID(v)
+		return nil
+	case certifylegal.FieldSourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceID(v)
+		return nil
+	case certifylegal.FieldDeclaredLicense:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeclaredLicense(v)
+		return nil
+	case certifylegal.FieldDiscoveredLicense:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscoveredLicense(v)
+		return nil
+	case certifylegal.FieldAttribution:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttribution(v)
+		return nil
+	case certifylegal.FieldJustification:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJustification(v)
+		return nil
+	case certifylegal.FieldTimeScanned:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimeScanned(v)
+		return nil
+	case certifylegal.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case certifylegal.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	case certifylegal.FieldDeclaredLicensesHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeclaredLicensesHash(v)
+		return nil
+	case certifylegal.FieldDiscoveredLicensesHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscoveredLicensesHash(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CertifyLegal field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CertifyLegalMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CertifyLegalMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CertifyLegalMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CertifyLegal numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CertifyLegalMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(certifylegal.FieldPackageID) {
+		fields = append(fields, certifylegal.FieldPackageID)
+	}
+	if m.FieldCleared(certifylegal.FieldSourceID) {
+		fields = append(fields, certifylegal.FieldSourceID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CertifyLegalMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CertifyLegalMutation) ClearField(name string) error {
+	switch name {
+	case certifylegal.FieldPackageID:
+		m.ClearPackageID()
+		return nil
+	case certifylegal.FieldSourceID:
+		m.ClearSourceID()
+		return nil
+	}
+	return fmt.Errorf("unknown CertifyLegal nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CertifyLegalMutation) ResetField(name string) error {
+	switch name {
+	case certifylegal.FieldPackageID:
+		m.ResetPackageID()
+		return nil
+	case certifylegal.FieldSourceID:
+		m.ResetSourceID()
+		return nil
+	case certifylegal.FieldDeclaredLicense:
+		m.ResetDeclaredLicense()
+		return nil
+	case certifylegal.FieldDiscoveredLicense:
+		m.ResetDiscoveredLicense()
+		return nil
+	case certifylegal.FieldAttribution:
+		m.ResetAttribution()
+		return nil
+	case certifylegal.FieldJustification:
+		m.ResetJustification()
+		return nil
+	case certifylegal.FieldTimeScanned:
+		m.ResetTimeScanned()
+		return nil
+	case certifylegal.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case certifylegal.FieldCollector:
+		m.ResetCollector()
+		return nil
+	case certifylegal.FieldDeclaredLicensesHash:
+		m.ResetDeclaredLicensesHash()
+		return nil
+	case certifylegal.FieldDiscoveredLicensesHash:
+		m.ResetDiscoveredLicensesHash()
+		return nil
+	}
+	return fmt.Errorf("unknown CertifyLegal field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CertifyLegalMutation) AddedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m._package != nil {
+		edges = append(edges, certifylegal.EdgePackage)
+	}
+	if m.source != nil {
+		edges = append(edges, certifylegal.EdgeSource)
+	}
+	if m.declared_licenses != nil {
+		edges = append(edges, certifylegal.EdgeDeclaredLicenses)
+	}
+	if m.discovered_licenses != nil {
+		edges = append(edges, certifylegal.EdgeDiscoveredLicenses)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CertifyLegalMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case certifylegal.EdgePackage:
+		if id := m._package; id != nil {
+			return []ent.Value{*id}
+		}
+	case certifylegal.EdgeSource:
+		if id := m.source; id != nil {
+			return []ent.Value{*id}
+		}
+	case certifylegal.EdgeDeclaredLicenses:
+		ids := make([]ent.Value, 0, len(m.declared_licenses))
+		for id := range m.declared_licenses {
+			ids = append(ids, id)
+		}
+		return ids
+	case certifylegal.EdgeDiscoveredLicenses:
+		ids := make([]ent.Value, 0, len(m.discovered_licenses))
+		for id := range m.discovered_licenses {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CertifyLegalMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.removeddeclared_licenses != nil {
+		edges = append(edges, certifylegal.EdgeDeclaredLicenses)
+	}
+	if m.removeddiscovered_licenses != nil {
+		edges = append(edges, certifylegal.EdgeDiscoveredLicenses)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CertifyLegalMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case certifylegal.EdgeDeclaredLicenses:
+		ids := make([]ent.Value, 0, len(m.removeddeclared_licenses))
+		for id := range m.removeddeclared_licenses {
+			ids = append(ids, id)
+		}
+		return ids
+	case certifylegal.EdgeDiscoveredLicenses:
+		ids := make([]ent.Value, 0, len(m.removeddiscovered_licenses))
+		for id := range m.removeddiscovered_licenses {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CertifyLegalMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.cleared_package {
+		edges = append(edges, certifylegal.EdgePackage)
+	}
+	if m.clearedsource {
+		edges = append(edges, certifylegal.EdgeSource)
+	}
+	if m.cleareddeclared_licenses {
+		edges = append(edges, certifylegal.EdgeDeclaredLicenses)
+	}
+	if m.cleareddiscovered_licenses {
+		edges = append(edges, certifylegal.EdgeDiscoveredLicenses)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CertifyLegalMutation) EdgeCleared(name string) bool {
+	switch name {
+	case certifylegal.EdgePackage:
+		return m.cleared_package
+	case certifylegal.EdgeSource:
+		return m.clearedsource
+	case certifylegal.EdgeDeclaredLicenses:
+		return m.cleareddeclared_licenses
+	case certifylegal.EdgeDiscoveredLicenses:
+		return m.cleareddiscovered_licenses
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CertifyLegalMutation) ClearEdge(name string) error {
+	switch name {
+	case certifylegal.EdgePackage:
+		m.ClearPackage()
+		return nil
+	case certifylegal.EdgeSource:
+		m.ClearSource()
+		return nil
+	}
+	return fmt.Errorf("unknown CertifyLegal unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CertifyLegalMutation) ResetEdge(name string) error {
+	switch name {
+	case certifylegal.EdgePackage:
+		m.ResetPackage()
+		return nil
+	case certifylegal.EdgeSource:
+		m.ResetSource()
+		return nil
+	case certifylegal.EdgeDeclaredLicenses:
+		m.ResetDeclaredLicenses()
+		return nil
+	case certifylegal.EdgeDiscoveredLicenses:
+		m.ResetDiscoveredLicenses()
+		return nil
+	}
+	return fmt.Errorf("unknown CertifyLegal edge %s", name)
 }
 
 // CertifyScorecardMutation represents an operation that mutates the CertifyScorecard nodes in the graph.
@@ -8326,16 +9506,22 @@ func (m *IsVulnerabilityMutation) ResetEdge(name string) error {
 // LicenseMutation represents an operation that mutates the License nodes in the graph.
 type LicenseMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	name          *string
-	inline        *string
-	list_version  *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*License, error)
-	predicates    []predicate.License
+	op                                  Op
+	typ                                 string
+	id                                  *int
+	name                                *string
+	inline                              *string
+	list_version                        *string
+	clearedFields                       map[string]struct{}
+	declared_in_certify_legals          map[int]struct{}
+	removeddeclared_in_certify_legals   map[int]struct{}
+	cleareddeclared_in_certify_legals   bool
+	discovered_in_certify_legals        map[int]struct{}
+	removeddiscovered_in_certify_legals map[int]struct{}
+	cleareddiscovered_in_certify_legals bool
+	done                                bool
+	oldValue                            func(context.Context) (*License, error)
+	predicates                          []predicate.License
 }
 
 var _ ent.Mutation = (*LicenseMutation)(nil)
@@ -8570,6 +9756,114 @@ func (m *LicenseMutation) ResetListVersion() {
 	delete(m.clearedFields, license.FieldListVersion)
 }
 
+// AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by ids.
+func (m *LicenseMutation) AddDeclaredInCertifyLegalIDs(ids ...int) {
+	if m.declared_in_certify_legals == nil {
+		m.declared_in_certify_legals = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.declared_in_certify_legals[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDeclaredInCertifyLegals clears the "declared_in_certify_legals" edge to the CertifyLegal entity.
+func (m *LicenseMutation) ClearDeclaredInCertifyLegals() {
+	m.cleareddeclared_in_certify_legals = true
+}
+
+// DeclaredInCertifyLegalsCleared reports if the "declared_in_certify_legals" edge to the CertifyLegal entity was cleared.
+func (m *LicenseMutation) DeclaredInCertifyLegalsCleared() bool {
+	return m.cleareddeclared_in_certify_legals
+}
+
+// RemoveDeclaredInCertifyLegalIDs removes the "declared_in_certify_legals" edge to the CertifyLegal entity by IDs.
+func (m *LicenseMutation) RemoveDeclaredInCertifyLegalIDs(ids ...int) {
+	if m.removeddeclared_in_certify_legals == nil {
+		m.removeddeclared_in_certify_legals = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.declared_in_certify_legals, ids[i])
+		m.removeddeclared_in_certify_legals[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDeclaredInCertifyLegals returns the removed IDs of the "declared_in_certify_legals" edge to the CertifyLegal entity.
+func (m *LicenseMutation) RemovedDeclaredInCertifyLegalsIDs() (ids []int) {
+	for id := range m.removeddeclared_in_certify_legals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DeclaredInCertifyLegalsIDs returns the "declared_in_certify_legals" edge IDs in the mutation.
+func (m *LicenseMutation) DeclaredInCertifyLegalsIDs() (ids []int) {
+	for id := range m.declared_in_certify_legals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDeclaredInCertifyLegals resets all changes to the "declared_in_certify_legals" edge.
+func (m *LicenseMutation) ResetDeclaredInCertifyLegals() {
+	m.declared_in_certify_legals = nil
+	m.cleareddeclared_in_certify_legals = false
+	m.removeddeclared_in_certify_legals = nil
+}
+
+// AddDiscoveredInCertifyLegalIDs adds the "discovered_in_certify_legals" edge to the CertifyLegal entity by ids.
+func (m *LicenseMutation) AddDiscoveredInCertifyLegalIDs(ids ...int) {
+	if m.discovered_in_certify_legals == nil {
+		m.discovered_in_certify_legals = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.discovered_in_certify_legals[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDiscoveredInCertifyLegals clears the "discovered_in_certify_legals" edge to the CertifyLegal entity.
+func (m *LicenseMutation) ClearDiscoveredInCertifyLegals() {
+	m.cleareddiscovered_in_certify_legals = true
+}
+
+// DiscoveredInCertifyLegalsCleared reports if the "discovered_in_certify_legals" edge to the CertifyLegal entity was cleared.
+func (m *LicenseMutation) DiscoveredInCertifyLegalsCleared() bool {
+	return m.cleareddiscovered_in_certify_legals
+}
+
+// RemoveDiscoveredInCertifyLegalIDs removes the "discovered_in_certify_legals" edge to the CertifyLegal entity by IDs.
+func (m *LicenseMutation) RemoveDiscoveredInCertifyLegalIDs(ids ...int) {
+	if m.removeddiscovered_in_certify_legals == nil {
+		m.removeddiscovered_in_certify_legals = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.discovered_in_certify_legals, ids[i])
+		m.removeddiscovered_in_certify_legals[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDiscoveredInCertifyLegals returns the removed IDs of the "discovered_in_certify_legals" edge to the CertifyLegal entity.
+func (m *LicenseMutation) RemovedDiscoveredInCertifyLegalsIDs() (ids []int) {
+	for id := range m.removeddiscovered_in_certify_legals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DiscoveredInCertifyLegalsIDs returns the "discovered_in_certify_legals" edge IDs in the mutation.
+func (m *LicenseMutation) DiscoveredInCertifyLegalsIDs() (ids []int) {
+	for id := range m.discovered_in_certify_legals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDiscoveredInCertifyLegals resets all changes to the "discovered_in_certify_legals" edge.
+func (m *LicenseMutation) ResetDiscoveredInCertifyLegals() {
+	m.discovered_in_certify_legals = nil
+	m.cleareddiscovered_in_certify_legals = false
+	m.removeddiscovered_in_certify_legals = nil
+}
+
 // Where appends a list predicates to the LicenseMutation builder.
 func (m *LicenseMutation) Where(ps ...predicate.License) {
 	m.predicates = append(m.predicates, ps...)
@@ -8752,49 +10046,111 @@ func (m *LicenseMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *LicenseMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.declared_in_certify_legals != nil {
+		edges = append(edges, license.EdgeDeclaredInCertifyLegals)
+	}
+	if m.discovered_in_certify_legals != nil {
+		edges = append(edges, license.EdgeDiscoveredInCertifyLegals)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *LicenseMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case license.EdgeDeclaredInCertifyLegals:
+		ids := make([]ent.Value, 0, len(m.declared_in_certify_legals))
+		for id := range m.declared_in_certify_legals {
+			ids = append(ids, id)
+		}
+		return ids
+	case license.EdgeDiscoveredInCertifyLegals:
+		ids := make([]ent.Value, 0, len(m.discovered_in_certify_legals))
+		for id := range m.discovered_in_certify_legals {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *LicenseMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.removeddeclared_in_certify_legals != nil {
+		edges = append(edges, license.EdgeDeclaredInCertifyLegals)
+	}
+	if m.removeddiscovered_in_certify_legals != nil {
+		edges = append(edges, license.EdgeDiscoveredInCertifyLegals)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *LicenseMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case license.EdgeDeclaredInCertifyLegals:
+		ids := make([]ent.Value, 0, len(m.removeddeclared_in_certify_legals))
+		for id := range m.removeddeclared_in_certify_legals {
+			ids = append(ids, id)
+		}
+		return ids
+	case license.EdgeDiscoveredInCertifyLegals:
+		ids := make([]ent.Value, 0, len(m.removeddiscovered_in_certify_legals))
+		for id := range m.removeddiscovered_in_certify_legals {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *LicenseMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.cleareddeclared_in_certify_legals {
+		edges = append(edges, license.EdgeDeclaredInCertifyLegals)
+	}
+	if m.cleareddiscovered_in_certify_legals {
+		edges = append(edges, license.EdgeDiscoveredInCertifyLegals)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *LicenseMutation) EdgeCleared(name string) bool {
+	switch name {
+	case license.EdgeDeclaredInCertifyLegals:
+		return m.cleareddeclared_in_certify_legals
+	case license.EdgeDiscoveredInCertifyLegals:
+		return m.cleareddiscovered_in_certify_legals
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *LicenseMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown License unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *LicenseMutation) ResetEdge(name string) error {
+	switch name {
+	case license.EdgeDeclaredInCertifyLegals:
+		m.ResetDeclaredInCertifyLegals()
+		return nil
+	case license.EdgeDiscoveredInCertifyLegals:
+		m.ResetDiscoveredInCertifyLegals()
+		return nil
+	}
 	return fmt.Errorf("unknown License edge %s", name)
 }
 

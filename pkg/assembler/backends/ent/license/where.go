@@ -4,6 +4,7 @@ package license
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
@@ -280,6 +281,52 @@ func ListVersionEqualFold(v string) predicate.License {
 // ListVersionContainsFold applies the ContainsFold predicate on the "list_version" field.
 func ListVersionContainsFold(v string) predicate.License {
 	return predicate.License(sql.FieldContainsFold(FieldListVersion, v))
+}
+
+// HasDeclaredInCertifyLegals applies the HasEdge predicate on the "declared_in_certify_legals" edge.
+func HasDeclaredInCertifyLegals() predicate.License {
+	return predicate.License(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, DeclaredInCertifyLegalsTable, DeclaredInCertifyLegalsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDeclaredInCertifyLegalsWith applies the HasEdge predicate on the "declared_in_certify_legals" edge with a given conditions (other predicates).
+func HasDeclaredInCertifyLegalsWith(preds ...predicate.CertifyLegal) predicate.License {
+	return predicate.License(func(s *sql.Selector) {
+		step := newDeclaredInCertifyLegalsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDiscoveredInCertifyLegals applies the HasEdge predicate on the "discovered_in_certify_legals" edge.
+func HasDiscoveredInCertifyLegals() predicate.License {
+	return predicate.License(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, DiscoveredInCertifyLegalsTable, DiscoveredInCertifyLegalsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDiscoveredInCertifyLegalsWith applies the HasEdge predicate on the "discovered_in_certify_legals" edge with a given conditions (other predicates).
+func HasDiscoveredInCertifyLegalsWith(preds ...predicate.CertifyLegal) predicate.License {
+	return predicate.License(func(s *sql.Selector) {
+		step := newDiscoveredInCertifyLegalsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

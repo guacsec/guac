@@ -18,6 +18,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -38,7 +39,10 @@ func (License) Fields() []ent.Field {
 
 // Edges of the License.
 func (License) Edges() []ent.Edge {
-	return []ent.Edge{}
+	return []ent.Edge{
+		edge.From("declared_in_certify_legals", CertifyLegal.Type).Ref("declared_licenses"),
+		edge.From("discovered_in_certify_legals", CertifyLegal.Type).Ref("discovered_licenses"),
+	}
 }
 
 // Indexes of the License.
