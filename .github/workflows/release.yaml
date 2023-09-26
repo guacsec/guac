@@ -171,8 +171,8 @@ jobs:
           cp docker-compose.yml guac-compose/
           cp -r container_files guac-compose/
           sed -i s/local-organic-guac/ghcr.io\\/${{ github.repository_owner }}\\/guac:${{ github.ref_name }}/ guac-compose/.env
-          tar -zcvf guac-compose-${{ github.ref_name }}.tar.gz guac-compose/
+          tar -zcvf guac-compose.tar.gz guac-compose/
           rm -rf guac-compose/
-          gh release upload ${{ github.ref_name }} guac-compose-${{ github.ref_name }}.tar.gz
-          rm guac-compose-${{ github.ref_name }}.tar.gz
+          gh release upload ${{ github.ref_name }} guac-compose.tar.gz
+          rm guac-compose.tar.gz
         shell: bash
