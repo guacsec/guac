@@ -248,7 +248,7 @@ func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifac
 	logger := logging.FromContext(ctx)
 	r, err := ref.New(artifact)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to parse OCI reference: %v", artifact)
 	}
 
 	m, err := rc.ManifestGet(ctx, r)
@@ -278,7 +278,7 @@ func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifac
 		}
 		btr1, err := blob.RawBody()
 		if err != nil {
-			return err
+			return fmt.Errorf("failed reading layer %d: %w", i, err)
 		}
 
 		doc := &processor.Document{
