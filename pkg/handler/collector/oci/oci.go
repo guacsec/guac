@@ -205,6 +205,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
 			}
 		}
+		return nil
 	}
 
 	digest := manifest.GetDigest(m)
