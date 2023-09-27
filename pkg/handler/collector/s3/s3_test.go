@@ -105,7 +105,7 @@ func (td TestBucketBuilder) GetDownloader(hostname string, port string, region s
 	return TestBucket{}
 }
 
-func TestQueuesSplit(t *testing.T) {
+func TestQueuesSplitPolling(t *testing.T) {
 	ctx := context.Background()
 
 	sigChan := make(chan os.Signal, 1)
@@ -114,6 +114,7 @@ func TestQueuesSplit(t *testing.T) {
 		MpBuilder:     TestMpBuilder{},
 		BucketBuilder: TestBucketBuilder{},
 		SigChan:       sigChan,
+		Poll:          true,
 	})
 
 	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
@@ -121,6 +122,7 @@ func TestQueuesSplit(t *testing.T) {
 		t.Fatalf("could not register collector: %v", err)
 	}
 
+	// redirect stdout to read it
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
@@ -134,6 +136,7 @@ func TestQueuesSplit(t *testing.T) {
 		outC <- buf.String()
 	}()
 
+	// create fake emitter and handler
 	var s []*processor.Document
 	em := func(d *processor.Document) error {
 		s = append(s, d)
@@ -143,13 +146,17 @@ func TestQueuesSplit(t *testing.T) {
 		return true
 	}
 
+	// spawn collector
 	go func() {
 		err := collector.Collect(ctx, em, eh)
 		if err != nil {
 			fmt.Printf("error collecting: %v", err)
 		}
 	}()
+
+	// wait for a while to get some messages
 	time.Sleep(5 * time.Second)
+	// shut down collector
 	signal.Notify(sigChan, syscall.SIGINT)
 
 	w.Close()
@@ -170,4 +177,43 @@ func TestQueuesSplit(t *testing.T) {
 	if !strings.Contains(out, "downloading file with bucket q2 and name item") {
 		t.Errorf("not downloading from bucket q2")
 	}
+}
+
+func TestNoPolling(t *testing.T) {
+	ctx := context.Background()
+
+	s3Collector := NewS3Collector(S3CollectorConfig{
+		BucketBuilder: TestBucketBuilder{},
+		S3Bucket:      "no-poll-bucket",
+		S3Item:        "no-poll-item",
+		Poll:          false,
+	})
+
+	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
+		!errors.Is(err, collector.ErrCollectorOverwrite) {
+		t.Fatalf("could not register collector: %v", err)
+	}
+
+	// create fake emitter and handler
+	var s []*processor.Document
+	em := func(d *processor.Document) error {
+		s = append(s, d)
+		return nil
+	}
+	eh := func(err error) bool {
+		return true
+	}
+
+	err := collector.Collect(ctx, em, eh)
+	if err != nil {
+		fmt.Printf("error collecting: %v", err)
+	}
+
+	if len(s) == 0 {
+		t.Errorf("no documents returned")
+	}
+	if len(s[0].Blob) != 3 {
+		t.Errorf("wrong document returned")
+	}
+
 }

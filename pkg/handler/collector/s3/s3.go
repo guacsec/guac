@@ -42,11 +42,14 @@ type S3CollectorConfig struct {
 	MessageProviderPort string
 	S3Host              string
 	S3Port              string
+	S3Bucket            string
+	S3Item              string
 	Region              string // optional (defaults to us-east-1, assumes same region for s3 and sqs)
 	Queues              string
 	MpBuilder           messaging.MessageProviderBuilder // optional
 	BucketBuilder       bucket.BuildBucket               // optional
 	SigChan             chan os.Signal                   // optional
+	Poll                bool
 }
 
 func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
@@ -57,9 +60,53 @@ func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
 }
 
 func (s S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+
+	if s.config.Poll {
+		retrieveWithPoll(s, ctx, docChannel)
+	} else {
+		retrieve(s, ctx, docChannel)
+	}
+
+	return nil
+}
+
+func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.Document) {
 	logger := logging.FromContext(ctx)
-	queues := strings.Split(s.config.Queues, ",")
 	downloader := getDownloader(s)
+
+	bckt := s.config.S3Bucket
+	item := s.config.S3Item
+
+	blob, err := downloader.DownloadFile(ctx, bckt, item)
+	if err != nil {
+		logger.Errorf("could not download item %v: %v", item, err)
+		return
+	}
+
+	enc, err := downloader.GetEncoding(ctx, bckt, item)
+	if err != nil {
+		logger.Errorf("could not get encoding for item %v: %v", item, err)
+		return
+	}
+
+	doc := &processor.Document{
+		Blob:     blob,
+		Type:     processor.DocumentUnknown,
+		Format:   processor.FormatUnknown,
+		Encoding: bucket.ExtractEncoding(enc, item),
+		SourceInformation: processor.SourceInformation{
+			Collector: S3CollectorType,
+			Source:    "S3",
+		},
+	}
+	docChannel <- doc
+
+}
+
+func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *processor.Document) {
+	logger := logging.FromContext(ctx)
+	downloader := getDownloader(s)
+	queues := strings.Split(s.config.Queues, ",")
 	sigChan := s.config.SigChan
 
 	cancelCtx, cancel := context.WithCancel(ctx)
@@ -149,8 +196,6 @@ func (s S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *p
 	}
 
 	wg.Wait()
-
-	return nil
 }
 
 func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider, error) {
