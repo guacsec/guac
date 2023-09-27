@@ -149,3 +149,9 @@ highly active contributors that completely step away from the project, we will
 create an emeritus process.
 
 GUAC contributors are happy to help you advance along the contributor ladder!
+
+### Reviewers list
+
+| Reviewer                            | Area                                                                                                                       | Vote                                                       |
+|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| [mrizzi](https://github.com/mrizzi) | [Backends (ent)](https://github.com/guacsec/guac/tree/4012842fab5d738f9bebf03f0cb44fc7ce39438b/pkg/assembler/backends/ent) | [issues/1310](https://github.com/guacsec/guac/issues/1310) |
