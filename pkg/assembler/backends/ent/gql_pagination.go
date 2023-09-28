@@ -15,6 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
@@ -1101,6 +1102,252 @@ func (c *Certification) ToEdge(order *CertificationOrder) *CertificationEdge {
 	return &CertificationEdge{
 		Node:   c,
 		Cursor: order.Field.toCursor(c),
+	}
+}
+
+// CertifyLegalEdge is the edge representation of CertifyLegal.
+type CertifyLegalEdge struct {
+	Node   *CertifyLegal `json:"node"`
+	Cursor Cursor        `json:"cursor"`
+}
+
+// CertifyLegalConnection is the connection containing edges to CertifyLegal.
+type CertifyLegalConnection struct {
+	Edges      []*CertifyLegalEdge `json:"edges"`
+	PageInfo   PageInfo            `json:"pageInfo"`
+	TotalCount int                 `json:"totalCount"`
+}
+
+func (c *CertifyLegalConnection) build(nodes []*CertifyLegal, pager *certifylegalPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *CertifyLegal
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *CertifyLegal {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *CertifyLegal {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*CertifyLegalEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &CertifyLegalEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// CertifyLegalPaginateOption enables pagination customization.
+type CertifyLegalPaginateOption func(*certifylegalPager) error
+
+// WithCertifyLegalOrder configures pagination ordering.
+func WithCertifyLegalOrder(order *CertifyLegalOrder) CertifyLegalPaginateOption {
+	if order == nil {
+		order = DefaultCertifyLegalOrder
+	}
+	o := *order
+	return func(pager *certifylegalPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultCertifyLegalOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithCertifyLegalFilter configures pagination filter.
+func WithCertifyLegalFilter(filter func(*CertifyLegalQuery) (*CertifyLegalQuery, error)) CertifyLegalPaginateOption {
+	return func(pager *certifylegalPager) error {
+		if filter == nil {
+			return errors.New("CertifyLegalQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type certifylegalPager struct {
+	reverse bool
+	order   *CertifyLegalOrder
+	filter  func(*CertifyLegalQuery) (*CertifyLegalQuery, error)
+}
+
+func newCertifyLegalPager(opts []CertifyLegalPaginateOption, reverse bool) (*certifylegalPager, error) {
+	pager := &certifylegalPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultCertifyLegalOrder
+	}
+	return pager, nil
+}
+
+func (p *certifylegalPager) applyFilter(query *CertifyLegalQuery) (*CertifyLegalQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *certifylegalPager) toCursor(cl *CertifyLegal) Cursor {
+	return p.order.Field.toCursor(cl)
+}
+
+func (p *certifylegalPager) applyCursors(query *CertifyLegalQuery, after, before *Cursor) (*CertifyLegalQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultCertifyLegalOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *certifylegalPager) applyOrder(query *CertifyLegalQuery) *CertifyLegalQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultCertifyLegalOrder.Field {
+		query = query.Order(DefaultCertifyLegalOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *certifylegalPager) orderExpr(query *CertifyLegalQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultCertifyLegalOrder.Field {
+			b.Comma().Ident(DefaultCertifyLegalOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to CertifyLegal.
+func (cl *CertifyLegalQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...CertifyLegalPaginateOption,
+) (*CertifyLegalConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newCertifyLegalPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if cl, err = pager.applyFilter(cl); err != nil {
+		return nil, err
+	}
+	conn := &CertifyLegalConnection{Edges: []*CertifyLegalEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = cl.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if cl, err = pager.applyCursors(cl, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		cl.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := cl.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	cl = pager.applyOrder(cl)
+	nodes, err := cl.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// CertifyLegalOrderField defines the ordering field of CertifyLegal.
+type CertifyLegalOrderField struct {
+	// Value extracts the ordering value from the given CertifyLegal.
+	Value    func(*CertifyLegal) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) certifylegal.OrderOption
+	toCursor func(*CertifyLegal) Cursor
+}
+
+// CertifyLegalOrder defines the ordering of CertifyLegal.
+type CertifyLegalOrder struct {
+	Direction OrderDirection          `json:"direction"`
+	Field     *CertifyLegalOrderField `json:"field"`
+}
+
+// DefaultCertifyLegalOrder is the default ordering of CertifyLegal.
+var DefaultCertifyLegalOrder = &CertifyLegalOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &CertifyLegalOrderField{
+		Value: func(cl *CertifyLegal) (ent.Value, error) {
+			return cl.ID, nil
+		},
+		column: certifylegal.FieldID,
+		toTerm: certifylegal.ByID,
+		toCursor: func(cl *CertifyLegal) Cursor {
+			return Cursor{ID: cl.ID}
+		},
+	},
+}
+
+// ToEdge converts CertifyLegal into CertifyLegalEdge.
+func (cl *CertifyLegal) ToEdge(order *CertifyLegalOrder) *CertifyLegalEdge {
+	if order == nil {
+		order = DefaultCertifyLegalOrder
+	}
+	return &CertifyLegalEdge{
+		Node:   cl,
+		Cursor: order.Field.toCursor(cl),
 	}
 }
 

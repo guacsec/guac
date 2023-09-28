@@ -4,12 +4,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
@@ -17,12 +19,16 @@ import (
 // LicenseQuery is the builder for querying License entities.
 type LicenseQuery struct {
 	config
-	ctx        *QueryContext
-	order      []license.OrderOption
-	inters     []Interceptor
-	predicates []predicate.License
-	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*License) error
+	ctx                                *QueryContext
+	order                              []license.OrderOption
+	inters                             []Interceptor
+	predicates                         []predicate.License
+	withDeclaredInCertifyLegals        *CertifyLegalQuery
+	withDiscoveredInCertifyLegals      *CertifyLegalQuery
+	modifiers                          []func(*sql.Selector)
+	loadTotal                          []func(context.Context, []*License) error
+	withNamedDeclaredInCertifyLegals   map[string]*CertifyLegalQuery
+	withNamedDiscoveredInCertifyLegals map[string]*CertifyLegalQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -57,6 +63,50 @@ func (lq *LicenseQuery) Unique(unique bool) *LicenseQuery {
 func (lq *LicenseQuery) Order(o ...license.OrderOption) *LicenseQuery {
 	lq.order = append(lq.order, o...)
 	return lq
+}
+
+// QueryDeclaredInCertifyLegals chains the current query on the "declared_in_certify_legals" edge.
+func (lq *LicenseQuery) QueryDeclaredInCertifyLegals() *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: lq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := lq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := lq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(license.Table, license.FieldID, selector),
+			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, license.DeclaredInCertifyLegalsTable, license.DeclaredInCertifyLegalsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDiscoveredInCertifyLegals chains the current query on the "discovered_in_certify_legals" edge.
+func (lq *LicenseQuery) QueryDiscoveredInCertifyLegals() *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: lq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := lq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := lq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(license.Table, license.FieldID, selector),
+			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, license.DiscoveredInCertifyLegalsTable, license.DiscoveredInCertifyLegalsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first License entity from the query.
@@ -246,15 +296,39 @@ func (lq *LicenseQuery) Clone() *LicenseQuery {
 		return nil
 	}
 	return &LicenseQuery{
-		config:     lq.config,
-		ctx:        lq.ctx.Clone(),
-		order:      append([]license.OrderOption{}, lq.order...),
-		inters:     append([]Interceptor{}, lq.inters...),
-		predicates: append([]predicate.License{}, lq.predicates...),
+		config:                        lq.config,
+		ctx:                           lq.ctx.Clone(),
+		order:                         append([]license.OrderOption{}, lq.order...),
+		inters:                        append([]Interceptor{}, lq.inters...),
+		predicates:                    append([]predicate.License{}, lq.predicates...),
+		withDeclaredInCertifyLegals:   lq.withDeclaredInCertifyLegals.Clone(),
+		withDiscoveredInCertifyLegals: lq.withDiscoveredInCertifyLegals.Clone(),
 		// clone intermediate query.
 		sql:  lq.sql.Clone(),
 		path: lq.path,
 	}
+}
+
+// WithDeclaredInCertifyLegals tells the query-builder to eager-load the nodes that are connected to
+// the "declared_in_certify_legals" edge. The optional arguments are used to configure the query builder of the edge.
+func (lq *LicenseQuery) WithDeclaredInCertifyLegals(opts ...func(*CertifyLegalQuery)) *LicenseQuery {
+	query := (&CertifyLegalClient{config: lq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	lq.withDeclaredInCertifyLegals = query
+	return lq
+}
+
+// WithDiscoveredInCertifyLegals tells the query-builder to eager-load the nodes that are connected to
+// the "discovered_in_certify_legals" edge. The optional arguments are used to configure the query builder of the edge.
+func (lq *LicenseQuery) WithDiscoveredInCertifyLegals(opts ...func(*CertifyLegalQuery)) *LicenseQuery {
+	query := (&CertifyLegalClient{config: lq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	lq.withDiscoveredInCertifyLegals = query
+	return lq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -333,8 +407,12 @@ func (lq *LicenseQuery) prepareQuery(ctx context.Context) error {
 
 func (lq *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*License, error) {
 	var (
-		nodes = []*License{}
-		_spec = lq.querySpec()
+		nodes       = []*License{}
+		_spec       = lq.querySpec()
+		loadedTypes = [2]bool{
+			lq.withDeclaredInCertifyLegals != nil,
+			lq.withDiscoveredInCertifyLegals != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*License).scanValues(nil, columns)
@@ -342,6 +420,7 @@ func (lq *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Lice
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &License{config: lq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(lq.modifiers) > 0 {
@@ -356,12 +435,167 @@ func (lq *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Lice
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := lq.withDeclaredInCertifyLegals; query != nil {
+		if err := lq.loadDeclaredInCertifyLegals(ctx, query, nodes,
+			func(n *License) { n.Edges.DeclaredInCertifyLegals = []*CertifyLegal{} },
+			func(n *License, e *CertifyLegal) {
+				n.Edges.DeclaredInCertifyLegals = append(n.Edges.DeclaredInCertifyLegals, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := lq.withDiscoveredInCertifyLegals; query != nil {
+		if err := lq.loadDiscoveredInCertifyLegals(ctx, query, nodes,
+			func(n *License) { n.Edges.DiscoveredInCertifyLegals = []*CertifyLegal{} },
+			func(n *License, e *CertifyLegal) {
+				n.Edges.DiscoveredInCertifyLegals = append(n.Edges.DiscoveredInCertifyLegals, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range lq.withNamedDeclaredInCertifyLegals {
+		if err := lq.loadDeclaredInCertifyLegals(ctx, query, nodes,
+			func(n *License) { n.appendNamedDeclaredInCertifyLegals(name) },
+			func(n *License, e *CertifyLegal) { n.appendNamedDeclaredInCertifyLegals(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range lq.withNamedDiscoveredInCertifyLegals {
+		if err := lq.loadDiscoveredInCertifyLegals(ctx, query, nodes,
+			func(n *License) { n.appendNamedDiscoveredInCertifyLegals(name) },
+			func(n *License, e *CertifyLegal) { n.appendNamedDiscoveredInCertifyLegals(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	for i := range lq.loadTotal {
 		if err := lq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
+}
+
+func (lq *LicenseQuery) loadDeclaredInCertifyLegals(ctx context.Context, query *CertifyLegalQuery, nodes []*License, init func(*License), assign func(*License, *CertifyLegal)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*License)
+	nids := make(map[int]map[*License]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(license.DeclaredInCertifyLegalsTable)
+		s.Join(joinT).On(s.C(certifylegal.FieldID), joinT.C(license.DeclaredInCertifyLegalsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(license.DeclaredInCertifyLegalsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(license.DeclaredInCertifyLegalsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*License]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*CertifyLegal](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "declared_in_certify_legals" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (lq *LicenseQuery) loadDiscoveredInCertifyLegals(ctx context.Context, query *CertifyLegalQuery, nodes []*License, init func(*License), assign func(*License, *CertifyLegal)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*License)
+	nids := make(map[int]map[*License]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(license.DiscoveredInCertifyLegalsTable)
+		s.Join(joinT).On(s.C(certifylegal.FieldID), joinT.C(license.DiscoveredInCertifyLegalsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(license.DiscoveredInCertifyLegalsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(license.DiscoveredInCertifyLegalsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*License]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*CertifyLegal](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "discovered_in_certify_legals" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
 }
 
 func (lq *LicenseQuery) sqlCount(ctx context.Context) (int, error) {
@@ -446,6 +680,34 @@ func (lq *LicenseQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedDeclaredInCertifyLegals tells the query-builder to eager-load the nodes that are connected to the "declared_in_certify_legals"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (lq *LicenseQuery) WithNamedDeclaredInCertifyLegals(name string, opts ...func(*CertifyLegalQuery)) *LicenseQuery {
+	query := (&CertifyLegalClient{config: lq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if lq.withNamedDeclaredInCertifyLegals == nil {
+		lq.withNamedDeclaredInCertifyLegals = make(map[string]*CertifyLegalQuery)
+	}
+	lq.withNamedDeclaredInCertifyLegals[name] = query
+	return lq
+}
+
+// WithNamedDiscoveredInCertifyLegals tells the query-builder to eager-load the nodes that are connected to the "discovered_in_certify_legals"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (lq *LicenseQuery) WithNamedDiscoveredInCertifyLegals(name string, opts ...func(*CertifyLegalQuery)) *LicenseQuery {
+	query := (&CertifyLegalClient{config: lq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if lq.withNamedDiscoveredInCertifyLegals == nil {
+		lq.withNamedDiscoveredInCertifyLegals = make(map[string]*CertifyLegalQuery)
+	}
+	lq.withNamedDiscoveredInCertifyLegals[name] = query
+	return lq
 }
 
 // LicenseGroupBy is the group-by builder for License entities.

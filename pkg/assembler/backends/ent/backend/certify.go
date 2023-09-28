@@ -224,11 +224,11 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 		}
 
 	case subject.Source != nil:
-		src, err := client.SourceName.Query().Where(sourceInputQuery(*subject.Source)).Only(ctx)
+		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source)
 		if err != nil {
 			return nil, err
 		}
-		insert.SetSource(src)
+		insert.SetSourceID(srcID)
 		conflictColumns = append(conflictColumns, certification.FieldSourceID)
 		conflictWhere = sql.And(
 			sql.IsNull(certification.FieldArtifactID),

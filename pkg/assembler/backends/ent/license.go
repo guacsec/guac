@@ -21,8 +21,45 @@ type License struct {
 	// Inline holds the value of the "inline" field.
 	Inline *string `json:"inline,omitempty"`
 	// ListVersion holds the value of the "list_version" field.
-	ListVersion  *string `json:"list_version,omitempty"`
+	ListVersion *string `json:"list_version,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the LicenseQuery when eager-loading is set.
+	Edges        LicenseEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// LicenseEdges holds the relations/edges for other nodes in the graph.
+type LicenseEdges struct {
+	// DeclaredInCertifyLegals holds the value of the declared_in_certify_legals edge.
+	DeclaredInCertifyLegals []*CertifyLegal `json:"declared_in_certify_legals,omitempty"`
+	// DiscoveredInCertifyLegals holds the value of the discovered_in_certify_legals edge.
+	DiscoveredInCertifyLegals []*CertifyLegal `json:"discovered_in_certify_legals,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+	// totalCount holds the count of the edges above.
+	totalCount [2]map[string]int
+
+	namedDeclaredInCertifyLegals   map[string][]*CertifyLegal
+	namedDiscoveredInCertifyLegals map[string][]*CertifyLegal
+}
+
+// DeclaredInCertifyLegalsOrErr returns the DeclaredInCertifyLegals value or an error if the edge
+// was not loaded in eager-loading.
+func (e LicenseEdges) DeclaredInCertifyLegalsOrErr() ([]*CertifyLegal, error) {
+	if e.loadedTypes[0] {
+		return e.DeclaredInCertifyLegals, nil
+	}
+	return nil, &NotLoadedError{edge: "declared_in_certify_legals"}
+}
+
+// DiscoveredInCertifyLegalsOrErr returns the DiscoveredInCertifyLegals value or an error if the edge
+// was not loaded in eager-loading.
+func (e LicenseEdges) DiscoveredInCertifyLegalsOrErr() ([]*CertifyLegal, error) {
+	if e.loadedTypes[1] {
+		return e.DiscoveredInCertifyLegals, nil
+	}
+	return nil, &NotLoadedError{edge: "discovered_in_certify_legals"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -88,6 +125,16 @@ func (l *License) Value(name string) (ent.Value, error) {
 	return l.selectValues.Get(name)
 }
 
+// QueryDeclaredInCertifyLegals queries the "declared_in_certify_legals" edge of the License entity.
+func (l *License) QueryDeclaredInCertifyLegals() *CertifyLegalQuery {
+	return NewLicenseClient(l.config).QueryDeclaredInCertifyLegals(l)
+}
+
+// QueryDiscoveredInCertifyLegals queries the "discovered_in_certify_legals" edge of the License entity.
+func (l *License) QueryDiscoveredInCertifyLegals() *CertifyLegalQuery {
+	return NewLicenseClient(l.config).QueryDiscoveredInCertifyLegals(l)
+}
+
 // Update returns a builder for updating this License.
 // Note that you need to call License.Unwrap() before calling this method if this License
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -125,6 +172,54 @@ func (l *License) String() string {
 	}
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedDeclaredInCertifyLegals returns the DeclaredInCertifyLegals named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (l *License) NamedDeclaredInCertifyLegals(name string) ([]*CertifyLegal, error) {
+	if l.Edges.namedDeclaredInCertifyLegals == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := l.Edges.namedDeclaredInCertifyLegals[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (l *License) appendNamedDeclaredInCertifyLegals(name string, edges ...*CertifyLegal) {
+	if l.Edges.namedDeclaredInCertifyLegals == nil {
+		l.Edges.namedDeclaredInCertifyLegals = make(map[string][]*CertifyLegal)
+	}
+	if len(edges) == 0 {
+		l.Edges.namedDeclaredInCertifyLegals[name] = []*CertifyLegal{}
+	} else {
+		l.Edges.namedDeclaredInCertifyLegals[name] = append(l.Edges.namedDeclaredInCertifyLegals[name], edges...)
+	}
+}
+
+// NamedDiscoveredInCertifyLegals returns the DiscoveredInCertifyLegals named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (l *License) NamedDiscoveredInCertifyLegals(name string) ([]*CertifyLegal, error) {
+	if l.Edges.namedDiscoveredInCertifyLegals == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := l.Edges.namedDiscoveredInCertifyLegals[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (l *License) appendNamedDiscoveredInCertifyLegals(name string, edges ...*CertifyLegal) {
+	if l.Edges.namedDiscoveredInCertifyLegals == nil {
+		l.Edges.namedDiscoveredInCertifyLegals = make(map[string][]*CertifyLegal)
+	}
+	if len(edges) == 0 {
+		l.Edges.namedDiscoveredInCertifyLegals[name] = []*CertifyLegal{}
+	} else {
+		l.Edges.namedDiscoveredInCertifyLegals[name] = append(l.Edges.namedDiscoveredInCertifyLegals[name], edges...)
+	}
 }
 
 // Licenses is a parsable slice of License.

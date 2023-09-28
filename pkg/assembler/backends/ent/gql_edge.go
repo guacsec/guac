@@ -116,6 +116,46 @@ func (c *Certification) Artifact(ctx context.Context) (*Artifact, error) {
 	return result, MaskNotFound(err)
 }
 
+func (cl *CertifyLegal) Package(ctx context.Context) (*PackageVersion, error) {
+	result, err := cl.Edges.PackageOrErr()
+	if IsNotLoaded(err) {
+		result, err = cl.QueryPackage().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (cl *CertifyLegal) Source(ctx context.Context) (*SourceName, error) {
+	result, err := cl.Edges.SourceOrErr()
+	if IsNotLoaded(err) {
+		result, err = cl.QuerySource().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (cl *CertifyLegal) DeclaredLicenses(ctx context.Context) (result []*License, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = cl.NamedDeclaredLicenses(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = cl.Edges.DeclaredLicensesOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = cl.QueryDeclaredLicenses().All(ctx)
+	}
+	return result, err
+}
+
+func (cl *CertifyLegal) DiscoveredLicenses(ctx context.Context) (result []*License, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = cl.NamedDiscoveredLicenses(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = cl.Edges.DiscoveredLicensesOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = cl.QueryDiscoveredLicenses().All(ctx)
+	}
+	return result, err
+}
+
 func (cs *CertifyScorecard) Scorecard(ctx context.Context) (*Scorecard, error) {
 	result, err := cs.Edges.ScorecardOrErr()
 	if IsNotLoaded(err) {
@@ -244,6 +284,30 @@ func (iv *IsVulnerability) Vulnerability(ctx context.Context) (*VulnerabilityTyp
 	result, err := iv.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
 		result, err = iv.QueryVulnerability().Only(ctx)
+	}
+	return result, err
+}
+
+func (l *License) DeclaredInCertifyLegals(ctx context.Context) (result []*CertifyLegal, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = l.NamedDeclaredInCertifyLegals(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = l.Edges.DeclaredInCertifyLegalsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = l.QueryDeclaredInCertifyLegals().All(ctx)
+	}
+	return result, err
+}
+
+func (l *License) DiscoveredInCertifyLegals(ctx context.Context) (result []*CertifyLegal, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = l.NamedDiscoveredInCertifyLegals(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = l.Edges.DiscoveredInCertifyLegalsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = l.QueryDiscoveredInCertifyLegals().All(ctx)
 	}
 	return result, err
 }

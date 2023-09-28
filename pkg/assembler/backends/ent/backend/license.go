@@ -18,11 +18,11 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -60,7 +60,6 @@ func (b *EntBackend) IngestLicense(ctx context.Context, license *model.LicenseIn
 }
 
 func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([]*model.License, error) {
-	fmt.Println("Licenses")
 	records, err := getLicenses(ctx, b.client, *filter)
 	if err != nil {
 		return nil, err
@@ -70,12 +69,7 @@ func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([
 
 func getLicenses(ctx context.Context, client *ent.Client, filter model.LicenseSpec) ([]*ent.License, error) {
 	results, err := client.License.Query().
-		Where(
-			optionalPredicate(filter.ID, IDEQ),
-			optionalPredicate(filter.Name, license.NameEqualFold),
-			optionalPredicate(filter.Inline, license.InlineEqualFold),
-			optionalPredicate(filter.ListVersion, license.ListVersionEqualFold),
-		).
+		Where(licenseQuery(filter)).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -128,11 +122,23 @@ func upsertLicense(ctx context.Context, client *ent.Tx, spec model.LicenseInputS
 	return &licenseId, nil
 }
 
-func toModelLicense(license *ent.License) *model.License {
-	return &model.License{
-		ID:          nodeID(license.ID),
-		Name:        license.Name,
-		Inline:      license.Inline,
-		ListVersion: license.ListVersion,
-	}
+func licenseQuery(filter model.LicenseSpec) predicate.License {
+	return license.And(
+		optionalPredicate(filter.ID, IDEQ),
+		optionalPredicate(filter.Name, license.NameEqualFold),
+		optionalPredicate(filter.Inline, license.InlineEqualFold),
+		optionalPredicate(filter.ListVersion, license.ListVersionEqualFold),
+	)
+}
+
+func licenseInputQuery(filter model.LicenseInputSpec) predicate.License {
+	return licenseQuery(model.LicenseSpec{
+		Name:        &filter.Name,
+		Inline:      filter.Inline,
+		ListVersion: filter.ListVersion,
+	})
+}
+
+func getLicenseID(ctx context.Context, client *ent.Client, license model.LicenseInputSpec) (int, error) {
+	return client.License.Query().Where(licenseInputQuery(license)).OnlyID(ctx)
 }
