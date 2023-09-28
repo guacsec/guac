@@ -114,7 +114,7 @@ func (b *EntBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInpu
 }
 
 func (b *EntBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec) (string, error) {
-	pkgVersion, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	pkgVersionID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), pkg)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to upsert package")
@@ -125,12 +125,12 @@ func (b *EntBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec
 		return "", err
 	}
 
-	return strconv.Itoa(pkgVersion.ID), nil
+	return strconv.Itoa(*pkgVersionID), nil
 }
 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
-func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
+func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*int, error) {
 
 	pkgID, err := client.PackageType.Create().
 		SetType(pkg.Type).
@@ -220,14 +220,7 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 		}
 	}
 
-	pv, err := client.PackageVersion.Query().Where(packageversion.ID(id)).
-		WithName(withPackageNameTree()).
-		Only(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "get package version")
-	}
-
-	return pv, nil
+	return &id, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {

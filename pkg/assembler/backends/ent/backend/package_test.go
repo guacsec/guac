@@ -91,11 +91,11 @@ func (s *Suite) Test_get_package_helpers() {
 		Subpath:   ptr("subpath"),
 	}
 
-	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p2Spec)
 	})
 	s.Require().NoError(err)
-	pkgVersionID, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	pkgVersionID, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p1Spec)
 	})
 	s.Require().NoError(err)
@@ -147,14 +147,14 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		},
 	}
 
-	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
 	})
 	s.Require().NoError(err)
 	s.Require().NotNil(pkg)
 
 	// Ingest twice to ensure upserts are working
-	pkg, err = WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	pkg, err = WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
 	})
 	s.Require().NoError(err)
@@ -166,7 +166,7 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 
 	s.Run("No Qualifiers", func() {
 		spec.Qualifiers = nil
-		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 			return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
 		})
 		s.Require().NoError(err)
