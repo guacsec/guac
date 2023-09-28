@@ -145,15 +145,17 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 	return collect(records, toModelSourceName), nil
 }
 
-func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
-	results, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]*ent.SourceName, error) {
-		results := make([]*ent.SourceName, len(sources))
+func (b *EntBackend) IngestSourceIDs(ctx context.Context, sources []*model.SourceInputSpec) ([]string, error) {
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		results := make([]string, len(sources))
 		var err error
+		var source *ent.SourceName
 		for i, src := range sources {
-			results[i], err = upsertSource(ctx, ent.TxFromContext(ctx), *src)
+			source, err = upsertSource(ctx, ent.TxFromContext(ctx), *src)
 			if err != nil {
 				return nil, err
 			}
+			results[i] = strconv.Itoa(source.ID)
 		}
 		return &results, nil
 	})
@@ -162,18 +164,7 @@ func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.SourceI
 		return nil, err
 	}
 
-	return collect(*results, toModelSourceName), nil
-}
-
-func (b *EntBackend) IngestSource(ctx context.Context, src model.SourceInputSpec) (*model.Source, error) {
-	sourceName, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SourceName, error) {
-		return upsertSource(ctx, ent.TxFromContext(ctx), src)
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return toModelSource(backReferenceSourceName(sourceName.Unwrap())), nil
+	return *ids, nil
 }
 
 func (b *EntBackend) IngestSourceID(ctx context.Context, source model.SourceInputSpec) (string, error) {

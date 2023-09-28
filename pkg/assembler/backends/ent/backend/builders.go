@@ -57,18 +57,6 @@ func builderInputQueryPredicate(spec model.BuilderInputSpec) predicate.Builder {
 	return builder.URIEqualFold(spec.URI)
 }
 
-func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.BuilderInputSpec) (*model.Builder, error) {
-	funcName := "IngestBuilder"
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Builder, error) {
-		client := ent.TxFromContext(ctx)
-		return upsertBuilder(ctx, client, build)
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, funcName)
-	}
-	return toModelBuilder(record.Unwrap()), nil
-}
-
 func (b *EntBackend) IngestBuilderID(ctx context.Context, build *model.BuilderInputSpec) (string, error) {
 	funcName := "IngestBuilder"
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Builder, error) {
@@ -81,26 +69,14 @@ func (b *EntBackend) IngestBuilderID(ctx context.Context, build *model.BuilderIn
 	return strconv.Itoa(record.ID), nil
 }
 
-func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
-	var modelBuilders []*model.Builder
-	for _, builder := range builders {
-		modelBuilder, err := b.IngestBuilder(ctx, builder)
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestBuilders failed with err: %v", err)
-		}
-		modelBuilders = append(modelBuilders, modelBuilder)
-	}
-	return modelBuilders, nil
-}
-
 func (b *EntBackend) IngestBuilderIDs(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
 	var buildersID []string
 	for _, builder := range builders {
-		modelBuilder, err := b.IngestBuilder(ctx, builder)
+		id, err := b.IngestBuilderID(ctx, builder)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestBuilders failed with err: %v", err)
 		}
-		buildersID = append(buildersID, modelBuilder.ID)
+		buildersID = append(buildersID, id)
 	}
 	return buildersID, nil
 }

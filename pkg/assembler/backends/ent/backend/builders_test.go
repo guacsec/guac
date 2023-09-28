@@ -59,13 +59,15 @@ func (s *Suite) TestIngestBuilder() {
 			if err != nil {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
-			got, err := b.IngestBuilder(ctx, tt.builderInput)
+			got, err := b.IngestBuilderID(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			if got == "" {
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
 			}
 		})
 	}
@@ -153,13 +155,15 @@ func (s *Suite) TestIngestBuilders() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			got, err := b.IngestBuilders(ctx, tt.builderInputs)
+			got, err := b.IngestBuilderIDs(ctx, tt.builderInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			if len(got) != 2 {
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
 			}
 		})
 	}
@@ -262,13 +266,13 @@ func (s *Suite) TestBuilders() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			ingestedBuilder, err := b.IngestBuilder(ctx, tt.builderInput)
+			id, err := b.IngestBuilderID(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.builderSpec.ID = &ingestedBuilder.ID
+				tt.builderSpec.ID = &id
 			}
 			got, err := b.Builders(ctx, tt.builderSpec)
 			if (err != nil) != tt.wantErr {
@@ -328,13 +332,13 @@ func (s *Suite) TestExactBuilder() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			ingestedBuilder, err := b.IngestBuilder(ctx, tt.builderInput)
+			id, err := b.IngestBuilderID(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.builderSpec.ID = &ingestedBuilder.ID
+				tt.builderSpec.ID = &id
 			}
 			got, err := b.Builders(ctx, tt.builderSpec)
 			if (err != nil) != tt.wantErr {

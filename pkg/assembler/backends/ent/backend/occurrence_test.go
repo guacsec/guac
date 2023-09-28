@@ -577,7 +577,7 @@ func (s *Suite) TestOccurrence() {
 			}
 
 			for _, src := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *src); err != nil {
+				if _, err := b.IngestSourceID(ctx, *src); err != nil {
 					s.T().Fatalf("Could not ingest source: %v", err)
 				}
 			}

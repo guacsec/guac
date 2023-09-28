@@ -33,7 +33,7 @@ func (s *Suite) Test_FindSoftware() {
 	}
 
 	for _, src := range []*model.SourceInputSpec{s1, s2} {
-		if _, err := b.IngestSource(s.Ctx, *src); err != nil {
+		if _, err := b.IngestSourceID(s.Ctx, *src); err != nil {
 			s.NoError(err)
 		}
 	}

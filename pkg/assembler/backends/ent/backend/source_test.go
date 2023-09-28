@@ -100,7 +100,7 @@ func (s *Suite) TestSources() {
 			if err != nil {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
-			ingestedPkg, err := be.IngestSources(ctx, tt.srcInput)
+			ids, err := be.IngestSourceIDs(ctx, tt.srcInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -111,7 +111,7 @@ func (s *Suite) TestSources() {
 			}
 
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedPkg[0].Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = &ids[0]
 			}
 			got, err := be.Sources(ctx, tt.srcFilter)
 			if (err != nil) != tt.wantErr {
@@ -620,14 +620,8 @@ func (s *Suite) TestHasSourceAt() {
 				}
 			}
 
-			_, err = b.IngestSources(ctx, test.InSrc)
+			_, err = b.IngestSourceIDs(ctx, test.InSrc)
 			s.NoError(err, "Could not ingest sources")
-
-			// for _, s := range test.InSrc {
-			// if _, err := b.IngestSource(ctx, *s); err != nil {
-			// 	t.Fatalf("Could not ingest source: %v", err)
-			// }
-			// }
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
