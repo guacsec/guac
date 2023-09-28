@@ -281,6 +281,15 @@ func (s *Suite) Test_Packages() {
 			want: []*model.Package{p3out},
 		},
 		{
+			name:     "tensorflow with version and subpath but query without subpath",
+			pkgInput: p3,
+			pkgFilter: &model.PkgSpec{
+				Type: ptrfrom.String("pypi"),
+				Name: ptrfrom.String("tensorflow"),
+			},
+			want: []*model.Package{p3out},
+		},
+		{
 			name:     "tensorflow without subpath",
 			pkgInput: p2,
 			pkgFilter: &model.PkgSpec{
