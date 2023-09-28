@@ -83,16 +83,12 @@ var osvCmd = &cobra.Command{
 		packageQuery := root_package.NewPackageQuery(gqlclient, 0)
 
 		totalNum := 0
+		var totalDocs []*processor.Document
 		gotErr := false
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
-
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to ingest document: %v", err)
-			}
+			totalDocs = append(totalDocs, d)
 			return nil
 		}
 
@@ -127,8 +123,14 @@ var osvCmd = &cobra.Command{
 		case <-done:
 			logger.Infof("All certifiers completed")
 		}
-		cf()
 		wg.Wait()
+
+		err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+		if err != nil {
+			gotErr = true
+			logger.Errorf("unable to ingest documents: %v", err)
+		}
+		cf()
 
 		if gotErr {
 			logger.Errorf("completed ingestion with errors")
