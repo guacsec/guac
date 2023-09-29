@@ -58,7 +58,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 				packagename.HasVersionsWith(
 					optionalPredicate(pkgSpec.ID, IDEQ),
 					optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
-					packageversion.SubpathEQ(ptrWithDefault(pkgSpec.Subpath, "")),
+					optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
 					packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
 				),
 			),
@@ -78,7 +78,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 							q.Where(
 								optionalPredicate(pkgSpec.ID, IDEQ),
 								optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
-								packageversion.SubpathEQ(ptrWithDefault(pkgSpec.Subpath, "")),
+								optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
 								packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
 							)
 						})
