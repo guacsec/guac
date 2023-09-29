@@ -11,6 +11,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
@@ -492,6 +493,172 @@ type certificationPaginateArgs struct {
 
 func newCertificationPaginateArgs(rv map[string]any) *certificationPaginateArgs {
 	args := &certificationPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (cl *CertifyLegalQuery) CollectFields(ctx context.Context, satisfies ...string) (*CertifyLegalQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return cl, nil
+	}
+	if err := cl.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return cl, nil
+}
+
+func (cl *CertifyLegalQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(certifylegal.Columns))
+		selectedFields = []string{certifylegal.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "package":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PackageVersionClient{config: cl.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			cl.withPackage = query
+			if _, ok := fieldSeen[certifylegal.FieldPackageID]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldPackageID)
+				fieldSeen[certifylegal.FieldPackageID] = struct{}{}
+			}
+		case "source":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&SourceNameClient{config: cl.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			cl.withSource = query
+			if _, ok := fieldSeen[certifylegal.FieldSourceID]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldSourceID)
+				fieldSeen[certifylegal.FieldSourceID] = struct{}{}
+			}
+		case "declaredLicenses":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&LicenseClient{config: cl.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			cl.WithNamedDeclaredLicenses(alias, func(wq *LicenseQuery) {
+				*wq = *query
+			})
+		case "discoveredLicenses":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&LicenseClient{config: cl.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			cl.WithNamedDiscoveredLicenses(alias, func(wq *LicenseQuery) {
+				*wq = *query
+			})
+		case "packageID":
+			if _, ok := fieldSeen[certifylegal.FieldPackageID]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldPackageID)
+				fieldSeen[certifylegal.FieldPackageID] = struct{}{}
+			}
+		case "sourceID":
+			if _, ok := fieldSeen[certifylegal.FieldSourceID]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldSourceID)
+				fieldSeen[certifylegal.FieldSourceID] = struct{}{}
+			}
+		case "declaredLicense":
+			if _, ok := fieldSeen[certifylegal.FieldDeclaredLicense]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldDeclaredLicense)
+				fieldSeen[certifylegal.FieldDeclaredLicense] = struct{}{}
+			}
+		case "discoveredLicense":
+			if _, ok := fieldSeen[certifylegal.FieldDiscoveredLicense]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldDiscoveredLicense)
+				fieldSeen[certifylegal.FieldDiscoveredLicense] = struct{}{}
+			}
+		case "attribution":
+			if _, ok := fieldSeen[certifylegal.FieldAttribution]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldAttribution)
+				fieldSeen[certifylegal.FieldAttribution] = struct{}{}
+			}
+		case "justification":
+			if _, ok := fieldSeen[certifylegal.FieldJustification]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldJustification)
+				fieldSeen[certifylegal.FieldJustification] = struct{}{}
+			}
+		case "timeScanned":
+			if _, ok := fieldSeen[certifylegal.FieldTimeScanned]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldTimeScanned)
+				fieldSeen[certifylegal.FieldTimeScanned] = struct{}{}
+			}
+		case "origin":
+			if _, ok := fieldSeen[certifylegal.FieldOrigin]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldOrigin)
+				fieldSeen[certifylegal.FieldOrigin] = struct{}{}
+			}
+		case "collector":
+			if _, ok := fieldSeen[certifylegal.FieldCollector]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldCollector)
+				fieldSeen[certifylegal.FieldCollector] = struct{}{}
+			}
+		case "declaredLicensesHash":
+			if _, ok := fieldSeen[certifylegal.FieldDeclaredLicensesHash]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldDeclaredLicensesHash)
+				fieldSeen[certifylegal.FieldDeclaredLicensesHash] = struct{}{}
+			}
+		case "discoveredLicensesHash":
+			if _, ok := fieldSeen[certifylegal.FieldDiscoveredLicensesHash]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldDiscoveredLicensesHash)
+				fieldSeen[certifylegal.FieldDiscoveredLicensesHash] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		cl.Select(selectedFields...)
+	}
+	return nil
+}
+
+type certifylegalPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []CertifyLegalPaginateOption
+}
+
+func newCertifyLegalPaginateArgs(rv map[string]any) *certifylegalPaginateArgs {
+	args := &certifylegalPaginateArgs{}
 	if rv == nil {
 		return args
 	}
@@ -1386,6 +1553,30 @@ func (l *LicenseQuery) collectField(ctx context.Context, opCtx *graphql.Operatio
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+		case "declaredInCertifyLegals":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyLegalClient{config: l.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			l.WithNamedDeclaredInCertifyLegals(alias, func(wq *CertifyLegalQuery) {
+				*wq = *query
+			})
+		case "discoveredInCertifyLegals":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyLegalClient{config: l.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			l.WithNamedDiscoveredInCertifyLegals(alias, func(wq *CertifyLegalQuery) {
+				*wq = *query
+			})
 		case "name":
 			if _, ok := fieldSeen[license.FieldName]; !ok {
 				selectedFields = append(selectedFields, license.FieldName)

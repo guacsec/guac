@@ -90,7 +90,7 @@ func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgIn
 }
 
 func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, spec model.HasSourceAtInputSpec) (*ent.HasSourceAt, error) {
-	src, err := client.SourceName.Query().Where(sourceInputQuery(source)).Only(ctx)
+	srcID, err := getSourceNameID(ctx, client.Client(), source)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSp
 		SetOrigin(spec.Origin).
 		SetJustification(spec.Justification).
 		SetKnownSince(spec.KnownSince).
-		SetSource(src)
+		SetSourceID(srcID)
 
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 		pkgName, err := client.PackageName.Query().Where(packageNameInputQuery(pkg)).Only(ctx)
@@ -337,4 +337,8 @@ func toModelSource(s *ent.SourceType) *model.Source {
 			}
 		}),
 	}
+}
+
+func getSourceNameID(ctx context.Context, client *ent.Client, s model.SourceInputSpec) (int, error) {
+	return client.SourceName.Query().Where(sourceInputQuery(s)).OnlyID(ctx)
 }
