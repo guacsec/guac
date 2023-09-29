@@ -63,7 +63,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with DESCRIBES relationship populates pUrl from described element",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
-					"HasSBOM")},
+					"HasSBOM"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 			{
@@ -111,7 +112,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with multiple DESCRIBES relationship populates multiple pUrls from described element",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
-					"HasSBOM")},
+					"HasSBOM"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 			{
@@ -176,7 +178,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with DESCRIBED_BY relationship populates pUrl from described element",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
-					"HasSBOM")},
+					"HasSBOM"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 		{
@@ -224,7 +227,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with DESCRIBED_BY relationship but no corresponding package reverts to using heuristic top level package",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
-					"HasSBOM")},
+					"HasSBOM"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 		{
@@ -259,7 +263,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with documentDescribes field",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
-					"HasSBOM")},
+					"HasSBOM"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 		{
@@ -340,7 +345,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with files that have 0000 hash file representation",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
-					"HasSBOM")},
+					"HasSBOM"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 		{
@@ -418,7 +424,6 @@ func Test_spdxParser(t *testing.T) {
 					},
 				},
 				IsOccurrence: []assembler.IsOccurrenceIngest{
-
 					{
 						Pkg: pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63#include-file"),
 						Artifact: &generated.ArtifactInputSpec{
@@ -438,7 +443,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with files that have empty file hash representation",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
-					"HasSBOM")},
+					"HasSBOM"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 		{
@@ -506,8 +512,158 @@ func Test_spdxParser(t *testing.T) {
 				  ],
 				  "licenseConcluded": "NOASSERTION",
 				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA224",
+					  "checksumValue": "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA384",
+					  "checksumValue": "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e36",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA3-256",
+					  "checksumValue": "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+								{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e37",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "MD5",
+					  "checksumValue": "d41d8cd98f00b204e9800998ecf8427e"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
 				}
-
+				,
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e38",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "adler",
+					  "checksumValue": "00000001"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e39",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA3-384",
+					  "checksumValue": "0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e39",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "SHA3-512",
+					  "checksumValue": "a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e39",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "BLAKE2b-256",
+					  "checksumValue": "0e5751c026e543b2e8ab2eb06099daa1d1e5df47778f7787faab45cdf12fe3a8"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e39",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "BLAKE2b-384",
+					  "checksumValue": "b32811423377f52d7862286ee1a72ee540524380fda1724a6f25d7978c6fd3244a6caf0498812673c5e05ef583825100"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				},
+				{
+				  "fileName": "include-file",
+				  "SPDXID": "SPDXRef-aef1c9f4f2277e39",
+				  "fileTypes": [
+					"TEXT"
+				  ],
+				  "checksums": [
+					{
+					  "algorithm": "BLAKE2b-512",
+					  "checksumValue": "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce"
+					}
+				  ],
+				  "licenseConcluded": "NOASSERTION",
+				  "copyrightText": ""
+				}
 			]
 		}
 	`),
@@ -531,7 +687,6 @@ func Test_spdxParser(t *testing.T) {
 					},
 				},
 				IsOccurrence: []assembler.IsOccurrenceIngest{
-
 					{
 						Pkg: pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63#include-file"),
 						Artifact: &generated.ArtifactInputSpec{
@@ -551,7 +706,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with complex license expression",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.IngestPredicates{},
-					"HasSBOM", "IsDependency", "IsOccurrence")},
+					"HasSBOM", "IsDependency", "IsOccurrence"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 {
@@ -632,7 +788,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with differing licenses",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.IngestPredicates{},
-					"HasSBOM", "IsDependency", "IsOccurrence")},
+					"HasSBOM", "IsDependency", "IsOccurrence"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 {
@@ -710,7 +867,8 @@ func Test_spdxParser(t *testing.T) {
 			name: "SPDX with custom licenses",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(assembler.IngestPredicates{},
-					"HasSBOM", "IsDependency", "IsOccurrence")},
+					"HasSBOM", "IsDependency", "IsOccurrence"),
+			},
 			doc: &processor.Document{
 				Blob: []byte(`
 {
