@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"log"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -135,16 +134,14 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.SourceInputSp
 	}
 
 	// NOTE: This might be better as a query, but using insert here since the spec is an inputspec
-	src, err := upsertSource(ctx, tx, source)
+	srcID, err := upsertSource(ctx, tx, source)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("Source ID", src.ID)
-
 	id, err := tx.CertifyScorecard.Create().
 		SetScorecardID(sc).
-		SetSource(src).
+		SetSourceID(*srcID).
 		OnConflict(
 			sql.ConflictColumns(certifyscorecard.FieldScorecardID, certifyscorecard.FieldSourceID),
 		).

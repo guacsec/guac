@@ -150,11 +150,11 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 				sql.IsNull(occurrence.FieldSourceID),
 			)
 		} else if subject.Source != nil {
-			srcName, err := upsertSource(ctx, tx, *subject.Source)
+			srcNameID, err := upsertSource(ctx, tx, *subject.Source)
 			if err != nil {
 				return nil, err
 			}
-			occurrenceCreate.SetSource(srcName)
+			occurrenceCreate.SetSourceID(*srcNameID)
 			occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldSourceID)
 			conflictWhere = sql.And(
 				sql.IsNull(occurrence.FieldPackageID),

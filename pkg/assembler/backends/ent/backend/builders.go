@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
 	"strconv"
 
 	"entgo.io/ent/dialect/sql"
@@ -59,14 +60,14 @@ func builderInputQueryPredicate(spec model.BuilderInputSpec) predicate.Builder {
 
 func (b *EntBackend) IngestBuilderID(ctx context.Context, build *model.BuilderInputSpec) (string, error) {
 	funcName := "IngestBuilder"
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Builder, error) {
+	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
 		return upsertBuilder(ctx, client, build)
 	})
 	if err != nil {
 		return "", errors.Wrap(err, funcName)
 	}
-	return strconv.Itoa(record.ID), nil
+	return strconv.Itoa(*id), nil
 }
 
 func (b *EntBackend) IngestBuilderIDs(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
@@ -81,15 +82,23 @@ func (b *EntBackend) IngestBuilderIDs(ctx context.Context, builders []*model.Bui
 	return buildersID, nil
 }
 
-func upsertBuilder(ctx context.Context, client *ent.Tx, spec *model.BuilderInputSpec) (*ent.Builder, error) {
+func upsertBuilder(ctx context.Context, client *ent.Tx, spec *model.BuilderInputSpec) (*int, error) {
 	id, err := client.Builder.Create().SetURI(spec.URI).OnConflict(
 		sql.ConflictColumns(builder.FieldURI),
 	).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert builder")
+		}
+		id, err = client.Builder.Query().
+			Where(builder.URIEQ(spec.URI)).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get builder ID")
+		}
 	}
 
-	return client.Builder.Get(ctx, id)
+	return &id, nil
 }
