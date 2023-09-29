@@ -188,7 +188,7 @@ func (cv *CertifyVex) Artifact(ctx context.Context) (*Artifact, error) {
 	return result, MaskNotFound(err)
 }
 
-func (cv *CertifyVex) Vulnerability(ctx context.Context) (*VulnerabilityType, error) {
+func (cv *CertifyVex) Vulnerability(ctx context.Context) (*VulnerabilityID, error) {
 	result, err := cv.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
 		result, err = cv.QueryVulnerability().Only(ctx)

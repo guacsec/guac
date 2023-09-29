@@ -298,9 +298,9 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "certify_vexes_vulnerability_types_vulnerability",
+				Symbol:     "certify_vexes_vulnerability_ids_vulnerability",
 				Columns:    []*schema.Column{CertifyVexesColumns[10]},
-				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
+				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -1148,7 +1148,7 @@ func init() {
 	CertifyScorecardsTable.ForeignKeys[1].RefTable = ScorecardsTable
 	CertifyVexesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	CertifyVexesTable.ForeignKeys[1].RefTable = ArtifactsTable
-	CertifyVexesTable.ForeignKeys[2].RefTable = VulnerabilityTypesTable
+	CertifyVexesTable.ForeignKeys[2].RefTable = VulnerabilityIdsTable
 	CertifyVulnsTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
