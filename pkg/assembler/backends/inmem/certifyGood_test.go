@@ -206,7 +206,7 @@ func TestCertifyGood(t *testing.T) {
 			ExpCG: []*model.CertifyGood{
 				{
 					Subject:    p1out,
-					KnownSince: time.Time{},
+					KnownSince: timeAfterOneSecond,
 				},
 			},
 		},

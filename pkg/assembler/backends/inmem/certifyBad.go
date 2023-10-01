@@ -382,6 +382,7 @@ func (c *demoClient) buildCertifyBad(link *badLink, filter *model.CertifyBadSpec
 		Justification: link.justification,
 		Origin:        link.origin,
 		Collector:     link.collector,
+		KnownSince:    link.knownSince,
 	}
 	return &certifyBad, nil
 }

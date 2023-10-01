@@ -1989,6 +1989,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				DownloadLocation: "uri: download location of the SBOM",
 				Origin:           "Demo ingestion",
 				Collector:        "Demo ingestion",
+				KnownSince:       time.Time{},
 			},
 		},
 		{

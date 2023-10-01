@@ -35,6 +35,7 @@ fragment allHasSBOMTree on HasSBOM {
   downloadLocation
   origin
   collector
+  knownSince
 }
 
 query HasSBOMQ1 {

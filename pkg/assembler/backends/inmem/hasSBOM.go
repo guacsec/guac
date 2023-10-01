@@ -17,8 +17,10 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -36,6 +38,7 @@ type hasSBOMStruct struct {
 	downloadLocation string
 	origin           string
 	collector        string
+	knownSince       time.Time
 }
 
 func (n *hasSBOMStruct) ID() uint32 { return n.id }
@@ -131,7 +134,8 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 			h.digest == digest &&
 			h.downloadLocation == input.DownloadLocation &&
 			h.origin == input.Origin &&
-			h.collector == input.Collector {
+			h.collector == input.Collector &&
+			input.KnownSince.Equal(h.knownSince) {
 			return c.convHasSBOM(h)
 		}
 	}
@@ -153,6 +157,7 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 		downloadLocation: input.DownloadLocation,
 		origin:           input.Origin,
 		collector:        input.Collector,
+		knownSince:       input.KnownSince,
 	}
 	c.index[h.id] = h
 	c.hasSBOMs = append(c.hasSBOMs, h)
@@ -173,6 +178,7 @@ func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
 		DownloadLocation: in.downloadLocation,
 		Origin:           in.origin,
 		Collector:        in.collector,
+		KnownSince:       in.knownSince,
 	}
 	if in.pkg != 0 {
 		p, err := c.buildPackageResponse(in.pkg, nil)
@@ -196,6 +202,10 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	funcName := "HasSBOM"
 	c.m.RLock()
 	defer c.m.RUnlock()
+
+	t := filter.KnownSince
+
+	fmt.Println(t)
 
 	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
@@ -260,6 +270,10 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 			}
 		}
 	}
+
+	t = filter.KnownSince
+
+	fmt.Println(t, out)
 	return out, nil
 }
 
@@ -273,7 +287,8 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 			noMatch(toLower(filter.Digest), link.digest) ||
 			noMatch(filter.DownloadLocation, link.downloadLocation) ||
 			noMatch(filter.Origin, link.origin) ||
-			noMatch(filter.Collector, link.collector) {
+			noMatch(filter.Collector, link.collector) ||
+			(filter.KnownSince != nil && filter.KnownSince.After(link.knownSince)) {
 			return out, nil
 		}
 		if filter.Subject != nil {

@@ -384,6 +384,7 @@ func (c *demoClient) buildCertifyGood(link *goodLink, filter *model.CertifyGoodS
 		Justification: link.justification,
 		Origin:        link.origin,
 		Collector:     link.collector,
+		KnownSince:    link.knownSince,
 	}
 	return &certifyGood, nil
 }

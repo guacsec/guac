@@ -733,6 +733,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
 				DownloadLocation: "TestSource",
+				KnownSince:       time.Time{},
 			},
 		},
 	}

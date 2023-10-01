@@ -206,7 +206,7 @@ func TestCertifyBad(t *testing.T) {
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:    p1out,
-					KnownSince: time.Time{},
+					KnownSince: timeAfterOneSecond,
 				},
 			},
 		},
