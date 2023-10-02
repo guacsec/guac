@@ -56,9 +56,9 @@ const (
 	ArtifactColumn = "artifact_id"
 	// VulnerabilityTable is the table that holds the vulnerability relation/edge.
 	VulnerabilityTable = "certify_vexes"
-	// VulnerabilityInverseTable is the table name for the VulnerabilityType entity.
-	// It exists in this package in order to avoid circular dependency with the "vulnerabilitytype" package.
-	VulnerabilityInverseTable = "vulnerability_types"
+	// VulnerabilityInverseTable is the table name for the VulnerabilityID entity.
+	// It exists in this package in order to avoid circular dependency with the "vulnerabilityid" package.
+	VulnerabilityInverseTable = "vulnerability_ids"
 	// VulnerabilityColumn is the table column denoting the vulnerability relation/edge.
 	VulnerabilityColumn = "vulnerability_id"
 )

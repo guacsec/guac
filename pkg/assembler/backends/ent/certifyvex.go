@@ -12,7 +12,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 )
 
 // CertifyVex is the model entity for the CertifyVex schema.
@@ -24,7 +24,7 @@ type CertifyVex struct {
 	PackageID *int `json:"package_id,omitempty"`
 	// ArtifactID holds the value of the "artifact_id" field.
 	ArtifactID *int `json:"artifact_id,omitempty"`
-	// Vulnerability is one of OSV, GHSA, or CVE, or nil if not vulnerable
+	// VulnerabilityID holds the value of the "vulnerability_id" field.
 	VulnerabilityID int `json:"vulnerability_id,omitempty"`
 	// KnownSince holds the value of the "known_since" field.
 	KnownSince time.Time `json:"known_since,omitempty"`
@@ -52,8 +52,8 @@ type CertifyVexEdges struct {
 	Package *PackageVersion `json:"package,omitempty"`
 	// Artifact holds the value of the artifact edge.
 	Artifact *Artifact `json:"artifact,omitempty"`
-	// Vulnerability is one of OSV, GHSA, or CVE
-	Vulnerability *VulnerabilityType `json:"vulnerability,omitempty"`
+	// Vulnerability holds the value of the vulnerability edge.
+	Vulnerability *VulnerabilityID `json:"vulnerability,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -89,11 +89,11 @@ func (e CertifyVexEdges) ArtifactOrErr() (*Artifact, error) {
 
 // VulnerabilityOrErr returns the Vulnerability value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e CertifyVexEdges) VulnerabilityOrErr() (*VulnerabilityType, error) {
+func (e CertifyVexEdges) VulnerabilityOrErr() (*VulnerabilityID, error) {
 	if e.loadedTypes[2] {
 		if e.Vulnerability == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: vulnerabilitytype.Label}
+			return nil, &NotFoundError{label: vulnerabilityid.Label}
 		}
 		return e.Vulnerability, nil
 	}
@@ -218,7 +218,7 @@ func (cv *CertifyVex) QueryArtifact() *ArtifactQuery {
 }
 
 // QueryVulnerability queries the "vulnerability" edge of the CertifyVex entity.
-func (cv *CertifyVex) QueryVulnerability() *VulnerabilityTypeQuery {
+func (cv *CertifyVex) QueryVulnerability() *VulnerabilityIDQuery {
 	return NewCertifyVexClient(cv.config).QueryVulnerability(cv)
 }
 

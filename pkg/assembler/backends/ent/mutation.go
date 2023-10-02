@@ -5284,13 +5284,13 @@ func (m *CertifyVexMutation) ResetArtifact() {
 	m.clearedartifact = false
 }
 
-// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityType entity.
+// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
 func (m *CertifyVexMutation) ClearVulnerability() {
 	m.clearedvulnerability = true
 	m.clearedFields[certifyvex.FieldVulnerabilityID] = struct{}{}
 }
 
-// VulnerabilityCleared reports if the "vulnerability" edge to the VulnerabilityType entity was cleared.
+// VulnerabilityCleared reports if the "vulnerability" edge to the VulnerabilityID entity was cleared.
 func (m *CertifyVexMutation) VulnerabilityCleared() bool {
 	return m.clearedvulnerability
 }
