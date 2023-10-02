@@ -67,7 +67,7 @@ var s3Cmd = &cobra.Command{
 			viper.GetString("s3-mp-port"),
 			viper.GetString("s3-queues"),
 			viper.GetString("s3-region"),
-			viper.GetBool("s3-poll"),
+			viper.GetBool("poll"),
 		)
 		if err != nil {
 			logger.Errorf("failed to validate flags: %v", err)

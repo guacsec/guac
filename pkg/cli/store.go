@@ -105,7 +105,6 @@ func init() {
 	set.String("s3-mp-port", "", "port for the message provider")
 	set.String("s3-queues", "", "comma-separated list of queue/topic names")
 	set.String("s3-region", "us-east-1", "aws region")
-	set.Bool("s3-poll", false, "polling or non-polling behaviour")
 
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f

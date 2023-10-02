@@ -64,13 +64,13 @@ func (s *S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *
 	if s.config.Poll {
 		retrieveWithPoll(*s, ctx, docChannel)
 	} else {
-		retrieve(*s, ctx, docChannel)
+		return retrieve(*s, ctx, docChannel)
 	}
 
 	return nil
 }
 
-func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.Document) {
+func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	downloader := getDownloader(s)
 
@@ -80,13 +80,13 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 	blob, err := downloader.DownloadFile(ctx, bckt, item)
 	if err != nil {
 		logger.Errorf("could not download item %v: %v", item, err)
-		return
+		return err
 	}
 
 	enc, err := downloader.GetEncoding(ctx, bckt, item)
 	if err != nil {
 		logger.Errorf("could not get encoding for item %v: %v", item, err)
-		return
+		return err
 	}
 
 	doc := &processor.Document{
@@ -101,6 +101,7 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 	}
 	docChannel <- doc
 
+	return nil
 }
 
 func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *processor.Document) {
