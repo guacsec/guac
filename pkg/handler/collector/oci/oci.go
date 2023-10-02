@@ -36,6 +36,28 @@ const (
 	OCICollector = "OCICollector"
 )
 
+// OCI artifact types
+const (
+	// SpdxJson   = "application/spdx+json"
+	InTotoJson = "application/vnd.in-toto+json"
+)
+
+// wellKnownOCIArtifactTypes is a map of OCI media types to document type and format
+// document and format is returned as a tuple
+var wellKnownOCIArtifactTypes = map[string]struct {
+	documentType processor.DocumentType
+	formatType   processor.FormatType
+}{
+	// SpdxJson: {
+	// 	documentType: processor.DocumentSPDX,
+	// 	formatType:   processor.FormatJSON,
+	// },
+	InTotoJson: {
+		documentType: processor.DocumentITE6SLSA,
+		formatType:   processor.FormatJSON,
+	},
+}
+
 type ociCollector struct {
 	collectDataSource datasource.CollectSource
 	checkedDigest     map[string][]string
@@ -183,6 +205,7 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 // Note: fetchOCIArtifacts currently does not re-check if a new sbom or attestation get reuploaded during polling with the same image digest.
 // A workaround for this would be to run the collector again with a specific tag without polling and ingest like normal
 func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *regclient.RegClient, image ref.Ref, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
 	// attempt to request only the headers, avoids Docker Hub rate limits
 	m, err := rc.ManifestHead(ctx, image)
 	if err != nil {
@@ -195,12 +218,15 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 			return err
 		}
 		pl, _ := manifest.GetPlatformList(m)
+		logger.Infof("%s is manifest list with %d platforms", image.Reference, len(pl))
 		for _, p := range pl {
+			logger.Infof("Fetching platform %s", p)
 			desc, err := manifest.GetPlatformDesc(m, p)
 			if err != nil {
 				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
 			}
 			image.Digest = desc.Digest.String()
+			logger.Infof("Fetching %s for platform %s", image.Digest, desc.Platform)
 			if err := o.fetchOCIArtifacts(ctx, repo, rc, image, docChannel); err != nil {
 				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
 			}
@@ -218,7 +244,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 		// check to see if the digest + suffix has already been collected
 		if !contains(o.checkedDigest[repo], digestTag) {
 			imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
-			err = fetchOCIArtifactBlobs(ctx, rc, imageTag, docChannel)
+			err = fetchOCIArtifactBlobs(ctx, rc, imageTag, "unknown", docChannel)
 			if err != nil {
 				return fmt.Errorf("failed retrieving artifact blobs from registry fallback artifacts: %w", err)
 			}
@@ -226,17 +252,22 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 		}
 	}
 
-	// check for referenced artifacts
 	referrerOpts := []scheme.ReferrerOpts{}
-	referrerOpts = append(referrerOpts, scheme.WithReferrerAT("application/spdx+json"))
-
 	referrerList, err := rc.ReferrerList(ctx, image, referrerOpts...)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed retrieving referrer list: %w", err)
 	}
+
+	logger.Infof("Found %d referrers for %s", len(referrerList.Descriptors), image.Digest)
+
 	for _, referrerDesc := range referrerList.Descriptors {
-		imageTag := fmt.Sprintf("%v@%v", repo, referrerDesc.Digest.String())
-		err = fetchOCIArtifactBlobs(ctx, rc, imageTag, docChannel)
+		if _, ok := wellKnownOCIArtifactTypes[referrerDesc.ArtifactType]; !ok {
+			logger.Infof("Skipping referrer %s with unknown artifact type %s", referrerDesc.Digest, referrerDesc.ArtifactType)
+			continue
+		}
+		logger.Infof("Fetching referrer %s with artifact type %s", referrerDesc.Digest, referrerDesc.ArtifactType)
+		referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDesc.Digest.String())
+		err = fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
 		if err != nil {
 			return err
 		}
@@ -245,7 +276,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	return nil
 }
 
-func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifact string, docChannel chan<- *processor.Document) error {
+func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifact string, artifactType string, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	r, err := ref.New(artifact)
 	if err != nil {
@@ -282,10 +313,21 @@ func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifac
 			return fmt.Errorf("failed reading layer %d: %w", i, err)
 		}
 
+		var docType = processor.DocumentUnknown
+		var docFormat = processor.FormatUnknown
+
+		// check if artifactType is in wellKnownOCIArtifactTypes
+		if artifactType != "" {
+			if wellKnownArtifactType, ok := wellKnownOCIArtifactTypes[artifactType]; ok {
+				docType = wellKnownArtifactType.documentType
+				docFormat = wellKnownArtifactType.formatType
+			}
+		}
+
 		doc := &processor.Document{
 			Blob:   btr1,
-			Type:   processor.DocumentUnknown,
-			Format: processor.FormatUnknown,
+			Type:   docType,
+			Format: docFormat,
 			SourceInformation: processor.SourceInformation{
 				Collector: string(OCICollector),
 				Source:    artifact,
@@ -295,6 +337,15 @@ func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifac
 	}
 
 	return nil
+}
+
+// addWellKnownReferrerATFilters adds the well known referrer Artifact Type filters to the referrer list
+// Iterate through ociArtifactTypesToDocumentAndFormatMap and add the Artifact Types to the referrer list
+func addWellKnownReferrerATFilters(opts []scheme.ReferrerOpts) []scheme.ReferrerOpts {
+	for artifactType := range wellKnownOCIArtifactTypes {
+		opts = append(opts, scheme.WithReferrerAT(artifactType))
+	}
+	return opts
 }
 
 func contains(elems []string, v string) bool {
