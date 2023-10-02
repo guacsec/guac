@@ -114,6 +114,25 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		},
 		wantErr: false,
 	}, {
+		name: "get OCI referrers",
+		fields: fields{
+			ociValues: []string{
+				"mcr.microsoft.com/oss/kubernetes/kubectl:v1.28.1",
+			},
+			poll:     false,
+			interval: 0,
+		},
+		want: []*processor.Document{
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.CsafExampleRedHat),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl:v1.28.1",
+				},
+			},
+		}}, {
 		name: "tag not specified not polling",
 		fields: fields{
 			ociValues: []string{
