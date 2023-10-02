@@ -33,8 +33,8 @@ type BuildBucket interface {
 type BucketBuilder struct {
 }
 
-func (bd BucketBuilder) GetBucket(hostname string, port string, region string) Bucket {
-	return S3Bucket{
+func (bd *BucketBuilder) GetBucket(hostname string, port string, region string) Bucket {
+	return &S3Bucket{
 		hostname,
 		port,
 		region,
@@ -53,10 +53,10 @@ type S3Bucket struct {
 }
 
 func GetDefaultBucket(hostname string, port string, region string) Bucket {
-	return S3Bucket{hostname, port, region}
+	return &S3Bucket{hostname, port, region}
 }
 
-func (d S3Bucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {
+func (d *S3Bucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error loading AWS SDK config: %w", err)
@@ -90,7 +90,7 @@ func (d S3Bucket) DownloadFile(ctx context.Context, bucket string, item string) 
 	return buf.Bytes(), nil
 }
 
-func (d S3Bucket) GetEncoding(ctx context.Context, bucket string, item string) (string, error) {
+func (d *S3Bucket) GetEncoding(ctx context.Context, bucket string, item string) (string, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return "", fmt.Errorf("error loading AWS SDK config: %w", err)

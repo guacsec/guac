@@ -53,15 +53,17 @@ type MpBuilder struct {
 }
 
 // GetMessageProvider Returns a MessageProvider with the given config. Defaults to Kafka provider if no MESSAGE_PROVIDER environment variable is found
-func (mb MpBuilder) GetMessageProvider(config MessageProviderConfig) (MessageProvider, error) {
+func (mb *MpBuilder) GetMessageProvider(config MessageProviderConfig) (MessageProvider, error) {
 	switch config.Provider {
 	case "sqs":
-		return NewSqsProvider(config)
+		provider, err := NewSqsProvider(config)
+		return &provider, err
 	default:
-		return NewKafkaProvider(config)
+		provider, err := NewKafkaProvider(config)
+		return &provider, err
 	}
 }
 
 func GetDefaultMessageProviderBuilder() MessageProviderBuilder {
-	return MpBuilder{}
+	return &MpBuilder{}
 }

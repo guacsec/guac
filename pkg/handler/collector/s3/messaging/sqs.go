@@ -55,7 +55,7 @@ type SqsMessage struct {
 	Records []SqsRecord `json:"Records"`
 }
 
-func (m SqsMessage) GetEvent() (EventName, error) {
+func (m *SqsMessage) GetEvent() (EventName, error) {
 	if len(m.Records) == 0 {
 		return "", fmt.Errorf("error getting event from message %s", m)
 	}
@@ -67,14 +67,14 @@ func (m SqsMessage) GetEvent() (EventName, error) {
 	return "", nil
 }
 
-func (m SqsMessage) GetBucket() (string, error) {
+func (m *SqsMessage) GetBucket() (string, error) {
 	if len(m.Records) == 0 {
 		return "", fmt.Errorf("error getting bucket from message %s", m)
 	}
 	return m.Records[0].S3.Bucket.Name, nil
 }
 
-func (m SqsMessage) GetItem() (string, error) {
+func (m *SqsMessage) GetItem() (string, error) {
 	if len(m.Records) == 0 {
 		return "", fmt.Errorf("error getting item from message %s", m)
 	}
@@ -105,7 +105,7 @@ func NewSqsProvider(mpConfig MessageProviderConfig) (SqsProvider, error) {
 	return sqsProvider, nil
 }
 
-func (s SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
+func (s *SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	logger := logging.FromContext(ctx)
 
 	addr := fmt.Sprintf("http://%s:%s/000000000000/%s", s.hostname, s.port, s.queue)
@@ -120,7 +120,7 @@ func (s SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	for {
 		select {
 		case <-ctx.Done():
-			return SqsMessage{}, nil
+			return &SqsMessage{}, nil
 		default:
 			receiveOutput, err := s.client.ReceiveMessage(ctx, receiveInput)
 			if err != nil {
@@ -137,7 +137,7 @@ func (s SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 				err := json.Unmarshal([]byte(*message.Body), &msg)
 				if err != nil {
 					logger.Errorf("error unmarshalling message: %v", err)
-					return SqsMessage{}, err
+					return &SqsMessage{}, err
 				}
 
 				// Delete the received message from the queue (stardard sqs procedure)
@@ -151,12 +151,12 @@ func (s SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 				}
 				logger.Debugf("Message deleted from the queue")
 
-				return msg, nil
+				return &msg, nil
 			}
 		}
 	}
 }
 
-func (s SqsProvider) Close(ctx context.Context) error {
+func (s *SqsProvider) Close(ctx context.Context) error {
 	return nil
 }

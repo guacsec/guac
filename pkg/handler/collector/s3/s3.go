@@ -59,12 +59,12 @@ func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
 	return s3collector
 }
 
-func (s S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+func (s *S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 
 	if s.config.Poll {
-		retrieveWithPoll(s, ctx, docChannel)
+		retrieveWithPoll(*s, ctx, docChannel)
 	} else {
-		retrieve(s, ctx, docChannel)
+		retrieve(*s, ctx, docChannel)
 	}
 
 	return nil
@@ -234,6 +234,6 @@ func getDownloader(s S3Collector) bucket.Bucket {
 	return downloader
 }
 
-func (s S3Collector) Type() string {
+func (s *S3Collector) Type() string {
 	return S3CollectorType
 }

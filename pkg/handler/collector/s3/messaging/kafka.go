@@ -35,14 +35,14 @@ type KafkaMessage struct {
 	Key       string `json:"Key"`
 }
 
-func (m KafkaMessage) GetEvent() (EventName, error) {
+func (m *KafkaMessage) GetEvent() (EventName, error) {
 	if m.EventName == "s3:ObjectCreated:Put" {
 		return PUT, nil
 	}
 	return "", nil
 }
 
-func (m KafkaMessage) GetBucket() (string, error) {
+func (m *KafkaMessage) GetBucket() (string, error) {
 	info := strings.Split(m.Key, "/")
 	if len(info) < 2 {
 		return "", fmt.Errorf("invalid format of key: %s", m.Key)
@@ -50,7 +50,7 @@ func (m KafkaMessage) GetBucket() (string, error) {
 	return info[0], nil
 }
 
-func (m KafkaMessage) GetItem() (string, error) {
+func (m *KafkaMessage) GetItem() (string, error) {
 	info := strings.Split(m.Key, "/")
 	if len(info) < 2 {
 		return "", fmt.Errorf("invalid format of item: %s", m.Key)
@@ -78,7 +78,7 @@ func NewKafkaProvider(mpConfig MessageProviderConfig) (KafkaProvider, error) {
 	return kafkaProvider, nil
 }
 
-func (k KafkaProvider) ReceiveMessage(ctx context.Context) (Message, error) {
+func (k *KafkaProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	logger := logging.FromContext(ctx)
 
 	m, err := k.reader.ReadMessage(ctx)
@@ -90,13 +90,13 @@ func (k KafkaProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	msg := KafkaMessage{}
 	err = json.Unmarshal(m.Value, &msg)
 	if err != nil {
-		return msg, fmt.Errorf("error parsing JSON: %w", err)
+		return &msg, fmt.Errorf("error parsing JSON: %w", err)
 	}
 
-	return msg, err
+	return &msg, err
 }
 
-func (k KafkaProvider) Close(ctx context.Context) error {
+func (k *KafkaProvider) Close(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 
 	if err := k.reader.Close(); err != nil {

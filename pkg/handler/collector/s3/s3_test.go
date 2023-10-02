@@ -41,15 +41,15 @@ type TestMessage struct {
 	event  messaging.EventName
 }
 
-func (msg TestMessage) GetEvent() (messaging.EventName, error) {
+func (msg *TestMessage) GetEvent() (messaging.EventName, error) {
 	return msg.event, nil
 }
 
-func (msg TestMessage) GetBucket() (string, error) {
+func (msg *TestMessage) GetBucket() (string, error) {
 	return msg.bucket, nil
 }
 
-func (msg TestMessage) GetItem() (string, error) {
+func (msg *TestMessage) GetItem() (string, error) {
 	return msg.item, nil
 }
 
@@ -62,18 +62,18 @@ func NewTestProvider(queue string) TestProvider {
 	return TestProvider{queue}
 }
 
-func (t TestProvider) ReceiveMessage(context.Context) (messaging.Message, error) {
+func (t *TestProvider) ReceiveMessage(context.Context) (messaging.Message, error) {
 	fmt.Printf("returning message for queue %s\n", t.queue)
 	time.Sleep(2 * time.Second)
 
-	return TestMessage{
+	return &TestMessage{
 		item:   "item",
 		bucket: t.queue,
 		event:  messaging.PUT,
 	}, nil
 }
 
-func (t TestProvider) Close(ctx context.Context) error {
+func (t *TestProvider) Close(ctx context.Context) error {
 	return nil
 }
 
@@ -81,28 +81,29 @@ func (t TestProvider) Close(ctx context.Context) error {
 type TestMpBuilder struct {
 }
 
-func (tb TestMpBuilder) GetMessageProvider(config messaging.MessageProviderConfig) (messaging.MessageProvider, error) {
-	return NewTestProvider(config.Queue), nil
+func (tb *TestMpBuilder) GetMessageProvider(config messaging.MessageProviderConfig) (messaging.MessageProvider, error) {
+	provider := NewTestProvider(config.Queue)
+	return &provider, nil
 }
 
 // Test Bucket
 type TestBucket struct {
 }
 
-func (td TestBucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {
+func (td *TestBucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {
 	fmt.Printf("downloading file with bucket %s and name %s\n", bucket, item)
 	return []byte{1, 2, 3}, nil
 }
 
-func (td TestBucket) GetEncoding(ctx context.Context, bucket string, item string) (string, error) {
+func (td *TestBucket) GetEncoding(ctx context.Context, bucket string, item string) (string, error) {
 	return "", nil
 }
 
 type TestBucketBuilder struct {
 }
 
-func (td TestBucketBuilder) GetDownloader(hostname string, port string, region string) bucket.Bucket {
-	return TestBucket{}
+func (td *TestBucketBuilder) GetDownloader(hostname string, port string, region string) bucket.Bucket {
+	return &TestBucket{}
 }
 
 func TestQueuesSplitPolling(t *testing.T) {
@@ -111,8 +112,8 @@ func TestQueuesSplitPolling(t *testing.T) {
 	sigChan := make(chan os.Signal, 1)
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		Queues:        "q1,q2",
-		MpBuilder:     TestMpBuilder{},
-		BucketBuilder: TestBucketBuilder{},
+		MpBuilder:     &TestMpBuilder{},
+		BucketBuilder: &TestBucketBuilder{},
 		SigChan:       sigChan,
 		Poll:          true,
 	})
@@ -183,7 +184,7 @@ func TestNoPolling(t *testing.T) {
 	ctx := context.Background()
 
 	s3Collector := NewS3Collector(S3CollectorConfig{
-		BucketBuilder: TestBucketBuilder{},
+		BucketBuilder: &TestBucketBuilder{},
 		S3Bucket:      "no-poll-bucket",
 		S3Item:        "no-poll-item",
 		Poll:          false,
