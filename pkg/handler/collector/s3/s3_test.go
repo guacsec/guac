@@ -164,8 +164,6 @@ func TestQueuesSplitPolling(t *testing.T) {
 	os.Stdout = oldStdout // restoring the real stdout
 	out := <-outC
 
-	fmt.Println(out)
-
 	if !strings.Contains(out, "returning message for queue q1") {
 		t.Errorf("message for q1 not returned")
 	}

@@ -68,7 +68,6 @@ func NewKafkaProvider(mpConfig MessageProviderConfig) (KafkaProvider, error) {
 		Brokers:   []string{fmt.Sprintf("%s:%s", kafkaHostname, kafkaPort)},
 		Topic:     kafkaTopic,
 		Partition: 0,
-		MaxBytes:  10e6,
 	})
 	err := kafkaProvider.reader.SetOffset(kafka.LastOffset)
 	if err != nil {
