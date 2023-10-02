@@ -117,44 +117,43 @@ func (s *SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 		WaitTimeSeconds:     10,
 	}
 
-	for {
-		select {
-		case <-ctx.Done():
-			return &SqsMessage{}, nil
-		default:
-			receiveOutput, err := s.client.ReceiveMessage(ctx, receiveInput)
+	select {
+	case <-ctx.Done():
+		return &SqsMessage{}, ctx.Err()
+	default:
+		receiveOutput, err := s.client.ReceiveMessage(ctx, receiveInput)
+		if err != nil {
+			fmt.Printf("error receiving message, skipping: %v\n", err)
+			//continue
+		}
+
+		messages := receiveOutput.Messages
+		if len(messages) > 0 {
+			message := receiveOutput.Messages[0]
+			logger.Debugf("Received message: %v\n", *message.Body)
+
+			var msg SqsMessage
+			err := json.Unmarshal([]byte(*message.Body), &msg)
 			if err != nil {
-				fmt.Printf("error receiving message, skipping: %v\n", err)
-				continue
+				logger.Errorf("error unmarshalling message: %v", err)
+				return &SqsMessage{}, err
 			}
 
-			messages := receiveOutput.Messages
-			if len(messages) > 0 {
-				message := receiveOutput.Messages[0]
-				logger.Debugf("Received message: %v\n", *message.Body)
-
-				var msg SqsMessage
-				err := json.Unmarshal([]byte(*message.Body), &msg)
-				if err != nil {
-					logger.Errorf("error unmarshalling message: %v", err)
-					return &SqsMessage{}, err
-				}
-
-				// Delete the received message from the queue (stardard sqs procedure)
-				deleteInput := &sqs.DeleteMessageInput{
-					QueueUrl:      &addr,
-					ReceiptHandle: message.ReceiptHandle,
-				}
-				_, err = s.client.DeleteMessage(context.TODO(), deleteInput)
-				if err != nil {
-					logger.Errorf("error deleting message: %v\n", err)
-				}
-				logger.Debugf("Message deleted from the queue")
-
-				return &msg, nil
+			// Delete the received message from the queue (stardard sqs procedure)
+			deleteInput := &sqs.DeleteMessageInput{
+				QueueUrl:      &addr,
+				ReceiptHandle: message.ReceiptHandle,
 			}
+			_, err = s.client.DeleteMessage(context.TODO(), deleteInput)
+			if err != nil {
+				logger.Errorf("error deleting message: %v\n", err)
+			}
+			logger.Debugf("Message deleted from the queue")
+
+			return &msg, nil
 		}
 	}
+	return &SqsMessage{}, nil
 }
 
 func (s *SqsProvider) Close(ctx context.Context) error {

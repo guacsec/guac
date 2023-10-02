@@ -177,7 +177,7 @@ func validateS3Opts(args []string, s3bucket string, s3item string, mp string, mp
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"s3-bucket", "s3-item", "s3-mp", "s3-mp-host", "s3-mp-port", "s3-queues", "s3-region"})
+	set, err := cli.BuildFlags([]string{"s3-bucket", "s3-item", "s3-mp", "s3-mp-host", "s3-mp-port", "s3-queues", "s3-region", "poll"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
 		os.Exit(1)
