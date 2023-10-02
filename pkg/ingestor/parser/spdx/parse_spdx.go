@@ -431,7 +431,7 @@ func isDependent(rel string) bool {
 
 func isPackageOf(rel string) bool {
 	return map[string]bool{
-		spdx_common.TypeRelationshipPackageOf:  true,
+		spdx_common.TypeRelationshipPackageOf: true,
 	}[rel]
 }
 
