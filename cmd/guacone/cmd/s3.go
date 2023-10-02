@@ -50,16 +50,15 @@ type s3Options struct {
 var s3Opts s3Options
 
 var s3Cmd = &cobra.Command{
-	Use:   "s3 [flags]",
-	Short: "listens to kafka/sqs s3 events to download documents and add them to the GUAC graph",
+	Use:   "s3 [flags] s3hostname s3port",
+	Short: "listens to kafka/sqs s3 events to download documents and add them to the GUAC graph, or directly downloads from s3",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
 		s3Opts, err := validateS3Opts(
-			viper.GetString("s3-host"),
-			viper.GetString("s3-port"),
+			args,
 			viper.GetString("s3-bucket"),
 			viper.GetString("s3-item"),
 			viper.GetString("s3-mp"),
@@ -138,14 +137,21 @@ var s3Cmd = &cobra.Command{
 	},
 }
 
-func validateS3Opts(s3hostname string, s3port string, s3bucket string, s3item string, mp string, mpHostname string, mpPort string, queues string, region string, poll bool) (s3Options, error) {
+func validateS3Opts(args []string, s3bucket string, s3item string, mp string, mpHostname string, mpPort string, queues string, region string, poll bool) (s3Options, error) {
 	var opts s3Options
+
+	if len(args) < 2 {
+		return opts, fmt.Errorf("wrong number of arguments")
+	}
+	s3hostname := args[0]
+	s3port := args[1]
 	if len(s3hostname) == 0 {
 		return opts, fmt.Errorf("expected s3 hostname")
 	}
 	if len(s3port) == 0 {
 		return opts, fmt.Errorf("expected s3 port")
 	}
+
 	if poll {
 		if len(mpHostname) == 0 {
 			return opts, fmt.Errorf("expected hostname for message provider")
@@ -171,7 +177,7 @@ func validateS3Opts(s3hostname string, s3port string, s3bucket string, s3item st
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"s3-host", "s3-port", "s3-bucket", "s3-item", "s3-mp", "s3-mp-host", "s3-mp-port", "s3-queues", "s3-region", "s3-poll"})
+	set, err := cli.BuildFlags([]string{"s3-bucket", "s3-item", "s3-mp", "s3-mp-host", "s3-mp-port", "s3-queues", "s3-region"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
 		os.Exit(1)
