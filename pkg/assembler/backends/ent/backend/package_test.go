@@ -204,7 +204,7 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 
 }
 
-func (s *Suite) Test_IngestPackagesID() {
+func (s *Suite) Test_IngestPackages() {
 	ctx := s.Ctx
 	tests := []struct {
 		name      string
@@ -228,6 +228,7 @@ func (s *Suite) Test_IngestPackagesID() {
 				return
 			}
 
+			// Here we chacks if all parameters are present and if they are alla different each other see https://github.com/guacsec/guac/pull/1330
 			if len(got) != 4 || (got[0] == got[1] || got[1] == got[2] || got[2] == got[3]) {
 				diff := cmp.Diff(tt.want, got, ignoreID)
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
