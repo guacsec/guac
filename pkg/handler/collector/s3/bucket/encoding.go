@@ -21,18 +21,12 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
-const (
-	BZIP2   = "BZIP2"
-	ZSTD    = "ZSTD"
-	UNKNOWN = "UNKNOWN"
-)
-
 func ExtractEncoding(encoding string, filename string) processor.EncodingType {
 	switch encoding {
-	case BZIP2:
-		return BZIP2
-	case ZSTD:
-		return ZSTD
+	case "BZIP2":
+		return processor.EncodingBzip2
+	case "ZSTD":
+		return processor.EncodingZstd
 	default:
 		return FromFile(filename)
 	}
@@ -43,10 +37,10 @@ func FromFile(file string) processor.EncodingType {
 	extension := strs[len(strs)-1]
 	switch extension {
 	case "bz2":
-		return BZIP2
+		return processor.EncodingBzip2
 	case "zst":
-		return ZSTD
+		return processor.EncodingZstd
 	default:
-		return UNKNOWN
+		return processor.EncodingUnknown
 	}
 }
