@@ -57,7 +57,6 @@ func (d *csubDataSources) GetDataSources(ctx context.Context) (*datasource.DataS
 		return nil, err
 	}
 	ds := entriesToSources(ctx, entries)
-	d.lastEntries = ds
 
 	return ds, nil
 }
