@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -203,10 +202,6 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	c.m.RLock()
 	defer c.m.RUnlock()
 
-	t := filter.KnownSince
-
-	fmt.Println(t)
-
 	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
@@ -271,9 +266,6 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 		}
 	}
 
-	t = filter.KnownSince
-
-	fmt.Println(t, out)
 	return out, nil
 }
 

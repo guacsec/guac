@@ -18,6 +18,9 @@ func (r *mutationResolver) IngestCertifyBad(ctx context.Context, subject model.P
 	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	if certifyBad.KnownSince.IsZero() {
+		return "", gqlerror.Errorf("certifyBad.KnownSince is a zero time")
+	}
 	ingestedCertifyBad, err := r.Backend.IngestCertifyBad(ctx, subject, &pkgMatchType, certifyBad)
 	if err != nil {
 		return "", err
@@ -51,6 +54,13 @@ func (r *mutationResolver) IngestCertifyBads(ctx context.Context, subjects model
 	if valuesDefined != 1 {
 		return ingestedCertifyBadsIDS, gqlerror.Errorf("%v :: must specify at most packages, artifacts or sources", funcName)
 	}
+
+	for _, certifyBad := range certifyBads {
+		if certifyBad.KnownSince.IsZero() {
+			return ingestedCertifyBadsIDS, gqlerror.Errorf("hasSBOMS contains a zero time")
+		}
+	}
+
 	ingestedCertifyBads, err := r.Backend.IngestCertifyBads(ctx, subjects, &pkgMatchType, certifyBads)
 	if err == nil {
 		for _, certifybad := range ingestedCertifyBads {

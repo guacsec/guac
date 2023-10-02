@@ -38,6 +38,8 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const topCdxPurlGuac string = "pkg:guac/cdx/"
 
+var zeroTime = time.Unix(0, 0)
+
 type cyclonedxParser struct {
 	doc               *processor.Document
 	packagePackages   map[string][]*model.PkgInputSpec
@@ -219,7 +221,7 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 		var err error
 		if c.cdxBom.Metadata.Timestamp == "" {
 			// set the time to zero time if timestamp is not provided
-			timestamp = time.Time{}
+			timestamp = zeroTime
 		} else {
 			timestamp, err = time.Parse(time.RFC3339, c.cdxBom.Metadata.Timestamp)
 			if err != nil {
