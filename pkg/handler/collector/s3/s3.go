@@ -113,7 +113,7 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// Send cancellation in case of receiving SIGINT
+	// Send cancellation in case of receiving SIGINT/SIGTERM
 	go func(cancel context.CancelFunc) {
 		<-sigChan
 		cancel()
@@ -137,6 +137,7 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 				logger.Errorf("error getting message provider for queue %v: %v", queue, err)
 				return
 			}
+			defer mp.Close(cncCtx)
 
 			for {
 				select {
