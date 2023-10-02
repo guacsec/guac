@@ -29,6 +29,8 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
+	cpecommon "github.com/knqyf263/go-cpe/common"
+	cpenaming "github.com/knqyf263/go-cpe/naming"
 	"github.com/spdx/tools-golang/json"
 	spdx "github.com/spdx/tools-golang/spdx"
 	spdx_common "github.com/spdx/tools-golang/spdx/v2/common"
@@ -78,7 +80,7 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("SPDX document had invalid created time %q : %w", spdxDoc.CreationInfo.Created, err)
 	}
 	s.timeScanned = time
-	if err := s.getPackages(); err != nil {
+	if err := s.getPackages(ctx); err != nil {
 		return err
 	}
 	if err := s.getFiles(); err != nil {
@@ -109,7 +111,8 @@ func (s *spdxParser) getTopLevelPackageSpdxIds() ([]string, error) {
 	return spdxIds, nil
 }
 
-func (s *spdxParser) getPackages() error {
+func (s *spdxParser) getPackages(ctx context.Context) error {
+	logger := logging.FromContext(ctx)
 	topLevelSpdxIds, err := s.getTopLevelPackageSpdxIds()
 	if err != nil {
 		return err
@@ -138,6 +141,33 @@ func (s *spdxParser) getPackages() error {
 			s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)], pkg)
 		}
 		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
+
+		// Create a package with a "CPE-based heuristic" purl
+		for _, extRef := range pac.PackageExternalReferences {
+			if extRef.Category == spdx_common.CategorySecurity {
+				var wfn cpecommon.WellFormedName
+				locator := extRef.Locator
+				if extRef.RefType == spdx_common.TypeSecurityCPE22Type {
+					wfn, err = cpenaming.UnbindURI(locator)
+					if err != nil {
+						logger.Warnf("Failed to unbind external reference locator %v :: %s\n", locator, err)
+						continue
+					}
+				} else if extRef.RefType == spdx_common.TypeSecurityCPE23Type {
+					wfn, err = cpenaming.UnbindFS(locator)
+					if err != nil {
+						logger.Warnf("Failed to unbind external reference locator %v :: %s\n", locator, err)
+						continue
+					}
+				}
+				extPkg, err := asmhelpers.CPEToPkg(wfn)
+				if err != nil {
+					logger.Warnf("Failed to generate package from external reference %v :: %s\n", extRef.Locator, err)
+				} else {
+					s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], extPkg)
+				}
+			}
+		}
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range pac.PackageChecksums {
@@ -312,7 +342,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	}
 
 	for id := range s.packagePackages {
-		for _, pkg := range s.packagePackages[id] {
+		for i, pkg := range s.packagePackages[id] {
 			for _, art := range s.packageArtifacts[id] {
 				preds.IsOccurrence = append(preds.IsOccurrence, assembler.IsOccurrenceIngest{
 					Pkg:      pkg,
@@ -321,6 +351,18 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 						Justification: "spdx package with checksum",
 					},
 				})
+			}
+			// the 0th element is the one coming with purl and all the other are CPE-based packages equal to the 0th one
+			if i != 0 {
+				pkgEqual := assembler.PkgEqualIngest{
+					Pkg:      pkg,
+					EqualPkg: s.packagePackages[id][0],
+					PkgEqual: &generated.PkgEqualInputSpec{
+						Justification: "spdx package with cpe external reference",
+						Collector:     "GUAC",
+					},
+				}
+				preds.PkgEqual = append(preds.PkgEqual, pkgEqual)
 			}
 		}
 	}

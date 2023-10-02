@@ -36,7 +36,7 @@ query PkgQ2 {
 }
 
 query PkgQ3 {
-  packages(pkgSpec: { name: "libp11-kit0" }) {
+  packages(pkgSpec: { type: "deb", name: "libp11-kit0" }) {
     ...allPkgTree
   }
 }

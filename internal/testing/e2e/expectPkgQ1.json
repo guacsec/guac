@@ -4,6 +4,9 @@
       "type": "alpine"
     },
     {
+      "type": "cpe"
+    },
+    {
       "type": "deb"
     },
     {

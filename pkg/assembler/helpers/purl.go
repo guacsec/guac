@@ -23,11 +23,13 @@ import (
 	"strings"
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	cpecommon "github.com/knqyf263/go-cpe/common"
 	purl "github.com/package-url/packageurl-go"
 )
 
 const (
 	PurlTypeGuac  = "guac"
+	PurlTypeCPE   = "cpe"
 	PurlFilesGuac = "pkg:guac/files/"
 	PurlPkgGuac   = "pkg:guac/pkg/"
 )
@@ -103,7 +105,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 	// so that they can be referenced with higher specificity in GUAC
 	//
 	// PURL types not defined in purl library handled generically
-	case "alpine", "alpm", "apk", "huggingface", "githubactions", "mlflow", "qpkg", "pub", "swid", PurlTypeGuac:
+	case "alpine", "alpm", "apk", "huggingface", "githubactions", "mlflow", "qpkg", "pub", "swid", PurlTypeGuac, PurlTypeCPE:
 		fallthrough
 	// PURL types defined in purl library handled generically
 	case purl.TypeBitbucket, purl.TypeCocoapods, purl.TypeCargo,
@@ -226,4 +228,52 @@ func GuacFilePurl(alg string, digest string, filename *string) string {
 
 func GuacGenericPurl(s string) string {
 	return fmt.Sprintf("pkg:guac/generic/%s", SanitizeString(s))
+}
+
+func CPEToPkg(wfn cpecommon.WellFormedName) (*model.PkgInputSpec, error) {
+	var qualifiers []purl.Qualifier
+	qualifiers = append(qualifiers, purl.Qualifier{
+		Key:   "cpe-part",
+		Value: escapeCPEWfn(wfn.GetString(cpecommon.AttributePart)),
+	})
+	qualifiers = append(qualifiers, purl.Qualifier{
+		Key:   "cpe-update",
+		Value: escapeCPEWfn(wfn.GetString(cpecommon.AttributeUpdate)),
+	})
+	qualifiers = append(qualifiers, purl.Qualifier{
+		Key:   "cpe-edition",
+		Value: escapeCPEWfn(wfn.GetString(cpecommon.AttributeEdition)),
+	})
+	qualifiers = append(qualifiers, purl.Qualifier{
+		Key:   "cpe-lang",
+		Value: escapeCPEWfn(wfn.GetString(cpecommon.AttributeLanguage)),
+	})
+	qualifiers = append(qualifiers, purl.Qualifier{
+		Key:   "cpe-sw-edition",
+		Value: escapeCPEWfn(wfn.GetString(cpecommon.AttributeSwEdition)),
+	})
+	qualifiers = append(qualifiers, purl.Qualifier{
+		Key:   "cpe-target-sw",
+		Value: escapeCPEWfn(wfn.GetString(cpecommon.AttributeTargetSw)),
+	})
+	qualifiers = append(qualifiers, purl.Qualifier{
+		Key:   "cpe-target-hw",
+		Value: escapeCPEWfn(wfn.GetString(cpecommon.AttributeTargetHw)),
+	})
+	qualifiers = append(qualifiers, purl.Qualifier{
+		Key:   "cpe-other",
+		Value: escapeCPEWfn(wfn.GetString(cpecommon.AttributeOther)),
+	})
+	p := purl.NewPackageURL("cpe",
+		escapeCPEWfn(wfn.GetString(cpecommon.AttributeVendor)),
+		escapeCPEWfn(wfn.GetString(cpecommon.AttributeProduct)),
+		escapeCPEWfn(wfn.GetString(cpecommon.AttributeVersion)),
+		qualifiers,
+		"",
+	)
+	return purlConvert(*p)
+}
+
+func escapeCPEWfn(s string) string {
+	return strings.ReplaceAll(s, "\\", "")
 }
