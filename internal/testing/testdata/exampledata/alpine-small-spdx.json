@@ -155,7 +155,8 @@
     "SPDXRef-f542a07f45615070",
     "SPDXRef-f91e100c74bf27e",
     "SPDXRef-f96f56f789a464ad",
-    "SPDXRef-fb57f5df1fd169db"
+    "SPDXRef-fb57f5df1fd169db",
+    "SPDXRef-d3f01bc78ba82ed5"
    ],
    "licenseDeclared": "MIT",
    "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
@@ -628,6 +629,11 @@
    "spdxElementId": "SPDXRef-ec1d619a28263eb0",
    "relationshipType": "CONTAINS",
    "relatedSpdxElement": "SPDXRef-e2c90ae8ae67431f"
+  },
+  {
+   "spdxElementId": "SPDXRef-ec1d619a28263eb0",
+   "relationshipType": "PACKAGE_OF",
+   "relatedSpdxElement": "SPDXRef-d3f01bc78ba82ed5"
   }
  ]
 }

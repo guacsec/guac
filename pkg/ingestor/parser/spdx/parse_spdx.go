@@ -268,6 +268,9 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		} else if isDependent(rel.Relationship) {
 			foundId = string(rel.RefB.ElementRefID)
 			relatedId = string(rel.RefA.ElementRefID)
+		} else if isPackageOf(rel.Relationship) {
+			foundId = string(rel.RefB.ElementRefID)
+			relatedId = string(rel.RefA.ElementRefID)
 		} else {
 			continue
 		}
@@ -423,6 +426,12 @@ func isDependent(rel string) bool {
 	return map[string]bool{
 		spdx_common.TypeRelationshipContainedBy:  true,
 		spdx_common.TypeRelationshipDependencyOf: true,
+	}[rel]
+}
+
+func isPackageOf(rel string) bool {
+	return map[string]bool{
+		spdx_common.TypeRelationshipPackageOf:  true,
 	}[rel]
 }
 
