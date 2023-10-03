@@ -47,8 +47,6 @@ type s3Options struct {
 	poll       bool   // polling or non-polling behaviour? (defaults to non-polling)
 }
 
-var s3Opts s3Options
-
 var s3Cmd = &cobra.Command{
 	Use:   "s3 [flags] s3hostname s3port",
 	Short: "listens to kafka/sqs s3 events to download documents and add them to the GUAC graph, or directly downloads from s3",
