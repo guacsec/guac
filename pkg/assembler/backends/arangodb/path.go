@@ -49,6 +49,8 @@ func (c *arangoClient) Node(ctx context.Context, nodeID string) (model.Node, err
 		return c.buildArtifactResponseByID(ctx, nodeID, nil)
 	case certifyBadsStr:
 		return c.buildCertifyBadByID(ctx, nodeID, nil)
+	case certifyGoodsStr:
+		return c.buildCertifyGoodByID(ctx, nodeID, nil)
 	}
 	return nil, nil
 }

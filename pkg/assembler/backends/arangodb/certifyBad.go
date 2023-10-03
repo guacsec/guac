@@ -27,6 +27,14 @@ import (
 
 func (c *arangoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
 
+	if certifyBadSpec != nil && certifyBadSpec.ID != nil {
+		cb, err := c.buildCertifyBadByID(ctx, *certifyBadSpec.ID, certifyBadSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildCertifyBadByID failed with an error: %w", err)
+		}
+		return []*model.CertifyBad{cb}, nil
+	}
+
 	var arangoQueryBuilder *arangoQueryBuilder
 	if certifyBadSpec.Subject != nil {
 		var combinedCertifyBad []*model.CertifyBad
@@ -1038,7 +1046,7 @@ func (c *arangoClient) queryCertifyBadNodeByID(ctx context.Context, filter *mode
 		certifyBad.Subject = builtSource
 	} else if collectedValues[0].ArtifactID != nil {
 		var builtArtifact *model.Artifact
-		if filter.Subject != nil && filter.Subject.Source != nil {
+		if filter.Subject != nil && filter.Subject.Artifact != nil {
 			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, filter.Subject.Artifact)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)

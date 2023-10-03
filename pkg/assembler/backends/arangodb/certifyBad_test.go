@@ -587,7 +587,7 @@ func TestCertifyBad(t *testing.T) {
 			Query: &model.CertifyBadSpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -1098,6 +1098,40 @@ func Test_buildCertifyBadByID(t *testing.T) {
 			},
 			ExpCB: &model.CertifyBad{
 				Subject:       testdata.A2out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Source - no filter",
+			InSrc: []*model.SourceInputSpec{testdata.S3},
+			Call: call{
+				Sub: model.PackageSourceOrArtifactInput{
+					Source: testdata.S3,
+				},
+				CB: &model.CertifyBadInputSpec{
+					Justification: "test justification",
+				},
+			},
+			Query: &model.CertifyBadSpec{},
+			ExpCB: &model.CertifyBad{
+				Subject:       testdata.S3out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Artifact - no filter",
+			InArt: []*model.ArtifactInputSpec{testdata.A3},
+			Call: call{
+				Sub: model.PackageSourceOrArtifactInput{
+					Artifact: testdata.A3,
+				},
+				CB: &model.CertifyBadInputSpec{
+					Justification: "test justification",
+				},
+			},
+			Query: &model.CertifyBadSpec{},
+			ExpCB: &model.CertifyBad{
+				Subject:       testdata.A3out,
 				Justification: "test justification",
 			},
 		},
