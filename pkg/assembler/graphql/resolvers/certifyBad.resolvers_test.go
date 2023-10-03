@@ -18,6 +18,7 @@ package resolvers_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/guacsec/guac/internal/testing/mocks"
@@ -26,6 +27,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 )
+
+var ZeroTime = time.Unix(0, 0)
 
 func TestIngestCertifyBad(t *testing.T) {
 	type call struct {
@@ -62,6 +65,7 @@ func TestIngestCertifyBad(t *testing.T) {
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
+						KnownSince:    ZeroTime,
 					},
 				},
 			},
@@ -189,6 +193,7 @@ func TestIngestCertifyBads(t *testing.T) {
 					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
+							KnownSince:    ZeroTime,
 						},
 					},
 				},

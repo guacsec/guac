@@ -19,7 +19,7 @@ func (r *mutationResolver) IngestCertifyGood(ctx context.Context, subject model.
 		return "", err
 	}
 	if certifyGood.KnownSince.IsZero() {
-		return "", gqlerror.Errorf("certifyBad.KnownSince is a zero time")
+		return "", gqlerror.Errorf("certifyGood.KnownSince is a zero time")
 	}
 	ingestedCertifyGood, err := r.Backend.IngestCertifyGood(ctx, subject, &pkgMatchType, certifyGood)
 	if err != nil {
@@ -57,7 +57,7 @@ func (r *mutationResolver) IngestCertifyGoods(ctx context.Context, subjects mode
 
 	for _, certifyGood := range certifyGoods {
 		if certifyGood.KnownSince.IsZero() {
-			return ingestedCertifyGoodsIDS, gqlerror.Errorf("hasSBOMS contains a zero time")
+			return ingestedCertifyGoodsIDS, gqlerror.Errorf("certifyGoods contains a zero time")
 		}
 	}
 

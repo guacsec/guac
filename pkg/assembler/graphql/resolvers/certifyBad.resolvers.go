@@ -57,7 +57,7 @@ func (r *mutationResolver) IngestCertifyBads(ctx context.Context, subjects model
 
 	for _, certifyBad := range certifyBads {
 		if certifyBad.KnownSince.IsZero() {
-			return ingestedCertifyBadsIDS, gqlerror.Errorf("hasSBOMS contains a zero time")
+			return ingestedCertifyBadsIDS, gqlerror.Errorf("certifyBads contains a zero time")
 		}
 	}
 
