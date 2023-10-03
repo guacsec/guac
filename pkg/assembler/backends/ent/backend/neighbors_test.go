@@ -100,7 +100,7 @@ func (s *Suite) TestNode() {
 			for i, id := range ids {
 				n, err := b.Node(s.Ctx, id)
 				s.Require().NoError(err)
-				if id == "" {
+				if n != nil {
 					if diff := cmp.Diff(test.Expected[i], n, ignoreID, ignoreEmptySlices); diff != "" {
 						s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 					}
