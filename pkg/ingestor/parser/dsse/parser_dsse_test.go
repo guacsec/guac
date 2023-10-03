@@ -17,21 +17,28 @@ package dsse
 
 import (
 	"context"
+	"sync"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/mockverifier"
+	"github.com/guacsec/guac/pkg/ingestor/verifier"
+
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
+var once sync.Once
+
 func Test_DsseParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
-	err := verifier.RegisterVerifier(mockverifier.NewMockSigstoreVerifier(), "sigstore")
+	var err error
+	once.Do(func() {
+		err = verifier.RegisterVerifier(mockverifier.NewMockSigstoreVerifier(), "sigstore")
+	})
 	if err != nil {
 		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
 	}
