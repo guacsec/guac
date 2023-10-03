@@ -156,7 +156,7 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 		downloadLocation: input.DownloadLocation,
 		origin:           input.Origin,
 		collector:        input.Collector,
-		knownSince:       input.KnownSince,
+		knownSince:       input.KnownSince.UTC(),
 	}
 	c.index[h.id] = h
 	c.hasSBOMs = append(c.hasSBOMs, h)
@@ -177,7 +177,7 @@ func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
 		DownloadLocation: in.downloadLocation,
 		Origin:           in.origin,
 		Collector:        in.collector,
-		KnownSince:       in.knownSince,
+		KnownSince:       in.knownSince.UTC(),
 	}
 	if in.pkg != 0 {
 		p, err := c.buildPackageResponse(in.pkg, nil)

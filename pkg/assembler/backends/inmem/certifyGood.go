@@ -184,7 +184,7 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 			justification: certifyGood.Justification,
 			origin:        certifyGood.Origin,
 			collector:     certifyGood.Collector,
-			knownSince:    certifyGood.KnownSince,
+			knownSince:    certifyGood.KnownSince.UTC(),
 		}
 		c.index[collectedCertifyGoodLink.id] = &collectedCertifyGoodLink
 		c.certifyGoods = append(c.certifyGoods, &collectedCertifyGoodLink)
@@ -384,7 +384,7 @@ func (c *demoClient) buildCertifyGood(link *goodLink, filter *model.CertifyGoodS
 		Justification: link.justification,
 		Origin:        link.origin,
 		Collector:     link.collector,
-		KnownSince:    link.knownSince,
+		KnownSince:    link.knownSince.UTC(),
 	}
 	return &certifyGood, nil
 }

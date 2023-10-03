@@ -25,6 +25,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// TODO: update the other backends to handle the new timestamp fields beacuse of: https://github.com/guacsec/guac/pull/1338/files#r1343080326
+
 // Internal data: link that a package/source/artifact is bad
 type badList []*badLink
 type badLink struct {
@@ -183,7 +185,7 @@ func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.Package
 			justification: certifyBad.Justification,
 			origin:        certifyBad.Origin,
 			collector:     certifyBad.Collector,
-			knownSince:    certifyBad.KnownSince,
+			knownSince:    certifyBad.KnownSince.UTC(),
 		}
 		c.index[collectedCertifyBadLink.id] = &collectedCertifyBadLink
 		c.certifyBads = append(c.certifyBads, &collectedCertifyBadLink)
@@ -382,7 +384,7 @@ func (c *demoClient) buildCertifyBad(link *badLink, filter *model.CertifyBadSpec
 		Justification: link.justification,
 		Origin:        link.origin,
 		Collector:     link.collector,
-		KnownSince:    link.knownSince,
+		KnownSince:    link.knownSince.UTC(),
 	}
 	return &certifyBad, nil
 }

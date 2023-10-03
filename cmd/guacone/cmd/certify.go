@@ -123,7 +123,7 @@ var certifyCmd = &cobra.Command{
 				Justification: opts.justification,
 				Origin:        "GUAC Certify CLI",
 				Collector:     "GUAC",
-				KnownSince:    time.Now(),
+				KnownSince:    time.Now().UTC(),
 			}
 			preds.CertifyGood = append(preds.CertifyGood, *certifyGood)
 		} else {
@@ -142,7 +142,7 @@ var certifyCmd = &cobra.Command{
 				Justification: opts.justification,
 				Origin:        "GUAC Certify CLI",
 				Collector:     "GUAC",
-				KnownSince:    time.Now(),
+				KnownSince:    time.Now().UTC(),
 			}
 			preds.CertifyBad = append(preds.CertifyBad, *certifyBad)
 		}
