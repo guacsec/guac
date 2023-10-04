@@ -32,7 +32,7 @@ services:
 
 - what it does: runs a GraphQL server
 - options:
-  - backend: inmem or neo4j or future DB
+  - backend: inmem, neo4j, arango, ent, or future DB
   - backend-specific options: neo4j connection options
   - playground / debug: also start playground
 
