@@ -91,9 +91,9 @@ func setupOneProvider(t *testing.T) {
 
 func randomData(t *testing.T, n int) []byte {
 	t.Helper()
-	rand.Seed(time.Now().UnixNano())
+	gen := rand.New(rand.NewSource(time.Now().UnixNano()))
 	data := make([]byte, n)
-	if _, err := rand.Read(data[:]); err != nil {
+	if _, err := gen.Read(data[:]); err != nil {
 		t.Fatal(err)
 	}
 	return data
