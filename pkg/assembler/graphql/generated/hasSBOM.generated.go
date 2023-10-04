@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -380,6 +381,50 @@ func (ec *executionContext) fieldContext_HasSBOM_collector(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _HasSBOM_knownSince(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasSBOM_knownSince(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.KnownSince, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_HasSBOM_knownSince(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "HasSBOM",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -391,7 +436,7 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"uri", "algorithm", "digest", "downloadLocation", "origin", "collector"}
+	fieldsInOrder := [...]string{"uri", "algorithm", "digest", "downloadLocation", "origin", "collector", "knownSince"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -452,6 +497,15 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 				return it, err
 			}
 			it.Collector = data
+		case "knownSince":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
+			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.KnownSince = data
 		}
 	}
 
@@ -465,7 +519,7 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "subject", "uri", "algorithm", "digest", "downloadLocation", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "subject", "uri", "algorithm", "digest", "downloadLocation", "origin", "collector", "knownSince"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -544,6 +598,15 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 				return it, err
 			}
 			it.Collector = data
+		case "knownSince":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.KnownSince = data
 		}
 	}
 
@@ -606,6 +669,11 @@ func (ec *executionContext) _HasSBOM(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "collector":
 			out.Values[i] = ec._HasSBOM_collector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "knownSince":
+			out.Values[i] = ec._HasSBOM_knownSince(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

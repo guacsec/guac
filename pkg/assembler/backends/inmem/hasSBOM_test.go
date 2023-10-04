@@ -19,6 +19,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -28,6 +29,8 @@ import (
 )
 
 func TestHasSBOM(t *testing.T) {
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
 	type call struct {
 		Sub model.PackageOrArtifactInput
 		HS  *model.HasSBOMInputSpec
@@ -124,6 +127,37 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject: p1out,
 					URI:     "test uri one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: p1,
+					},
+					HS: &model.HasSBOMInputSpec{
+						KnownSince: timeAfterOneSecond,
+					},
+				},
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: p1,
+					},
+					HS: &model.HasSBOMInputSpec{
+						KnownSince: curTime,
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				KnownSince: &timeAfterOneSecond,
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:    p1out,
+					KnownSince: timeAfterOneSecond,
 				},
 			},
 		},

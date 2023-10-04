@@ -243,8 +243,13 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		return preds
 	} else {
 		// adding top level package edge manually for all depends on package
+		timestamp, err := time.Parse(time.RFC3339, s.spdxDoc.CreationInfo.Created)
+		if err != nil {
+			logger.Errorf("SPDX document had invalid created time %q : %w", s.spdxDoc.CreationInfo.Created, err)
+			return nil
+		}
 		for _, topLevelPkg := range topLevel {
-			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(topLevelPkg, s.doc))
+			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(topLevelPkg, s.doc, timestamp))
 		}
 
 		if s.topLevelIsHeuristic {

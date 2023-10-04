@@ -452,6 +452,7 @@ var (
 				},
 				CertifyGood: &model.CertifyGoodInputSpec{
 					Justification: "good package",
+					KnownSince:    tm,
 				},
 			},
 			{
@@ -466,6 +467,7 @@ var (
 				},
 				CertifyGood: &model.CertifyGoodInputSpec{
 					Justification: "good package",
+					KnownSince:    tm,
 				},
 			},
 		},

@@ -1965,6 +1965,7 @@ func ingestHashEqual(ctx context.Context, client graphql.Client) {
 
 func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 	opensslNs := "openssl.org"
 	opensslVersion := "3.0.3"
 	ingestHasSBOM := []struct {
@@ -1989,6 +1990,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				DownloadLocation: "uri: download location of the SBOM",
 				Origin:           "Demo ingestion",
 				Collector:        "Demo ingestion",
+				KnownSince:       tm,
 			},
 		},
 		{
@@ -2004,6 +2006,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				DownloadLocation: "uri: download location of the SBOM",
 				Origin:           "Demo ingestion",
 				Collector:        "Demo ingestion",
+				KnownSince:       tm,
 			},
 		},
 		{
@@ -2022,6 +2025,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				DownloadLocation: "uri: download location of the SBOM",
 				Origin:           "Demo ingestion",
 				Collector:        "Demo ingestion",
+				KnownSince:       tm,
 			},
 		},
 		{
@@ -2037,6 +2041,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				DownloadLocation: "uri: download location of the SBOM",
 				Origin:           "Demo ingestion",
 				Collector:        "Demo ingestion",
+				KnownSince:       tm,
 			},
 		},
 	}
