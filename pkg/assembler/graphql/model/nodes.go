@@ -130,6 +130,9 @@ type CertifyBadInputSpec struct {
 //
 // If a source is specified in the subject filter, then it must specify a name,
 // and optionally a tag and a commit.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
 type CertifyBadSpec struct {
 	ID            *string                      `json:"id,omitempty"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
@@ -178,6 +181,9 @@ type CertifyGoodInputSpec struct {
 //
 // If a source is specified in the subject filter, then it must specify a name,
 // and optionally a tag and a commit.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
 type CertifyGoodSpec struct {
 	ID            *string                      `json:"id,omitempty"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
@@ -461,6 +467,9 @@ type HasSBOMInputSpec struct {
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
 //
 // Only the package or artifact can be added, not both.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
 type HasSBOMSpec struct {
 	ID               *string                `json:"id,omitempty"`
 	Subject          *PackageOrArtifactSpec `json:"subject,omitempty"`
