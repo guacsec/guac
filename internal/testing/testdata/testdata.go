@@ -201,6 +201,7 @@ var (
 		VexJustification: generated.VexJustificationNotProvided,
 		Statement:        "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
 		StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusAffected, generated.VexJustificationNotProvided),
+		KnownSince:       time.Unix(0, 0),
 	}
 	CycloneDXAffectedVulnMetadata = []assembler.VulnMetadataIngest{
 		{
@@ -208,6 +209,7 @@ var (
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 10,
+				Timestamp:  time.Unix(0, 0),
 			},
 		},
 	}

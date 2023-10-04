@@ -18,6 +18,7 @@ package cyclonedx
 import (
 	"context"
 	"testing"
+	"time"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
 	"github.com/google/go-cmp/cmp"
@@ -300,7 +301,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				identifierStrings: &common.IdentifierStrings{},
 			}
 			c.cdxBom = tt.cdxBom
-			if err := c.getTopLevelPackage(tt.cdxBom); err != nil {
+			if err := c.getTopLevelPackage(); err != nil {
 				t.Errorf("Failed to getTopLevelPackage %s", err)
 			}
 			wantPackage, err := asmhelpers.PurlToPkg(tt.wantPurl)
@@ -457,7 +458,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				identifierStrings: &common.IdentifierStrings{},
 			}
 			c.cdxBom = tt.cdxBom
-			if err := c.getPackages(tt.cdxBom); err != nil {
+			if err := c.getPackages(); err != nil {
 				t.Errorf("Failed to getTopLevelPackage %s", err)
 			}
 			wantPackage, err := asmhelpers.PurlToPkg(tt.wantPurl)
@@ -501,12 +502,16 @@ func affectedVexPredicates() *assembler.IngestPredicates {
 			{
 				Pkg:           guacPkgHelper("product-ABC", "2.4"),
 				Vulnerability: testdata.VulnSpecAffected,
-				VulnData:      &model.ScanMetadataInput{},
+				VulnData: &model.ScanMetadataInput{
+					TimeScanned: time.Unix(0, 0),
+				},
 			},
 			{
 				Pkg:           guacPkgHelper("product-ABC", "2.6"),
 				Vulnerability: testdata.VulnSpecAffected,
-				VulnData:      &model.ScanMetadataInput{},
+				VulnData: &model.ScanMetadataInput{
+					TimeScanned: time.Unix(0, 0),
+				},
 			},
 		},
 	}
