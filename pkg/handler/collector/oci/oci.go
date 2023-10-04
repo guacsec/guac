@@ -225,9 +225,14 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 			if err != nil {
 				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
 			}
-			image.Digest = desc.Digest.String()
-			logger.Infof("Fetching %s for platform %s", image.Digest, desc.Platform)
-			if err := o.fetchOCIArtifacts(ctx, repo, rc, image, docChannel); err != nil {
+			platformImage := ref.Ref{
+				Scheme:     image.Scheme,
+				Registry:   image.Registry,
+				Repository: image.Repository,
+				Digest:     desc.Digest.String(),
+			}
+			logger.Infof("Fetching %s for platform %s", platformImage.Digest, desc.Platform)
+			if err := o.fetchOCIArtifacts(ctx, repo, rc, platformImage, docChannel); err != nil {
 				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
 			}
 		}
@@ -235,6 +240,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	}
 
 	digest := manifest.GetDigest(m)
+	image.Digest = digest.String()
 
 	// check for fallback artifacts
 	digestFormatted := fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded())
