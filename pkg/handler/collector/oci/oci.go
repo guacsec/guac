@@ -38,7 +38,7 @@ const (
 
 // OCI artifact types
 const (
-	// SpdxJson   = "application/spdx+json"
+	SpdxJson   = "application/spdx+json"
 	InTotoJson = "application/vnd.in-toto+json"
 )
 
@@ -48,10 +48,10 @@ var wellKnownOCIArtifactTypes = map[string]struct {
 	documentType processor.DocumentType
 	formatType   processor.FormatType
 }{
-	// SpdxJson: {
-	// 	documentType: processor.DocumentSPDX,
-	// 	formatType:   processor.FormatJSON,
-	// },
+	SpdxJson: {
+		documentType: processor.DocumentSPDX,
+		formatType:   processor.FormatJSON,
+	},
 	InTotoJson: {
 		documentType: processor.DocumentITE6SLSA,
 		formatType:   processor.FormatJSON,
@@ -231,7 +231,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
 			}
 		}
-		return nil
+		logger.Infof("Finished fetching manifest list %s", image.Reference)
 	}
 
 	digest := manifest.GetDigest(m)
@@ -308,6 +308,7 @@ func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifac
 		if err != nil {
 			return fmt.Errorf("failed pulling layer %d: %w", i, err)
 		}
+		defer blob.Close()
 		btr1, err := blob.RawBody()
 		if err != nil {
 			return fmt.Errorf("failed reading layer %d: %w", i, err)
@@ -337,15 +338,6 @@ func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifac
 	}
 
 	return nil
-}
-
-// addWellKnownReferrerATFilters adds the well known referrer Artifact Type filters to the referrer list
-// Iterate through ociArtifactTypesToDocumentAndFormatMap and add the Artifact Types to the referrer list
-func addWellKnownReferrerATFilters(opts []scheme.ReferrerOpts) []scheme.ReferrerOpts {
-	for artifactType := range wellKnownOCIArtifactTypes {
-		opts = append(opts, scheme.WithReferrerAT(artifactType))
-	}
-	return opts
 }
 
 func contains(elems []string, v string) bool {
