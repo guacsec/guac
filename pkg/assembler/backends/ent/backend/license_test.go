@@ -19,6 +19,7 @@ package backend
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -191,8 +192,8 @@ func (s *Suite) TestLicense() {
 	}
 }
 
-func lessLic(a, b *model.License) bool {
-	return a.Name < b.Name
+func lessLic(a, b *model.License) int {
+	return strings.Compare(a.Name, b.Name)
 }
 
 func (s *Suite) TestIngestLicenses() {

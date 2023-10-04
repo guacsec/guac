@@ -119,8 +119,8 @@ func getArangoConfig() *ArangoConfig {
 	}
 }
 
-func lessArtifact(a, b *model.Artifact) bool {
-	return a.Digest < b.Digest
+func lessArtifact(a, b *model.Artifact) int {
+	return strings.Compare(a.Digest, b.Digest)
 }
 
 func Test_IngestArtifacts(t *testing.T) {
