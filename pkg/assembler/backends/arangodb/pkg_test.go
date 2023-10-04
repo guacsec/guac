@@ -771,8 +771,9 @@ func Test_PackagesName(t *testing.T) {
 	}
 }
 
-func lessPkg(a, b *model.Package) bool {
-	return a.Namespaces[0].Names[0].Name < b.Namespaces[0].Names[0].Name
+func lessPkg(a, b *model.Package) int {
+	return strings.Compare(a.Namespaces[0].Names[0].Name,
+		b.Namespaces[0].Names[0].Name)
 }
 
 func Test_IngestPackages(t *testing.T) {

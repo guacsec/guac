@@ -19,6 +19,7 @@ package backend
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -520,7 +521,7 @@ func (s *Suite) TestHashEqual() {
 			if err != nil {
 				return
 			}
-			less := func(a, b *model.Artifact) bool { return a.Digest < b.Digest }
+			less := func(a, b *model.Artifact) int { return strings.Compare(a.Digest, b.Digest) }
 			for _, he := range got {
 				slices.SortFunc(he.Artifacts, less)
 			}
@@ -787,7 +788,7 @@ func (s *Suite) TestIngestHashEquals() {
 			if err != nil {
 				return
 			}
-			less := func(a, b *model.Artifact) bool { return a.Digest < b.Digest }
+			less := func(a, b *model.Artifact) int { return strings.Compare(a.Digest, b.Digest) }
 			for _, he := range got {
 				slices.SortFunc(he.Artifacts, less)
 			}

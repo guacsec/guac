@@ -510,7 +510,7 @@ func TestHashEqual(t *testing.T) {
 			if err != nil {
 				return
 			}
-			less := func(a, b *model.Artifact) bool { return a.Digest < b.Digest }
+			less := func(a, b *model.Artifact) int { return strings.Compare(a.Digest, b.Digest) }
 			for _, he := range got {
 				slices.SortFunc(he.Artifacts, less)
 			}
@@ -820,7 +820,7 @@ func TestIngestHashEquals(t *testing.T) {
 			if err != nil {
 				return
 			}
-			less := func(a, b *model.Artifact) bool { return a.Digest < b.Digest }
+			less := func(a, b *model.Artifact) int { return strings.Compare(a.Digest, b.Digest) }
 			for _, he := range got {
 				slices.SortFunc(he.Artifacts, less)
 			}
