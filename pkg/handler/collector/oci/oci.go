@@ -209,13 +209,13 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	// attempt to request only the headers, avoids Docker Hub rate limits
 	m, err := rc.ManifestHead(ctx, image)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed retrieving manifest head: %w", err)
 	}
 
 	if m.IsList() {
 		m, err := rc.ManifestGet(ctx, image)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed retrieving manifest: %w", err)
 		}
 		pl, _ := manifest.GetPlatformList(m)
 		logger.Infof("%s is manifest list with %d platforms", image.Reference, len(pl))
