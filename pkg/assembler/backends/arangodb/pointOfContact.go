@@ -1001,8 +1001,8 @@ func getPointOfContactFromCursor(ctx context.Context, cursor driver.Cursor) ([]*
 			Info:          createdValue.Info,
 			Since:         createdValue.Since,
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 
 		if pkg != nil {

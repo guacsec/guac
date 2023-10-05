@@ -547,8 +547,8 @@ func getHasSBOMFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.H
 			Algorithm:        createdValue.Algorithm,
 			Digest:           createdValue.Digest,
 			DownloadLocation: createdValue.DownloadLocation,
-			Origin:           createdValue.Collector,
-			Collector:        createdValue.Origin,
+			Origin:           createdValue.Origin,
+			Collector:        createdValue.Collector,
 		}
 		if pkg != nil {
 			hasSBOM.Subject = pkg

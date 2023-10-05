@@ -618,8 +618,8 @@ func getPkgEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.
 			ID:            createdValue.PkgEqualId,
 			Packages:      []*model.Package{pkg, equalPkg},
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 		pkgEqualList = append(pkgEqualList, pkgEqual)
 	}

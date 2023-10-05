@@ -938,8 +938,8 @@ func getCertifyGoodFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 		certifyGood := &model.CertifyGood{
 			ID:            createdValue.CertifyGoodID,
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 		if pkg != nil {
 			certifyGood.Subject = pkg

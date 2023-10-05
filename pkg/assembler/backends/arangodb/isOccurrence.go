@@ -635,8 +635,8 @@ func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mo
 			ID:            createdValue.IsOccurrenceID,
 			Artifact:      createdValue.Artifact,
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 		if pkg != nil {
 			isOccurrence.Subject = pkg

@@ -1000,8 +1000,8 @@ func getHasMetadataFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 			Value:         createdValue.Value,
 			Timestamp:     createdValue.Timestamp,
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 
 		if pkg != nil {

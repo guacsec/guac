@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -34,6 +35,14 @@ const (
 )
 
 func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
+
+	if certifyVEXStatementSpec != nil && certifyVEXStatementSpec.ID != nil {
+		sc, err := c.buildCertifyVexByID(ctx, *certifyVEXStatementSpec.ID, certifyVEXStatementSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildCertifyVexByID failed with an error: %w", err)
+		}
+		return []*model.CertifyVEXStatement{sc}, nil
+	}
 
 	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
 	var arangoQueryBuilder *arangoQueryBuilder
@@ -119,7 +128,7 @@ func getPkgVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder 
 		    "vuln_id": vVulnID._id,
 		    "vuln": vVulnID.vulnerabilityID
 		},
-		'certifyVex': certifyVex._id,
+		'certifyVex_id': certifyVex._id,
 		'status': certifyVex.status,
 		'vexJustification': certifyVex.vexJustification,
 		'statement': certifyVex.statement,
@@ -152,7 +161,7 @@ func getArtifactVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBui
 		    "vuln_id": vVulnID._id,
 		    "vuln": vVulnID.vulnerabilityID
 		},
-		'certifyVex': certifyVex._id,
+		'certifyVex_id': certifyVex._id,
 		'status': certifyVex.status,
 		'vexJustification': certifyVex.vexJustification,
 		'statement': certifyVex.statement,
@@ -194,7 +203,7 @@ func setVexMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVexSpec *m
 	}
 	if certifyVexSpec.KnownSince != nil {
 		arangoQueryBuilder.filter("certifyVex", knownSinceStr, "==", "@"+knownSinceStr)
-		queryValues[knownSinceStr] = *certifyVexSpec.KnownSince
+		queryValues[knownSinceStr] = certifyVexSpec.KnownSince.UTC()
 	}
 	if certifyVexSpec.Origin != nil {
 		arangoQueryBuilder.filter("certifyVex", origin, "==", "@"+origin)
@@ -243,7 +252,7 @@ func getVEXStatementQueryValues(pkg *model.PkgInputSpec, artifact *model.Artifac
 	values[vexJustificationStr] = vexStatement.VexJustification
 	values[statementStr] = vexStatement.Statement
 	values[statusNotesStr] = vexStatement.StatusNotes
-	values[knownSinceStr] = vexStatement.KnownSince
+	values[knownSinceStr] = vexStatement.KnownSince.UTC()
 	values[origin] = vexStatement.Origin
 	values[collector] = vexStatement.Collector
 
@@ -319,7 +328,7 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 			  'vuln_id': firstVuln.vuln_id,
 			  'vuln': firstVuln.vuln
 		  },
-		  'certifyVex': certifyVex._id,
+		  'certifyVex_id': certifyVex._id,
 		  'status': certifyVex.status,
 		  'vexJustification': certifyVex.vexJustification,
 		  'statement': certifyVex.statement,
@@ -526,7 +535,7 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 				'vuln_id': firstVuln.vuln_id,
 				'vuln': firstVuln.vuln
 			},
-			'certifyVex': certifyVex._id,
+			'certifyVex_id': certifyVex._id,
 			'status': certifyVex.status,
 			'vexJustification': certifyVex.vexJustification,
 			'statement': certifyVex.statement,
@@ -708,8 +717,8 @@ func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 			Statement:        createdValue.Statement,
 			StatusNotes:      createdValue.StatusNotes,
 			KnownSince:       createdValue.KnownSince,
-			Origin:           createdValue.Collector,
-			Collector:        createdValue.Origin,
+			Origin:           createdValue.Origin,
+			Collector:        createdValue.Collector,
 		}
 		if pkg != nil {
 			certifyVex.Subject = pkg
@@ -722,4 +731,125 @@ func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 		certifyVexList = append(certifyVexList, certifyVex)
 	}
 	return certifyVexList, nil
+}
+
+func (c *arangoClient) buildCertifyVexByID(ctx context.Context, id string, filter *model.CertifyVEXStatementSpec) (*model.CertifyVEXStatement, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == certifyVEXsStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.CertifyVEXStatementSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryCertifyVexNodeByID(ctx, filter)
+	}
+	return nil, nil
+}
+
+func (c *arangoClient) queryCertifyVexNodeByID(ctx context.Context, filter *model.CertifyVEXStatementSpec) (*model.CertifyVEXStatement, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(certifyVEXsStr, "certifyVex")
+	setVexMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN certifyVex`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryCertifyVexNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for certifyVex: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbVex struct {
+		VexID            string    `json:"_id"`
+		PackageID        *string   `json:"packageID"`
+		ArtifactID       *string   `json:"artifactID"`
+		VulnerabilityID  string    `json:"vulnerabilityID"`
+		Status           string    `json:"status"`
+		VexJustification string    `json:"vexJustification"`
+		Statement        string    `json:"statement"`
+		StatusNotes      string    `json:"statusNotes"`
+		KnownSince       time.Time `json:"knownSince"`
+		Collector        string    `json:"collector"`
+		Origin           string    `json:"origin"`
+	}
+
+	var collectedValues []dbVex
+	for {
+		var doc dbVex
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to certifyVex from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of certifyVex nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	vex := &model.CertifyVEXStatement{
+		Status:           model.VexStatus(collectedValues[0].Status),
+		VexJustification: model.VexJustification(collectedValues[0].VexJustification),
+		Statement:        collectedValues[0].Statement,
+		StatusNotes:      collectedValues[0].StatusNotes,
+		KnownSince:       collectedValues[0].KnownSince,
+		Origin:           collectedValues[0].Origin,
+		Collector:        collectedValues[0].Collector,
+	}
+
+	builtVuln, err := c.buildVulnResponseByID(ctx, collectedValues[0].VulnerabilityID, filter.Vulnerability)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vulnerability from ID: %s, with error: %w", collectedValues[0].VulnerabilityID, err)
+	}
+	vex.Vulnerability = builtVuln
+
+	if collectedValues[0].PackageID != nil {
+		var builtPackage *model.Package
+		if filter.Subject != nil && filter.Subject.Package != nil {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Subject.Package)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		} else {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		}
+		vex.Subject = builtPackage
+	} else if collectedValues[0].ArtifactID != nil {
+		var builtArtifact *model.Artifact
+		if filter.Subject != nil && filter.Subject.Artifact != nil {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, filter.Subject.Artifact)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		} else {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		}
+		vex.Subject = builtArtifact
+	} else {
+		return nil, fmt.Errorf("failed to get subject from certifyVEXStatement")
+	}
+	return vex, nil
 }

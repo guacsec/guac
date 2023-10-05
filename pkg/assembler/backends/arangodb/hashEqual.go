@@ -317,8 +317,8 @@ func getHashEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model
 			ID:            createdValue.HashEqualId,
 			Artifacts:     []*model.Artifact{createdValue.Artifact, createdValue.EqualArtifact},
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 		hashEqualList = append(hashEqualList, hashEqual)
 	}

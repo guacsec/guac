@@ -723,8 +723,8 @@ func getHasSourceAtFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 			Source:        src,
 			KnownSince:    createdValue.KnownSince,
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 
 		hasSourceAtList = append(hasSourceAtList, hasSourceAt)
