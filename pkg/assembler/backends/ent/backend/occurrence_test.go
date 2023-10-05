@@ -18,6 +18,8 @@
 package backend
 
 import (
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
