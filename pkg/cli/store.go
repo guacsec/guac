@@ -41,7 +41,6 @@ func init() {
 	set.Int("gql-listen-port", 8080, "port used for graphql api server")
 	set.Bool("gql-debug", false, "debug flag which enables the graphQL playground")
 	set.Bool("gql-trace", false, "flag which enables tracing of graphQL requests and responses on the console")
-	set.Bool("gql-test-data", false, "Populate backend with test data")
 
 	set.String("neo4j-addr", "neo4j://localhost:7687", "address to neo4j db")
 	set.String("neo4j-user", "", "neo4j user credential to connect to graph db")

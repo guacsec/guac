@@ -54,6 +54,7 @@ type ComplexityRoot struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
+		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
 	}
@@ -62,6 +63,7 @@ type ComplexityRoot struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
+		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
 	}
@@ -123,6 +125,7 @@ type ComplexityRoot struct {
 		Digest           func(childComplexity int) int
 		DownloadLocation func(childComplexity int) int
 		ID               func(childComplexity int) int
+		KnownSince       func(childComplexity int) int
 		Origin           func(childComplexity int) int
 		Subject          func(childComplexity int) int
 		URI              func(childComplexity int) int
@@ -470,6 +473,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyBad.Justification(childComplexity), true
 
+	case "CertifyBad.knownSince":
+		if e.complexity.CertifyBad.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.CertifyBad.KnownSince(childComplexity), true
+
 	case "CertifyBad.origin":
 		if e.complexity.CertifyBad.Origin == nil {
 			break
@@ -504,6 +514,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyGood.Justification(childComplexity), true
+
+	case "CertifyGood.knownSince":
+		if e.complexity.CertifyGood.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.CertifyGood.KnownSince(childComplexity), true
 
 	case "CertifyGood.origin":
 		if e.complexity.CertifyGood.Origin == nil {
@@ -805,6 +822,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSBOM.ID(childComplexity), true
+
+	case "HasSBOM.knownSince":
+		if e.complexity.HasSBOM.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.KnownSince(childComplexity), true
 
 	case "HasSBOM.origin":
 		if e.complexity.HasSBOM.Origin == nil {
@@ -2883,6 +2907,7 @@ type CertifyBad {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -2895,6 +2920,9 @@ name and one of version, qualifiers, or subpath.
 
 If a source is specified in the subject filter, then it must specify a name,
 and optionally a tag and a commit.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input CertifyBadSpec {
   id: ID
@@ -2902,6 +2930,7 @@ input CertifyBadSpec {
   justification: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 """
@@ -2912,6 +2941,7 @@ input CertifyBadInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -2986,6 +3016,7 @@ type CertifyGood {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -2998,6 +3029,9 @@ name and one of version, qualifiers, or subpath.
 
 If a source is specified in the subject filter, then it must specify a name,
 and optionally a tag and a commit.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input CertifyGoodSpec {
   id: ID
@@ -3005,6 +3039,7 @@ input CertifyGoodSpec {
   justification: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 """
@@ -3014,6 +3049,7 @@ input CertifyGoodInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 extend type Query {
@@ -3686,12 +3722,17 @@ type HasSBOM {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Timestamp for SBOM creation"
+  knownSince: Time!
 }
 
 """
 HasSBOMSpec allows filtering the list of HasSBOM to return.
 
 Only the package or artifact can be added, not both.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input HasSBOMSpec {
   id: ID
@@ -3702,6 +3743,7 @@ input HasSBOMSpec {
   downloadLocation: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 "HasSBOMInputSpec is the same as HasSBOM but for mutation input."
@@ -3712,6 +3754,7 @@ input HasSBOMInputSpec {
   downloadLocation: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 extend type Query {

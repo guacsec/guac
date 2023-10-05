@@ -18,25 +18,26 @@ package inmem
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/exp/slices"
-
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal hashEqual
 
-type hashEqualList []*hashEqualStruct
-type hashEqualStruct struct {
-	id            uint32
-	artifacts     []uint32
-	justification string
-	origin        string
-	collector     string
-}
+type (
+	hashEqualList   []*hashEqualStruct
+	hashEqualStruct struct {
+		id            uint32
+		artifacts     []uint32
+		justification string
+		origin        string
+		collector     string
+	}
+)
 
 func (n *hashEqualStruct) ID() uint32 { return n.id }
 
@@ -275,7 +276,8 @@ func (c *demoClient) convHashEqual(h *hashEqualStruct) (*model.HashEqual, error)
 
 func (c *demoClient) addHEIfMatch(out []*model.HashEqual,
 	filter *model.HashEqualSpec, link *hashEqualStruct) (
-	[]*model.HashEqual, error) {
+	[]*model.HashEqual, error,
+) {
 	if noMatch(filter.Justification, link.justification) ||
 		noMatch(filter.Origin, link.origin) ||
 		noMatch(filter.Collector, link.collector) ||

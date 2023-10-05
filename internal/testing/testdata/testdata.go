@@ -18,6 +18,7 @@ package testdata
 import (
 	_ "embed"
 	"encoding/base64"
+	"fmt"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -154,7 +155,7 @@ var (
 				Status:           generated.VexStatusNotAffected,
 				VexJustification: generated.VexJustificationVulnerableCodeNotInExecutePath,
 				Statement:        "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly.",
-				StatusNotes:      "not_affected:code_not_reachable",
+				StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusNotAffected, generated.VexJustificationVulnerableCodeNotInExecutePath),
 				KnownSince:       parseUTCTime("2020-12-03T00:00:00.000Z"),
 			},
 		},
@@ -185,51 +186,43 @@ var (
 			},
 		},
 	}
+	CycloneDXUnAffectedPredicates = assembler.IngestPredicates{
+		VulnMetadata: CycloneDXUnAffectedVulnMetadata,
+		Vex:          CycloneDXUnAffectedVexIngest,
+	}
 
-	// CycloneDX VEX testdata in triage
-	pkg1, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.4")
-	pkg2, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.6")
-
-	vulnSpecAffected = &generated.VulnerabilityInputSpec{
+	// CycloneDX VEX testdata affected packages.
+	VulnSpecAffected = &generated.VulnerabilityInputSpec{
 		Type:            "cve",
 		VulnerabilityID: "cve-2021-44228",
 	}
-	vexDataAffected = &generated.VexStatementInputSpec{
-		Status:      generated.VexStatusAffected,
-		Statement:   "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
-		StatusNotes: "exploitable:",
-	}
-	CycloneDXAffectedVexIngest = []assembler.VexIngest{
-		{
-			Pkg:           pkg1,
-			Vulnerability: vulnSpecAffected,
-			VexData:       vexDataAffected,
-		},
-		{
-			Pkg:           pkg2,
-			Vulnerability: vulnSpecAffected,
-			VexData:       vexDataAffected,
-		},
+	VexDataAffected = &generated.VexStatementInputSpec{
+		Status:           generated.VexStatusAffected,
+		VexJustification: generated.VexJustificationNotProvided,
+		Statement:        "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
+		StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusAffected, generated.VexJustificationNotProvided),
+		KnownSince:       time.Unix(0, 0),
 	}
 	CycloneDXAffectedVulnMetadata = []assembler.VulnMetadataIngest{
 		{
-			Vulnerability: vulnSpecAffected,
+			Vulnerability: VulnSpecAffected,
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 10,
+				Timestamp:  time.Unix(0, 0),
 			},
 		},
 	}
-	CycloneDXAffectedCertifyVuln = []assembler.CertifyVulnIngest{
+
+	topLevelPkg, _     = asmhelpers.PurlToPkg("pkg:guac/cdx/ABC")
+	HasSBOMVexAffected = []assembler.HasSBOMIngest{
 		{
-			Pkg:           pkg1,
-			Vulnerability: vulnSpecAffected,
-			VulnData:      &generated.ScanMetadataInput{},
-		},
-		{
-			Pkg:           pkg2,
-			Vulnerability: vulnSpecAffected,
-			VulnData:      &generated.ScanMetadataInput{},
+			Pkg: topLevelPkg,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Algorithm:  "sha256",
+				Digest:     "eb62836ed6339a2d57f66d2e42509718fd480a1befea83f925e918444c369114",
+				KnownSince: parseRfc3339("2022-03-03T00:00:00Z"),
+			},
 		},
 	}
 
@@ -725,6 +718,8 @@ var (
 		},
 	}
 
+	spdxTime, _ = time.Parse(time.RFC3339, "2022-09-24T17:27:55.556104Z")
+
 	SpdxHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: topLevelPack,
@@ -733,6 +728,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
 				DownloadLocation: "TestSource",
+				KnownSince:       spdxTime,
 			},
 		},
 	}
@@ -852,6 +848,8 @@ var (
 		},
 	}
 
+	cdxTime, _ = time.Parse(time.RFC3339, "2022-10-08T10:01:23-04:00")
+
 	CdxHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: cdxTopLevelPack,
@@ -860,6 +858,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "01942b5eefd3c15b50318c66d8d16627be573197c877e8a286a8cb12de7939cb",
 				DownloadLocation: "TestSource",
+				KnownSince:       cdxTime,
 			},
 		},
 	}
@@ -942,6 +941,8 @@ var (
 		},
 	}
 
+	cdxQuarkusTime, _ = time.Parse(time.RFC3339, "2022-11-09T11:14:31Z")
+
 	CdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: cdxTopQuarkusPack,
@@ -950,6 +951,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "036a9f51468f5ce6eec7c310583164ed0ab9f58d7c03380a3fe19d420609e3de",
 				DownloadLocation: "TestSource",
+				KnownSince:       cdxQuarkusTime,
 			},
 		},
 	}
@@ -977,6 +979,8 @@ var (
 		},
 	}
 
+	cdxNpmTime, _ = time.Parse(time.RFC3339, "2022-11-22T17:14:57Z")
+
 	CdxNpmHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: cdxWebAppPackage,
@@ -985,6 +989,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "35363f03c80f26a88db6f2400771bdcc6624bb7b61b96da8503be0f757605fde",
 				DownloadLocation: "TestSource",
+				KnownSince:       cdxNpmTime,
 			},
 		},
 	}
@@ -995,6 +1000,7 @@ var (
 	}
 
 	quarkusParentPackage, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-parent@999-SNAPSHOT?type=pom")
+	quarkusTime, _          = time.Parse(time.RFC3339, "2023-02-16T21:52:02Z")
 
 	quarkusParentPackageHasSBOM = []assembler.HasSBOMIngest{
 		{
@@ -1004,6 +1010,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "fcd4d1f9c83c274fbc2dabdca4e7de749b23fab1aa15dc2854880a13479fa74e",
 				DownloadLocation: "TestSource",
+				KnownSince:       quarkusTime,
 			},
 		},
 	}

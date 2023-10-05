@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -24,29 +25,33 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 var l1 = &model.LicenseInputSpec{
 	Name:        "BSD-3-Clause",
 	ListVersion: ptrfrom.String("3.21 2023-06-18"),
 }
+
 var l1out = &model.License{
 	Name:        "BSD-3-Clause",
 	ListVersion: ptrfrom.String("3.21 2023-06-18"),
 }
+
 var l2 = &model.LicenseInputSpec{
 	Name:        "GPL-2.0-or-later",
 	ListVersion: ptrfrom.String("3.21 2023-06-18"),
 }
+
 var l2out = &model.License{
 	Name:        "GPL-2.0-or-later",
 	ListVersion: ptrfrom.String("3.21 2023-06-18"),
 }
+
 var l3 = &model.LicenseInputSpec{
 	Name:        "MPL-2.0",
 	ListVersion: ptrfrom.String("1.23 2020"),
 }
+
 var l3out = &model.License{
 	Name:        "MPL-2.0",
 	ListVersion: ptrfrom.String("1.23 2020"),
@@ -64,6 +69,7 @@ var l4 = &model.LicenseInputSpec{
 	Name:   "LicenseRef-d58b4101",
 	Inline: &inlineLicense,
 }
+
 var l4out = &model.License{
 	Name:   "LicenseRef-d58b4101",
 	Inline: &inlineLicense,
@@ -179,8 +185,8 @@ func TestLicense(t *testing.T) {
 	}
 }
 
-func lessLic(a, b *model.License) bool {
-	return a.Name < b.Name
+func lessLic(a, b *model.License) int {
+	return strings.Compare(a.Name, b.Name)
 }
 
 func TestIngestLicenses(t *testing.T) {

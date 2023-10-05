@@ -21,16 +21,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"slices"
 	"syscall"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/spf13/cobra"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
-
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
 	_ "github.com/guacsec/guac/pkg/assembler/backends/inmem"
@@ -39,6 +36,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/spf13/cobra"
+	"golang.org/x/exp/maps"
 )
 
 const (
@@ -90,11 +89,6 @@ func startServer(cmd *cobra.Command) {
 	if flags.debug {
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		logger.Infof("connect to http://localhost:%d/ for GraphQL playground", flags.port)
-	}
-
-	// Ingest additional test data in a go-routine.
-	if flags.testData {
-		go ingestData(flags.port)
 	}
 
 	server := &http.Server{Addr: fmt.Sprintf(":%d", flags.port)}

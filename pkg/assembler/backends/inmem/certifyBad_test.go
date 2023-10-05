@@ -17,17 +17,20 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestCertifyBad(t *testing.T) {
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
@@ -64,7 +67,7 @@ func TestCertifyBad(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpCB: []*model.CertifyBad{
-				&model.CertifyBad{
+				{
 					Subject:       p1out,
 					Justification: "test justification",
 				},
@@ -74,7 +77,7 @@ func TestCertifyBad(t *testing.T) {
 			Name:  "HappyPath All Version",
 			InPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{
-				call{
+				{
 					Sub: model.PackageSourceOrArtifactInput{
 						Package: p1,
 					},
@@ -90,7 +93,7 @@ func TestCertifyBad(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpCB: []*model.CertifyBad{
-				&model.CertifyBad{
+				{
 					Subject:       p1outName,
 					Justification: "test justification",
 				},
@@ -100,7 +103,7 @@ func TestCertifyBad(t *testing.T) {
 			Name:  "Ingest same twice",
 			InPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{
-				call{
+				{
 					Sub: model.PackageSourceOrArtifactInput{
 						Package: p1,
 					},
@@ -111,7 +114,7 @@ func TestCertifyBad(t *testing.T) {
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Sub: model.PackageSourceOrArtifactInput{
 						Package: p1,
 					},
@@ -127,7 +130,7 @@ func TestCertifyBad(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpCB: []*model.CertifyBad{
-				&model.CertifyBad{
+				{
 					Subject:       p1out,
 					Justification: "test justification",
 				},
@@ -137,7 +140,7 @@ func TestCertifyBad(t *testing.T) {
 			Name:  "Query on Justification",
 			InPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{
-				call{
+				{
 					Sub: model.PackageSourceOrArtifactInput{
 						Package: p1,
 					},
@@ -148,7 +151,7 @@ func TestCertifyBad(t *testing.T) {
 						Justification: "test justification one",
 					},
 				},
-				call{
+				{
 					Sub: model.PackageSourceOrArtifactInput{
 						Package: p1,
 					},
@@ -164,9 +167,46 @@ func TestCertifyBad(t *testing.T) {
 				Justification: ptrfrom.String("test justification one"),
 			},
 			ExpCB: []*model.CertifyBad{
-				&model.CertifyBad{
+				{
 					Subject:       p1out,
 					Justification: "test justification one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: p1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						KnownSince: timeAfterOneSecond,
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: p1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						KnownSince: curTime,
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				KnownSince: &timeAfterOneSecond,
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:    p1out,
+					KnownSince: timeAfterOneSecond,
 				},
 			},
 		},
@@ -583,7 +623,7 @@ func TestIngestCertifyBads(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpCB: []*model.CertifyBad{
-				&model.CertifyBad{
+				{
 					Subject:       p1out,
 					Justification: "test justification",
 				},
@@ -593,7 +633,7 @@ func TestIngestCertifyBads(t *testing.T) {
 			Name:  "HappyPath All Version",
 			InPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{
-				call{
+				{
 					Sub: model.PackageSourceOrArtifactInputs{
 						Packages: []*model.PkgInputSpec{p1},
 					},
@@ -611,7 +651,7 @@ func TestIngestCertifyBads(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpCB: []*model.CertifyBad{
-				&model.CertifyBad{
+				{
 					Subject:       p1outName,
 					Justification: "test justification",
 				},
@@ -642,7 +682,7 @@ func TestIngestCertifyBads(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpCB: []*model.CertifyBad{
-				&model.CertifyBad{
+				{
 					Subject:       p1out,
 					Justification: "test justification",
 				},
@@ -863,8 +903,8 @@ func TestCertifyBadNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "5"}, // pkg version
-				"5": []string{"1"},      // certify bad
+				"4": {"1", "5"}, // pkg version
+				"5": {"1"},      // certify bad
 			},
 		},
 		{
@@ -902,17 +942,17 @@ func TestCertifyBadNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"1":  []string{"1"},
-				"2":  []string{"1", "1"},
-				"3":  []string{"1", "1", "9"}, // pkg name
-				"4":  []string{"1"},           // pkg version
-				"5":  []string{"5"},
-				"6":  []string{"5", "5"},
-				"7":  []string{"5", "10"}, // src name
-				"8":  []string{"11"},      // art
-				"9":  []string{"1"},       // cb 1 -> pkg name
-				"10": []string{"5"},       // cb 2 -> src name
-				"11": []string{"8"},       // cb 3 -> art
+				"1":  {"1"},
+				"2":  {"1", "1"},
+				"3":  {"1", "1", "9"}, // pkg name
+				"4":  {"1"},           // pkg version
+				"5":  {"5"},
+				"6":  {"5", "5"},
+				"7":  {"5", "10"}, // src name
+				"8":  {"11"},      // art
+				"9":  {"1"},       // cb 1 -> pkg name
+				"10": {"5"},       // cb 2 -> src name
+				"11": {"8"},       // cb 3 -> art
 			},
 		},
 	}

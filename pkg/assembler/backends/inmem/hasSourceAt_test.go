@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -25,7 +26,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestHasSourceAt(t *testing.T) {
@@ -821,9 +821,9 @@ func TestHasSourceAtNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "8"}, // Package Version
-				"7": []string{"5", "8"}, // Source Name
-				"8": []string{"1", "5"}, // HSA
+				"4": {"1", "8"}, // Package Version
+				"7": {"5", "8"}, // Source Name
+				"8": {"1", "5"}, // HSA
 			},
 		},
 		{
@@ -851,11 +851,11 @@ func TestHasSourceAtNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"3": []string{"1", "1", "9"}, // Package Name
-				"4": []string{"1", "8"},      // Package Version
-				"7": []string{"5", "8", "9"}, // Source Name
-				"8": []string{"1", "5"},      // HSA -> Version
-				"9": []string{"1", "5"},      // HSA -> Name
+				"3": {"1", "1", "9"}, // Package Name
+				"4": {"1", "8"},      // Package Version
+				"7": {"5", "8", "9"}, // Source Name
+				"8": {"1", "5"},      // HSA -> Version
+				"9": {"1", "5"},      // HSA -> Name
 			},
 		},
 	}

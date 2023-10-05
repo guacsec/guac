@@ -18,12 +18,13 @@
 package backend
 
 import (
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func (s *Suite) TestHashEqual() {
@@ -520,7 +521,7 @@ func (s *Suite) TestHashEqual() {
 			if err != nil {
 				return
 			}
-			less := func(a, b *model.Artifact) bool { return a.Digest < b.Digest }
+			less := func(a, b *model.Artifact) int { return strings.Compare(a.Digest, b.Digest) }
 			for _, he := range got {
 				slices.SortFunc(he.Artifacts, less)
 			}
@@ -787,7 +788,7 @@ func (s *Suite) TestIngestHashEquals() {
 			if err != nil {
 				return
 			}
-			less := func(a, b *model.Artifact) bool { return a.Digest < b.Digest }
+			less := func(a, b *model.Artifact) int { return strings.Compare(a.Digest, b.Digest) }
 			for _, he := range got {
 				slices.SortFunc(he.Artifacts, less)
 			}

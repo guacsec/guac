@@ -19,13 +19,13 @@ package arangodb
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 // TODO (pxp928): add tests back in when implemented
@@ -116,8 +116,8 @@ func Test_IngestBuilder(t *testing.T) {
 	}
 }
 
-func lessBuilder(a, b *model.Builder) bool {
-	return a.URI < b.URI
+func lessBuilder(a, b *model.Builder) int {
+	return strings.Compare(a.URI, b.URI)
 }
 
 func Test_IngestBuilders(t *testing.T) {
@@ -144,14 +144,16 @@ func Test_IngestBuilders(t *testing.T) {
 			},
 			{
 				URI: "https://tekton.dev/chains/v2",
-			}},
+			},
+		},
 		want: []*model.Builder{
 			{
 				URI: "https://github.com/CreateFork/HubHostedActions@v1",
 			},
 			{
 				URI: "https://tekton.dev/chains/v2",
-			}},
+			},
+		},
 		wantErr: false,
 	}}
 

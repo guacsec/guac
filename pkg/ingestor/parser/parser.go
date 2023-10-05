@@ -19,14 +19,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gofrs/uuid"
 	jsoniter "github.com/json-iterator/go"
-
-	uuid "github.com/gofrs/uuid"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	cdxVex "github.com/guacsec/guac/pkg/ingestor/parser/cdx_vex"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/csaf"
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
@@ -52,7 +50,6 @@ func init() {
 	_ = RegisterDocumentParser(deps_dev.NewDepsDevParser, processor.DocumentDepsDev)
 	_ = RegisterDocumentParser(csaf.NewCsafParser, processor.DocumentCsaf)
 	_ = RegisterDocumentParser(open_vex.NewOpenVEXParser, processor.DocumentOpenVEX)
-	_ = RegisterDocumentParser(cdxVex.NewCdxVexParser, processor.DocumentCdxVex)
 }
 
 var (

@@ -19,6 +19,7 @@ package arangodb
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -26,7 +27,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 // func Test_pkgNamespaceStruct_Neighbors(t *testing.T) {
@@ -771,8 +771,9 @@ func Test_PackagesName(t *testing.T) {
 	}
 }
 
-func lessPkg(a, b *model.Package) bool {
-	return a.Namespaces[0].Names[0].Name < b.Namespaces[0].Names[0].Name
+func lessPkg(a, b *model.Package) int {
+	return strings.Compare(a.Namespaces[0].Names[0].Name,
+		b.Namespaces[0].Names[0].Name)
 }
 
 func Test_IngestPackages(t *testing.T) {

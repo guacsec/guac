@@ -17,17 +17,20 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestHasSBOM(t *testing.T) {
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
 	type call struct {
 		Sub model.PackageOrArtifactInput
 		HS  *model.HasSBOMInputSpec
@@ -124,6 +127,37 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject: p1out,
 					URI:     "test uri one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: p1,
+					},
+					HS: &model.HasSBOMInputSpec{
+						KnownSince: timeAfterOneSecond,
+					},
+				},
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: p1,
+					},
+					HS: &model.HasSBOMInputSpec{
+						KnownSince: curTime,
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				KnownSince: &timeAfterOneSecond,
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:    p1out,
+					KnownSince: timeAfterOneSecond,
 				},
 			},
 		},
@@ -765,8 +799,8 @@ func TestHasSBOMNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "5"}, // pkg version
-				"5": []string{"1"},      // hasSBOM
+				"4": {"1", "5"}, // pkg version
+				"5": {"1"},      // hasSBOM
 			},
 		},
 		{
@@ -792,10 +826,10 @@ func TestHasSBOMNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "6"}, // pkg version -> hs1
-				"5": []string{"7"},      // artifact -> hs2
-				"6": []string{"1"},      // hs1 -> pkg version
-				"7": []string{"5"},      // hs2 -> artifact
+				"4": {"1", "6"}, // pkg version -> hs1
+				"5": {"7"},      // artifact -> hs2
+				"6": {"1"},      // hs1 -> pkg version
+				"7": {"5"},      // hs2 -> artifact
 			},
 		},
 	}
