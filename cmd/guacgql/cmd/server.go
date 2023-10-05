@@ -92,11 +92,6 @@ func startServer(cmd *cobra.Command) {
 		logger.Infof("connect to http://localhost:%d/ for GraphQL playground", flags.port)
 	}
 
-	// Ingest additional test data in a go-routine.
-	if flags.testData {
-		go ingestData(flags.port)
-	}
-
 	server := &http.Server{Addr: fmt.Sprintf(":%d", flags.port)}
 	logger.Info("starting server")
 	go func() {
