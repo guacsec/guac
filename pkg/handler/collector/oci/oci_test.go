@@ -311,7 +311,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			for i := range tt.want {
 				collectedDoc := findDocumentBySource(collectedDocs, tt.want[i].SourceInformation.Source)
 				if collectedDoc == nil {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", collectedDocs, tt.want)
+					t.Errorf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
 				}
 				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDoc), dochelper.DocNode(tt.want[i]))
 				if !result {
