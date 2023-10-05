@@ -27,7 +27,6 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
-	"github.com/regclient/regclient/scheme"
 	"github.com/regclient/regclient/types/manifest"
 	"github.com/regclient/regclient/types/ref"
 )
@@ -257,8 +256,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 		}
 	}
 
-	referrerOpts := []scheme.ReferrerOpts{}
-	referrerList, err := rc.ReferrerList(ctx, image, referrerOpts...)
+	referrerList, err := rc.ReferrerList(ctx, image)
 	if err != nil {
 		return fmt.Errorf("failed retrieving referrer list: %w", err)
 	}
