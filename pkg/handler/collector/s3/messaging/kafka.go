@@ -82,7 +82,7 @@ func (k *KafkaProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 
 	m, err := k.reader.ReadMessage(ctx)
 	if err != nil {
-		fmt.Println(err.Error())
+		return &KafkaMessage{}, fmt.Errorf("error receiving message, skipping: %w\n", err)
 	}
 	logger.Debugf("Message at offset %d: %s = %s\n", m.Offset, string(m.Key), string(m.Value))
 
