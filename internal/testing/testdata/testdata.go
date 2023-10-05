@@ -219,8 +219,9 @@ var (
 		{
 			Pkg: topLevelPkg,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Algorithm: "sha256",
-				Digest:    "eb62836ed6339a2d57f66d2e42509718fd480a1befea83f925e918444c369114",
+				Algorithm:  "sha256",
+				Digest:     "eb62836ed6339a2d57f66d2e42509718fd480a1befea83f925e918444c369114",
+				KnownSince: parseRfc3339("2022-03-03T00:00:00Z"),
 			},
 		},
 	}
