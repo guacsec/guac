@@ -309,7 +309,11 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			}
 
 			for i := range tt.want {
-				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i]))
+				collectedDoc := findDocumentBySource(collectedDocs, tt.want[i].SourceInformation.Source)
+				if collectedDoc == nil {
+					t.Errorf("g.RetrieveArtifacts() = %v, want %v", collectedDocs, tt.want)
+				}
+				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDoc), dochelper.DocNode(tt.want[i]))
 				if !result {
 					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
 				}
@@ -325,6 +329,16 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 
 		})
 	}
+}
+
+// findDocumentBySource returns the document with the given source
+func findDocumentBySource(docs []*processor.Document, source string) *processor.Document {
+	for _, d := range docs {
+		if d.SourceInformation.Source == source {
+			return d
+		}
+	}
+	return nil
 }
 
 func toDataSource(ociValues []string) datasource.CollectSource {
