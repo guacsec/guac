@@ -1,0 +1,2141 @@
+{
+ "SPDXID": "SPDXRef-DOCUMENT",
+ "name": "/mnt/vss/_work/1/release/images/linux/amd64/kubectl-amd64.tar",
+ "spdxVersion": "SPDX-2.2",
+ "creationInfo": {
+  "created": "2023-08-29T23:44:36.856125332Z",
+  "creators": [
+   "Organization: Anchore, Inc",
+   "Tool: syft-0.58.0"
+  ],
+  "licenseListVersion": "3.18"
+ },
+ "dataLicense": "CC0-1.0",
+ "documentNamespace": "https://anchore.com/syft/image/mnt/vss/_work/1/release/images/linux/amd64/kubectl-amd64.tar-d59126bb-93f2-473c-bd47-4c5ebc3ad6f8",
+ "packages": [
+  {
+   "SPDXID": "SPDXRef-f121c4592d545921",
+   "name": "./staging/src/k8s.io/api",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/api:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/./staging/src/k8s.io/api@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-ec6a961f55adb8ed",
+   "name": "./staging/src/k8s.io/apimachinery",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/apimachinery:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/./staging/src/k8s.io/apimachinery@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-e1d182097f604235",
+   "name": "./staging/src/k8s.io/cli-runtime",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/cli-runtime:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/cli_runtime:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/./staging/src/k8s.io/cli-runtime@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-bc5b1a0249f6e2cd",
+   "name": "./staging/src/k8s.io/client-go",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/client-go:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/client_go:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/./staging/src/k8s.io/client-go@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-80698bc24c5dcb3b",
+   "name": "./staging/src/k8s.io/component-base",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/component-base:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/component_base:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/./staging/src/k8s.io/component-base@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-7b670078dedf8ff2",
+   "name": "./staging/src/k8s.io/component-helpers",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/component-helpers:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/component_helpers:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/./staging/src/k8s.io/component-helpers@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-82534a8990a5bf77",
+   "name": "./staging/src/k8s.io/kubectl",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/kubectl:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/./staging/src/k8s.io/kubectl@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-5e4f3685ced1c6ad",
+   "name": "./staging/src/k8s.io/metrics",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:staging:src\\/k8s.io\\/metrics:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/./staging/src/k8s.io/metrics@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-c74950e50b0df030",
+   "name": "base-files",
+   "licenseConcluded": "NOASSERTION",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:base-files:base-files:11.1\\+deb11u7:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:base-files:base_files:11.1\\+deb11u7:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:base_files:base-files:11.1\\+deb11u7:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:base_files:base_files:11.1\\+deb11u7:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:base:base-files:11.1\\+deb11u7:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:base:base_files:11.1\\+deb11u7:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:deb/debian/base-files@11.1+deb11u7?arch=amd64&distro=debian-11",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NOASSERTION",
+   "originator": "Person: Santiago Vila <sanvila@debian.org>",
+   "sourceInfo": "acquired package info from DPKG DB: /usr/share/doc/base-files/copyright, /var/lib/dpkg/status.d/base-files",
+   "versionInfo": "11.1+deb11u7"
+  },
+  {
+   "SPDXID": "SPDXRef-26d9771eca9efb95",
+   "name": "github.com/MakeNowJust/heredoc",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:MakeNowJust:heredoc:v1.0.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/MakeNowJust/heredoc@v1.0.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.0"
+  },
+  {
+   "SPDXID": "SPDXRef-c6aafcaad01bfc7d",
+   "name": "github.com/beorn7/perks",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:beorn7:perks:v1.0.1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/beorn7/perks@v1.0.1",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.1"
+  },
+  {
+   "SPDXID": "SPDXRef-ef9d2ded5e7ca935",
+   "name": "github.com/blang/semver/v4",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:blang:semver\\/v4:v4.0.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/blang/semver/v4@v4.0.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v4.0.0"
+  },
+  {
+   "SPDXID": "SPDXRef-c476866269e42d4d",
+   "name": "github.com/cespare/xxhash/v2",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:cespare:xxhash\\/v2:v2.2.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/cespare/xxhash/v2@v2.2.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v2.2.0"
+  },
+  {
+   "SPDXID": "SPDXRef-74ba96a4336adfee",
+   "name": "github.com/chai2010/gettext-go",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:chai2010:gettext-go:v1.0.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:chai2010:gettext_go:v1.0.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/chai2010/gettext-go@v1.0.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.2"
+  },
+  {
+   "SPDXID": "SPDXRef-9751d0f27fea1bd8",
+   "name": "github.com/davecgh/go-spew",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:davecgh:go-spew:v1.1.1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:davecgh:go_spew:v1.1.1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/davecgh/go-spew@v1.1.1",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.1.1"
+  },
+  {
+   "SPDXID": "SPDXRef-cd751eac5a874738",
+   "name": "github.com/daviddengcn/go-colortext",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:daviddengcn:go-colortext:v1.0.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:daviddengcn:go_colortext:v1.0.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/daviddengcn/go-colortext@v1.0.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.0"
+  },
+  {
+   "SPDXID": "SPDXRef-c9800d8bcced335e",
+   "name": "github.com/docker/distribution",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:docker:distribution:v2.8.2\\+incompatible:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/docker/distribution@v2.8.2+incompatible",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v2.8.2+incompatible"
+  },
+  {
+   "SPDXID": "SPDXRef-d371ec12d6c83f69",
+   "name": "github.com/emicklei/go-restful/v3",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:emicklei:go-restful\\/v3:v3.9.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:emicklei:go_restful\\/v3:v3.9.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v3.9.0"
+  },
+  {
+   "SPDXID": "SPDXRef-104f4c6af3f80d7d",
+   "name": "github.com/evanphx/json-patch",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:evanphx:json-patch:v5.6.0\\+incompatible:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:evanphx:json_patch:v5.6.0\\+incompatible:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/evanphx/json-patch@v5.6.0+incompatible",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v5.6.0+incompatible"
+  },
+  {
+   "SPDXID": "SPDXRef-b348ca0f2034e212",
+   "name": "github.com/exponent-io/jsonpath",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:exponent-io:jsonpath:v0.0.0-20151013193312-d6023ce2651d:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:exponent_io:jsonpath:v0.0.0-20151013193312-d6023ce2651d:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:exponent:jsonpath:v0.0.0-20151013193312-d6023ce2651d:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/exponent-io/jsonpath@v0.0.0-20151013193312-d6023ce2651d",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20151013193312-d6023ce2651d"
+  },
+  {
+   "SPDXID": "SPDXRef-dcecd6d7174d4969",
+   "name": "github.com/fatih/camelcase",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:fatih:camelcase:v1.0.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/fatih/camelcase@v1.0.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.0"
+  },
+  {
+   "SPDXID": "SPDXRef-2bf092b34210fa0",
+   "name": "github.com/fvbommel/sortorder",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:fvbommel:sortorder:v1.1.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/fvbommel/sortorder@v1.1.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.1.0"
+  },
+  {
+   "SPDXID": "SPDXRef-ef2ab2a525c15a6e",
+   "name": "github.com/go-errors/errors",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go-errors:errors:v1.4.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go_errors:errors:v1.4.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go:errors:v1.4.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/go-errors/errors@v1.4.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.4.2"
+  },
+  {
+   "SPDXID": "SPDXRef-5c9fd91dd92e5332",
+   "name": "github.com/go-logr/logr",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go-logr:logr:v1.2.4:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go_logr:logr:v1.2.4:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go:logr:v1.2.4:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/go-logr/logr@v1.2.4",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.2.4"
+  },
+  {
+   "SPDXID": "SPDXRef-57db482aa67b1a14",
+   "name": "github.com/go-openapi/jsonpointer",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go-openapi:jsonpointer:v0.19.6:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go_openapi:jsonpointer:v0.19.6:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go:jsonpointer:v0.19.6:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/go-openapi/jsonpointer@v0.19.6",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.19.6"
+  },
+  {
+   "SPDXID": "SPDXRef-be138aae07eab635",
+   "name": "github.com/go-openapi/jsonreference",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go-openapi:jsonreference:v0.20.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go_openapi:jsonreference:v0.20.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go:jsonreference:v0.20.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/go-openapi/jsonreference@v0.20.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.20.2"
+  },
+  {
+   "SPDXID": "SPDXRef-f81def24c4e1d671",
+   "name": "github.com/go-openapi/swag",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go-openapi:swag:v0.22.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go_openapi:swag:v0.22.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:go:swag:v0.22.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/go-openapi/swag@v0.22.3",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.22.3"
+  },
+  {
+   "SPDXID": "SPDXRef-512b8ca9e28206fb",
+   "name": "github.com/gogo/protobuf",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:gogo:protobuf:v1.3.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/gogo/protobuf@v1.3.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.3.2"
+  },
+  {
+   "SPDXID": "SPDXRef-9395e1cbc6446be5",
+   "name": "github.com/golang/protobuf",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:golang:protobuf:v1.5.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/golang/protobuf@v1.5.3",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.5.3"
+  },
+  {
+   "SPDXID": "SPDXRef-aee33615ffb2216",
+   "name": "github.com/google/btree",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:google:btree:v1.0.1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/google/btree@v1.0.1",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.1"
+  },
+  {
+   "SPDXID": "SPDXRef-5d8154d04c4a9abd",
+   "name": "github.com/google/gnostic-models",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:google:gnostic-models:v0.6.8:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:google:gnostic_models:v0.6.8:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/google/gnostic-models@v0.6.8",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.6.8"
+  },
+  {
+   "SPDXID": "SPDXRef-9d336d5119281663",
+   "name": "github.com/google/go-cmp",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:google:go-cmp:v0.5.9:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:google:go_cmp:v0.5.9:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/google/go-cmp@v0.5.9",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.5.9"
+  },
+  {
+   "SPDXID": "SPDXRef-d5a1ad9d0d8d9747",
+   "name": "github.com/google/gofuzz",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:google:gofuzz:v1.2.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/google/gofuzz@v1.2.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.2.0"
+  },
+  {
+   "SPDXID": "SPDXRef-92c2ea300f15e9d8",
+   "name": "github.com/google/shlex",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:google:shlex:v0.0.0-20191202100458-e7afc7fbc510:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/google/shlex@v0.0.0-20191202100458-e7afc7fbc510",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20191202100458-e7afc7fbc510"
+  },
+  {
+   "SPDXID": "SPDXRef-85235647c5831523",
+   "name": "github.com/google/uuid",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:google:uuid:v1.3.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/google/uuid@v1.3.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.3.0"
+  },
+  {
+   "SPDXID": "SPDXRef-57925e5d3f88587b",
+   "name": "github.com/gregjones/httpcache",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:gregjones:httpcache:v0.0.0-20180305231024-9cad4c3443a7:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/gregjones/httpcache@v0.0.0-20180305231024-9cad4c3443a7",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20180305231024-9cad4c3443a7"
+  },
+  {
+   "SPDXID": "SPDXRef-1fead9360416d4b9",
+   "name": "github.com/imdario/mergo",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:imdario:mergo:v0.3.6:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/imdario/mergo@v0.3.6",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.3.6"
+  },
+  {
+   "SPDXID": "SPDXRef-7dd919b15939d14b",
+   "name": "github.com/jonboulle/clockwork",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:jonboulle:clockwork:v0.2.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/jonboulle/clockwork@v0.2.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.2.2"
+  },
+  {
+   "SPDXID": "SPDXRef-2a543a83260a47ac",
+   "name": "github.com/josharian/intern",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:josharian:intern:v1.0.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/josharian/intern@v1.0.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.0"
+  },
+  {
+   "SPDXID": "SPDXRef-461e8335ffc597ae",
+   "name": "github.com/json-iterator/go",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:json-iterator:go:v1.1.12:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:json_iterator:go:v1.1.12:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:json:go:v1.1.12:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/json-iterator/go@v1.1.12",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.1.12"
+  },
+  {
+   "SPDXID": "SPDXRef-4cd5edf3a7a3c32d",
+   "name": "github.com/liggitt/tabwriter",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:liggitt:tabwriter:v0.0.0-20181228230101-89fcab3d43de:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/liggitt/tabwriter@v0.0.0-20181228230101-89fcab3d43de",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20181228230101-89fcab3d43de"
+  },
+  {
+   "SPDXID": "SPDXRef-5bdcbaaa8d4dd159",
+   "name": "github.com/lithammer/dedent",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:lithammer:dedent:v1.1.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/lithammer/dedent@v1.1.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.1.0"
+  },
+  {
+   "SPDXID": "SPDXRef-3097221662409355",
+   "name": "github.com/mailru/easyjson",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:mailru:easyjson:v0.7.7:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/mailru/easyjson@v0.7.7",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.7.7"
+  },
+  {
+   "SPDXID": "SPDXRef-7e6829f351575496",
+   "name": "github.com/matttproud/golang_protobuf_extensions",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:matttproud:golang-protobuf-extensions:v1.0.4:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:matttproud:golang_protobuf_extensions:v1.0.4:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/matttproud/golang_protobuf_extensions@v1.0.4",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.4"
+  },
+  {
+   "SPDXID": "SPDXRef-1a8a24ae64f6a8d4",
+   "name": "github.com/mitchellh/go-wordwrap",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:mitchellh:go-wordwrap:v1.0.1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:mitchellh:go_wordwrap:v1.0.1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/mitchellh/go-wordwrap@v1.0.1",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.1"
+  },
+  {
+   "SPDXID": "SPDXRef-80851dfdb5102797",
+   "name": "github.com/moby/spdystream",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:moby:spdystream:v0.2.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/moby/spdystream@v0.2.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.2.0"
+  },
+  {
+   "SPDXID": "SPDXRef-43ccf5cc68567cd6",
+   "name": "github.com/moby/term",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:moby:term:v0.0.0-20221205130635-1aeaba878587:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/moby/term@v0.0.0-20221205130635-1aeaba878587",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20221205130635-1aeaba878587"
+  },
+  {
+   "SPDXID": "SPDXRef-59285be512d3f1b0",
+   "name": "github.com/modern-go/concurrent",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:modern-go:concurrent:v0.0.0-20180306012644-bacd9c7ef1dd:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:modern_go:concurrent:v0.0.0-20180306012644-bacd9c7ef1dd:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:modern:concurrent:v0.0.0-20180306012644-bacd9c7ef1dd:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/modern-go/concurrent@v0.0.0-20180306012644-bacd9c7ef1dd",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20180306012644-bacd9c7ef1dd"
+  },
+  {
+   "SPDXID": "SPDXRef-4df28b98d4bbc93",
+   "name": "github.com/modern-go/reflect2",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:modern-go:reflect2:v1.0.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:modern_go:reflect2:v1.0.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:modern:reflect2:v1.0.2:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/modern-go/reflect2@v1.0.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.2"
+  },
+  {
+   "SPDXID": "SPDXRef-b74d8391da082724",
+   "name": "github.com/monochromegane/go-gitignore",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:monochromegane:go-gitignore:v0.0.0-20200626010858-205db1a8cc00:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:monochromegane:go_gitignore:v0.0.0-20200626010858-205db1a8cc00:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/monochromegane/go-gitignore@v0.0.0-20200626010858-205db1a8cc00",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20200626010858-205db1a8cc00"
+  },
+  {
+   "SPDXID": "SPDXRef-edde3c0f53d3b44c",
+   "name": "github.com/munnerz/goautoneg",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:munnerz:goautoneg:v0.0.0-20191010083416-a7dc8b61c822:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/munnerz/goautoneg@v0.0.0-20191010083416-a7dc8b61c822",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20191010083416-a7dc8b61c822"
+  },
+  {
+   "SPDXID": "SPDXRef-b33a0cc3883477da",
+   "name": "github.com/mxk/go-flowrate",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:mxk:go-flowrate:v0.0.0-20140419014527-cca7078d478f:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:mxk:go_flowrate:v0.0.0-20140419014527-cca7078d478f:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/mxk/go-flowrate@v0.0.0-20140419014527-cca7078d478f",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20140419014527-cca7078d478f"
+  },
+  {
+   "SPDXID": "SPDXRef-8f46d10887a803e1",
+   "name": "github.com/opencontainers/go-digest",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:opencontainers:go-digest:v1.0.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:opencontainers:go_digest:v1.0.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/opencontainers/go-digest@v1.0.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.0"
+  },
+  {
+   "SPDXID": "SPDXRef-e1dd4bae8231ee71",
+   "name": "github.com/peterbourgon/diskv",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:peterbourgon:diskv:v2.0.1\\+incompatible:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/peterbourgon/diskv@v2.0.1+incompatible",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v2.0.1+incompatible"
+  },
+  {
+   "SPDXID": "SPDXRef-7cc0a9d8de0f6283",
+   "name": "github.com/pkg/errors",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:pkg:errors:v0.9.1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/pkg/errors@v0.9.1",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.9.1"
+  },
+  {
+   "SPDXID": "SPDXRef-593cdf40acdc31c9",
+   "name": "github.com/prometheus/client_golang",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:prometheus:client-golang:v1.16.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:prometheus:client_golang:v1.16.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/prometheus/client_golang@v1.16.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.16.0"
+  },
+  {
+   "SPDXID": "SPDXRef-d60d6db06be5c37",
+   "name": "github.com/prometheus/client_model",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:prometheus:client-model:v0.4.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:prometheus:client_model:v0.4.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/prometheus/client_model@v0.4.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.4.0"
+  },
+  {
+   "SPDXID": "SPDXRef-b9accb9e6f8ec3cf",
+   "name": "github.com/prometheus/common",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:prometheus:common:v0.44.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/prometheus/common@v0.44.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.44.0"
+  },
+  {
+   "SPDXID": "SPDXRef-8c42cec52abad46d",
+   "name": "github.com/prometheus/procfs",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:prometheus:procfs:v0.10.1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/prometheus/procfs@v0.10.1",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.10.1"
+  },
+  {
+   "SPDXID": "SPDXRef-979d417c49393e20",
+   "name": "github.com/russross/blackfriday/v2",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:russross:blackfriday\\/v2:v2.1.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/russross/blackfriday/v2@v2.1.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v2.1.0"
+  },
+  {
+   "SPDXID": "SPDXRef-9e4ef8d9b4cab1a6",
+   "name": "github.com/spf13/cobra",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:spf13:cobra:v1.7.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/spf13/cobra@v1.7.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.7.0"
+  },
+  {
+   "SPDXID": "SPDXRef-499103953fcfae95",
+   "name": "github.com/spf13/pflag",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:spf13:pflag:v1.0.5:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/spf13/pflag@v1.0.5",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.0.5"
+  },
+  {
+   "SPDXID": "SPDXRef-9660f1931bf28890",
+   "name": "github.com/xlab/treeprint",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:xlab:treeprint:v1.2.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/github.com/xlab/treeprint@v1.2.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.2.0"
+  },
+  {
+   "SPDXID": "SPDXRef-b2e54fe1382d04c0",
+   "name": "go.starlark.net",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/go.starlark.net@v0.0.0-20230525235612-a134d8f9ddca",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20230525235612-a134d8f9ddca"
+  },
+  {
+   "SPDXID": "SPDXRef-e8973a7484011d5b",
+   "name": "golang.org/x/net",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:golang:x\\/net:v0.13.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/golang.org/x/net@v0.13.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.13.0"
+  },
+  {
+   "SPDXID": "SPDXRef-9d502304b0b21da0",
+   "name": "golang.org/x/oauth2",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:golang:x\\/oauth2:v0.8.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/golang.org/x/oauth2@v0.8.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.8.0"
+  },
+  {
+   "SPDXID": "SPDXRef-79539e55a7f41cd7",
+   "name": "golang.org/x/sync",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:golang:x\\/sync:v0.2.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/golang.org/x/sync@v0.2.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.2.0"
+  },
+  {
+   "SPDXID": "SPDXRef-53de9ccaa65d04b5",
+   "name": "golang.org/x/sys",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:golang:x\\/sys:v0.10.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/golang.org/x/sys@v0.10.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.10.0"
+  },
+  {
+   "SPDXID": "SPDXRef-619a1f2439d90f1a",
+   "name": "golang.org/x/term",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:golang:x\\/term:v0.10.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/golang.org/x/term@v0.10.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.10.0"
+  },
+  {
+   "SPDXID": "SPDXRef-667ab0ec3ece84a8",
+   "name": "golang.org/x/text",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:golang:x\\/text:v0.11.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/golang.org/x/text@v0.11.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.11.0"
+  },
+  {
+   "SPDXID": "SPDXRef-57547d71725c0d4",
+   "name": "golang.org/x/time",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:golang:x\\/time:v0.3.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/golang.org/x/time@v0.3.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.3.0"
+  },
+  {
+   "SPDXID": "SPDXRef-495e4a3e263e7fcd",
+   "name": "google.golang.org/protobuf",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:google:protobuf:v1.30.0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/google.golang.org/protobuf@v1.30.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.30.0"
+  },
+  {
+   "SPDXID": "SPDXRef-f0b9c3364c748578",
+   "name": "gopkg.in/inf.v0",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/gopkg.in/inf.v0@v0.9.1",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.9.1"
+  },
+  {
+   "SPDXID": "SPDXRef-7effebde7d7f86a2",
+   "name": "gopkg.in/yaml.v2",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/gopkg.in/yaml.v2@v2.4.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v2.4.0"
+  },
+  {
+   "SPDXID": "SPDXRef-39050bf5ed113a92",
+   "name": "gopkg.in/yaml.v3",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/gopkg.in/yaml.v3@v3.0.1",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v3.0.1"
+  },
+  {
+   "SPDXID": "SPDXRef-38297cc97714d87e",
+   "name": "k8s.io/klog/v2",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:klog:v2:v2.100.1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/k8s.io/klog/v2@v2.100.1",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v2.100.1"
+  },
+  {
+   "SPDXID": "SPDXRef-c050c7b215c94528",
+   "name": "k8s.io/kube-openapi",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230717233707-2695361300d9",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20230717233707-2695361300d9"
+  },
+  {
+   "SPDXID": "SPDXRef-7780cd46e6cd4d15",
+   "name": "k8s.io/kubernetes",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/k8s.io/kubernetes@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-e68154d993824076",
+   "name": "k8s.io/release/images/build/go-runner",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:release:images\\/build\\/go-runner:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:release:images\\/build\\/go_runner:\\(devel\\):*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/k8s.io/release/images/build/go-runner@(devel)",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /go-runner",
+   "versionInfo": "(devel)"
+  },
+  {
+   "SPDXID": "SPDXRef-6fc7b9834a1eeedf",
+   "name": "k8s.io/utils",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/k8s.io/utils@v0.0.0-20230406110748-d93618cff8a2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20230406110748-d93618cff8a2"
+  },
+  {
+   "SPDXID": "SPDXRef-913906225fd3778b",
+   "name": "netbase",
+   "licenseConcluded": "GPL-2.0-only",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:netbase:netbase:6.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "GPL-2.0-only",
+   "originator": "Person: Marco d'Itri <md@linux.it>",
+   "sourceInfo": "acquired package info from DPKG DB: /usr/share/doc/netbase/copyright, /var/lib/dpkg/status.d/netbase",
+   "versionInfo": "6.3"
+  },
+  {
+   "SPDXID": "SPDXRef-ecad634dbcfffe74",
+   "name": "sigs.k8s.io/json",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.0.0-20221116044647-bc3834ca7abd"
+  },
+  {
+   "SPDXID": "SPDXRef-959590b341d4f818",
+   "name": "sigs.k8s.io/kustomize/api",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:kustomize:api:v0.13.5-0.20230601165947-6ce0bf390ce3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/sigs.k8s.io/kustomize/api@v0.13.5-0.20230601165947-6ce0bf390ce3",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.13.5-0.20230601165947-6ce0bf390ce3"
+  },
+  {
+   "SPDXID": "SPDXRef-be26635e759d7106",
+   "name": "sigs.k8s.io/kustomize/kustomize/v5",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:kustomize:kustomize\\/v5:v5.0.4-0.20230601165947-6ce0bf390ce3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/sigs.k8s.io/kustomize/kustomize/v5@v5.0.4-0.20230601165947-6ce0bf390ce3",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v5.0.4-0.20230601165947-6ce0bf390ce3"
+  },
+  {
+   "SPDXID": "SPDXRef-281000e3de9120aa",
+   "name": "sigs.k8s.io/kustomize/kyaml",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:kustomize:kyaml:v0.14.3-0.20230601165947-6ce0bf390ce3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/sigs.k8s.io/kustomize/kyaml@v0.14.3-0.20230601165947-6ce0bf390ce3",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v0.14.3-0.20230601165947-6ce0bf390ce3"
+  },
+  {
+   "SPDXID": "SPDXRef-bcec41145436a361",
+   "name": "sigs.k8s.io/structured-merge-diff/v4",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:structured-merge-diff:v4:v4.2.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:structured_merge_diff:v4:v4.2.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:structured-merge:v4:v4.2.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:structured_merge:v4:v4.2.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:structured:v4:v4.2.3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.2.3",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v4.2.3"
+  },
+  {
+   "SPDXID": "SPDXRef-6b12334e4ad9c795",
+   "name": "sigs.k8s.io/yaml",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:golang/sigs.k8s.io/yaml@v1.3.0",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "sourceInfo": "acquired package info from go module information: /bin/kubectl",
+   "versionInfo": "v1.3.0"
+  },
+  {
+   "SPDXID": "SPDXRef-c1b7cb5a1f9da3ca",
+   "name": "tzdata",
+   "licenseConcluded": "NONE",
+   "downloadLocation": "NOASSERTION",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:tzdata:tzdata:2021a-1\\+deb11u10:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:deb/debian/tzdata@2021a-1+deb11u10?arch=all&distro=debian-11",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "NONE",
+   "originator": "Person: GNU Libc Maintainers <debian-glibc@lists.debian.org>",
+   "sourceInfo": "acquired package info from DPKG DB: /usr/share/doc/tzdata/copyright, /var/lib/dpkg/status.d/tzdata",
+   "versionInfo": "2021a-1+deb11u10"
+  }
+ ]
+}
