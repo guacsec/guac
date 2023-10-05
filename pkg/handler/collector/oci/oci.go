@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
@@ -27,7 +28,9 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
+	"github.com/regclient/regclient/types"
 	"github.com/regclient/regclient/types/manifest"
+	"github.com/regclient/regclient/types/platform"
 	"github.com/regclient/regclient/types/ref"
 )
 
@@ -216,25 +219,50 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 		if err != nil {
 			return fmt.Errorf("failed retrieving manifest: %w", err)
 		}
+
 		pl, _ := manifest.GetPlatformList(m)
 		logger.Infof("%s is manifest list with %d platforms", image.Reference, len(pl))
+
+		// Use goroutines to fetch platforms concurrently
+		// Create a channel to collect errors from goroutines
+		errorChan := make(chan error, len(pl))
+		var wg sync.WaitGroup
+
 		for _, p := range pl {
-			logger.Infof("Fetching platform %s", p)
-			desc, err := manifest.GetPlatformDesc(m, p)
+			// Increment the WaitGroup counter
+			wg.Add(1)
+			go func(p *platform.Platform) {
+				defer wg.Done() // Decrement the WaitGroup counter when done
+				logger.Infof("Fetching platform %s", p)
+				desc, err := manifest.GetPlatformDesc(m, p)
+				if err != nil {
+					errorChan <- fmt.Errorf("failed retrieving platform specific digest: %w", err)
+				}
+				platformImage := ref.Ref{
+					Scheme:     image.Scheme,
+					Registry:   image.Registry,
+					Repository: image.Repository,
+					Digest:     desc.Digest.String(),
+				}
+				logger.Infof("Fetching %s for platform %s", platformImage.Digest, desc.Platform)
+				if err := o.fetchOCIArtifacts(ctx, repo, rc, platformImage, docChannel); err != nil {
+					errorChan <- fmt.Errorf("failed retrieving platform specific digest: %w", err)
+				}
+			}(p)
+		}
+		// Wait for all goroutines to finish
+		wg.Wait()
+
+		// Close the errorChannel to signal that all errors have been collected
+		close(errorChan)
+
+		// Check if any errors occurred during processing
+		for err := range errorChan {
 			if err != nil {
-				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
-			}
-			platformImage := ref.Ref{
-				Scheme:     image.Scheme,
-				Registry:   image.Registry,
-				Repository: image.Repository,
-				Digest:     desc.Digest.String(),
-			}
-			logger.Infof("Fetching %s for platform %s", platformImage.Digest, desc.Platform)
-			if err := o.fetchOCIArtifacts(ctx, repo, rc, platformImage, docChannel); err != nil {
-				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
+				return err // Return the first error encountered
 			}
 		}
+
 	}
 
 	digest := manifest.GetDigest(m)
@@ -263,22 +291,44 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 
 	logger.Infof("Found %d referrers for %s", len(referrerList.Descriptors), image.Digest)
 
+	// Use goroutines to fetch referrers concurrently
+	// Create a channel to collect errors from goroutines
+	errorChan := make(chan error, len(referrerList.Descriptors))
+	var wg sync.WaitGroup
+
 	for _, referrerDesc := range referrerList.Descriptors {
-		if _, ok := wellKnownOCIArtifactTypes[referrerDesc.ArtifactType]; !ok {
-			logger.Infof("Skipping referrer %s with unknown artifact type %s", referrerDesc.Digest, referrerDesc.ArtifactType)
-			continue
-		}
+		// Increment the WaitGroup counter
+		wg.Add(1)
+		go func(referrerDesc types.Descriptor) {
+			defer wg.Done() // Decrement the WaitGroup counter when done
+			if _, ok := wellKnownOCIArtifactTypes[referrerDesc.ArtifactType]; ok {
+				referrerDescDigest := referrerDesc.Digest.String()
 
-		referrerDescDigest := referrerDesc.Digest.String()
-
-		if !contains(o.checkedDigest[repo], referrerDescDigest) {
-			logger.Infof("Fetching referrer %s with artifact type %s", referrerDescDigest, referrerDesc.ArtifactType)
-			referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDescDigest)
-			err = fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
-			if err != nil {
-				return err
+				if !contains(o.checkedDigest[repo], referrerDescDigest) {
+					logger.Infof("Fetching referrer %s with artifact type %s", referrerDescDigest, referrerDesc.ArtifactType)
+					referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDescDigest)
+					err = fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
+					if err != nil {
+						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", err)
+					}
+					o.checkedDigest[repo] = append(o.checkedDigest[repo], referrerDescDigest)
+				} else {
+					logger.Infof("Skipping referrer %s with unknown artifact type %s", referrerDesc.Digest, referrerDesc.ArtifactType)
+				}
 			}
-			o.checkedDigest[repo] = append(o.checkedDigest[repo], referrerDescDigest)
+		}(referrerDesc)
+	}
+
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	// Close the errorChannel to signal that all errors have been collected
+	close(errorChan)
+
+	// Check if any errors occurred during processing
+	for err := range errorChan {
+		if err != nil {
+			return err // Return the first error encountered
 		}
 	}
 
