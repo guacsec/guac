@@ -18,7 +18,6 @@
 package backend
 
 import (
-	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -181,13 +180,6 @@ var s1out = &model.Source{
 			Tag:    ptrfrom.String(""),
 			Commit: ptrfrom.String(""),
 		}},
-	}},
-}
-
-var s1outNamespace = &model.Source{
-	Type: "git",
-	Namespaces: []*model.SourceNamespace{{
-		Namespace: "github.com/jeff",
 	}},
 }
 
