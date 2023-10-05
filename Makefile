@@ -20,9 +20,10 @@ test: generate
 	echo 'mode: atomic' > coverage.txt && go test -covermode=atomic -coverprofile=coverage.txt -v -race -timeout=30s ./...
 
 # Run the integration tests. Requires github token for scorecard (GITHUB_AUTH_TOKEN=<your token>)
+# To run it locally you can run the following command: make start-integration-service
 .PHONY: integration-test
 integration-test: generate check-env
-	go test -tags=integration ./...
+	ENT_TEST_DATABASE_URL='postgresql://guac:guac@localhost/guac?sslmode=disable' go test -tags=integration ./...
 
 .PHONY: integration-merge-test
 integration-merge-test: generate check-env
@@ -136,6 +137,11 @@ start-service: check-docker-compose-tool-check
 .PHONY: stop-service
 stop-service:
 	$(CONTAINER) compose down
+
+# This is a helper target to run the integration tests locally. 
+.PHONY: start-integration-service
+start-integration-service: check-docker-compose-tool-check
+	$(CONTAINER) compose -f integration.docker-compose.yaml up 	--force-recreate
 
 .PHONY: check-docker-tool-check
 check-docker-tool-check:
