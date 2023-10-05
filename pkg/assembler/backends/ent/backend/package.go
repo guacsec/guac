@@ -33,6 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
+	"golang.org/x/exp/slices"
 )
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -57,27 +58,27 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 				packagename.HasVersionsWith(
 					optionalPredicate(pkgSpec.ID, IDEQ),
 					optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
-					packageversion.SubpathEQ(ptrWithDefault(pkgSpec.Subpath, "")),
+					optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
 					packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
 				),
 			),
 		),
 	)
 
-	if PathContains(paths, "namespaces") || !isGQL {
+	if slices.Contains(paths, "namespaces") || !isGQL {
 		query.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
 			q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
 
-			if PathContains(paths, "namespaces.names") || !isGQL {
+			if slices.Contains(paths, "namespaces.names") || !isGQL {
 				q.WithNames(func(q *ent.PackageNameQuery) {
 					q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
 
-					if PathContains(paths, "namespaces.names.versions") || !isGQL {
+					if slices.Contains(paths, "namespaces.names.versions") || !isGQL {
 						q.WithVersions(func(q *ent.PackageVersionQuery) {
 							q.Where(
 								optionalPredicate(pkgSpec.ID, IDEQ),
 								optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
-								packageversion.SubpathEQ(ptrWithDefault(pkgSpec.Subpath, "")),
+								optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
 								packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
 							)
 						})

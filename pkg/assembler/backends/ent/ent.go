@@ -16,6 +16,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
@@ -23,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -101,6 +103,7 @@ func checkColumn(table, column string) error {
 			billofmaterials.Table:   billofmaterials.ValidColumn,
 			builder.Table:           builder.ValidColumn,
 			certification.Table:     certification.ValidColumn,
+			certifylegal.Table:      certifylegal.ValidColumn,
 			certifyscorecard.Table:  certifyscorecard.ValidColumn,
 			certifyvex.Table:        certifyvex.ValidColumn,
 			certifyvuln.Table:       certifyvuln.ValidColumn,
@@ -108,6 +111,7 @@ func checkColumn(table, column string) error {
 			hassourceat.Table:       hassourceat.ValidColumn,
 			hashequal.Table:         hashequal.ValidColumn,
 			isvulnerability.Table:   isvulnerability.ValidColumn,
+			license.Table:           license.ValidColumn,
 			occurrence.Table:        occurrence.ValidColumn,
 			packagename.Table:       packagename.ValidColumn,
 			packagenamespace.Table:  packagenamespace.ValidColumn,

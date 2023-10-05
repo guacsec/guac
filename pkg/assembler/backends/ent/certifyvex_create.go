@@ -14,7 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 )
 
 // CertifyVexCreate is the builder for creating a CertifyVex entity.
@@ -111,8 +111,8 @@ func (cvc *CertifyVexCreate) SetArtifact(a *Artifact) *CertifyVexCreate {
 	return cvc.SetArtifactID(a.ID)
 }
 
-// SetVulnerability sets the "vulnerability" edge to the VulnerabilityType entity.
-func (cvc *CertifyVexCreate) SetVulnerability(v *VulnerabilityType) *CertifyVexCreate {
+// SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
+func (cvc *CertifyVexCreate) SetVulnerability(v *VulnerabilityID) *CertifyVexCreate {
 	return cvc.SetVulnerabilityID(v.ID)
 }
 
@@ -274,7 +274,7 @@ func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

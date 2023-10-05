@@ -29,8 +29,9 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func lessSource(a, b *model.Source) bool {
-	return a.Namespaces[0].Namespace < b.Namespaces[0].Namespace
+func lessSource(a, b *model.Source) int {
+	return strings.Compare(a.Namespaces[0].Namespace,
+		b.Namespaces[0].Namespace)
 }
 
 func Test_IngestSources(t *testing.T) {

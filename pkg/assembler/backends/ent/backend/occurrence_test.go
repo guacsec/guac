@@ -603,3 +603,108 @@ func (s *Suite) TestOccurrence() {
 		})
 	}
 }
+
+func (s *Suite) TestIngestOccurrences() {
+	type call struct {
+		PkgSrcs     model.PackageOrSourceInputs
+		Artifacts   []*model.ArtifactInputSpec
+		Occurrences []*model.IsOccurrenceInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		ExpOcc       []*model.IsOccurrence
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{{
+		Name:  "HappyPath - packages",
+		InPkg: []*model.PkgInputSpec{p1, p2},
+		InArt: []*model.ArtifactInputSpec{a1, a2},
+		Calls: []call{
+			call{
+				PkgSrcs: model.PackageOrSourceInputs{
+					Packages: []*model.PkgInputSpec{p1, p2},
+				},
+				Artifacts: []*model.ArtifactInputSpec{a1, a2},
+				Occurrences: []*model.IsOccurrenceInputSpec{{
+					Justification: "test justification",
+				}, {
+					Justification: "test justification",
+				}},
+			},
+		},
+		ExpOcc: []*model.IsOccurrence{
+			&model.IsOccurrence{
+				Subject:       p1out,
+				Artifact:      a1out,
+				Justification: "test justification",
+			}, &model.IsOccurrence{
+				Subject:       p2out,
+				Artifact:      a2out,
+				Justification: "test justification",
+			},
+		},
+	}, {
+		Name:  "HappyPath - sources",
+		InSrc: []*model.SourceInputSpec{s1},
+		InArt: []*model.ArtifactInputSpec{a1},
+		Calls: []call{
+			call{
+				PkgSrcs: model.PackageOrSourceInputs{
+					Sources: []*model.SourceInputSpec{s1},
+				},
+				Artifacts: []*model.ArtifactInputSpec{a1},
+				Occurrences: []*model.IsOccurrenceInputSpec{{
+					Justification: "test justification",
+				}},
+			},
+		},
+		ExpOcc: []*model.IsOccurrence{
+			{
+				Subject:       s1out,
+				Artifact:      a1out,
+				Justification: "test justification",
+			},
+		},
+	}}
+	ctx := s.Ctx
+	for _, test := range tests {
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				got, err := b.IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpOcc, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+		})
+	}
+}

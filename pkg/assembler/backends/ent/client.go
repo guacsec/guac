@@ -19,6 +19,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
@@ -26,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -55,6 +57,8 @@ type Client struct {
 	Builder *BuilderClient
 	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
+	// CertifyLegal is the client for interacting with the CertifyLegal builders.
+	CertifyLegal *CertifyLegalClient
 	// CertifyScorecard is the client for interacting with the CertifyScorecard builders.
 	CertifyScorecard *CertifyScorecardClient
 	// CertifyVex is the client for interacting with the CertifyVex builders.
@@ -69,6 +73,8 @@ type Client struct {
 	HashEqual *HashEqualClient
 	// IsVulnerability is the client for interacting with the IsVulnerability builders.
 	IsVulnerability *IsVulnerabilityClient
+	// License is the client for interacting with the License builders.
+	License *LicenseClient
 	// Occurrence is the client for interacting with the Occurrence builders.
 	Occurrence *OccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
@@ -116,6 +122,7 @@ func (c *Client) init() {
 	c.BillOfMaterials = NewBillOfMaterialsClient(c.config)
 	c.Builder = NewBuilderClient(c.config)
 	c.Certification = NewCertificationClient(c.config)
+	c.CertifyLegal = NewCertifyLegalClient(c.config)
 	c.CertifyScorecard = NewCertifyScorecardClient(c.config)
 	c.CertifyVex = NewCertifyVexClient(c.config)
 	c.CertifyVuln = NewCertifyVulnClient(c.config)
@@ -123,6 +130,7 @@ func (c *Client) init() {
 	c.HasSourceAt = NewHasSourceAtClient(c.config)
 	c.HashEqual = NewHashEqualClient(c.config)
 	c.IsVulnerability = NewIsVulnerabilityClient(c.config)
+	c.License = NewLicenseClient(c.config)
 	c.Occurrence = NewOccurrenceClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
@@ -226,6 +234,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		BillOfMaterials:   NewBillOfMaterialsClient(cfg),
 		Builder:           NewBuilderClient(cfg),
 		Certification:     NewCertificationClient(cfg),
+		CertifyLegal:      NewCertifyLegalClient(cfg),
 		CertifyScorecard:  NewCertifyScorecardClient(cfg),
 		CertifyVex:        NewCertifyVexClient(cfg),
 		CertifyVuln:       NewCertifyVulnClient(cfg),
@@ -233,6 +242,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		HasSourceAt:       NewHasSourceAtClient(cfg),
 		HashEqual:         NewHashEqualClient(cfg),
 		IsVulnerability:   NewIsVulnerabilityClient(cfg),
+		License:           NewLicenseClient(cfg),
 		Occurrence:        NewOccurrenceClient(cfg),
 		PackageName:       NewPackageNameClient(cfg),
 		PackageNamespace:  NewPackageNamespaceClient(cfg),
@@ -270,6 +280,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		BillOfMaterials:   NewBillOfMaterialsClient(cfg),
 		Builder:           NewBuilderClient(cfg),
 		Certification:     NewCertificationClient(cfg),
+		CertifyLegal:      NewCertifyLegalClient(cfg),
 		CertifyScorecard:  NewCertifyScorecardClient(cfg),
 		CertifyVex:        NewCertifyVexClient(cfg),
 		CertifyVuln:       NewCertifyVulnClient(cfg),
@@ -277,6 +288,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		HasSourceAt:       NewHasSourceAtClient(cfg),
 		HashEqual:         NewHashEqualClient(cfg),
 		IsVulnerability:   NewIsVulnerabilityClient(cfg),
+		License:           NewLicenseClient(cfg),
 		Occurrence:        NewOccurrenceClient(cfg),
 		PackageName:       NewPackageNameClient(cfg),
 		PackageNamespace:  NewPackageNamespaceClient(cfg),
@@ -320,12 +332,12 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyScorecard,
-		c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual,
-		c.IsVulnerability, c.Occurrence, c.PackageName, c.PackageNamespace,
-		c.PackageType, c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard,
-		c.SourceName, c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
-		c.VulnerabilityType,
+		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyLegal,
+		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasSourceAt,
+		c.HashEqual, c.IsVulnerability, c.License, c.Occurrence, c.PackageName,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
+		c.SLSAAttestation, c.Scorecard, c.SourceName, c.SourceNamespace, c.SourceType,
+		c.VulnEqual, c.VulnerabilityID, c.VulnerabilityType,
 	} {
 		n.Use(hooks...)
 	}
@@ -335,12 +347,12 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyScorecard,
-		c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasSourceAt, c.HashEqual,
-		c.IsVulnerability, c.Occurrence, c.PackageName, c.PackageNamespace,
-		c.PackageType, c.PackageVersion, c.PkgEqual, c.SLSAAttestation, c.Scorecard,
-		c.SourceName, c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
-		c.VulnerabilityType,
+		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyLegal,
+		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasSourceAt,
+		c.HashEqual, c.IsVulnerability, c.License, c.Occurrence, c.PackageName,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
+		c.SLSAAttestation, c.Scorecard, c.SourceName, c.SourceNamespace, c.SourceType,
+		c.VulnEqual, c.VulnerabilityID, c.VulnerabilityType,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -357,6 +369,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Builder.mutate(ctx, m)
 	case *CertificationMutation:
 		return c.Certification.mutate(ctx, m)
+	case *CertifyLegalMutation:
+		return c.CertifyLegal.mutate(ctx, m)
 	case *CertifyScorecardMutation:
 		return c.CertifyScorecard.mutate(ctx, m)
 	case *CertifyVexMutation:
@@ -371,6 +385,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.HashEqual.mutate(ctx, m)
 	case *IsVulnerabilityMutation:
 		return c.IsVulnerability.mutate(ctx, m)
+	case *LicenseMutation:
+		return c.License.mutate(ctx, m)
 	case *OccurrenceMutation:
 		return c.Occurrence.mutate(ctx, m)
 	case *PackageNameMutation:
@@ -1112,6 +1128,203 @@ func (c *CertificationClient) mutate(ctx context.Context, m *CertificationMutati
 	}
 }
 
+// CertifyLegalClient is a client for the CertifyLegal schema.
+type CertifyLegalClient struct {
+	config
+}
+
+// NewCertifyLegalClient returns a client for the CertifyLegal from the given config.
+func NewCertifyLegalClient(c config) *CertifyLegalClient {
+	return &CertifyLegalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `certifylegal.Hooks(f(g(h())))`.
+func (c *CertifyLegalClient) Use(hooks ...Hook) {
+	c.hooks.CertifyLegal = append(c.hooks.CertifyLegal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `certifylegal.Intercept(f(g(h())))`.
+func (c *CertifyLegalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CertifyLegal = append(c.inters.CertifyLegal, interceptors...)
+}
+
+// Create returns a builder for creating a CertifyLegal entity.
+func (c *CertifyLegalClient) Create() *CertifyLegalCreate {
+	mutation := newCertifyLegalMutation(c.config, OpCreate)
+	return &CertifyLegalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CertifyLegal entities.
+func (c *CertifyLegalClient) CreateBulk(builders ...*CertifyLegalCreate) *CertifyLegalCreateBulk {
+	return &CertifyLegalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CertifyLegalClient) MapCreateBulk(slice any, setFunc func(*CertifyLegalCreate, int)) *CertifyLegalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CertifyLegalCreateBulk{err: fmt.Errorf("calling to CertifyLegalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CertifyLegalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CertifyLegalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CertifyLegal.
+func (c *CertifyLegalClient) Update() *CertifyLegalUpdate {
+	mutation := newCertifyLegalMutation(c.config, OpUpdate)
+	return &CertifyLegalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CertifyLegalClient) UpdateOne(cl *CertifyLegal) *CertifyLegalUpdateOne {
+	mutation := newCertifyLegalMutation(c.config, OpUpdateOne, withCertifyLegal(cl))
+	return &CertifyLegalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CertifyLegalClient) UpdateOneID(id int) *CertifyLegalUpdateOne {
+	mutation := newCertifyLegalMutation(c.config, OpUpdateOne, withCertifyLegalID(id))
+	return &CertifyLegalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CertifyLegal.
+func (c *CertifyLegalClient) Delete() *CertifyLegalDelete {
+	mutation := newCertifyLegalMutation(c.config, OpDelete)
+	return &CertifyLegalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CertifyLegalClient) DeleteOne(cl *CertifyLegal) *CertifyLegalDeleteOne {
+	return c.DeleteOneID(cl.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CertifyLegalClient) DeleteOneID(id int) *CertifyLegalDeleteOne {
+	builder := c.Delete().Where(certifylegal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CertifyLegalDeleteOne{builder}
+}
+
+// Query returns a query builder for CertifyLegal.
+func (c *CertifyLegalClient) Query() *CertifyLegalQuery {
+	return &CertifyLegalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCertifyLegal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CertifyLegal entity by its id.
+func (c *CertifyLegalClient) Get(ctx context.Context, id int) (*CertifyLegal, error) {
+	return c.Query().Where(certifylegal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CertifyLegalClient) GetX(ctx context.Context, id int) *CertifyLegal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPackage queries the package edge of a CertifyLegal.
+func (c *CertifyLegalClient) QueryPackage(cl *CertifyLegal) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifylegal.Table, certifylegal.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certifylegal.PackageTable, certifylegal.PackageColumn),
+		)
+		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySource queries the source edge of a CertifyLegal.
+func (c *CertifyLegalClient) QuerySource(cl *CertifyLegal) *SourceNameQuery {
+	query := (&SourceNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifylegal.Table, certifylegal.FieldID, id),
+			sqlgraph.To(sourcename.Table, sourcename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certifylegal.SourceTable, certifylegal.SourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDeclaredLicenses queries the declared_licenses edge of a CertifyLegal.
+func (c *CertifyLegalClient) QueryDeclaredLicenses(cl *CertifyLegal) *LicenseQuery {
+	query := (&LicenseClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifylegal.Table, certifylegal.FieldID, id),
+			sqlgraph.To(license.Table, license.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, certifylegal.DeclaredLicensesTable, certifylegal.DeclaredLicensesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiscoveredLicenses queries the discovered_licenses edge of a CertifyLegal.
+func (c *CertifyLegalClient) QueryDiscoveredLicenses(cl *CertifyLegal) *LicenseQuery {
+	query := (&LicenseClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certifylegal.Table, certifylegal.FieldID, id),
+			sqlgraph.To(license.Table, license.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, certifylegal.DiscoveredLicensesTable, certifylegal.DiscoveredLicensesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CertifyLegalClient) Hooks() []Hook {
+	return c.hooks.CertifyLegal
+}
+
+// Interceptors returns the client interceptors.
+func (c *CertifyLegalClient) Interceptors() []Interceptor {
+	return c.inters.CertifyLegal
+}
+
+func (c *CertifyLegalClient) mutate(ctx context.Context, m *CertifyLegalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CertifyLegalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CertifyLegalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CertifyLegalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CertifyLegalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CertifyLegal mutation op: %q", m.Op())
+	}
+}
+
 // CertifyScorecardClient is a client for the CertifyScorecard schema.
 type CertifyScorecardClient struct {
 	config
@@ -1418,13 +1631,13 @@ func (c *CertifyVexClient) QueryArtifact(cv *CertifyVex) *ArtifactQuery {
 }
 
 // QueryVulnerability queries the vulnerability edge of a CertifyVex.
-func (c *CertifyVexClient) QueryVulnerability(cv *CertifyVex) *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: c.config}).Query()
+func (c *CertifyVexClient) QueryVulnerability(cv *CertifyVex) *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := cv.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvex.Table, certifyvex.FieldID, id),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.VulnerabilityTable, certifyvex.VulnerabilityColumn),
 		)
 		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)
@@ -2296,6 +2509,171 @@ func (c *IsVulnerabilityClient) mutate(ctx context.Context, m *IsVulnerabilityMu
 		return (&IsVulnerabilityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown IsVulnerability mutation op: %q", m.Op())
+	}
+}
+
+// LicenseClient is a client for the License schema.
+type LicenseClient struct {
+	config
+}
+
+// NewLicenseClient returns a client for the License from the given config.
+func NewLicenseClient(c config) *LicenseClient {
+	return &LicenseClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `license.Hooks(f(g(h())))`.
+func (c *LicenseClient) Use(hooks ...Hook) {
+	c.hooks.License = append(c.hooks.License, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `license.Intercept(f(g(h())))`.
+func (c *LicenseClient) Intercept(interceptors ...Interceptor) {
+	c.inters.License = append(c.inters.License, interceptors...)
+}
+
+// Create returns a builder for creating a License entity.
+func (c *LicenseClient) Create() *LicenseCreate {
+	mutation := newLicenseMutation(c.config, OpCreate)
+	return &LicenseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of License entities.
+func (c *LicenseClient) CreateBulk(builders ...*LicenseCreate) *LicenseCreateBulk {
+	return &LicenseCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LicenseClient) MapCreateBulk(slice any, setFunc func(*LicenseCreate, int)) *LicenseCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LicenseCreateBulk{err: fmt.Errorf("calling to LicenseClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LicenseCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LicenseCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for License.
+func (c *LicenseClient) Update() *LicenseUpdate {
+	mutation := newLicenseMutation(c.config, OpUpdate)
+	return &LicenseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LicenseClient) UpdateOne(l *License) *LicenseUpdateOne {
+	mutation := newLicenseMutation(c.config, OpUpdateOne, withLicense(l))
+	return &LicenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LicenseClient) UpdateOneID(id int) *LicenseUpdateOne {
+	mutation := newLicenseMutation(c.config, OpUpdateOne, withLicenseID(id))
+	return &LicenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for License.
+func (c *LicenseClient) Delete() *LicenseDelete {
+	mutation := newLicenseMutation(c.config, OpDelete)
+	return &LicenseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LicenseClient) DeleteOne(l *License) *LicenseDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LicenseClient) DeleteOneID(id int) *LicenseDeleteOne {
+	builder := c.Delete().Where(license.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LicenseDeleteOne{builder}
+}
+
+// Query returns a query builder for License.
+func (c *LicenseClient) Query() *LicenseQuery {
+	return &LicenseQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLicense},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a License entity by its id.
+func (c *LicenseClient) Get(ctx context.Context, id int) (*License, error) {
+	return c.Query().Where(license.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LicenseClient) GetX(ctx context.Context, id int) *License {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDeclaredInCertifyLegals queries the declared_in_certify_legals edge of a License.
+func (c *LicenseClient) QueryDeclaredInCertifyLegals(l *License) *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := l.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(license.Table, license.FieldID, id),
+			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, license.DeclaredInCertifyLegalsTable, license.DeclaredInCertifyLegalsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiscoveredInCertifyLegals queries the discovered_in_certify_legals edge of a License.
+func (c *LicenseClient) QueryDiscoveredInCertifyLegals(l *License) *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := l.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(license.Table, license.FieldID, id),
+			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, license.DiscoveredInCertifyLegalsTable, license.DiscoveredInCertifyLegalsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LicenseClient) Hooks() []Hook {
+	return c.hooks.License
+}
+
+// Interceptors returns the client interceptors.
+func (c *LicenseClient) Interceptors() []Interceptor {
+	return c.inters.License
+}
+
+func (c *LicenseClient) mutate(ctx context.Context, m *LicenseMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LicenseCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LicenseUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LicenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LicenseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown License mutation op: %q", m.Op())
 	}
 }
 
@@ -4580,17 +4958,19 @@ func (c *VulnerabilityTypeClient) mutate(ctx context.Context, m *VulnerabilityTy
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard, CertifyVex,
-		CertifyVuln, Dependency, HasSourceAt, HashEqual, IsVulnerability, Occurrence,
-		PackageName, PackageNamespace, PackageType, PackageVersion, PkgEqual,
-		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
-		VulnerabilityID, VulnerabilityType []ent.Hook
+		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
+		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasSourceAt, HashEqual,
+		IsVulnerability, License, Occurrence, PackageName, PackageNamespace,
+		PackageType, PackageVersion, PkgEqual, SLSAAttestation, Scorecard, SourceName,
+		SourceNamespace, SourceType, VulnEqual, VulnerabilityID,
+		VulnerabilityType []ent.Hook
 	}
 	inters struct {
-		Artifact, BillOfMaterials, Builder, Certification, CertifyScorecard, CertifyVex,
-		CertifyVuln, Dependency, HasSourceAt, HashEqual, IsVulnerability, Occurrence,
-		PackageName, PackageNamespace, PackageType, PackageVersion, PkgEqual,
-		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
-		VulnerabilityID, VulnerabilityType []ent.Interceptor
+		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
+		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasSourceAt, HashEqual,
+		IsVulnerability, License, Occurrence, PackageName, PackageNamespace,
+		PackageType, PackageVersion, PkgEqual, SLSAAttestation, Scorecard, SourceName,
+		SourceNamespace, SourceType, VulnEqual, VulnerabilityID,
+		VulnerabilityType []ent.Interceptor
 	}
 )

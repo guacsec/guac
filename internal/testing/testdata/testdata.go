@@ -717,6 +717,8 @@ var (
 		},
 	}
 
+	spdxTime, _ = time.Parse(time.RFC3339, "2022-09-24T17:27:55.556104Z")
+
 	SpdxHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: topLevelPack,
@@ -725,6 +727,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
 				DownloadLocation: "TestSource",
+				KnownSince:       spdxTime,
 			},
 		},
 	}
@@ -844,6 +847,8 @@ var (
 		},
 	}
 
+	cdxTime, _ = time.Parse(time.RFC3339, "2022-10-08T10:01:23-04:00")
+
 	CdxHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: cdxTopLevelPack,
@@ -852,6 +857,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "01942b5eefd3c15b50318c66d8d16627be573197c877e8a286a8cb12de7939cb",
 				DownloadLocation: "TestSource",
+				KnownSince:       cdxTime,
 			},
 		},
 	}
@@ -934,6 +940,8 @@ var (
 		},
 	}
 
+	cdxQuarkusTime, _ = time.Parse(time.RFC3339, "2022-11-09T11:14:31Z")
+
 	CdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: cdxTopQuarkusPack,
@@ -942,6 +950,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "036a9f51468f5ce6eec7c310583164ed0ab9f58d7c03380a3fe19d420609e3de",
 				DownloadLocation: "TestSource",
+				KnownSince:       cdxQuarkusTime,
 			},
 		},
 	}
@@ -969,6 +978,8 @@ var (
 		},
 	}
 
+	cdxNpmTime, _ = time.Parse(time.RFC3339, "2022-11-22T17:14:57Z")
+
 	CdxNpmHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: cdxWebAppPackage,
@@ -977,6 +988,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "35363f03c80f26a88db6f2400771bdcc6624bb7b61b96da8503be0f757605fde",
 				DownloadLocation: "TestSource",
+				KnownSince:       cdxNpmTime,
 			},
 		},
 	}
@@ -987,6 +999,7 @@ var (
 	}
 
 	quarkusParentPackage, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-parent@999-SNAPSHOT?type=pom")
+	quarkusTime, _          = time.Parse(time.RFC3339, "2023-02-16T21:52:02Z")
 
 	quarkusParentPackageHasSBOM = []assembler.HasSBOMIngest{
 		{
@@ -996,6 +1009,7 @@ var (
 				Algorithm:        "sha256",
 				Digest:           "fcd4d1f9c83c274fbc2dabdca4e7de749b23fab1aa15dc2854880a13479fa74e",
 				DownloadLocation: "TestSource",
+				KnownSince:       quarkusTime,
 			},
 		},
 	}
@@ -2220,6 +2234,29 @@ var (
 				Type:       "rpm",
 				Namespace:  strP("redhat"),
 				Name:       "openssl",
+				Version:    strP("1.1.1k-8.el8_6"),
+				Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "aarch64"}, {Key: "epoch", Value: "1"}},
+				Subpath:    strP(""),
+			},
+			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2023-0286"},
+			VexData: &model.VexStatementInputSpec{
+				Status:           generated.VexStatusFixed,
+				VexJustification: generated.VexJustificationNotProvided,
+				Statement: `For details on how to apply this update, which includes the changes described in this advisory, refer to:
+
+https://access.redhat.com/articles/11258
+
+For the update to take effect, all services linked to the OpenSSL library must be restarted, or the system rebooted.`,
+
+				KnownSince: parseRfc3339("2023-03-23T11:14:00Z"),
+				Origin:     "RHSA-2023:1441",
+			},
+		},
+		{
+			Pkg: &model.PkgInputSpec{
+				Type:       "rpm",
+				Namespace:  strP("redhat"),
+				Name:       "openssl",
 				Version:    strP("1.1.1k-7.el8_6"),
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "x86_64"}, {Key: "epoch", Value: "1"}},
 				Subpath:    strP(""),
@@ -2240,6 +2277,23 @@ For the update to take effect, all services linked to the OpenSSL library must b
 		},
 	}
 	CsafCertifyVulnIngest = []assembler.CertifyVulnIngest{
+		{
+			Pkg: &model.PkgInputSpec{
+				Type:      "rpm",
+				Namespace: strP("redhat"),
+				Name:      "openssl",
+				Version:   strP("1.1.1k-8.el8_6"),
+				Qualifiers: []model.PackageQualifierInputSpec{
+					{Key: "arch", Value: "aarch64"},
+					{Key: "epoch", Value: "1"},
+				},
+				Subpath: strP(""),
+			},
+			Vulnerability: &model.VulnerabilityInputSpec{Type: "NoVuln", VulnerabilityID: ""},
+			VulnData: &model.ScanMetadataInput{
+				TimeScanned: parseRfc3339("2023-03-23T11:14:00Z"),
+			},
+		},
 		{
 			Pkg: &model.PkgInputSpec{
 				Type:      "rpm",

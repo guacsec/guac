@@ -18,6 +18,9 @@ func (r *mutationResolver) IngestCertifyGood(ctx context.Context, subject model.
 	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
 		return "", err
 	}
+	if certifyGood.KnownSince.IsZero() {
+		return "", gqlerror.Errorf("certifyGood.KnownSince is a zero time")
+	}
 	ingestedCertifyGood, err := r.Backend.IngestCertifyGood(ctx, subject, &pkgMatchType, certifyGood)
 	if err != nil {
 		return "", err
@@ -51,6 +54,13 @@ func (r *mutationResolver) IngestCertifyGoods(ctx context.Context, subjects mode
 	if valuesDefined != 1 {
 		return ingestedCertifyGoodsIDS, gqlerror.Errorf("%v :: must specify at most packages, artifacts or sources", funcName)
 	}
+
+	for _, certifyGood := range certifyGoods {
+		if certifyGood.KnownSince.IsZero() {
+			return ingestedCertifyGoodsIDS, gqlerror.Errorf("certifyGoods contains a zero time")
+		}
+	}
+
 	ingestedCertifyGoods, err := r.Backend.IngestCertifyGoods(ctx, subjects, &pkgMatchType, certifyGoods)
 	if err == nil {
 		for _, certifyGood := range ingestedCertifyGoods {

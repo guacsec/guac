@@ -38,6 +38,8 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const topCdxPurlGuac string = "pkg:guac/cdx/"
 
+var zeroTime = time.Unix(0, 0)
+
 var vexStatusMap = map[cdx.ImpactAnalysisState]model.VexStatus{
 	cdx.IASResolved:    model.VexStatusFixed,
 	cdx.IASExploitable: model.VexStatusAffected,
@@ -244,8 +246,21 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	// TODO: This is not based on the relationship so that can be inaccurate (can capture both direct and in-direct)...Remove this and be done below by the *c.cdxBom.Dependencies?
 	// see https://github.com/CycloneDX/specification/issues/33
 	if toplevel != nil {
+		var timestamp time.Time
+		var err error
+		if c.cdxBom.Metadata.Timestamp == "" {
+			// set the time to zero time if timestamp is not provided
+			timestamp = zeroTime
+		} else {
+			timestamp, err = time.Parse(time.RFC3339, c.cdxBom.Metadata.Timestamp)
+			if err != nil {
+				logger.Errorf("SPDX document had invalid created time %q : %v", c.cdxBom.Metadata.Timestamp, err)
+				return nil
+			}
+		}
+
 		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
-		preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(toplevel[0], c.doc))
+		preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(toplevel[0], c.doc, timestamp))
 	}
 
 	for id := range c.packagePackages {

@@ -33,12 +33,17 @@ type HasSBOM {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Timestamp for SBOM creation"
+  knownSince: Time!
 }
 
 """
 HasSBOMSpec allows filtering the list of HasSBOM to return.
 
 Only the package or artifact can be added, not both.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input HasSBOMSpec {
   id: ID
@@ -49,6 +54,7 @@ input HasSBOMSpec {
   downloadLocation: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 "HasSBOMInputSpec is the same as HasSBOM but for mutation input."
@@ -59,6 +65,7 @@ input HasSBOMInputSpec {
   downloadLocation: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 extend type Query {

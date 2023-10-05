@@ -190,7 +190,7 @@ func (s *Suite) TestIsDependency() {
 			},
 			Query: &model.IsDependencySpec{
 				Package: &model.PkgSpec{
-					ID: ptrfrom.String("64424509449"),
+					ID: ptrfrom.String("0"),
 				},
 			},
 			ExpID: []*model.IsDependency{
@@ -621,7 +621,7 @@ func (s *Suite) TestIsDependency() {
 				if p, err := b.IngestPackage(ctx, *a); err != nil {
 					s.Require().NoError(err, "Could not ingest pkg")
 				} else {
-					pksIDs[i] = p.ID
+					pksIDs[i] = p.Namespaces[0].Names[0].Versions[0].ID
 				}
 			}
 
@@ -655,7 +655,7 @@ func (s *Suite) TestIsDependency() {
 					if idIdx < 0 || idIdx >= len(pksIDs) {
 						s.T().Logf("ID index out of range, want: %d, got: %d. So ID %d will be directly used to query.", len(pksIDs), idIdx, idIdx)
 					} else {
-						test.Query.ID = &pksIDs[idIdx]
+						test.Query.Package.ID = &pksIDs[idIdx]
 					}
 				}
 			}

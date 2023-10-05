@@ -18,6 +18,10 @@ func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.Pack
 	if err := helper.ValidatePackageOrArtifactInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	if hasSbom.KnownSince.IsZero() {
+		return "", gqlerror.Errorf("hasSbom.KnownSince is a zero time")
+	}
+
 	ingestedHasSbom, err := r.Backend.IngestHasSbom(ctx, subject, hasSbom)
 	if err != nil {
 		return "", err
@@ -44,6 +48,12 @@ func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.Pa
 	}
 	if valuesDefined != 1 {
 		return ingestedHasSBOMSIDS, gqlerror.Errorf("%v :: must specify at most packages or artifacts for ingestion", funcName)
+	}
+
+	for _, hasSbom := range hasSBOMs {
+		if hasSbom.KnownSince.IsZero() {
+			return ingestedHasSBOMSIDS, gqlerror.Errorf("hasSBOMS contains a zero time")
+		}
 	}
 
 	ingestedHasSBOMs, err := r.Backend.IngestHasSBOMs(ctx, subjects, hasSBOMs)

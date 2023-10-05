@@ -94,3 +94,11 @@ func ConvertBuilderInputSpecToBuilderSpec(input *model.BuilderInputSpec) *model.
 	}
 	return &output
 }
+
+func ConvertLicenseInputSpecToLicenseSpec(licenseInput *model.LicenseInputSpec) *model.LicenseSpec {
+	return &model.LicenseSpec{
+		Name:        &licenseInput.Name,
+		Inline:      licenseInput.Inline,
+		ListVersion: licenseInput.ListVersion,
+	}
+}

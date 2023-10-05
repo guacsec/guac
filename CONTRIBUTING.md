@@ -90,8 +90,8 @@ create issues, fork the repository, create PRs, add comments to issues and PRs.
 ### Reviewer
 
 Once a community participant has demonstrated expertise in one GUAC topic area,
-owners and/on maintainers can propose graduating the community participant to
-the next role, that of Reviewer.
+owners and/or maintainers can propose graduating the community participant to
+the Reviewer role, upon a maintainer majority vote.
 
 A reviewer will be responsible of reviewing contributions from other
 contributors that touch the corresponding topic area. They should ensure that
@@ -149,3 +149,9 @@ highly active contributors that completely step away from the project, we will
 create an emeritus process.
 
 GUAC contributors are happy to help you advance along the contributor ladder!
+
+### Reviewers list
+
+| Reviewer                            | Area                                                                                                                       | Vote                                                       |
+|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| [mrizzi](https://github.com/mrizzi) | [Backends (ent)](https://github.com/guacsec/guac/tree/4012842fab5d738f9bebf03f0cb44fc7ce39438b/pkg/assembler/backends/ent) | [issues/1310](https://github.com/guacsec/guac/issues/1310) |
