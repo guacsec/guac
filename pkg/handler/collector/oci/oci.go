@@ -236,7 +236,6 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
 			}
 		}
-		logger.Infof("Finished fetching manifest list %s", image.Reference)
 	}
 
 	digest := manifest.GetDigest(m)
@@ -271,11 +270,17 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 			logger.Infof("Skipping referrer %s with unknown artifact type %s", referrerDesc.Digest, referrerDesc.ArtifactType)
 			continue
 		}
-		logger.Infof("Fetching referrer %s with artifact type %s", referrerDesc.Digest, referrerDesc.ArtifactType)
-		referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDesc.Digest.String())
-		err = fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
-		if err != nil {
-			return err
+
+		referrerDescDigest := referrerDesc.Digest.String()
+
+		if !contains(o.checkedDigest[repo], referrerDescDigest) {
+			logger.Infof("Fetching referrer %s with artifact type %s", referrerDescDigest, referrerDesc.ArtifactType)
+			referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDescDigest)
+			err = fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
+			if err != nil {
+				return err
+			}
+			o.checkedDigest[repo] = append(o.checkedDigest[repo], referrerDescDigest)
 		}
 	}
 
