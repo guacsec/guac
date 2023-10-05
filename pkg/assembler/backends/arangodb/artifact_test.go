@@ -19,13 +19,13 @@ package arangodb
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 // TODO (pxp928): add tests back in when implemented

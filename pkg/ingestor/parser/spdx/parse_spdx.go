@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -32,7 +33,6 @@ import (
 	"github.com/spdx/tools-golang/json"
 	spdx "github.com/spdx/tools-golang/spdx"
 	spdx_common "github.com/spdx/tools-golang/spdx/v2/common"
-	"golang.org/x/exp/slices"
 )
 
 type spdxParser struct {

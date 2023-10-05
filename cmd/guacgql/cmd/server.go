@@ -21,16 +21,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"slices"
 	"syscall"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/spf13/cobra"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
-
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
 	_ "github.com/guacsec/guac/pkg/assembler/backends/inmem"
@@ -39,6 +36,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/spf13/cobra"
+	"golang.org/x/exp/maps"
 )
 
 const (

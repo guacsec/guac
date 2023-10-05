@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -25,7 +26,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestCertifyScorecard(t *testing.T) {
@@ -646,8 +646,8 @@ func TestCertifyScorecardNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"3": []string{"1", "4"}, // src name
-				"4": []string{"1"},      // SC
+				"3": {"1", "4"}, // src name
+				"4": {"1"},      // SC
 			},
 		},
 		{
@@ -675,11 +675,11 @@ func TestCertifyScorecardNeighbors(t *testing.T) {
 			},
 			ExpNeighbors: map[string][]string{
 				// test sources are all type git, id:2
-				"3": []string{"1", "6"},      // src name 1 -> src namespace, SC1
-				"5": []string{"1", "7", "8"}, // src name 2 -> src namespace, SC2, SC3
-				"6": []string{"1"},           // SC 1
-				"7": []string{"1"},           // SC 2
-				"8": []string{"1"},           // SC 3
+				"3": {"1", "6"},      // src name 1 -> src namespace, SC1
+				"5": {"1", "7", "8"}, // src name 2 -> src namespace, SC2, SC3
+				"6": {"1"},           // SC 1
+				"7": {"1"},           // SC 2
+				"8": {"1"},           // SC 3
 			},
 		},
 	}

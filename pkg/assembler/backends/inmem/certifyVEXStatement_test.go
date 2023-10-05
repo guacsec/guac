@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -25,7 +26,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestVEX(t *testing.T) {
@@ -1082,7 +1082,7 @@ func TestVEXNeighbors(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{p1},
 			InVuln: []*model.VulnerabilityInputSpec{o1},
 			Calls: []call{
-				call{
+				{
 					Sub: model.PackageOrArtifactInput{
 						Package: p1,
 					},
@@ -1094,9 +1094,9 @@ func TestVEXNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "7"}, // pkg version -> pkg name, vex
-				"6": []string{"5", "7"}, // vuln -> vuln type, vex
-				"7": []string{"1", "5"}, // Vex -> pkg version, vuln
+				"4": {"1", "7"}, // pkg version -> pkg name, vex
+				"6": {"5", "7"}, // vuln -> vuln type, vex
+				"7": {"1", "5"}, // Vex -> pkg version, vuln
 			},
 		},
 		{
@@ -1126,11 +1126,11 @@ func TestVEXNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "8", "9"}, // pkg version -> pkg name, vex1, vex2
-				"6": []string{"5", "8"},      // Vuln1 -> vulnType, vex1
-				"7": []string{"5", "9"},      // Vuln2 -> vulnType, vex2
-				"8": []string{"1", "5"},      // Vex1 -> pkg version, vuln1
-				"9": []string{"1", "5"},      // Vex2 -> pkg version, vuln2
+				"4": {"1", "8", "9"}, // pkg version -> pkg name, vex1, vex2
+				"6": {"5", "8"},      // Vuln1 -> vulnType, vex1
+				"7": {"5", "9"},      // Vuln2 -> vulnType, vex2
+				"8": {"1", "5"},      // Vex1 -> pkg version, vuln1
+				"9": {"1", "5"},      // Vex2 -> pkg version, vuln2
 			},
 		},
 	}

@@ -18,13 +18,13 @@
 package backend
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func (s *Suite) TestHashEqual() {

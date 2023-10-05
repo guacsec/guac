@@ -17,20 +17,21 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"golang.org/x/exp/slices"
-
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-var t2 = time.Unix(1e9, 0)
-var t3 = time.Unix(1e9+5, 0)
+var (
+	t2 = time.Unix(1e9, 0)
+	t3 = time.Unix(1e9+5, 0)
+)
 
 func TestLegal(t *testing.T) {
 	type call struct {
@@ -658,12 +659,12 @@ func TestLegalNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"1": []string{"1"},
-				"2": []string{"1", "1"},
-				"3": []string{"1", "1"},
-				"4": []string{"1", "6"}, // pkg version
-				"5": []string{"6"},      // license
-				"6": []string{"1", "5"}, // certifyLegal
+				"1": {"1"},
+				"2": {"1", "1"},
+				"3": {"1", "1"},
+				"4": {"1", "6"}, // pkg version
+				"5": {"6"},      // license
+				"6": {"1", "5"}, // certifyLegal
 			},
 		},
 		{
@@ -691,13 +692,13 @@ func TestLegalNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4":  []string{"1", "9"},      // pkg version 1
-				"5":  []string{"1", "10"},     // pkg version 2
-				"6":  []string{"9", "10"},     // license 1
-				"7":  []string{"9"},           // license 2
-				"8":  []string{"10"},          // license 2
-				"9":  []string{"1", "6", "7"}, // certLegal 1
-				"10": []string{"1", "6", "8"}, // certLegal 2
+				"4":  {"1", "9"},      // pkg version 1
+				"5":  {"1", "10"},     // pkg version 2
+				"6":  {"9", "10"},     // license 1
+				"7":  {"9"},           // license 2
+				"8":  {"10"},          // license 2
+				"9":  {"1", "6", "7"}, // certLegal 1
+				"10": {"1", "6", "8"}, // certLegal 2
 			},
 		},
 	}

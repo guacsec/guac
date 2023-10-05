@@ -17,22 +17,23 @@ package inmem
 
 import (
 	"context"
+	"slices"
 	"strconv"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/exp/slices"
-
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-type pkgEqualList []*pkgEqualStruct
-type pkgEqualStruct struct {
-	id            uint32
-	pkgs          []uint32
-	justification string
-	origin        string
-	collector     string
-}
+type (
+	pkgEqualList   []*pkgEqualStruct
+	pkgEqualStruct struct {
+		id            uint32
+		pkgs          []uint32
+		justification string
+		origin        string
+		collector     string
+	}
+)
 
 func (n *pkgEqualStruct) ID() uint32 { return n.id }
 
@@ -201,8 +202,8 @@ func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) (
 
 func (c *demoClient) addCPIfMatch(out []*model.PkgEqual,
 	filter *model.PkgEqualSpec, link *pkgEqualStruct) (
-	[]*model.PkgEqual, error) {
-
+	[]*model.PkgEqual, error,
+) {
 	if noMatch(filter.Justification, link.justification) ||
 		noMatch(filter.Origin, link.origin) ||
 		noMatch(filter.Collector, link.collector) {
