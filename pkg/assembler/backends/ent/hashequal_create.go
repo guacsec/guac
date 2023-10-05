@@ -362,12 +362,16 @@ func (u *HashEqualUpsertOne) IDX(ctx context.Context) int {
 // HashEqualCreateBulk is the builder for creating many HashEqual entities in bulk.
 type HashEqualCreateBulk struct {
 	config
+	err      error
 	builders []*HashEqualCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the HashEqual entities in the database.
 func (hecb *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error) {
+	if hecb.err != nil {
+		return nil, hecb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(hecb.builders))
 	nodes := make([]*HashEqual, len(hecb.builders))
 	mutators := make([]Mutator, len(hecb.builders))
@@ -569,6 +573,9 @@ func (u *HashEqualUpsertBulk) UpdateJustification() *HashEqualUpsertBulk {
 
 // Exec executes the query.
 func (u *HashEqualUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the HashEqualCreateBulk instead", i)

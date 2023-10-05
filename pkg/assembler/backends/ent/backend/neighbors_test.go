@@ -117,9 +117,11 @@ func (s *Suite) TestNodes() {
 
 	id, err := be.IngestPackageID(s.Ctx, *p4)
 	s.Require().NoError(err)
+
 	pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
 	s.Require().NoError(err)
 	p := pkgs[0]
+
 	nodes, err := be.Nodes(s.Ctx, []string{v, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
 	s.Require().NoError(err)
 	if diff := cmp.Diff(a1out, nodes[0], ignoreID, ignoreEmptySlices); diff != "" {

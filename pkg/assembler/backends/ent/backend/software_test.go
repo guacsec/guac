@@ -147,7 +147,7 @@ func (s *Suite) TestIngestOccurrence_Package() {
 	_, err = be.IngestPackageID(s.Ctx, *p1)
 	s.NoError(err)
 
-	_, err = be.IngestArtifact(s.Ctx, &model.ArtifactInputSpec{
+	_, err = be.IngestArtifactID(s.Ctx, &model.ArtifactInputSpec{
 		Algorithm: "sha256", Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 	})
 	s.NoError(err)

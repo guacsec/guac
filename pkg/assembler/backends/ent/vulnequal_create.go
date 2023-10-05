@@ -362,12 +362,16 @@ func (u *VulnEqualUpsertOne) IDX(ctx context.Context) int {
 // VulnEqualCreateBulk is the builder for creating many VulnEqual entities in bulk.
 type VulnEqualCreateBulk struct {
 	config
+	err      error
 	builders []*VulnEqualCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the VulnEqual entities in the database.
 func (vecb *VulnEqualCreateBulk) Save(ctx context.Context) ([]*VulnEqual, error) {
+	if vecb.err != nil {
+		return nil, vecb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(vecb.builders))
 	nodes := make([]*VulnEqual, len(vecb.builders))
 	mutators := make([]Mutator, len(vecb.builders))
@@ -569,6 +573,9 @@ func (u *VulnEqualUpsertBulk) UpdateCollector() *VulnEqualUpsertBulk {
 
 // Exec executes the query.
 func (u *VulnEqualUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the VulnEqualCreateBulk instead", i)

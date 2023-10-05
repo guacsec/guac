@@ -576,10 +576,10 @@ func (mr *MockBackendMockRecorder) IngestCertifyVuln(ctx, pkg, vulnerability, ce
 }
 
 // IngestCertifyVulnID mocks base method.
-func (m *MockBackend) IngestCertifyVulnID(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*string, error) {
+func (m *MockBackend) IngestCertifyVulnID(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestCertifyVulnID", ctx, pkg, vulnerability, certifyVuln)
-	ret0, _ := ret[0].(*string)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1371,10 +1371,10 @@ func (mr *MockBackendMockRecorder) IngestVulnEqual(ctx, vulnerability, otherVuln
 }
 
 // IngestVulnEqualID mocks base method.
-func (m *MockBackend) IngestVulnEqualID(ctx context.Context, vulnerability, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*string, error) {
+func (m *MockBackend) IngestVulnEqualID(ctx context.Context, vulnerability, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestVulnEqualID", ctx, vulnerability, otherVulnerability, vulnEqual)
-	ret0, _ := ret[0].(*string)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

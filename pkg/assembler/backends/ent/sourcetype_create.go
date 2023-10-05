@@ -281,12 +281,16 @@ func (u *SourceTypeUpsertOne) IDX(ctx context.Context) int {
 // SourceTypeCreateBulk is the builder for creating many SourceType entities in bulk.
 type SourceTypeCreateBulk struct {
 	config
+	err      error
 	builders []*SourceTypeCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the SourceType entities in the database.
 func (stcb *SourceTypeCreateBulk) Save(ctx context.Context) ([]*SourceType, error) {
+	if stcb.err != nil {
+		return nil, stcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(stcb.builders))
 	nodes := make([]*SourceType, len(stcb.builders))
 	mutators := make([]Mutator, len(stcb.builders))
@@ -460,6 +464,9 @@ func (u *SourceTypeUpsertBulk) UpdateType() *SourceTypeUpsertBulk {
 
 // Exec executes the query.
 func (u *SourceTypeUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the SourceTypeCreateBulk instead", i)
