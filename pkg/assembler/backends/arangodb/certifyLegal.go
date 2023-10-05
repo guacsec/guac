@@ -195,7 +195,7 @@ func setCertifyLegalMatchValues(aqb *arangoQueryBuilder, certifyLegalSpec *model
 	}
 	if certifyLegalSpec.TimeScanned != nil {
 		aqb.filter("certifyLegal", "timeScanned", "==", "@timeScanned")
-		queryValues["timeScanned"] = *certifyLegalSpec.TimeScanned
+		queryValues["timeScanned"] = certifyLegalSpec.TimeScanned.UTC()
 	}
 	if certifyLegalSpec.Origin != nil {
 		aqb.filter("certifyLegal", origin, "==", "@"+origin)
@@ -243,7 +243,7 @@ func getCertifyLegalQueryValues(pkg *model.PkgInputSpec, source *model.SourceInp
 	values["discoveredLicense"] = certifyLegal.DiscoveredLicense
 	values["attribution"] = certifyLegal.Attribution
 	values["justification"] = certifyLegal.Justification
-	values["timeScanned"] = certifyLegal.TimeScanned
+	values["timeScanned"] = certifyLegal.TimeScanned.UTC()
 	values["origin"] = certifyLegal.Origin
 	values["collector"] = certifyLegal.Collector
 
