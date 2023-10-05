@@ -1,6 +1,6 @@
 query isDependency {
   IsDependency(
-    isDependencySpec: {dependentPackage: {namespace: "github.com/prometheus", name: "client_golang"}}
+    isDependencySpec: {dependencyPackage: {namespace: "github.com/prometheus", name: "client_golang"}}
   ) {
     id
     justification
@@ -25,7 +25,7 @@ query isDependency {
         }
       }
     }
-    dependentPackage {
+    dependencyPackage {
       id
       type
       namespaces {

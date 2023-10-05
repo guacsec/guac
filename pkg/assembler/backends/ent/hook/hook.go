@@ -57,6 +57,18 @@ func (f CertificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertificationMutation", m)
 }
 
+// The CertifyLegalFunc type is an adapter to allow the use of ordinary
+// function as CertifyLegal mutator.
+type CertifyLegalFunc func(context.Context, *ent.CertifyLegalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CertifyLegalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CertifyLegalMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertifyLegalMutation", m)
+}
+
 // The CertifyScorecardFunc type is an adapter to allow the use of ordinary
 // function as CertifyScorecard mutator.
 type CertifyScorecardFunc func(context.Context, *ent.CertifyScorecardMutation) (ent.Value, error)
@@ -139,6 +151,18 @@ func (f IsVulnerabilityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IsVulnerabilityMutation", m)
+}
+
+// The LicenseFunc type is an adapter to allow the use of ordinary
+// function as License mutator.
+type LicenseFunc func(context.Context, *ent.LicenseMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LicenseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LicenseMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LicenseMutation", m)
 }
 
 // The OccurrenceFunc type is an adapter to allow the use of ordinary

@@ -16,7 +16,7 @@
 package guesser
 
 import (
-	"encoding/json"
+	jsonValidator "encoding/json"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -24,7 +24,7 @@ import (
 type jsonFormatGuesser struct{}
 
 func (_ *jsonFormatGuesser) GuessFormat(blob []byte) processor.FormatType {
-	if json.Valid(blob) {
+	if jsonValidator.Valid(blob) {
 		return processor.FormatJSON
 	}
 	return processor.FormatUnknown

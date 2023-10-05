@@ -231,6 +231,9 @@ func TestPkgEqual(t *testing.T) {
 				{
 					Packages: []*model.Package{p1out, p2out},
 				},
+				{
+					Packages: []*model.Package{p1out, p3out},
+				},
 			},
 		},
 		{
@@ -581,6 +584,10 @@ func TestIngestPkgEquals(t *testing.T) {
 			ExpHE: []*model.PkgEqual{
 				{
 					Packages:      []*model.Package{p1out, p2out},
+					Justification: "test justification",
+				},
+				{
+					Packages:      []*model.Package{p1out, p3out},
 					Justification: "test justification",
 				},
 			},

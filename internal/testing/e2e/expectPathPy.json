@@ -57,7 +57,7 @@
         }
       ]
     },
-    "dependentPackage": {
+    "dependencyPackage": {
       "type": "deb",
       "namespaces": [
         {

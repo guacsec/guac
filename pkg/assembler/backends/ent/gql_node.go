@@ -17,6 +17,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
@@ -24,6 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -60,6 +62,9 @@ func (n *Builder) IsNode() {}
 func (n *Certification) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
+func (n *CertifyLegal) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
 func (n *CertifyScorecard) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
@@ -79,6 +84,9 @@ func (n *HashEqual) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *IsVulnerability) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *License) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *Occurrence) IsNode() {}
@@ -228,6 +236,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			return nil, err
 		}
 		return n, nil
+	case certifylegal.Table:
+		query := c.CertifyLegal.Query().
+			Where(certifylegal.ID(id))
+		query, err := query.CollectFields(ctx, "CertifyLegal")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	case certifyscorecard.Table:
 		query := c.CertifyScorecard.Query().
 			Where(certifyscorecard.ID(id))
@@ -304,6 +324,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.IsVulnerability.Query().
 			Where(isvulnerability.ID(id))
 		query, err := query.CollectFields(ctx, "IsVulnerability")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case license.Table:
+		query := c.License.Query().
+			Where(license.ID(id))
+		query, err := query.CollectFields(ctx, "License")
 		if err != nil {
 			return nil, err
 		}
@@ -617,6 +649,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
+	case certifylegal.Table:
+		query := c.CertifyLegal.Query().
+			Where(certifylegal.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "CertifyLegal")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case certifyscorecard.Table:
 		query := c.CertifyScorecard.Query().
 			Where(certifyscorecard.IDIn(ids...))
@@ -717,6 +765,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.IsVulnerability.Query().
 			Where(isvulnerability.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "IsVulnerability")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case license.Table:
+		query := c.License.Query().
+			Where(license.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "License")
 		if err != nil {
 			return nil, err
 		}

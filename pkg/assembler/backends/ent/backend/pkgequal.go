@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
@@ -50,6 +51,18 @@ func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 	}
 
 	return toModelPkgEqual(record), nil
+}
+
+func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
+	var ids []string
+	for i, pkgEqual := range pkgEquals {
+		pe, err := b.IngestPkgEqual(ctx, *pkgs[i], *otherPackages[i], *pkgEqual)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestPkgEquals failed with err: %v", err)
+		}
+		ids = append(ids, pe.ID)
+	}
+	return ids, nil
 }
 
 func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInputSpec, pkgB model.PkgInputSpec, spec model.PkgEqualInputSpec) (*ent.PkgEqual, error) {

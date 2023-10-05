@@ -42,9 +42,10 @@ cover: test
 .PHONY: fmt
 fmt:
 	@echo "Testing formatting and imports"
-	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec goimports -l -e {} \;)"
+	test -z "$(shell find . -name '*.go' -not -path './.git/*' -not -wholename './vendor/*' -not -name '*.pb.go' -exec goimports -l -e {} \;)"
 	@echo "Testing copyright notice"
-	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec .github/scripts/copyright.sh {} \;)"
+	test -z "$(shell find . -name '*.go' -not -path './.git/*' -not -wholename './vendor/*' -not -name '*.pb.go' -exec .github/scripts/copyright.sh {} \;)"
+
 
 # Check that generated files are up to date
 .PHONY: generated_up_to_date

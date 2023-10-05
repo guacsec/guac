@@ -106,6 +106,133 @@ func TestIngestMetadata(t *testing.T) {
 	}
 }
 
+func TestIngestBulkMetadata(t *testing.T) {
+	type call struct {
+		Sub   model.PackageSourceOrArtifactInputs
+		Match model.MatchFlags
+		HM    []*model.HasMetadataInputSpec
+	}
+	tests := []struct {
+		Name         string
+		Calls        []call
+		ExpIngestErr bool
+	}{
+		{
+			Name: "Ingest with two packages and one hasMetadata",
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+					},
+					Match: model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HM: []*model.HasMetadataInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "Ingest with two sources and one hasMetadata",
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+					},
+					HM: []*model.HasMetadataInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "Ingest with two artifacts and one hasMetadata",
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+					},
+					HM: []*model.HasMetadataInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "Ingest with one package, one source, one artifact and one hasMetadata",
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages:  []*model.PkgInputSpec{testdata.P1},
+						Sources:   []*model.SourceInputSpec{testdata.S1},
+						Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+					},
+					HM: []*model.HasMetadataInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "HappyPath All Version",
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{testdata.P1},
+					},
+					Match: model.MatchFlags{
+						Pkg: model.PkgMatchTypeAllVersions,
+					},
+					HM: []*model.HasMetadataInputSpec{
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+		},
+	}
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			b := mocks.NewMockBackend(ctrl)
+			r := resolvers.Resolver{Backend: b}
+			for _, o := range test.Calls {
+				times := 1
+				if test.ExpIngestErr {
+					times = 0
+				}
+				b.
+					EXPECT().
+					IngestBulkHasMetadata(ctx, o.Sub, &o.Match, o.HM).
+					Return([]string{}, nil).
+					Times(times)
+				_, err := r.Mutation().IngestBulkHasMetadata(ctx, o.Sub, o.Match, o.HM)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+			}
+		})
+	}
+}
+
 func TestMetadata(t *testing.T) {
 	tests := []struct {
 		Name        string

@@ -452,6 +452,7 @@ var (
 				},
 				CertifyGood: &model.CertifyGoodInputSpec{
 					Justification: "good package",
+					KnownSince:    tm,
 				},
 			},
 			{
@@ -466,6 +467,7 @@ var (
 				},
 				CertifyGood: &model.CertifyGoodInputSpec{
 					Justification: "good package",
+					KnownSince:    tm,
 				},
 			},
 		},
@@ -994,7 +996,7 @@ func ingestHasSourceAt(ctx context.Context, client graphql.Client, graph assembl
 			return fmt.Errorf("error in ingesting src HasSourceAt: %v\n", err)
 		}
 
-		_, err = model.HasSourceAt(ctx, client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.Src, *ingest.HasSourceAt)
+		_, err = model.IngestHasSourceAt(ctx, client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.Src, *ingest.HasSourceAt)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting HasSourceAt: %v\n", err)

@@ -19,6 +19,7 @@ import (
 	"context"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -36,6 +37,7 @@ type hasSBOMStruct struct {
 	downloadLocation string
 	origin           string
 	collector        string
+	knownSince       time.Time
 }
 
 func (n *hasSBOMStruct) ID() uint32 { return n.id }
@@ -131,7 +133,8 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 			h.digest == digest &&
 			h.downloadLocation == input.DownloadLocation &&
 			h.origin == input.Origin &&
-			h.collector == input.Collector {
+			h.collector == input.Collector &&
+			input.KnownSince.Equal(h.knownSince) {
 			return c.convHasSBOM(h)
 		}
 	}
@@ -153,6 +156,7 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 		downloadLocation: input.DownloadLocation,
 		origin:           input.Origin,
 		collector:        input.Collector,
+		knownSince:       input.KnownSince.UTC(),
 	}
 	c.index[h.id] = h
 	c.hasSBOMs = append(c.hasSBOMs, h)
@@ -173,6 +177,7 @@ func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
 		DownloadLocation: in.downloadLocation,
 		Origin:           in.origin,
 		Collector:        in.collector,
+		KnownSince:       in.knownSince.UTC(),
 	}
 	if in.pkg != 0 {
 		p, err := c.buildPackageResponse(in.pkg, nil)
@@ -219,13 +224,13 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	var search []uint32
 	foundOne := false
 	if filter != nil && filter.Subject != nil && filter.Subject.Package != nil {
-		exactPackage, err := c.exactPackageVersion(filter.Subject.Package)
+		pkgs, err := c.findPackageVersion(filter.Subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
-		if exactPackage != nil {
-			search = exactPackage.hasSBOMs
-			foundOne = true
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.hasSBOMs...)
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Artifact != nil {
@@ -260,6 +265,7 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 			}
 		}
 	}
+
 	return out, nil
 }
 
@@ -273,7 +279,8 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 			noMatch(toLower(filter.Digest), link.digest) ||
 			noMatch(filter.DownloadLocation, link.downloadLocation) ||
 			noMatch(filter.Origin, link.origin) ||
-			noMatch(filter.Collector, link.collector) {
+			noMatch(filter.Collector, link.collector) ||
+			(filter.KnownSince != nil && filter.KnownSince.After(link.knownSince)) {
 			return out, nil
 		}
 		if filter.Subject != nil {

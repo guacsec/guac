@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
@@ -151,4 +152,22 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		return nil, Errorf("%v :: %s", funcName, err)
 	}
 	return toModelHasSBOM(sbom), nil
+}
+
+func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
+	var modelHasSboms []*model.HasSbom
+	for i, hasSbom := range hasSBOMs {
+		var subject model.PackageOrArtifactInput
+		if len(subjects.Artifacts) > 0 {
+			subject = model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
+		} else {
+			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
+		}
+		modelHasSbom, err := b.IngestHasSbom(ctx, subject, *hasSbom)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
+		}
+		modelHasSboms = append(modelHasSboms, modelHasSbom)
+	}
+	return modelHasSboms, nil
 }

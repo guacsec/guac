@@ -54,6 +54,7 @@ type ComplexityRoot struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
+		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
 	}
@@ -62,6 +63,7 @@ type ComplexityRoot struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
+		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
 	}
@@ -123,6 +125,7 @@ type ComplexityRoot struct {
 		Digest           func(childComplexity int) int
 		DownloadLocation func(childComplexity int) int
 		ID               func(childComplexity int) int
+		KnownSince       func(childComplexity int) int
 		Origin           func(childComplexity int) int
 		Subject          func(childComplexity int) int
 		URI              func(childComplexity int) int
@@ -153,14 +156,14 @@ type ComplexityRoot struct {
 	}
 
 	IsDependency struct {
-		Collector        func(childComplexity int) int
-		DependencyType   func(childComplexity int) int
-		DependentPackage func(childComplexity int) int
-		ID               func(childComplexity int) int
-		Justification    func(childComplexity int) int
-		Origin           func(childComplexity int) int
-		Package          func(childComplexity int) int
-		VersionRange     func(childComplexity int) int
+		Collector         func(childComplexity int) int
+		DependencyPackage func(childComplexity int) int
+		DependencyType    func(childComplexity int) int
+		ID                func(childComplexity int) int
+		Justification     func(childComplexity int) int
+		Origin            func(childComplexity int) int
+		Package           func(childComplexity int) int
+		VersionRange      func(childComplexity int) int
 	}
 
 	IsOccurrence struct {
@@ -180,49 +183,52 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		IngestArtifact               func(childComplexity int, artifact *model.ArtifactInputSpec) int
-		IngestArtifacts              func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
-		IngestBuilder                func(childComplexity int, builder *model.BuilderInputSpec) int
-		IngestBuilders               func(childComplexity int, builders []*model.BuilderInputSpec) int
-		IngestCertifyBad             func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
-		IngestCertifyBads            func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
-		IngestCertifyGood            func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
-		IngestCertifyGoods           func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
-		IngestCertifyLegal           func(childComplexity int, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) int
-		IngestCertifyLegals          func(childComplexity int, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) int
-		IngestCertifyVuln            func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) int
-		IngestCertifyVulns           func(childComplexity int, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) int
-		IngestDependencies           func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) int
-		IngestDependency             func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) int
-		IngestHasMetadata            func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
-		IngestHasSBOMs               func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
-		IngestHasSbom                func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
-		IngestHasSourceAt            func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
-		IngestHashEqual              func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
-		IngestHashEquals             func(childComplexity int, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) int
-		IngestLicense                func(childComplexity int, license *model.LicenseInputSpec) int
-		IngestLicenses               func(childComplexity int, licenses []*model.LicenseInputSpec) int
-		IngestOccurrence             func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
-		IngestOccurrences            func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
-		IngestPackage                func(childComplexity int, pkg model.PkgInputSpec) int
-		IngestPackages               func(childComplexity int, pkgs []*model.PkgInputSpec) int
-		IngestPkgEqual               func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
-		IngestPkgEquals              func(childComplexity int, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) int
-		IngestPointOfContact         func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
-		IngestSLSAs                  func(childComplexity int, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) int
-		IngestScorecard              func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
-		IngestScorecards             func(childComplexity int, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) int
-		IngestSlsa                   func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
-		IngestSource                 func(childComplexity int, source model.SourceInputSpec) int
-		IngestSources                func(childComplexity int, sources []*model.SourceInputSpec) int
-		IngestVEXStatement           func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) int
-		IngestVEXStatements          func(childComplexity int, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) int
-		IngestVulnEqual              func(childComplexity int, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) int
-		IngestVulnEquals             func(childComplexity int, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) int
-		IngestVulnerabilities        func(childComplexity int, vulns []*model.VulnerabilityInputSpec) int
-		IngestVulnerability          func(childComplexity int, vuln model.VulnerabilityInputSpec) int
-		IngestVulnerabilityMetadata  func(childComplexity int, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) int
-		IngestVulnerabilityMetadatas func(childComplexity int, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadatas []*model.VulnerabilityMetadataInputSpec) int
+		IngestArtifact                  func(childComplexity int, artifact *model.ArtifactInputSpec) int
+		IngestArtifacts                 func(childComplexity int, artifacts []*model.ArtifactInputSpec) int
+		IngestBuilder                   func(childComplexity int, builder *model.BuilderInputSpec) int
+		IngestBuilders                  func(childComplexity int, builders []*model.BuilderInputSpec) int
+		IngestBulkHasMetadata           func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) int
+		IngestBulkVulnerabilityMetadata func(childComplexity int, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) int
+		IngestCertifyBad                func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
+		IngestCertifyBads               func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) int
+		IngestCertifyGood               func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
+		IngestCertifyGoods              func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) int
+		IngestCertifyLegal              func(childComplexity int, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) int
+		IngestCertifyLegals             func(childComplexity int, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) int
+		IngestCertifyVuln               func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) int
+		IngestCertifyVulns              func(childComplexity int, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) int
+		IngestDependencies              func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) int
+		IngestDependency                func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) int
+		IngestHasMetadata               func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
+		IngestHasSBOMs                  func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
+		IngestHasSbom                   func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
+		IngestHasSourceAt               func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
+		IngestHasSourceAts              func(childComplexity int, pkgs []*model.PkgInputSpec, pkgMatchType model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) int
+		IngestHashEqual                 func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
+		IngestHashEquals                func(childComplexity int, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) int
+		IngestLicense                   func(childComplexity int, license *model.LicenseInputSpec) int
+		IngestLicenses                  func(childComplexity int, licenses []*model.LicenseInputSpec) int
+		IngestOccurrence                func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
+		IngestOccurrences               func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
+		IngestPackage                   func(childComplexity int, pkg model.PkgInputSpec) int
+		IngestPackages                  func(childComplexity int, pkgs []*model.PkgInputSpec) int
+		IngestPkgEqual                  func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
+		IngestPkgEquals                 func(childComplexity int, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) int
+		IngestPointOfContact            func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
+		IngestPointOfContacts           func(childComplexity int, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) int
+		IngestSLSAs                     func(childComplexity int, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) int
+		IngestScorecard                 func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
+		IngestScorecards                func(childComplexity int, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) int
+		IngestSlsa                      func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
+		IngestSource                    func(childComplexity int, source model.SourceInputSpec) int
+		IngestSources                   func(childComplexity int, sources []*model.SourceInputSpec) int
+		IngestVEXStatement              func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) int
+		IngestVEXStatements             func(childComplexity int, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) int
+		IngestVulnEqual                 func(childComplexity int, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) int
+		IngestVulnEquals                func(childComplexity int, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) int
+		IngestVulnerabilities           func(childComplexity int, vulns []*model.VulnerabilityInputSpec) int
+		IngestVulnerability             func(childComplexity int, vuln model.VulnerabilityInputSpec) int
+		IngestVulnerabilityMetadata     func(childComplexity int, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) int
 	}
 
 	Package struct {
@@ -467,6 +473,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyBad.Justification(childComplexity), true
 
+	case "CertifyBad.knownSince":
+		if e.complexity.CertifyBad.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.CertifyBad.KnownSince(childComplexity), true
+
 	case "CertifyBad.origin":
 		if e.complexity.CertifyBad.Origin == nil {
 			break
@@ -501,6 +514,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyGood.Justification(childComplexity), true
+
+	case "CertifyGood.knownSince":
+		if e.complexity.CertifyGood.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.CertifyGood.KnownSince(childComplexity), true
 
 	case "CertifyGood.origin":
 		if e.complexity.CertifyGood.Origin == nil {
@@ -803,6 +823,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HasSBOM.ID(childComplexity), true
 
+	case "HasSBOM.knownSince":
+		if e.complexity.HasSBOM.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.KnownSince(childComplexity), true
+
 	case "HasSBOM.origin":
 		if e.complexity.HasSBOM.Origin == nil {
 			break
@@ -936,19 +963,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsDependency.Collector(childComplexity), true
 
+	case "IsDependency.dependencyPackage":
+		if e.complexity.IsDependency.DependencyPackage == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.DependencyPackage(childComplexity), true
+
 	case "IsDependency.dependencyType":
 		if e.complexity.IsDependency.DependencyType == nil {
 			break
 		}
 
 		return e.complexity.IsDependency.DependencyType(childComplexity), true
-
-	case "IsDependency.dependentPackage":
-		if e.complexity.IsDependency.DependentPackage == nil {
-			break
-		}
-
-		return e.complexity.IsDependency.DependentPackage(childComplexity), true
 
 	case "IsDependency.id":
 		if e.complexity.IsDependency.ID == nil {
@@ -1102,6 +1129,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestBuilders(childComplexity, args["builders"].([]*model.BuilderInputSpec)), true
+
+	case "Mutation.ingestBulkHasMetadata":
+		if e.complexity.Mutation.IngestBulkHasMetadata == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestBulkHasMetadata_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestBulkHasMetadata(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["hasMetadataList"].([]*model.HasMetadataInputSpec)), true
+
+	case "Mutation.ingestBulkVulnerabilityMetadata":
+		if e.complexity.Mutation.IngestBulkVulnerabilityMetadata == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestBulkVulnerabilityMetadata_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestBulkVulnerabilityMetadata(childComplexity, args["vulnerabilities"].([]*model.VulnerabilityInputSpec), args["vulnerabilityMetadataList"].([]*model.VulnerabilityMetadataInputSpec)), true
 
 	case "Mutation.ingestCertifyBad":
 		if e.complexity.Mutation.IngestCertifyBad == nil {
@@ -1271,6 +1322,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestHasSourceAt(childComplexity, args["pkg"].(model.PkgInputSpec), args["pkgMatchType"].(model.MatchFlags), args["source"].(model.SourceInputSpec), args["hasSourceAt"].(model.HasSourceAtInputSpec)), true
 
+	case "Mutation.ingestHasSourceAts":
+		if e.complexity.Mutation.IngestHasSourceAts == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHasSourceAts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHasSourceAts(childComplexity, args["pkgs"].([]*model.PkgInputSpec), args["pkgMatchType"].(model.MatchFlags), args["sources"].([]*model.SourceInputSpec), args["hasSourceAts"].([]*model.HasSourceAtInputSpec)), true
+
 	case "Mutation.ingestHashEqual":
 		if e.complexity.Mutation.IngestHashEqual == nil {
 			break
@@ -1402,6 +1465,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestPointOfContact(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(model.MatchFlags), args["pointOfContact"].(model.PointOfContactInputSpec)), true
+
+	case "Mutation.ingestPointOfContacts":
+		if e.complexity.Mutation.IngestPointOfContacts == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestPointOfContacts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestPointOfContacts(childComplexity, args["subjects"].(model.PackageSourceOrArtifactInputs), args["pkgMatchType"].(model.MatchFlags), args["pointOfContacts"].([]*model.PointOfContactInputSpec)), true
 
 	case "Mutation.ingestSLSAs":
 		if e.complexity.Mutation.IngestSLSAs == nil {
@@ -1558,18 +1633,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestVulnerabilityMetadata(childComplexity, args["vulnerability"].(model.VulnerabilityInputSpec), args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec)), true
-
-	case "Mutation.ingestVulnerabilityMetadatas":
-		if e.complexity.Mutation.IngestVulnerabilityMetadatas == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestVulnerabilityMetadatas_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestVulnerabilityMetadatas(childComplexity, args["vulnerabilities"].([]*model.VulnerabilityInputSpec), args["vulnerabilityMetadatas"].([]*model.VulnerabilityMetadataInputSpec)), true
 
 	case "Package.id":
 		if e.complexity.Package.ID == nil {
@@ -2844,6 +2907,7 @@ type CertifyBad {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -2856,6 +2920,9 @@ name and one of version, qualifiers, or subpath.
 
 If a source is specified in the subject filter, then it must specify a name,
 and optionally a tag and a commit.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input CertifyBadSpec {
   id: ID
@@ -2863,6 +2930,7 @@ input CertifyBadSpec {
   justification: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 """
@@ -2873,6 +2941,7 @@ input CertifyBadInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -2947,6 +3016,7 @@ type CertifyGood {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -2959,6 +3029,9 @@ name and one of version, qualifiers, or subpath.
 
 If a source is specified in the subject filter, then it must specify a name,
 and optionally a tag and a commit.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input CertifyGoodSpec {
   id: ID
@@ -2966,6 +3039,7 @@ input CertifyGoodSpec {
   justification: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 """
@@ -2975,6 +3049,7 @@ input CertifyGoodInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 extend type Query {
@@ -3604,6 +3679,12 @@ extend type Mutation {
     pkgMatchType: MatchFlags!
     pointOfContact: PointOfContactInputSpec!
   ): ID!
+  "Adds bulk PointOfContact attestations to a package, source or artifact. The returned array of IDs can be a an array of empty string."
+  ingestPointOfContacts(
+    subjects: PackageSourceOrArtifactInputs!
+    pkgMatchType: MatchFlags!
+    pointOfContacts: [PointOfContactInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
@@ -3641,12 +3722,17 @@ type HasSBOM {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Timestamp for SBOM creation"
+  knownSince: Time!
 }
 
 """
 HasSBOMSpec allows filtering the list of HasSBOM to return.
 
 Only the package or artifact can be added, not both.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input HasSBOMSpec {
   id: ID
@@ -3657,6 +3743,7 @@ input HasSBOMSpec {
   downloadLocation: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 "HasSBOMInputSpec is the same as HasSBOM but for mutation input."
@@ -3667,6 +3754,7 @@ input HasSBOMInputSpec {
   downloadLocation: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 extend type Query {
@@ -3906,6 +3994,13 @@ extend type Mutation {
     source: SourceInputSpec!
     hasSourceAt: HasSourceAtInputSpec!
   ): ID!
+  "Bulk ingestion of certifications that a package (PackageName or PackageVersion) is built from the source. The returned array of IDs can be a an array of empty string."
+  ingestHasSourceAts(
+    pkgs: [PkgInputSpec!]!
+    pkgMatchType: MatchFlags!
+    sources: [SourceInputSpec!]!
+    hasSourceAts: [HasSourceAtInputSpec!]!
+  ):[ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hashEqual.graphql", Input: `#
@@ -4011,13 +4106,13 @@ enum DependencyType {
   UNKNOWN
 }
 
-"IsDependency is an attestation to record that a package depends on another."
+"IsDependency is an attestation to record that a package depends on another. "
 type IsDependency {
   id: ID!
   "Package that has the dependency"
   package: Package!
-  "Package for the dependency; MUST be PackageName or PackageVersion"
-  dependentPackage: Package!
+  "Package for the dependency; MUST be PackageName or PackageVersion "
+  dependencyPackage: Package!
   "Version range for the dependency link, required if depedentPackage points to PackageName"
   versionRange: String!
   "Type of dependency"
@@ -4036,12 +4131,12 @@ IsDependencySpec allows filtering the list of dependencies to return.
 To obtain the list of dependency packages, caller must fill in the package
 field.
 
-Dependent packages must be defined at PackageName, not PackageVersion.
+Dependency packages must be defined at PackageName, not PackageVersion.
 """
 input IsDependencySpec {
   id: ID
   package: PkgSpec
-  dependentPackage: PkgSpec
+  dependencyPackage: PkgSpec
   versionRange: String
   dependencyType: DependencyType
   justification: String
@@ -4370,6 +4465,12 @@ extend type Mutation {
     pkgMatchType: MatchFlags!
     hasMetadata: HasMetadataInputSpec!
   ): ID!
+  "Adds bulk metadata about a package, source or artifact. The returned array of IDs can be a an array of empty string."
+  ingestBulkHasMetadata(
+    subjects: PackageSourceOrArtifactInputs!
+    pkgMatchType: MatchFlags!
+    hasMetadataList: [HasMetadataInputSpec!]!
+  ): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/package.graphql", Input: `#
@@ -5156,7 +5257,7 @@ extend type Mutation {
   "Adds metadata about a vulnerability. The returned ID can be empty string."
   ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
   "Bulk add certifications that vulnerability has a specific score. The returned array of IDs can be a an array of empty string."
-  ingestVulnerabilityMetadatas(vulnerabilities: [VulnerabilityInputSpec!]!, vulnerabilityMetadatas: [VulnerabilityMetadataInputSpec!]!): [ID!]!
+  ingestBulkVulnerabilityMetadata(vulnerabilities: [VulnerabilityInputSpec!]!, vulnerabilityMetadataList: [VulnerabilityMetadataInputSpec!]!): [ID!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnerability.graphql", Input: `#

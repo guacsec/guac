@@ -17,11 +17,12 @@ package emitter
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/internal/testing/dochelper"
@@ -32,6 +33,7 @@ import (
 )
 
 var (
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// Taken from: https://slsa.dev/provenance/v0.1#example
 	ite6SLSA = `
 	{

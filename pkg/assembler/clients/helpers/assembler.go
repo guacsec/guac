@@ -76,6 +76,14 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			licenses := p.GetLicenses(ctx)
+			logger.Infof("assembling License: %v", len(licenses))
+			for _, v := range licenses {
+				if err := ingestLicense(ctx, gqlclient, &v); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			for _, v := range p.CertifyScorecard {
 				if err := ingestCertifyScorecard(ctx, gqlclient, v); err != nil {
@@ -153,6 +161,13 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			logger.Infof("assembling HasMetadata: %v", len(p.HasMetadata))
+			for _, hm := range p.HasMetadata {
+				if err := ingestHasMetadata(ctx, gqlclient, hm); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			for _, hb := range p.HasSBOM {
 				if err := ingestHasSBOM(ctx, gqlclient, hb); err != nil {
@@ -177,6 +192,13 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 			logger.Infof("assembling PkgEqual : %v", len(p.PkgEqual))
 			for _, equal := range p.PkgEqual {
 				if err := ingestPkgEqual(ctx, gqlclient, equal); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling CertifyLegal : %v", len(p.CertifyLegal))
+			for _, cl := range p.CertifyLegal {
+				if err := ingestCertifyLegal(ctx, gqlclient, cl); err != nil {
 					return err
 				}
 			}
@@ -207,6 +229,11 @@ func ingestBuilder(ctx context.Context, client graphql.Client, v *model.BuilderI
 
 func ingestVulnerability(ctx context.Context, client graphql.Client, v *model.VulnerabilityInputSpec) error {
 	_, err := model.IngestVulnerability(ctx, client, *v)
+	return err
+}
+
+func ingestLicense(ctx context.Context, client graphql.Client, l *model.LicenseInputSpec) error {
+	_, err := model.IngestLicense(ctx, client, *l)
 	return err
 }
 
@@ -259,7 +286,7 @@ func ingestVulnEqual(ctx context.Context, client graphql.Client, ve assembler.Vu
 }
 
 func hasSourceAt(ctx context.Context, client graphql.Client, hsa assembler.HasSourceAtIngest) error {
-	_, err := model.HasSourceAt(ctx, client, *hsa.Pkg, hsa.PkgMatchFlag, *hsa.Src, *hsa.HasSourceAt)
+	_, err := model.IngestHasSourceAt(ctx, client, *hsa.Pkg, hsa.PkgMatchFlag, *hsa.Src, *hsa.HasSourceAt)
 	return err
 }
 
@@ -311,6 +338,23 @@ func ingestPointOfContact(ctx context.Context, client graphql.Client, poc assemb
 		return err
 	}
 	_, err := model.PointOfContactArtifact(ctx, client, *poc.Artifact, *poc.PointOfContact)
+	return err
+}
+
+func ingestHasMetadata(ctx context.Context, client graphql.Client, hm assembler.HasMetadataIngest) error {
+	if err := validatePackageSourceOrArtifactInput(hm.Pkg, hm.Src, hm.Artifact, "hasMetadata"); err != nil {
+		return fmt.Errorf("input validation failed for hasMetadata: %w", err)
+	}
+
+	if hm.Pkg != nil {
+		_, err := model.HasMetadataPkg(ctx, client, *hm.Pkg, hm.PkgMatchFlag, *hm.HasMetadata)
+		return err
+	}
+	if hm.Src != nil {
+		_, err := model.HasMetadataSrc(ctx, client, *hm.Src, *hm.HasMetadata)
+		return err
+	}
+	_, err := model.HasMetadataArtifact(ctx, client, *hm.Artifact, *hm.HasMetadata)
 	return err
 }
 
@@ -382,6 +426,22 @@ func ingestHashEqual(ctx context.Context, client graphql.Client, v assembler.Has
 		return fmt.Errorf("unable to create HashEqual without equal artifact")
 	}
 	_, err := model.IngestHashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
+	return err
+}
+
+func ingestCertifyLegal(ctx context.Context, client graphql.Client, v assembler.CertifyLegalIngest) error {
+	if v.Pkg != nil && v.Src != nil {
+		return fmt.Errorf("unable to create CertifyLegal with both Src and Pkg subject specified")
+	}
+	if v.Pkg == nil && v.Src == nil {
+		return fmt.Errorf("unable to create CertifyLegal without either Src and Pkg subject specified")
+	}
+
+	if v.Src != nil {
+		_, err := model.CertifyLegalSrc(ctx, client, *v.Src, v.Declared, v.Discovered, *v.CertifyLegal)
+		return err
+	}
+	_, err := model.CertifyLegalPkg(ctx, client, *v.Pkg, v.Declared, v.Discovered, *v.CertifyLegal)
 	return err
 }
 

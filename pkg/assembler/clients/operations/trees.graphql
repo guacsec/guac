@@ -144,7 +144,7 @@ fragment AllIsDependencyTree on IsDependency {
   package {
     ...AllPkgTree
   }
-  dependentPackage {
+  dependencyPackage {
     ...AllPkgTree
   }
   dependencyType
@@ -208,6 +208,7 @@ fragment AllCertifyLegalTree on CertifyLegal {
 fragment AllCertifyBad on CertifyBad {
   id
   justification
+  knownSince
   subject {
     __typename
     ... on Package {
@@ -227,6 +228,7 @@ fragment AllCertifyBad on CertifyBad {
 fragment AllCertifyGood on CertifyGood {
   id
   justification
+  knownSince
   subject {
     __typename
     ... on Package {
@@ -270,6 +272,7 @@ fragment AllHasSBOMTree on HasSBOM {
   downloadLocation
   origin
   collector
+  knownSince
 }
 
 fragment AllHasSourceAt on HasSourceAt {

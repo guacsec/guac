@@ -99,11 +99,34 @@ const (
 	hashEqualSubjectArtEdgesStr string = "hashEqualSubjectArtEdges"
 	hashEqualsStr               string = "hashEquals"
 
+	// hasMetadata collection
+
+	hasMetadataPkgVersionEdgesStr string = "hasMetadataPkgVersionEdges"
+	hasMetadataPkgNameEdgesStr    string = "hasMetadataPkgNameEdges"
+	hasMetadataSrcEdgesStr        string = "hasMetadataSrcEdges"
+	hasMetadataArtEdgesStr        string = "hasMetadataArtEdges"
+	hasMetadataStr                string = "hasMetadataCollection"
+
+	// pointOfContact collection
+
+	pointOfContactPkgVersionEdgesStr string = "pointOfContactPkgVersionEdges"
+	pointOfContactPkgNameEdgesStr    string = "pointOfContactPkgNameEdges"
+	pointOfContactSrcEdgesStr        string = "pointOfContactSrcEdges"
+	pointOfContactArtEdgesStr        string = "pointOfContactArtEdges"
+	pointOfContactStr                string = "pointOfContacts"
+
 	// hasSBOM collection
 
 	hasSBOMPkgEdgesStr string = "hasSBOMPkgEdges"
 	hasSBOMArtEdgesStr string = "hasSBOMArtEdges"
 	hasSBOMsStr        string = "hasSBOMs"
+
+	// hasSourceAt collection
+
+	hasSourceAtPkgVersionEdgesStr string = "hasSourceAtPkgVersionEdges"
+	hasSourceAtPkgNameEdgesStr    string = "hasSourceAtPkgNameEdges"
+	hasSourceAtEdgesStr           string = "hasSourceAtEdges"
+	hasSourceAtsStr               string = "hasSourceAts"
 
 	// certifyVex collection
 
@@ -113,6 +136,7 @@ const (
 	certifyVEXsStr         string = "certifyVEXs"
 
 	// certifyVuln collection
+
 	certifyVulnPkgEdgesStr string = "certifyVulnPkgEdges"
 	certifyVulnEdgesStr    string = "certifyVulnEdges"
 	certifyVulnsStr        string = "certifyVulns"
@@ -120,7 +144,7 @@ const (
 	// vulnMetadata collection
 
 	vulnMetadataEdgesStr string = "vulnMetadataEdges"
-	vulnMetadatasStr     string = "vulnMetadatas"
+	vulnMetadataStr      string = "vulnMetadataCollection"
 
 	// vulnEquals collections
 
@@ -359,6 +383,48 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		hashEqualSubjectArtEdges.From = []string{artifactsStr}
 		hashEqualSubjectArtEdges.To = []string{hashEqualsStr}
 
+		// setup hasMetadata collections
+		var hasMetadataPkgVersionEdges driver.EdgeDefinition
+		hasMetadataPkgVersionEdges.Collection = hasMetadataPkgVersionEdgesStr
+		hasMetadataPkgVersionEdges.From = []string{pkgVersionsStr}
+		hasMetadataPkgVersionEdges.To = []string{hasMetadataStr}
+
+		var hasMetadataPkgNameEdges driver.EdgeDefinition
+		hasMetadataPkgNameEdges.Collection = hasMetadataPkgNameEdgesStr
+		hasMetadataPkgNameEdges.From = []string{pkgNamesStr}
+		hasMetadataPkgNameEdges.To = []string{hasMetadataStr}
+
+		var hasMetadataArtEdges driver.EdgeDefinition
+		hasMetadataArtEdges.Collection = hasMetadataArtEdgesStr
+		hasMetadataArtEdges.From = []string{artifactsStr}
+		hasMetadataArtEdges.To = []string{hasMetadataStr}
+
+		var hasMetadataSrcEdges driver.EdgeDefinition
+		hasMetadataSrcEdges.Collection = hasMetadataSrcEdgesStr
+		hasMetadataSrcEdges.From = []string{srcNamesStr}
+		hasMetadataSrcEdges.To = []string{hasMetadataStr}
+
+		// setup pointOfContact collections
+		var pointOfContactPkgVersionEdges driver.EdgeDefinition
+		pointOfContactPkgVersionEdges.Collection = pointOfContactPkgVersionEdgesStr
+		pointOfContactPkgVersionEdges.From = []string{pkgVersionsStr}
+		pointOfContactPkgVersionEdges.To = []string{pointOfContactStr}
+
+		var pointOfContactPkgNameEdges driver.EdgeDefinition
+		pointOfContactPkgNameEdges.Collection = pointOfContactPkgNameEdgesStr
+		pointOfContactPkgNameEdges.From = []string{pkgNamesStr}
+		pointOfContactPkgNameEdges.To = []string{pointOfContactStr}
+
+		var pointOfContactArtEdges driver.EdgeDefinition
+		pointOfContactArtEdges.Collection = pointOfContactArtEdgesStr
+		pointOfContactArtEdges.From = []string{artifactsStr}
+		pointOfContactArtEdges.To = []string{pointOfContactStr}
+
+		var pointOfContactSrcEdges driver.EdgeDefinition
+		pointOfContactSrcEdges.Collection = pointOfContactSrcEdgesStr
+		pointOfContactSrcEdges.From = []string{srcNamesStr}
+		pointOfContactSrcEdges.To = []string{pointOfContactStr}
+
 		// setup hasSBOM collections
 		var hasSBOMPkgEdges driver.EdgeDefinition
 		hasSBOMPkgEdges.Collection = hasSBOMPkgEdgesStr
@@ -369,6 +435,22 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		hasSBOMArtEdges.Collection = hasSBOMArtEdgesStr
 		hasSBOMArtEdges.From = []string{artifactsStr}
 		hasSBOMArtEdges.To = []string{hasSBOMsStr}
+
+		// setup hasSourceAt collections
+		var hasSourceAtPkgVersionEdges driver.EdgeDefinition
+		hasSourceAtPkgVersionEdges.Collection = hasSourceAtPkgVersionEdgesStr
+		hasSourceAtPkgVersionEdges.From = []string{pkgVersionsStr}
+		hasSourceAtPkgVersionEdges.To = []string{hasSourceAtsStr}
+
+		var hasSourceAtPkgNameEdges driver.EdgeDefinition
+		hasSourceAtPkgNameEdges.Collection = hasSourceAtPkgNameEdgesStr
+		hasSourceAtPkgNameEdges.From = []string{pkgNamesStr}
+		hasSourceAtPkgNameEdges.To = []string{hasSourceAtsStr}
+
+		var hasSourceAtEdges driver.EdgeDefinition
+		hasSourceAtEdges.Collection = hasSourceAtEdgesStr
+		hasSourceAtEdges.From = []string{hasSourceAtsStr}
+		hasSourceAtEdges.To = []string{srcNamesStr}
 
 		// setup certifyVex collections
 		var certifyVexPkgEdges driver.EdgeDefinition
@@ -401,7 +483,7 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		var vulnMetadataEdges driver.EdgeDefinition
 		vulnMetadataEdges.Collection = vulnMetadataEdgesStr
 		vulnMetadataEdges.From = []string{vulnerabilitiesStr}
-		vulnMetadataEdges.To = []string{vulnMetadatasStr}
+		vulnMetadataEdges.To = []string{vulnMetadataStr}
 
 		// setup vulnEqual collections
 		var vulnEqualVulnEdges driver.EdgeDefinition
@@ -482,7 +564,9 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
 			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges,
-			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges}
+			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges, hasMetadataPkgVersionEdges, hasMetadataPkgNameEdges,
+			hasMetadataArtEdges, hasMetadataSrcEdges, pointOfContactPkgVersionEdges, pointOfContactPkgNameEdges,
+			pointOfContactArtEdges, pointOfContactSrcEdges, hasSourceAtEdges, hasSourceAtPkgVersionEdges, hasSourceAtPkgNameEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -557,7 +641,7 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "justification"}, true, "byPkgIDArtIDJust"); err != nil {
+		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "justification", "origin"}, true, "byPkgIDArtIDOriginJust"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 
@@ -826,32 +910,6 @@ func getPreloadString(prefix, name string) string {
 		return prefix + "." + name
 	}
 	return name
-}
-
-// Retrieval read-only queries for evidence trees
-
-func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
-	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
-}
-
-// Mutations for evidence trees (read-write queries, assume software trees ingested)
-
-func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
-	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
-}
-
-// Topological queries: queries where node connectivity matters more than node type
-func (c *arangoClient) Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: Neighbors - Neighbors"))
-}
-func (c *arangoClient) Node(ctx context.Context, node string) (model.Node, error) {
-	panic(fmt.Errorf("not implemented: Node - Node"))
-}
-func (c *arangoClient) Nodes(ctx context.Context, nodes []string) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: Nodes - Nodes"))
-}
-func (c *arangoClient) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: Path - Path"))
 }
 
 func (c *arangoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {

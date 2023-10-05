@@ -17,13 +17,16 @@ package arangodb
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	values := map[string]any{}

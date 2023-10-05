@@ -46,6 +46,8 @@ type IngestPredicates struct {
 	Vex              []VexIngest              `json:"vex,omitempty"`
 	PointOfContact   []PointOfContactIngest   `json:"contact,omitempty"`
 	VulnMetadata     []VulnMetadataIngest     `json:"vulnMetadata,omitempty"`
+	HasMetadata      []HasMetadataIngest      `json:"hasMetadata,omitempty"`
+	CertifyLegal     []CertifyLegalIngest     `json:"certifyLegal,omitempty"`
 }
 
 type CertifyScorecardIngest struct {
@@ -113,6 +115,15 @@ type HasSourceAtIngest struct {
 	HasSourceAt  *generated.HasSourceAtInputSpec `json:"hasSourceAt,omitempty"`
 }
 
+type HasMetadataIngest struct {
+	// hasMetadata describes either pkg, src or artifact metadata
+	Pkg          *generated.PkgInputSpec         `json:"pkg,omitempty"`
+	PkgMatchFlag generated.MatchFlags            `json:"pkgMatchFlag,omitempty"`
+	Src          *generated.SourceInputSpec      `json:"src,omitempty"`
+	Artifact     *generated.ArtifactInputSpec    `json:"artifact,omitempty"`
+	HasMetadata  *generated.HasMetadataInputSpec `json:"hasMetadata,omitempty"`
+}
+
 type CertifyBadIngest struct {
 	// certifyBad describes either pkg, src or artifact
 	Pkg          *generated.PkgInputSpec        `json:"pkg,omitempty"`
@@ -172,6 +183,16 @@ type PkgEqualIngest struct {
 	Pkg      *generated.PkgInputSpec      `json:"pkg,omitempty"`
 	EqualPkg *generated.PkgInputSpec      `json:"equalPkg,omitempty"`
 	PkgEqual *generated.PkgEqualInputSpec `json:"pkgEqual,omitempty"`
+}
+
+type CertifyLegalIngest struct {
+	Pkg *generated.PkgInputSpec    `json:"pkg,omitempty"`
+	Src *generated.SourceInputSpec `json:"src,omitempty"`
+
+	Declared   []generated.LicenseInputSpec `json:"declared,omitempty"`
+	Discovered []generated.LicenseInputSpec `json:"discovered,omitempty"`
+
+	CertifyLegal *generated.CertifyLegalInputSpec `json:"certifyLegal,omitempty"`
 }
 
 func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInputSpec {
@@ -254,6 +275,14 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 			}
 		}
 	}
+	for _, hm := range i.HasMetadata {
+		if hm.Pkg != nil {
+			pkgPurl := helpers.PkgInputSpecToPurl(hm.Pkg)
+			if _, ok := packageMap[pkgPurl]; !ok {
+				packageMap[pkgPurl] = hm.Pkg
+			}
+		}
+	}
 	for _, equal := range i.PkgEqual {
 		if equal.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(equal.Pkg)
@@ -265,6 +294,14 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 			equalPkgPurl := helpers.PkgInputSpecToPurl(equal.EqualPkg)
 			if _, ok := packageMap[equalPkgPurl]; !ok {
 				packageMap[equalPkgPurl] = equal.EqualPkg
+			}
+		}
+	}
+	for _, cl := range i.CertifyLegal {
+		if cl.Pkg != nil {
+			pkgPurl := helpers.PkgInputSpecToPurl(cl.Pkg)
+			if _, ok := packageMap[pkgPurl]; !ok {
+				packageMap[pkgPurl] = cl.Pkg
 			}
 		}
 	}
@@ -323,6 +360,22 @@ func (i IngestPredicates) GetSources(ctx context.Context) []*generated.SourceInp
 			sourceString := concatenateSourceInput(poc.Src)
 			if _, ok := sourceMap[sourceString]; !ok {
 				sourceMap[sourceString] = poc.Src
+			}
+		}
+	}
+	for _, hm := range i.HasMetadata {
+		if hm.Src != nil {
+			sourceString := concatenateSourceInput(hm.Src)
+			if _, ok := sourceMap[sourceString]; !ok {
+				sourceMap[sourceString] = hm.Src
+			}
+		}
+	}
+	for _, cl := range i.CertifyLegal {
+		if cl.Src != nil {
+			sourceString := concatenateSourceInput(cl.Src)
+			if _, ok := sourceMap[sourceString]; !ok {
+				sourceMap[sourceString] = cl.Src
 			}
 		}
 	}
@@ -389,6 +442,14 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) []*generated.Artifac
 			artifactString := poc.Artifact.Algorithm + ":" + poc.Artifact.Digest
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = poc.Artifact
+			}
+		}
+	}
+	for _, hm := range i.HasMetadata {
+		if hm.Artifact != nil {
+			artifactString := hm.Artifact.Algorithm + ":" + hm.Artifact.Digest
+			if _, ok := artifactMap[artifactString]; !ok {
+				artifactMap[artifactString] = hm.Artifact
 			}
 		}
 	}
@@ -493,6 +554,29 @@ func (i IngestPredicates) GetVulnerabilities(ctx context.Context) []*generated.V
 	return vulns
 }
 
+func (i IngestPredicates) GetLicenses(ctx context.Context) []generated.LicenseInputSpec {
+	licenseMap := make(map[string]*generated.LicenseInputSpec)
+	for _, cl := range i.CertifyLegal {
+		for i := range cl.Declared {
+			k := licenseKey(&cl.Declared[i])
+			if _, ok := licenseMap[k]; !ok {
+				licenseMap[k] = &cl.Declared[i]
+			}
+		}
+		for i := range cl.Discovered {
+			k := licenseKey(&cl.Discovered[i])
+			if _, ok := licenseMap[k]; !ok {
+				licenseMap[k] = &cl.Discovered[i]
+			}
+		}
+	}
+	licenses := make([]generated.LicenseInputSpec, 0, len(licenseMap))
+	for _, license := range licenseMap {
+		licenses = append(licenses, *license)
+	}
+	return licenses
+}
+
 func concatenateSourceInput(source *generated.SourceInputSpec) string {
 	var sourceElements []string
 	sourceElements = append(sourceElements, source.Type, source.Namespace, source.Name)
@@ -503,6 +587,13 @@ func concatenateSourceInput(source *generated.SourceInputSpec) string {
 		sourceElements = append(sourceElements, *source.Commit)
 	}
 	return strings.Join(sourceElements, "/")
+}
+
+func licenseKey(l *generated.LicenseInputSpec) string {
+	if l.ListVersion != nil && *l.ListVersion != "" {
+		return strings.Join([]string{l.Name, *l.ListVersion}, ":")
+	}
+	return l.Name
 }
 
 // AssemblerInput represents the inputs to add to the graph

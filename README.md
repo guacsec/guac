@@ -57,6 +57,7 @@ refer to [how GUAC works](https://docs.guac.sh/how-guac-works/).
 - [SLSA](https://github.com/slsa-framework/slsa)
 - [SPDX](https://spdx.dev/specifications/)
 - [CSAF/CSAF VEX](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html)
+- [OpenVEX](https://github.com/openvex)
 
 Note that GUAC uses software identifiers standards to help link metadata
 together. However, these identifiers are not always available and heuristics

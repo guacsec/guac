@@ -605,7 +605,7 @@ func bulkIngestVulnerabilityMetadata(ctx context.Context, client graphql.Client)
 		if _, err := model.IngestVulnerabilities(ctx, client, ingest.vulns); err != nil {
 			logger.Errorf("Error in ingesting vulnerabilities: %v\n", err)
 		}
-		if _, err := model.VulnHasMetadatas(ctx, client, ingest.vulns, ingest.vulnerabilityMetadataList); err != nil {
+		if _, err := model.BulkVulnHasMetadata(ctx, client, ingest.vulns, ingest.vulnerabilityMetadataList); err != nil {
 			logger.Errorf("Error in ingesting VulnHasMetadatas: %v\n", err)
 		}
 	}
@@ -1965,6 +1965,7 @@ func ingestHashEqual(ctx context.Context, client graphql.Client) {
 
 func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 	opensslNs := "openssl.org"
 	opensslVersion := "3.0.3"
 	ingestHasSBOM := []struct {
@@ -1989,6 +1990,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				DownloadLocation: "uri: download location of the SBOM",
 				Origin:           "Demo ingestion",
 				Collector:        "Demo ingestion",
+				KnownSince:       tm,
 			},
 		},
 		{
@@ -2004,6 +2006,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				DownloadLocation: "uri: download location of the SBOM",
 				Origin:           "Demo ingestion",
 				Collector:        "Demo ingestion",
+				KnownSince:       tm,
 			},
 		},
 		{
@@ -2022,6 +2025,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				DownloadLocation: "uri: download location of the SBOM",
 				Origin:           "Demo ingestion",
 				Collector:        "Demo ingestion",
+				KnownSince:       tm,
 			},
 		},
 		{
@@ -2037,6 +2041,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 				DownloadLocation: "uri: download location of the SBOM",
 				Origin:           "Demo ingestion",
 				Collector:        "Demo ingestion",
+				KnownSince:       tm,
 			},
 		},
 	}
@@ -2156,7 +2161,7 @@ func ingestHasSourceAt(ctx context.Context, client graphql.Client) {
 		if _, err := model.IngestSource(ctx, client, ingest.source); err != nil {
 			logger.Errorf("Error in ingesting source: %v\n", err)
 		}
-		if _, err := model.HasSourceAt(ctx, client, ingest.pkg, ingest.pkgMatchType, ingest.source, ingest.hasSourceAt); err != nil {
+		if _, err := model.IngestHasSourceAt(ctx, client, ingest.pkg, ingest.pkgMatchType, ingest.source, ingest.hasSourceAt); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}
@@ -2921,7 +2926,7 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 		if _, err := model.IsOccurrencePkg(ctx, client, ingest.depPkgWithVersion, ingest.art, ingest.occurrence); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
-		if _, err := model.HasSourceAt(ctx, client, ingest.depPkgWithVersion, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, ingest.source, ingest.hasSourceAt); err != nil {
+		if _, err := model.IngestHasSourceAt(ctx, client, ingest.depPkgWithVersion, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, ingest.source, ingest.hasSourceAt); err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 		if _, err := model.IsOccurrenceSrc(ctx, client, ingest.source, ingest.sourceArt, ingest.sourceOccurrence); err != nil {

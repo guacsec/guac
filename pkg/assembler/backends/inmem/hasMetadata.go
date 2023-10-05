@@ -61,6 +61,37 @@ func (n *hasMetadataLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest HasMetadata
+
+func (c *demoClient) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
+	var modelHasMetadataIDs []string
+
+	for i := range hasMetadataList {
+		var hasMetadata *model.HasMetadata
+		var err error
+		if len(subjects.Packages) > 0 {
+			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
+			hasMetadata, err = c.IngestHasMetadata(ctx, subject, pkgMatchType, *hasMetadataList[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestHasMetadata failed with err: %v", err)
+			}
+		} else if len(subjects.Sources) > 0 {
+			subject := model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
+			hasMetadata, err = c.IngestHasMetadata(ctx, subject, pkgMatchType, *hasMetadataList[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestHasMetadata failed with err: %v", err)
+			}
+		} else {
+			subject := model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
+			hasMetadata, err = c.IngestHasMetadata(ctx, subject, pkgMatchType, *hasMetadataList[i])
+			if err != nil {
+				return nil, gqlerror.Errorf("IngestHasMetadata failed with err: %v", err)
+			}
+		}
+		modelHasMetadataIDs = append(modelHasMetadataIDs, hasMetadata.ID)
+	}
+	return modelHasMetadataIDs, nil
+}
+
 func (c *demoClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
 	return c.ingestHasMetadata(ctx, subject, pkgMatchType, hasMetadata, true)
 }

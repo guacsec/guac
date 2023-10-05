@@ -401,12 +401,16 @@ func (u *PkgEqualUpsertOne) IDX(ctx context.Context) int {
 // PkgEqualCreateBulk is the builder for creating many PkgEqual entities in bulk.
 type PkgEqualCreateBulk struct {
 	config
+	err      error
 	builders []*PkgEqualCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the PkgEqual entities in the database.
 func (pecb *PkgEqualCreateBulk) Save(ctx context.Context) ([]*PkgEqual, error) {
+	if pecb.err != nil {
+		return nil, pecb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(pecb.builders))
 	nodes := make([]*PkgEqual, len(pecb.builders))
 	mutators := make([]Mutator, len(pecb.builders))
@@ -622,6 +626,9 @@ func (u *PkgEqualUpsertBulk) UpdatePackagesHash() *PkgEqualUpsertBulk {
 
 // Exec executes the query.
 func (u *PkgEqualUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the PkgEqualCreateBulk instead", i)

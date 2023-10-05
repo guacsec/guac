@@ -18,10 +18,12 @@ package verifier
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -31,6 +33,8 @@ import (
 )
 
 var (
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
+	once sync.Once
 	// Taken from: https://slsa.dev/provenance/v0.1#example
 	ite6SLSA = `
 	{
@@ -125,7 +129,10 @@ func (m *mockSigstoreVerifier) Type() VerifierType {
 
 func TestVerifyIdentity(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
-	err := RegisterVerifier(newMockSigstoreVerifier(), "sigstore")
+	var err error
+	once.Do(func() {
+		err = RegisterVerifier(newMockSigstoreVerifier(), "sigstore")
+	})
 	if err != nil {
 		t.Errorf("RegisterVerifier() failed with error: %v", err)
 	}

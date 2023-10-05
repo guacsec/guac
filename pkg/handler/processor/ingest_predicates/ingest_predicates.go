@@ -18,11 +18,13 @@ package ingest_predicates
 import (
 	"fmt"
 
-	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // IngestPredicatesProcessor processes IngestPredicates documents.
 // Currently only supports JSON IngestPredicates documents

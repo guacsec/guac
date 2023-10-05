@@ -14,7 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 )
 
 // CertifyVexCreate is the builder for creating a CertifyVex entity.
@@ -111,8 +111,8 @@ func (cvc *CertifyVexCreate) SetArtifact(a *Artifact) *CertifyVexCreate {
 	return cvc.SetArtifactID(a.ID)
 }
 
-// SetVulnerability sets the "vulnerability" edge to the VulnerabilityType entity.
-func (cvc *CertifyVexCreate) SetVulnerability(v *VulnerabilityType) *CertifyVexCreate {
+// SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
+func (cvc *CertifyVexCreate) SetVulnerability(v *VulnerabilityID) *CertifyVexCreate {
 	return cvc.SetVulnerabilityID(v.ID)
 }
 
@@ -274,7 +274,7 @@ func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -697,12 +697,16 @@ func (u *CertifyVexUpsertOne) IDX(ctx context.Context) int {
 // CertifyVexCreateBulk is the builder for creating many CertifyVex entities in bulk.
 type CertifyVexCreateBulk struct {
 	config
+	err      error
 	builders []*CertifyVexCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the CertifyVex entities in the database.
 func (cvcb *CertifyVexCreateBulk) Save(ctx context.Context) ([]*CertifyVex, error) {
+	if cvcb.err != nil {
+		return nil, cvcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(cvcb.builders))
 	nodes := make([]*CertifyVex, len(cvcb.builders))
 	mutators := make([]Mutator, len(cvcb.builders))
@@ -1016,6 +1020,9 @@ func (u *CertifyVexUpsertBulk) UpdateCollector() *CertifyVexUpsertBulk {
 
 // Exec executes the query.
 func (u *CertifyVexUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CertifyVexCreateBulk instead", i)

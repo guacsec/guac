@@ -62,6 +62,7 @@ func TestIngestCertifyGood(t *testing.T) {
 					},
 					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
+						KnownSince:    ZeroTime,
 					},
 				},
 			},
@@ -189,6 +190,7 @@ func TestIngestCertifyGoods(t *testing.T) {
 					CG: []*model.CertifyGoodInputSpec{
 						{
 							Justification: "test justification",
+							KnownSince:    ZeroTime,
 						},
 					},
 				},

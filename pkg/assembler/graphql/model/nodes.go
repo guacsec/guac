@@ -107,6 +107,7 @@ type CertifyBad struct {
 	Justification string                  `json:"justification"`
 	Origin        string                  `json:"origin"`
 	Collector     string                  `json:"collector"`
+	KnownSince    time.Time               `json:"knownSince"`
 }
 
 func (CertifyBad) IsNode() {}
@@ -114,9 +115,10 @@ func (CertifyBad) IsNode() {}
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
 type CertifyBadInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
@@ -128,12 +130,16 @@ type CertifyBadInputSpec struct {
 //
 // If a source is specified in the subject filter, then it must specify a name,
 // and optionally a tag and a commit.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
 type CertifyBadSpec struct {
 	ID            *string                      `json:"id,omitempty"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
 	Justification *string                      `json:"justification,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
+	KnownSince    *time.Time                   `json:"knownSince,omitempty"`
 }
 
 // CertifyGood is an attestation that a package, source, or artifact is considered
@@ -153,15 +159,17 @@ type CertifyGood struct {
 	Justification string                  `json:"justification"`
 	Origin        string                  `json:"origin"`
 	Collector     string                  `json:"collector"`
+	KnownSince    time.Time               `json:"knownSince"`
 }
 
 func (CertifyGood) IsNode() {}
 
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
@@ -173,12 +181,16 @@ type CertifyGoodInputSpec struct {
 //
 // If a source is specified in the subject filter, then it must specify a name,
 // and optionally a tag and a commit.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
 type CertifyGoodSpec struct {
 	ID            *string                      `json:"id,omitempty"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
 	Justification *string                      `json:"justification,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
+	KnownSince    *time.Time                   `json:"knownSince,omitempty"`
 }
 
 // CertifyLegal is an attestation to attach legal information to a package or source.
@@ -435,23 +447,29 @@ type HasSbom struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Timestamp for SBOM creation
+	KnownSince time.Time `json:"knownSince"`
 }
 
 func (HasSbom) IsNode() {}
 
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
-	URI              string `json:"uri"`
-	Algorithm        string `json:"algorithm"`
-	Digest           string `json:"digest"`
-	DownloadLocation string `json:"downloadLocation"`
-	Origin           string `json:"origin"`
-	Collector        string `json:"collector"`
+	URI              string    `json:"uri"`
+	Algorithm        string    `json:"algorithm"`
+	Digest           string    `json:"digest"`
+	DownloadLocation string    `json:"downloadLocation"`
+	Origin           string    `json:"origin"`
+	Collector        string    `json:"collector"`
+	KnownSince       time.Time `json:"knownSince"`
 }
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
 //
 // Only the package or artifact can be added, not both.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
 type HasSBOMSpec struct {
 	ID               *string                `json:"id,omitempty"`
 	Subject          *PackageOrArtifactSpec `json:"subject,omitempty"`
@@ -461,6 +479,7 @@ type HasSBOMSpec struct {
 	DownloadLocation *string                `json:"downloadLocation,omitempty"`
 	Origin           *string                `json:"origin,omitempty"`
 	Collector        *string                `json:"collector,omitempty"`
+	KnownSince       *time.Time             `json:"knownSince,omitempty"`
 }
 
 // HasSLSA records that a subject node has a SLSA attestation.
@@ -568,7 +587,7 @@ type IsDependency struct {
 	// Package that has the dependency
 	Package *Package `json:"package"`
 	// Package for the dependency; MUST be PackageName or PackageVersion
-	DependentPackage *Package `json:"dependentPackage"`
+	DependencyPackage *Package `json:"dependencyPackage"`
 	// Version range for the dependency link, required if depedentPackage points to PackageName
 	VersionRange string `json:"versionRange"`
 	// Type of dependency
@@ -598,16 +617,16 @@ type IsDependencyInputSpec struct {
 // To obtain the list of dependency packages, caller must fill in the package
 // field.
 //
-// Dependent packages must be defined at PackageName, not PackageVersion.
+// Dependency packages must be defined at PackageName, not PackageVersion.
 type IsDependencySpec struct {
-	ID               *string         `json:"id,omitempty"`
-	Package          *PkgSpec        `json:"package,omitempty"`
-	DependentPackage *PkgSpec        `json:"dependentPackage,omitempty"`
-	VersionRange     *string         `json:"versionRange,omitempty"`
-	DependencyType   *DependencyType `json:"dependencyType,omitempty"`
-	Justification    *string         `json:"justification,omitempty"`
-	Origin           *string         `json:"origin,omitempty"`
-	Collector        *string         `json:"collector,omitempty"`
+	ID                *string         `json:"id,omitempty"`
+	Package           *PkgSpec        `json:"package,omitempty"`
+	DependencyPackage *PkgSpec        `json:"dependencyPackage,omitempty"`
+	VersionRange      *string         `json:"versionRange,omitempty"`
+	DependencyType    *DependencyType `json:"dependencyType,omitempty"`
+	Justification     *string         `json:"justification,omitempty"`
+	Origin            *string         `json:"origin,omitempty"`
+	Collector         *string         `json:"collector,omitempty"`
 }
 
 // IsOccurrence is an attestation to link an artifact to a package or source.

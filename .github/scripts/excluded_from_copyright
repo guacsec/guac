@@ -29,6 +29,13 @@
 ./pkg/assembler/backends/ent/certification_delete.go
 ./pkg/assembler/backends/ent/certification_query.go
 ./pkg/assembler/backends/ent/certification_update.go
+./pkg/assembler/backends/ent/certifylegal/certifylegal.go
+./pkg/assembler/backends/ent/certifylegal/where.go
+./pkg/assembler/backends/ent/certifylegal_delete.go
+./pkg/assembler/backends/ent/certifylegal_update.go
+./pkg/assembler/backends/ent/certifylegal.go
+./pkg/assembler/backends/ent/certifylegal_create.go
+./pkg/assembler/backends/ent/certifylegal_query.go
 ./pkg/assembler/backends/ent/certifyscorecard.go
 ./pkg/assembler/backends/ent/certifyscorecard/certifyscorecard.go
 ./pkg/assembler/backends/ent/certifyscorecard/where.go
@@ -87,6 +94,13 @@
 ./pkg/assembler/backends/ent/isvulnerability_delete.go
 ./pkg/assembler/backends/ent/isvulnerability_query.go
 ./pkg/assembler/backends/ent/isvulnerability_update.go
+./pkg/assembler/backends/ent/license/where.go
+./pkg/assembler/backends/ent/license/license.go
+./pkg/assembler/backends/ent/license_query.go
+./pkg/assembler/backends/ent/license.go
+./pkg/assembler/backends/ent/license_create.go
+./pkg/assembler/backends/ent/license_delete.go
+./pkg/assembler/backends/ent/license_update.go
 ./pkg/assembler/backends/ent/migrate/migrate.go
 ./pkg/assembler/backends/ent/migrate/schema.go
 ./pkg/assembler/backends/ent/mutation.go

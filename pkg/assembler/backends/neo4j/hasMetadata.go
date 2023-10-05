@@ -29,3 +29,7 @@ func (c *neo4jClient) IngestHasMetadata(ctx context.Context, subject model.Packa
 func (c *neo4jClient) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
 	return nil, fmt.Errorf("not implemented: HasMetadata")
 }
+
+func (c *neo4jClient) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
+	return nil, fmt.Errorf("not implemented: IngestBulkHasMetadata")
+}

@@ -286,12 +286,16 @@ func (u *PackageTypeUpsertOne) IDX(ctx context.Context) int {
 // PackageTypeCreateBulk is the builder for creating many PackageType entities in bulk.
 type PackageTypeCreateBulk struct {
 	config
+	err      error
 	builders []*PackageTypeCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the PackageType entities in the database.
 func (ptcb *PackageTypeCreateBulk) Save(ctx context.Context) ([]*PackageType, error) {
+	if ptcb.err != nil {
+		return nil, ptcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ptcb.builders))
 	nodes := make([]*PackageType, len(ptcb.builders))
 	mutators := make([]Mutator, len(ptcb.builders))
@@ -465,6 +469,9 @@ func (u *PackageTypeUpsertBulk) UpdateType() *PackageTypeUpsertBulk {
 
 // Exec executes the query.
 func (u *PackageTypeUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the PackageTypeCreateBulk instead", i)

@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -19,6 +20,12 @@ import (
 func init() {
 	certificationFields := schema.Certification{}.Fields()
 	_ = certificationFields
+	licenseFields := schema.License{}.Fields()
+	_ = licenseFields
+	// licenseDescName is the schema descriptor for name field.
+	licenseDescName := licenseFields[0].Descriptor()
+	// license.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	license.NameValidator = licenseDescName.Validators[0].(func(string) error)
 	packagenameFields := schema.PackageName{}.Fields()
 	_ = packagenameFields
 	// packagenameDescName is the schema descriptor for name field.
