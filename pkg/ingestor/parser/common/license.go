@@ -18,10 +18,10 @@ package common
 import (
 	"fmt"
 	"hash/fnv"
+	"slices"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"golang.org/x/exp/slices"
 )
 
 var ignore = []string{

@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -26,7 +27,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 var t1, _ = time.Parse(time.RFC3339, "2023-01-01T00:00:00Z")
@@ -779,7 +779,7 @@ func TestIngestCertifyVulns(t *testing.T) {
 					Pkgs:  []*model.PkgInputSpec{p2},
 					Vulns: []*model.VulnerabilityInputSpec{o1},
 					CertifyVulns: []*model.ScanMetadataInput{
-						&model.ScanMetadataInput{
+						{
 							Collector:      "test collector",
 							Origin:         "test origin",
 							ScannerVersion: "v1.0.0",
@@ -814,7 +814,7 @@ func TestIngestCertifyVulns(t *testing.T) {
 					Pkgs:  []*model.PkgInputSpec{p2},
 					Vulns: []*model.VulnerabilityInputSpec{g1},
 					CertifyVulns: []*model.ScanMetadataInput{
-						&model.ScanMetadataInput{
+						{
 							Collector:      "test collector",
 							Origin:         "test origin",
 							ScannerVersion: "v1.0.0",
@@ -895,7 +895,7 @@ func TestIngestCertifyVulns(t *testing.T) {
 					Pkgs:  []*model.PkgInputSpec{p2},
 					Vulns: []*model.VulnerabilityInputSpec{g1},
 					CertifyVulns: []*model.ScanMetadataInput{
-						&model.ScanMetadataInput{
+						{
 							Collector:      "test collector",
 							Origin:         "test origin",
 							ScannerVersion: "v1.0.0",
@@ -1120,7 +1120,7 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{p1},
 			InVuln: []*model.VulnerabilityInputSpec{o1},
 			Calls: []call{
-				call{
+				{
 					Pkg:  p1,
 					Vuln: o1,
 					CertifyVuln: &model.ScanMetadataInput{
@@ -1135,9 +1135,9 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "7"}, // pkg version -> pkg name, vex
-				"6": []string{"5", "7"}, // Vuln -> vex
-				"7": []string{"1", "5"}, // Vex -> pkg version, vuln
+				"4": {"1", "7"}, // pkg version -> pkg name, vex
+				"6": {"5", "7"}, // Vuln -> vex
+				"7": {"1", "5"}, // Vex -> pkg version, vuln
 			},
 		},
 		{
@@ -1145,7 +1145,7 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{p1},
 			InVuln: []*model.VulnerabilityInputSpec{o1, o2},
 			Calls: []call{
-				call{
+				{
 					Pkg:  p1,
 					Vuln: o1,
 					CertifyVuln: &model.ScanMetadataInput{
@@ -1158,7 +1158,7 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 						TimeScanned:    t1,
 					},
 				},
-				call{
+				{
 					Pkg:  p1,
 					Vuln: o2,
 					CertifyVuln: &model.ScanMetadataInput{
@@ -1173,11 +1173,11 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "8", "9"}, // pkg version -> pkg name, certVuln1, certVuln2
-				"6": []string{"5", "8"},      // Vuln1 -> vunType, certVuln1
-				"7": []string{"5", "9"},      // Vuln2 -> vunType, certVuln2
-				"8": []string{"1", "5"},      // certVuln1 -> pkg version, vuln1
-				"9": []string{"1", "5"},      // certVuln2 -> pkg version, vuln2
+				"4": {"1", "8", "9"}, // pkg version -> pkg name, certVuln1, certVuln2
+				"6": {"5", "8"},      // Vuln1 -> vunType, certVuln1
+				"7": {"5", "9"},      // Vuln2 -> vunType, certVuln2
+				"8": {"1", "5"},      // certVuln1 -> pkg version, vuln1
+				"9": {"1", "5"},      // certVuln2 -> pkg version, vuln2
 			},
 		},
 	}

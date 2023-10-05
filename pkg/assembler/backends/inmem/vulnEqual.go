@@ -17,23 +17,24 @@ package inmem
 
 import (
 	"context"
+	"slices"
 	"strconv"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/exp/slices"
-
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal data: link between equal vulnerabilities (vulnEqual)
-type vulnerabilityEqualList []*vulnerabilityEqualLink
-type vulnerabilityEqualLink struct {
-	id              uint32
-	vulnerabilities []uint32
-	justification   string
-	origin          string
-	collector       string
-}
+type (
+	vulnerabilityEqualList []*vulnerabilityEqualLink
+	vulnerabilityEqualLink struct {
+		id              uint32
+		vulnerabilities []uint32
+		justification   string
+		origin          string
+		collector       string
+	}
+)
 
 func (n *vulnerabilityEqualLink) ID() uint32 { return n.id }
 
@@ -207,8 +208,8 @@ func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 
 func (c *demoClient) addVulnIfMatch(out []*model.VulnEqual,
 	filter *model.VulnEqualSpec, link *vulnerabilityEqualLink) (
-	[]*model.VulnEqual, error) {
-
+	[]*model.VulnEqual, error,
+) {
 	if noMatch(filter.Justification, link.justification) ||
 		noMatch(filter.Origin, link.origin) ||
 		noMatch(filter.Collector, link.collector) {

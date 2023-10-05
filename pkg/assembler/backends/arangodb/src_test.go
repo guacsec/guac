@@ -19,6 +19,7 @@ package arangodb
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -26,7 +27,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func lessSource(a, b *model.Source) int {
@@ -215,7 +215,8 @@ func Test_SourceTypes(t *testing.T) {
 			}, {
 				Type:       "svn",
 				Namespaces: []*model.SourceNamespace{},
-			}},
+			},
+		},
 		wantErr: false,
 	}, {
 		name:     "bobsrepo with commit, type search",
@@ -321,7 +322,8 @@ func Test_SourceNamespaces(t *testing.T) {
 					Namespace: "github.com/bob",
 					Names:     []*model.SourceName{},
 				}},
-			}},
+			},
+		},
 		wantErr: false,
 	}, {
 		name:     "bobsrepo with commit, type search",

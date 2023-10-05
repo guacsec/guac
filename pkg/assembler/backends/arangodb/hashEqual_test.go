@@ -19,6 +19,7 @@ package arangodb
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -26,7 +27,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestHashEqual(t *testing.T) {

@@ -17,32 +17,33 @@ package inmem
 
 import (
 	"context"
+	"slices"
 	"strconv"
 	"time"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/exp/slices"
-
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal certifyLegal
 
-type certifyLegalList []*certifyLegalStruct
-type certifyLegalStruct struct {
-	id                 uint32
-	pkg                uint32
-	source             uint32
-	declaredLicense    string
-	declaredLicenses   []uint32
-	discoveredLicense  string
-	discoveredLicenses []uint32
-	attribution        string
-	justification      string
-	timeScanned        time.Time
-	origin             string
-	collector          string
-}
+type (
+	certifyLegalList   []*certifyLegalStruct
+	certifyLegalStruct struct {
+		id                 uint32
+		pkg                uint32
+		source             uint32
+		declaredLicense    string
+		declaredLicenses   []uint32
+		discoveredLicense  string
+		discoveredLicenses []uint32
+		attribution        string
+		justification      string
+		timeScanned        time.Time
+		origin             string
+		collector          string
+	}
+)
 
 func (n *certifyLegalStruct) ID() uint32 { return n.id }
 
@@ -356,8 +357,8 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 
 func (c *demoClient) addLegalIfMatch(out []*model.CertifyLegal,
 	filter *model.CertifyLegalSpec, link *certifyLegalStruct) (
-	[]*model.CertifyLegal, error) {
-
+	[]*model.CertifyLegal, error,
+) {
 	if noMatch(filter.DeclaredLicense, link.declaredLicense) ||
 		noMatch(filter.DiscoveredLicense, link.discoveredLicense) ||
 		noMatch(filter.Attribution, link.attribution) ||
