@@ -279,7 +279,7 @@ func (s *Suite) TestLegal() {
 			},
 			Query: &model.CertifyLegalSpec{
 				DeclaredLicenses: []*model.LicenseSpec{
-					{Inline: &inlineLicense},
+					{Inline: &testdata.InlineLicense},
 				},
 			},
 			ExpLegal: []*model.CertifyLegal{

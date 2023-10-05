@@ -19,6 +19,7 @@ package arangodb
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -26,11 +27,10 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
-func lessLicense(a, b *model.License) bool {
-	return a.Name < b.Name
+func lessLicense(a, b *model.License) int {
+	return strings.Compare(a.Name, b.Name)
 }
 
 func Test_Licenses(t *testing.T) {

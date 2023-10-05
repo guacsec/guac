@@ -18,11 +18,11 @@ package arangodb
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func (c *arangoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
