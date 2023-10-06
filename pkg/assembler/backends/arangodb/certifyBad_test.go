@@ -21,12 +21,15 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+var zeroTime = time.Unix(0, 0)
 
 func TestCertifyBad(t *testing.T) {
 	ctx := context.Background()
@@ -72,16 +75,19 @@ func TestCertifyBad(t *testing.T) {
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
+						KnownSince:    zeroTime,
 					},
 				},
 			},
 			Query: &model.CertifyBadSpec{
 				Justification: ptrfrom.String("test justification"),
+				KnownSince:    ptrfrom.Time(zeroTime),
 			},
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
+					KnownSince:    zeroTime,
 				},
 			},
 		},

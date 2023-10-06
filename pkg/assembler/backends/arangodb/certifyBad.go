@@ -278,7 +278,7 @@ func setCertifyBadMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyBad
 		queryValues[collector] = *certifyBadSpec.Collector
 	}
 	if certifyBadSpec.KnownSince != nil {
-		arangoQueryBuilder.filter("certifyBad", "knownSince", "==", "@"+knownSince)
+		arangoQueryBuilder.filter("certifyBad", "knownSince", ">=", "@"+knownSince)
 		queryValues[collector] = *certifyBadSpec.KnownSince
 	}
 }
