@@ -60,6 +60,9 @@ var wellKnownOCIArtifactTypes = map[string]struct {
 	},
 }
 
+// wellKnownSuffixes are the well known suffixes for fallback artifacts
+var wellKnownSuffixes = []string{"att", "sbom"}
+
 type ociCollector struct {
 	collectDataSource datasource.CollectSource
 	checkedDigest     sync.Map
@@ -270,8 +273,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 
 	// check for fallback artifacts
 	digestFormatted := fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded())
-	suffixList := []string{"att", "sbom"}
-	for _, suffix := range suffixList {
+	for _, suffix := range wellKnownSuffixes {
 		digestTag := fmt.Sprintf("%v.%v", digestFormatted, suffix)
 		// check to see if the digest + suffix has already been collected
 		if !o.isDigestCollected(repo, digestTag) {
