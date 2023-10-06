@@ -33,7 +33,7 @@ func (CertifyVex) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("package_id").Optional().Nillable(),
 		field.Int("artifact_id").Optional().Nillable(),
-		field.Int("vulnerability_id").Comment("Vulnerability is one of OSV, GHSA, or CVE, or nil if not vulnerable"),
+		field.Int("vulnerability_id"),
 		field.Time("known_since"),
 		field.String("status"),
 		field.String("statement"),
@@ -49,7 +49,7 @@ func (CertifyVex) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("package", PackageVersion.Type).Unique().Field("package_id"),
 		edge.To("artifact", Artifact.Type).Unique().Field("artifact_id"),
-		edge.To("vulnerability", VulnerabilityType.Type).Unique().Required().Field("vulnerability_id").Comment("Vulnerability is one of OSV, GHSA, or CVE"),
+		edge.To("vulnerability", VulnerabilityID.Type).Unique().Required().Field("vulnerability_id"),
 	}
 }
 

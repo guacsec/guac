@@ -17,7 +17,6 @@ package dsse
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"reflect"
 	"testing"
 

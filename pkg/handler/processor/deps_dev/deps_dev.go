@@ -16,12 +16,14 @@
 package deps_dev
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type DepsDev struct {
 }

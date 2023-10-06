@@ -17,8 +17,9 @@ package csaf
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -31,6 +32,7 @@ import (
 )
 
 var (
+	json              = jsoniter.ConfigCompatibleWithStandardLibrary
 	justificationsMap = map[string]generated.VexJustification{
 		"component_not_present":                             generated.VexJustificationComponentNotPresent,
 		"vulnerable_code_not_present":                       generated.VexJustificationVulnerableCodeNotPresent,
@@ -88,7 +90,7 @@ func (c *csafParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 }
 
 func (c *csafParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return c.identifierStrings, nil
 }
 
 // findPurl searches the given CSAF product tree recursively to find the
@@ -253,6 +255,7 @@ func (c *csafParser) generateVexIngest(ctx context.Context, vulnInput *generated
 
 	vi.VexData = &vd
 	vi.Vulnerability = vulnInput
+	c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, product_id)
 
 	pkg, err := c.findPkgSpec(ctx, product_id)
 	if err != nil {
@@ -295,6 +298,19 @@ func (c *csafParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 					cv := assembler.CertifyVulnIngest{
 						Pkg:           vi.Pkg,
 						Vulnerability: vuln,
+						VulnData:      &vulnData,
+					}
+					cvs = append(cvs, cv)
+				} else if status == "known_not_affected" || status == "fixed" {
+					vulnData := generated.ScanMetadataInput{
+						TimeScanned: c.csaf.Document.Tracking.CurrentReleaseDate,
+					}
+					noVuln := generated.VulnerabilityInputSpec{
+						Type: "NoVuln",
+					}
+					cv := assembler.CertifyVulnIngest{
+						Pkg:           vi.Pkg,
+						Vulnerability: &noVuln,
 						VulnData:      &vulnData,
 					}
 					cvs = append(cvs, cv)

@@ -21,6 +21,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) HashEqual(ctx context.Context, spec *model.HashEqualSpec) ([]*model.HashEqual, error) {
@@ -59,6 +60,18 @@ func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.Artifac
 	}
 
 	return toModelHashEqual(record.Unwrap()), nil
+}
+
+func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
+	var result []*model.HashEqual
+	for i := range hashEquals {
+		he, err := b.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestHashEquals failed for elements #%v with err: %v", i, err)
+		}
+		result = append(result, he)
+	}
+	return result, nil
 }
 
 func upsertHashEqual(ctx context.Context, client *ent.Tx, artifactA model.ArtifactInputSpec, artifactB model.ArtifactInputSpec, spec model.HashEqualInputSpec) (*ent.HashEqual, error) {

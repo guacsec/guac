@@ -28,7 +28,7 @@
           }
         ]
       },
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {

@@ -98,9 +98,21 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 }
 
 func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	// funcName := "IngestOccurrences"
-
-	return nil, nil
+	var models []*model.IsOccurrence
+	for i := range occurrences {
+		var subject model.PackageOrSourceInput
+		if len(subjects.Packages) > 0 {
+			subject = model.PackageOrSourceInput{Package: subjects.Packages[i]}
+		} else {
+			subject = model.PackageOrSourceInput{Source: subjects.Sources[i]}
+		}
+		modelOccurrence, err := b.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestOccurrences failed with element #%v with err: %v", i, err)
+		}
+		models = append(models, modelOccurrence)
+	}
+	return models, nil
 }
 
 func (b *EntBackend) IngestOccurrence(ctx context.Context,

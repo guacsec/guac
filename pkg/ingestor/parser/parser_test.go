@@ -17,7 +17,6 @@ package parser
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"reflect"
 	"strings"

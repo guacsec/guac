@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
@@ -76,8 +77,20 @@ func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSp
 	return toModelHasSourceAt(record.Unwrap()), nil
 }
 
+func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType *model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
+	var result []string
+	for i := range hasSourceAts {
+		hsa, err := b.IngestHasSourceAt(ctx, *pkgs[i], *pkgMatchType, *sources[i], *hasSourceAts[i])
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestHasSourceAts failed with err: %v", err)
+		}
+		result = append(result, hsa.ID)
+	}
+	return result, nil
+}
+
 func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, spec model.HasSourceAtInputSpec) (*ent.HasSourceAt, error) {
-	src, err := client.SourceName.Query().Where(sourceInputQuery(source)).Only(ctx)
+	srcID, err := getSourceNameID(ctx, client.Client(), source)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +104,7 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSp
 		SetOrigin(spec.Origin).
 		SetJustification(spec.Justification).
 		SetKnownSince(spec.KnownSince).
-		SetSource(src)
+		SetSourceID(srcID)
 
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 		pkgName, err := client.PackageName.Query().Where(packageNameInputQuery(pkg)).Only(ctx)
@@ -272,6 +285,8 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 		pkg = toModelPackage(backReferencePackageVersion(record.Edges.PackageVersion))
 	} else {
 		pkg = toModelPackage(backReferencePackageName(record.Edges.AllVersions))
+		// in this case, the expected response is package name with an empty package version array
+		pkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
 	}
 
 	return &model.HasSourceAt{
@@ -322,4 +337,8 @@ func toModelSource(s *ent.SourceType) *model.Source {
 			}
 		}),
 	}
+}
+
+func getSourceNameID(ctx context.Context, client *ent.Client, s model.SourceInputSpec) (int, error) {
+	return client.SourceName.Query().Where(sourceInputQuery(s)).OnlyID(ctx)
 }

@@ -20,6 +20,8 @@ type Tx struct {
 	Builder *BuilderClient
 	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
+	// CertifyLegal is the client for interacting with the CertifyLegal builders.
+	CertifyLegal *CertifyLegalClient
 	// CertifyScorecard is the client for interacting with the CertifyScorecard builders.
 	CertifyScorecard *CertifyScorecardClient
 	// CertifyVex is the client for interacting with the CertifyVex builders.
@@ -34,6 +36,8 @@ type Tx struct {
 	HashEqual *HashEqualClient
 	// IsVulnerability is the client for interacting with the IsVulnerability builders.
 	IsVulnerability *IsVulnerabilityClient
+	// License is the client for interacting with the License builders.
+	License *LicenseClient
 	// Occurrence is the client for interacting with the Occurrence builders.
 	Occurrence *OccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
@@ -197,6 +201,7 @@ func (tx *Tx) init() {
 	tx.BillOfMaterials = NewBillOfMaterialsClient(tx.config)
 	tx.Builder = NewBuilderClient(tx.config)
 	tx.Certification = NewCertificationClient(tx.config)
+	tx.CertifyLegal = NewCertifyLegalClient(tx.config)
 	tx.CertifyScorecard = NewCertifyScorecardClient(tx.config)
 	tx.CertifyVex = NewCertifyVexClient(tx.config)
 	tx.CertifyVuln = NewCertifyVulnClient(tx.config)
@@ -204,6 +209,7 @@ func (tx *Tx) init() {
 	tx.HasSourceAt = NewHasSourceAtClient(tx.config)
 	tx.HashEqual = NewHashEqualClient(tx.config)
 	tx.IsVulnerability = NewIsVulnerabilityClient(tx.config)
+	tx.License = NewLicenseClient(tx.config)
 	tx.Occurrence = NewOccurrenceClient(tx.config)
 	tx.PackageName = NewPackageNameClient(tx.config)
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)

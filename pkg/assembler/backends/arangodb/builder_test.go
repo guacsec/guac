@@ -116,8 +116,8 @@ func Test_IngestBuilder(t *testing.T) {
 	}
 }
 
-func lessBuilder(a, b *model.Builder) bool {
-	return a.URI < b.URI
+func lessBuilder(a, b *model.Builder) int {
+	return strings.Compare(a.URI, b.URI)
 }
 
 func Test_IngestBuilders(t *testing.T) {

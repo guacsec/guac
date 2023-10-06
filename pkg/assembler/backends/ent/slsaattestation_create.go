@@ -723,12 +723,16 @@ func (u *SLSAAttestationUpsertOne) IDX(ctx context.Context) int {
 // SLSAAttestationCreateBulk is the builder for creating many SLSAAttestation entities in bulk.
 type SLSAAttestationCreateBulk struct {
 	config
+	err      error
 	builders []*SLSAAttestationCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the SLSAAttestation entities in the database.
 func (sacb *SLSAAttestationCreateBulk) Save(ctx context.Context) ([]*SLSAAttestation, error) {
+	if sacb.err != nil {
+		return nil, sacb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(sacb.builders))
 	nodes := make([]*SLSAAttestation, len(sacb.builders))
 	mutators := make([]Mutator, len(sacb.builders))
@@ -1049,6 +1053,9 @@ func (u *SLSAAttestationUpsertBulk) UpdateBuiltFromHash() *SLSAAttestationUpsert
 
 // Exec executes the query.
 func (u *SLSAAttestationUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the SLSAAttestationCreateBulk instead", i)

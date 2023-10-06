@@ -45,15 +45,19 @@ func TestCertifyGood(t *testing.T) {
 		CG    *model.CertifyGoodInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		InSrc        []*model.SourceInputSpec
-		InArt        []*model.ArtifactInputSpec
-		Calls        []call
-		Query        *model.CertifyGoodSpec
-		ExpCG        []*model.CertifyGood
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name          string
+		InPkg         []*model.PkgInputSpec
+		InSrc         []*model.SourceInputSpec
+		InArt         []*model.ArtifactInputSpec
+		Calls         []call
+		Query         *model.CertifyGoodSpec
+		QueryID       bool
+		QueryPkgID    bool
+		QuerySourceID bool
+		QueryArtID    bool
+		ExpCG         []*model.CertifyGood
+		ExpIngestErr  bool
+		ExpQueryErr   bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -244,6 +248,31 @@ func TestCertifyGood(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on Package version ID",
+			InPkg: []*model.PkgInputSpec{testdata.P4},
+			InSrc: []*model.SourceInputSpec{},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P4,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			QueryPkgID: true,
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       testdata.P4out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
 			Name:  "Query on Source",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
@@ -291,6 +320,28 @@ func TestCertifyGood(t *testing.T) {
 			},
 		},
 		{
+			Name:  "Query on Source ID",
+			InPkg: []*model.PkgInputSpec{},
+			InSrc: []*model.SourceInputSpec{testdata.S2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Source: testdata.S2,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			QuerySourceID: true,
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       testdata.S2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
 			Name:  "Query on Artifact",
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
@@ -327,6 +378,36 @@ func TestCertifyGood(t *testing.T) {
 					},
 				},
 			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       testdata.A2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Artifact ID",
+			InSrc: []*model.SourceInputSpec{},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Artifact: testdata.A1,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Artifact: testdata.A2,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			QueryArtID: true,
 			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.A2out,
@@ -481,6 +562,7 @@ func TestCertifyGood(t *testing.T) {
 					},
 				},
 			},
+			QueryID: true,
 			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.A2out,
@@ -535,9 +617,42 @@ func TestCertifyGood(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query ID" {
+				if test.QueryID {
 					test.Query = &model.CertifyGoodSpec{
 						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.QueryPkgID {
+					if _, ok := found.Subject.(*model.Package); ok {
+						test.Query = &model.CertifyGoodSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Package: &model.PkgSpec{
+									ID: ptrfrom.String(found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID),
+								},
+							},
+						}
+					}
+				}
+				if test.QuerySourceID {
+					if _, ok := found.Subject.(*model.Source); ok {
+						test.Query = &model.CertifyGoodSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Source: &model.SourceSpec{
+									ID: ptrfrom.String(found.Subject.(*model.Source).Namespaces[0].Names[0].ID),
+								},
+							},
+						}
+					}
+				}
+				if test.QueryArtID {
+					if _, ok := found.Subject.(*model.Artifact); ok {
+						test.Query = &model.CertifyGoodSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Artifact: &model.ArtifactSpec{
+									ID: ptrfrom.String(found.Subject.(*model.Artifact).ID),
+								},
+							},
+						}
 					}
 				}
 			}

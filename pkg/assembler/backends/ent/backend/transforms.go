@@ -115,7 +115,7 @@ func valueOrDefault[T any](v *T, def T) T {
 func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
 	return &model.IsOccurrence{
 		ID:            nodeID(o.ID),
-		Subject:       toOccurrenceSubject(o),
+		Subject:       toModelPackageOrSource(o.Edges.Package, o.Edges.Source),
 		Artifact:      toModelArtifact(o.Edges.Artifact),
 		Justification: o.Justification,
 		Origin:        o.Origin,
@@ -133,25 +133,6 @@ func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
 //		Collector:     o.Collector,
 //	}
 //}
-
-func toOccurrenceSubject(oc *ent.Occurrence) model.PackageOrSource {
-	if oc.Edges.Package != nil {
-		return toModelPackage(backReferencePackageVersion(oc.Edges.Package))
-	} else if oc.Edges.Source != nil &&
-		// FIXME: (ivanvanderbyl) Refactor into backReferenceSubject(...)
-		oc.Edges.Source.Edges.Namespace != nil &&
-		oc.Edges.Source.Edges.Namespace.Edges.SourceType != nil {
-
-		// Manually construct back references to avoid another 3 queries
-		s := oc.Edges.Source
-		ns := s.Edges.Namespace
-		ns.Edges.Names = []*ent.SourceName{s}
-		st := ns.Edges.SourceType
-		st.Edges.Namespaces = []*ent.SourceNamespace{ns}
-		return toModelSource(st)
-	}
-	return nil
-}
 
 //func pkgQualifierInputSpecToQuerySpec(input []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
 //	if input == nil {
@@ -199,14 +180,14 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 	}
 
 	return &model.IsDependency{
-		ID:               nodeID(id.ID),
-		Package:          pkg,
-		DependentPackage: depPkg,
-		VersionRange:     id.VersionRange,
-		DependencyType:   dependencyTypeFromEnum(id.DependencyType),
-		Justification:    id.Justification,
-		Origin:           id.Origin,
-		Collector:        id.Collector,
+		ID:                nodeID(id.ID),
+		Package:           pkg,
+		DependencyPackage: depPkg,
+		VersionRange:      id.VersionRange,
+		DependencyType:    dependencyTypeFromEnum(id.DependencyType),
+		Justification:     id.Justification,
+		Origin:            id.Origin,
+		Collector:         id.Collector,
 	}
 }
 
@@ -239,6 +220,47 @@ func toPackageOrArtifact(p *ent.PackageVersion, a *ent.Artifact) model.PackageOr
 		return toModelPackage(backReferencePackageVersion(p))
 	} else if a != nil {
 		return toModelArtifact(a)
+	}
+	return nil
+}
+
+func toModelLicense(license *ent.License) *model.License {
+	return &model.License{
+		ID:          nodeID(license.ID),
+		Name:        license.Name,
+		Inline:      license.Inline,
+		ListVersion: license.ListVersion,
+	}
+}
+
+func toModelCertifyLegal(cl *ent.CertifyLegal) *model.CertifyLegal {
+	return &model.CertifyLegal{
+		ID:                 nodeID(cl.ID),
+		Subject:            toModelPackageOrSource(cl.Edges.Package, cl.Edges.Source),
+		DeclaredLicense:    cl.DeclaredLicense,
+		DeclaredLicenses:   collect(cl.Edges.DeclaredLicenses, toModelLicense),
+		DiscoveredLicense:  cl.DiscoveredLicense,
+		DiscoveredLicenses: collect(cl.Edges.DiscoveredLicenses, toModelLicense),
+		Attribution:        cl.Attribution,
+		Justification:      cl.Justification,
+		TimeScanned:        cl.TimeScanned,
+		Origin:             cl.Origin,
+		Collector:          cl.Collector,
+	}
+}
+
+func toModelPackageOrSource(pkg *ent.PackageVersion, src *ent.SourceName) model.PackageOrSource {
+	if pkg != nil {
+		return toModelPackage(backReferencePackageVersion(pkg))
+	} else if src != nil &&
+		src.Edges.Namespace != nil &&
+		src.Edges.Namespace.Edges.SourceType != nil {
+		// Manually construct back references to avoid another 3 queries
+		ns := src.Edges.Namespace
+		ns.Edges.Names = []*ent.SourceName{src}
+		st := ns.Edges.SourceType
+		st.Edges.Namespaces = []*ent.SourceNamespace{ns}
+		return toModelSource(st)
 	}
 	return nil
 }

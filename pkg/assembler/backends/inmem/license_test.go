@@ -179,8 +179,8 @@ func TestLicense(t *testing.T) {
 	}
 }
 
-func lessLic(a, b *model.License) bool {
-	return a.Name < b.Name
+func lessLic(a, b *model.License) int {
+	return strings.Compare(a.Name, b.Name)
 }
 
 func TestIngestLicenses(t *testing.T) {

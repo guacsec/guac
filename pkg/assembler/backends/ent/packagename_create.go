@@ -347,12 +347,16 @@ func (u *PackageNameUpsertOne) IDX(ctx context.Context) int {
 // PackageNameCreateBulk is the builder for creating many PackageName entities in bulk.
 type PackageNameCreateBulk struct {
 	config
+	err      error
 	builders []*PackageNameCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the PackageName entities in the database.
 func (pncb *PackageNameCreateBulk) Save(ctx context.Context) ([]*PackageName, error) {
+	if pncb.err != nil {
+		return nil, pncb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(pncb.builders))
 	nodes := make([]*PackageName, len(pncb.builders))
 	mutators := make([]Mutator, len(pncb.builders))
@@ -540,6 +544,9 @@ func (u *PackageNameUpsertBulk) UpdateName() *PackageNameUpsertBulk {
 
 // Exec executes the query.
 func (u *PackageNameUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the PackageNameCreateBulk instead", i)

@@ -120,7 +120,10 @@
                 "name": "openssl-1:1.1.1k-8.el8_6.aarch64",
                 "product": {
                   "name": "openssl-1:1.1.1k-8.el8_6.aarch64",
-                  "product_id": "openssl-1:1.1.1k-8.el8_6.aarch64"
+                  "product_id": "openssl-1:1.1.1k-8.el8_6.aarch64",
+                  "product_identification_helper": {
+                    "purl": "pkg:rpm/redhat/openssl@1.1.1k-8.el8_6?arch=aarch64&epoch=1"
+                  }
                 }
               },
               {

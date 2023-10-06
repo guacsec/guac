@@ -179,6 +179,59 @@ var (
 			},
 		},
 	}
+	// CertifyLegalsColumns holds the columns for the "certify_legals" table.
+	CertifyLegalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "declared_license", Type: field.TypeString},
+		{Name: "discovered_license", Type: field.TypeString},
+		{Name: "attribution", Type: field.TypeString},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "time_scanned", Type: field.TypeTime},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "declared_licenses_hash", Type: field.TypeString},
+		{Name: "discovered_licenses_hash", Type: field.TypeString},
+		{Name: "package_id", Type: field.TypeInt, Nullable: true},
+		{Name: "source_id", Type: field.TypeInt, Nullable: true},
+	}
+	// CertifyLegalsTable holds the schema information for the "certify_legals" table.
+	CertifyLegalsTable = &schema.Table{
+		Name:       "certify_legals",
+		Columns:    CertifyLegalsColumns,
+		PrimaryKey: []*schema.Column{CertifyLegalsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "certify_legals_package_versions_package",
+				Columns:    []*schema.Column{CertifyLegalsColumns[10]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "certify_legals_source_names_source",
+				Columns:    []*schema.Column{CertifyLegalsColumns[11]},
+				RefColumns: []*schema.Column{SourceNamesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "certifylegal_source_id_declared_license_discovered_license_attribution_justification_time_scanned_origin_collector_declared_licenses_hash_discovered_licenses_hash",
+				Unique:  true,
+				Columns: []*schema.Column{CertifyLegalsColumns[11], CertifyLegalsColumns[1], CertifyLegalsColumns[2], CertifyLegalsColumns[3], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NULL AND source_id IS NOT NULL",
+				},
+			},
+			{
+				Name:    "certifylegal_package_id_declared_license_discovered_license_attribution_justification_time_scanned_origin_collector_declared_licenses_hash_discovered_licenses_hash",
+				Unique:  true,
+				Columns: []*schema.Column{CertifyLegalsColumns[10], CertifyLegalsColumns[1], CertifyLegalsColumns[2], CertifyLegalsColumns[3], CertifyLegalsColumns[4], CertifyLegalsColumns[5], CertifyLegalsColumns[6], CertifyLegalsColumns[7], CertifyLegalsColumns[8], CertifyLegalsColumns[9]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NOT NULL AND source_id IS NULL",
+				},
+			},
+		},
+	}
 	// CertifyScorecardsColumns holds the columns for the "certify_scorecards" table.
 	CertifyScorecardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -245,9 +298,9 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "certify_vexes_vulnerability_types_vulnerability",
+				Symbol:     "certify_vexes_vulnerability_ids_vulnerability",
 				Columns:    []*schema.Column{CertifyVexesColumns[10]},
-				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
+				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -472,6 +525,45 @@ var (
 				Name:    "isvulnerability_origin_justification_osv_id_vulnerability_id",
 				Unique:  true,
 				Columns: []*schema.Column{IsVulnerabilitiesColumns[2], IsVulnerabilitiesColumns[1], IsVulnerabilitiesColumns[4], IsVulnerabilitiesColumns[5]},
+			},
+		},
+	}
+	// LicensesColumns holds the columns for the "licenses" table.
+	LicensesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "inline", Type: field.TypeString, Nullable: true},
+		{Name: "list_version", Type: field.TypeString, Nullable: true},
+	}
+	// LicensesTable holds the schema information for the "licenses" table.
+	LicensesTable = &schema.Table{
+		Name:       "licenses",
+		Columns:    LicensesColumns,
+		PrimaryKey: []*schema.Column{LicensesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "license_name_inline_list_version",
+				Unique:  true,
+				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[2], LicensesColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "inline IS NOT NULL AND list_version IS NOT NULL",
+				},
+			},
+			{
+				Name:    "license_name_list_version",
+				Unique:  true,
+				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "inline IS NULL AND list_version IS NOT NULL",
+				},
+			},
+			{
+				Name:    "license_name_inline",
+				Unique:  true,
+				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "inline IS NOT NULL AND list_version IS NULL",
+				},
 			},
 		},
 	}
@@ -855,6 +947,56 @@ var (
 			},
 		},
 	}
+	// CertifyLegalDeclaredLicensesColumns holds the columns for the "certify_legal_declared_licenses" table.
+	CertifyLegalDeclaredLicensesColumns = []*schema.Column{
+		{Name: "certify_legal_id", Type: field.TypeInt},
+		{Name: "license_id", Type: field.TypeInt},
+	}
+	// CertifyLegalDeclaredLicensesTable holds the schema information for the "certify_legal_declared_licenses" table.
+	CertifyLegalDeclaredLicensesTable = &schema.Table{
+		Name:       "certify_legal_declared_licenses",
+		Columns:    CertifyLegalDeclaredLicensesColumns,
+		PrimaryKey: []*schema.Column{CertifyLegalDeclaredLicensesColumns[0], CertifyLegalDeclaredLicensesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "certify_legal_declared_licenses_certify_legal_id",
+				Columns:    []*schema.Column{CertifyLegalDeclaredLicensesColumns[0]},
+				RefColumns: []*schema.Column{CertifyLegalsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "certify_legal_declared_licenses_license_id",
+				Columns:    []*schema.Column{CertifyLegalDeclaredLicensesColumns[1]},
+				RefColumns: []*schema.Column{LicensesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// CertifyLegalDiscoveredLicensesColumns holds the columns for the "certify_legal_discovered_licenses" table.
+	CertifyLegalDiscoveredLicensesColumns = []*schema.Column{
+		{Name: "certify_legal_id", Type: field.TypeInt},
+		{Name: "license_id", Type: field.TypeInt},
+	}
+	// CertifyLegalDiscoveredLicensesTable holds the schema information for the "certify_legal_discovered_licenses" table.
+	CertifyLegalDiscoveredLicensesTable = &schema.Table{
+		Name:       "certify_legal_discovered_licenses",
+		Columns:    CertifyLegalDiscoveredLicensesColumns,
+		PrimaryKey: []*schema.Column{CertifyLegalDiscoveredLicensesColumns[0], CertifyLegalDiscoveredLicensesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "certify_legal_discovered_licenses_certify_legal_id",
+				Columns:    []*schema.Column{CertifyLegalDiscoveredLicensesColumns[0]},
+				RefColumns: []*schema.Column{CertifyLegalsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "certify_legal_discovered_licenses_license_id",
+				Columns:    []*schema.Column{CertifyLegalDiscoveredLicensesColumns[1]},
+				RefColumns: []*schema.Column{LicensesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// HashEqualArtifactsColumns holds the columns for the "hash_equal_artifacts" table.
 	HashEqualArtifactsColumns = []*schema.Column{
 		{Name: "hash_equal_id", Type: field.TypeInt},
@@ -961,6 +1103,7 @@ var (
 		BillOfMaterialsTable,
 		BuildersTable,
 		CertificationsTable,
+		CertifyLegalsTable,
 		CertifyScorecardsTable,
 		CertifyVexesTable,
 		CertifyVulnsTable,
@@ -968,6 +1111,7 @@ var (
 		HasSourceAtsTable,
 		HashEqualsTable,
 		IsVulnerabilitiesTable,
+		LicensesTable,
 		OccurrencesTable,
 		PackageNamesTable,
 		PackageNamespacesTable,
@@ -982,6 +1126,8 @@ var (
 		VulnEqualsTable,
 		VulnerabilityIdsTable,
 		VulnerabilityTypesTable,
+		CertifyLegalDeclaredLicensesTable,
+		CertifyLegalDiscoveredLicensesTable,
 		HashEqualArtifactsTable,
 		PkgEqualPackagesTable,
 		SlsaAttestationBuiltFromTable,
@@ -996,11 +1142,13 @@ func init() {
 	CertificationsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	CertificationsTable.ForeignKeys[2].RefTable = PackageNamesTable
 	CertificationsTable.ForeignKeys[3].RefTable = ArtifactsTable
+	CertifyLegalsTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	CertifyLegalsTable.ForeignKeys[1].RefTable = SourceNamesTable
 	CertifyScorecardsTable.ForeignKeys[0].RefTable = SourceNamesTable
 	CertifyScorecardsTable.ForeignKeys[1].RefTable = ScorecardsTable
 	CertifyVexesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	CertifyVexesTable.ForeignKeys[1].RefTable = ArtifactsTable
-	CertifyVexesTable.ForeignKeys[2].RefTable = VulnerabilityTypesTable
+	CertifyVexesTable.ForeignKeys[2].RefTable = VulnerabilityIdsTable
 	CertifyVulnsTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	CertifyVulnsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
@@ -1025,6 +1173,10 @@ func init() {
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
 	VulnerabilityIdsTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
+	CertifyLegalDeclaredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
+	CertifyLegalDeclaredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
+	CertifyLegalDiscoveredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
+	CertifyLegalDiscoveredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	HashEqualArtifactsTable.ForeignKeys[0].RefTable = HashEqualsTable
 	HashEqualArtifactsTable.ForeignKeys[1].RefTable = ArtifactsTable
 	PkgEqualPackagesTable.ForeignKeys[0].RefTable = PkgEqualsTable

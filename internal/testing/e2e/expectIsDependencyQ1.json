@@ -1,7 +1,7 @@
 {
   "IsDependency": [
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -16,7 +16,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -31,7 +31,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -46,7 +46,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -61,7 +61,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -76,7 +76,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -91,7 +91,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -106,7 +106,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -121,7 +121,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -136,7 +136,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -151,7 +151,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -166,7 +166,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -181,7 +181,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -196,7 +196,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -211,7 +211,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -226,7 +226,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -241,7 +241,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -256,7 +256,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -271,7 +271,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -286,7 +286,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -301,7 +301,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -316,7 +316,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -331,7 +331,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -346,7 +346,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -361,7 +361,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -376,7 +376,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -391,7 +391,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -406,7 +406,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -421,7 +421,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -436,7 +436,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -451,7 +451,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -466,7 +466,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -481,7 +481,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -496,7 +496,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -511,7 +511,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -526,7 +526,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -541,7 +541,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -556,7 +556,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -571,7 +571,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -586,7 +586,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -601,7 +601,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -616,7 +616,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -631,7 +631,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -646,7 +646,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -661,7 +661,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -676,7 +676,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -691,7 +691,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -706,7 +706,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -721,7 +721,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -736,7 +736,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -751,7 +751,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -766,7 +766,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -781,7 +781,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -796,7 +796,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -811,7 +811,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -826,7 +826,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -841,7 +841,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -856,7 +856,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -871,7 +871,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -886,7 +886,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -901,7 +901,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -916,7 +916,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -931,7 +931,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -946,7 +946,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -961,7 +961,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -976,7 +976,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -991,7 +991,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1006,7 +1006,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1021,7 +1021,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1036,7 +1036,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1051,7 +1051,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1066,7 +1066,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1081,7 +1081,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1096,7 +1096,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1111,7 +1111,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1126,7 +1126,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1141,7 +1141,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1156,7 +1156,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1171,7 +1171,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1186,7 +1186,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1201,7 +1201,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1216,7 +1216,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1231,7 +1231,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1246,7 +1246,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1261,7 +1261,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1276,7 +1276,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1291,7 +1291,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1306,7 +1306,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1321,7 +1321,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1336,7 +1336,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1351,7 +1351,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1366,7 +1366,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1381,7 +1381,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1396,7 +1396,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1411,7 +1411,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1426,7 +1426,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1441,7 +1441,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1456,7 +1456,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1471,7 +1471,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1486,7 +1486,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1501,7 +1501,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1516,7 +1516,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1531,7 +1531,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1546,7 +1546,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1561,7 +1561,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1576,7 +1576,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1591,7 +1591,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1606,7 +1606,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1621,7 +1621,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1636,7 +1636,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1651,7 +1651,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1666,7 +1666,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1681,7 +1681,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1696,7 +1696,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1711,7 +1711,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1726,7 +1726,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1741,7 +1741,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1756,7 +1756,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1771,7 +1771,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1786,7 +1786,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1801,7 +1801,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1816,7 +1816,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1831,7 +1831,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1846,7 +1846,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1861,7 +1861,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1876,7 +1876,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1891,7 +1891,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1906,7 +1906,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1921,7 +1921,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1936,7 +1936,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -1951,7 +1951,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1966,7 +1966,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1981,7 +1981,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -1996,7 +1996,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -2011,7 +2011,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2026,7 +2026,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2041,7 +2041,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2056,7 +2056,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2071,7 +2071,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2086,7 +2086,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2101,7 +2101,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2116,7 +2116,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2131,7 +2131,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2146,7 +2146,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2161,7 +2161,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2176,7 +2176,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2191,7 +2191,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2206,7 +2206,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2221,7 +2221,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2236,7 +2236,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2251,7 +2251,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2266,7 +2266,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2281,7 +2281,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2296,7 +2296,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -2311,7 +2311,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2326,7 +2326,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2341,7 +2341,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2356,7 +2356,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2371,7 +2371,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2386,7 +2386,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2401,7 +2401,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2416,7 +2416,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -2431,7 +2431,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -2446,7 +2446,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2461,7 +2461,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2476,7 +2476,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2491,7 +2491,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2506,7 +2506,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2521,7 +2521,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2536,7 +2536,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2551,7 +2551,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2566,7 +2566,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2581,7 +2581,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2596,7 +2596,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2611,7 +2611,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {
@@ -2626,7 +2626,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2641,7 +2641,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2656,7 +2656,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2671,7 +2671,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2686,7 +2686,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2701,7 +2701,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2716,7 +2716,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2731,7 +2731,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2746,7 +2746,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2761,7 +2761,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2776,7 +2776,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2791,7 +2791,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2806,7 +2806,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2821,7 +2821,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2836,7 +2836,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "golang",
         "namespaces": [
           {
@@ -2851,7 +2851,7 @@
       }
     },
     {
-      "dependentPackage": {
+      "dependencyPackage": {
         "type": "alpine",
         "namespaces": [
           {

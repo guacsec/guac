@@ -16,11 +16,13 @@
 package simpledoc
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // TODO: Move to internal
 

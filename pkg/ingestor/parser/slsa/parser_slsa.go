@@ -17,10 +17,11 @@ package slsa
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/in-toto/in-toto-golang/in_toto"
 	scommon "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
@@ -42,6 +43,7 @@ import (
 // - An IsOccurence input spec which will generate a predicate for each occurence
 
 var ErrMetadataNil = errors.New("SLSA01 Metadata is nil")
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type slsaEntity struct {
 	artifacts []*model.ArtifactInputSpec

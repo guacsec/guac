@@ -1,0 +1,101 @@
+#
+# Copyright 2022 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This workflow requires a GitHub App to be registered and installed at the 
+# GitHub Org or personal account level which provides the permissions needed
+# to trigger nightly releases. See details at 
+# https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow.
+# Note that the GitHub App must grant read/write permissions on Contents.
+# This is needed because the inbuilt GITHUB_TOKEN will not trigger a new workflow
+# and we don't want to independently create and manage a bot account -
+# see https://docs.github.com/en/actions/using-workflows/triggering-a-workflow.
+
+name: Nightly Release
+
+on:
+  workflow_dispatch: # testing only, trigger manually to test it works
+  # schedule:
+  #   - cron: '44 4 * * *'   #UTC
+
+env:
+  NIGHTLY_RELEASE_TAG: v0-nightly   #goreleaser enforces semver on tags
+  # Note that the container tag (per .goreleaser-nightly.yaml) 
+  # is simply 'nightly' without semver prefix
+
+jobs:
+  refresh-nightly-tag:
+    runs-on: ubuntu-latest
+    name: trigger nightly build 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # tag=v3
+
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@5804f049e1ab39f8b6e41c4c42f121d2e04c781b # v1.2.2
+        id: app-token
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Refresh nightly tag
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+
+            const { owner, repo } = context.repo
+
+            try { 
+              console.log('Deleting release')
+              const { data: { id } } = await github.rest.repos.getReleaseByTag({ 
+                owner, 
+                repo, 
+                tag: "${{ env.NIGHTLY_RELEASE_TAG }}"
+              })
+              const result = await github.rest.repos.deleteRelease({ 
+                owner, 
+                repo, 
+                release_id: id 
+              })
+              console.log(result)
+            } catch (error) { 
+              // ignore error in case release doesn't exist
+              console.log(error)
+            }
+
+            try { 
+              console.log('Deleting tag')
+              const result = github.rest.git.deleteRef({
+                owner: owner,
+                repo: repo,
+                ref: "tags/${{ env.NIGHTLY_RELEASE_TAG }}"
+              })
+              console.log(result)
+            } catch (error) {
+              // ignore error in case tag doesn't exist
+              console.log(error)
+            }
+ 
+            // sleep to make sure the delete ops above are propagated in github
+            await new Promise(r => setTimeout(r, 3000));
+        
+            console.log('Creating tag to trigger build')
+            const result = github.rest.git.createRef({
+              owner: owner,
+              repo: repo,
+              ref: "refs/tags/${{ env.NIGHTLY_RELEASE_TAG }}",
+              sha: context.sha
+            })
+            console.log(result)

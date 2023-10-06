@@ -46,13 +46,15 @@ func TestCertifyScorecard(t *testing.T) {
 		SC  *model.ScorecardInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InSrc        []*model.SourceInputSpec
-		Calls        []call
-		Query        *model.CertifyScorecardSpec
-		ExpSC        []*model.CertifyScorecard
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name          string
+		InSrc         []*model.SourceInputSpec
+		Calls         []call
+		Query         *model.CertifyScorecardSpec
+		QueryID       bool
+		QuerySourceID bool
+		ExpSC         []*model.CertifyScorecard
+		ExpIngestErr  bool
+		ExpQueryErr   bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -101,6 +103,34 @@ func TestCertifyScorecard(t *testing.T) {
 			ExpSC: []*model.CertifyScorecard{
 				{
 					Source: testdata.S1out,
+					Scorecard: &model.Scorecard{
+						Checks: []*model.ScorecardCheck{},
+						Origin: "test origin",
+					},
+				},
+			},
+		},
+		{
+			Name:  "Query on Source ID",
+			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+			Calls: []call{
+				{
+					Src: testdata.S1,
+					SC: &model.ScorecardInputSpec{
+						Origin: "test origin",
+					},
+				},
+				{
+					Src: testdata.S2,
+					SC: &model.ScorecardInputSpec{
+						Origin: "test origin",
+					},
+				},
+			},
+			QuerySourceID: true,
+			ExpSC: []*model.CertifyScorecard{
+				{
+					Source: testdata.S2out,
 					Scorecard: &model.Scorecard{
 						Checks: []*model.ScorecardCheck{},
 						Origin: "test origin",
@@ -445,6 +475,7 @@ func TestCertifyScorecard(t *testing.T) {
 					},
 				},
 			},
+			QueryID: true,
 			ExpSC: []*model.CertifyScorecard{
 				{
 					Source: testdata.S1out,
@@ -496,10 +527,18 @@ func TestCertifyScorecard(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if test.Name == "Query ID" {
+				if test.QueryID {
 					test.Query = &model.CertifyScorecardSpec{
 						ID: ptrfrom.String(found.ID),
 					}
+				}
+				if test.QuerySourceID {
+					test.Query = &model.CertifyScorecardSpec{
+						Source: &model.SourceSpec{
+							ID: ptrfrom.String(found.Source.Namespaces[0].Names[0].ID),
+						},
+					}
+
 				}
 			}
 			got, err := b.Scorecards(ctx, test.Query)

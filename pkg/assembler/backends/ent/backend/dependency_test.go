@@ -65,10 +65,10 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p1out,
-					DependentPackage: p2outName,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p1out,
+					DependencyPackage: p2outName,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -98,10 +98,10 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p1out,
-					DependentPackage: p2outName,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p1out,
+					DependencyPackage: p2outName,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -131,10 +131,10 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p1out,
-					DependentPackage: p2outName,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p1out,
+					DependencyPackage: p2outName,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -164,10 +164,10 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p1out,
-					DependentPackage: p2outName,
-					Justification:    "test justification one",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p1out,
+					DependencyPackage: p2outName,
+					Justification:     "test justification one",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -190,14 +190,14 @@ func (s *Suite) TestIsDependency() {
 			},
 			Query: &model.IsDependencySpec{
 				Package: &model.PkgSpec{
-					ID: ptrfrom.String("64424509449"),
+					ID: ptrfrom.String("0"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p1out,
-					DependentPackage: p2outName,
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p1out,
+					DependencyPackage: p2outName,
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -219,15 +219,15 @@ func (s *Suite) TestIsDependency() {
 				},
 			},
 			Query: &model.IsDependencySpec{
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Name: ptrfrom.String("openssl"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p2out,
-					DependentPackage: p4outName,
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p2out,
+					DependencyPackage: p4outName,
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -255,14 +255,14 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p1out,
-					DependentPackage: p1outName,
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p1out,
+					DependencyPackage: p1outName,
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 				{
-					Package:          p3out,
-					DependentPackage: p1outName,
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p3out,
+					DependencyPackage: p1outName,
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -287,15 +287,15 @@ func (s *Suite) TestIsDependency() {
 				Package: &model.PkgSpec{
 					Subpath: ptrfrom.String("saved_model_cli.py"),
 				},
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Name: ptrfrom.String("openssl"),
 				},
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p3out,
-					DependentPackage: p4outName,
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p3out,
+					DependencyPackage: p4outName,
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -357,9 +357,9 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p2out,
-					DependentPackage: p1outName,
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p2out,
+					DependencyPackage: p1outName,
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -389,10 +389,10 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p1out,
-					DependentPackage: p1outName,
-					VersionRange:     "1-3",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p1out,
+					DependencyPackage: p1outName,
+					VersionRange:      "1-3",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -422,9 +422,9 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p2out,
-					DependentPackage: p1outName,
-					DependencyType:   model.DependencyTypeIndirect,
+					Package:           p2out,
+					DependencyPackage: p1outName,
+					DependencyType:    model.DependencyTypeIndirect,
 				},
 			},
 		},
@@ -500,10 +500,10 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p3out,
-					DependentPackage: p2out,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p3out,
+					DependencyPackage: p2out,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -525,10 +525,10 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p3out,
-					DependentPackage: p2outName,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p3out,
+					DependencyPackage: p2outName,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
@@ -558,21 +558,21 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p3out,
-					DependentPackage: p2out,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p3out,
+					DependencyPackage: p2out,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 				{
-					Package:          p3out,
-					DependentPackage: p2outName,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p3out,
+					DependencyPackage: p2outName,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
 		{
-			Name:  "Ingest DependentPackage with version and query without version",
+			Name:  "Ingest DependencyPackage with version and query without version",
 			InPkg: []*model.PkgInputSpec{p2, p4},
 			Calls: []call{
 				{
@@ -590,7 +590,7 @@ func (s *Suite) TestIsDependency() {
 					Type: ptrfrom.String("pypi"),
 					Name: ptrfrom.String("tensorflow"),
 				},
-				DependentPackage: &model.PkgSpec{
+				DependencyPackage: &model.PkgSpec{
 					Type:      ptrfrom.String("conan"),
 					Namespace: ptrfrom.String("openssl.org"),
 					Name:      ptrfrom.String("openssl"),
@@ -598,11 +598,11 @@ func (s *Suite) TestIsDependency() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p2out,
-					DependentPackage: p4out,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
-					VersionRange:     "v3.0.3",
+					Package:           p2out,
+					DependencyPackage: p4out,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
+					VersionRange:      "v3.0.3",
 				},
 			},
 		},
@@ -621,7 +621,7 @@ func (s *Suite) TestIsDependency() {
 				if p, err := b.IngestPackage(ctx, *a); err != nil {
 					s.Require().NoError(err, "Could not ingest pkg")
 				} else {
-					pksIDs[i] = p.ID
+					pksIDs[i] = p.Namespaces[0].Names[0].Versions[0].ID
 				}
 			}
 
@@ -655,7 +655,7 @@ func (s *Suite) TestIsDependency() {
 					if idIdx < 0 || idIdx >= len(pksIDs) {
 						s.T().Logf("ID index out of range, want: %d, got: %d. So ID %d will be directly used to query.", len(pksIDs), idIdx, idIdx)
 					} else {
-						test.Query.ID = &pksIDs[idIdx]
+						test.Query.Package.ID = &pksIDs[idIdx]
 					}
 				}
 			}
@@ -712,16 +712,16 @@ func (s *Suite) TestIngestDependencies() {
 			},
 			ExpID: []*model.IsDependency{
 				{
-					Package:          p1out,
-					DependentPackage: p2outName,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p1out,
+					DependencyPackage: p2outName,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 				{
-					Package:          p2out,
-					DependentPackage: p4outName,
-					Justification:    "test justification",
-					DependencyType:   model.DependencyTypeUnknown,
+					Package:           p2out,
+					DependencyPackage: p4outName,
+					Justification:     "test justification",
+					DependencyType:    model.DependencyTypeUnknown,
 				},
 			},
 		},
