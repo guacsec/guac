@@ -19,6 +19,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"reflect"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -100,7 +101,7 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 	return isDeps
 }
 
-func CreateTopLevelHasSBOM(topLevel *model.PkgInputSpec, sbomDoc *processor.Document) assembler.HasSBOMIngest {
+func CreateTopLevelHasSBOM(topLevel *model.PkgInputSpec, sbomDoc *processor.Document, timeStamp time.Time) assembler.HasSBOMIngest {
 	sha256sum := sha256.Sum256(sbomDoc.Blob)
 	hash := hex.EncodeToString(sha256sum[:])
 	return assembler.HasSBOMIngest{
@@ -110,6 +111,7 @@ func CreateTopLevelHasSBOM(topLevel *model.PkgInputSpec, sbomDoc *processor.Docu
 			Algorithm:        "sha256",
 			Digest:           hash,
 			DownloadLocation: sbomDoc.SourceInformation.Source,
+			KnownSince:       timeStamp,
 		},
 	}
 }

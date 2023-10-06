@@ -60,7 +60,8 @@ func TestIngestHasSbom(t *testing.T) {
 						Package: testdata.P1,
 					},
 					HS: &model.HasSBOMInputSpec{
-						URI: "test uri",
+						URI:        "test uri",
+						KnownSince: ZeroTime,
 					},
 				},
 			},
@@ -147,7 +148,8 @@ func TestIngestHasSBOMs(t *testing.T) {
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
-							URI: "test uri",
+							URI:        "test uri",
+							KnownSince: ZeroTime,
 						},
 					},
 				},
@@ -163,7 +165,8 @@ func TestIngestHasSBOMs(t *testing.T) {
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
-							URI: "test uri",
+							URI:        "test uri",
+							KnownSince: ZeroTime,
 						},
 					},
 				},

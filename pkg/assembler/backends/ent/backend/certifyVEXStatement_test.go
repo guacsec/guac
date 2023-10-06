@@ -13,22 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package inmem_test
+//go:build integration
+
+package backend
 
 import (
-	"context"
-	"slices"
-	"strings"
-	"testing"
+	"strconv"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func TestVEX(t *testing.T) {
+func (s *Suite) TestVEX() {
 	testTime := time.Unix(1e9+5, 0)
 	type call struct {
 		Sub  model.PackageOrArtifactInput
@@ -481,7 +479,7 @@ func TestVEX(t *testing.T) {
 				},
 			},
 			Query: &model.CertifyVEXStatementSpec{
-				ID: ptrfrom.String("8"),
+				ID: ptrfrom.String("0"),
 			},
 			ExpVEX: []*model.CertifyVEXStatement{
 				{
@@ -649,18 +647,16 @@ func TestVEX(t *testing.T) {
 				},
 			},
 			Query: &model.CertifyVEXStatementSpec{
-				ID: ptrfrom.String("-5"),
+				ID: ptrfrom.String("asdf"),
 			},
 			ExpQueryErr: true,
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
-	ctx := context.Background()
+	ctx := s.Ctx
 	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("inmem", nil, nil)
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -679,15 +675,28 @@ func TestVEX(t *testing.T) {
 					t.Fatalf("Could not ingest vulnerability: %v", err)
 				}
 			}
-			for _, o := range test.Calls {
-				_, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
+			ids := make([]string, len(test.Calls))
+			for i, o := range test.Calls {
+				v, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
+				ids[i] = v.ID
 			}
+
+			if test.Query.ID != nil {
+				idIdx, err := strconv.Atoi(*test.Query.ID)
+				if err == nil {
+					if idIdx < 0 || idIdx >= len(ids) {
+						s.T().Fatalf("ID index out of range, want: %d, got: %d. So ID %d will be directly used to query", len(ids), idIdx, idIdx)
+					}
+					test.Query.ID = ptrfrom.String(ids[idIdx])
+				}
+			}
+
 			got, err := b.CertifyVEXStatement(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
@@ -702,7 +711,7 @@ func TestVEX(t *testing.T) {
 	}
 }
 
-func TestVEXBulkIngest(t *testing.T) {
+func (s *Suite) TestVEXBulkIngest() {
 	type call struct {
 		Subs  model.PackageOrArtifactInputs
 		Vulns []*model.VulnerabilityInputSpec
@@ -1018,13 +1027,11 @@ func TestVEXBulkIngest(t *testing.T) {
 			},
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
-	ctx := context.Background()
+	ctx := s.Ctx
 	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("inmem", nil, nil)
+		s.Run(test.Name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -1058,120 +1065,6 @@ func TestVEXBulkIngest(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.ExpVEX, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-			}
-		})
-	}
-}
-
-func TestVEXNeighbors(t *testing.T) {
-	type call struct {
-		Sub  model.PackageOrArtifactInput
-		Vuln *model.VulnerabilityInputSpec
-		In   *model.VexStatementInputSpec
-	}
-	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		InArt        []*model.ArtifactInputSpec
-		InVuln       []*model.VulnerabilityInputSpec
-		Calls        []call
-		ExpNeighbors map[string][]string
-	}{
-		{
-			Name:   "HappyPath",
-			InPkg:  []*model.PkgInputSpec{p1},
-			InVuln: []*model.VulnerabilityInputSpec{o1},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: o1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			ExpNeighbors: map[string][]string{
-				"4": {"1", "7"}, // pkg version -> pkg name, vex
-				"6": {"5", "7"}, // vuln -> vuln type, vex
-				"7": {"1", "5"}, // Vex -> pkg version, vuln
-			},
-		},
-		{
-			Name:   "Two vex on same package",
-			InPkg:  []*model.PkgInputSpec{p1},
-			InVuln: []*model.VulnerabilityInputSpec{o1, o2},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: o1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: o2,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			ExpNeighbors: map[string][]string{
-				"4": {"1", "8", "9"}, // pkg version -> pkg name, vex1, vex2
-				"6": {"5", "8"},      // Vuln1 -> vulnType, vex1
-				"7": {"5", "9"},      // Vuln2 -> vulnType, vex2
-				"8": {"1", "5"},      // Vex1 -> pkg version, vuln1
-				"9": {"1", "5"},      // Vex2 -> pkg version, vuln2
-			},
-		},
-	}
-	ctx := context.Background()
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("inmem", nil, nil)
-			if err != nil {
-				t.Fatalf("Could not instantiate testing backend: %v", err)
-			}
-			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
-					t.Fatalf("Could not ingest package: %v", err)
-				}
-			}
-			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
-					t.Fatalf("Could not ingest artifact: %a", err)
-				}
-			}
-			for _, v := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *v); err != nil {
-					t.Fatalf("Could not ingest vulnerability: %v", err)
-				}
-			}
-			for _, o := range test.Calls {
-				if _, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In); err != nil {
-					t.Fatalf("Could not ingest VEXStatement")
-				}
-			}
-			for q, r := range test.ExpNeighbors {
-				got, err := b.Neighbors(ctx, q, nil)
-				if err != nil {
-					t.Fatalf("Could not query neighbors: %s", err)
-				}
-				gotIDs := convNodes(got)
-				slices.Sort(r)
-				slices.Sort(gotIDs)
-				if diff := cmp.Diff(r, gotIDs); diff != "" {
-					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-				}
 			}
 		})
 	}

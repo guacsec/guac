@@ -70,6 +70,7 @@ func (v *AllBuilderTree) GetUri() string { return v.Uri }
 type AllCertifyBad struct {
 	Id            string                                      `json:"id"`
 	Justification string                                      `json:"justification"`
+	KnownSince    time.Time                                   `json:"knownSince"`
 	Subject       AllCertifyBadSubjectPackageSourceOrArtifact `json:"-"`
 	Origin        string                                      `json:"origin"`
 	Collector     string                                      `json:"collector"`
@@ -80,6 +81,9 @@ func (v *AllCertifyBad) GetId() string { return v.Id }
 
 // GetJustification returns AllCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *AllCertifyBad) GetJustification() string { return v.Justification }
+
+// GetKnownSince returns AllCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *AllCertifyBad) GetKnownSince() time.Time { return v.KnownSince }
 
 // GetSubject returns AllCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *AllCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact { return v.Subject }
@@ -128,6 +132,8 @@ type __premarshalAllCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -148,6 +154,7 @@ func (v *AllCertifyBad) __premarshalJSON() (*__premarshalAllCertifyBad, error) {
 
 	retval.Id = v.Id
 	retval.Justification = v.Justification
+	retval.KnownSince = v.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -539,6 +546,7 @@ func (v *AllCertifyBadSubjectSource) __premarshalJSON() (*__premarshalAllCertify
 type AllCertifyGood struct {
 	Id            string                                       `json:"id"`
 	Justification string                                       `json:"justification"`
+	KnownSince    time.Time                                    `json:"knownSince"`
 	Subject       AllCertifyGoodSubjectPackageSourceOrArtifact `json:"-"`
 	Origin        string                                       `json:"origin"`
 	Collector     string                                       `json:"collector"`
@@ -549,6 +557,9 @@ func (v *AllCertifyGood) GetId() string { return v.Id }
 
 // GetJustification returns AllCertifyGood.Justification, and is useful for accessing the field via an interface.
 func (v *AllCertifyGood) GetJustification() string { return v.Justification }
+
+// GetKnownSince returns AllCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *AllCertifyGood) GetKnownSince() time.Time { return v.KnownSince }
 
 // GetSubject returns AllCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *AllCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact { return v.Subject }
@@ -597,6 +608,8 @@ type __premarshalAllCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -617,6 +630,7 @@ func (v *AllCertifyGood) __premarshalJSON() (*__premarshalAllCertifyGood, error)
 
 	retval.Id = v.Id
 	retval.Justification = v.Justification
+	retval.KnownSince = v.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -3060,6 +3074,8 @@ type AllHasSBOMTree struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Timestamp for SBOM creation
+	KnownSince time.Time `json:"knownSince"`
 }
 
 // GetId returns AllHasSBOMTree.Id, and is useful for accessing the field via an interface.
@@ -3085,6 +3101,9 @@ func (v *AllHasSBOMTree) GetOrigin() string { return v.Origin }
 
 // GetCollector returns AllHasSBOMTree.Collector, and is useful for accessing the field via an interface.
 func (v *AllHasSBOMTree) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns AllHasSBOMTree.KnownSince, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTree) GetKnownSince() time.Time { return v.KnownSince }
 
 func (v *AllHasSBOMTree) UnmarshalJSON(b []byte) error {
 
@@ -3135,6 +3154,8 @@ type __premarshalAllHasSBOMTree struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
 }
 
 func (v *AllHasSBOMTree) MarshalJSON() ([]byte, error) {
@@ -3167,6 +3188,7 @@ func (v *AllHasSBOMTree) __premarshalJSON() (*__premarshalAllHasSBOMTree, error)
 	retval.DownloadLocation = v.DownloadLocation
 	retval.Origin = v.Origin
 	retval.Collector = v.Collector
+	retval.KnownSince = v.KnownSince
 	return &retval, nil
 }
 
@@ -6060,9 +6082,10 @@ func (v *CertifyBadArtifactsResponse) GetIngestCertifyBads() []string { return v
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
 type CertifyBadInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // GetJustification returns CertifyBadInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -6073,6 +6096,9 @@ func (v *CertifyBadInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns CertifyBadInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyBadInputSpec) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns CertifyBadInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // CertifyBadPkgResponse is returned by CertifyBadPkg on success.
 type CertifyBadPkgResponse struct {
@@ -6101,12 +6127,16 @@ func (v *CertifyBadPkgsResponse) GetIngestCertifyBads() []string { return v.Inge
 //
 // If a source is specified in the subject filter, then it must specify a name,
 // and optionally a tag and a commit.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
 type CertifyBadSpec struct {
 	Id            *string                      `json:"id"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
 	Justification *string                      `json:"justification"`
 	Origin        *string                      `json:"origin"`
 	Collector     *string                      `json:"collector"`
+	KnownSince    *time.Time                   `json:"knownSince"`
 }
 
 // GetId returns CertifyBadSpec.Id, and is useful for accessing the field via an interface.
@@ -6123,6 +6153,9 @@ func (v *CertifyBadSpec) GetOrigin() *string { return v.Origin }
 
 // GetCollector returns CertifyBadSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyBadSpec) GetCollector() *string { return v.Collector }
+
+// GetKnownSince returns CertifyBadSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadSpec) GetKnownSince() *time.Time { return v.KnownSince }
 
 // CertifyBadSrcResponse is returned by CertifyBadSrc on success.
 type CertifyBadSrcResponse struct {
@@ -6166,6 +6199,9 @@ func (v *CertifyBadsCertifyBad) GetId() string { return v.AllCertifyBad.Id }
 // GetJustification returns CertifyBadsCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *CertifyBadsCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
 
+// GetKnownSince returns CertifyBadsCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadsCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns CertifyBadsCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *CertifyBadsCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -6207,6 +6243,8 @@ type __premarshalCertifyBadsCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -6227,6 +6265,7 @@ func (v *CertifyBadsCertifyBad) __premarshalJSON() (*__premarshalCertifyBadsCert
 
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -6273,9 +6312,10 @@ func (v *CertifyGoodArtifactsResponse) GetIngestCertifyGoods() []string { return
 
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // GetJustification returns CertifyGoodInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -6286,6 +6326,9 @@ func (v *CertifyGoodInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns CertifyGoodInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyGoodInputSpec) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns CertifyGoodInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // CertifyGoodPkgResponse is returned by CertifyGoodPkg on success.
 type CertifyGoodPkgResponse struct {
@@ -7339,12 +7382,13 @@ func (v *HasSBOMArtifactsResponse) GetIngestHasSBOMs() []string { return v.Inges
 
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
-	Uri              string `json:"uri"`
-	Algorithm        string `json:"algorithm"`
-	Digest           string `json:"digest"`
-	DownloadLocation string `json:"downloadLocation"`
-	Origin           string `json:"origin"`
-	Collector        string `json:"collector"`
+	Uri              string    `json:"uri"`
+	Algorithm        string    `json:"algorithm"`
+	Digest           string    `json:"digest"`
+	DownloadLocation string    `json:"downloadLocation"`
+	Origin           string    `json:"origin"`
+	Collector        string    `json:"collector"`
+	KnownSince       time.Time `json:"knownSince"`
 }
 
 // GetUri returns HasSBOMInputSpec.Uri, and is useful for accessing the field via an interface.
@@ -7364,6 +7408,9 @@ func (v *HasSBOMInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns HasSBOMInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns HasSBOMInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSBOMInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // HasSBOMPkgResponse is returned by HasSBOMPkg on success.
 type HasSBOMPkgResponse struct {
@@ -8027,6 +8074,9 @@ func (v *NeighborsNeighborsCertifyBad) GetJustification() string {
 	return v.AllCertifyBad.Justification
 }
 
+// GetKnownSince returns NeighborsNeighborsCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns NeighborsNeighborsCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -8070,6 +8120,8 @@ type __premarshalNeighborsNeighborsCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -8091,6 +8143,7 @@ func (v *NeighborsNeighborsCertifyBad) __premarshalJSON() (*__premarshalNeighbor
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -8138,6 +8191,9 @@ func (v *NeighborsNeighborsCertifyGood) GetJustification() string {
 	return v.AllCertifyGood.Justification
 }
 
+// GetKnownSince returns NeighborsNeighborsCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
+
 // GetSubject returns NeighborsNeighborsCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
 	return v.AllCertifyGood.Subject
@@ -8181,6 +8237,8 @@ type __premarshalNeighborsNeighborsCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -8202,6 +8260,7 @@ func (v *NeighborsNeighborsCertifyGood) __premarshalJSON() (*__premarshalNeighbo
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyGood.Id
 	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -8867,6 +8926,9 @@ func (v *NeighborsNeighborsHasSBOM) GetOrigin() string { return v.AllHasSBOMTree
 // GetCollector returns NeighborsNeighborsHasSBOM.Collector, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collector }
 
+// GetKnownSince returns NeighborsNeighborsHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
+
 func (v *NeighborsNeighborsHasSBOM) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -8910,6 +8972,8 @@ type __premarshalNeighborsNeighborsHasSBOM struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
 }
 
 func (v *NeighborsNeighborsHasSBOM) MarshalJSON() ([]byte, error) {
@@ -8943,6 +9007,7 @@ func (v *NeighborsNeighborsHasSBOM) __premarshalJSON() (*__premarshalNeighborsNe
 	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
 	return &retval, nil
 }
 
@@ -11427,6 +11492,9 @@ func (v *NodeNodeCertifyBad) GetId() string { return v.AllCertifyBad.Id }
 // GetJustification returns NodeNodeCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
 
+// GetKnownSince returns NodeNodeCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns NodeNodeCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -11470,6 +11538,8 @@ type __premarshalNodeNodeCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -11491,6 +11561,7 @@ func (v *NodeNodeCertifyBad) __premarshalJSON() (*__premarshalNodeNodeCertifyBad
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -11536,6 +11607,9 @@ func (v *NodeNodeCertifyGood) GetId() string { return v.AllCertifyGood.Id }
 // GetJustification returns NodeNodeCertifyGood.Justification, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyGood) GetJustification() string { return v.AllCertifyGood.Justification }
 
+// GetKnownSince returns NodeNodeCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
+
 // GetSubject returns NodeNodeCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
 	return v.AllCertifyGood.Subject
@@ -11579,6 +11653,8 @@ type __premarshalNodeNodeCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -11600,6 +11676,7 @@ func (v *NodeNodeCertifyGood) __premarshalJSON() (*__premarshalNodeNodeCertifyGo
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyGood.Id
 	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -12247,6 +12324,9 @@ func (v *NodeNodeHasSBOM) GetOrigin() string { return v.AllHasSBOMTree.Origin }
 // GetCollector returns NodeNodeHasSBOM.Collector, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collector }
 
+// GetKnownSince returns NodeNodeHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
+
 func (v *NodeNodeHasSBOM) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -12290,6 +12370,8 @@ type __premarshalNodeNodeHasSBOM struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
 }
 
 func (v *NodeNodeHasSBOM) MarshalJSON() ([]byte, error) {
@@ -12323,6 +12405,7 @@ func (v *NodeNodeHasSBOM) __premarshalJSON() (*__premarshalNodeNodeHasSBOM, erro
 	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
 	return &retval, nil
 }
 
@@ -13875,6 +13958,9 @@ func (v *NodesNodesCertifyBad) GetId() string { return v.AllCertifyBad.Id }
 // GetJustification returns NodesNodesCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *NodesNodesCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
 
+// GetKnownSince returns NodesNodesCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodesNodesCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns NodesNodesCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *NodesNodesCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -13918,6 +14004,8 @@ type __premarshalNodesNodesCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -13939,6 +14027,7 @@ func (v *NodesNodesCertifyBad) __premarshalJSON() (*__premarshalNodesNodesCertif
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -13984,6 +14073,9 @@ func (v *NodesNodesCertifyGood) GetId() string { return v.AllCertifyGood.Id }
 // GetJustification returns NodesNodesCertifyGood.Justification, and is useful for accessing the field via an interface.
 func (v *NodesNodesCertifyGood) GetJustification() string { return v.AllCertifyGood.Justification }
 
+// GetKnownSince returns NodesNodesCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodesNodesCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
+
 // GetSubject returns NodesNodesCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *NodesNodesCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
 	return v.AllCertifyGood.Subject
@@ -14027,6 +14119,8 @@ type __premarshalNodesNodesCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -14048,6 +14142,7 @@ func (v *NodesNodesCertifyGood) __premarshalJSON() (*__premarshalNodesNodesCerti
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyGood.Id
 	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -14697,6 +14792,9 @@ func (v *NodesNodesHasSBOM) GetOrigin() string { return v.AllHasSBOMTree.Origin 
 // GetCollector returns NodesNodesHasSBOM.Collector, and is useful for accessing the field via an interface.
 func (v *NodesNodesHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collector }
 
+// GetKnownSince returns NodesNodesHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
+
 func (v *NodesNodesHasSBOM) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -14740,6 +14838,8 @@ type __premarshalNodesNodesHasSBOM struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
 }
 
 func (v *NodesNodesHasSBOM) MarshalJSON() ([]byte, error) {
@@ -14773,6 +14873,7 @@ func (v *NodesNodesHasSBOM) __premarshalJSON() (*__premarshalNodesNodesHasSBOM, 
 	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
 	return &retval, nil
 }
 
@@ -17329,6 +17430,9 @@ func (v *PathPathCertifyBad) GetId() string { return v.AllCertifyBad.Id }
 // GetJustification returns PathPathCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
 
+// GetKnownSince returns PathPathCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns PathPathCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -17372,6 +17476,8 @@ type __premarshalPathPathCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -17393,6 +17499,7 @@ func (v *PathPathCertifyBad) __premarshalJSON() (*__premarshalPathPathCertifyBad
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -17438,6 +17545,9 @@ func (v *PathPathCertifyGood) GetId() string { return v.AllCertifyGood.Id }
 // GetJustification returns PathPathCertifyGood.Justification, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyGood) GetJustification() string { return v.AllCertifyGood.Justification }
 
+// GetKnownSince returns PathPathCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
+
 // GetSubject returns PathPathCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
 	return v.AllCertifyGood.Subject
@@ -17481,6 +17591,8 @@ type __premarshalPathPathCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -17502,6 +17614,7 @@ func (v *PathPathCertifyGood) __premarshalJSON() (*__premarshalPathPathCertifyGo
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyGood.Id
 	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -18149,6 +18262,9 @@ func (v *PathPathHasSBOM) GetOrigin() string { return v.AllHasSBOMTree.Origin }
 // GetCollector returns PathPathHasSBOM.Collector, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collector }
 
+// GetKnownSince returns PathPathHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
+
 func (v *PathPathHasSBOM) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -18192,6 +18308,8 @@ type __premarshalPathPathHasSBOM struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
 }
 
 func (v *PathPathHasSBOM) MarshalJSON() ([]byte, error) {
@@ -18225,6 +18343,7 @@ func (v *PathPathHasSBOM) __premarshalJSON() (*__premarshalPathPathHasSBOM, erro
 	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
 	return &retval, nil
 }
 
@@ -22277,6 +22396,7 @@ query CertifyBads ($filter: CertifyBadSpec!) {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -24748,6 +24868,7 @@ fragment AllSLSATree on HasSLSA {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -24766,6 +24887,7 @@ fragment AllCertifyBad on CertifyBad {
 fragment AllCertifyGood on CertifyGood {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -24807,6 +24929,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	downloadLocation
 	origin
 	collector
+	knownSince
 }
 fragment AllHasSourceAt on HasSourceAt {
 	id
@@ -25207,6 +25330,7 @@ fragment AllSLSATree on HasSLSA {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -25225,6 +25349,7 @@ fragment AllCertifyBad on CertifyBad {
 fragment AllCertifyGood on CertifyGood {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -25266,6 +25391,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	downloadLocation
 	origin
 	collector
+	knownSince
 }
 fragment AllHasSourceAt on HasSourceAt {
 	id
@@ -25664,6 +25790,7 @@ fragment AllSLSATree on HasSLSA {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -25682,6 +25809,7 @@ fragment AllCertifyBad on CertifyBad {
 fragment AllCertifyGood on CertifyGood {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -25723,6 +25851,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	downloadLocation
 	origin
 	collector
+	knownSince
 }
 fragment AllHasSourceAt on HasSourceAt {
 	id
@@ -26350,6 +26479,7 @@ fragment AllSLSATree on HasSLSA {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -26368,6 +26498,7 @@ fragment AllCertifyBad on CertifyBad {
 fragment AllCertifyGood on CertifyGood {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -26409,6 +26540,7 @@ fragment AllHasSBOMTree on HasSBOM {
 	downloadLocation
 	origin
 	collector
+	knownSince
 }
 fragment AllHasSourceAt on HasSourceAt {
 	id

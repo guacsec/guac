@@ -1631,13 +1631,13 @@ func (c *CertifyVexClient) QueryArtifact(cv *CertifyVex) *ArtifactQuery {
 }
 
 // QueryVulnerability queries the vulnerability edge of a CertifyVex.
-func (c *CertifyVexClient) QueryVulnerability(cv *CertifyVex) *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: c.config}).Query()
+func (c *CertifyVexClient) QueryVulnerability(cv *CertifyVex) *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := cv.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(certifyvex.Table, certifyvex.FieldID, id),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certifyvex.VulnerabilityTable, certifyvex.VulnerabilityColumn),
 		)
 		fromV = sqlgraph.Neighbors(cv.driver.Dialect(), step)

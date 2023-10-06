@@ -19,13 +19,13 @@ package arangodb
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 // TODO (pxp928): add tests back in when implemented
@@ -119,8 +119,8 @@ func getArangoConfig() *ArangoConfig {
 	}
 }
 
-func lessArtifact(a, b *model.Artifact) bool {
-	return a.Digest < b.Digest
+func lessArtifact(a, b *model.Artifact) int {
+	return strings.Compare(a.Digest, b.Digest)
 }
 
 func Test_IngestArtifacts(t *testing.T) {

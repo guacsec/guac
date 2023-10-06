@@ -1,0 +1,158 @@
+header:
+  schema-version: 1.0.0
+  expiration-date: '2023-10-04T10:10:09.000Z'
+  last-updated: '2023-10-04'
+  last-reviewed: '2023-10-04'
+  commit-hash: 24dc68f69cc0ceb9783fbbae8f45893577f6a3de
+  project-url: https://github.com/guacsec/guac
+  project-release: '0.2.0'
+  changelog: https://github.com/guacsec/guac/releases
+  license: https://github.com/guacsec/guac/blob/main/LICENSE
+project-lifecycle:
+  status: active
+  roadmap: https://github.com/guacsec/guac/blob/main/ROADMAP.md
+  bug-fixes-only: false
+  core-maintainers:
+  - github:mlieberman85
+  - github:mihaimaruseac
+  - github:lumjjb
+  - github:pxp928
+  - github:SantiagoTorres
+  - github:jeffmendoza
+contribution-policy:
+  accepts-pull-requests: true
+  accepts-automated-pull-requests: true
+  automated-tools-list:
+  - automated-tool: dependabot
+    action: allowed
+    path:
+    - /
+  contributing-policy: https://github.com/guacsec/guac/blob/main/CONTRIBUTING.md
+  code-of-conduct: https://github.com/guacsec/guac/blob/main/CONTRIBUTING.md
+documentation:
+- https://docs.guac.sh
+distribution-points:
+- https://github.com/guacsec/guac/releases
+security-artifacts:
+  threat-model:
+    threat-model-created: false
+    comment: |
+      GUAC is planning to have a threat model performed before GA release.
+  self-assessment:
+    self-assessment-created: false
+    comment: |
+      GUAC is planning to do a security self assessment before GA release.
+security-testing:
+- tool-type: sast
+  tool-name: CodeQL
+  tool-url: https://codeql.github.com/
+  tool-rulesets:
+  - built-in
+  integration:
+    ad-hoc: false
+    ci: true
+    before-release: true
+- tool-type: sca
+  tool-name: Scorecard
+  tool-url: https://securityscorecards.dev/
+  tool-rulesets:
+  - built-in
+  integration:
+    ad-hoc: false
+    ci: true
+    before-release: true
+  comment: |
+    This doesn't quite fit under SCA, but currently this is the closest fit as 
+    far as tool type goes.
+security-contacts:
+- type: email
+  value: parth@kusari.dev
+  primary: true
+- type: email
+  value: lumb@google.com
+  primary: true
+vulnerability-reporting:
+  accepts-vulnerability-reports: false
+  comment: |
+    Vulnerability reporting and security policy is being built out and will update
+    once project falls under neutral governance.
+dependencies:
+  third-party-packages: true
+  dependencies-lists:
+  - https://github.com/guacsec/guac/blob/main/go.mod
+  sbom:
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccollect-linux-amd64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccollect-linux-arm.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccollect-linux-arm64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccollect-windows-amd64.exe.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccollect.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccsub-linux-amd64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccsub-linux-arm.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccsub-linux-arm64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccsub-windows-amd64.exe.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guaccsub.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacgql-linux-amd64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacgql-linux-arm.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacgql-linux-arm64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacgql-windows-amd64.exe.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacgql.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacingest-linux-amd64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacingest-linux-arm.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacingest-linux-arm64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacingest-windows-amd64.exe.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacingest.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacone-linux-amd64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacone-linux-arm.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacone-linux-arm64.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacone-windows-amd64.exe.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3/
+  - sbom-file: https://github.com/guacsec/guac/releases/latest/download/guacone.spdx.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://spdx.github.io/spdx-spec/v2.3

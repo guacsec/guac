@@ -15,7 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 )
 
 // CertifyVexUpdate is the builder for updating CertifyVex entities.
@@ -129,8 +129,8 @@ func (cvu *CertifyVexUpdate) SetArtifact(a *Artifact) *CertifyVexUpdate {
 	return cvu.SetArtifactID(a.ID)
 }
 
-// SetVulnerability sets the "vulnerability" edge to the VulnerabilityType entity.
-func (cvu *CertifyVexUpdate) SetVulnerability(v *VulnerabilityType) *CertifyVexUpdate {
+// SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
+func (cvu *CertifyVexUpdate) SetVulnerability(v *VulnerabilityID) *CertifyVexUpdate {
 	return cvu.SetVulnerabilityID(v.ID)
 }
 
@@ -151,7 +151,7 @@ func (cvu *CertifyVexUpdate) ClearArtifact() *CertifyVexUpdate {
 	return cvu
 }
 
-// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityType entity.
+// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
 func (cvu *CertifyVexUpdate) ClearVulnerability() *CertifyVexUpdate {
 	cvu.mutation.ClearVulnerability()
 	return cvu
@@ -291,7 +291,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -304,7 +304,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -430,8 +430,8 @@ func (cvuo *CertifyVexUpdateOne) SetArtifact(a *Artifact) *CertifyVexUpdateOne {
 	return cvuo.SetArtifactID(a.ID)
 }
 
-// SetVulnerability sets the "vulnerability" edge to the VulnerabilityType entity.
-func (cvuo *CertifyVexUpdateOne) SetVulnerability(v *VulnerabilityType) *CertifyVexUpdateOne {
+// SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
+func (cvuo *CertifyVexUpdateOne) SetVulnerability(v *VulnerabilityID) *CertifyVexUpdateOne {
 	return cvuo.SetVulnerabilityID(v.ID)
 }
 
@@ -452,7 +452,7 @@ func (cvuo *CertifyVexUpdateOne) ClearArtifact() *CertifyVexUpdateOne {
 	return cvuo
 }
 
-// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityType entity.
+// ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
 func (cvuo *CertifyVexUpdateOne) ClearVulnerability() *CertifyVexUpdateOne {
 	cvuo.mutation.ClearVulnerability()
 	return cvuo
@@ -622,7 +622,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -635,7 +635,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilitytype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

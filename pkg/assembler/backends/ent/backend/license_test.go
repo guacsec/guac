@@ -18,55 +18,15 @@
 package backend
 
 import (
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
-
-var l1 = &model.LicenseInputSpec{
-	Name:        "BSD-3-Clause",
-	ListVersion: ptrfrom.String("3.21 2023-06-18"),
-}
-var l1out = &model.License{
-	Name:        "BSD-3-Clause",
-	ListVersion: ptrfrom.String("3.21 2023-06-18"),
-}
-var l2 = &model.LicenseInputSpec{
-	Name:        "GPL-2.0-or-later",
-	ListVersion: ptrfrom.String("3.21 2023-06-18"),
-}
-var l2out = &model.License{
-	Name:        "GPL-2.0-or-later",
-	ListVersion: ptrfrom.String("3.21 2023-06-18"),
-}
-var l3 = &model.LicenseInputSpec{
-	Name:        "MPL-2.0",
-	ListVersion: ptrfrom.String("1.23 2020"),
-}
-var l3out = &model.License{
-	Name:        "MPL-2.0",
-	ListVersion: ptrfrom.String("1.23 2020"),
-}
-
-var inlineLicense = `
-Redistribution and use of the MAME code or any derivative works are permitted provided that the following conditions are met:
-* Redistributions may not be sold, nor may they be used in a commercial product or activity.
-* Redistributions that are modified from the original source must include the complete source code, including the source code for all components used by a binary built from the modified sources. However, as a special exception, the source code distributed need not include anything that is normally distributed (in either source or binary form) with the major components (compiler, kernel, and so on) of the operating system on which the executable runs, unless that component itself accompanies the executable.
-* Redistributions must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-`
-
-var l4 = &model.LicenseInputSpec{
-	Name:   "LicenseRef-d58b4101",
-	Inline: &inlineLicense,
-}
-var l4out = &model.License{
-	Name:   "LicenseRef-d58b4101",
-	Inline: &inlineLicense,
-}
 
 func (s *Suite) TestLicense() {
 	tests := []struct {
@@ -79,57 +39,57 @@ func (s *Suite) TestLicense() {
 	}{
 		{
 			Name:    "HappyPath",
-			Ingests: []*model.LicenseInputSpec{l1},
+			Ingests: []*model.LicenseInputSpec{testdata.L1},
 			Query:   &model.LicenseSpec{},
-			Exp:     []*model.License{l1out},
+			Exp:     []*model.License{testdata.L1out},
 		},
 		{
 			Name:    "Multiple",
-			Ingests: []*model.LicenseInputSpec{l1, l2},
+			Ingests: []*model.LicenseInputSpec{testdata.L1, testdata.L2},
 			Query:   &model.LicenseSpec{},
-			Exp:     []*model.License{l1out, l2out},
+			Exp:     []*model.License{testdata.L1out, testdata.L2out},
 		},
 		{
 			Name:    "Duplicates",
-			Ingests: []*model.LicenseInputSpec{l1, l1, l1},
+			Ingests: []*model.LicenseInputSpec{testdata.L1, testdata.L1, testdata.L1},
 			Query:   &model.LicenseSpec{},
-			Exp:     []*model.License{l1out},
+			Exp:     []*model.License{testdata.L1out},
 		},
 		{
 			Name:    "Query by Name",
-			Ingests: []*model.LicenseInputSpec{l1, l2, l3},
+			Ingests: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L3},
 			Query: &model.LicenseSpec{
 				Name: ptrfrom.String("BSD-3-Clause"),
 			},
-			Exp: []*model.License{l1out},
+			Exp: []*model.License{testdata.L1out},
 		},
 		{
 			Name:    "Query by Inline",
-			Ingests: []*model.LicenseInputSpec{l2, l3, l4},
+			Ingests: []*model.LicenseInputSpec{testdata.L2, testdata.L3, testdata.L4},
 			Query: &model.LicenseSpec{
-				Inline: &inlineLicense,
+				Inline: &testdata.InlineLicense,
 			},
-			Exp: []*model.License{l4out},
+			Exp: []*model.License{testdata.L4out},
 		},
 		{
 			Name:    "Query by ListVersion",
-			Ingests: []*model.LicenseInputSpec{l2, l3, l4},
+			Ingests: []*model.LicenseInputSpec{testdata.L2, testdata.L3, testdata.L4},
 			Query: &model.LicenseSpec{
 				ListVersion: ptrfrom.String("1.23 2020"),
 			},
-			Exp: []*model.License{l3out},
+			Exp: []*model.License{testdata.L3out},
 		},
 		{
 			Name:    "Query by ID",
-			Ingests: []*model.LicenseInputSpec{l2, l3, l4},
+			Ingests: []*model.LicenseInputSpec{testdata.L2, testdata.L3, testdata.L4},
 			Query: &model.LicenseSpec{
 				ID: ptrfrom.String("1"),
 			},
-			Exp: []*model.License{l3out},
+			Exp: []*model.License{testdata.L3out},
 		},
 		{
 			Name:    "Query None",
-			Ingests: []*model.LicenseInputSpec{l2, l3, l4},
+			Ingests: []*model.LicenseInputSpec{testdata.L2, testdata.L3, testdata.L4},
 			Query: &model.LicenseSpec{
 				ListVersion: ptrfrom.String("foo"),
 			},
@@ -137,7 +97,7 @@ func (s *Suite) TestLicense() {
 		},
 		{
 			Name:    "Query invalid ID",
-			Ingests: []*model.LicenseInputSpec{l1, l2, l3},
+			Ingests: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L3},
 			Query: &model.LicenseSpec{
 				ID: ptrfrom.String("asdf"),
 			},
@@ -191,8 +151,8 @@ func (s *Suite) TestLicense() {
 	}
 }
 
-func lessLic(a, b *model.License) bool {
-	return a.Name < b.Name
+func lessLic(a, b *model.License) int {
+	return strings.Compare(a.Name, b.Name)
 }
 
 func (s *Suite) TestIngestLicenses() {
@@ -203,7 +163,7 @@ func (s *Suite) TestIngestLicenses() {
 	}{
 		{
 			name:    "Multiple",
-			ingests: []*model.LicenseInputSpec{l1, l2, l3, l4},
+			ingests: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L3, testdata.L4},
 			exp:     []*model.License{{}, {}, {}, {}},
 		},
 	}

@@ -17,32 +17,33 @@ package inmem
 
 import (
 	"context"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"golang.org/x/exp/slices"
-
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-type hasSLSAList []*hasSLSAStruct
-type hasSLSAStruct struct {
-	id         uint32
-	subject    uint32
-	builtFrom  []uint32
-	builtBy    uint32
-	buildType  string
-	predicates []*model.SLSAPredicate
-	version    string
-	start      *time.Time
-	finish     *time.Time
-	origin     string
-	collector  string
-}
+type (
+	hasSLSAList   []*hasSLSAStruct
+	hasSLSAStruct struct {
+		id         uint32
+		subject    uint32
+		builtFrom  []uint32
+		builtBy    uint32
+		buildType  string
+		predicates []*model.SLSAPredicate
+		version    string
+		start      *time.Time
+		finish     *time.Time
+		origin     string
+		collector  string
+	}
+)
 
 func (n *hasSLSAStruct) ID() uint32 { return n.id }
 
@@ -172,15 +173,16 @@ func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifact
 
 func (c *demoClient) IngestSLSA(ctx context.Context,
 	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
-	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec,
+) (*model.HasSlsa, error) {
 	return c.ingestSLSA(ctx, subject, builtFrom, builtBy, slsa, true)
 }
 
 func (c *demoClient) ingestSLSA(ctx context.Context,
 	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
 	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec, readOnly bool) (
-	*model.HasSlsa, error) {
-
+	*model.HasSlsa, error,
+) {
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
@@ -307,7 +309,8 @@ func (c *demoClient) convSLSA(in *hasSLSAStruct) (*model.HasSlsa, error) {
 
 func (c *demoClient) addSLSAIfMatch(out []*model.HasSlsa,
 	filter *model.HasSLSASpec, link *hasSLSAStruct) (
-	[]*model.HasSlsa, error) {
+	[]*model.HasSlsa, error,
+) {
 	bb, err := byID[*builderStruct](link.builtBy, c)
 	if err != nil {
 		return nil, err

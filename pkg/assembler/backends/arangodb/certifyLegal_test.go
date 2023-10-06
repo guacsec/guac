@@ -13,25 +13,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package inmem_test
+//go:build integration
+
+package arangodb
 
 import (
 	"context"
-	"slices"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler/backends"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-var (
-	t2 = time.Unix(1e9, 0)
-	t3 = time.Unix(1e9+5, 0)
-)
+// var pNone = &model.PkgInputSpec{
+// 	Type: "none",
+// 	Name: "none",
+// }
+
+// var sNone = &model.SourceInputSpec{
+// 	Type:      "none",
+// 	Namespace: "github.com/nope",
+// 	Name:      "none",
+// }
+
+// var lNone = &model.LicenseInputSpec{
+// 	Name:        "LIC_NONE",
+// 	ListVersion: ptrfrom.String("1.2.3"),
+// }
 
 func TestLegal(t *testing.T) {
 	type call struct {
@@ -46,6 +58,7 @@ func TestLegal(t *testing.T) {
 		InSrc        []*model.SourceInputSpec
 		InLic        []*model.LicenseInputSpec
 		Calls        []call
+		IDInFilter   int
 		Query        *model.CertifyLegalSpec
 		ExpLegal     []*model.CertifyLegal
 		ExpIngestErr bool
@@ -53,14 +66,14 @@ func TestLegal(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{p1},
-			InLic: []*model.LicenseInputSpec{l1},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
@@ -71,31 +84,31 @@ func TestLegal(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          p1out,
-					DeclaredLicenses: []*model.License{l1out},
+					Subject:          testdata.P1out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
 					Justification:    "test justification",
 				},
 			},
 		},
 		{
 			Name:  "Ingest same twice",
-			InPkg: []*model.PkgInputSpec{p1},
-			InLic: []*model.LicenseInputSpec{l1},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
@@ -106,31 +119,31 @@ func TestLegal(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          p1out,
-					DeclaredLicenses: []*model.License{l1out},
+					Subject:          testdata.P1out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
 					Justification:    "test justification",
 				},
 			},
 		},
 		{
 			Name:  "Query on Justification",
-			InPkg: []*model.PkgInputSpec{p1},
-			InLic: []*model.LicenseInputSpec{l1},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification 2",
 					},
@@ -141,31 +154,65 @@ func TestLegal(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          p1out,
-					DeclaredLicenses: []*model.License{l1out},
+					Subject:          testdata.P1out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
 					Justification:    "test justification 2",
 				},
 			},
 		},
 		{
-			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{p1, p2},
-			InLic: []*model.LicenseInputSpec{l1},
+			Name:  "Query on ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p2,
+						Package: testdata.P1,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
+					Legal: &model.CertifyLegalInputSpec{
+						Justification: "test justification 2",
+					},
+				},
+			},
+			IDInFilter: 2,
+			Query:      &model.CertifyLegalSpec{},
+			ExpLegal: []*model.CertifyLegal{
+				{
+					Subject:          testdata.P1out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
+					Justification:    "test justification 2",
+				},
+			},
+		},
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P1,
+					},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
+					Legal: &model.CertifyLegalInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P2,
+					},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
@@ -174,37 +221,37 @@ func TestLegal(t *testing.T) {
 			Query: &model.CertifyLegalSpec{
 				Subject: &model.PackageOrSourceSpec{
 					Package: &model.PkgSpec{
-						Version: ptrfrom.String(""),
+						Version: ptrfrom.String("2.11.1"),
 					},
 				},
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          p1out,
-					DeclaredLicenses: []*model.License{l1out},
+					Subject:          testdata.P2out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
 					Justification:    "test justification",
 				},
 			},
 		},
 		{
 			Name:  "Query on Source",
-			InSrc: []*model.SourceInputSpec{s1, s2},
-			InLic: []*model.LicenseInputSpec{l1},
+			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: s1,
+						Source: testdata.S1,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: s2,
+						Source: testdata.S2,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
@@ -219,31 +266,31 @@ func TestLegal(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          s1out,
-					DeclaredLicenses: []*model.License{l1out},
+					Subject:          testdata.S1out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
 					Justification:    "test justification",
 				},
 			},
 		},
 		{
 			Name:  "Query on License",
-			InSrc: []*model.SourceInputSpec{s1},
-			InLic: []*model.LicenseInputSpec{l1, l2, l3},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InLic: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L3},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: s1,
+						Source: testdata.S1,
 					},
-					Dec: []*model.LicenseInputSpec{l1, l2},
+					Dec: []*model.LicenseInputSpec{testdata.L1, testdata.L2},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: s1,
+						Source: testdata.S1,
 					},
-					Dec: []*model.LicenseInputSpec{l3},
+					Dec: []*model.LicenseInputSpec{testdata.L3},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
@@ -256,31 +303,31 @@ func TestLegal(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          s1out,
-					DeclaredLicenses: []*model.License{l1out, l2out},
+					Subject:          testdata.S1out,
+					DeclaredLicenses: []*model.License{testdata.L1out, testdata.L2out},
 					Justification:    "test justification",
 				},
 			},
 		},
 		{
 			Name:  "Query on License inline",
-			InSrc: []*model.SourceInputSpec{s1},
-			InLic: []*model.LicenseInputSpec{l1, l2, l4},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InLic: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L4},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: s1,
+						Source: testdata.S1,
 					},
-					Dec: []*model.LicenseInputSpec{l1, l4},
+					Dec: []*model.LicenseInputSpec{testdata.L1, testdata.L4},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: s1,
+						Source: testdata.S1,
 					},
-					Dec: []*model.LicenseInputSpec{l2},
+					Dec: []*model.LicenseInputSpec{testdata.L2},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification",
 					},
@@ -288,24 +335,24 @@ func TestLegal(t *testing.T) {
 			},
 			Query: &model.CertifyLegalSpec{
 				DeclaredLicenses: []*model.LicenseSpec{
-					{Inline: &inlineLicense},
+					{Inline: &testdata.InlineLicense},
 				},
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          s1out,
-					DeclaredLicenses: []*model.License{l1out, l4out},
+					Subject:          testdata.S1out,
+					DeclaredLicenses: []*model.License{testdata.L1out, testdata.L4out},
 					Justification:    "test justification",
 				},
 			},
 		},
 		{
 			Name:  "Query on expression",
-			InPkg: []*model.PkgInputSpec{p1},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						DeclaredLicense: "GPL OR MIT",
@@ -313,7 +360,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						DeclaredLicense: "GPL AND MIT",
@@ -325,18 +372,18 @@ func TestLegal(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:         p1out,
+					Subject:         testdata.P1out,
 					DeclaredLicense: "GPL AND MIT",
 				},
 			},
 		},
 		{
 			Name:  "Query on attribution",
-			InPkg: []*model.PkgInputSpec{p1},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						Attribution: "Copyright Jeff",
@@ -344,7 +391,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						Attribution: "Copyright Bob",
@@ -356,137 +403,142 @@ func TestLegal(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:     p1out,
+					Subject:     testdata.P1out,
 					Attribution: "Copyright Jeff",
 				},
 			},
 		},
 		{
 			Name:  "Query on time",
-			InPkg: []*model.PkgInputSpec{p1},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
 					Legal: &model.CertifyLegalInputSpec{
-						TimeScanned: t3,
+						TimeScanned: testdata.T3,
 					},
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
 					Legal: &model.CertifyLegalInputSpec{
-						TimeScanned: t2,
+						TimeScanned: testdata.T2,
 					},
 				},
 			},
 			Query: &model.CertifyLegalSpec{
-				TimeScanned: &t2,
+				TimeScanned: &testdata.T2,
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:     p1out,
-					TimeScanned: t2,
+					Subject:     testdata.P1out,
+					TimeScanned: testdata.T2,
 				},
 			},
 		},
 		{
 			Name:  "Query multiple",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-			InLic: []*model.LicenseInputSpec{l1},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
+						Package: testdata.P1,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
-						Justification: "test justification",
+						Justification: "test justification special",
 					},
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p2,
+						Package: testdata.P2,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
-						Justification: "test justification",
+						Justification: "test justification special",
 					},
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: p3,
+						Package: testdata.P3,
 					},
-					Dec: []*model.LicenseInputSpec{l1},
+					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
 						Justification: "test justification other",
 					},
 				},
 			},
 			Query: &model.CertifyLegalSpec{
-				Justification: ptrfrom.String("test justification"),
+				Justification: ptrfrom.String("test justification special"),
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          p1out,
-					DeclaredLicenses: []*model.License{l1out},
-					Justification:    "test justification",
+					Subject:          testdata.P1out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
+					Justification:    "test justification special",
 				},
 				{
-					Subject:          p2out,
-					DeclaredLicenses: []*model.License{l1out},
-					Justification:    "test justification",
+					Subject:          testdata.P2out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
+					Justification:    "test justification special",
 				},
 			},
 		},
-		{
-			Name: "Ingest without Package",
-			Calls: []call{
-				{
-					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
-					},
-					Legal: &model.CertifyLegalInputSpec{},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name: "Ingest without Source",
-			Calls: []call{
-				{
-					PkgSrc: model.PackageOrSourceInput{
-						Source: s1,
-					},
-					Legal: &model.CertifyLegalInputSpec{},
-				},
-			},
-			ExpIngestErr: true,
-		},
-		{
-			Name:  "Ingest without License",
-			InPkg: []*model.PkgInputSpec{p1},
-			Calls: []call{
-				{
-					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
-					},
-					Dec:   []*model.LicenseInputSpec{l1},
-					Legal: &model.CertifyLegalInputSpec{},
-				},
-			},
-			ExpIngestErr: true,
-		},
+		// {
+		// 	Name: "Ingest without Package",
+		// 	Calls: []call{
+		// 		{
+		// 			PkgSrc: model.PackageOrSourceInput{
+		// 				Package: pNone,
+		// 			},
+		// 			Legal: &model.CertifyLegalInputSpec{},
+		// 		},
+		// 	},
+		// 	ExpIngestErr: true,
+		// },
+		// {
+		// 	Name: "Ingest without Source",
+		// 	Calls: []call{
+		// 		{
+		// 			PkgSrc: model.PackageOrSourceInput{
+		// 				Source: sNone,
+		// 			},
+		// 			Legal: &model.CertifyLegalInputSpec{},
+		// 		},
+		// 	},
+		// 	ExpIngestErr: true,
+		// },
+		// {
+		// 	Name:  "Ingest without License",
+		// 	InPkg: []*model.PkgInputSpec{testdata.P1},
+		// 	Calls: []call{
+		// 		{
+		// 			PkgSrc: model.PackageOrSourceInput{
+		// 				Package: testdata.P1,
+		// 			},
+		// 			Dec:   []*model.LicenseInputSpec{lNone},
+		// 			Legal: &model.CertifyLegalInputSpec{},
+		// 		},
+		// 	},
+		// 	ExpIngestErr: true,
+		// },
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("inmem", nil, nil)
+			b, err := getBackend(ctx, arangArg)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -505,13 +557,16 @@ func TestLegal(t *testing.T) {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
-			for _, o := range test.Calls {
-				_, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+			for i, o := range test.Calls {
+				cl, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
+				}
+				if (i + 1) == test.IDInFilter {
+					test.Query.ID = &cl.ID
 				}
 			}
 			got, err := b.CertifyLegal(ctx, test.Query)
@@ -548,14 +603,14 @@ func TestLegals(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{p1, p2},
-			InLic: []*model.LicenseInputSpec{l1},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInputs{
-						Packages: []*model.PkgInputSpec{p1, p2},
+						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 					},
-					Dec: [][]*model.LicenseInputSpec{{l1}, {l1}},
+					Dec: [][]*model.LicenseInputSpec{{testdata.L1}, {testdata.L1}},
 					Dis: [][]*model.LicenseInputSpec{{}, {}},
 					Legal: []*model.CertifyLegalInputSpec{
 						{Justification: "test justification"},
@@ -568,13 +623,13 @@ func TestLegals(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          p1out,
-					DeclaredLicenses: []*model.License{l1out},
+					Subject:          testdata.P1out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
 					Justification:    "test justification",
 				},
 				{
-					Subject:          p2out,
-					DeclaredLicenses: []*model.License{l1out},
+					Subject:          testdata.P2out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
 					Justification:    "test justification",
 				},
 			},
@@ -584,9 +639,14 @@ func TestLegals(t *testing.T) {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("inmem", nil, nil)
+			b, err := getBackend(ctx, arangArg)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -623,123 +683,6 @@ func TestLegals(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.ExpLegal, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-			}
-		})
-	}
-}
-
-func TestLegalNeighbors(t *testing.T) {
-	type call struct {
-		PkgSrc model.PackageOrSourceInput
-		Dec    []*model.LicenseInputSpec
-		Dis    []*model.LicenseInputSpec
-		Legal  *model.CertifyLegalInputSpec
-	}
-	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		InSrc        []*model.SourceInputSpec
-		InLic        []*model.LicenseInputSpec
-		Calls        []call
-		ExpNeighbors map[string][]string
-	}{
-		{
-			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{p1},
-			InLic: []*model.LicenseInputSpec{l1},
-			Calls: []call{
-				{
-					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
-					},
-					Dec: []*model.LicenseInputSpec{l1},
-					Legal: &model.CertifyLegalInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpNeighbors: map[string][]string{
-				"1": {"1"},
-				"2": {"1", "1"},
-				"3": {"1", "1"},
-				"4": {"1", "6"}, // pkg version
-				"5": {"6"},      // license
-				"6": {"1", "5"}, // certifyLegal
-			},
-		},
-		{
-			Name:  "Two Certify Legals",
-			InPkg: []*model.PkgInputSpec{p1, p2},
-			InLic: []*model.LicenseInputSpec{l1, l2, l3},
-			Calls: []call{
-				{
-					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
-					},
-					Dec: []*model.LicenseInputSpec{l1, l2},
-					Legal: &model.CertifyLegalInputSpec{
-						Justification: "test justification",
-					},
-				},
-				{
-					PkgSrc: model.PackageOrSourceInput{
-						Package: p2,
-					},
-					Dec: []*model.LicenseInputSpec{l1, l3},
-					Legal: &model.CertifyLegalInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpNeighbors: map[string][]string{
-				"4":  {"1", "9"},      // pkg version 1
-				"5":  {"1", "10"},     // pkg version 2
-				"6":  {"9", "10"},     // license 1
-				"7":  {"9"},           // license 2
-				"8":  {"10"},          // license 2
-				"9":  {"1", "6", "7"}, // certLegal 1
-				"10": {"1", "6", "8"}, // certLegal 2
-			},
-		},
-	}
-	ctx := context.Background()
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("inmem", nil, nil)
-			if err != nil {
-				t.Fatalf("Could not instantiate testing backend: %v", err)
-			}
-			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
-					t.Fatalf("Could not ingest package: %v", err)
-				}
-			}
-			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
-					t.Fatalf("Could not ingest source: %v", err)
-				}
-			}
-			for _, a := range test.InLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
-					t.Fatalf("Could not ingest license: %v", err)
-				}
-			}
-			for _, o := range test.Calls {
-				if _, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal); err != nil {
-					t.Fatalf("Could not ingest CertifyLegal: %s", err)
-				}
-			}
-			for q, r := range test.ExpNeighbors {
-				got, err := b.Neighbors(ctx, q, nil)
-				if err != nil {
-					t.Fatalf("Could not query neighbors: %s", err)
-				}
-				gotIDs := convNodes(got)
-				slices.Sort(r)
-				slices.Sort(gotIDs)
-				if diff := cmp.Diff(r, gotIDs); diff != "" {
-					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-				}
 			}
 		})
 	}

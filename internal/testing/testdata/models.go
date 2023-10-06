@@ -23,6 +23,8 @@ import (
 )
 
 var T1, _ = time.Parse(time.RFC3339, "2023-01-01T00:00:00Z")
+var T2 = time.Unix(1e9, 0)
+var T3 = time.Unix(1e9+5, 0)
 
 var A1 = &model.ArtifactInputSpec{
 	Algorithm: "sha256",
@@ -398,4 +400,46 @@ var NoVulnInput = &model.VulnerabilityInputSpec{
 }
 var NoVulnOut = &model.VulnerabilityID{
 	VulnerabilityID: "",
+}
+
+var L1 = &model.LicenseInputSpec{
+	Name:        "BSD-3-Clause",
+	ListVersion: ptrfrom.String("3.21 2023-06-18"),
+}
+var L1out = &model.License{
+	Name:        "BSD-3-Clause",
+	ListVersion: ptrfrom.String("3.21 2023-06-18"),
+}
+var L2 = &model.LicenseInputSpec{
+	Name:        "GPL-2.0-or-later",
+	ListVersion: ptrfrom.String("3.21 2023-06-18"),
+}
+var L2out = &model.License{
+	Name:        "GPL-2.0-or-later",
+	ListVersion: ptrfrom.String("3.21 2023-06-18"),
+}
+var L3 = &model.LicenseInputSpec{
+	Name:        "MPL-2.0",
+	ListVersion: ptrfrom.String("1.23 2020"),
+}
+var L3out = &model.License{
+	Name:        "MPL-2.0",
+	ListVersion: ptrfrom.String("1.23 2020"),
+}
+
+var InlineLicense = `
+Redistribution and use of the MAME code or any derivative works are permitted provided that the following conditions are met:
+* Redistributions may not be sold, nor may they be used in a commercial product or activity.
+* Redistributions that are modified from the original source must include the complete source code, including the source code for all components used by a binary built from the modified sources. However, as a special exception, the source code distributed need not include anything that is normally distributed (in either source or binary form) with the major components (compiler, kernel, and so on) of the operating system on which the executable runs, unless that component itself accompanies the executable.
+* Redistributions must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+`
+
+var L4 = &model.LicenseInputSpec{
+	Name:   "LicenseRef-d58b4101",
+	Inline: &InlineLicense,
+}
+var L4out = &model.License{
+	Name:   "LicenseRef-d58b4101",
+	Inline: &InlineLicense,
 }

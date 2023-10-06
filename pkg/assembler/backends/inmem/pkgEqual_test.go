@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -24,7 +25,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestPkgEqual(t *testing.T) {
@@ -689,9 +689,9 @@ func TestPkgEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "6"}, // p1
-				"5": []string{"1", "6"}, // p2
-				"6": []string{"1", "1"}, // pkgequal
+				"4": {"1", "6"}, // p1
+				"5": {"1", "6"}, // p2
+				"6": {"1", "1"}, // pkgequal
 			},
 		},
 		{
@@ -714,11 +714,11 @@ func TestPkgEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "7", "8"}, // p1
-				"5": []string{"1", "7"},      // p2
-				"6": []string{"1", "8"},      // p3
-				"7": []string{"1", "1"},      // pkgequal 1
-				"8": []string{"1", "1"},      // pkgequal 2
+				"4": {"1", "7", "8"}, // p1
+				"5": {"1", "7"},      // p2
+				"6": {"1", "8"},      // p3
+				"7": {"1", "1"},      // pkgequal 1
+				"8": {"1", "1"},      // pkgequal 2
 			},
 		},
 	}

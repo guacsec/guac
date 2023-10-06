@@ -1,6 +1,7 @@
 fragment allCertifyGoodTree on CertifyGood {
   id
   justification
+  knownSince
   subject {
     __typename
     ... on Package {

@@ -65,7 +65,7 @@ jobs:
       - name: setup-go
         uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v3.2.1
         with:
-          go-version: '1.19'
+          go-version: '1.21'
       - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: ~/go/pkg/mod
@@ -86,7 +86,7 @@ jobs:
       - name: setup-go
         uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v3.2.1
         with:
-          go-version: '1.19'
+          go-version: '1.21'
       - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: ~/go/pkg/mod
@@ -105,7 +105,7 @@ jobs:
       - name: setup-go
         uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v3.2.1
         with:
-          go-version: '1.19'
+          go-version: '1.21'
       - name: Install formatter
         run: go install golang.org/x/tools/cmd/goimports@latest
       - name: Check format
@@ -118,6 +118,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # tag=v3
+      - name: setup-go
+        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v4.1.0
+        with:
+          go-version: '1.21'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # tag=v3.2.0
         with:
@@ -134,8 +138,8 @@ jobs:
     - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
     - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
       with:
-        go-version: '~1.19'
-    - uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1
+        go-version: '~1.21'
+    - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236
       with:
         python-version: '3.10'
     - run: ./internal/testing/e2e/e2e
@@ -190,7 +194,7 @@ jobs:
       - name: setup-go
         uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v3.2.1
         with:
-          go-version: '1.19'
+          go-version: '1.21'
       - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: ~/go/pkg/mod

@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -24,7 +25,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestHashEqual(t *testing.T) {
@@ -440,7 +440,7 @@ func TestHashEqual(t *testing.T) {
 			if err != nil {
 				return
 			}
-			less := func(a, b *model.Artifact) bool { return a.Digest < b.Digest }
+			less := func(a, b *model.Artifact) int { return strings.Compare(a.Digest, b.Digest) }
 			for _, he := range got {
 				slices.SortFunc(he.Artifacts, less)
 			}
@@ -709,7 +709,7 @@ func TestIngestHashEquals(t *testing.T) {
 			if err != nil {
 				return
 			}
-			less := func(a, b *model.Artifact) bool { return a.Digest < b.Digest }
+			less := func(a, b *model.Artifact) int { return strings.Compare(a.Digest, b.Digest) }
 			for _, he := range got {
 				slices.SortFunc(he.Artifacts, less)
 			}
@@ -748,9 +748,9 @@ func TestHashEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"1": []string{"3"},      // a1
-				"2": []string{"3"},      // a2
-				"3": []string{"1", "2"}, // hashequal
+				"1": {"3"},      // a1
+				"2": {"3"},      // a2
+				"3": {"1", "2"}, // hashequal
 			},
 		},
 		{
@@ -773,11 +773,11 @@ func TestHashEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"1": []string{"4", "5"}, // a1
-				"2": []string{"4"},      // a2
-				"3": []string{"5"},      // a3
-				"4": []string{"1", "2"}, // hashequal 1
-				"5": []string{"1", "3"}, // hashequal 2
+				"1": {"4", "5"}, // a1
+				"2": {"4"},      // a2
+				"3": {"5"},      // a3
+				"4": {"1", "2"}, // hashequal 1
+				"5": {"1", "3"}, // hashequal 2
 			},
 		},
 	}

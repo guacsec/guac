@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -24,7 +25,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestVulnEqual(t *testing.T) {
@@ -46,7 +46,7 @@ func TestVulnEqual(t *testing.T) {
 			Name:   "HappyPath",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
@@ -58,13 +58,13 @@ func TestVulnEqual(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 						},
@@ -77,14 +77,14 @@ func TestVulnEqual(t *testing.T) {
 			Name:   "Igest same twice",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
@@ -96,13 +96,13 @@ func TestVulnEqual(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 						},
@@ -115,14 +115,14 @@ func TestVulnEqual(t *testing.T) {
 			Name:   "Query on Justification",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
@@ -134,13 +134,13 @@ func TestVulnEqual(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 						},
@@ -153,14 +153,14 @@ func TestVulnEqual(t *testing.T) {
 			Name:   "Query on OSV",
 			InVuln: []*model.VulnerabilityInputSpec{o1, o2, c1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o2,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
@@ -176,13 +176,13 @@ func TestVulnEqual(t *testing.T) {
 				},
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o2out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 						},
@@ -195,21 +195,21 @@ func TestVulnEqual(t *testing.T) {
 			Name:   "Query on GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1, c2, g1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c2,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: g1,
 					In: &model.VulnEqualInputSpec{
@@ -225,13 +225,13 @@ func TestVulnEqual(t *testing.T) {
 				},
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "ghsa",
 							VulnerabilityIDs: []*model.VulnerabilityID{g1out},
 						},
@@ -244,21 +244,21 @@ func TestVulnEqual(t *testing.T) {
 			Name:   "Query none",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1, c2, g1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c2,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: g1,
 					In: &model.VulnEqualInputSpec{
@@ -279,21 +279,21 @@ func TestVulnEqual(t *testing.T) {
 			Name:   "Query multiple",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1, c2, g1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c2,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: g1,
 					In: &model.VulnEqualInputSpec{
@@ -309,26 +309,26 @@ func TestVulnEqual(t *testing.T) {
 				},
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 						},
 					},
 					Justification: "test justification",
 				},
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c2out},
 						},
@@ -341,21 +341,21 @@ func TestVulnEqual(t *testing.T) {
 			Name:   "Query ID",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1, c2, g1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c2,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: g1,
 					In: &model.VulnEqualInputSpec{
@@ -367,13 +367,13 @@ func TestVulnEqual(t *testing.T) {
 				ID: ptrfrom.String("8"),
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 						},
@@ -386,21 +386,21 @@ func TestVulnEqual(t *testing.T) {
 			Name:   "Query ID not found",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1, c2, g1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c2,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: g1,
 					In: &model.VulnEqualInputSpec{
@@ -489,7 +489,7 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name:   "HappyPath",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1, o1, c2},
 			Calls: []call{
-				call{
+				{
 					Vulns:      []*model.VulnerabilityInputSpec{o1, o1},
 					OtherVulns: []*model.VulnerabilityInputSpec{c1, c2},
 					Ins: []*model.VulnEqualInputSpec{
@@ -506,26 +506,26 @@ func TestIngestVulnEquals(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 						},
 					},
 					Justification: "test justification",
 				},
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c2out},
 						},
@@ -538,7 +538,7 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name:   "Ingest same twice",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1, o1, c1},
 			Calls: []call{
-				call{
+				{
 					Vulns:      []*model.VulnerabilityInputSpec{o1, o1},
 					OtherVulns: []*model.VulnerabilityInputSpec{c1, c1},
 					Ins: []*model.VulnEqualInputSpec{
@@ -555,13 +555,13 @@ func TestIngestVulnEquals(t *testing.T) {
 				Justification: ptrfrom.String("test justification"),
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o1out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "cve",
 							VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 						},
@@ -575,7 +575,7 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name:   "Query on OSV",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1, o2, g2},
 			Calls: []call{
-				call{
+				{
 					Vulns:      []*model.VulnerabilityInputSpec{o1, o2},
 					OtherVulns: []*model.VulnerabilityInputSpec{c1, g2},
 					Ins: []*model.VulnEqualInputSpec{
@@ -596,13 +596,13 @@ func TestIngestVulnEquals(t *testing.T) {
 				},
 			},
 			ExpVulnEqual: []*model.VulnEqual{
-				&model.VulnEqual{
+				{
 					Vulnerabilities: []*model.Vulnerability{
-						&model.Vulnerability{
+						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{o2out},
 						},
-						&model.Vulnerability{
+						{
 							Type:             "ghsa",
 							VulnerabilityIDs: []*model.VulnerabilityID{g2out},
 						},
@@ -664,7 +664,7 @@ func TestVulnerabilityEqualNeighbors(t *testing.T) {
 			Name:   "HappyPath",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
@@ -673,23 +673,23 @@ func TestVulnerabilityEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"1", "5"}, // osv to isVuln
-				"4": []string{"3", "5"}, // cve to isVuln
-				"5": []string{"1", "3"}, // isVuln to osv and cve
+				"2": {"1", "5"}, // osv to isVuln
+				"4": {"3", "5"}, // cve to isVuln
+				"5": {"1", "3"}, // isVuln to osv and cve
 			},
 		},
 		{
 			Name:   "Two IsVuln",
 			InVuln: []*model.VulnerabilityInputSpec{o1, c1, g1},
 			Calls: []call{
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: c1,
 					In: &model.VulnEqualInputSpec{
 						Justification: "test justification",
 					},
 				},
-				call{
+				{
 					Vuln:      o1,
 					OtherVuln: g1,
 					In: &model.VulnEqualInputSpec{
@@ -698,11 +698,11 @@ func TestVulnerabilityEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"1", "7", "8"}, // osv to both isVuln
-				"4": []string{"3", "7"},
-				"6": []string{"5", "8"},
-				"7": []string{"1", "3"},
-				"8": []string{"1", "5"},
+				"2": {"1", "7", "8"}, // osv to both isVuln
+				"4": {"3", "7"},
+				"6": {"5", "8"},
+				"7": {"1", "3"},
+				"8": {"1", "5"},
 			},
 		},
 	}

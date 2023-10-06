@@ -1,5 +1,5 @@
 run:
-  timeout: 3m
+  timeout: 6m
   skip-files:
     - ".*\\.pb\\.go$"
     - "pkg/assembler/generated/.*"
