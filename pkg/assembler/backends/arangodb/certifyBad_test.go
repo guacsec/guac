@@ -75,19 +75,16 @@ func TestCertifyBad(t *testing.T) {
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
-						KnownSince:    zeroTime,
 					},
 				},
 			},
 			Query: &model.CertifyBadSpec{
 				Justification: ptrfrom.String("test justification"),
-				KnownSince:    ptrfrom.Time(zeroTime),
 			},
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
-					KnownSince:    zeroTime,
 				},
 			},
 		},
@@ -196,6 +193,47 @@ func TestCertifyBad(t *testing.T) {
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						Justification: "test justification one",
+						KnownSince:    zeroTime,
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						Justification: "test justification two",
+						KnownSince:    zeroTime,
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				Justification: ptrfrom.String("test justification one"),
+				KnownSince:    ptrfrom.Time(zeroTime),
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       testdata.P1out,
+					Justification: "test justification one",
+					KnownSince:    zeroTime,
 				},
 			},
 		},

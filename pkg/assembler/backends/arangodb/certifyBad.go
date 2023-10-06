@@ -173,7 +173,7 @@ func getSrcCertifyBadForQuery(ctx context.Context, c *arangoClient, arangoQueryB
 		'certifyBad_id': certifyBad._id,
 		'justification': certifyBad.justification,
 		'collector': certifyBad.collector,
-		'knownSince': certifyBad.knownSince
+		'knownSince': certifyBad.knownSince,
 		'origin': certifyBad.origin
 	  }`)
 
@@ -278,8 +278,9 @@ func setCertifyBadMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyBad
 		queryValues[collector] = *certifyBadSpec.Collector
 	}
 	if certifyBadSpec.KnownSince != nil {
+		certifyBadKnownSince := *certifyBadSpec.KnownSince
 		arangoQueryBuilder.filter("certifyBad", "knownSince", ">=", "@"+knownSince)
-		queryValues[collector] = *certifyBadSpec.KnownSince
+		queryValues[knownSince] = certifyBadKnownSince.UTC()
 	}
 }
 
@@ -304,7 +305,7 @@ func getCertifyBadQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Match
 	values["justification"] = certifyBad.Justification
 	values["origin"] = certifyBad.Origin
 	values["collector"] = certifyBad.Collector
-	values[knownSince] = certifyBad.KnownSince
+	values[knownSince] = certifyBad.KnownSince.UTC()
 
 	return values
 }
@@ -625,8 +626,8 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		)
 		  
 		  LET certifyBad = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:@knownSince } 
-				  INSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:@knownSince } 
+			  UPSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+				  INSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 				  UPDATE {} IN certifyBads
 				  RETURN NEW
 		  )
@@ -691,8 +692,8 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 			)
 			  
 			  LET certifyBad = FIRST(
-				  UPSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:@knownSince } 
-					  INSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:@knownSince } 
+				  UPSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+					  INSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 					  UPDATE {} IN certifyBads
 					  RETURN NEW
 			  )
@@ -765,8 +766,8 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		LET certifyBad = FIRST(
-			UPSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:@knownSince } 
-				INSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:@knownSince } 
+			UPSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+				INSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 				UPDATE {} IN certifyBads
 				RETURN NEW
 		)
@@ -854,8 +855,8 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		)
 		  
 		LET certifyBad = FIRST(
-			UPSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:@knownSince } 
-				INSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:@knownSince } 
+			UPSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+				INSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 				UPDATE {} IN certifyBads
 				RETURN NEW
 		)
