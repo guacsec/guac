@@ -23,7 +23,14 @@ test: generate
 # To run it locally you can run the following command: make start-integration-service
 .PHONY: integration-test
 integration-test: generate check-env
+	 go test -tags=integration ./...
+
+# Runs the integration tests locally using docker-compose to start the dependencies and cleans up after itself.
+.PHONY: integration-test-local
+integration-test-local: generate check-env start-integration-service
+	sleep 5
 	ENT_TEST_DATABASE_URL='postgresql://guac:guac@localhost/guac?sslmode=disable' go test -tags=integration ./...
+	$(CONTAINER) compose down
 
 .PHONY: integration-merge-test
 integration-merge-test: generate check-env
@@ -141,7 +148,7 @@ stop-service:
 # This is a helper target to run the integration tests locally. 
 .PHONY: start-integration-service
 start-integration-service: check-docker-compose-tool-check
-	$(CONTAINER) compose -f integration.docker-compose.yaml up 	--force-recreate
+	$(CONTAINER) compose -f integration.docker-compose.yaml up 	--force-recreate -d
 
 .PHONY: check-docker-tool-check
 check-docker-tool-check:
