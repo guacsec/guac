@@ -646,7 +646,7 @@
       "hasSbom": {
         "uri": "TestSource",
         "algorithm": "sha256",
-        "digest": "cc141f24bef6367cd21c3501864b1411c428d34b5b10cce2214d3a2107df97c3",
+        "digest": "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
         "downloadLocation": "TestSource",
         "origin": "",
         "collector": ""

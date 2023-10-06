@@ -726,7 +726,7 @@ var (
 			HasSBOM: &model.HasSBOMInputSpec{
 				Uri:              "TestSource",
 				Algorithm:        "sha256",
-				Digest:           "cc141f24bef6367cd21c3501864b1411c428d34b5b10cce2214d3a2107df97c3",
+				Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
 				DownloadLocation: "TestSource",
 				KnownSince:       spdxTime,
 			},
@@ -2478,7 +2478,7 @@ For the update to take effect, all services linked to the OpenSSL library must b
 				HasSBOM: &generated.HasSBOMInputSpec{
 					Uri:              "TestSource",
 					Algorithm:        "sha256",
-					Digest:           "cc141f24bef6367cd21c3501864b1411c428d34b5b10cce2214d3a2107df97c3",
+					Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
 					DownloadLocation: "TestSource",
 				},
 			},
