@@ -62,7 +62,7 @@ var wellKnownOCIArtifactTypes = map[string]struct {
 
 type ociCollector struct {
 	collectDataSource datasource.CollectSource
-	checkedDigest     map[string][]string
+	checkedDigest     sync.Map
 	poll              bool
 	interval          time.Duration
 }
@@ -75,7 +75,7 @@ type ociCollector struct {
 func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) *ociCollector {
 	return &ociCollector{
 		collectDataSource: collectDataSource,
-		checkedDigest:     map[string][]string{},
+		checkedDigest:     sync.Map{},
 		poll:              poll,
 		interval:          interval,
 	}
@@ -274,13 +274,13 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	for _, suffix := range suffixList {
 		digestTag := fmt.Sprintf("%v.%v", digestFormatted, suffix)
 		// check to see if the digest + suffix has already been collected
-		if !contains(o.checkedDigest[repo], digestTag) {
+		if !o.isDigestCollected(repo, digestTag) {
 			imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
 			err = fetchOCIArtifactBlobs(ctx, rc, imageTag, "unknown", docChannel)
 			if err != nil {
 				return fmt.Errorf("failed retrieving artifact blobs from registry fallback artifacts: %w", err)
 			}
-			o.checkedDigest[repo] = append(o.checkedDigest[repo], digestTag)
+			o.markDigestAsCollected(repo, digestTag)
 		}
 	}
 
@@ -294,6 +294,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	// Use goroutines to fetch referrers concurrently
 	// Create a channel to collect errors from goroutines
 	errorChan := make(chan error, len(referrerList.Descriptors))
+
 	var wg sync.WaitGroup
 
 	for _, referrerDesc := range referrerList.Descriptors {
@@ -304,25 +305,26 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 			if _, ok := wellKnownOCIArtifactTypes[referrerDesc.ArtifactType]; ok {
 				referrerDescDigest := referrerDesc.Digest.String()
 
-				if !contains(o.checkedDigest[repo], referrerDescDigest) {
+				if !o.isDigestCollected(repo, referrerDescDigest) {
 					logger.Infof("Fetching referrer %s with artifact type %s", referrerDescDigest, referrerDesc.ArtifactType)
 					referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDescDigest)
-					err = fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
-					if err != nil {
+					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
+					if e != nil {
 						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", err)
 					}
-					o.checkedDigest[repo] = append(o.checkedDigest[repo], referrerDescDigest)
-				} else {
-					logger.Infof("Skipping referrer %s with unknown artifact type %s", referrerDesc.Digest, referrerDesc.ArtifactType)
+					o.markDigestAsCollected(repo, referrerDescDigest)
 				}
+			} else {
+				logger.Infof("Skipping referrer %s with unknown artifact type %s", referrerDesc.Digest, referrerDesc.ArtifactType)
 			}
+
 		}(referrerDesc)
 	}
 
 	// Wait for all goroutines to finish
 	wg.Wait()
 
-	// Close the errorChannel to signal that all errors have been collected
+	// Close the errorChan to signal that all errors have been collected
 	close(errorChan)
 
 	// Check if any errors occurred during processing
@@ -406,6 +408,32 @@ func contains(elems []string, v string) bool {
 		}
 	}
 	return false
+}
+
+func (o *ociCollector) isDigestCollected(repo string, digest string) bool {
+	collectedDigests, ok := o.checkedDigest.Load(repo)
+	if !ok {
+		o.checkedDigest.Store(repo, []string{})
+		return false
+	} else {
+		digests, ok := collectedDigests.([]string)
+		if !ok {
+			return false
+		}
+		return contains(digests, digest)
+	}
+}
+
+func (o *ociCollector) markDigestAsCollected(repo string, digest string) {
+	collectedDigests, ok := o.checkedDigest.Load(repo)
+	if !ok {
+		o.checkedDigest.Store(repo, []string{})
+	}
+	digests, ok := collectedDigests.([]string)
+	if !ok {
+		return
+	}
+	o.checkedDigest.Store(repo, append(digests, digest))
 }
 
 // Type is the collector type of the collector
