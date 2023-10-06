@@ -24,6 +24,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
+	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -443,13 +444,10 @@ func TestPkgEqual(t *testing.T) {
 			if err != nil {
 				return
 			}
-			// less := func(a, b *model.Package) bool { return a.Version < b.Version }
-			// for _, he := range got {
-			// 	slices.SortFunc(he.Packages, less)
-			// }
-			// for _, he := range test.ExpHE {
-			// 	slices.SortFunc(he.Packages, less)
-			// }
+
+			inmem.MakeCanonicalPkgEqualSlice(got)
+			inmem.MakeCanonicalPkgEqualSlice(test.ExpHE)
+
 			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
@@ -657,6 +655,10 @@ func TestIngestPkgEquals(t *testing.T) {
 			if err != nil {
 				return
 			}
+
+			inmem.MakeCanonicalPkgEqualSlice(got)
+			inmem.MakeCanonicalPkgEqualSlice(test.ExpHE)
+
 			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}

@@ -17,10 +17,13 @@ package inmem
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -98,7 +101,7 @@ type pkgVersionStruct struct {
 	id                  uint32
 	parent              uint32
 	name                string
-	versions            pkgVersionList
+	versions            pkgVersionMap
 	srcMapLinks         []uint32
 	isDependencyLinks   []uint32
 	badLinks            []uint32
@@ -106,7 +109,8 @@ type pkgVersionStruct struct {
 	hasMetadataLinks    []uint32
 	pointOfContactLinks []uint32
 }
-type pkgVersionList []*pkgVersionNode
+type pkgVersionNodeHash string
+type pkgVersionMap map[pkgVersionNodeHash]*pkgVersionNode
 type pkgVersionNode struct {
 	id                  uint32
 	parent              uint32
@@ -386,20 +390,21 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 				id:       c.getNextID(),
 				parent:   namesStruct.id,
 				name:     input.Name,
-				versions: pkgVersionList{},
+				versions: pkgVersionMap{},
 			}
 			c.index[versionStruct.id] = versionStruct
 			names[input.Name] = versionStruct
 		}
 		c.m.Unlock()
 	}
+	versions := versionStruct.versions
 
 	c.m.RLock()
-	duplicate, collectedVersion := duplicatePkgVer(versionStruct.versions, input)
+	duplicate, collectedVersion := duplicatePkgVer(versions, input)
 	c.m.RUnlock()
 	if !duplicate {
 		c.m.Lock()
-		duplicate, collectedVersion = duplicatePkgVer(versionStruct.versions, input)
+		duplicate, collectedVersion = duplicatePkgVer(versions, input)
 		if !duplicate {
 			collectedVersion = &pkgVersionNode{
 				id:         c.getNextID(),
@@ -409,8 +414,13 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 				qualifiers: getQualifiersFromInput(input.Qualifiers),
 			}
 			c.index[collectedVersion.id] = collectedVersion
-			// Need to append to version and replace field in versionStruct
-			versionStruct.versions = append(versionStruct.versions, collectedVersion)
+
+			versionDigest, err := hashPkgVersionNode(collectedVersion)
+			if err != nil {
+				c.m.Unlock()
+				return nil, err
+			}
+			versions[versionDigest] = collectedVersion
 		}
 		c.m.Unlock()
 	}
@@ -421,18 +431,39 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 	return c.buildPackageResponse(collectedVersion.id, nil)
 }
 
-func duplicatePkgVer(versions pkgVersionList, input model.PkgInputSpec) (bool, *pkgVersionNode) {
-	for _, v := range versions {
-		if noMatchInput(input.Version, v.version) {
-			continue
-		}
-		if noMatchInput(input.Subpath, v.subpath) {
-			continue
-		}
-		if !reflect.DeepEqual(v.qualifiers, getQualifiersFromInput(input.Qualifiers)) {
-			continue
-		}
-		return true, v
+// hash the canonical representation of a version.
+func hashPkgVersionNode(version *pkgVersionNode) (pkgVersionNodeHash, error) {
+	if version == nil {
+		return "", fmt.Errorf("version is nil")
+	}
+	return hashVersionHelper(version.version, version.subpath, version.qualifiers), nil
+}
+
+// hash the canonical representation of a version
+func hashPkgInputSpecVersion(input model.PkgInputSpec) pkgVersionNodeHash {
+	qualifiers := getQualifiersFromInput(input.Qualifiers)
+	return hashVersionHelper(nilToEmpty(input.Version), nilToEmpty(input.Subpath), qualifiers)
+}
+
+func hashVersionHelper(version string, subpath string, qualifiers map[string]string) pkgVersionNodeHash {
+	// first sort the qualifiers
+	qualifierSlice := make([]string, 0, len(qualifiers))
+	for key, value := range qualifiers {
+		qualifierSlice = append(qualifierSlice, fmt.Sprintf("%s:%s", key, value))
+	}
+	slices.Sort(qualifierSlice)
+	qualifiersStr := strings.Join(qualifierSlice, ",")
+
+	canonicalVersion := fmt.Sprintf("%s,%s,%s", version, subpath, qualifiersStr)
+	digest := sha256.Sum256([]byte(canonicalVersion))
+	return pkgVersionNodeHash(fmt.Sprintf("%x", digest))
+}
+
+func duplicatePkgVer(versions pkgVersionMap, input model.PkgInputSpec) (bool, *pkgVersionNode) {
+	digest := hashPkgInputSpecVersion(input)
+
+	if version, ok := versions[digest]; ok {
+		return true, version
 	}
 	return false, nil
 }
