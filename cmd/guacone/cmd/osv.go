@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -45,6 +46,12 @@ type osvOptions struct {
 	interval        time.Duration
 }
 
+const (
+	maxIntervalTime    = 10 * time.Minute
+	randFactorForRetry = 0.5
+	multiplierForRetry = 1.5
+)
+
 var osvCmd = &cobra.Command{
 	Use:   "osv [flags]",
 	Short: "runs the osv certifier",
@@ -58,7 +65,6 @@ var osvCmd = &cobra.Command{
 			viper.GetString("interval"),
 			viper.GetString("csub-addr"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -92,45 +98,67 @@ var osvCmd = &cobra.Command{
 			return nil
 		}
 
-		// Collect
-		errHandler := func(err error) bool {
-			if err == nil {
-				logger.Info("certifier ended gracefully")
-				return true
-			}
-			logger.Errorf("certifier ended with error: %v", err)
-			gotErr = true
-			// process documents already captures
-			return true
-		}
+		operation := func() error {
+			ctx, cf := context.WithCancel(ctx)
+			defer cf() // Ensure to cancel the context when we're done.
 
-		ctx, cf := context.WithCancel(ctx)
-		var wg sync.WaitGroup
-		done := make(chan bool, 1)
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if err := certify.Certify(ctx, packageQuery, emit, errHandler, opts.poll, opts.interval); err != nil {
-				logger.Errorf("Unhandled error in the certifier: %s", err)
+			var wg sync.WaitGroup
+			done := make(chan bool, 1)
+			gotErr := false // Track if we encounter an error.
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				errHandler := func(err error) bool {
+					if err == nil {
+						logger.Info("certifier ended gracefully")
+						return true
+					}
+					logger.Errorf("certifier ended with error: %v", err)
+					gotErr = true
+					return true
+				}
+
+				if err := certify.Certify(ctx, packageQuery, emit, errHandler, opts.poll, opts.interval); err != nil {
+					logger.Errorf("Unhandled error in the certifier: %s", err)
+					gotErr = true
+				}
+				done <- true
+			}()
+
+			sigs := make(chan os.Signal, 1)
+			signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+			select {
+			case s := <-sigs:
+				logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+			case <-done:
+				if gotErr {
+					return fmt.Errorf("certifier encountered an error")
+				}
+				logger.Infof("All certifiers completed")
 			}
-			done <- true
-		}()
-		sigs := make(chan os.Signal, 1)
-		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-		select {
-		case s := <-sigs:
-			logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
-		case <-done:
-			logger.Infof("All certifiers completed")
+
+			wg.Wait()
+			return nil // No error, no retry.
 		}
-		wg.Wait()
+		// Set up exponential backoff for retrying the operation
+		expBackOff := backoff.NewExponentialBackOff()
+		expBackOff.MaxElapsedTime = maxIntervalTime
+		expBackOff.RandomizationFactor = randFactorForRetry
+		expBackOff.Multiplier = multiplierForRetry
+
+		// Retry the operation with exponential backoff
+		if err := backoff.Retry(operation, expBackOff); err != nil {
+			logger.Errorf("Operation failed despite retrying: %v", err)
+		}
 
 		err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 		if err != nil {
 			gotErr = true
 			logger.Errorf("unable to ingest documents: %v", err)
 		}
-		cf()
 
 		if gotErr {
 			logger.Errorf("completed ingestion with errors")
