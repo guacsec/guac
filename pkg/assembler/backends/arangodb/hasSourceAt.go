@@ -785,7 +785,7 @@ func (c *arangoClient) queryHasSourceAtNodeByID(ctx context.Context, filter *mod
 	defer cursor.Close()
 
 	type dbHasSourceAt struct {
-		CertifyBadID  string    `json:"_id"`
+		HasSourceAtID string    `json:"_id"`
 		PackageID     string    `json:"packageID"`
 		SourceID      string    `json:"sourceID"`
 		KnownSince    time.Time `json:"knownSince"`
@@ -824,7 +824,7 @@ func (c *arangoClient) queryHasSourceAtNodeByID(ctx context.Context, filter *mod
 	}
 
 	return &model.HasSourceAt{
-		ID:            collectedValues[0].CertifyBadID,
+		ID:            collectedValues[0].HasSourceAtID,
 		Package:       builtPackage,
 		Source:        builtSource,
 		KnownSince:    collectedValues[0].KnownSince,

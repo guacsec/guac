@@ -1066,7 +1066,7 @@ func (c *arangoClient) queryHasMetadataNodeByID(ctx context.Context, filter *mod
 	defer cursor.Close()
 
 	type dbHasMetadata struct {
-		CertifyBadID  string    `json:"_id"`
+		HasMetadataID string    `json:"_id"`
 		PackageID     *string   `json:"packageID"`
 		SourceID      *string   `json:"sourceID"`
 		ArtifactID    *string   `json:"artifactID"`
@@ -1098,7 +1098,7 @@ func (c *arangoClient) queryHasMetadataNodeByID(ctx context.Context, filter *mod
 	}
 
 	hasMetadata := &model.HasMetadata{
-		ID:            collectedValues[0].CertifyBadID,
+		ID:            collectedValues[0].HasMetadataID,
 		Key:           collectedValues[0].Key,
 		Value:         collectedValues[0].Value,
 		Timestamp:     collectedValues[0].Timestamp,
