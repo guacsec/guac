@@ -280,7 +280,7 @@ func setPointOfContactMatchValues(arangoQueryBuilder *arangoQueryBuilder, PointO
 	}
 	if PointOfContactSpec.Since != nil {
 		arangoQueryBuilder.filter("pointOfContact", sinceStr, ">=", "@"+sinceStr)
-		queryValues[sinceStr] = *PointOfContactSpec.Since
+		queryValues[sinceStr] = PointOfContactSpec.Since.UTC()
 	}
 	if PointOfContactSpec.Justification != nil {
 		arangoQueryBuilder.filter("pointOfContact", justification, "==", "@"+justification)
@@ -316,7 +316,7 @@ func getPointOfContactQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.M
 
 	values[emailStr] = pointOfContact.Email
 	values[infoStr] = pointOfContact.Info
-	values[sinceStr] = pointOfContact.Since
+	values[sinceStr] = pointOfContact.Since.UTC()
 	values[justification] = pointOfContact.Justification
 	values[origin] = pointOfContact.Origin
 	values[collector] = pointOfContact.Collector

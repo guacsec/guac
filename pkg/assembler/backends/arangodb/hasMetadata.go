@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -31,6 +32,14 @@ const (
 )
 
 func (c *arangoClient) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
+
+	if hasMetadataSpec != nil && hasMetadataSpec.ID != nil {
+		cv, err := c.buildHasMetadataByID(ctx, *hasMetadataSpec.ID, hasMetadataSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildHasMetadataByID failed with an error: %w", err)
+		}
+		return []*model.HasMetadata{cv}, nil
+	}
 
 	var arangoQueryBuilder *arangoQueryBuilder
 	if hasMetadataSpec.Subject != nil {
@@ -279,7 +288,7 @@ func setHasMetadataMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasMetada
 	}
 	if hasMetadataSpec.Since != nil {
 		arangoQueryBuilder.filter("hasMetadata", timeStampStr, ">=", "@"+timeStampStr)
-		queryValues[timeStampStr] = *hasMetadataSpec.Since
+		queryValues[timeStampStr] = hasMetadataSpec.Since.UTC()
 	}
 	if hasMetadataSpec.Justification != nil {
 		arangoQueryBuilder.filter("hasMetadata", justification, "==", "@"+justification)
@@ -315,7 +324,7 @@ func getHasMetadataQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 
 	values[keyStr] = hasMetadata.Key
 	values[valueStr] = hasMetadata.Value
-	values[timeStampStr] = hasMetadata.Timestamp
+	values[timeStampStr] = hasMetadata.Timestamp.UTC()
 	values[justification] = hasMetadata.Justification
 	values[origin] = hasMetadata.Origin
 	values[collector] = hasMetadata.Collector
@@ -1016,4 +1025,132 @@ func getHasMetadataFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 		hasMetadataList = append(hasMetadataList, hasMetadata)
 	}
 	return hasMetadataList, nil
+}
+
+func (c *arangoClient) buildHasMetadataByID(ctx context.Context, id string, filter *model.HasMetadataSpec) (*model.HasMetadata, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == hasMetadataStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.HasMetadataSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryHasMetadataNodeByID(ctx, filter)
+	}
+	return nil, nil
+}
+
+func (c *arangoClient) queryHasMetadataNodeByID(ctx context.Context, filter *model.HasMetadataSpec) (*model.HasMetadata, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(hasMetadataStr, "hasMetadata")
+	setHasMetadataMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN hasMetadata`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryHasMetadataNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for hasMetadata: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbHasMetadata struct {
+		CertifyBadID  string    `json:"_id"`
+		PackageID     *string   `json:"packageID"`
+		SourceID      *string   `json:"sourceID"`
+		ArtifactID    *string   `json:"artifactID"`
+		Key           string    `json:"key"`
+		Value         string    `json:"value"`
+		Timestamp     time.Time `json:"timestamp"`
+		Justification string    `json:"justification"`
+		Collector     string    `json:"collector"`
+		Origin        string    `json:"origin"`
+	}
+
+	var collectedValues []dbHasMetadata
+	for {
+		var doc dbHasMetadata
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to hasMetadata from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of hasMetadata nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	hasMetadata := &model.HasMetadata{
+		ID:            collectedValues[0].CertifyBadID,
+		Key:           collectedValues[0].Key,
+		Value:         collectedValues[0].Value,
+		Timestamp:     collectedValues[0].Timestamp,
+		Justification: collectedValues[0].Justification,
+		Origin:        collectedValues[0].Origin,
+		Collector:     collectedValues[0].Collector,
+	}
+
+	if collectedValues[0].PackageID != nil {
+		var builtPackage *model.Package
+		if filter.Subject != nil && filter.Subject.Package != nil {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Subject.Package)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		} else {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		}
+		hasMetadata.Subject = builtPackage
+	} else if collectedValues[0].SourceID != nil {
+		var builtSource *model.Source
+		if filter.Subject != nil && filter.Subject.Source != nil {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, filter.Subject.Source)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		} else {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		}
+		hasMetadata.Subject = builtSource
+	} else if collectedValues[0].ArtifactID != nil {
+		var builtArtifact *model.Artifact
+		if filter.Subject != nil && filter.Subject.Artifact != nil {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, filter.Subject.Artifact)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		} else {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		}
+		hasMetadata.Subject = builtArtifact
+	} else {
+		return nil, fmt.Errorf("failed to get subject from hasMetadata")
+	}
+	return hasMetadata, nil
 }

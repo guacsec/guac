@@ -21,10 +21,19 @@ import (
 	"strings"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
+
+	if hasSBOMSpec != nil && hasSBOMSpec.ID != nil {
+		cv, err := c.buildHasSbomByID(ctx, *hasSBOMSpec.ID, hasSBOMSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildHasSbomByID failed with an error: %w", err)
+		}
+		return []*model.HasSbom{cv}, nil
+	}
 
 	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval
 	var arangoQueryBuilder *arangoQueryBuilder
@@ -560,4 +569,117 @@ func getHasSBOMFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.H
 		hasSBOMList = append(hasSBOMList, hasSBOM)
 	}
 	return hasSBOMList, nil
+}
+
+func (c *arangoClient) buildHasSbomByID(ctx context.Context, id string, filter *model.HasSBOMSpec) (*model.HasSbom, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == hasSBOMsStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.HasSBOMSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryHasSbomNodeByID(ctx, filter)
+	}
+	return nil, nil
+}
+
+func (c *arangoClient) queryHasSbomNodeByID(ctx context.Context, filter *model.HasSBOMSpec) (*model.HasSbom, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(hasSBOMsStr, "hasSBOM")
+	setHasSBOMMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN hasSBOM`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryHasSbomNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for hasSBOM: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbHasSbom struct {
+		HasSbomID        string  `json:"_id"`
+		PackageID        *string `json:"packageID"`
+		ArtifactID       *string `json:"artifactID"`
+		Uri              string  `json:"uri"`
+		Algorithm        string  `json:"algorithm"`
+		Digest           string  `json:"digest"`
+		DownloadLocation string  `json:"downloadLocation"`
+		Collector        string  `json:"collector"`
+		Origin           string  `json:"origin"`
+	}
+
+	var collectedValues []dbHasSbom
+	for {
+		var doc dbHasSbom
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to hasSBOM from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of hasSBOM nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	hasSBOM := &model.HasSbom{
+		ID:               collectedValues[0].HasSbomID,
+		URI:              collectedValues[0].Uri,
+		Algorithm:        collectedValues[0].Algorithm,
+		Digest:           collectedValues[0].Digest,
+		DownloadLocation: collectedValues[0].DownloadLocation,
+		Origin:           collectedValues[0].Origin,
+		Collector:        collectedValues[0].Collector,
+	}
+
+	if collectedValues[0].PackageID != nil {
+		var builtPackage *model.Package
+		if filter.Subject != nil && filter.Subject.Package != nil {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Subject.Package)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		} else {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		}
+		hasSBOM.Subject = builtPackage
+	} else if collectedValues[0].ArtifactID != nil {
+		var builtArtifact *model.Artifact
+		if filter.Subject != nil && filter.Subject.Artifact != nil {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, filter.Subject.Artifact)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		} else {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		}
+		hasSBOM.Subject = builtArtifact
+	} else {
+		return nil, fmt.Errorf("failed to get subject from hasSBOM")
+	}
+	return hasSBOM, nil
 }

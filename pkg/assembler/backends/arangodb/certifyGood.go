@@ -1062,12 +1062,12 @@ func (c *arangoClient) queryCertifyGoodNodeByID(ctx context.Context, filter *mod
 		if filter.Subject != nil && filter.Subject.Artifact != nil {
 			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, filter.Subject.Artifact)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
 			}
 		} else {
 			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
 			}
 		}
 		certifyGood.Subject = builtArtifact

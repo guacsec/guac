@@ -123,7 +123,7 @@ func setVulnMetadataMatchValues(arangoQueryBuilder *arangoQueryBuilder, vulnMeta
 	}
 	if vulnMetadata.Timestamp != nil {
 		arangoQueryBuilder.filter("vulnMetadata", timeStampStr, "==", "@"+timeStampStr)
-		queryValues[timeStampStr] = *vulnMetadata.Timestamp
+		queryValues[timeStampStr] = vulnMetadata.Timestamp.UTC()
 	}
 	if vulnMetadata.Origin != nil {
 		arangoQueryBuilder.filter("vulnMetadata", origin, "==", "@"+origin)
@@ -146,7 +146,7 @@ func getVulnMetadataQueryValues(vulnerability *model.VulnerabilityInputSpec, vul
 
 	values[scoreTypeStr] = vulnerabilityMetadata.ScoreType
 	values[scoreValueStr] = vulnerabilityMetadata.ScoreValue
-	values[timeStampStr] = vulnerabilityMetadata.Timestamp
+	values[timeStampStr] = vulnerabilityMetadata.Timestamp.UTC()
 	values[origin] = vulnerabilityMetadata.Origin
 	values[collector] = vulnerabilityMetadata.Collector
 

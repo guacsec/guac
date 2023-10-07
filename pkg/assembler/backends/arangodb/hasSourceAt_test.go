@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -892,6 +890,309 @@ func TestIngestHasSourceAts(t *testing.T) {
 				}
 				if err != nil {
 					return
+				}
+			}
+			got, err := b.HasSourceAt(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpHSA, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_buildHasSourceAtByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	testTime := time.Unix(1e9+5, 0)
+	type call struct {
+		Pkg   *model.PkgInputSpec
+		Src   *model.SourceInputSpec
+		Match *model.MatchFlags
+		HSA   *model.HasSourceAtInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		Calls        []call
+		Query        *model.HasSourceAtSpec
+		ExpHSA       *model.HasSourceAt
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P4},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Pkg: testdata.P1,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+				{
+					Pkg: testdata.P4,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+			},
+			Query: &model.HasSourceAtSpec{
+				Package: &model.PkgSpec{
+					Type:      ptrfrom.String("conan"),
+					Namespace: ptrfrom.String("openssl.org"),
+					Name:      ptrfrom.String("openssl"),
+				},
+			},
+			ExpHSA: []*model.HasSourceAt{
+				{
+					Package: testdata.P4out,
+					Source:  testdata.S1out,
+				},
+			},
+		},
+		{
+			Name:  "Query on Package version ID",
+			InPkg: []*model.PkgInputSpec{testdata.P4},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Pkg: testdata.P4,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+			},
+			QueryPkgID: true,
+			ExpHSA: []*model.HasSourceAt{
+				{
+					Package: testdata.P4out,
+					Source:  testdata.S1out,
+				},
+			},
+		},
+		{
+			Name:  "Query on Source - tag",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S3},
+			Calls: []call{
+				{
+					Pkg: testdata.P1,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+				{
+					Pkg: testdata.P1,
+					Src: testdata.S3,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+			},
+			Query: &model.HasSourceAtSpec{
+				Source: &model.SourceSpec{
+					Type:      ptrfrom.String("git"),
+					Namespace: ptrfrom.String("github.com/jeff"),
+					Name:      ptrfrom.String("myrepo"),
+					Tag:       ptrfrom.String("v1.0"),
+				},
+			},
+			ExpHSA: []*model.HasSourceAt{
+				{
+					Package: testdata.P1out,
+					Source:  testdata.S3out,
+				},
+			},
+		},
+		{
+			Name:  "Query on Source ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InSrc: []*model.SourceInputSpec{testdata.S2},
+			Calls: []call{
+				{
+					Pkg: testdata.P1,
+					Src: testdata.S2,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+			},
+			QuerySourceID: true,
+			ExpHSA: []*model.HasSourceAt{
+				{
+					Package: testdata.P1out,
+					Source:  testdata.S2out,
+				},
+			},
+		},
+		{
+			Name:  "Query ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Pkg: testdata.P1,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+				{
+					Pkg: testdata.P2,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+			},
+			QueryID: true,
+			ExpHSA: []*model.HasSourceAt{
+				{
+					Package: testdata.P2out,
+					Source:  testdata.S1out,
+				},
+			},
+		},
+		{
+			Name:  "Query Name and Version",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P4},
+			InSrc: []*model.SourceInputSpec{testdata.S4},
+			Calls: []call{
+				{
+					Pkg: testdata.P1,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+				{
+					Pkg: testdata.P1,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeAllVersions,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+				{
+					Pkg: testdata.P4,
+					Src: testdata.S4,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+			},
+			Query: &model.HasSourceAtSpec{
+				Package: &model.PkgSpec{
+					Type:      ptrfrom.String("conan"),
+					Namespace: ptrfrom.String("openssl.org"),
+					Name:      ptrfrom.String("openssl"),
+				},
+				Source: &model.SourceSpec{
+					Type:      ptrfrom.String("svn"),
+					Namespace: ptrfrom.String("github.com/bob"),
+					Name:      ptrfrom.String("bobsrepo"),
+					Commit:    ptrfrom.String("5e7c41f"),
+				},
+			},
+			ExpHSA: []*model.HasSourceAt{
+				{
+					Package: testdata.P4out,
+					Source:  testdata.S4out,
+				},
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Pkg: testdata.P1,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{},
+				},
+			},
+			Query: &model.HasSourceAtSpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: false,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestHasSourceAt(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if test.QueryID {
+					test.Query = &model.HasSourceAtSpec{
+						ID: ptrfrom.String(found.ID),
+					}
+				}
+				if test.QueryPkgID {
+					test.Query = &model.HasSourceAtSpec{
+						Package: &model.PkgSpec{
+							ID: ptrfrom.String(found.Package.Namespaces[0].Names[0].Versions[0].ID),
+						},
+					}
+
+				}
+				if test.QuerySourceID {
+					test.Query = &model.HasSourceAtSpec{
+						Source: &model.SourceSpec{
+							ID: ptrfrom.String(found.Source.Namespaces[0].Names[0].ID),
+						},
+					}
 				}
 			}
 			got, err := b.HasSourceAt(ctx, test.Query)

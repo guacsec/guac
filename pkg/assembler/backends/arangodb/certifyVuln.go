@@ -35,6 +35,14 @@ const (
 
 func (c *arangoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
+	if certifyVulnSpec != nil && certifyVulnSpec.ID != nil {
+		cv, err := c.buildCertifyVulnByID(ctx, *certifyVulnSpec.ID, certifyVulnSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildCertifyVulnByID failed with an error: %w", err)
+		}
+		return []*model.CertifyVuln{cv}, nil
+	}
+
 	// TODO (pxp928): Optimization of the query can be done by starting from the vulnerability node (if specified)
 	var arangoQueryBuilder *arangoQueryBuilder
 	if certifyVulnSpec.Package != nil {
@@ -105,7 +113,7 @@ func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVu
 	}
 	if certifyVulnSpec.TimeScanned != nil {
 		arangoQueryBuilder.filter("certifyVuln", timeScannedStr, "==", "@"+timeScannedStr)
-		queryValues[timeScannedStr] = *certifyVulnSpec.TimeScanned
+		queryValues[timeScannedStr] = certifyVulnSpec.TimeScanned.UTC()
 	}
 	if certifyVulnSpec.DbURI != nil {
 		arangoQueryBuilder.filter("certifyVuln", dbUriStr, "==", "@"+dbUriStr)
@@ -170,7 +178,7 @@ func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.Vul
 		values["guacVulnKey"] = vuln.VulnerabilityID
 	}
 
-	values[timeScannedStr] = certifyVuln.TimeScanned
+	values[timeScannedStr] = certifyVuln.TimeScanned.UTC()
 	values[dbUriStr] = certifyVuln.DbURI
 	values[dbVersionStr] = certifyVuln.DbVersion
 	values[scannerUriStr] = certifyVuln.ScannerURI
@@ -496,7 +504,7 @@ func (c *arangoClient) buildCertifyVulnByID(ctx context.Context, id string, filt
 
 func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *model.CertifyVulnSpec) (*model.CertifyVuln, error) {
 	values := map[string]any{}
-	arangoQueryBuilder := newForQuery(certifyVEXsStr, "certifyVuln")
+	arangoQueryBuilder := newForQuery(certifyVulnsStr, "certifyVuln")
 	setCertifyVulnMatchValues(arangoQueryBuilder, filter, values)
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN certifyVuln`)
@@ -508,16 +516,16 @@ func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *mod
 	defer cursor.Close()
 
 	type dbVuln struct {
-		CertifyVulnID    string    `json:"_id"`
-		PackageID        *string   `json:"packageID"`
-		VulnerabilityID  string    `json:"vulnerabilityID"`
-		Status           string    `json:"status"`
-		VexJustification string    `json:"vexJustification"`
-		Statement        string    `json:"statement"`
-		StatusNotes      string    `json:"statusNotes"`
-		KnownSince       time.Time `json:"knownSince"`
-		Collector        string    `json:"collector"`
-		Origin           string    `json:"origin"`
+		CertifyVulnID   string    `json:"_id"`
+		PackageID       *string   `json:"packageID"`
+		VulnerabilityID string    `json:"vulnerabilityID"`
+		TimeScanned     time.Time `json:"timeScanned"`
+		DbUri           string    `json:"dbUri"`
+		DbVersion       string    `json:"dbVersion"`
+		ScannerUri      string    `json:"scannerUri"`
+		ScannerVersion  string    `json:"scannerVersion"`
+		Collector       string    `json:"collector"`
+		Origin          string    `json:"origin"`
 	}
 
 	var collectedValues []dbVuln
@@ -528,7 +536,7 @@ func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *mod
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to certifyVex from cursor: %w", err)
+				return nil, fmt.Errorf("failed to certifyVuln from cursor: %w", err)
 			}
 		} else {
 			collectedValues = append(collectedValues, doc)
@@ -536,55 +544,34 @@ func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *mod
 	}
 
 	if len(collectedValues) != 1 {
-		return nil, fmt.Errorf("number of certifyVex nodes found for ID: %s is greater than one", *filter.ID)
+		return nil, fmt.Errorf("number of certifyVuln nodes found for ID: %s is greater than one", *filter.ID)
 	}
 
-	vex := &model.CertifyVEXStatement{
-		Status:           model.VexStatus(collectedValues[0].Status),
-		VexJustification: model.VexJustification(collectedValues[0].VexJustification),
-		Statement:        collectedValues[0].Statement,
-		StatusNotes:      collectedValues[0].StatusNotes,
-		KnownSince:       collectedValues[0].KnownSince,
-		Origin:           collectedValues[0].Origin,
-		Collector:        collectedValues[0].Collector,
+	certifyVuln := &model.CertifyVuln{
+		ID: collectedValues[0].CertifyVulnID,
+		Metadata: &model.ScanMetadata{
+			TimeScanned:    collectedValues[0].TimeScanned,
+			DbURI:          collectedValues[0].DbUri,
+			DbVersion:      collectedValues[0].DbVersion,
+			ScannerURI:     collectedValues[0].ScannerUri,
+			ScannerVersion: collectedValues[0].ScannerVersion,
+			Origin:         collectedValues[0].Origin,
+			Collector:      collectedValues[0].Collector,
+		},
 	}
 
 	builtVuln, err := c.buildVulnResponseByID(ctx, collectedValues[0].VulnerabilityID, filter.Vulnerability)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get vulnerability from ID: %s, with error: %w", collectedValues[0].VulnerabilityID, err)
 	}
-	vex.Vulnerability = builtVuln
+	certifyVuln.Vulnerability = builtVuln
 
-	if collectedValues[0].PackageID != nil {
-		var builtPackage *model.Package
-		if filter.Subject != nil && filter.Subject.Package != nil {
-			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Subject.Package)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
-			}
-		} else {
-			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, nil)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
-			}
-		}
-		vex.Subject = builtPackage
-	} else if collectedValues[0].ArtifactID != nil {
-		var builtArtifact *model.Artifact
-		if filter.Subject != nil && filter.Subject.Artifact != nil {
-			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, filter.Subject.Artifact)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
-			}
-		} else {
-			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, nil)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
-			}
-		}
-		vex.Subject = builtArtifact
-	} else {
-		return nil, fmt.Errorf("failed to get subject from certifyVEXStatement")
+	builtPackage, err := c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Package)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
 	}
-	return vex, nil
+
+	certifyVuln.Package = builtPackage
+
+	return certifyVuln, nil
 }

@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -37,11 +38,30 @@ const (
 
 func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 
+	if hasSLSASpec != nil && hasSLSASpec.ID != nil {
+		cv, err := c.buildHasSlsaByID(ctx, *hasSLSASpec.ID, hasSLSASpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildHasSlsaByID failed with an error: %w", err)
+		}
+		return []*model.HasSlsa{cv}, nil
+	}
+
 	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval (like from builtBy/builtFrom if specified)
 	values := map[string]any{}
 	arangoQueryBuilder := setArtifactMatchValues(hasSLSASpec.Subject, values)
+	arangoQueryBuilder.forOutBound(hasSLSASubjectArtEdgesStr, "hasSLSA", "art")
 	setHasSLSAMatchValues(arangoQueryBuilder, hasSLSASpec, values)
-
+	arangoQueryBuilder.forOutBound(hasSLSABuiltByEdgesStr, "build", "hasSLSA")
+	if hasSLSASpec.BuiltBy != nil {
+		if hasSLSASpec.BuiltBy.ID != nil {
+			arangoQueryBuilder.filter("build", "_id", "==", "@id")
+			values["id"] = *hasSLSASpec.BuiltBy.ID
+		}
+		if hasSLSASpec.BuiltBy.URI != nil {
+			arangoQueryBuilder.filter("build", "uri", "==", "@uri")
+			values["uri"] = *hasSLSASpec.BuiltBy.URI
+		}
+	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
 		'subject': {
@@ -74,8 +94,6 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 }
 
 func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *model.HasSLSASpec, queryValues map[string]any) {
-
-	arangoQueryBuilder.forOutBound(hasSLSASubjectArtEdgesStr, "hasSLSA", "art")
 	if hasSLSASpec.ID != nil {
 		arangoQueryBuilder.filter("hasSLSA", "_id", "==", "@id")
 		queryValues["id"] = *hasSLSASpec.ID
@@ -108,17 +126,6 @@ func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *
 	if hasSLSASpec.Collector != nil {
 		arangoQueryBuilder.filter("hasSLSA", collector, "==", "@"+collector)
 		queryValues[collector] = *hasSLSASpec.Collector
-	}
-	arangoQueryBuilder.forOutBound(hasSLSABuiltByEdgesStr, "build", "hasSLSA")
-	if hasSLSASpec.BuiltBy != nil {
-		if hasSLSASpec.BuiltBy.ID != nil {
-			arangoQueryBuilder.filter("build", "_id", "==", "@id")
-			queryValues["id"] = *hasSLSASpec.BuiltBy.ID
-		}
-		if hasSLSASpec.BuiltBy.URI != nil {
-			arangoQueryBuilder.filter("build", "uri", "==", "@uri")
-			queryValues["uri"] = *hasSLSASpec.BuiltBy.URI
-		}
 	}
 }
 
@@ -484,4 +491,129 @@ func getCollectedPredicates(slsaPredicateList []string) []*model.SLSAPredicate {
 		}
 	}
 	return predicates
+}
+
+func (c *arangoClient) buildHasSlsaByID(ctx context.Context, id string, filter *model.HasSLSASpec) (*model.HasSlsa, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == hasSLSAsStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.HasSLSASpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryHasSlsaNodeByID(ctx, filter)
+	}
+	return nil, nil
+}
+
+func (c *arangoClient) queryHasSlsaNodeByID(ctx context.Context, filter *model.HasSLSASpec) (*model.HasSlsa, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
+	setHasSLSAMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN hasSLSA`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryHasSlsaNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for hasSLSA: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbHasSLSA struct {
+		HasSlsaID     string     `json:"_id"`
+		ArtifactID    string     `json:"subjectID"`
+		BuiltByID     string     `json:"builtByID"`
+		BuiltFrom     []string   `json:"builtFrom"`
+		HasSLSAId     string     `json:"hasSLSA_id"`
+		BuildType     string     `json:"buildType"`
+		SlsaPredicate []string   `json:"slsaPredicate"`
+		SlsaVersion   string     `json:"slsaVersion"`
+		StartedOn     *time.Time `json:"startedOn"`
+		FinishedOn    *time.Time `json:"finishedOn"`
+		Collector     string     `json:"collector"`
+		Origin        string     `json:"origin"`
+	}
+
+	var collectedValues []dbHasSLSA
+	for {
+		var doc dbHasSLSA
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to hasSLSA from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of hasSLSA nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	slsa := &model.Slsa{
+		BuildType:     collectedValues[0].BuildType,
+		SlsaPredicate: getCollectedPredicates(collectedValues[0].SlsaPredicate),
+		SlsaVersion:   collectedValues[0].SlsaVersion,
+		Origin:        collectedValues[0].Origin,
+		Collector:     collectedValues[0].Collector,
+	}
+
+	if !collectedValues[0].StartedOn.Equal(time.Unix(0, 0).UTC()) {
+		slsa.StartedOn = collectedValues[0].StartedOn
+	}
+
+	if !collectedValues[0].FinishedOn.Equal(time.Unix(0, 0).UTC()) {
+		slsa.FinishedOn = collectedValues[0].FinishedOn
+	}
+
+	builtPackage, err := c.buildBuilderResponseByID(ctx, collectedValues[0].BuiltByID, filter.BuiltBy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get builtBy from ID: %s, with error: %w", collectedValues[0].BuiltByID, err)
+	}
+	slsa.BuiltBy = builtPackage
+
+	artifacts, err := c.getMaterialsByID(ctx, collectedValues[0].BuiltFrom)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get artifact by ID for hasSLSA builtFrom with error: %w", err)
+	}
+
+	matchingArtifacts := true
+	if filter.BuiltFrom != nil {
+		matchingArtifacts = false
+		for _, bfArtifact := range filter.BuiltFrom {
+			if containsMatchingArtifact(artifacts, bfArtifact.ID, bfArtifact.Algorithm, bfArtifact.Digest) {
+				matchingArtifacts = true
+				break
+			}
+		}
+	}
+	if matchingArtifacts {
+		slsa.BuiltFrom = append(slsa.BuiltFrom, artifacts...)
+	}
+
+	subject, err := c.buildArtifactResponseByID(ctx, collectedValues[0].ArtifactID, filter.Subject)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", collectedValues[0].ArtifactID, err)
+	}
+
+	return &model.HasSlsa{
+		ID:      collectedValues[0].HasSlsaID,
+		Subject: subject,
+		Slsa:    slsa,
+	}, nil
 }
