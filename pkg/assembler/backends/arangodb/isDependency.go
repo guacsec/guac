@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -28,6 +29,13 @@ const (
 	versionRangeStr   string = "versionRange"
 	dependencyTypeStr string = "dependencyType"
 )
+
+var dependencyTypeToEnum = map[string]model.DependencyType{
+	model.DependencyTypeDirect.String():   model.DependencyTypeDirect,
+	model.DependencyTypeIndirect.String(): model.DependencyTypeIndirect,
+	model.DependencyTypeUnknown.String():  model.DependencyTypeUnknown,
+	"":                                    "",
+}
 
 func checkPkgNameDependency(isDependencySpec *model.IsDependencySpec) bool {
 	if isDependencySpec.DependencyPackage != nil {
@@ -45,6 +53,14 @@ func checkPkgNameDependency(isDependencySpec *model.IsDependencySpec) bool {
 // Query IsDependency
 
 func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
+
+	if isDependencySpec != nil && isDependencySpec.ID != nil {
+		d, err := c.buildIsDependencyByID(ctx, *isDependencySpec.ID, isDependencySpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildIsDependencyByID failed with an error: %w", err)
+		}
+		return []*model.IsDependency{d}, nil
+	}
 
 	// TODO (pxp928): Optimization of the query can be done by starting from the dependent package node (if specified)
 	var arangoQueryBuilder *arangoQueryBuilder
@@ -196,7 +212,7 @@ func getDependencyForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 	return getIsDependencyFromCursor(ctx, cursor)
 }
 
-func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any, queryDepPkgVersion bool) {
+func queryIsDependencyBasedOnFilter(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any) {
 	if isDependencySpec.ID != nil {
 		arangoQueryBuilder.filter("isDependency", "_id", "==", "@id")
 		queryValues["id"] = *isDependencySpec.ID
@@ -221,6 +237,10 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 		arangoQueryBuilder.filter("isDependency", collector, "==", "@"+collector)
 		queryValues[collector] = *isDependencySpec.Collector
 	}
+}
+
+func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDependencySpec *model.IsDependencySpec, queryValues map[string]any, queryDepPkgVersion bool) {
+	queryIsDependencyBasedOnFilter(arangoQueryBuilder, isDependencySpec, queryValues)
 	if isDependencySpec.DependencyPackage != nil {
 		if !queryDepPkgVersion {
 			arangoQueryBuilder.forOutBound(isDependencyDepPkgNameEdgesStr, "depName", "isDependency")
@@ -756,22 +776,6 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	}
 }
 
-func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
-	if status == model.DependencyTypeDirect.String() {
-		return model.DependencyTypeDirect, nil
-	}
-	if status == model.DependencyTypeIndirect.String() {
-		return model.DependencyTypeIndirect, nil
-	}
-	if status == model.DependencyTypeUnknown.String() {
-		return model.DependencyTypeUnknown, nil
-	}
-	if status == "" {
-		return "", nil
-	}
-	return model.DependencyTypeUnknown, fmt.Errorf("failed to convert DependencyType to enum")
-}
-
 func getIsDependencyFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.IsDependency, error) {
 	type collectedData struct {
 		PkgVersion     *dbPkgVersion `json:"pkgVersion"`
@@ -807,23 +811,120 @@ func getIsDependencyFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mo
 		depPkg := generateModelPackage(createdValue.DepPkg.TypeID, createdValue.DepPkg.PkgType, createdValue.DepPkg.NamespaceID, createdValue.DepPkg.Namespace, createdValue.DepPkg.NameID,
 			createdValue.DepPkg.Name, createdValue.DepPkg.VersionID, createdValue.DepPkg.Version, createdValue.DepPkg.Subpath, createdValue.DepPkg.QualifierList)
 
-		dependencyTypeEnum, err := convertDependencyTypeToEnum(createdValue.DependencyType)
-		if err != nil {
-			return nil, fmt.Errorf("convertDependencyTypeToEnum failed with error: %w", err)
-		}
-
 		isDependency := &model.IsDependency{
 			ID:                createdValue.IsDependencyID,
 			Package:           pkg,
 			DependencyPackage: depPkg,
 			VersionRange:      createdValue.VersionRange,
-			DependencyType:    dependencyTypeEnum,
 			Justification:     createdValue.Justification,
 			Origin:            createdValue.Collector,
 			Collector:         createdValue.Origin,
+		}
+
+		if depType, ok := dependencyTypeToEnum[createdValue.DependencyType]; ok {
+			isDependency.DependencyType = depType
+		} else {
+			return nil, fmt.Errorf("DependencyType %s failed to match", createdValue.DependencyType)
 		}
 		isDependencyList = append(isDependencyList, isDependency)
 	}
 
 	return isDependencyList, nil
+}
+
+func (c *arangoClient) buildIsDependencyByID(ctx context.Context, id string, filter *model.IsDependencySpec) (*model.IsDependency, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == isDependenciesStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.IsDependencySpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryIsDependencyNodeByID(ctx, filter)
+	}
+	return nil, nil
+}
+
+func (c *arangoClient) queryIsDependencyNodeByID(ctx context.Context, filter *model.IsDependencySpec) (*model.IsDependency, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(isDependenciesStr, "isDependency")
+	queryIsDependencyBasedOnFilter(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN isDependency`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryIsDependencyNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for isDependency: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbIsDependency struct {
+		IsDependencyID string `json:"_id"`
+		PackageID      string `json:"packageID"`
+		DepPackageID   string `json:"depPackageID"`
+		VersionRange   string `json:"versionRange"`
+		DependencyType string `json:"dependencyType"`
+		Justification  string `json:"justification"`
+		Collector      string `json:"collector"`
+		Origin         string `json:"origin"`
+	}
+
+	var collectedValues []dbIsDependency
+	for {
+		var doc dbIsDependency
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to isDependency from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of isDependency nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	var depType model.DependencyType
+	if typeEnum, ok := dependencyTypeToEnum[collectedValues[0].DependencyType]; ok {
+		depType = typeEnum
+	} else {
+		return nil, fmt.Errorf("DependencyType %s failed to match", collectedValues[0].DependencyType)
+	}
+
+	builtPackage, err := c.buildPackageResponseFromID(ctx, collectedValues[0].PackageID, filter.Package)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", collectedValues[0].PackageID, err)
+	}
+
+	builtDepPackage, err := c.buildPackageResponseFromID(ctx, collectedValues[0].DepPackageID, filter.DependencyPackage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", collectedValues[0].DepPackageID, err)
+	}
+
+	return &model.IsDependency{
+		ID:                collectedValues[0].IsDependencyID,
+		Package:           builtPackage,
+		DependencyPackage: builtDepPackage,
+		VersionRange:      collectedValues[0].VersionRange,
+		DependencyType:    depType,
+		Justification:     collectedValues[0].Justification,
+		Origin:            collectedValues[0].Collector,
+		Collector:         collectedValues[0].Origin,
+	}, nil
 }

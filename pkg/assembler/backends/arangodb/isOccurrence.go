@@ -21,11 +21,20 @@ import (
 	"strings"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // Query IsOccurrence
 func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+
+	if isOccurrenceSpec != nil && isOccurrenceSpec.ID != nil {
+		d, err := c.buildIsOccurrenceByID(ctx, *isOccurrenceSpec.ID, isOccurrenceSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildIsOccurrenceByID failed with an error: %w", err)
+		}
+		return []*model.IsOccurrence{d}, nil
+	}
 
 	// TODO (pxp928): Optimization of the query can be done by starting from the occurrence artifact node (if specified)
 	var arangoQueryBuilder *arangoQueryBuilder
@@ -163,7 +172,7 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	return getIsOccurrenceFromCursor(ctx, cursor)
 }
 
-func setIsOccurrenceMatchValues(arangoQueryBuilder *arangoQueryBuilder, isOccurrenceSpec *model.IsOccurrenceSpec, queryValues map[string]any) {
+func queryIsOccurrenceBasedOnFilter(arangoQueryBuilder *arangoQueryBuilder, isOccurrenceSpec *model.IsOccurrenceSpec, queryValues map[string]any) {
 	if isOccurrenceSpec.ID != nil {
 		arangoQueryBuilder.filter("isOccurrence", "_id", "==", "@id")
 		queryValues["id"] = *isOccurrenceSpec.ID
@@ -180,6 +189,10 @@ func setIsOccurrenceMatchValues(arangoQueryBuilder *arangoQueryBuilder, isOccurr
 		arangoQueryBuilder.filter("isOccurrence", collector, "==", "@"+collector)
 		queryValues[collector] = *isOccurrenceSpec.Collector
 	}
+}
+
+func setIsOccurrenceMatchValues(arangoQueryBuilder *arangoQueryBuilder, isOccurrenceSpec *model.IsOccurrenceSpec, queryValues map[string]any) {
+	queryIsOccurrenceBasedOnFilter(arangoQueryBuilder, isOccurrenceSpec, queryValues)
 	arangoQueryBuilder.forOutBound(isOccurrenceArtEdgesStr, "art", "isOccurrence")
 	if isOccurrenceSpec.Artifact != nil {
 		if isOccurrenceSpec.Artifact.ID != nil {
@@ -648,4 +661,118 @@ func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mo
 		isOccurrenceList = append(isOccurrenceList, isOccurrence)
 	}
 	return isOccurrenceList, nil
+}
+
+func (c *arangoClient) buildIsOccurrenceByID(ctx context.Context, id string, filter *model.IsOccurrenceSpec) (*model.IsOccurrence, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == isOccurrencesStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.IsOccurrenceSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryIsOccurrenceNodeByID(ctx, filter)
+	}
+	return nil, nil
+}
+
+func (c *arangoClient) queryIsOccurrenceNodeByID(ctx context.Context, filter *model.IsOccurrenceSpec) (*model.IsOccurrence, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(isOccurrencesStr, "isOccurrence")
+	queryIsOccurrenceBasedOnFilter(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN isOccurrence`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryIsOccurrenceNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for isOccurrence: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbIsOccurrence struct {
+		IsOccurrenceID string  `json:"_id"`
+		PackageID      *string `json:"packageID"`
+		SourceID       *string `json:"sourceID"`
+		ArtifactID     string  `json:"artifactID"`
+		Justification  string  `json:"justification"`
+		Collector      string  `json:"collector"`
+		Origin         string  `json:"origin"`
+	}
+
+	var collectedValues []dbIsOccurrence
+	for {
+		var doc dbIsOccurrence
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to isOccurrence from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of isOccurrence nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	isOccurrence := &model.IsOccurrence{
+		ID:            collectedValues[0].IsOccurrenceID,
+		Justification: collectedValues[0].Justification,
+		Origin:        collectedValues[0].Origin,
+		Collector:     collectedValues[0].Collector,
+	}
+
+	builtArtifact, err := c.buildArtifactResponseByID(ctx, collectedValues[0].ArtifactID, filter.Artifact)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", collectedValues[0].ArtifactID, err)
+	}
+	isOccurrence.Artifact = builtArtifact
+
+	if collectedValues[0].PackageID != nil {
+		var builtPackage *model.Package
+		if filter.Subject != nil && filter.Subject.Package != nil {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Subject.Package)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		} else {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		}
+		isOccurrence.Subject = builtPackage
+	} else if collectedValues[0].SourceID != nil {
+		var builtSource *model.Source
+		if filter.Subject != nil && filter.Subject.Source != nil {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, filter.Subject.Source)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		} else {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		}
+		isOccurrence.Subject = builtSource
+	} else {
+		return nil, fmt.Errorf("failed to get subject from isOccurrence")
+	}
+	return isOccurrence, nil
 }
