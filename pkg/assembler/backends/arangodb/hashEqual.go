@@ -29,11 +29,11 @@ import (
 func (c *arangoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 
 	if hashEqualSpec != nil && hashEqualSpec.ID != nil {
-		cv, err := c.buildHashEqualByID(ctx, *hashEqualSpec.ID, hashEqualSpec)
+		he, err := c.buildHashEqualByID(ctx, *hashEqualSpec.ID, hashEqualSpec)
 		if err != nil {
 			return nil, fmt.Errorf("buildHashEqualByID failed with an error: %w", err)
 		}
-		return []*model.HashEqual{cv}, nil
+		return []*model.HashEqual{he}, nil
 	}
 
 	values := map[string]any{}

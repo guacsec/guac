@@ -34,11 +34,11 @@ const (
 func (c *arangoClient) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
 
 	if hasMetadataSpec != nil && hasMetadataSpec.ID != nil {
-		cv, err := c.buildHasMetadataByID(ctx, *hasMetadataSpec.ID, hasMetadataSpec)
+		hm, err := c.buildHasMetadataByID(ctx, *hasMetadataSpec.ID, hasMetadataSpec)
 		if err != nil {
 			return nil, fmt.Errorf("buildHasMetadataByID failed with an error: %w", err)
 		}
-		return []*model.HasMetadata{cv}, nil
+		return []*model.HasMetadata{hm}, nil
 	}
 
 	var arangoQueryBuilder *arangoQueryBuilder

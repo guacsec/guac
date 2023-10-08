@@ -914,7 +914,7 @@ func (c *arangoClient) queryIsDependencyNodeByID(ctx context.Context, filter *mo
 
 	builtDepPackage, err := c.buildPackageResponseFromID(ctx, collectedValues[0].DepPackageID, filter.DependencyPackage)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", collectedValues[0].DepPackageID, err)
+		return nil, fmt.Errorf("failed to get dependency package from ID: %s, with error: %w", collectedValues[0].DepPackageID, err)
 	}
 
 	return &model.IsDependency{

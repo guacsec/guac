@@ -28,11 +28,11 @@ import (
 func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
 	if hasSBOMSpec != nil && hasSBOMSpec.ID != nil {
-		cv, err := c.buildHasSbomByID(ctx, *hasSBOMSpec.ID, hasSBOMSpec)
+		sbom, err := c.buildHasSbomByID(ctx, *hasSBOMSpec.ID, hasSBOMSpec)
 		if err != nil {
 			return nil, fmt.Errorf("buildHasSbomByID failed with an error: %w", err)
 		}
-		return []*model.HasSbom{cv}, nil
+		return []*model.HasSbom{sbom}, nil
 	}
 
 	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval

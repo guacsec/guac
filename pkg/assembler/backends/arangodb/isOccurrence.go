@@ -29,11 +29,11 @@ import (
 func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
 	if isOccurrenceSpec != nil && isOccurrenceSpec.ID != nil {
-		d, err := c.buildIsOccurrenceByID(ctx, *isOccurrenceSpec.ID, isOccurrenceSpec)
+		io, err := c.buildIsOccurrenceByID(ctx, *isOccurrenceSpec.ID, isOccurrenceSpec)
 		if err != nil {
 			return nil, fmt.Errorf("buildIsOccurrenceByID failed with an error: %w", err)
 		}
-		return []*model.IsOccurrence{d}, nil
+		return []*model.IsOccurrence{io}, nil
 	}
 
 	// TODO (pxp928): Optimization of the query can be done by starting from the occurrence artifact node (if specified)

@@ -37,11 +37,11 @@ const (
 func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 
 	if certifyVEXStatementSpec != nil && certifyVEXStatementSpec.ID != nil {
-		sc, err := c.buildCertifyVexByID(ctx, *certifyVEXStatementSpec.ID, certifyVEXStatementSpec)
+		vex, err := c.buildCertifyVexByID(ctx, *certifyVEXStatementSpec.ID, certifyVEXStatementSpec)
 		if err != nil {
 			return nil, fmt.Errorf("buildCertifyVexByID failed with an error: %w", err)
 		}
-		return []*model.CertifyVEXStatement{sc}, nil
+		return []*model.CertifyVEXStatement{vex}, nil
 	}
 
 	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval

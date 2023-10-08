@@ -29,11 +29,11 @@ import (
 func (c *arangoClient) CertifyLegal(ctx context.Context, certifyLegalSpec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
 
 	if certifyLegalSpec != nil && certifyLegalSpec.ID != nil {
-		cg, err := c.buildCertifyLegalByID(ctx, *certifyLegalSpec.ID, certifyLegalSpec)
+		cl, err := c.buildCertifyLegalByID(ctx, *certifyLegalSpec.ID, certifyLegalSpec)
 		if err != nil {
 			return nil, fmt.Errorf("buildCertifyLegalByID failed with an error: %w", err)
 		}
-		return []*model.CertifyLegal{cg}, nil
+		return []*model.CertifyLegal{cl}, nil
 	}
 
 	var aqb *arangoQueryBuilder

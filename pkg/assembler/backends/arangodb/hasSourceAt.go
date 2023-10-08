@@ -29,11 +29,11 @@ import (
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 
 	if hasSourceAtSpec != nil && hasSourceAtSpec.ID != nil {
-		cv, err := c.buildHasSourceAtByID(ctx, *hasSourceAtSpec.ID, hasSourceAtSpec)
+		hs, err := c.buildHasSourceAtByID(ctx, *hasSourceAtSpec.ID, hasSourceAtSpec)
 		if err != nil {
 			return nil, fmt.Errorf("buildHasSourceAtByID failed with an error: %w", err)
 		}
-		return []*model.HasSourceAt{cv}, nil
+		return []*model.HasSourceAt{hs}, nil
 	}
 
 	var arangoQueryBuilder *arangoQueryBuilder

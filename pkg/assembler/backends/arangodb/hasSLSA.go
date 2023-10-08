@@ -39,11 +39,11 @@ const (
 func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 
 	if hasSLSASpec != nil && hasSLSASpec.ID != nil {
-		cv, err := c.buildHasSlsaByID(ctx, *hasSLSASpec.ID, hasSLSASpec)
+		slsa, err := c.buildHasSlsaByID(ctx, *hasSLSASpec.ID, hasSLSASpec)
 		if err != nil {
 			return nil, fmt.Errorf("buildHasSlsaByID failed with an error: %w", err)
 		}
-		return []*model.HasSlsa{cv}, nil
+		return []*model.HasSlsa{slsa}, nil
 	}
 
 	// TODO (pxp928): Optimize/add other queries based on input and starting node/edge for most efficient retrieval (like from builtBy/builtFrom if specified)
