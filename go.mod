@@ -197,7 +197,6 @@ require (
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/json-iterator/go v1.1.12
 	github.com/klauspost/compress v1.17.0
-	github.com/knqyf263/go-cpe v0.0.0-20230627041855-cb0794d06872
 	github.com/lib/pq v1.10.9
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0

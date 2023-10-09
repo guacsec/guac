@@ -22,8 +22,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	cpecommon "github.com/knqyf263/go-cpe/common"
-	cpenaming "github.com/knqyf263/go-cpe/naming"
 )
 
 var cmpOpts = []cmp.Option{
@@ -787,81 +785,6 @@ func TestGuacFilePurl(t *testing.T) {
 	}
 }
 
-func TestCPEToPkg(t *testing.T) {
-	tests := []struct {
-		name    string
-		args    cpecommon.WellFormedName
-		want    *model.PkgInputSpec
-		wantErr bool
-	}{
-		{
-			name: "CPE22",
-			args: unbindURI("cpe:/o:redhat:enterprise_linux:7::server"),
-			want: &model.PkgInputSpec{
-				Type:      "cpe",
-				Namespace: strP("redhat"),
-				Name:      "enterprise_linux",
-				Version:   strP("7"),
-				Qualifiers: []model.PackageQualifierInputSpec{
-					{Key: "cpe-part", Value: "o"},
-					{Key: "cpe-update", Value: "ANY"},
-					{Key: "cpe-edition", Value: "server"},
-					{Key: "cpe-lang", Value: "ANY"},
-					{Key: "cpe-sw-edition", Value: "ANY"},
-					{Key: "cpe-target-sw", Value: "ANY"},
-					{Key: "cpe-target-hw", Value: "ANY"},
-					{Key: "cpe-other", Value: "ANY"},
-				},
-				Subpath: strP(""),
-			},
-		},
-		{
-			name: "CPE23",
-			args: unbindFS("cpe:2.3:a:alpine_baselayout_data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*"),
-			want: &model.PkgInputSpec{
-				Type:      "cpe",
-				Namespace: strP("alpine_baselayout_data"),
-				Name:      "alpine-baselayout-data",
-				Version:   strP("3.2.0-r22"),
-				Qualifiers: []model.PackageQualifierInputSpec{
-					{Key: "cpe-edition", Value: "ANY"},
-					{Key: "cpe-lang", Value: "ANY"},
-					{Key: "cpe-other", Value: "ANY"},
-					{Key: "cpe-update", Value: "ANY"},
-					{Key: "cpe-part", Value: "a"},
-					{Key: "cpe-sw-edition", Value: "ANY"},
-					{Key: "cpe-target-hw", Value: "ANY"},
-					{Key: "cpe-target-sw", Value: "ANY"},
-				},
-				Subpath: strP(""),
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := CPEToPkg(tt.args)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("CPEToPkg() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if diff := cmp.Diff(tt.want, got, cmpOpts...); diff != "" {
-				t.Errorf("model PkgInputSpec mismatch (-want +got):\n%s", diff)
-				return
-			}
-		})
-	}
-}
-
 func strP(s string) *string {
 	return &s
-}
-
-func unbindURI(locator string) cpecommon.WellFormedName {
-	wfn, _ := cpenaming.UnbindURI(locator)
-	return wfn
-}
-
-func unbindFS(locator string) cpecommon.WellFormedName {
-	wfn, _ := cpenaming.UnbindFS(locator)
-	return wfn
 }
