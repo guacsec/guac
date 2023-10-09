@@ -21,6 +21,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
@@ -2332,6 +2333,252 @@ func (d *Dependency) ToEdge(order *DependencyOrder) *DependencyEdge {
 	return &DependencyEdge{
 		Node:   d,
 		Cursor: order.Field.toCursor(d),
+	}
+}
+
+// HasMetadataEdge is the edge representation of HasMetadata.
+type HasMetadataEdge struct {
+	Node   *HasMetadata `json:"node"`
+	Cursor Cursor       `json:"cursor"`
+}
+
+// HasMetadataConnection is the connection containing edges to HasMetadata.
+type HasMetadataConnection struct {
+	Edges      []*HasMetadataEdge `json:"edges"`
+	PageInfo   PageInfo           `json:"pageInfo"`
+	TotalCount int                `json:"totalCount"`
+}
+
+func (c *HasMetadataConnection) build(nodes []*HasMetadata, pager *hasmetadataPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *HasMetadata
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *HasMetadata {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *HasMetadata {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*HasMetadataEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &HasMetadataEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// HasMetadataPaginateOption enables pagination customization.
+type HasMetadataPaginateOption func(*hasmetadataPager) error
+
+// WithHasMetadataOrder configures pagination ordering.
+func WithHasMetadataOrder(order *HasMetadataOrder) HasMetadataPaginateOption {
+	if order == nil {
+		order = DefaultHasMetadataOrder
+	}
+	o := *order
+	return func(pager *hasmetadataPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultHasMetadataOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithHasMetadataFilter configures pagination filter.
+func WithHasMetadataFilter(filter func(*HasMetadataQuery) (*HasMetadataQuery, error)) HasMetadataPaginateOption {
+	return func(pager *hasmetadataPager) error {
+		if filter == nil {
+			return errors.New("HasMetadataQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type hasmetadataPager struct {
+	reverse bool
+	order   *HasMetadataOrder
+	filter  func(*HasMetadataQuery) (*HasMetadataQuery, error)
+}
+
+func newHasMetadataPager(opts []HasMetadataPaginateOption, reverse bool) (*hasmetadataPager, error) {
+	pager := &hasmetadataPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultHasMetadataOrder
+	}
+	return pager, nil
+}
+
+func (p *hasmetadataPager) applyFilter(query *HasMetadataQuery) (*HasMetadataQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *hasmetadataPager) toCursor(hm *HasMetadata) Cursor {
+	return p.order.Field.toCursor(hm)
+}
+
+func (p *hasmetadataPager) applyCursors(query *HasMetadataQuery, after, before *Cursor) (*HasMetadataQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultHasMetadataOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *hasmetadataPager) applyOrder(query *HasMetadataQuery) *HasMetadataQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultHasMetadataOrder.Field {
+		query = query.Order(DefaultHasMetadataOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *hasmetadataPager) orderExpr(query *HasMetadataQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultHasMetadataOrder.Field {
+			b.Comma().Ident(DefaultHasMetadataOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to HasMetadata.
+func (hm *HasMetadataQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...HasMetadataPaginateOption,
+) (*HasMetadataConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newHasMetadataPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if hm, err = pager.applyFilter(hm); err != nil {
+		return nil, err
+	}
+	conn := &HasMetadataConnection{Edges: []*HasMetadataEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = hm.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if hm, err = pager.applyCursors(hm, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		hm.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := hm.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	hm = pager.applyOrder(hm)
+	nodes, err := hm.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// HasMetadataOrderField defines the ordering field of HasMetadata.
+type HasMetadataOrderField struct {
+	// Value extracts the ordering value from the given HasMetadata.
+	Value    func(*HasMetadata) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) hasmetadata.OrderOption
+	toCursor func(*HasMetadata) Cursor
+}
+
+// HasMetadataOrder defines the ordering of HasMetadata.
+type HasMetadataOrder struct {
+	Direction OrderDirection         `json:"direction"`
+	Field     *HasMetadataOrderField `json:"field"`
+}
+
+// DefaultHasMetadataOrder is the default ordering of HasMetadata.
+var DefaultHasMetadataOrder = &HasMetadataOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &HasMetadataOrderField{
+		Value: func(hm *HasMetadata) (ent.Value, error) {
+			return hm.ID, nil
+		},
+		column: hasmetadata.FieldID,
+		toTerm: hasmetadata.ByID,
+		toCursor: func(hm *HasMetadata) Cursor {
+			return Cursor{ID: hm.ID}
+		},
+	},
+}
+
+// ToEdge converts HasMetadata into HasMetadataEdge.
+func (hm *HasMetadata) ToEdge(order *HasMetadataOrder) *HasMetadataEdge {
+	if order == nil {
+		order = DefaultHasMetadataOrder
+	}
+	return &HasMetadataEdge{
+		Node:   hm,
+		Cursor: order.Field.toCursor(hm),
 	}
 }
 

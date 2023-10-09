@@ -30,6 +30,8 @@ type Tx struct {
 	CertifyVuln *CertifyVulnClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
+	// HasMetadata is the client for interacting with the HasMetadata builders.
+	HasMetadata *HasMetadataClient
 	// HasSourceAt is the client for interacting with the HasSourceAt builders.
 	HasSourceAt *HasSourceAtClient
 	// HashEqual is the client for interacting with the HashEqual builders.
@@ -206,6 +208,7 @@ func (tx *Tx) init() {
 	tx.CertifyVex = NewCertifyVexClient(tx.config)
 	tx.CertifyVuln = NewCertifyVulnClient(tx.config)
 	tx.Dependency = NewDependencyClient(tx.config)
+	tx.HasMetadata = NewHasMetadataClient(tx.config)
 	tx.HasSourceAt = NewHasSourceAtClient(tx.config)
 	tx.HashEqual = NewHashEqualClient(tx.config)
 	tx.IsVulnerability = NewIsVulnerabilityClient(tx.config)

@@ -79,6 +79,13 @@
 ./pkg/assembler/backends/ent/hashequal_delete.go
 ./pkg/assembler/backends/ent/hashequal_query.go
 ./pkg/assembler/backends/ent/hashequal_update.go
+./pkg/assembler/backends/ent/hasmetadata/hasmetadata.go
+./pkg/assembler/backends/ent/hasmetadata/where.go
+./pkg/assembler/backends/ent/hasmetadata.go
+./pkg/assembler/backends/ent/hasmetadata_update.go
+./pkg/assembler/backends/ent/hasmetadata_create.go
+./pkg/assembler/backends/ent/hasmetadata_query.go
+./pkg/assembler/backends/ent/hasmetadata_delete.go
 ./pkg/assembler/backends/ent/hassourceat.go
 ./pkg/assembler/backends/ent/hassourceat/hassourceat.go
 ./pkg/assembler/backends/ent/hassourceat/where.go
