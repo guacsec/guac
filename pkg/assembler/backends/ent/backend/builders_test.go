@@ -59,15 +59,18 @@ func (s *Suite) TestIngestBuilder() {
 			if err != nil {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
-			got, err := b.IngestBuilderID(ctx, tt.builderInput)
+			id, err := b.IngestBuilderID(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got == "" {
-				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-				}
+
+			got, err := b.Builders(ctx, &model.BuilderSpec{ID: &id})
+			if err != nil {
+				t.Fatalf("Builders() error = %v", err)
+			}
+			if diff := cmp.Diff(tt.want, got[0], ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -98,23 +101,26 @@ func (s *Suite) TestIngestBuilders() {
 		wantErr: false,
 	}}
 	ctx := s.Ctx
-	for _, tt := range tests {
+	for index, tt := range tests {
 		s.Run(tt.name, func() {
 			t := s.T()
 			b, err := GetBackend(s.Client)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			got, err := b.IngestBuilderIDs(ctx, tt.builderInputs)
+			ids, err := b.IngestBuilderIDs(ctx, tt.builderInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if len(got) != 2 {
-				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-				}
+			got, err := b.Builders(ctx, &model.BuilderSpec{ID: &ids[index]})
+			if err != nil {
+				t.Fatalf("Builders() error = %v", err)
 			}
+			if diff := cmp.Diff(tt.want[index], got[index], ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+
 		})
 	}
 }

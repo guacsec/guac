@@ -228,7 +228,7 @@ func (s *Suite) Test_IngestPackages() {
 				return
 			}
 
-			// Here we chacks if all parameters are present and if they are alla different each other see https://github.com/guacsec/guac/pull/1330
+			// Here we check if all parameters are present and if they are alla different each other see https://github.com/guacsec/guac/pull/1330
 			if len(got) != 4 || (got[0] == got[1] || got[1] == got[2] || got[2] == got[3]) {
 				diff := cmp.Diff(tt.want, got, ignoreID)
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
