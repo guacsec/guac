@@ -391,7 +391,10 @@ func (c *arangoClient) buildVulnerabilityMetadataByID(ctx context.Context, id st
 func (c *arangoClient) queryVulnerabilityMetadataNodeByID(ctx context.Context, filter *model.VulnerabilityMetadataSpec) (*model.VulnerabilityMetadata, error) {
 	values := map[string]any{}
 	arangoQueryBuilder := newForQuery(vulnMetadataStr, "vulnMetadata")
-	setVulnMetadataMatchValues(arangoQueryBuilder, filter, values)
+	err := setVulnMetadataMatchValues(arangoQueryBuilder, filter, values)
+	if err != nil {
+		return nil, fmt.Errorf("setting match values for vuln metadata resulted in error: %w", err)
+	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN vulnMetadata`)
 
