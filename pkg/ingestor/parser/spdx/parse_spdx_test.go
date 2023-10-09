@@ -47,6 +47,10 @@ func Test_spdxParser(t *testing.T) {
 	}{
 		{
 			name: "valid big SPDX document",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(generated.HasMetadataInputSpec{},
+					"Timestamp"),
+			},
 			doc: &processor.Document{
 				Blob:   testdata.SpdxExampleAlpine,
 				Format: processor.FormatJSON,

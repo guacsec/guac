@@ -360,6 +360,31 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 	}
 
+	for _, pkg := range s.spdxDoc.Packages {
+		pkgInputSpecs := s.getPackageElement(string(pkg.PackageSPDXIdentifier))
+		for _, extRef := range pkg.PackageExternalReferences {
+			if extRef.Category == spdx_common.CategorySecurity {
+				locator := extRef.Locator
+				metadataInputSpec := &model.HasMetadataInputSpec{
+					Key:           "cpe",
+					Value:         locator,
+					Timestamp:     time.Now().UTC(),
+					Justification: "spdx cpe external reference",
+					Origin:        "GUAC SPDX",
+					Collector:     "GUAC",
+				}
+				for i := range pkgInputSpecs {
+					hasMetadata := assembler.HasMetadataIngest{
+						Pkg:          pkgInputSpecs[i],
+						PkgMatchFlag: model.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						HasMetadata:  metadataInputSpec,
+					}
+					preds.HasMetadata = append(preds.HasMetadata, hasMetadata)
+				}
+			}
+		}
+	}
+
 	return preds
 }
 
