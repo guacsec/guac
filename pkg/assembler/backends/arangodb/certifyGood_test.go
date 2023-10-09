@@ -19,13 +19,12 @@ package arangodb
 
 import (
 	"context"
-	"strings"
-	"testing"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"strings"
+	"testing"
 )
 
 func TestCertifyGood(t *testing.T) {
@@ -190,6 +189,47 @@ func TestCertifyGood(t *testing.T) {
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification one",
+						KnownSince:    zeroTime,
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification two",
+						KnownSince:    zeroTime,
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Justification: ptrfrom.String("test justification one"),
+				KnownSince:    ptrfrom.Time(zeroTime),
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       testdata.P1out,
+					Justification: "test justification one",
+					KnownSince:    zeroTime,
 				},
 			},
 		},
