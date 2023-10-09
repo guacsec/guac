@@ -1,0 +1,138 @@
+openapi: 3.0.0
+info:
+  title: GUAC REST API
+  version: 0.1.0
+paths:
+  /known/package/{hash}:
+    get:
+      summary: Returns known item for a given pURL
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Known item found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Neighbors'
+        '400':
+          description: Known item not found
+        '500':
+          description: Internal Server Error
+  /known/source/{vcs}:
+    get:
+      summary: Returns known item for a given VCS
+      parameters:
+        - name: vcs
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Known item found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Neighbors'
+        '400':
+          description: Known item not found
+        '500':
+          description: Internal Server Error
+components:
+  schemas:
+    Neighbors:
+      type: object
+      properties:
+        HashEquals:
+          type: array
+          items:
+            $ref: '#/components/schemas/HashEqual'
+        Scorecards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Scorecard'
+        Occurrences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Occurrence'
+        HasSrcAt:
+          type: array
+          items:
+            $ref: '#/components/schemas/HasSourceAt'
+        HasSBOMs:
+          type: array
+          items:
+            $ref: '#/components/schemas/HasSBOM'
+        HasSLSAs:
+          type: array
+          items:
+            $ref: '#/components/schemas/HasSLSA'
+        CertifyVulns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CertifyVuln'
+        VexLinks:
+          type: array
+          items:
+            $ref: '#/components/schemas/VEXStatement'
+        BadLinks:
+          type: array
+          items:
+            $ref: '#/components/schemas/BadLink'
+        GoodLinks:
+          type: array
+          items:
+            $ref: '#/components/schemas/GoodLink'
+        PkgEquals:
+          type: array
+          items:
+            $ref: '#/components/schemas/PkgEqual'
+    HashEqual:
+      type: object
+      properties:
+        // properties of HashEqual
+    Scorecard:
+      type: object
+      properties:
+        // properties of Scorecard
+    Occurrence:
+      type: object
+      properties:
+        // properties of Occurrence
+    HasSourceAt:
+      type: object
+      properties:
+        // properties of HasSourceAt
+    HasSBOM:
+      type: object
+      properties:
+        // properties of HasSBOM
+    HasSLSA:
+      type: object
+      properties:
+        // properties of HasSLSA
+    CertifyVuln:
+      type: object
+      properties:
+        // properties of CertifyVuln
+    VEXStatement:
+      type: object
+      properties:
+        // properties of VEXStatement
+    BadLink:
+      type: object
+      properties:
+        // properties of BadLink
+    GoodLink:
+      type: object
+      properties:
+        // properties of GoodLink
+    PkgEqual:
+      type: object
+      properties:
+        // properties of PkgEqual
