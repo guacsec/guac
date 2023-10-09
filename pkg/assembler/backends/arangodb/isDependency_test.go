@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -1089,7 +1091,6 @@ func Test_buildIsDependencyByID(t *testing.T) {
 				DependencyPackage: testdata.P4outName,
 			},
 		},
-
 		{
 			Name:  "Query on ID",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},

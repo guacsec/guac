@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -213,6 +215,77 @@ func Test_LicensesBulk(t *testing.T) {
 			slices.SortFunc(got, lessLicense)
 			if diff := cmp.Diff(tt.Exp, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_getLicenseByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	tests := []struct {
+		Name         string
+		Ingests      []*model.LicenseInputSpec
+		ExpIngestErr bool
+		IDInFilter   int
+		Query        *model.LicenseSpec
+		Exp          *model.License
+		ExpQueryErr  bool
+	}{
+		{
+			Name:    "HappyPath",
+			Ingests: []*model.LicenseInputSpec{testdata.L1},
+			Query:   &model.LicenseSpec{},
+			Exp:     testdata.L1out,
+		},
+		{
+			Name:       "Query by ID",
+			Ingests:    []*model.LicenseInputSpec{testdata.L4},
+			IDInFilter: 2,
+			Query:      &model.LicenseSpec{},
+			Exp:        testdata.L4out,
+		},
+		{
+			Name: "Query bad ID",
+			Query: &model.LicenseSpec{
+				ID: ptrfrom.String("foo"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			c, err := getBackend(ctx, arangArg)
+			if err != nil {
+				t.Fatalf("error creating arango backend: %v", err)
+			}
+			for _, ingest := range tt.Ingests {
+				ingestedLicense, err := c.IngestLicense(ctx, ingest)
+				if (err != nil) != tt.ExpIngestErr {
+					t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.ExpIngestErr)
+					return
+				}
+				if err != nil {
+					return
+				}
+				got, err := c.(*arangoClient).getLicenseByID(ctx, ingestedLicense.ID)
+				if (err != nil) != tt.ExpQueryErr {
+					t.Errorf("demoClient.Licenses() error = %v, wantErr %v", err, tt.ExpQueryErr)
+					return
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(tt.Exp, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
 			}
 		})
 	}

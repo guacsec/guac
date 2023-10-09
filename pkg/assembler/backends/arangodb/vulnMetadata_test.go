@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -1348,7 +1350,6 @@ func Test_buildVulnerabilityMetadataByID(t *testing.T) {
 		Vuln         *model.VulnerabilityInputSpec
 		VulnMetadata *model.VulnerabilityMetadataInputSpec
 	}
-
 	tests := []struct {
 		Name         string
 		InVuln       []*model.VulnerabilityInputSpec

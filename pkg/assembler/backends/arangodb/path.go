@@ -47,14 +47,55 @@ func (c *arangoClient) Node(ctx context.Context, nodeID string) (model.Node, err
 		return c.buildBuilderResponseByID(ctx, nodeID, nil)
 	case artifactsStr:
 		return c.buildArtifactResponseByID(ctx, nodeID, nil)
+	case licensesStr:
+		return c.getLicenseByID(ctx, nodeID)
 	case certifyBadsStr:
 		return c.buildCertifyBadByID(ctx, nodeID, nil)
 	case certifyGoodsStr:
 		return c.buildCertifyGoodByID(ctx, nodeID, nil)
+	case certifyLegalsStr:
+		return c.buildCertifyLegalByID(ctx, nodeID, nil)
+	case scorecardStr:
+		return c.buildCertifyScorecardByID(ctx, nodeID, nil)
+	case certifyVEXsStr:
+		return c.buildCertifyVexByID(ctx, nodeID, nil)
+	case certifyVulnsStr:
+		return c.buildCertifyVulnByID(ctx, nodeID, nil)
+	case hashEqualsStr:
+		return c.buildHashEqualByID(ctx, nodeID, nil)
+	case hasMetadataStr:
+		return c.buildHasMetadataByID(ctx, nodeID, nil)
+	case hasSBOMsStr:
+		return c.buildHasSbomByID(ctx, nodeID, nil)
+	case hasSLSAsStr:
+		return c.buildHasSlsaByID(ctx, nodeID, nil)
+	case hasSourceAtsStr:
+		return c.buildHasSourceAtByID(ctx, nodeID, nil)
+	case isDependenciesStr:
+		return c.buildIsDependencyByID(ctx, nodeID, nil)
+	case isOccurrencesStr:
+		return c.buildIsOccurrenceByID(ctx, nodeID, nil)
+	case pkgEqualsStr:
+		return c.buildPkgEqualByID(ctx, nodeID, nil)
+	case pointOfContactStr:
+		return c.buildPointOfContactByID(ctx, nodeID, nil)
+	case vulnEqualsStr:
+		return c.buildVulnEqualByID(ctx, nodeID, nil)
+	case vulnMetadataStr:
+		return c.buildVulnerabilityMetadataByID(ctx, nodeID, nil)
+	default:
+		return nil, fmt.Errorf("unknown ID for node query: %s", nodeID)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) Nodes(ctx context.Context, nodeIDs []string) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: Nodes"))
+	rv := make([]model.Node, 0, len(nodeIDs))
+	for _, id := range nodeIDs {
+		n, err := c.Node(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		rv = append(rv, n)
+	}
+	return rv, nil
 }
