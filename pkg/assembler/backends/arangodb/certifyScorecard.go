@@ -450,8 +450,9 @@ func (c *arangoClient) buildCertifyScorecardByID(ctx context.Context, id string,
 			}
 		}
 		return c.queryCertifyScorecardNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for certifyScorecard query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryCertifyScorecardNodeByID(ctx context.Context, filter *model.CertifyScorecardSpec) (*model.CertifyScorecard, error) {

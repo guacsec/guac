@@ -1048,8 +1048,9 @@ func (c *arangoClient) buildHasMetadataByID(ctx context.Context, id string, filt
 			}
 		}
 		return c.queryHasMetadataNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for hasMetadata query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryHasMetadataNodeByID(ctx context.Context, filter *model.HasMetadataSpec) (*model.HasMetadata, error) {

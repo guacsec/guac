@@ -754,8 +754,9 @@ func (c *arangoClient) buildCertifyVexByID(ctx context.Context, id string, filte
 			}
 		}
 		return c.queryCertifyVexNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for certifyVex query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryCertifyVexNodeByID(ctx context.Context, filter *model.CertifyVEXStatementSpec) (*model.CertifyVEXStatement, error) {

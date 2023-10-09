@@ -477,8 +477,9 @@ func (c *arangoClient) buildVulnEqualByID(ctx context.Context, id string, filter
 			}
 		}
 		return c.queryVulnEqualNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for VulnEqual query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryVulnEqualNodeByID(ctx context.Context, filter *model.VulnEqualSpec) (*model.VulnEqual, error) {

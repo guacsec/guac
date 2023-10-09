@@ -384,8 +384,9 @@ func (c *arangoClient) buildVulnerabilityMetadataByID(ctx context.Context, id st
 			}
 		}
 		return c.queryVulnerabilityMetadataNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for Vulnerability Metadata query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryVulnerabilityMetadataNodeByID(ctx context.Context, filter *model.VulnerabilityMetadataSpec) (*model.VulnerabilityMetadata, error) {

@@ -911,8 +911,9 @@ func (c *arangoClient) buildCertifyLegalByID(ctx context.Context, id string, fil
 			}
 		}
 		return c.queryCertifyLegalNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for certifyLegal query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryCertifyLegalNodeByID(ctx context.Context, filter *model.CertifyLegalSpec) (*model.CertifyLegal, error) {

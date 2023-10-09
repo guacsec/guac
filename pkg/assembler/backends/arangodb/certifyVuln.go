@@ -498,8 +498,9 @@ func (c *arangoClient) buildCertifyVulnByID(ctx context.Context, id string, filt
 			}
 		}
 		return c.queryCertifyVulnNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for certifyVuln query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *model.CertifyVulnSpec) (*model.CertifyVuln, error) {

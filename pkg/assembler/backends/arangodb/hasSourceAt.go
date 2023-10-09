@@ -767,8 +767,9 @@ func (c *arangoClient) buildHasSourceAtByID(ctx context.Context, id string, filt
 			}
 		}
 		return c.queryHasSourceAtNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for hasSourceAt query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryHasSourceAtNodeByID(ctx context.Context, filter *model.HasSourceAtSpec) (*model.HasSourceAt, error) {

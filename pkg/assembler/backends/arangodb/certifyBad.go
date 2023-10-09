@@ -963,8 +963,9 @@ func (c *arangoClient) buildCertifyBadByID(ctx context.Context, id string, filte
 			}
 		}
 		return c.queryCertifyBadNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for certifyBad query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryCertifyBadNodeByID(ctx context.Context, filter *model.CertifyBadSpec) (*model.CertifyBad, error) {

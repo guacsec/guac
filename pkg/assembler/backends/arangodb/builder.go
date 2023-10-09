@@ -187,6 +187,7 @@ func (c *arangoClient) buildBuilderResponseByID(ctx context.Context, id string, 
 			return nil, fmt.Errorf("number of builder nodes found for ID: %s is greater than one", id)
 		}
 		return foundBuilders[0], nil
+	} else {
+		return nil, fmt.Errorf("id type does not match for builder query: %s", id)
 	}
-	return nil, nil
 }

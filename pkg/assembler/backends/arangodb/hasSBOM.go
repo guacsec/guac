@@ -592,8 +592,9 @@ func (c *arangoClient) buildHasSbomByID(ctx context.Context, id string, filter *
 			}
 		}
 		return c.queryHasSbomNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for hasSBOM query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryHasSbomNodeByID(ctx context.Context, filter *model.HasSBOMSpec) (*model.HasSbom, error) {

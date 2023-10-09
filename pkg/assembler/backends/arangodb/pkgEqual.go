@@ -657,8 +657,9 @@ func (c *arangoClient) buildPkgEqualByID(ctx context.Context, id string, filter 
 			}
 		}
 		return c.queryPkgEqualNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for pkgEqual query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryPkgEqualNodeByID(ctx context.Context, filter *model.PkgEqualSpec) (*model.PkgEqual, error) {

@@ -684,8 +684,9 @@ func (c *arangoClient) buildIsOccurrenceByID(ctx context.Context, id string, fil
 			}
 		}
 		return c.queryIsOccurrenceNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for isOccurrence query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryIsOccurrenceNodeByID(ctx context.Context, filter *model.IsOccurrenceSpec) (*model.IsOccurrence, error) {

@@ -356,8 +356,9 @@ func (c *arangoClient) buildHashEqualByID(ctx context.Context, id string, filter
 			}
 		}
 		return c.queryHashEqualNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for hashEqual query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryHashEqualNodeByID(ctx context.Context, filter *model.HashEqualSpec) (*model.HashEqual, error) {

@@ -514,8 +514,9 @@ func (c *arangoClient) buildHasSlsaByID(ctx context.Context, id string, filter *
 			}
 		}
 		return c.queryHasSlsaNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for hasSLSA query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryHasSlsaNodeByID(ctx context.Context, filter *model.HasSLSASpec) (*model.HasSlsa, error) {

@@ -853,8 +853,9 @@ func (c *arangoClient) buildIsDependencyByID(ctx context.Context, id string, fil
 			}
 		}
 		return c.queryIsDependencyNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for isDependency query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryIsDependencyNodeByID(ctx context.Context, filter *model.IsDependencySpec) (*model.IsDependency, error) {

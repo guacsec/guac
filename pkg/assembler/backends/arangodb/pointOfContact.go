@@ -1049,8 +1049,9 @@ func (c *arangoClient) buildPointOfContactByID(ctx context.Context, id string, f
 			}
 		}
 		return c.queryPointOfContactNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for PointOfContact query: %s", id)
 	}
-	return nil, nil
 }
 
 func (c *arangoClient) queryPointOfContactNodeByID(ctx context.Context, filter *model.PointOfContactSpec) (*model.PointOfContact, error) {

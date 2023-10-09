@@ -300,6 +300,7 @@ func (c *arangoClient) buildArtifactResponseByID(ctx context.Context, id string,
 			return nil, fmt.Errorf("number of artifact nodes found for ID: %s is greater than one", id)
 		}
 		return foundArtifacts[0], nil
+	} else {
+		return nil, fmt.Errorf("id type does not match for artifact query: %s", id)
 	}
-	return nil, nil
 }
