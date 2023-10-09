@@ -28,6 +28,15 @@ import (
 
 // Query VulnEqual
 func (c *arangoClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
+
+	if vulnEqualSpec != nil && vulnEqualSpec.ID != nil {
+		cv, err := c.buildVulnEqualByID(ctx, *vulnEqualSpec.ID, vulnEqualSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildVulnEqualByID failed with an error: %w", err)
+		}
+		return []*model.VulnEqual{cv}, nil
+	}
+
 	values := map[string]any{}
 	if vulnEqualSpec.Vulnerabilities != nil {
 		if len(vulnEqualSpec.Vulnerabilities) == 1 {
@@ -445,4 +454,88 @@ func getVulnEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model
 		vulnEqualList = append(vulnEqualList, vulnEqual)
 	}
 	return vulnEqualList, nil
+}
+
+func (c *arangoClient) buildVulnEqualByID(ctx context.Context, id string, filter *model.VulnEqualSpec) (*model.VulnEqual, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == vulnEqualsStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.VulnEqualSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryVulnEqualNodeByID(ctx, filter)
+	}
+	return nil, nil
+}
+
+func (c *arangoClient) queryVulnEqualNodeByID(ctx context.Context, filter *model.VulnEqualSpec) (*model.VulnEqual, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(vulnEqualsStr, "vulnEqual")
+	setVulnEqualMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN vulnEqual`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryVulnEqualNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for vulnEqual: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbVulnEqual struct {
+		VulnEqualID          string `json:"_id"`
+		VulnerabilityID      string `json:"vulnerabilityID"`
+		EqualVulnerabilityID string `json:"equalVulnerabilityID"`
+		Justification        string `json:"justification"`
+		Collector            string `json:"collector"`
+		Origin               string `json:"origin"`
+	}
+
+	var collectedValues []dbVulnEqual
+	for {
+		var doc dbVulnEqual
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to vulnEqual from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of vulnEqual nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	builtVuln, err := c.buildVulnResponseByID(ctx, collectedValues[0].VulnerabilityID, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vulnerability from ID: %s, with error: %w", collectedValues[0].VulnerabilityID, err)
+	}
+
+	builtEqualVuln, err := c.buildVulnResponseByID(ctx, collectedValues[0].EqualVulnerabilityID, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get equal vulnerability from ID: %s, with error: %w", collectedValues[0].EqualVulnerabilityID, err)
+	}
+	return &model.VulnEqual{
+		ID:              collectedValues[0].VulnEqualID,
+		Vulnerabilities: []*model.Vulnerability{builtVuln, builtEqualVuln},
+		Justification:   collectedValues[0].Justification,
+		Origin:          collectedValues[0].Origin,
+		Collector:       collectedValues[0].Collector,
+	}, nil
 }
