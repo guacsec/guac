@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -40,7 +41,7 @@ func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 		All(ctx)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to retrieve HasMetadata :: %s", err)
 	}
 
 	return collect(records, toModelHasMetadata), nil
@@ -51,7 +52,7 @@ func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.Packag
 		return upsertHasMetadata(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, hasMetadata)
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute IngestHasMetadata :: %s", err)
 	}
 
 	return &model.HasMetadata{ID: nodeID(*recordID)}, nil
@@ -108,7 +109,7 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 	insert := client.HasMetadata.Create().
 		SetKey(spec.Key).
 		SetValue(spec.Value).
-		SetTimestamp(spec.Timestamp).
+		SetTimestamp(spec.Timestamp.UTC()).
 		SetJustification(spec.Justification).
 		SetOrigin(spec.Origin).
 		SetCollector(spec.Collector)
@@ -127,7 +128,7 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 	case subject.Artifact != nil:
 		art, err := client.Artifact.Query().Where(artifactQueryInputPredicates(*subject.Artifact)).Only(ctx)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to retrieve subject artifact :: %s", err)
 		}
 		insert.SetArtifact(art)
 		conflictColumns = append(conflictColumns, hasmetadata.FieldArtifactID)
@@ -142,7 +143,7 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
 			pv, err := getPkgVersion(ctx, client.Client(), *subject.Package)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to retrieve subject package version :: %s", err)
 			}
 			insert.SetPackageVersion(pv)
 			conflictColumns = append(conflictColumns, hasmetadata.FieldPackageVersionID)
@@ -155,7 +156,7 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 		} else {
 			pn, err := getPkgName(ctx, client.Client(), *subject.Package)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to retrieve subject package name :: %s", err)
 			}
 			insert.SetAllVersions(pn)
 			conflictColumns = append(conflictColumns, hasmetadata.FieldPackageNameID)
@@ -170,7 +171,7 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 	case subject.Source != nil:
 		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to retrieve subject source :: %s", err)
 		}
 		insert.SetSourceID(srcID)
 		conflictColumns = append(conflictColumns, hasmetadata.FieldSourceID)
