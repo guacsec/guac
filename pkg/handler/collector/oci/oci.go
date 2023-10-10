@@ -260,6 +260,10 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 	errorChan := make(chan error, len(pl))
 	var wg sync.WaitGroup
 
+	// Create a context with cancel to cancel all goroutines if one of them returns an error
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	for _, p := range pl {
 		// Increment the WaitGroup counter
 		wg.Add(1)
@@ -269,6 +273,7 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 			desc, err := manifest.GetPlatformDesc(m, p)
 			if err != nil {
 				errorChan <- fmt.Errorf("failed retrieving platform specific digest: %w", err)
+				cancel()
 				return
 			}
 			platformImage := ref.Ref{
@@ -280,6 +285,7 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 			logger.Infof("Fetching %s for platform %s", platformImage.Digest, desc.Platform)
 			if err := o.fetchOCIArtifacts(ctx, repo, rc, platformImage, docChannel); err != nil {
 				errorChan <- fmt.Errorf("failed fetching artifacts for platform specific digest: %w", err)
+				cancel()
 			}
 		}(p)
 	}
@@ -340,8 +346,11 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 	// Use goroutines to fetch referrers concurrently
 	// Create a channel to collect errors from goroutines
 	errorChan := make(chan error, len(referrerList.Descriptors))
-
 	var wg sync.WaitGroup
+
+	// Create a context with cancel to cancel all goroutines if one of them returns an error
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
 	for _, referrerDesc := range referrerList.Descriptors {
 		// Increment the WaitGroup counter
@@ -357,6 +366,7 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
 					if e != nil {
 						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", err)
+						cancel()
 						return
 					}
 					o.markDigestAsCollected(repo, referrerDescDigest)
