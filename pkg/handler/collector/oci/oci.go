@@ -18,6 +18,7 @@ package oci
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -466,7 +467,7 @@ func (o *ociCollector) isDigestCollected(repo string, digest string) bool {
 		if !ok {
 			return false
 		}
-		return contains(digests, digest)
+		return slices.Contains(digests, digest)
 	}
 }
 
@@ -487,15 +488,6 @@ func (o *ociCollector) markDigestAsCollected(repo string, digest string) {
 // Type is the collector type of the collector
 func (o *ociCollector) Type() string {
 	return OCICollector
-}
-
-func contains(elems []string, v string) bool {
-	for _, s := range elems {
-		if v == s {
-			return true
-		}
-	}
-	return false
 }
 
 // hasNoTag determines if an OCI string passed in had no tag
