@@ -28,11 +28,12 @@ import (
 
 var flags = struct {
 	// graphQL server flags
-	backend  string
-	port     int
-	debug    bool
-	tracegql bool
-	testData bool
+	backend     string
+	port        int
+	tlsCertFile string
+	tlsKeyFile  string
+	debug       bool
+	tracegql    bool
 
 	// Needed only if using neo4j backend
 	nAddr  string
@@ -66,9 +67,10 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		flags.backend = viper.GetString("gql-backend")
 		flags.port = viper.GetInt("gql-listen-port")
+		flags.tlsCertFile = viper.GetString("gql-tls-cert-file")
+		flags.tlsKeyFile = viper.GetString("gql-tls-key-file")
 		flags.debug = viper.GetBool("gql-debug")
 		flags.tracegql = viper.GetBool("gql-trace")
-		flags.testData = viper.GetBool("gql-test-data")
 
 		flags.nUser = viper.GetString("neo4j-user")
 		flags.nPass = viper.GetString("neo4j-pass")
@@ -102,7 +104,7 @@ func init() {
 		"arango-addr", "arango-user", "arango-pass",
 		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm",
 		"neptune-endpoint", "neptune-port", "neptune-region", "neptune-user", "neptune-realm",
-		"gql-test-data", "gql-listen-port", "gql-debug", "gql-backend", "gql-trace",
+		"gql-listen-port", "gql-tls-cert-file", "gql-tls-key-file", "gql-debug", "gql-backend", "gql-trace",
 		"db-address", "db-driver", "db-debug", "db-migrate",
 	})
 	if err != nil {

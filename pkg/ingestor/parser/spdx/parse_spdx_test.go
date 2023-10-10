@@ -37,6 +37,10 @@ func pUrlToPkgDiscardError(pUrl string) *generated.PkgInputSpec {
 }
 
 func Test_spdxParser(t *testing.T) {
+	packageOfns := "spdx"
+	//packageOfVersion := "sha256:a743268cd3c56f921f3fb706c"
+	depPackageOfVersion := "sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10"
+	packageOfEmptyString := ""
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
 		name           string
@@ -47,6 +51,10 @@ func Test_spdxParser(t *testing.T) {
 	}{
 		{
 			name: "valid big SPDX document",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(generated.HasMetadataInputSpec{},
+					"Timestamp"),
+			},
 			doc: &processor.Document{
 				Blob:   testdata.SpdxExampleAlpine,
 				Format: processor.FormatJSON,
@@ -58,6 +66,95 @@ func Test_spdxParser(t *testing.T) {
 			},
 			wantPredicates: &testdata.SpdxIngestionPredicates,
 			wantErr:        false,
+		},
+		{
+			name: "SPDX with PACKAGE_OF relationship populates pUrl from described element",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM"),
+			},
+			doc: &processor.Document{
+				Blob: []byte(`
+			{
+			"spdxVersion": "SPDX-2.3",
+			"SPDXID":"SPDXRef-DOCUMENT",
+			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+			"creationInfo": { "created": "2023-01-01T01:01:01.00Z" },
+			"packages":[
+				{
+					"SPDXID":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+					"name":"sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+					"externalRefs":[
+						{
+							"referenceCategory":"PACKAGE_MANAGER",
+							"referenceLocator":"pkg:oci/image@sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10?mediaType=application%2Fvnd.oci.image.manifest.v1%2Bjson",
+							"referenceType":"purl"
+						}
+					]
+				}
+			],
+			"relationships":[
+				{
+					"spdxElementId":"SPDXRef-DOCUMENT",
+					"relationshipType":"PACKAGE_OF",
+					"relatedSpdxElement":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10"
+				}
+			]
+			}
+			`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				IsDependency: []assembler.IsDependencyIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: &packageOfns,
+							Name:      "sbom-sha256%3Aa743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						DepPkg: &generated.PkgInputSpec{
+							Type:       "oci",
+							Namespace:  &packageOfEmptyString,
+							Name:       "image",
+							Version:    &depPackageOfVersion,
+							Qualifiers: []generated.PackageQualifierInputSpec{{Key: "mediatype", Value: "application/vnd.oci.image.manifest.v1+json"}},
+							Subpath:    &packageOfEmptyString,
+						},
+						DepPkgMatchFlag: generated.MatchFlags{Pkg: "SPECIFIC_VERSION"},
+						IsDependency: &generated.IsDependencyInputSpec{
+							VersionRange:   "sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+							DependencyType: "UNKNOWN",
+							Justification:  "top-level package GUAC heuristic connecting to each file/package",
+						},
+					},
+				},
+
+				HasSBOM: []assembler.HasSBOMIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: &packageOfns,
+							Name:      "sbom-sha256%3Aa743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "TestSource",
+							Algorithm:        "sha256",
+							Digest:           "ba096464061993bbbdfc30a26b42cd8beb1bfff301726fe6c58cb45d468c7648",
+							DownloadLocation: "TestSource",
+						},
+					},
+				},
+			},
+			wantErr: false,
 		},
 		{
 			name: "SPDX with DESCRIBES relationship populates pUrl from described element",

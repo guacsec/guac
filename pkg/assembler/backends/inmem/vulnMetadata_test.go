@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -25,14 +26,15 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
-var greater model.Comparator = model.ComparatorGreater
-var greaterEqual model.Comparator = model.ComparatorGreaterEqual
-var less model.Comparator = model.ComparatorLess
-var lessEqual model.Comparator = model.ComparatorLessEqual
-var equal model.Comparator = model.ComparatorEqual
+var (
+	greater      model.Comparator = model.ComparatorGreater
+	greaterEqual model.Comparator = model.ComparatorGreaterEqual
+	less         model.Comparator = model.ComparatorLess
+	lessEqual    model.Comparator = model.ComparatorLessEqual
+	equal        model.Comparator = model.ComparatorEqual
+)
 
 var cvss2ScoreType model.VulnerabilityScoreType = model.VulnerabilityScoreTypeCVSSv2
 
@@ -1133,7 +1135,7 @@ func TestVulnMetadataNeighbors(t *testing.T) {
 			Name:   "HappyPath",
 			InVuln: []*model.VulnerabilityInputSpec{o1},
 			Calls: []call{
-				call{
+				{
 					Vuln: o1,
 					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
 						ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -1145,15 +1147,15 @@ func TestVulnMetadataNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"1", "3"}, // Vuln -> vunType, vulnMeta1
-				"3": []string{"1"},      // vulnMeta1 -> vuln
+				"2": {"1", "3"}, // Vuln -> vunType, vulnMeta1
+				"3": {"1"},      // vulnMeta1 -> vuln
 			},
 		},
 		{
 			Name:   "Two vuln metadata on same vulnerability",
 			InVuln: []*model.VulnerabilityInputSpec{o1},
 			Calls: []call{
-				call{
+				{
 					Vuln: o1,
 					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
 						ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -1163,7 +1165,7 @@ func TestVulnMetadataNeighbors(t *testing.T) {
 						Origin:     "test origin",
 					},
 				},
-				call{
+				{
 					Vuln: o1,
 					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
 						ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
@@ -1175,9 +1177,9 @@ func TestVulnMetadataNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"2": []string{"1", "3", "4"}, // Vuln1 -> vunType, vulnMeta1
-				"3": []string{"1"},           // vulnMeta1 -> vuln1
-				"4": []string{"1"},           // vulnMeta2 -> vuln2
+				"2": {"1", "3", "4"}, // Vuln1 -> vunType, vulnMeta1
+				"3": {"1"},           // vulnMeta1 -> vuln1
+				"4": {"1"},           // vulnMeta2 -> vuln2
 			},
 		},
 	}

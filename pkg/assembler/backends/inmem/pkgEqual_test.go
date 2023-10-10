@@ -17,14 +17,15 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
+	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 func TestPkgEqual(t *testing.T) {
@@ -443,13 +444,10 @@ func TestPkgEqual(t *testing.T) {
 			if err != nil {
 				return
 			}
-			// less := func(a, b *model.Package) bool { return a.Version < b.Version }
-			// for _, he := range got {
-			// 	slices.SortFunc(he.Packages, less)
-			// }
-			// for _, he := range test.ExpHE {
-			// 	slices.SortFunc(he.Packages, less)
-			// }
+
+			inmem.MakeCanonicalPkgEqualSlice(got)
+			inmem.MakeCanonicalPkgEqualSlice(test.ExpHE)
+
 			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
@@ -657,6 +655,10 @@ func TestIngestPkgEquals(t *testing.T) {
 			if err != nil {
 				return
 			}
+
+			inmem.MakeCanonicalPkgEqualSlice(got)
+			inmem.MakeCanonicalPkgEqualSlice(test.ExpHE)
+
 			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
@@ -689,9 +691,9 @@ func TestPkgEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "6"}, // p1
-				"5": []string{"1", "6"}, // p2
-				"6": []string{"1", "1"}, // pkgequal
+				"4": {"1", "6"}, // p1
+				"5": {"1", "6"}, // p2
+				"6": {"1", "1"}, // pkgequal
 			},
 		},
 		{
@@ -714,11 +716,11 @@ func TestPkgEqualNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"4": []string{"1", "7", "8"}, // p1
-				"5": []string{"1", "7"},      // p2
-				"6": []string{"1", "8"},      // p3
-				"7": []string{"1", "1"},      // pkgequal 1
-				"8": []string{"1", "1"},      // pkgequal 2
+				"4": {"1", "7", "8"}, // p1
+				"5": {"1", "7"},      // p2
+				"6": {"1", "8"},      // p3
+				"7": {"1", "1"},      // pkgequal 1
+				"8": {"1", "1"},      // pkgequal 2
 			},
 		},
 	}

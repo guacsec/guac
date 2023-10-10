@@ -21,16 +21,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"slices"
 	"syscall"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/spf13/cobra"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
-
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
 	_ "github.com/guacsec/guac/pkg/assembler/backends/inmem"
@@ -39,6 +36,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/spf13/cobra"
+	"golang.org/x/exp/maps"
 )
 
 const (
@@ -87,20 +86,23 @@ func startServer(cmd *cobra.Command) {
 	http.HandleFunc("/healthz", healthHandler)
 
 	http.Handle("/query", srv)
+	proto := "http"
+	if flags.tlsCertFile != "" && flags.tlsKeyFile != "" {
+		proto = "https"
+	}
 	if flags.debug {
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-		logger.Infof("connect to http://localhost:%d/ for GraphQL playground", flags.port)
-	}
-
-	// Ingest additional test data in a go-routine.
-	if flags.testData {
-		go ingestData(flags.port)
+		logger.Infof("connect to %s://localhost:%d/ for GraphQL playground", proto, flags.port)
 	}
 
 	server := &http.Server{Addr: fmt.Sprintf(":%d", flags.port)}
 	logger.Info("starting server")
 	go func() {
-		logger.Infof("server finished: %s", server.ListenAndServe())
+		if proto == "https" {
+			logger.Infof("server finished: %s", server.ListenAndServeTLS(flags.tlsCertFile, flags.tlsKeyFile))
+		} else {
+			logger.Infof("server finished: %s", server.ListenAndServe())
+		}
 	}()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)

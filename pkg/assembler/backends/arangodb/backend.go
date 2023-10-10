@@ -27,7 +27,6 @@ import (
 	arangodbdriverhttp "github.com/arangodb/go-driver/http"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 const (
@@ -71,6 +70,10 @@ const (
 	vulnTypesStr              string = "vulnTypes"
 	vulnHasVulnerabilityIDStr string = "vulnHasVulnerabilityID"
 	vulnerabilitiesStr        string = "vulnerabilities"
+
+	// license collection
+
+	licensesStr string = "licenses"
 
 	// isDependency collections
 
@@ -178,6 +181,14 @@ const (
 	certifyGoodSrcEdgesStr        string = "certifyGoodSrcEdges"
 	certifyGoodArtEdgesStr        string = "certifyGoodArtEdges"
 	certifyGoodsStr               string = "certifyGoods"
+
+	// certifyLegal collection
+
+	certifyLegalPkgEdgesStr                string = "certifyLegalPkgEdges"
+	certifyLegalSrcEdgesStr                string = "certifyLegalSrcEdges"
+	certifyLegalDeclaredLicensesEdgesStr   string = "certifyLegalDeclaredLicensesEdges"
+	certifyLegalDiscoveredLicensesEdgesStr string = "certifyLegalDiscoveredLicensesEdges"
+	certifyLegalsStr                       string = "certifyLegals"
 )
 
 type ArangoConfig struct {
@@ -555,6 +566,27 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		certifyGoodSrcEdges.From = []string{srcNamesStr}
 		certifyGoodSrcEdges.To = []string{certifyGoodsStr}
 
+		// setup certifyLegal collections
+		var certifyLegalPkgEdges driver.EdgeDefinition
+		certifyLegalPkgEdges.Collection = certifyLegalPkgEdgesStr
+		certifyLegalPkgEdges.From = []string{pkgVersionsStr}
+		certifyLegalPkgEdges.To = []string{certifyLegalsStr}
+
+		var certifyLegalSrcEdges driver.EdgeDefinition
+		certifyLegalSrcEdges.Collection = certifyLegalSrcEdgesStr
+		certifyLegalSrcEdges.From = []string{srcNamesStr}
+		certifyLegalSrcEdges.To = []string{certifyLegalsStr}
+
+		var certifyLegalDeclaredLicensesEdges driver.EdgeDefinition
+		certifyLegalDeclaredLicensesEdges.Collection = certifyLegalDeclaredLicensesEdgesStr
+		certifyLegalDeclaredLicensesEdges.From = []string{certifyLegalsStr}
+		certifyLegalDeclaredLicensesEdges.To = []string{licensesStr}
+
+		var certifyLegalDiscoveredLicensesEdges driver.EdgeDefinition
+		certifyLegalDiscoveredLicensesEdges.Collection = certifyLegalDiscoveredLicensesEdgesStr
+		certifyLegalDiscoveredLicensesEdges.From = []string{certifyLegalsStr}
+		certifyLegalDiscoveredLicensesEdges.To = []string{licensesStr}
+
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
 		options.EdgeDefinitions = []driver.EdgeDefinition{pkgHasNamespace, pkgHasName,
@@ -566,7 +598,8 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges,
 			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges, hasMetadataPkgVersionEdges, hasMetadataPkgNameEdges,
 			hasMetadataArtEdges, hasMetadataSrcEdges, pointOfContactPkgVersionEdges, pointOfContactPkgNameEdges,
-			pointOfContactArtEdges, pointOfContactSrcEdges, hasSourceAtEdges, hasSourceAtPkgVersionEdges, hasSourceAtPkgNameEdges}
+			pointOfContactArtEdges, pointOfContactSrcEdges, hasSourceAtEdges, hasSourceAtPkgVersionEdges, hasSourceAtPkgNameEdges,
+			certifyLegalPkgEdges, certifyLegalSrcEdges, certifyLegalDeclaredLicensesEdges, certifyLegalDiscoveredLicensesEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -595,6 +628,10 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 		if err := createIndexPerCollection(ctx, db, vulnerabilitiesStr, []string{"vulnerabilityID"}, false, "byVulnID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for vulnerabilities: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, licensesStr, []string{"name", "inline", "listversion"}, true, "byNameInlineListVer"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for licenses: %w", err)
 		}
 
 		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID", "justification"}, true, "byArtIDEqualArtIDJust"); err != nil {
@@ -910,25 +947,6 @@ func getPreloadString(prefix, name string) string {
 		return prefix + "." + name
 	}
 	return name
-}
-
-func (c *arangoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
-	panic(fmt.Errorf("not implemented: Licenses"))
-}
-func (c *arangoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
-	panic(fmt.Errorf("not implemented: IngestLicense"))
-}
-func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
-	panic(fmt.Errorf("not implemented: IngestLicenses"))
-}
-func (c *arangoClient) CertifyLegal(ctx context.Context, certifyLegalSpec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
-	panic(fmt.Errorf("not implemented: CertifyLegal"))
-}
-func (c *arangoClient) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (*model.CertifyLegal, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyLegal"))
-}
-func (c *arangoClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
-	panic(fmt.Errorf("not implemented: IngestCertifyLegals"))
 }
 
 func ptrfromArangoSearchNGramStreamType(s driver.ArangoSearchNGramStreamType) *driver.ArangoSearchNGramStreamType {

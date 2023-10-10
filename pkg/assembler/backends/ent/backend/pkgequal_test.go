@@ -18,13 +18,13 @@
 package backend
 
 import (
+	"slices"
 	"strconv"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	jsoniter "github.com/json-iterator/go"
-	"golang.org/x/exp/slices"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -776,9 +776,9 @@ func (s *Suite) TestPkgEqualNeighbors() {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "7"}, // p1
-				"6": []string{"2", "7"}, // p2
-				"7": []string{"2", "2"}, // pkgequal
+				"5": {"2", "7"}, // p1
+				"6": {"2", "7"}, // p2
+				"7": {"2", "2"}, // pkgequal
 			},
 		},
 		{
@@ -801,11 +801,11 @@ func (s *Suite) TestPkgEqualNeighbors() {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"5": []string{"2", "8", "9"}, // p1
-				"6": []string{"2", "8"},      // p2
-				"7": []string{"2", "9"},      // p3
-				"8": []string{"2", "2"},      // pkgequal 1
-				"9": []string{"2", "2"},      // pkgequal 2
+				"5": {"2", "8", "9"}, // p1
+				"6": {"2", "8"},      // p2
+				"7": {"2", "9"},      // p3
+				"8": {"2", "2"},      // pkgequal 1
+				"9": {"2", "2"},      // pkgequal 2
 			},
 		},
 	}

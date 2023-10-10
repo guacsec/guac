@@ -18,6 +18,7 @@ package testdata
 import (
 	_ "embed"
 	"encoding/base64"
+	"fmt"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -175,7 +176,7 @@ var (
 				Status:           generated.VexStatusNotAffected,
 				VexJustification: generated.VexJustificationVulnerableCodeNotInExecutePath,
 				Statement:        "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly.",
-				StatusNotes:      "not_affected:code_not_reachable",
+				StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusNotAffected, generated.VexJustificationVulnerableCodeNotInExecutePath),
 				KnownSince:       parseUTCTime("2020-12-03T00:00:00.000Z"),
 			},
 		},
@@ -206,51 +207,43 @@ var (
 			},
 		},
 	}
+	CycloneDXUnAffectedPredicates = assembler.IngestPredicates{
+		VulnMetadata: CycloneDXUnAffectedVulnMetadata,
+		Vex:          CycloneDXUnAffectedVexIngest,
+	}
 
-	// CycloneDX VEX testdata in triage
-	pkg1, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.4")
-	pkg2, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.6")
-
-	vulnSpecAffected = &generated.VulnerabilityInputSpec{
+	// CycloneDX VEX testdata affected packages.
+	VulnSpecAffected = &generated.VulnerabilityInputSpec{
 		Type:            "cve",
 		VulnerabilityID: "cve-2021-44228",
 	}
-	vexDataAffected = &generated.VexStatementInputSpec{
-		Status:      generated.VexStatusAffected,
-		Statement:   "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
-		StatusNotes: "exploitable:",
-	}
-	CycloneDXAffectedVexIngest = []assembler.VexIngest{
-		{
-			Pkg:           pkg1,
-			Vulnerability: vulnSpecAffected,
-			VexData:       vexDataAffected,
-		},
-		{
-			Pkg:           pkg2,
-			Vulnerability: vulnSpecAffected,
-			VexData:       vexDataAffected,
-		},
+	VexDataAffected = &generated.VexStatementInputSpec{
+		Status:           generated.VexStatusAffected,
+		VexJustification: generated.VexJustificationNotProvided,
+		Statement:        "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
+		StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusAffected, generated.VexJustificationNotProvided),
+		KnownSince:       time.Unix(0, 0),
 	}
 	CycloneDXAffectedVulnMetadata = []assembler.VulnMetadataIngest{
 		{
-			Vulnerability: vulnSpecAffected,
+			Vulnerability: VulnSpecAffected,
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 10,
+				Timestamp:  time.Unix(0, 0),
 			},
 		},
 	}
-	CycloneDXAffectedCertifyVuln = []assembler.CertifyVulnIngest{
+
+	topLevelPkg, _     = asmhelpers.PurlToPkg("pkg:guac/cdx/ABC")
+	HasSBOMVexAffected = []assembler.HasSBOMIngest{
 		{
-			Pkg:           pkg1,
-			Vulnerability: vulnSpecAffected,
-			VulnData:      &generated.ScanMetadataInput{},
-		},
-		{
-			Pkg:           pkg2,
-			Vulnerability: vulnSpecAffected,
-			VulnData:      &generated.ScanMetadataInput{},
+			Pkg: topLevelPkg,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Algorithm:  "sha256",
+				Digest:     "eb62836ed6339a2d57f66d2e42509718fd480a1befea83f925e918444c369114",
+				KnownSince: parseRfc3339("2022-03-03T00:00:00Z"),
+			},
 		},
 	}
 
@@ -827,10 +820,102 @@ var (
 		},
 	}
 
+	SpdxHasMetadata = []assembler.HasMetadataIngest{
+		{
+			Pkg:          baselayoutPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          baselayoutPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          baselayoutdataPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout-data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          baselayoutdataPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout-data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-keys:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-keys:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+	}
+
 	SpdxIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: SpdxDeps,
 		IsOccurrence: SpdxOccurences,
 		HasSBOM:      SpdxHasSBOM,
+		HasMetadata:  SpdxHasMetadata,
 		CertifyLegal: SpdxCertifyLegal,
 	}
 
@@ -2835,6 +2920,7 @@ var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.SortSlices(slsaPredicateInputSpecLess),
 	cmpopts.SortSlices(certifyLegalInputSpecLess),
 	cmpopts.SortSlices(licenseInputSpecLess),
+	cmpopts.SortSlices(hasMetadataLess),
 }
 
 func certifyScorecardLess(e1, e2 assembler.CertifyScorecardIngest) bool {
@@ -2866,6 +2952,9 @@ func certifyLegalInputSpecLess(e1, e2 assembler.CertifyLegalIngest) bool {
 }
 
 func licenseInputSpecLess(e1, e2 generated.LicenseInputSpec) bool {
+	return gLess(e1, e2)
+}
+func hasMetadataLess(e1, e2 assembler.HasMetadataIngest) bool {
 	return gLess(e1, e2)
 }
 

@@ -915,8 +915,8 @@ func getCertifyBadFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 		certifyBad := &model.CertifyBad{
 			ID:            createdValue.CertifyBadID,
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 
 		if pkg != nil {

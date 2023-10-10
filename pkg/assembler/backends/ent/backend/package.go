@@ -21,6 +21,7 @@ import (
 	"crypto/sha1"
 	stdsql "database/sql"
 	"fmt"
+	"slices"
 	"sort"
 
 	"entgo.io/ent/dialect/sql"
@@ -33,7 +34,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
-	"golang.org/x/exp/slices"
 )
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -131,7 +131,6 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
 func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
-
 	pkgID, err := client.PackageType.Create().
 		SetType(pkg.Type).
 		OnConflict(sql.ConflictColumns(packagetype.FieldType)).

@@ -17,6 +17,7 @@ package inmem_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 
@@ -24,7 +25,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/exp/slices"
 )
 
 var (
@@ -675,7 +675,6 @@ func TestIsDependencies(t *testing.T) {
 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}
-
 		})
 	}
 }
@@ -705,10 +704,10 @@ func TestIsDependencyNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"3": []string{"1", "1", "1", "6"}, // p1/p2 name
-				"4": []string{"1", "6"},           // p1 version
-				"5": []string{"1"},                // p2 version
-				"6": []string{"1", "1"},           // isDep
+				"3": {"1", "1", "1", "6"}, // p1/p2 name
+				"4": {"1", "6"},           // p1 version
+				"5": {"1"},                // p2 version
+				"6": {"1", "1"},           // isDep
 			},
 		},
 		{
@@ -733,12 +732,12 @@ func TestIsDependencyNeighbors(t *testing.T) {
 				},
 			},
 			ExpNeighbors: map[string][]string{
-				"3":  []string{"1", "1", "1"},        // p1/p2 name, 1 up, 2 down
-				"4":  []string{"1", "10"},            // p1 version, 1 up, isdep
-				"5":  []string{"1", "11"},            // p2 version, 1 up, isdep
-				"8":  []string{"6", "6", "10", "11"}, // p4 name, 1 up, 1 down, 2 isdeps
-				"10": []string{"1", "6"},             // isdep 1
-				"11": []string{"1", "6"},             // isdep 2
+				"3":  {"1", "1", "1"},        // p1/p2 name, 1 up, 2 down
+				"4":  {"1", "10"},            // p1 version, 1 up, isdep
+				"5":  {"1", "11"},            // p2 version, 1 up, isdep
+				"8":  {"6", "6", "10", "11"}, // p4 name, 1 up, 1 down, 2 isdeps
+				"10": {"1", "6"},             // isdep 1
+				"11": {"1", "6"},             // isdep 2
 			},
 		},
 	}
