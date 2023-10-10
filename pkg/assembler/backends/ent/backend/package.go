@@ -41,10 +41,6 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	// query := b.client.PackageVersion.Query().Limit(MaxPageSize)
-
-	// query.Where(packageVersionQuery(pkgSpec))
-	// query.WithName(withPackageNameTree())
 	query := b.client.PackageType.Query().Limit(MaxPageSize)
 
 	paths, isGQL := getPreloads(ctx)
@@ -92,10 +88,6 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	if err != nil {
 		return nil, err
 	}
-
-	// return collect(pkgs, func(v *ent.PackageVersion) *model.Package {
-	// 	return toModelPackage(backReferencePackageVersion(v))
-	// }), nil
 
 	return collect(pkgs, toModelPackage), nil
 }

@@ -337,3 +337,63 @@ func (s *Suite) Test_Packages() {
 		})
 	}
 }
+
+// This test is to traverse the other branches of the upsert, not covered by the happy path at the insertion,
+// when the create fails due to the presence of the input in the store, and a where query is used in the error branch
+func (s *Suite) TestPackagesIngestSameTwice() {
+
+	tests := []struct {
+		name          string
+		pkgInputsSpec []model.PkgInputSpec
+	}{{
+		name: "IngestSameTwice",
+		pkgInputsSpec: []model.PkgInputSpec{
+			{
+				Type:      "apk",
+				Namespace: ptr("test"),
+				Name:      "alpine",
+				Version:   ptr("1.0.0"),
+				Subpath:   ptr("subpath"),
+				Qualifiers: []*model.PackageQualifierInputSpec{
+					{Key: "arch", Value: "amd64"},
+					{Key: "ac", Value: "dc"},
+				},
+			},
+			{
+				Type:      "apk",
+				Namespace: ptr("test"),
+				Name:      "alpine",
+				Version:   ptr("1.0.0"),
+				Subpath:   ptr("subpath"),
+				Qualifiers: []*model.PackageQualifierInputSpec{
+					{Key: "arch", Value: "amd64"},
+					{Key: "ac", Value: "dc"},
+				},
+			},
+		},
+	}}
+
+	ctx := s.Ctx
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+
+			for _, bIn := range tt.pkgInputsSpec {
+				if _, err := b.IngestPackageID(ctx, bIn); err != nil {
+					t.Fatalf("Could not ingest package: %v , err: %v", bIn, err)
+				}
+			}
+			items, err := b.Packages(ctx, &model.PkgSpec{})
+			if err != nil {
+				t.Fatalf("Error on load Packages %v", err)
+			}
+			if len(items) == 2 {
+				t.Fatalf("Wrong ingestions, ingest same twice found two")
+			}
+		})
+	}
+}

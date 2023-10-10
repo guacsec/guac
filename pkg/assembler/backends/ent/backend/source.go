@@ -147,23 +147,15 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 }
 
 func (b *EntBackend) IngestSourceIDs(ctx context.Context, sources []*model.SourceInputSpec) ([]string, error) {
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
-		results := make([]string, len(sources))
-		for i, src := range sources {
-			id, err := upsertSource(ctx, ent.TxFromContext(ctx), *src)
-			if err != nil {
-				return nil, err
-			}
-			results[i] = strconv.Itoa(*id)
+	ids := make([]string, len(sources))
+	for i, src := range sources {
+		s, err := b.IngestSourceID(ctx, *src)
+		if err != nil {
+			return nil, err
 		}
-		return &results, nil
-	})
-
-	if err != nil {
-		return nil, err
+		ids[i] = s
 	}
-
-	return *ids, nil
+	return ids, nil
 }
 
 func (b *EntBackend) IngestSourceID(ctx context.Context, source model.SourceInputSpec) (string, error) {

@@ -658,3 +658,55 @@ func (s *Suite) TestHasSourceAt() {
 		})
 	}
 }
+
+// This test is to traverse the other branches of the upsert, not covered by the happy path at the insertion,
+// when the create fails due to the presence of the input in the store, and a where query is used in the error branch
+func (s *Suite) TestSourcesIngestSameTwice() {
+
+	tests := []struct {
+		name             string
+		sourceInputsSpec []model.SourceInputSpec
+	}{{
+		name: "IngestSameTwice",
+		sourceInputsSpec: []model.SourceInputSpec{
+			{
+				Type:      "git",
+				Namespace: "github.com/jeff",
+				Name:      "myrepo",
+				Tag:       ptr("nightly"),
+				Commit:    ptr("012345678"),
+			},
+			{
+				Type:      "git",
+				Namespace: "github.com/jeff",
+				Name:      "myrepo",
+				Tag:       ptr("nightly"),
+				Commit:    ptr("012345678"),
+			},
+		},
+	}}
+
+	ctx := s.Ctx
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+
+			for _, bIn := range tt.sourceInputsSpec {
+				if _, err := b.IngestSourceID(ctx, bIn); err != nil {
+					t.Fatalf("Could not ingest source: %v , err: %v", bIn, err)
+				}
+			}
+			items, err := b.Sources(ctx, &model.SourceSpec{})
+			if err != nil {
+				t.Fatalf("Error on load Sources %v", err)
+			}
+			if len(items) == 2 {
+				t.Fatalf("Wrong ingestions, ingest same twice found two")
+			}
+		})
+	}
+}
