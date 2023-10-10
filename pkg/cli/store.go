@@ -75,6 +75,9 @@ func init() {
 
 	set.Bool("service-poll", true, "sets the collector or certifier to polling mode")
 	set.BoolP("poll", "p", false, "sets the collector or certifier to polling mode")
+
+	set.Bool("retrieve-dependencies", true, "enable the deps.dev collector to retrieve package dependencies")
+
 	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
 
 	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")

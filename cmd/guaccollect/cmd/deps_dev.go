@@ -40,6 +40,8 @@ type depsDevOptions struct {
 	natsAddr string
 	// run as poll collector
 	poll bool
+	// query for dependencies
+	retrieveDependencies bool
 }
 
 var depsDevCmd = &cobra.Command{
@@ -57,6 +59,7 @@ var depsDevCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
+			viper.GetBool("retrieve-dependencies"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -65,7 +68,7 @@ var depsDevCmd = &cobra.Command{
 		}
 
 		// Register collector
-		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, 30*time.Second)
+		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
@@ -78,10 +81,11 @@ var depsDevCmd = &cobra.Command{
 	},
 }
 
-func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (depsDevOptions, error) {
+func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, retrieveDependencies bool, args []string) (depsDevOptions, error) {
 	var opts depsDevOptions
 	opts.natsAddr = natsAddr
 	opts.poll = poll
+	opts.retrieveDependencies = retrieveDependencies
 
 	if useCsub {
 		csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

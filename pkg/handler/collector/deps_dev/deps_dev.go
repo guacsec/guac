@@ -62,18 +62,19 @@ type PackageComponent struct {
 }
 
 type depsCollector struct {
-	collectDataSource datasource.CollectSource
-	client            pb.InsightsClient
-	poll              bool
-	interval          time.Duration
-	checkedPurls      map[string]*PackageComponent
-	ingestedSource    map[string]*model.SourceInputSpec
-	projectInfoMap    map[string]*pb.Project
-	versions          map[string]*pb.Version
-	dependencies      map[string]*pb.Dependencies
+	collectDataSource    datasource.CollectSource
+	client               pb.InsightsClient
+	poll                 bool
+	retrieveDependencies bool
+	interval             time.Duration
+	checkedPurls         map[string]*PackageComponent
+	ingestedSource       map[string]*model.SourceInputSpec
+	projectInfoMap       map[string]*pb.Project
+	versions             map[string]*pb.Version
+	dependencies         map[string]*pb.Dependencies
 }
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, retrieveDependencies bool, interval time.Duration) (*depsCollector, error) {
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
 	if err != nil {
@@ -93,15 +94,16 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	client := pb.NewInsightsClient(conn)
 
 	return &depsCollector{
-		collectDataSource: collectDataSource,
-		client:            client,
-		poll:              poll,
-		interval:          interval,
-		checkedPurls:      map[string]*PackageComponent{},
-		ingestedSource:    map[string]*model.SourceInputSpec{},
-		projectInfoMap:    map[string]*pb.Project{},
-		versions:          map[string]*pb.Version{},
-		dependencies:      map[string]*pb.Dependencies{},
+		collectDataSource:    collectDataSource,
+		client:               client,
+		poll:                 poll,
+		retrieveDependencies: retrieveDependencies,
+		interval:             interval,
+		checkedPurls:         map[string]*PackageComponent{},
+		ingestedSource:       map[string]*model.SourceInputSpec{},
+		projectInfoMap:       map[string]*pb.Project{},
+		versions:             map[string]*pb.Version{},
+		dependencies:         map[string]*pb.Dependencies{},
 	}, nil
 }
 
@@ -133,6 +135,17 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 	if err != nil {
 		return fmt.Errorf("unable to retrieve datasource: %w", err)
 	}
+
+	if !d.retrieveDependencies {
+		for _, purl := range ds.PurlDataSources {
+			err = d.retrieveMetadataWithoutDeps(ctx, purl, docChannel)
+			if err != nil {
+				return fmt.Errorf("failed to get metadata: %w", err)
+			}
+		}
+		return nil
+	}
+
 	start := time.Now()
 	err = d.getAllDependencies(ctx, ds.PurlDataSources)
 	if err != nil {
@@ -147,6 +160,58 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 			return fmt.Errorf("failed to fetch dependencies: %w", err)
 		}
 	}
+	return nil
+}
+
+// retrieve version data, scorecards, etc only on for a single package
+func (d *depsCollector) retrieveMetadataWithoutDeps(ctx context.Context, p datasource.Source, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
+
+	purl := p.Value
+	packageInput, err := helpers.PurlToPkg(purl)
+	if err != nil {
+		logger.Infof("failed to parse purl to pkg: %s", purl)
+		return nil
+	}
+
+	// check if top level purl has already been queried
+	if _, ok := d.checkedPurls[purl]; ok {
+		logger.Infof("purl %s already queried", purl)
+		return nil
+	}
+
+	// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
+	if *packageInput.Version == "" {
+		logger.Infof("purl does not contain version, skipping deps.dev query: %s", purl)
+		return nil
+	}
+
+	component := &PackageComponent{}
+	component.CurrentPackage = packageInput
+
+	err = d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version, component)
+	if err != nil {
+		logger.Debugf("failed to get additional metadata for package: %s, err: %v", purl, err)
+		return nil
+	}
+	logger.Infof("obtained additional metadata for package: %s", purl)
+
+	d.checkedPurls[purl] = component
+	blob, err := json.Marshal(component)
+	if err != nil {
+		return err
+	}
+
+	doc := &processor.Document{
+		Blob:   blob,
+		Type:   processor.DocumentDepsDev,
+		Format: processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{
+			Collector: DepsCollector,
+			Source:    DepsCollector,
+		},
+	}
+	docChannel <- doc
 	return nil
 }
 
@@ -212,6 +277,7 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 			logger.Debugf("failed to get dependencies %v", err)
 			return nil
 		}
+		logger.Infof("Retrieved dependencies for %s", purl)
 		d.dependencies[versionKey.String()] = deps
 
 		for i, node := range deps.Nodes {
@@ -297,6 +363,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 			logger.Debugf("failed to get dependencies: %v", err)
 			return nil
 		}
+		logger.Infof("Retrieved dependencies for %s", purl)
 		d.dependencies[versionKey.String()] = deps
 	}
 
