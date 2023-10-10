@@ -414,10 +414,13 @@ func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifac
 		if err != nil {
 			return fmt.Errorf("failed pulling layer %d: %w", i, err)
 		}
-		defer blob.Close()
 		btr1, err := blob.RawBody()
+		closeErr := blob.Close()
 		if err != nil {
 			return fmt.Errorf("failed reading layer %d: %w", i, err)
+		}
+		if closeErr != nil {
+			return fmt.Errorf("failed closing layer %d: %w", i, err)
 		}
 
 		var docType = processor.DocumentUnknown
