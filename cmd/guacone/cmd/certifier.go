@@ -26,7 +26,7 @@ import (
 
 var certifierCmd = &cobra.Command{
 	Use:   "certifier",
-	Short: "Runs the certifier command aginst GraphQL",
+	Short: "Runs the certifier command against GraphQL",
 }
 
 func init() {
