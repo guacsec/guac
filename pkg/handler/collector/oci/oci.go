@@ -251,7 +251,7 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 	if err != nil {
 		return fmt.Errorf("failed retrieving manifest list: %w", err)
 	}
-	
+
 	logger.Infof("%s is manifest list with %d platforms", image.Reference, len(pl))
 
 	// Use goroutines to fetch platforms concurrently
@@ -356,6 +356,7 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel)
 					if e != nil {
 						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", err)
+						return
 					}
 					o.markDigestAsCollected(repo, referrerDescDigest)
 				}
