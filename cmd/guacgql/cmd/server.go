@@ -86,15 +86,23 @@ func startServer(cmd *cobra.Command) {
 	http.HandleFunc("/healthz", healthHandler)
 
 	http.Handle("/query", srv)
+	proto := "http"
+	if flags.tlsCertFile != "" && flags.tlsKeyFile != "" {
+		proto = "https"
+	}
 	if flags.debug {
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-		logger.Infof("connect to http://localhost:%d/ for GraphQL playground", flags.port)
+		logger.Infof("connect to %s://localhost:%d/ for GraphQL playground", proto, flags.port)
 	}
 
 	server := &http.Server{Addr: fmt.Sprintf(":%d", flags.port)}
 	logger.Info("starting server")
 	go func() {
-		logger.Infof("server finished: %s", server.ListenAndServe())
+		if proto == "https" {
+			logger.Infof("server finished: %s", server.ListenAndServeTLS(flags.tlsCertFile, flags.tlsKeyFile))
+		} else {
+			logger.Infof("server finished: %s", server.ListenAndServe())
+		}
 	}()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
