@@ -247,7 +247,11 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 		return fmt.Errorf("failed retrieving manifest: %w", err)
 	}
 
-	pl, _ := manifest.GetPlatformList(m)
+	pl, err := manifest.GetPlatformList(m)
+	if err != nil {
+		return fmt.Errorf("failed retrieving manifest list: %w", err)
+	}
+	
 	logger.Infof("%s is manifest list with %d platforms", image.Reference, len(pl))
 
 	// Use goroutines to fetch platforms concurrently
