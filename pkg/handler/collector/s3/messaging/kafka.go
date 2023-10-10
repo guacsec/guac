@@ -59,13 +59,11 @@ func (m *KafkaMessage) GetItem() (string, error) {
 }
 
 func NewKafkaProvider(mpConfig MessageProviderConfig) (KafkaProvider, error) {
-	kafkaHostname := mpConfig.Host
-	kafkaPort := mpConfig.Port
 	kafkaTopic := mpConfig.Queue
 
 	kafkaProvider := KafkaProvider{}
 	kafkaProvider.reader = kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   []string{fmt.Sprintf("%s:%s", kafkaHostname, kafkaPort)},
+		Brokers:   []string{mpConfig.Endpoint},
 		Topic:     kafkaTopic,
 		Partition: 0,
 	})

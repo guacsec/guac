@@ -35,20 +35,18 @@ import (
 
 // s3Options flags for configuring the command
 type s3Options struct {
-	s3hostname string // hostname of the s3 provider
-	s3port     string // port of the s3 provider
-	s3bucket   string // s3 bucket (only for non-polling behaviour)
+	s3url      string // base url of the s3 to collect from
+	s3bucket   string // name of bucket to collect from
 	s3item     string // s3 item (only for non-polling behaviour)
 	region     string // AWS region, for s3/sqs configuration (defaults to us-east-1)
 	queues     string // comma-separated list of queues/topics (only for polling behaviour)
 	mp         string // message provider name (sqs or kafka, will default to kafka)
-	mpHostname string // hostname for the message provider (only for polling behaviour)
-	mpPort     string // port for the message provider (only for polling behaviour)
+	mpEndpoint string // endpoint for the message provider (only for polling behaviour)
 	poll       bool   // polling or non-polling behaviour? (defaults to non-polling)
 }
 
 var s3Cmd = &cobra.Command{
-	Use:   "s3 [flags] s3hostname s3port",
+	Use:   "s3 [flags]",
 	Short: "listens to kafka/sqs s3 events to download documents and add them to the GUAC graph, or directly downloads from s3",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -56,14 +54,13 @@ var s3Cmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		s3Opts, err := validateS3Opts(
-			args,
+			viper.GetString("s3-url"),
 			viper.GetString("s3-bucket"),
+			viper.GetString("s3-region"),
 			viper.GetString("s3-item"),
 			viper.GetString("s3-mp"),
-			viper.GetString("s3-mp-host"),
-			viper.GetString("s3-mp-port"),
+			viper.GetString("s3-mp-endpoint"),
 			viper.GetString("s3-queues"),
-			viper.GetString("s3-region"),
 			viper.GetBool("poll"),
 		)
 		if err != nil {
@@ -76,17 +73,15 @@ var s3Cmd = &cobra.Command{
 		signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 		s3Collector := s3.NewS3Collector(s3.S3CollectorConfig{
-			S3Host:              s3Opts.s3hostname,
-			S3Port:              s3Opts.s3port,
-			S3Bucket:            s3Opts.s3bucket,
-			S3Item:              s3Opts.s3item,
-			MessageProvider:     s3Opts.mp,
-			MessageProviderHost: s3Opts.mpHostname,
-			MessageProviderPort: s3Opts.mpPort,
-			Queues:              s3Opts.queues,
-			Region:              s3Opts.region,
-			SigChan:             signals,
-			Poll:                s3Opts.poll,
+			S3Url:                   s3Opts.s3url,
+			S3Bucket:                s3Opts.s3bucket,
+			S3Region:                s3Opts.region,
+			S3Item:                  s3Opts.s3item,
+			MessageProvider:         s3Opts.mp,
+			MessageProviderEndpoint: s3Opts.mpEndpoint,
+			Queues:                  s3Opts.queues,
+			SigChan:                 signals,
+			Poll:                    s3Opts.poll,
 		})
 
 		if err := collector.RegisterDocumentCollector(s3Collector, s3.S3CollectorType); err != nil {
@@ -135,47 +130,35 @@ var s3Cmd = &cobra.Command{
 	},
 }
 
-func validateS3Opts(args []string, s3bucket string, s3item string, mp string, mpHostname string, mpPort string, queues string, region string, poll bool) (s3Options, error) {
+func validateS3Opts(s3url string, s3bucket string, region string, s3item string, mp string, mpEndpoint string, queues string, poll bool) (s3Options, error) {
 	var opts s3Options
 
-	if len(args) < 2 {
-		return opts, fmt.Errorf("wrong number of arguments")
-	}
-	s3hostname := args[0]
-	s3port := args[1]
-	if len(s3hostname) == 0 {
-		return opts, fmt.Errorf("expected s3 hostname")
-	}
-	if len(s3port) == 0 {
-		return opts, fmt.Errorf("expected s3 port")
-	}
-
 	if poll {
-		if len(mpHostname) == 0 {
-			return opts, fmt.Errorf("expected hostname for message provider")
-		}
-		if len(mpPort) == 0 {
-			return opts, fmt.Errorf("expected port for message provider")
+		if mp == "kafka" {
+			if len(mpEndpoint) == 0 {
+				return opts, fmt.Errorf("expected endpoint for message provider")
+			}
 		}
 		if len(queues) == 0 {
 			return opts, fmt.Errorf("expected at least one queue")
 		}
 	} else {
-		if len(s3bucket) == 0 {
-			return opts, fmt.Errorf("expected s3 bucket")
-		}
 		if len(s3item) == 0 {
 			return opts, fmt.Errorf("expected s3 item")
 		}
 	}
 
-	opts = s3Options{s3hostname, s3port, s3bucket, s3item, region, queues, mp, mpHostname, mpPort, poll}
+	if len(s3bucket) == 0 {
+		return opts, fmt.Errorf("expected s3 bucket")
+	}
+
+	opts = s3Options{s3url, s3bucket, region, s3item, queues, mp, mpEndpoint, poll}
 
 	return opts, nil
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"s3-bucket", "s3-item", "s3-mp", "s3-mp-host", "s3-mp-port", "s3-queues", "s3-region", "poll"})
+	set, err := cli.BuildFlags([]string{"s3-url", "s3-bucket", "s3-region", "s3-item", "s3-mp", "s3-mp-endpoint", "s3-queues", "poll"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
 		os.Exit(1)

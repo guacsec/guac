@@ -27,16 +27,15 @@ import (
 )
 
 type BuildBucket interface {
-	GetDownloader(hostname string, port string, region string) Bucket
+	GetDownloader(url string, region string) Bucket
 }
 
 type BucketBuilder struct {
 }
 
-func (bd *BucketBuilder) GetBucket(hostname string, port string, region string) Bucket {
+func (bd *BucketBuilder) GetBucket(url string, region string) Bucket {
 	return &s3Bucket{
-		hostname,
-		port,
+		url,
 		region,
 	}
 }
@@ -47,13 +46,12 @@ type Bucket interface {
 }
 
 type s3Bucket struct {
-	hostname string
-	port     string
-	region   string
+	url    string
+	region string
 }
 
-func GetDefaultBucket(hostname string, port string, region string) Bucket {
-	return &s3Bucket{hostname, port, region}
+func GetDefaultBucket(url string, region string) Bucket {
+	return &s3Bucket{url, region}
 }
 
 func (d *s3Bucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {
@@ -62,11 +60,15 @@ func (d *s3Bucket) DownloadFile(ctx context.Context, bucket string, item string)
 		return nil, fmt.Errorf("error loading AWS SDK config: %w", err)
 	}
 
-	addr := fmt.Sprintf("http://%s:%s/%s/", d.hostname, d.port, bucket)
-	cfg.Region = d.region
-
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-		o.BaseEndpoint = aws.String(addr)
+		o.UsePathStyle = true
+		if d.url != "" {
+			o.BaseEndpoint = aws.String(d.url)
+		}
+
+		if d.region != "" {
+			o.Region = d.region
+		}
 	})
 
 	// Create a GetObjectInput with the bucket name and object key.
@@ -96,11 +98,14 @@ func (d *s3Bucket) GetEncoding(ctx context.Context, bucket string, item string) 
 		return "", fmt.Errorf("error loading AWS SDK config: %w", err)
 	}
 
-	addr := fmt.Sprintf("http://%s:%s/%s/", d.hostname, d.port, bucket)
-	cfg.Region = d.region
-
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-		o.BaseEndpoint = aws.String(addr)
+		o.UsePathStyle = true
+		if d.url != "" {
+			o.BaseEndpoint = aws.String(d.url)
+		}
+		if d.region != "" {
+			o.Region = d.region
+		}
 	})
 
 	headObject, err := client.HeadObject(context.Background(), &s3.HeadObjectInput{Bucket: aws.String(bucket), Key: aws.String(item)})

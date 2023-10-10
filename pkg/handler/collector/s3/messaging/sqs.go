@@ -20,17 +20,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
 type SqsProvider struct {
-	client   *sqs.Client
-	hostname string
-	port     string
-	queue    string
+	client *sqs.Client
+	queue  string
 }
 
 type SqsBucket struct {
@@ -82,8 +79,6 @@ func (m *SqsMessage) GetItem() (string, error) {
 }
 
 func NewSqsProvider(mpConfig MessageProviderConfig) (SqsProvider, error) {
-	sqsHostname := mpConfig.Host
-	sqsPort := mpConfig.Port
 	sqsQueue := mpConfig.Queue
 	sqsProvider := SqsProvider{}
 
@@ -93,13 +88,15 @@ func NewSqsProvider(mpConfig MessageProviderConfig) (SqsProvider, error) {
 	}
 
 	client := sqs.NewFromConfig(cfg, func(o *sqs.Options) {
-		o.BaseEndpoint = aws.String(fmt.Sprintf("http://%s:%s", sqsHostname, sqsPort))
-		o.Region = mpConfig.Region
+		if mpConfig.Endpoint != "" {
+			o.EndpointResolver = sqs.EndpointResolverFromURL(mpConfig.Endpoint)
+		}
+		if mpConfig.Region != "" {
+			o.Region = mpConfig.Region
+		}
 	})
 
 	sqsProvider.client = client
-	sqsProvider.hostname = sqsHostname
-	sqsProvider.port = sqsPort
 	sqsProvider.queue = sqsQueue
 
 	return sqsProvider, nil
@@ -108,11 +105,23 @@ func NewSqsProvider(mpConfig MessageProviderConfig) (SqsProvider, error) {
 func (s *SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	logger := logging.FromContext(ctx)
 
-	addr := fmt.Sprintf("http://%s:%s/000000000000/%s", s.hostname, s.port, s.queue)
+	gQInput := &sqs.GetQueueUrlInput{
+		QueueName: &s.queue,
+	}
+
+	// Get URL of queue
+	urlResult, err := s.client.GetQueueUrl(ctx, gQInput)
+	if err != nil {
+		fmt.Println("Got an error getting the queue URL:")
+		fmt.Println(err)
+		return nil, err
+	}
+
+	addr := urlResult.QueueUrl
 
 	// Receive messages from the queue
 	receiveInput := &sqs.ReceiveMessageInput{
-		QueueUrl:            &addr,
+		QueueUrl:            addr,
 		MaxNumberOfMessages: 1,
 		WaitTimeSeconds:     10,
 	}
@@ -140,7 +149,7 @@ func (s *SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 
 			// Delete the received message from the queue (stardard sqs procedure)
 			deleteInput := &sqs.DeleteMessageInput{
-				QueueUrl:      &addr,
+				QueueUrl:      addr,
 				ReceiptHandle: message.ReceiptHandle,
 			}
 			_, err = s.client.DeleteMessage(context.TODO(), deleteInput)

@@ -37,19 +37,17 @@ type S3Collector struct {
 }
 
 type S3CollectorConfig struct {
-	MessageProvider     string
-	MessageProviderHost string
-	MessageProviderPort string
-	S3Host              string
-	S3Port              string
-	S3Bucket            string
-	S3Item              string
-	Region              string // optional (defaults to us-east-1, assumes same region for s3 and sqs)
-	Queues              string
-	MpBuilder           messaging.MessageProviderBuilder // optional
-	BucketBuilder       bucket.BuildBucket               // optional
-	SigChan             chan os.Signal                   // optional
-	Poll                bool
+	MessageProvider         string
+	MessageProviderEndpoint string                           // optional if using the sqs message provider
+	S3Url                   string                           // optional (uses aws sdk defaults)
+	S3Bucket                string                           // bucket name to collect from
+	S3Item                  string                           // optional (only for non-polling behaviour)
+	S3Region                string                           // optional (defaults to us-east-1, assumes same region for s3 and sqs)
+	Queues                  string                           // optional (comma-separated list of queues/topics)
+	MpBuilder               messaging.MessageProviderBuilder // optional
+	BucketBuilder           bucket.BuildBucket               // optional
+	SigChan                 chan os.Signal                   // optional
+	Poll                    bool
 }
 
 func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
@@ -74,16 +72,15 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 	logger := logging.FromContext(ctx)
 	downloader := getDownloader(s)
 
-	bckt := s.config.S3Bucket
 	item := s.config.S3Item
 
-	blob, err := downloader.DownloadFile(ctx, bckt, item)
+	blob, err := downloader.DownloadFile(ctx, s.config.S3Bucket, item)
 	if err != nil {
 		logger.Errorf("could not download item %v: %v", item, err)
 		return err
 	}
 
-	enc, err := downloader.GetEncoding(ctx, bckt, item)
+	enc, err := downloader.GetEncoding(ctx, s.config.S3Bucket, item)
 	if err != nil {
 		logger.Errorf("could not get encoding for item %v: %v", item, err)
 		return err
@@ -214,10 +211,8 @@ func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider,
 
 	mp, err := mpBuilder.GetMessageProvider(messaging.MessageProviderConfig{
 		Queue:    queue,
-		Host:     s.config.MessageProviderHost,
-		Port:     s.config.MessageProviderPort,
+		Endpoint: s.config.MessageProviderEndpoint,
 		Provider: s.config.MessageProvider,
-		Region:   s.config.Region,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error creating message provider: %s", err)
@@ -229,9 +224,9 @@ func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider,
 func getDownloader(s S3Collector) bucket.Bucket {
 	var downloader bucket.Bucket
 	if s.config.BucketBuilder != nil {
-		downloader = s.config.BucketBuilder.GetDownloader(s.config.S3Host, s.config.S3Port, s.config.Region)
+		downloader = s.config.BucketBuilder.GetDownloader(s.config.S3Url, s.config.S3Region)
 	} else {
-		downloader = bucket.GetDefaultBucket(s.config.S3Host, s.config.S3Port, s.config.Region)
+		downloader = bucket.GetDefaultBucket(s.config.S3Url, s.config.S3Region)
 	}
 	return downloader
 }

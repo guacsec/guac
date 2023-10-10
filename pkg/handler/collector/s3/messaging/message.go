@@ -38,8 +38,7 @@ type MessageProvider interface {
 
 type MessageProviderConfig struct {
 	Queue    string
-	Host     string
-	Port     string
+	Endpoint string
 	Provider string
 	Region   string
 }
