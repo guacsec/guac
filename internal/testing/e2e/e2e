@@ -36,7 +36,22 @@ popd
 echo @@@@ Starting up guac server in background
 go run "${GUAC_DIR}/cmd/guacgql" &
 
-sleep 15
+echo -n "Waiting for guac server to start"
+
+set +e
+for iteration in {1..36} ; do
+  sleep 5
+  curl -s http://localhost:8080/query >/dev/null 2>&1
+  if [ $? -ne 7 ] ; then
+    break
+  fi
+  echo -n "."
+done
+set -e
+echo
+
+curl -s http://localhost:8080/query >/dev/null 2>&1 || (echo "Guac server not running in time" && exit 1)
+echo "Guac server started"
 
 echo @@@@ Ingesting guac-data into server
 go run "${GUAC_DIR}/cmd/guacone" collect files "${GUAC_DIR}/guac-data/docs/"
