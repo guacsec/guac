@@ -135,7 +135,7 @@ query Scorecard {
 
 query CertifyVuln {
   CertifyVuln(
-    certifyVulnSpec: {vulnerability: {osv: {osvId: "ghsa-cg3q-j54f-5p7p"}}}
+    certifyVulnSpec: {vulnerability: {type: "osv", vulnerabilityID: "ghsa-cg3q-j54f-5p7p"}}
   ) {
     id
     package {
@@ -160,22 +160,11 @@ query CertifyVuln {
       }
     }
     vulnerability {
-      __typename
-      ... on CVE {
+      id
+      type
+      vulnerabilityIDs {
         id
-        year
-        cveId
-      }
-      ... on OSV {
-        id
-        osvId
-      }
-      ... on GHSA {
-        id
-        ghsaId
-      }
-      ... on NoVuln {
-        id
+        vulnerabilityID
       }
     }
     metadata {
