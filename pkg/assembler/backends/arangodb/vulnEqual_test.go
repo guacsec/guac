@@ -569,6 +569,7 @@ func TestVulnEqual(t *testing.T) {
 				ID: ptrfrom.String("123456"),
 			},
 			ExpVulnEqual: nil,
+			ExpQueryErr:  true,
 		},
 		{
 			Name: "Query Error",
@@ -586,7 +587,7 @@ func TestVulnEqual(t *testing.T) {
 			Query: &model.VulnEqualSpec{
 				ID: ptrfrom.String("-123"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -830,6 +831,149 @@ func TestIngestVulnEquals(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.ExpVulnEqual, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_buildVulnEqualByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		Vuln      *model.VulnerabilityInputSpec
+		OtherVuln *model.VulnerabilityInputSpec
+		In        *model.VulnEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InVuln       []*model.VulnerabilityInputSpec
+		Calls        []call
+		Query        *model.VulnEqualSpec
+		ExpVulnEqual *model.VulnEqual
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:   "Query on vuln Equal ID",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O2, testdata.C1},
+			Calls: []call{
+				{
+					Vuln:      testdata.O2,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpVulnEqual: &model.VulnEqual{
+				Vulnerabilities: []*model.Vulnerability{
+					{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+					},
+					{
+						Type:             "osv",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+					},
+				},
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:   "Query on ID",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.G1},
+			Calls: []call{
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.G1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpVulnEqual: &model.VulnEqual{
+				Vulnerabilities: []*model.Vulnerability{
+					{
+						Type:             "osv",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+					},
+					{
+						Type:             "ghsa",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+					},
+				},
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:   "Query ID not found",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1, testdata.C2, testdata.G1},
+			Calls: []call{
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.C2,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.G1,
+					In: &model.VulnEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				ID: ptrfrom.String("123456"),
+			},
+			ExpVulnEqual: nil,
+			ExpQueryErr:  true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, g := range test.InVuln {
+				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+					t.Fatalf("Could not ingest vulnerability: %a", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildVulnEqualByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpVulnEqual, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
 			}
 		})
 	}

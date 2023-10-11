@@ -571,7 +571,7 @@ func TestCertifyGood(t *testing.T) {
 			},
 		},
 		{
-			Name:  "Query good ID",
+			Name:  "Query bad ID",
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
@@ -586,7 +586,7 @@ func TestCertifyGood(t *testing.T) {
 			Query: &model.CertifyGoodSpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -962,6 +962,224 @@ func TestIngestCertifyGoods(t *testing.T) {
 				}
 			}
 			got, err := b.CertifyGood(ctx, test.Query)
+			if (err != nil) != test.ExpQueryErr {
+				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			}
+			if err != nil {
+				return
+			}
+			if diff := cmp.Diff(test.ExpCG, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_buildCertifyGoodByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		Sub   model.PackageSourceOrArtifactInput
+		Match *model.MatchFlags
+		CG    *model.CertifyGoodInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Call         call
+		Query        *model.CertifyGoodSpec
+		ExpCG        *model.CertifyGood
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Call: call{
+				Sub: model.PackageSourceOrArtifactInput{
+					Package: testdata.P1,
+				},
+				Match: &model.MatchFlags{
+					Pkg: model.PkgMatchTypeSpecificVersion,
+				},
+				CG: &model.CertifyGoodInputSpec{
+					Justification: "test justification",
+				},
+			},
+
+			Query: &model.CertifyGoodSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpCG: &model.CertifyGood{
+				Subject:       testdata.P1out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{testdata.P4},
+			Call: call{
+				Sub: model.PackageSourceOrArtifactInput{
+					Package: testdata.P4,
+				},
+				Match: &model.MatchFlags{
+					Pkg: model.PkgMatchTypeSpecificVersion,
+				},
+				CG: &model.CertifyGoodInputSpec{
+					Justification: "test justification",
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Type:      ptrfrom.String("conan"),
+						Namespace: ptrfrom.String("openssl.org"),
+						Name:      ptrfrom.String("openssl"),
+						Version:   ptrfrom.String("3.0.3"),
+					},
+				},
+			},
+			ExpCG: &model.CertifyGood{
+				Subject:       testdata.P4out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Source",
+			InSrc: []*model.SourceInputSpec{testdata.S2},
+			Call: call{
+				Sub: model.PackageSourceOrArtifactInput{
+					Source: testdata.S2,
+				},
+				CG: &model.CertifyGoodInputSpec{
+					Justification: "test justification",
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Source: &model.SourceSpec{
+						Name: ptrfrom.String("bobsrepo"),
+					},
+				},
+			},
+			ExpCG: &model.CertifyGood{
+				Subject:       testdata.S2out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Artifact",
+			InArt: []*model.ArtifactInputSpec{testdata.A2},
+			Call: call{
+				Sub: model.PackageSourceOrArtifactInput{
+					Artifact: testdata.A2,
+				},
+				CG: &model.CertifyGoodInputSpec{
+					Justification: "test justification",
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Artifact: &model.ArtifactSpec{
+						Algorithm: ptrfrom.String("sha1"),
+					},
+				},
+			},
+			ExpCG: &model.CertifyGood{
+				Subject:       testdata.A2out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Source - no filter",
+			InSrc: []*model.SourceInputSpec{testdata.S3},
+			Call: call{
+				Sub: model.PackageSourceOrArtifactInput{
+					Source: testdata.S3,
+				},
+				CG: &model.CertifyGoodInputSpec{
+					Justification: "test justification",
+				},
+			},
+			Query: &model.CertifyGoodSpec{},
+			ExpCG: &model.CertifyGood{
+				Subject:       testdata.S3out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Artifact - no filter",
+			InArt: []*model.ArtifactInputSpec{testdata.A3},
+			Call: call{
+				Sub: model.PackageSourceOrArtifactInput{
+					Artifact: testdata.A3,
+				},
+				CG: &model.CertifyGoodInputSpec{
+					Justification: "test justification",
+				},
+			},
+			Query: &model.CertifyGoodSpec{},
+			ExpCG: &model.CertifyGood{
+				Subject:       testdata.A3out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Call: call{
+				Sub: model.PackageSourceOrArtifactInput{
+					Source: testdata.S1,
+				},
+				CG: &model.CertifyGoodInputSpec{
+					Justification: "test justification",
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			found, err := b.IngestCertifyGood(ctx, test.Call.Sub, test.Call.Match, *test.Call.CG)
+			if (err != nil) != test.ExpIngestErr {
+				t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+			}
+			if err != nil {
+				return
+			}
+
+			got, err := b.(*arangoClient).buildCertifyGoodByID(ctx, found.ID, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}

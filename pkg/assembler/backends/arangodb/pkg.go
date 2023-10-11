@@ -413,6 +413,13 @@ func setPkgVersionMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any
 }
 
 func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	if pkgSpec != nil && pkgSpec.ID != nil {
+		p, err := c.buildPackageResponseFromID(ctx, *pkgSpec.ID, pkgSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildPackageResponseFromID failed with an error: %w", err)
+		}
+		return []*model.Package{p}, nil
+	}
 
 	if _, ok := ctx.Value("graphql").(graphql.OperationContext); ok {
 		// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions

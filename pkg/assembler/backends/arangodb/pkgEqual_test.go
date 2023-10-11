@@ -566,7 +566,7 @@ func TestPkgEqual(t *testing.T) {
 			Query: &model.PkgEqualSpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -1033,6 +1033,117 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 				t.Errorf("purl mismatch wanted: %s, got: %s", tt.expectedPurlUri, got)
 				return
 			}
+		})
+	}
+}
+
+func Test_buildPkgEqualByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		P1 *model.PkgInputSpec
+		P2 *model.PkgInputSpec
+		HE *model.PkgEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		Calls        []call
+		Query        *model.PkgEqualSpec
+		ExpHE        *model.PkgEqual
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query on pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification two",
+					},
+				},
+			},
+			ExpHE: &model.PkgEqual{
+				Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+				Justification: "test justification two",
+			},
+		},
+		{
+			Name:  "Query on ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpHE: &model.PkgEqual{
+				Packages:      []*model.Package{testdata.P1out, testdata.P3out},
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, a := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildPkgEqualByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+
 		})
 	}
 }

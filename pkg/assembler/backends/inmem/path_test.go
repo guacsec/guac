@@ -13,9 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
-package arangodb
+package inmem_test
 
 import (
 	"context"
@@ -25,20 +23,12 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func Test_Nodes(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
-	if err != nil {
-		t.Fatalf("error deleting arango database: %v", err)
-	}
-	b, err := getBackend(ctx, arangArg)
-	if err != nil {
-		t.Fatalf("error creating arango backend: %v", err)
-	}
 	type certifyBadCall struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
@@ -326,7 +316,7 @@ func Test_Nodes(t *testing.T) {
 			HE: &model.HashEqualInputSpec{},
 		},
 		want: []model.Node{&model.HashEqual{
-			Artifacts: []*model.Artifact{testdata.A3out, testdata.A1out},
+			Artifacts: []*model.Artifact{testdata.A1out, testdata.A3out},
 		}},
 	}, {
 		name:  "hasMetadata",
@@ -506,6 +496,10 @@ func Test_Nodes(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			b, err := backends.Get("inmem", nil, nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
 			var nodeID string
 			for _, p := range tt.inPkg {
 				if _, err := b.IngestPackage(ctx, *p); err != nil {

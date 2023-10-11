@@ -617,7 +617,7 @@ func TestHasSLSA(t *testing.T) {
 			Query: &model.HasSLSASpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -899,6 +899,230 @@ func TestIngestHasSLSAs(t *testing.T) {
 			if diff := cmp.Diff(test.ExpHS, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
+		})
+	}
+}
+
+func Test_buildHasSlsaByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		Sub  *model.ArtifactInputSpec
+		BF   []*model.ArtifactInputSpec
+		BB   *model.BuilderInputSpec
+		SLSA *model.SLSAInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InArt        []*model.ArtifactInputSpec
+		InBld        []*model.BuilderInputSpec
+		Calls        []call
+		Query        *model.HasSLSASpec
+		ExpHS        *model.HasSlsa
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query on Subject",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: testdata.A1,
+					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BB:  testdata.B1,
+					SLSA: &model.SLSAInputSpec{
+						BuildType: "test type one",
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				Subject: &model.ArtifactSpec{
+					Algorithm: ptrfrom.String("sha256"),
+					Digest:    ptrfrom.String("6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"),
+				},
+				BuildType: ptrfrom.String("test type one"),
+			},
+			ExpHS: &model.HasSlsa{
+				Subject: testdata.A1out,
+				Slsa: &model.Slsa{
+					BuiltBy:   testdata.B1out,
+					BuiltFrom: []*model.Artifact{testdata.A2out},
+					BuildType: "test type one",
+				},
+			},
+		},
+		{
+			Name:  "Query on Subject ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A2, testdata.A3},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub:  testdata.A3,
+					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BB:   testdata.B1,
+					SLSA: &model.SLSAInputSpec{},
+				},
+			},
+			ExpHS: &model.HasSlsa{
+				Subject: testdata.A3out,
+				Slsa: &model.Slsa{
+					BuiltBy:   testdata.B1out,
+					BuiltFrom: []*model.Artifact{testdata.A2out},
+				},
+			},
+		},
+		{
+			Name:  "Query on Materials",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A4},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub:  testdata.A1,
+					BF:   []*model.ArtifactInputSpec{testdata.A4},
+					BB:   testdata.B1,
+					SLSA: &model.SLSAInputSpec{},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuiltFrom: []*model.ArtifactSpec{{
+					Digest: ptrfrom.String("5a787865sd676dacb0142afa0b83029cd7befd9"),
+				}},
+			},
+			ExpHS: &model.HasSlsa{
+				Subject: testdata.A1out,
+				Slsa: &model.Slsa{
+					BuiltBy:   testdata.B1out,
+					BuiltFrom: []*model.Artifact{testdata.A4out},
+				},
+			},
+		},
+		{
+			Name:  "Query on Builder",
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			InBld: []*model.BuilderInputSpec{testdata.B2},
+			Calls: []call{
+				{
+					Sub:  testdata.A1,
+					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BB:   testdata.B2,
+					SLSA: &model.SLSAInputSpec{},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				BuiltBy: &model.BuilderSpec{
+					URI: ptrfrom.String("qwer"),
+				},
+			},
+			ExpHS: &model.HasSlsa{
+				Subject: testdata.A1out,
+				Slsa: &model.Slsa{
+					BuiltBy:   testdata.B2out,
+					BuiltFrom: []*model.Artifact{testdata.A2out},
+				},
+			},
+		},
+		{
+			Name:  "Query on Builder ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A2, testdata.A3},
+			InBld: []*model.BuilderInputSpec{testdata.B2},
+			Calls: []call{
+				{
+					Sub:  testdata.A3,
+					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BB:   testdata.B2,
+					SLSA: &model.SLSAInputSpec{},
+				},
+			},
+			ExpHS: &model.HasSlsa{
+				Subject: testdata.A3out,
+				Slsa: &model.Slsa{
+					BuiltBy:   testdata.B2out,
+					BuiltFrom: []*model.Artifact{testdata.A2out},
+				},
+			},
+		},
+		{
+			Name:  "Query on ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
+			Calls: []call{
+				{
+					Sub:  testdata.A1,
+					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BB:   testdata.B2,
+					SLSA: &model.SLSAInputSpec{},
+				},
+			},
+			ExpHS: &model.HasSlsa{
+				Subject: testdata.A1out,
+				Slsa: &model.Slsa{
+					BuiltBy:   testdata.B2out,
+					BuiltFrom: []*model.Artifact{testdata.A2out},
+				},
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B2},
+			Calls: []call{
+				{
+					Sub:  testdata.A1,
+					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BB:   testdata.B2,
+					SLSA: &model.SLSAInputSpec{},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, bld := range test.InBld {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+					t.Fatalf("Could not ingest builder: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildHasSlsaByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpHS, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+
 		})
 	}
 }

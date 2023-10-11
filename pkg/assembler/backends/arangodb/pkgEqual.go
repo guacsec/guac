@@ -22,11 +22,21 @@ import (
 	"strings"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	purl "github.com/package-url/packageurl-go"
 )
 
 func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
+
+	if pkgEqualSpec != nil && pkgEqualSpec.ID != nil {
+		pe, err := c.buildPkgEqualByID(ctx, *pkgEqualSpec.ID, pkgEqualSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildPkgEqualByID failed with an error: %w", err)
+		}
+		return []*model.PkgEqual{pe}, nil
+	}
+
 	values := map[string]any{}
 	if pkgEqualSpec.Packages != nil {
 		if len(pkgEqualSpec.Packages) == 1 {
@@ -618,10 +628,96 @@ func getPkgEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.
 			ID:            createdValue.PkgEqualId,
 			Packages:      []*model.Package{pkg, equalPkg},
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 		pkgEqualList = append(pkgEqualList, pkgEqual)
 	}
 	return pkgEqualList, nil
+}
+
+func (c *arangoClient) buildPkgEqualByID(ctx context.Context, id string, filter *model.PkgEqualSpec) (*model.PkgEqual, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == pkgEqualsStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.PkgEqualSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryPkgEqualNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for pkgEqual query: %s", id)
+	}
+}
+
+func (c *arangoClient) queryPkgEqualNodeByID(ctx context.Context, filter *model.PkgEqualSpec) (*model.PkgEqual, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pkgEqualsStr, "pkgEqual")
+	setPkgEqualMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN pkgEqual`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryPkgEqualNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for pkgEqual: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbPkgEqual struct {
+		PkgEqualID     string `json:"_id"`
+		PackageID      string `json:"packageID"`
+		EqualPackageID string `json:"equalPackageID"`
+		Justification  string `json:"justification"`
+		Collector      string `json:"collector"`
+		Origin         string `json:"origin"`
+	}
+
+	var collectedValues []dbPkgEqual
+	for {
+		var doc dbPkgEqual
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to pkgEqual from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of pkgEqual nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	builtPackage, err := c.buildPackageResponseFromID(ctx, collectedValues[0].PackageID, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", collectedValues[0].PackageID, err)
+	}
+
+	builtEqualPackage, err := c.buildPackageResponseFromID(ctx, collectedValues[0].EqualPackageID, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get equal package from ID: %s, with error: %w", collectedValues[0].EqualPackageID, err)
+	}
+
+	return &model.PkgEqual{
+		ID:            collectedValues[0].PkgEqualID,
+		Packages:      []*model.Package{builtPackage, builtEqualPackage},
+		Justification: collectedValues[0].Justification,
+		Origin:        collectedValues[0].Collector,
+		Collector:     collectedValues[0].Origin,
+	}, nil
 }

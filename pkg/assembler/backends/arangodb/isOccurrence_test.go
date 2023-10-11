@@ -29,28 +29,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// func convNode(n model.Node) hasID {
-// 	// All nodes have a json "id"
-// 	// Only getting top-level id however
-// 	var h hasID
-// 	b, _ := json.Marshal(n)
-// 	_ = json.Unmarshal(b, &h)
-// 	return h
-// }
-
-// func convNodes(ns []model.Node) []string {
-// 	var ids []string
-// 	for _, n := range ns {
-// 		h := convNode(n)
-// 		ids = append(ids, h.ID)
-// 	}
-// 	return ids
-// }
-
-// type hasID struct {
-// 	ID string `json:"id"`
-// }
-
 func TestOccurrence(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
@@ -411,7 +389,8 @@ func TestOccurrence(t *testing.T) {
 			Query: &model.IsOccurrenceSpec{
 				ID: ptrfrom.String("12345"),
 			},
-			ExpOcc: nil,
+			ExpOcc:      nil,
+			ExpQueryErr: true,
 		},
 		{
 			Name:  "Query on ID",
@@ -500,7 +479,7 @@ func TestOccurrence(t *testing.T) {
 			Query: &model.IsOccurrenceSpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -689,6 +668,263 @@ func TestIngestOccurrences(t *testing.T) {
 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}
+		})
+	}
+}
+
+func Test_buildIsOccurrenceByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		PkgSrc     model.PackageOrSourceInput
+		Artifact   *model.ArtifactInputSpec
+		Occurrence *model.IsOccurrenceInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		Query        *model.IsOccurrenceSpec
+		ExpOcc       *model.IsOccurrence
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query on Artifact",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InArt: []*model.ArtifactInputSpec{testdata.A4},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P1,
+					},
+					Artifact: testdata.A4,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+			},
+			Query: &model.IsOccurrenceSpec{
+				Artifact: &model.ArtifactSpec{
+					Algorithm: ptrfrom.String("sha1"),
+					Digest:    ptrfrom.String("5a787865sd676dacb0142afa0b83029cd7befd9"),
+				},
+			},
+			ExpOcc: &model.IsOccurrence{
+				Subject:       testdata.P1out,
+				Artifact:      testdata.A4out,
+				Justification: "justification",
+			},
+		},
+		{
+			Name:  "Query on Artifact ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InArt: []*model.ArtifactInputSpec{testdata.A4},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P1,
+					},
+					Artifact: testdata.A4,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+			},
+			ExpOcc: &model.IsOccurrence{
+				Subject:       testdata.P1out,
+				Artifact:      testdata.A4out,
+				Justification: "justification",
+			},
+		},
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{testdata.P4},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P4,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+			},
+			Query: &model.IsOccurrenceSpec{
+				Subject: &model.PackageOrSourceSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String("3.0.3"),
+					},
+				},
+			},
+			ExpOcc: &model.IsOccurrence{
+				Subject:       testdata.P4out,
+				Artifact:      testdata.A1out,
+				Justification: "justification",
+			},
+		},
+		{
+			Name:  "Query on Package ID",
+			InPkg: []*model.PkgInputSpec{testdata.P4},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P4,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+			},
+			ExpOcc: &model.IsOccurrence{
+				Subject:       testdata.P4out,
+				Artifact:      testdata.A1out,
+				Justification: "justification",
+			},
+		},
+		{
+			Name:  "Query on Source",
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Source: testdata.S1,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+			},
+			Query: &model.IsOccurrenceSpec{
+				Subject: &model.PackageOrSourceSpec{
+					Source: &model.SourceSpec{},
+				},
+			},
+			ExpOcc: &model.IsOccurrence{
+				Subject:       testdata.S1out,
+				Artifact:      testdata.A1out,
+				Justification: "justification",
+			},
+		},
+		{
+			Name:  "Query on Source ID",
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Source: testdata.S1,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+			},
+			ExpOcc: &model.IsOccurrence{
+				Subject:       testdata.S1out,
+				Artifact:      testdata.A1out,
+				Justification: "justification",
+			},
+		},
+		{
+			Name:  "Query on ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P1,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpOcc: &model.IsOccurrence{
+				Subject:       testdata.P1out,
+				Artifact:      testdata.A1out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: testdata.P1,
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "justification",
+					},
+				},
+			},
+			Query: &model.IsOccurrenceSpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildIsOccurrenceByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpOcc, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+
 		})
 	}
 }

@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -32,6 +33,14 @@ const (
 )
 
 func (c *arangoClient) VulnerabilityMetadata(ctx context.Context, vulnerabilityMetadataSpec *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
+
+	if vulnerabilityMetadataSpec != nil && vulnerabilityMetadataSpec.ID != nil {
+		cv, err := c.buildVulnerabilityMetadataByID(ctx, *vulnerabilityMetadataSpec.ID, vulnerabilityMetadataSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildVulnerabilityMetadataByID failed with an error: %w", err)
+		}
+		return []*model.VulnerabilityMetadata{cv}, nil
+	}
 
 	var arangoQueryBuilder *arangoQueryBuilder
 	if vulnerabilityMetadataSpec.Vulnerability != nil {
@@ -123,7 +132,7 @@ func setVulnMetadataMatchValues(arangoQueryBuilder *arangoQueryBuilder, vulnMeta
 	}
 	if vulnMetadata.Timestamp != nil {
 		arangoQueryBuilder.filter("vulnMetadata", timeStampStr, "==", "@"+timeStampStr)
-		queryValues[timeStampStr] = *vulnMetadata.Timestamp
+		queryValues[timeStampStr] = vulnMetadata.Timestamp.UTC()
 	}
 	if vulnMetadata.Origin != nil {
 		arangoQueryBuilder.filter("vulnMetadata", origin, "==", "@"+origin)
@@ -146,7 +155,7 @@ func getVulnMetadataQueryValues(vulnerability *model.VulnerabilityInputSpec, vul
 
 	values[scoreTypeStr] = vulnerabilityMetadata.ScoreType
 	values[scoreValueStr] = vulnerabilityMetadata.ScoreValue
-	values[timeStampStr] = vulnerabilityMetadata.Timestamp
+	values[timeStampStr] = vulnerabilityMetadata.Timestamp.UTC()
 	values[origin] = vulnerabilityMetadata.Origin
 	values[collector] = vulnerabilityMetadata.Collector
 
@@ -352,4 +361,91 @@ func geVulnMetadataFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 		vulnMetadataList = append(vulnMetadataList, vulnMetadata)
 	}
 	return vulnMetadataList, nil
+}
+
+func (c *arangoClient) buildVulnerabilityMetadataByID(ctx context.Context, id string, filter *model.VulnerabilityMetadataSpec) (*model.VulnerabilityMetadata, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == vulnMetadataStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.VulnerabilityMetadataSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryVulnerabilityMetadataNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for Vulnerability Metadata query: %s", id)
+	}
+}
+
+func (c *arangoClient) queryVulnerabilityMetadataNodeByID(ctx context.Context, filter *model.VulnerabilityMetadataSpec) (*model.VulnerabilityMetadata, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(vulnMetadataStr, "vulnMetadata")
+	err := setVulnMetadataMatchValues(arangoQueryBuilder, filter, values)
+	if err != nil {
+		return nil, fmt.Errorf("setting match values for vuln metadata resulted in error: %w", err)
+	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN vulnMetadata`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryVulnerabilityMetadataNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for vulnMetadata: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbVulnMetadata struct {
+		VulnMetadataID  string                       `json:"_id"`
+		VulnerabilityID string                       `json:"vulnerabilityID"`
+		ScoreType       model.VulnerabilityScoreType `json:"scoreType"`
+		ScoreValue      float64                      `json:"scoreValue"`
+		Timestamp       time.Time                    `json:"timestamp"`
+		Collector       string                       `json:"collector"`
+		Origin          string                       `json:"origin"`
+	}
+
+	var collectedValues []dbVulnMetadata
+	for {
+		var doc dbVulnMetadata
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to vulnMetadata from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of vulnMetadata nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	builtVuln, err := c.buildVulnResponseByID(ctx, collectedValues[0].VulnerabilityID, filter.Vulnerability)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vulnerability from ID: %s, with error: %w", collectedValues[0].VulnerabilityID, err)
+	}
+
+	return &model.VulnerabilityMetadata{
+		ID:            collectedValues[0].VulnMetadataID,
+		Vulnerability: builtVuln,
+		ScoreType:     collectedValues[0].ScoreType,
+		ScoreValue:    collectedValues[0].ScoreValue,
+		Timestamp:     collectedValues[0].Timestamp,
+		Origin:        collectedValues[0].Origin,
+		Collector:     collectedValues[0].Collector,
+	}, nil
 }
