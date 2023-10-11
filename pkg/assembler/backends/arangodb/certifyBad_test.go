@@ -29,8 +29,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-var zeroTime = time.Unix(0, 0)
-
 func TestCertifyBad(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
@@ -42,6 +40,8 @@ func TestCertifyBad(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
@@ -209,7 +209,7 @@ func TestCertifyBad(t *testing.T) {
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification one",
-						KnownSince:    zeroTime,
+						KnownSince:    curTime,
 					},
 				},
 				{
@@ -221,19 +221,19 @@ func TestCertifyBad(t *testing.T) {
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification two",
-						KnownSince:    zeroTime,
+						KnownSince:    timeAfterOneSecond,
 					},
 				},
 			},
 			Query: &model.CertifyBadSpec{
 				Justification: ptrfrom.String("test justification one"),
-				KnownSince:    ptrfrom.Time(zeroTime),
+				KnownSince:    ptrfrom.Time(curTime),
 			},
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification one",
-					KnownSince:    zeroTime,
+					KnownSince:    curTime,
 				},
 			},
 		},

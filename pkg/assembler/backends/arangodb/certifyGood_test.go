@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestCertifyGood(t *testing.T) {
@@ -38,6 +39,8 @@ func TestCertifyGood(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
@@ -205,7 +208,7 @@ func TestCertifyGood(t *testing.T) {
 					},
 					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification one",
-						KnownSince:    zeroTime,
+						KnownSince:    curTime,
 					},
 				},
 				{
@@ -217,19 +220,19 @@ func TestCertifyGood(t *testing.T) {
 					},
 					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification two",
-						KnownSince:    zeroTime,
+						KnownSince:    timeAfterOneSecond,
 					},
 				},
 			},
 			Query: &model.CertifyGoodSpec{
 				Justification: ptrfrom.String("test justification one"),
-				KnownSince:    ptrfrom.Time(zeroTime),
+				KnownSince:    ptrfrom.Time(curTime),
 			},
 			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification one",
-					KnownSince:    zeroTime,
+					KnownSince:    curTime,
 				},
 			},
 		},
