@@ -24,6 +24,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 type BuildBucket interface {
@@ -93,6 +94,7 @@ func (d *s3Bucket) DownloadFile(ctx context.Context, bucket string, item string)
 }
 
 func (d *s3Bucket) GetEncoding(ctx context.Context, bucket string, item string) (string, error) {
+	logger := logging.FromContext(ctx)
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return "", fmt.Errorf("error loading AWS SDK config: %w", err)
@@ -107,6 +109,8 @@ func (d *s3Bucket) GetEncoding(ctx context.Context, bucket string, item string) 
 			o.Region = d.region
 		}
 	})
+
+	logger.Infof("Downloading document %v from bucket %v", item, bucket)
 
 	headObject, err := client.HeadObject(context.Background(), &s3.HeadObjectInput{Bucket: aws.String(bucket), Key: aws.String(item)})
 	if err != nil {
