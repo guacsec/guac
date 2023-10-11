@@ -172,7 +172,7 @@ var almostValidConstraint = regexp.MustCompile(`^(?P<op1>[><~^=]{1,3})v?(?P<semv
 var dashRangeRegexp = regexp.MustCompile(`(v?(?P<semver1>(?P<major1>0|[1-9]\d*)(\.(?P<minor1>0|[1-9]\d*))?(\.(?P<patch1>0|[1-9]\d*))?(?:-(?P<prerelease1>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata1>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)?)\s\s*-\s*(v?(?P<semver2>(?P<major2>0|[1-9]\d*)(\.(?P<minor2>0|[1-9]\d*))?(\.(?P<patch2>0|[1-9]\d*))?(?:-(?P<prerelease2>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata2>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)?)`)
 
 func almostSemVer(s string) bool {
-	return !exactSvR.Match([]byte(s)) && almostExactSvR.Match([]byte(s))
+	return !exactSvR.MatchString(s) && almostExactSvR.MatchString(s)
 }
 
 func fixAlmostSemVer(s string) (string, error) {
@@ -184,23 +184,23 @@ func fixAlmostSemVer(s string) (string, error) {
 }
 
 func isSemver(s string) bool {
-	return exactSvR.Match([]byte(s))
+	return exactSvR.MatchString(s)
 }
 
 func isSemVerWildcard(s string) bool {
-	return !exactSvR.Match([]byte(s)) && exactSvRWithWildcard.Match([]byte(s))
+	return !exactSvR.MatchString(s) && exactSvRWithWildcard.MatchString(s)
 }
 
 func isValidConstraint(s string) bool {
-	return validConstraint.Match([]byte(s))
+	return validConstraint.MatchString(s)
 }
 
 func isAlmostValidConstraint(s string) bool {
-	return almostValidConstraint.Match([]byte(s))
+	return almostValidConstraint.MatchString(s)
 }
 
 func isDashRange(s string) bool {
-	return dashRangeRegexp.Match([]byte(s))
+	return dashRangeRegexp.MatchString(s)
 }
 
 func ParseVersionRange(s string) (VersionMatchObject, error) {
@@ -389,7 +389,7 @@ func getConstraint(s string) (string, error) {
 	}
 
 	// check if its java ranges
-	if rangeRegexp.Match([]byte(s)) {
+	if rangeRegexp.MatchString(s) {
 		matches := rangeRegexp.FindStringSubmatch(s)
 		semver1Idx := rangeRegexp.SubexpIndex("semver1")
 		semver2Idx := rangeRegexp.SubexpIndex("semver2")
