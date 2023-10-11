@@ -799,10 +799,102 @@ var (
 		},
 	}
 
+	SpdxHasMetadata = []assembler.HasMetadataIngest{
+		{
+			Pkg:          baselayoutPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          baselayoutPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          baselayoutdataPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout-data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          baselayoutdataPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout-data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-keys:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-keys:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+	}
+
 	SpdxIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: SpdxDeps,
 		IsOccurrence: SpdxOccurences,
 		HasSBOM:      SpdxHasSBOM,
+		HasMetadata:  SpdxHasMetadata,
 		CertifyLegal: SpdxCertifyLegal,
 	}
 
@@ -2807,6 +2899,7 @@ var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.SortSlices(slsaPredicateInputSpecLess),
 	cmpopts.SortSlices(certifyLegalInputSpecLess),
 	cmpopts.SortSlices(licenseInputSpecLess),
+	cmpopts.SortSlices(hasMetadataLess),
 }
 
 func certifyScorecardLess(e1, e2 assembler.CertifyScorecardIngest) bool {
@@ -2838,6 +2931,9 @@ func certifyLegalInputSpecLess(e1, e2 assembler.CertifyLegalIngest) bool {
 }
 
 func licenseInputSpecLess(e1, e2 generated.LicenseInputSpec) bool {
+	return gLess(e1, e2)
+}
+func hasMetadataLess(e1, e2 assembler.HasMetadataIngest) bool {
 	return gLess(e1, e2)
 }
 

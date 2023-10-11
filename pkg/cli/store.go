@@ -39,6 +39,8 @@ func init() {
 
 	set.String("gql-backend", "inmem", "backend used for graphql api server: [inmem | arango (experimental) | ent (experimental) | neo4j (unmaintained)]")
 	set.Int("gql-listen-port", 8080, "port used for graphql api server")
+	set.String("gql-tls-cert-file", "", "path to the TLS certificate in PEM format")
+	set.String("gql-tls-key-file", "", "path to the TLS key in PEM format")
 	set.Bool("gql-debug", false, "debug flag which enables the graphQL playground")
 	set.Bool("gql-trace", false, "flag which enables tracing of graphQL requests and responses on the console")
 

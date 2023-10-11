@@ -265,7 +265,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		if isDependency(rel.Relationship) {
 			foundId = string(rel.RefA.ElementRefID)
 			relatedId = string(rel.RefB.ElementRefID)
-		} else if isDependent(rel.Relationship) {
+		} else if isDependent(rel.Relationship) || isPackageOf(rel.Relationship) {
 			foundId = string(rel.RefB.ElementRefID)
 			relatedId = string(rel.RefA.ElementRefID)
 		} else {
@@ -360,6 +360,31 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 	}
 
+	for _, pkg := range s.spdxDoc.Packages {
+		pkgInputSpecs := s.getPackageElement(string(pkg.PackageSPDXIdentifier))
+		for _, extRef := range pkg.PackageExternalReferences {
+			if extRef.Category == spdx_common.CategorySecurity {
+				locator := extRef.Locator
+				metadataInputSpec := &model.HasMetadataInputSpec{
+					Key:           "cpe",
+					Value:         locator,
+					Timestamp:     time.Now().UTC(),
+					Justification: "spdx cpe external reference",
+					Origin:        "GUAC SPDX",
+					Collector:     "GUAC",
+				}
+				for i := range pkgInputSpecs {
+					hasMetadata := assembler.HasMetadataIngest{
+						Pkg:          pkgInputSpecs[i],
+						PkgMatchFlag: model.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						HasMetadata:  metadataInputSpec,
+					}
+					preds.HasMetadata = append(preds.HasMetadata, hasMetadata)
+				}
+			}
+		}
+	}
+
 	return preds
 }
 
@@ -398,6 +423,12 @@ func isDependent(rel string) bool {
 	return map[string]bool{
 		spdx_common.TypeRelationshipContainedBy:  true,
 		spdx_common.TypeRelationshipDependencyOf: true,
+	}[rel]
+}
+
+func isPackageOf(rel string) bool {
+	return map[string]bool{
+		spdx_common.TypeRelationshipPackageOf: true,
 	}[rel]
 }
 
