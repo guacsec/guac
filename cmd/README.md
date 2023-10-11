@@ -59,7 +59,7 @@ services:
   - colsub addr
   - collector/certifier name
   - polling options
-  - flag to toggle retrieving deps 
+  - flag to toggle retrieving deps
 
 ## Collectors and Certifiers
 

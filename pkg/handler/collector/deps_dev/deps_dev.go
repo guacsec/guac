@@ -137,12 +137,17 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 	}
 
 	if !d.retrieveDependencies {
+		var wg sync.WaitGroup
+		wg.Add(len(ds.PurlDataSources))
+
 		for _, purl := range ds.PurlDataSources {
-			err = d.retrieveMetadataWithoutDeps(ctx, purl, docChannel)
-			if err != nil {
-				return fmt.Errorf("failed to get metadata: %w", err)
-			}
+			go func(p datasource.Source) {
+				defer wg.Done()
+				d.retrieveMetadataWithoutDeps(ctx, p, docChannel)
+			}(purl)
 		}
+
+		wg.Wait()
 		return nil
 	}
 
@@ -164,26 +169,26 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 }
 
 // retrieve version data, scorecards, etc only on for a single package
-func (d *depsCollector) retrieveMetadataWithoutDeps(ctx context.Context, p datasource.Source, docChannel chan<- *processor.Document) error {
+func (d *depsCollector) retrieveMetadataWithoutDeps(ctx context.Context, p datasource.Source, docChannel chan<- *processor.Document) {
 	logger := logging.FromContext(ctx)
 
 	purl := p.Value
 	packageInput, err := helpers.PurlToPkg(purl)
 	if err != nil {
 		logger.Infof("failed to parse purl to pkg: %s", purl)
-		return nil
+		return
 	}
 
 	// check if top level purl has already been queried
 	if _, ok := d.checkedPurls[purl]; ok {
 		logger.Infof("purl %s already queried", purl)
-		return nil
+		return
 	}
 
 	// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
 	if *packageInput.Version == "" {
 		logger.Infof("purl does not contain version, skipping deps.dev query: %s", purl)
-		return nil
+		return
 	}
 
 	component := &PackageComponent{}
@@ -192,14 +197,15 @@ func (d *depsCollector) retrieveMetadataWithoutDeps(ctx context.Context, p datas
 	err = d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version, component)
 	if err != nil {
 		logger.Debugf("failed to get additional metadata for package: %s, err: %v", purl, err)
-		return nil
+		return
 	}
 	logger.Infof("obtained additional metadata for package: %s", purl)
 
 	d.checkedPurls[purl] = component
 	blob, err := json.Marshal(component)
 	if err != nil {
-		return err
+		logger.Errorf("Error marshalling component to json: %s", err)
+		return
 	}
 
 	doc := &processor.Document{
@@ -212,7 +218,6 @@ func (d *depsCollector) retrieveMetadataWithoutDeps(ctx context.Context, p datas
 		},
 	}
 	docChannel <- doc
-	return nil
 }
 
 // getAllDependencies gets all the dependencies for the purls provided in a concurrent manner.
