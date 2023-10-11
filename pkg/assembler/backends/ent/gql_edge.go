@@ -236,6 +236,38 @@ func (d *Dependency) DependentPackageVersion(ctx context.Context) (*PackageVersi
 	return result, MaskNotFound(err)
 }
 
+func (hm *HasMetadata) Source(ctx context.Context) (*SourceName, error) {
+	result, err := hm.Edges.SourceOrErr()
+	if IsNotLoaded(err) {
+		result, err = hm.QuerySource().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (hm *HasMetadata) PackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := hm.Edges.PackageVersionOrErr()
+	if IsNotLoaded(err) {
+		result, err = hm.QueryPackageVersion().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (hm *HasMetadata) AllVersions(ctx context.Context) (*PackageName, error) {
+	result, err := hm.Edges.AllVersionsOrErr()
+	if IsNotLoaded(err) {
+		result, err = hm.QueryAllVersions().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (hm *HasMetadata) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := hm.Edges.ArtifactOrErr()
+	if IsNotLoaded(err) {
+		result, err = hm.QueryArtifact().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
 func (hsa *HasSourceAt) PackageVersion(ctx context.Context) (*PackageVersion, error) {
 	result, err := hsa.Edges.PackageVersionOrErr()
 	if IsNotLoaded(err) {

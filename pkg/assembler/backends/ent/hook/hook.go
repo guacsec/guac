@@ -117,6 +117,18 @@ func (f DependencyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DependencyMutation", m)
 }
 
+// The HasMetadataFunc type is an adapter to allow the use of ordinary
+// function as HasMetadata mutator.
+type HasMetadataFunc func(context.Context, *ent.HasMetadataMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f HasMetadataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.HasMetadataMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.HasMetadataMutation", m)
+}
+
 // The HasSourceAtFunc type is an adapter to allow the use of ordinary
 // function as HasSourceAt mutator.
 type HasSourceAtFunc func(context.Context, *ent.HasSourceAtMutation) (ent.Value, error)

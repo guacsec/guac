@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
@@ -75,6 +76,9 @@ func (n *CertifyVuln) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *Dependency) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *HasMetadata) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *HasSourceAt) IsNode() {}
@@ -288,6 +292,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.Dependency.Query().
 			Where(dependency.ID(id))
 		query, err := query.CollectFields(ctx, "Dependency")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case hasmetadata.Table:
+		query := c.HasMetadata.Query().
+			Where(hasmetadata.ID(id))
+		query, err := query.CollectFields(ctx, "HasMetadata")
 		if err != nil {
 			return nil, err
 		}
@@ -717,6 +733,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.Dependency.Query().
 			Where(dependency.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "Dependency")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case hasmetadata.Table:
+		query := c.HasMetadata.Query().
+			Where(hasmetadata.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "HasMetadata")
 		if err != nil {
 			return nil, err
 		}
