@@ -15,7 +15,11 @@
 
 package cmd
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/spf13/cobra"
+)
 
 func TestValidateGCSFlags(t *testing.T) {
 	testCases := []struct {
@@ -77,4 +81,19 @@ func TestValidateGCSFlags(t *testing.T) {
 		})
 	}
 
+}
+
+func TestJsonBz2Ingestion(t *testing.T) {
+	rootCmd := &cobra.Command{
+		Use:   "guacone",
+		Short: "guacone",
+	}
+	rootCmd.AddCommand(collectCmd)
+	rootCmd.AddCommand(filesCmd)
+	bz2Path := "./../../../internal/testing/testdata/exampledata/busybox-cyclonedx.json.bz2"
+	rootCmd.SetArgs([]string{"collect", "files", bz2Path})
+	err := rootCmd.Execute()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
