@@ -129,6 +129,13 @@ var osvCmd = &cobra.Command{
 					}
 				}
 			}
+			if len(totalDocs) > 0 {
+				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+				if err != nil {
+					gotErr = true
+					logger.Errorf("unable to ingest documents: %v", err)
+				}
+			}
 		}()
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
