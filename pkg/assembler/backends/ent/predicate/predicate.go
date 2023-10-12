@@ -66,6 +66,9 @@ type PackageVersion func(*sql.Selector)
 // PkgEqual is the predicate function for pkgequal builders.
 type PkgEqual func(*sql.Selector)
 
+// PointOfContact is the predicate function for pointofcontact builders.
+type PointOfContact func(*sql.Selector)
+
 // SLSAAttestation is the predicate function for slsaattestation builders.
 type SLSAAttestation func(*sql.Selector)
 

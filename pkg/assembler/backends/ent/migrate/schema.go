@@ -827,6 +827,86 @@ var (
 			},
 		},
 	}
+	// PointOfContactsColumns holds the columns for the "point_of_contacts" table.
+	PointOfContactsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "email", Type: field.TypeString},
+		{Name: "info", Type: field.TypeString},
+		{Name: "since", Type: field.TypeTime},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "source_id", Type: field.TypeInt, Nullable: true},
+		{Name: "package_version_id", Type: field.TypeInt, Nullable: true},
+		{Name: "package_name_id", Type: field.TypeInt, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
+	}
+	// PointOfContactsTable holds the schema information for the "point_of_contacts" table.
+	PointOfContactsTable = &schema.Table{
+		Name:       "point_of_contacts",
+		Columns:    PointOfContactsColumns,
+		PrimaryKey: []*schema.Column{PointOfContactsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "point_of_contacts_source_names_source",
+				Columns:    []*schema.Column{PointOfContactsColumns[7]},
+				RefColumns: []*schema.Column{SourceNamesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "point_of_contacts_package_versions_package_version",
+				Columns:    []*schema.Column{PointOfContactsColumns[8]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "point_of_contacts_package_names_all_versions",
+				Columns:    []*schema.Column{PointOfContactsColumns[9]},
+				RefColumns: []*schema.Column{PackageNamesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "point_of_contacts_artifacts_artifact",
+				Columns:    []*schema.Column{PointOfContactsColumns[10]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "pointofcontact_since_email_info_justification_origin_collector_source_id",
+				Unique:  true,
+				Columns: []*schema.Column{PointOfContactsColumns[3], PointOfContactsColumns[1], PointOfContactsColumns[2], PointOfContactsColumns[4], PointOfContactsColumns[5], PointOfContactsColumns[6], PointOfContactsColumns[7]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "pointofcontact_since_email_info_justification_origin_collector_package_version_id",
+				Unique:  true,
+				Columns: []*schema.Column{PointOfContactsColumns[3], PointOfContactsColumns[1], PointOfContactsColumns[2], PointOfContactsColumns[4], PointOfContactsColumns[5], PointOfContactsColumns[6], PointOfContactsColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "pointofcontact_since_email_info_justification_origin_collector_package_name_id",
+				Unique:  true,
+				Columns: []*schema.Column{PointOfContactsColumns[3], PointOfContactsColumns[1], PointOfContactsColumns[2], PointOfContactsColumns[4], PointOfContactsColumns[5], PointOfContactsColumns[6], PointOfContactsColumns[9]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL",
+				},
+			},
+			{
+				Name:    "pointofcontact_since_email_info_justification_origin_collector_artifact_id",
+				Unique:  true,
+				Columns: []*schema.Column{PointOfContactsColumns[3], PointOfContactsColumns[1], PointOfContactsColumns[2], PointOfContactsColumns[4], PointOfContactsColumns[5], PointOfContactsColumns[6], PointOfContactsColumns[10]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL",
+				},
+			},
+		},
+	}
 	// SlsaAttestationsColumns holds the columns for the "slsa_attestations" table.
 	SlsaAttestationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -1199,6 +1279,7 @@ var (
 		PackageTypesTable,
 		PackageVersionsTable,
 		PkgEqualsTable,
+		PointOfContactsTable,
 		SlsaAttestationsTable,
 		ScorecardsTable,
 		SourceNamesTable,
@@ -1250,6 +1331,10 @@ func init() {
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageTypesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
+	PointOfContactsTable.ForeignKeys[0].RefTable = SourceNamesTable
+	PointOfContactsTable.ForeignKeys[1].RefTable = PackageVersionsTable
+	PointOfContactsTable.ForeignKeys[2].RefTable = PackageNamesTable
+	PointOfContactsTable.ForeignKeys[3].RefTable = ArtifactsTable
 	SlsaAttestationsTable.ForeignKeys[0].RefTable = BuildersTable
 	SlsaAttestationsTable.ForeignKeys[1].RefTable = ArtifactsTable
 	SlsaAttestationsTable.Annotation = &entsql.Annotation{

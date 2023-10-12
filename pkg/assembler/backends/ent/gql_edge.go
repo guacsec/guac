@@ -476,6 +476,38 @@ func (pe *PkgEqual) Packages(ctx context.Context) (result []*PackageVersion, err
 	return result, err
 }
 
+func (poc *PointOfContact) Source(ctx context.Context) (*SourceName, error) {
+	result, err := poc.Edges.SourceOrErr()
+	if IsNotLoaded(err) {
+		result, err = poc.QuerySource().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (poc *PointOfContact) PackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := poc.Edges.PackageVersionOrErr()
+	if IsNotLoaded(err) {
+		result, err = poc.QueryPackageVersion().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (poc *PointOfContact) AllVersions(ctx context.Context) (*PackageName, error) {
+	result, err := poc.Edges.AllVersionsOrErr()
+	if IsNotLoaded(err) {
+		result, err = poc.QueryAllVersions().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (poc *PointOfContact) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := poc.Edges.ArtifactOrErr()
+	if IsNotLoaded(err) {
+		result, err = poc.QueryArtifact().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
 func (sa *SLSAAttestation) BuiltFrom(ctx context.Context) (result []*Artifact, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = sa.NamedBuiltFrom(graphql.GetFieldContext(ctx).Field.Alias)
