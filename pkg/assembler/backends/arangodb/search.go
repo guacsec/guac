@@ -31,7 +31,9 @@ func (c *arangoClient) FindSoftware(ctx context.Context, searchText string) ([]m
 	query := `
 
 FOR doc in GuacSearch
-SEARCH PHRASE(doc.guacKey, @searchText, "text_en") || PHRASE(doc.guacKey, @searchText, "customgram") || doc.digest == @searchText
+SEARCH PHRASE(doc.guacKey, @searchText, "text_en") || PHRASE(doc.guacKey, @searchText, "customgram") || 
+	PHRASE(doc.version, @searchText, "text_en") || PHRASE(doc.version, @searchText, "customgram") ||
+	doc.digest == @searchText 
 
 LET parsedDoc =
     IS_SAME_COLLECTION(doc, "pkgNames") ?
