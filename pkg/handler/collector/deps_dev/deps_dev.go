@@ -24,6 +24,7 @@ import (
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/exp/maps"
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
@@ -137,17 +138,11 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 	}
 
 	if !d.retrieveDependencies {
-		var wg sync.WaitGroup
-		wg.Add(len(ds.PurlDataSources))
+		// do validation of and converting purls here, to remove duplicated work in next two calls
+		versionKeys, pkgInputs := d.validatePurls(ctx, ds.PurlDataSources)
 
-		for _, purl := range ds.PurlDataSources {
-			go func(p datasource.Source) {
-				defer wg.Done()
-				d.retrieveMetadataWithoutDeps(ctx, p, docChannel)
-			}(purl)
-		}
-
-		wg.Wait()
+		d.retrieveVersionsAndProjects(ctx, maps.Values(versionKeys))
+		d.collectMetadata(ctx, docChannel, pkgInputs)
 		return nil
 	}
 
@@ -168,56 +163,123 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 	return nil
 }
 
-// retrieve version data, scorecards, etc only on for a single package
-func (d *depsCollector) retrieveMetadataWithoutDeps(ctx context.Context, p datasource.Source, docChannel chan<- *processor.Document) {
+// returns mappings of purls to VersionKeys and PkgInputSpec, not including the purls that:
+// - have already been queried
+// - error when converting to PkgInputSpec
+// - error when converting to VersionKey
+// - don't contain a version
+func (d *depsCollector) validatePurls(ctx context.Context, datasources []datasource.Source) (map[string]*pb.VersionKey, map[string]*model.PkgInputSpec) {
 	logger := logging.FromContext(ctx)
 
-	purl := p.Value
-	packageInput, err := helpers.PurlToPkg(purl)
-	if err != nil {
-		logger.Infof("failed to parse purl to pkg: %s", purl)
-		return
+	validVersionKeys := map[string]*pb.VersionKey{}
+	validPackageInputs := map[string]*model.PkgInputSpec{}
+
+	for _, ds := range datasources {
+		purl := ds.Value
+
+		if _, ok := d.checkedPurls[purl]; ok {
+			logger.Infof("purl %s already queried", purl)
+			continue
+		}
+
+		packageInput, err := helpers.PurlToPkg(purl)
+		if err != nil {
+			logger.Infof("failed to parse purl to pkg: %s", purl)
+			continue
+		}
+
+		// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
+		if *packageInput.Version == "" {
+			logger.Infof("purl does not contain version, skipping deps.dev query: %s", purl)
+			continue
+		}
+
+		versionKey, err := getVersionKey(packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version)
+		if err != nil {
+			logger.Debugf("failed to get VersionKey with the following error: %v", err)
+			continue
+		}
+
+		validPackageInputs[purl] = packageInput
+		validVersionKeys[purl] = versionKey
 	}
 
-	// check if top level purl has already been queried
-	if _, ok := d.checkedPurls[purl]; ok {
-		logger.Infof("purl %s already queried", purl)
-		return
+	return validVersionKeys, validPackageInputs
+}
+
+// retrieves version and project information concurrently for all version keys
+func (d *depsCollector) retrieveVersionsAndProjects(ctx context.Context, versionKeys []*pb.VersionKey) {
+	// channels to signal when the project and version info have been fetched
+	projectDone := make(chan bool)
+	versionDone := make(chan bool)
+
+	// channels to send the inputs to the goroutines
+	projectChan := make(chan *pb.ProjectKey)
+	versionChan := make(chan *pb.VersionKey)
+
+	// the projectChan and versionChan are used to send the project key and version key to the respective channels
+	go func() {
+		// this go routine has to be before the next go routine as it will be pushing into the project channel
+		// for each version that is fetched from the version channel it will check if the project has to be fetched
+		d.versions = d.getVersions(ctx, versionChan, projectChan) // the results are the stored in the versions map
+		versionDone <- true
+	}()
+
+	// the project channel is used to send the project key to the project channel
+	// these goroutines will be used to fetch the projects concurrently
+	go func() {
+		// this sets up the goroutine to fetch the projects concurrently for each input
+		d.projectInfoMap = d.getProjects(ctx, projectChan) // the results are the stored in the projectInfoMap map
+		// posts to the projectDone channel to signal that all projects have been fetched
+		projectDone <- true
+	}()
+
+	for _, versionKey := range versionKeys {
+		versionChan <- versionKey
 	}
 
-	// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
-	if *packageInput.Version == "" {
-		logger.Infof("purl does not contain version, skipping deps.dev query: %s", purl)
-		return
-	}
+	close(versionChan)
+	<-versionDone
+	close(projectChan)
+	<-projectDone
+}
 
-	component := &PackageComponent{}
-	component.CurrentPackage = packageInput
+// For each purl, generate a document containing scorecard and source metadata and write to docChannel.
+// For performance, retrieveVersionsAndProjects should be called before to populate d.versions and d.projectInfoMap. Otherwise,
+// blocking calls to deps.dev will be made for each purl
+func (d *depsCollector) collectMetadata(ctx context.Context, docChannel chan<- *processor.Document, purls map[string]*model.PkgInputSpec) {
+	logger := logging.FromContext(ctx)
 
-	err = d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version, component)
-	if err != nil {
-		logger.Debugf("failed to get additional metadata for package: %s, err: %v", purl, err)
-		return
-	}
-	logger.Infof("obtained additional metadata for package: %s", purl)
+	for purl, packageInput := range purls {
+		component := &PackageComponent{}
+		component.CurrentPackage = packageInput
 
-	d.checkedPurls[purl] = component
-	blob, err := json.Marshal(component)
-	if err != nil {
-		logger.Errorf("Error marshalling component to json: %s", err)
-		return
-	}
+		err := d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version, component)
+		if err != nil {
+			logger.Debugf("failed to get additional metadata for package: %s, err: %v", purl, err)
+			continue
+		}
 
-	doc := &processor.Document{
-		Blob:   blob,
-		Type:   processor.DocumentDepsDev,
-		Format: processor.FormatJSON,
-		SourceInformation: processor.SourceInformation{
-			Collector: DepsCollector,
-			Source:    DepsCollector,
-		},
+		logger.Infof("obtained additional metadata for package: %s", purl)
+		d.checkedPurls[purl] = component
+
+		blob, err := json.Marshal(component)
+		if err != nil {
+			logger.Errorf("Error marshalling component to json: %s", err)
+			continue
+		}
+
+		doc := &processor.Document{
+			Blob:   blob,
+			Type:   processor.DocumentDepsDev,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: DepsCollector,
+				Source:    DepsCollector,
+			},
+		}
+		docChannel <- doc
 	}
-	docChannel <- doc
 }
 
 // getAllDependencies gets all the dependencies for the purls provided in a concurrent manner.
@@ -311,6 +373,7 @@ func (d *depsCollector) getAllDependencies(ctx context.Context, purls []datasour
 			versionChan <- depsVersionKey
 		}
 	}
+
 	close(versionChan)
 	<-versionDone
 	close(projectChan)
