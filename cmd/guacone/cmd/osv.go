@@ -84,11 +84,55 @@ var osvCmd = &cobra.Command{
 
 		totalNum := 0
 		var totalDocs []*processor.Document
+		docChan := make(chan *processor.Document)
+		tickInterval := 30 * time.Second
+		ticker := time.NewTicker(tickInterval)
 		gotErr := false
+
+		go func() {
+			for !gotErr {
+				select {
+				case <-ticker.C:
+					if len(totalDocs) > 0 {
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						if err != nil {
+							gotErr = true
+							logger.Errorf("unable to ingest documents: %v", err)
+						}
+						totalDocs = []*processor.Document{}
+					}
+					ticker.Reset(tickInterval)
+				case d := <-docChan:
+					totalNum += 1
+					totalDocs = append(totalDocs, d)
+					if len(totalDocs) >= 1000 {
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						if err != nil {
+							gotErr = true
+							logger.Errorf("unable to ingest documents: %v", err)
+						}
+						totalDocs = []*processor.Document{}
+						ticker.Reset(tickInterval)
+					}
+				case <-ctx.Done():
+					return
+				}
+			}
+			for len(docChan) > 0 {
+				totalNum += 1
+				totalDocs = append(totalDocs, <-docChan)
+				if len(totalDocs) >= 1000 {
+					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+					if err != nil {
+						gotErr = true
+						logger.Errorf("unable to ingest documents: %v", err)
+					}
+				}
+			}
+		}()
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
-			totalNum += 1
-			totalDocs = append(totalDocs, d)
+			docChan <- d
 			return nil
 		}
 
@@ -120,15 +164,18 @@ var osvCmd = &cobra.Command{
 		select {
 		case s := <-sigs:
 			logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+			cf()
 		case <-done:
 			logger.Infof("All certifiers completed")
 		}
 		wg.Wait()
 
-		err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
-		if err != nil {
-			gotErr = true
-			logger.Errorf("unable to ingest documents: %v", err)
+		if ctx.Err() == nil {
+			err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+			if err != nil {
+				gotErr = true
+				logger.Errorf("unable to ingest documents: %v", err)
+			}
 		}
 		cf()
 
