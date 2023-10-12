@@ -332,8 +332,12 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	switch nodeType {
 	case certifyVulnStr:
 		for _, certVuln := range collectedNeighbors.certifyVulns {
-			for _, vuln := range certVuln.Vulnerability.VulnerabilityIDs {
-				tableRows = append(tableRows, table.Row{certifyVulnStr, certVuln.Id, "vulnerability ID: " + vuln.VulnerabilityID})
+			if certVuln.Vulnerability.Type != noVulnType {
+				for _, vuln := range certVuln.Vulnerability.VulnerabilityIDs {
+					tableRows = append(tableRows, table.Row{certifyVulnStr, certVuln.Id, "vulnerability ID: " + vuln.VulnerabilityID})
+				}
+			} else {
+				tableRows = append(tableRows, table.Row{certifyVulnStr, certVuln.Id, "vulnerability ID: " + noVulnType})
 			}
 		}
 	case badLinkStr:
