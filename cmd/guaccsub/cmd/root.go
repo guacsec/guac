@@ -32,18 +32,35 @@ import (
 	"github.com/spf13/viper"
 )
 
+type csubOptions struct {
+	port        int
+	tlsCertFile string
+	tlsKeyFile  string
+}
+
 var rootCmd = &cobra.Command{
 	Use:     "guaccsub",
 	Short:   "GUAC collect subscriber service for GUAC collectors",
 	Version: version.Version,
 	Run: func(cmd *cobra.Command, args []string) {
-		port := viper.GetInt("csub-listen-port")
+
+		var opts, err = validateCsubFlags(
+			viper.GetInt("csub-listen-port"),
+			viper.GetString("csub-tls-cert-file"),
+			viper.GetString("csub-tls-key-file"),
+		)
+
+		if err != nil {
+			fmt.Printf("unable to validate flags: %v\n", err)
+			_ = cmd.Help()
+			os.Exit(1)
+		}
 
 		ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
 		logger := logging.FromContext(ctx)
 
 		// Start csub listening server
-		csubServer, err := server.NewServer(port)
+		csubServer, err := server.NewServer(opts.port, opts.tlsCertFile, opts.tlsKeyFile)
 		if err != nil {
 			logger.Fatalf("unable to create csub server: %v", err)
 		}
@@ -66,10 +83,19 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+func validateCsubFlags(port int, tlsCertFile string, tlsKeyFile string) (csubOptions, error) {
+	var opts csubOptions
+	opts.port = port
+	opts.tlsCertFile = tlsCertFile
+	opts.tlsKeyFile = tlsKeyFile
+
+	return opts, nil
+}
+
 func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
-	set, err := cli.BuildFlags([]string{"csub-listen-port"})
+	set, err := cli.BuildFlags([]string{"csub-listen-port", "csub-tls-cert-file", "csub-tls-key-file"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

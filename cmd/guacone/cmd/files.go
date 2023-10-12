@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/cli"
+	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -51,8 +52,8 @@ type fileOptions struct {
 	path string
 	// gql endpoint
 	graphqlEndpoint string
-	// csub address for identifier strings
-	csubAddr string
+	// csub client options for identifier strings
+	csubClientOptions client.CsubClientOptions
 }
 
 var filesCmd = &cobra.Command{
@@ -67,6 +68,8 @@ var filesCmd = &cobra.Command{
 			viper.GetString("verifier-key-id"),
 			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -109,7 +112,7 @@ var filesCmd = &cobra.Command{
 		}
 
 		// initialize collectsub client
-		csubClient, err := csub_client.NewClient(opts.csubAddr)
+		csubClient, err := csub_client.NewClient(opts.csubClientOptions)
 		if err != nil {
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
@@ -176,7 +179,7 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFilesFlags(keyPath string, keyID string, graphqlEndpoint string, csubAddr string, args []string) (fileOptions, error) {
+func validateFilesFlags(keyPath string, keyID string, graphqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, args []string) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 
@@ -195,7 +198,11 @@ func validateFilesFlags(keyPath string, keyID string, graphqlEndpoint string, cs
 		return opts, fmt.Errorf("expected positional argument for file_path")
 	}
 
-	opts.csubAddr = csubAddr
+	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	if err != nil {
+		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+	}
+	opts.csubClientOptions = csubOpts
 	opts.path = args[0]
 
 	return opts, nil

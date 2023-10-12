@@ -33,14 +33,18 @@ func init() {
 	// names for config file.
 	set.String("nats-addr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	set.String("csub-addr", "localhost:2782", "address to connect to collect-sub service")
+	set.Bool("csub-tls", false, "enable tls connection to the server")
+	set.Bool("csub-tls-skip-verify", false, "skip verifying server certificate (for self-signed certificates for example)")
 	set.Bool("use-csub", true, "use collectsub server for datasource")
 
 	set.Int("csub-listen-port", 2782, "port to listen to on collect-sub service")
+	set.String("csub-tls-cert-file", "", "path to the TLS certificate in PEM format for collect-sub service")
+	set.String("csub-tls-key-file", "", "path to the TLS key in PEM format for collect-sub service")
 
 	set.String("gql-backend", "inmem", "backend used for graphql api server: [inmem | arango (experimental) | ent (experimental) | neo4j (unmaintained)]")
 	set.Int("gql-listen-port", 8080, "port used for graphql api server")
-	set.String("gql-tls-cert-file", "", "path to the TLS certificate in PEM format")
-	set.String("gql-tls-key-file", "", "path to the TLS key in PEM format")
+	set.String("gql-tls-cert-file", "", "path to the TLS certificate in PEM format for graphql api server")
+	set.String("gql-tls-key-file", "", "path to the TLS key in PEM format for graphql api server")
 	set.Bool("gql-debug", false, "debug flag which enables the graphQL playground")
 	set.Bool("gql-trace", false, "flag which enables tracing of graphQL requests and responses on the console")
 

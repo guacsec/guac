@@ -21,6 +21,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/guacsec/guac/pkg/collectsub/client"
 	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
@@ -53,6 +54,8 @@ var ociCmd = &cobra.Command{
 		opts, err := validateOCIFlags(
 			viper.GetString("nats-addr"),
 			viper.GetString("csub-addr"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			args)
@@ -76,13 +79,17 @@ var ociCmd = &cobra.Command{
 	},
 }
 
-func validateOCIFlags(natsAddr string, csubAddr string, useCsub bool, poll bool, args []string) (ociOptions, error) {
+func validateOCIFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (ociOptions, error) {
 	var opts ociOptions
 	opts.natsAddr = natsAddr
 	opts.poll = poll
 
 	if useCsub {
-		c, err := csubclient.NewClient(csubAddr)
+		csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+		if err != nil {
+			return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+		}
+		c, err := csubclient.NewClient(csubOpts)
 		if err != nil {
 			return opts, err
 		}
