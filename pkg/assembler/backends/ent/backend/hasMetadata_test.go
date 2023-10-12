@@ -204,6 +204,43 @@ func (s *Suite) TestHasMetadata() {
 			},
 		},
 		{
+			Name:  "Ingest same twice with version",
+			InPkg: []*model.PkgInputSpec{p2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: p2,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HM: &model.HasMetadataInputSpec{
+						Justification: "test justification",
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: p2,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HM: &model.HasMetadataInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.HasMetadataSpec{
+				Justification: ptrfrom.String("test justification"),
+			},
+			ExpHM: []*model.HasMetadata{
+				{
+					Subject:       p2out,
+					Justification: "test justification",
+				},
+			},
+		},
+		{
 			Name:  "Ingest two different keys",
 			InPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{

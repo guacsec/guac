@@ -236,7 +236,7 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 func hasMetadataInputPredicate(subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, filter model.HasMetadataInputSpec) predicate.HasMetadata {
 	var subjectSpec *model.PackageSourceOrArtifactSpec
 	if subject.Package != nil {
-		if pkgMatchType != nil || pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+		if pkgMatchType != nil && pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 			subject.Package.Version = nil
 		}
 		subjectSpec = &model.PackageSourceOrArtifactSpec{
