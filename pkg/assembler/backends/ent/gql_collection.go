@@ -244,6 +244,11 @@ func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphq
 				selectedFields = append(selectedFields, billofmaterials.FieldCollector)
 				fieldSeen[billofmaterials.FieldCollector] = struct{}{}
 			}
+		case "knownSince":
+			if _, ok := fieldSeen[billofmaterials.FieldKnownSince]; !ok {
+				selectedFields = append(selectedFields, billofmaterials.FieldKnownSince)
+				fieldSeen[billofmaterials.FieldKnownSince] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:

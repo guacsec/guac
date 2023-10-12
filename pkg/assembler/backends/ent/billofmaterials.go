@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -34,6 +35,8 @@ type BillOfMaterials struct {
 	Origin string `json:"origin,omitempty"`
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
+	// KnownSince holds the value of the "known_since" field.
+	KnownSince time.Time `json:"known_since,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BillOfMaterialsQuery when eager-loading is set.
 	Edges        BillOfMaterialsEdges `json:"edges"`
@@ -88,6 +91,8 @@ func (*BillOfMaterials) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case billofmaterials.FieldURI, billofmaterials.FieldAlgorithm, billofmaterials.FieldDigest, billofmaterials.FieldDownloadLocation, billofmaterials.FieldOrigin, billofmaterials.FieldCollector:
 			values[i] = new(sql.NullString)
+		case billofmaterials.FieldKnownSince:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -158,6 +163,12 @@ func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				bom.Collector = value.String
+			}
+		case billofmaterials.FieldKnownSince:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field known_since", values[i])
+			} else if value.Valid {
+				bom.KnownSince = value.Time
 			}
 		default:
 			bom.selectValues.Set(columns[i], values[i])
@@ -232,6 +243,9 @@ func (bom *BillOfMaterials) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(bom.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("known_since=")
+	builder.WriteString(bom.KnownSince.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

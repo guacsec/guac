@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -87,6 +88,12 @@ func (bomc *BillOfMaterialsCreate) SetCollector(s string) *BillOfMaterialsCreate
 	return bomc
 }
 
+// SetKnownSince sets the "known_since" field.
+func (bomc *BillOfMaterialsCreate) SetKnownSince(t time.Time) *BillOfMaterialsCreate {
+	bomc.mutation.SetKnownSince(t)
+	return bomc
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (bomc *BillOfMaterialsCreate) SetPackage(p *PackageVersion) *BillOfMaterialsCreate {
 	return bomc.SetPackageID(p.ID)
@@ -149,6 +156,9 @@ func (bomc *BillOfMaterialsCreate) check() error {
 	if _, ok := bomc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "BillOfMaterials.collector"`)}
 	}
+	if _, ok := bomc.mutation.KnownSince(); !ok {
+		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "BillOfMaterials.known_since"`)}
+	}
 	return nil
 }
 
@@ -199,6 +209,10 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 	if value, ok := bomc.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := bomc.mutation.KnownSince(); ok {
+		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
+		_node.KnownSince = value
 	}
 	if nodes := bomc.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -394,6 +408,18 @@ func (u *BillOfMaterialsUpsert) UpdateCollector() *BillOfMaterialsUpsert {
 	return u
 }
 
+// SetKnownSince sets the "known_since" field.
+func (u *BillOfMaterialsUpsert) SetKnownSince(v time.Time) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldKnownSince, v)
+	return u
+}
+
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateKnownSince() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldKnownSince)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -557,6 +583,20 @@ func (u *BillOfMaterialsUpsertOne) SetCollector(v string) *BillOfMaterialsUpsert
 func (u *BillOfMaterialsUpsertOne) UpdateCollector() *BillOfMaterialsUpsertOne {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetKnownSince sets the "known_since" field.
+func (u *BillOfMaterialsUpsertOne) SetKnownSince(v time.Time) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetKnownSince(v)
+	})
+}
+
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateKnownSince() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateKnownSince()
 	})
 }
 
@@ -886,6 +926,20 @@ func (u *BillOfMaterialsUpsertBulk) SetCollector(v string) *BillOfMaterialsUpser
 func (u *BillOfMaterialsUpsertBulk) UpdateCollector() *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetKnownSince sets the "known_since" field.
+func (u *BillOfMaterialsUpsertBulk) SetKnownSince(v time.Time) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetKnownSince(v)
+	})
+}
+
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateKnownSince() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateKnownSince()
 	})
 }
 

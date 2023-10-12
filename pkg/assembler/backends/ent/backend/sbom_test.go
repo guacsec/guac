@@ -19,6 +19,7 @@ package backend
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -26,6 +27,9 @@ import (
 )
 
 func (s *Suite) Test_HasSBOM() {
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
+
 	type call struct {
 		Sub  model.PackageOrArtifactInput
 		Spec *model.HasSBOMInputSpec
@@ -123,6 +127,37 @@ func (s *Suite) Test_HasSBOM() {
 				{
 					Subject: p1out,
 					URI:     "test uri one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: p1,
+					},
+					Spec: &model.HasSBOMInputSpec{
+						KnownSince: curTime,
+					},
+				},
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: p1,
+					},
+					Spec: &model.HasSBOMInputSpec{
+						KnownSince: timeAfterOneSecond,
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				KnownSince: ptrfrom.Time(curTime),
+			},
+			Expected: []*model.HasSbom{
+				{
+					Subject:    p1out,
+					KnownSince: curTime,
 				},
 			},
 		},
@@ -518,6 +553,9 @@ func (s *Suite) Test_HasSBOM() {
 }
 
 func (s *Suite) TestIngestHasSBOMs() {
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
+
 	type call struct {
 		Sub model.PackageOrArtifactInputs
 		HS  []*model.HasSBOMInputSpec
@@ -610,6 +648,34 @@ func (s *Suite) TestIngestHasSBOMs() {
 				{
 					Subject: p1out,
 					URI:     "test uri one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p1},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							KnownSince: curTime,
+						},
+						{
+							KnownSince: timeAfterOneSecond,
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				KnownSince: ptrfrom.Time(curTime),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:    p1out,
+					KnownSince: curTime,
 				},
 			},
 		},

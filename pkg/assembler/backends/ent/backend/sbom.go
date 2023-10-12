@@ -38,6 +38,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 		optionalPredicate(spec.Collector, billofmaterials.CollectorEQ),
 		optionalPredicate(spec.DownloadLocation, billofmaterials.DownloadLocationEQ),
 		optionalPredicate(spec.Origin, billofmaterials.OriginEQ),
+		optionalPredicate(spec.KnownSince, billofmaterials.KnownSinceEQ),
 		// billofmaterials.AnnotationsMatchSpec(spec.Annotations),
 	}
 
@@ -80,13 +81,16 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			SetDigest(strings.ToLower(spec.Digest)).
 			SetDownloadLocation(spec.DownloadLocation).
 			SetOrigin(spec.Origin).
-			SetCollector(spec.Collector)
+			SetCollector(spec.Collector).
+			SetKnownSince(spec.KnownSince)
 
+		// If a new column is included in the conflict columns, it must be added to the Indexes() function in the schema
 		conflictColumns := []string{
 			billofmaterials.FieldURI,
 			billofmaterials.FieldAlgorithm,
 			billofmaterials.FieldDigest,
 			billofmaterials.FieldDownloadLocation,
+			billofmaterials.FieldKnownSince,
 		}
 
 		var conflictWhere *sql.Predicate
