@@ -32,6 +32,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -120,6 +121,7 @@ func checkColumn(table, column string) error {
 			packagetype.Table:       packagetype.ValidColumn,
 			packageversion.Table:    packageversion.ValidColumn,
 			pkgequal.Table:          pkgequal.ValidColumn,
+			pointofcontact.Table:    pointofcontact.ValidColumn,
 			slsaattestation.Table:   slsaattestation.ValidColumn,
 			scorecard.Table:         scorecard.ValidColumn,
 			sourcename.Table:        sourcename.ValidColumn,

@@ -249,6 +249,18 @@ func (f PkgEqualFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PkgEqualMutation", m)
 }
 
+// The PointOfContactFunc type is an adapter to allow the use of ordinary
+// function as PointOfContact mutator.
+type PointOfContactFunc func(context.Context, *ent.PointOfContactMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PointOfContactFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PointOfContactMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PointOfContactMutation", m)
+}
+
 // The SLSAAttestationFunc type is an adapter to allow the use of ordinary
 // function as SLSAAttestation mutator.
 type SLSAAttestationFunc func(context.Context, *ent.SLSAAttestationMutation) (ent.Value, error)

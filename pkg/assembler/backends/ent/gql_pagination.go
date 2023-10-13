@@ -31,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -5039,6 +5040,252 @@ func (pe *PkgEqual) ToEdge(order *PkgEqualOrder) *PkgEqualEdge {
 	return &PkgEqualEdge{
 		Node:   pe,
 		Cursor: order.Field.toCursor(pe),
+	}
+}
+
+// PointOfContactEdge is the edge representation of PointOfContact.
+type PointOfContactEdge struct {
+	Node   *PointOfContact `json:"node"`
+	Cursor Cursor          `json:"cursor"`
+}
+
+// PointOfContactConnection is the connection containing edges to PointOfContact.
+type PointOfContactConnection struct {
+	Edges      []*PointOfContactEdge `json:"edges"`
+	PageInfo   PageInfo              `json:"pageInfo"`
+	TotalCount int                   `json:"totalCount"`
+}
+
+func (c *PointOfContactConnection) build(nodes []*PointOfContact, pager *pointofcontactPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *PointOfContact
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *PointOfContact {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *PointOfContact {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*PointOfContactEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &PointOfContactEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// PointOfContactPaginateOption enables pagination customization.
+type PointOfContactPaginateOption func(*pointofcontactPager) error
+
+// WithPointOfContactOrder configures pagination ordering.
+func WithPointOfContactOrder(order *PointOfContactOrder) PointOfContactPaginateOption {
+	if order == nil {
+		order = DefaultPointOfContactOrder
+	}
+	o := *order
+	return func(pager *pointofcontactPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultPointOfContactOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithPointOfContactFilter configures pagination filter.
+func WithPointOfContactFilter(filter func(*PointOfContactQuery) (*PointOfContactQuery, error)) PointOfContactPaginateOption {
+	return func(pager *pointofcontactPager) error {
+		if filter == nil {
+			return errors.New("PointOfContactQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type pointofcontactPager struct {
+	reverse bool
+	order   *PointOfContactOrder
+	filter  func(*PointOfContactQuery) (*PointOfContactQuery, error)
+}
+
+func newPointOfContactPager(opts []PointOfContactPaginateOption, reverse bool) (*pointofcontactPager, error) {
+	pager := &pointofcontactPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultPointOfContactOrder
+	}
+	return pager, nil
+}
+
+func (p *pointofcontactPager) applyFilter(query *PointOfContactQuery) (*PointOfContactQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *pointofcontactPager) toCursor(poc *PointOfContact) Cursor {
+	return p.order.Field.toCursor(poc)
+}
+
+func (p *pointofcontactPager) applyCursors(query *PointOfContactQuery, after, before *Cursor) (*PointOfContactQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultPointOfContactOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *pointofcontactPager) applyOrder(query *PointOfContactQuery) *PointOfContactQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultPointOfContactOrder.Field {
+		query = query.Order(DefaultPointOfContactOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *pointofcontactPager) orderExpr(query *PointOfContactQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultPointOfContactOrder.Field {
+			b.Comma().Ident(DefaultPointOfContactOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to PointOfContact.
+func (poc *PointOfContactQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...PointOfContactPaginateOption,
+) (*PointOfContactConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newPointOfContactPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if poc, err = pager.applyFilter(poc); err != nil {
+		return nil, err
+	}
+	conn := &PointOfContactConnection{Edges: []*PointOfContactEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = poc.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if poc, err = pager.applyCursors(poc, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		poc.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := poc.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	poc = pager.applyOrder(poc)
+	nodes, err := poc.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// PointOfContactOrderField defines the ordering field of PointOfContact.
+type PointOfContactOrderField struct {
+	// Value extracts the ordering value from the given PointOfContact.
+	Value    func(*PointOfContact) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) pointofcontact.OrderOption
+	toCursor func(*PointOfContact) Cursor
+}
+
+// PointOfContactOrder defines the ordering of PointOfContact.
+type PointOfContactOrder struct {
+	Direction OrderDirection            `json:"direction"`
+	Field     *PointOfContactOrderField `json:"field"`
+}
+
+// DefaultPointOfContactOrder is the default ordering of PointOfContact.
+var DefaultPointOfContactOrder = &PointOfContactOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &PointOfContactOrderField{
+		Value: func(poc *PointOfContact) (ent.Value, error) {
+			return poc.ID, nil
+		},
+		column: pointofcontact.FieldID,
+		toTerm: pointofcontact.ByID,
+		toCursor: func(poc *PointOfContact) Cursor {
+			return Cursor{ID: poc.ID}
+		},
+	},
+}
+
+// ToEdge converts PointOfContact into PointOfContactEdge.
+func (poc *PointOfContact) ToEdge(order *PointOfContactOrder) *PointOfContactEdge {
+	if order == nil {
+		order = DefaultPointOfContactOrder
+	}
+	return &PointOfContactEdge{
+		Node:   poc,
+		Cursor: order.Field.toCursor(poc),
 	}
 }
 

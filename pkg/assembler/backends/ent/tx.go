@@ -52,6 +52,8 @@ type Tx struct {
 	PackageVersion *PackageVersionClient
 	// PkgEqual is the client for interacting with the PkgEqual builders.
 	PkgEqual *PkgEqualClient
+	// PointOfContact is the client for interacting with the PointOfContact builders.
+	PointOfContact *PointOfContactClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
 	// Scorecard is the client for interacting with the Scorecard builders.
@@ -219,6 +221,7 @@ func (tx *Tx) init() {
 	tx.PackageType = NewPackageTypeClient(tx.config)
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
 	tx.PkgEqual = NewPkgEqualClient(tx.config)
+	tx.PointOfContact = NewPointOfContactClient(tx.config)
 	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
 	tx.Scorecard = NewScorecardClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
