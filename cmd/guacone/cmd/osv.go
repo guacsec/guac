@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -86,12 +87,76 @@ var osvCmd = &cobra.Command{
 		packageQuery := root_package.NewPackageQuery(gqlclient, 0)
 
 		totalNum := 0
-		var totalDocs []*processor.Document
-		gotErr := false
+		docChan := make(chan *processor.Document)
+		ingestionStop := make(chan bool, 1)
+		tickInterval := 30 * time.Second
+		ticker := time.NewTicker(tickInterval)
+
+		var gotErr int32
+		var wg sync.WaitGroup
+		ingestion := func() {
+			defer wg.Done()
+			var totalDocs []*processor.Document
+			const threshold = 1000
+			stop := false
+			for !stop {
+				select {
+				case <-ticker.C:
+					if len(totalDocs) > 0 {
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						if err != nil {
+							stop = true
+							atomic.StoreInt32(&gotErr, 1)
+							logger.Errorf("unable to ingest documents: %v", err)
+						}
+						totalDocs = []*processor.Document{}
+					}
+					ticker.Reset(tickInterval)
+				case d := <-docChan:
+					totalNum += 1
+					totalDocs = append(totalDocs, d)
+					if len(totalDocs) >= threshold {
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						if err != nil {
+							stop = true
+							atomic.StoreInt32(&gotErr, 1)
+							logger.Errorf("unable to ingest documents: %v", err)
+						}
+						totalDocs = []*processor.Document{}
+						ticker.Reset(tickInterval)
+					}
+				case <-ingestionStop:
+					stop = true
+				case <-ctx.Done():
+					return
+				}
+			}
+			for len(docChan) > 0 {
+				totalNum += 1
+				totalDocs = append(totalDocs, <-docChan)
+				if len(totalDocs) >= threshold {
+					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+					if err != nil {
+						atomic.StoreInt32(&gotErr, 1)
+						logger.Errorf("unable to ingest documents: %v", err)
+					}
+					totalDocs = []*processor.Document{}
+				}
+			}
+			if len(totalDocs) > 0 {
+				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+				if err != nil {
+					atomic.StoreInt32(&gotErr, 1)
+					logger.Errorf("unable to ingest documents: %v", err)
+				}
+			}
+		}
+		wg.Add(1)
+		go ingestion()
+
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
-			totalNum += 1
-			totalDocs = append(totalDocs, d)
+			docChan <- d
 			return nil
 		}
 
@@ -102,13 +167,12 @@ var osvCmd = &cobra.Command{
 				return true
 			}
 			logger.Errorf("certifier ended with error: %v", err)
-			gotErr = true
+			atomic.StoreInt32(&gotErr, 1)
 			// process documents already captures
 			return true
 		}
 
 		ctx, cf := context.WithCancel(ctx)
-		var wg sync.WaitGroup
 		done := make(chan bool, 1)
 		wg.Add(1)
 		go func() {
@@ -123,19 +187,15 @@ var osvCmd = &cobra.Command{
 		select {
 		case s := <-sigs:
 			logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+			cf()
 		case <-done:
 			logger.Infof("All certifiers completed")
 		}
+		ingestionStop <- true
 		wg.Wait()
-
-		err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
-		if err != nil {
-			gotErr = true
-			logger.Errorf("unable to ingest documents: %v", err)
-		}
 		cf()
 
-		if gotErr {
+		if atomic.LoadInt32(&gotErr) == 1 {
 			logger.Errorf("completed ingestion with errors")
 		} else {
 			logger.Infof("completed ingesting %v documents", totalNum)
