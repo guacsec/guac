@@ -44,7 +44,7 @@ func TestNewDepsCollector(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, 5*time.Second)
+			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -55,13 +55,14 @@ func TestNewDepsCollector(t *testing.T) {
 
 func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 	tests := []struct {
-		name       string
-		packages   []string
-		want       []*processor.Document
-		poll       bool
-		interval   time.Duration
-		wantErr    bool
-		errMessage error
+		name               string
+		packages           []string
+		want               []*processor.Document
+		poll               bool
+		disableGettingDeps bool
+		interval           time.Duration
+		wantErr            bool
+		errMessage         error
 	}{{
 		name:     "no packages",
 		packages: []string{},
@@ -183,6 +184,25 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		wantErr:    true,
 		errMessage: context.DeadlineExceeded,
 	},
+		{
+			name:     "disable getting deps -- only metadata is retrieved",
+			packages: []string{"pkg:cargo/foreign-types@0.3.2"},
+			want: []*processor.Document{
+				{
+					Blob:   []byte(testdata.CollectedForeignTypesNoDeps),
+					Type:   processor.DocumentDepsDev,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: DepsCollector,
+						Source:    DepsCollector,
+					},
+				},
+			},
+			poll:               false,
+			disableGettingDeps: true,
+			interval:           time.Minute,
+			wantErr:            false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -195,7 +215,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, tt.interval)
+			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -307,7 +327,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 		ctx = context.Background()
 	}
 
-	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, tests.interval)
+	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval)
 	if err != nil {
 		t.Errorf("NewDepsCollector() error = %v", err)
 		return

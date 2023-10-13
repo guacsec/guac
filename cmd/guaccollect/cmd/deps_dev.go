@@ -21,6 +21,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
@@ -40,6 +41,8 @@ type depsDevOptions struct {
 	natsAddr string
 	// run as poll collector
 	poll bool
+	// query for dependencies
+	retrieveDependencies bool
 }
 
 var depsDevCmd = &cobra.Command{
@@ -57,6 +60,7 @@ var depsDevCmd = &cobra.Command{
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
+			viper.GetBool("retrieve-dependencies"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -65,7 +69,7 @@ var depsDevCmd = &cobra.Command{
 		}
 
 		// Register collector
-		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, 30*time.Second)
+		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
@@ -78,10 +82,11 @@ var depsDevCmd = &cobra.Command{
 	},
 }
 
-func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (depsDevOptions, error) {
+func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, retrieveDependencies bool, args []string) (depsDevOptions, error) {
 	var opts depsDevOptions
 	opts.natsAddr = natsAddr
 	opts.poll = poll
+	opts.retrieveDependencies = retrieveDependencies
 
 	if useCsub {
 		csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -119,5 +124,15 @@ func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTl
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"retrieve-dependencies"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	depsDevCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(depsDevCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	rootCmd.AddCommand(depsDevCmd)
 }
