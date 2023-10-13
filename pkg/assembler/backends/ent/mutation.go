@@ -2137,6 +2137,7 @@ type CertificationMutation struct {
 	justification          *string
 	origin                 *string
 	collector              *string
+	known_since            *time.Time
 	clearedFields          map[string]struct{}
 	source                 *int
 	clearedsource          bool
@@ -2589,6 +2590,42 @@ func (m *CertificationMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetKnownSince sets the "known_since" field.
+func (m *CertificationMutation) SetKnownSince(t time.Time) {
+	m.known_since = &t
+}
+
+// KnownSince returns the value of the "known_since" field in the mutation.
+func (m *CertificationMutation) KnownSince() (r time.Time, exists bool) {
+	v := m.known_since
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKnownSince returns the old "known_since" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldKnownSince(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKnownSince is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKnownSince requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKnownSince: %w", err)
+	}
+	return oldValue.KnownSince, nil
+}
+
+// ResetKnownSince resets all changes to the "known_since" field.
+func (m *CertificationMutation) ResetKnownSince() {
+	m.known_since = nil
+}
+
 // ClearSource clears the "source" edge to the SourceName entity.
 func (m *CertificationMutation) ClearSource() {
 	m.clearedsource = true
@@ -2744,7 +2781,7 @@ func (m *CertificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertificationMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.source != nil {
 		fields = append(fields, certification.FieldSourceID)
 	}
@@ -2768,6 +2805,9 @@ func (m *CertificationMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, certification.FieldCollector)
+	}
+	if m.known_since != nil {
+		fields = append(fields, certification.FieldKnownSince)
 	}
 	return fields
 }
@@ -2793,6 +2833,8 @@ func (m *CertificationMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case certification.FieldCollector:
 		return m.Collector()
+	case certification.FieldKnownSince:
+		return m.KnownSince()
 	}
 	return nil, false
 }
@@ -2818,6 +2860,8 @@ func (m *CertificationMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldOrigin(ctx)
 	case certification.FieldCollector:
 		return m.OldCollector(ctx)
+	case certification.FieldKnownSince:
+		return m.OldKnownSince(ctx)
 	}
 	return nil, fmt.Errorf("unknown Certification field %s", name)
 }
@@ -2882,6 +2926,13 @@ func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case certification.FieldKnownSince:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKnownSince(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)
@@ -2985,6 +3036,9 @@ func (m *CertificationMutation) ResetField(name string) error {
 		return nil
 	case certification.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case certification.FieldKnownSince:
+		m.ResetKnownSince()
 		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)

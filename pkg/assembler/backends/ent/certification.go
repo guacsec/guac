@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -36,6 +37,8 @@ type Certification struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// KnownSince holds the value of the "known_since" field.
+	KnownSince time.Time `json:"known_since,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CertificationQuery when eager-loading is set.
 	Edges        CertificationEdges `json:"edges"`
@@ -120,6 +123,8 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case certification.FieldType, certification.FieldJustification, certification.FieldOrigin, certification.FieldCollector:
 			values[i] = new(sql.NullString)
+		case certification.FieldKnownSince:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -192,6 +197,12 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				c.Collector = value.String
+			}
+		case certification.FieldKnownSince:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field known_since", values[i])
+			} else if value.Valid {
+				c.KnownSince = value.Time
 			}
 		default:
 			c.selectValues.Set(columns[i], values[i])
@@ -280,6 +291,9 @@ func (c *Certification) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(c.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("known_since=")
+	builder.WriteString(c.KnownSince.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

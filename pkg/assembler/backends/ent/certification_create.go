@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -113,6 +114,12 @@ func (cc *CertificationCreate) SetCollector(s string) *CertificationCreate {
 	return cc
 }
 
+// SetKnownSince sets the "known_since" field.
+func (cc *CertificationCreate) SetKnownSince(t time.Time) *CertificationCreate {
+	cc.mutation.SetKnownSince(t)
+	return cc
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (cc *CertificationCreate) SetSource(s *SourceName) *CertificationCreate {
 	return cc.SetSourceID(s.ID)
@@ -207,6 +214,9 @@ func (cc *CertificationCreate) check() error {
 	if _, ok := cc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "Certification.collector"`)}
 	}
+	if _, ok := cc.mutation.KnownSince(); !ok {
+		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "Certification.known_since"`)}
+	}
 	return nil
 }
 
@@ -249,6 +259,10 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 	if value, ok := cc.mutation.Collector(); ok {
 		_spec.SetField(certification.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := cc.mutation.KnownSince(); ok {
+		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
+		_node.KnownSince = value
 	}
 	if nodes := cc.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -490,6 +504,18 @@ func (u *CertificationUpsert) UpdateCollector() *CertificationUpsert {
 	return u
 }
 
+// SetKnownSince sets the "known_since" field.
+func (u *CertificationUpsert) SetKnownSince(v time.Time) *CertificationUpsert {
+	u.Set(certification.FieldKnownSince, v)
+	return u
+}
+
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateKnownSince() *CertificationUpsert {
+	u.SetExcluded(certification.FieldKnownSince)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -667,6 +693,20 @@ func (u *CertificationUpsertOne) SetCollector(v string) *CertificationUpsertOne 
 func (u *CertificationUpsertOne) UpdateCollector() *CertificationUpsertOne {
 	return u.Update(func(s *CertificationUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetKnownSince sets the "known_since" field.
+func (u *CertificationUpsertOne) SetKnownSince(v time.Time) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetKnownSince(v)
+	})
+}
+
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateKnownSince() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateKnownSince()
 	})
 }
 
@@ -1011,6 +1051,20 @@ func (u *CertificationUpsertBulk) SetCollector(v string) *CertificationUpsertBul
 func (u *CertificationUpsertBulk) UpdateCollector() *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetKnownSince sets the "known_since" field.
+func (u *CertificationUpsertBulk) SetKnownSince(v time.Time) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetKnownSince(v)
+	})
+}
+
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateKnownSince() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateKnownSince()
 	})
 }
 

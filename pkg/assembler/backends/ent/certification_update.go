@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -143,6 +144,12 @@ func (cu *CertificationUpdate) SetCollector(s string) *CertificationUpdate {
 	return cu
 }
 
+// SetKnownSince sets the "known_since" field.
+func (cu *CertificationUpdate) SetKnownSince(t time.Time) *CertificationUpdate {
+	cu.mutation.SetKnownSince(t)
+	return cu
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (cu *CertificationUpdate) SetSource(s *SourceName) *CertificationUpdate {
 	return cu.SetSourceID(s.ID)
@@ -266,6 +273,9 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cu.mutation.Collector(); ok {
 		_spec.SetField(certification.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := cu.mutation.KnownSince(); ok {
+		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
 	}
 	if cu.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -515,6 +525,12 @@ func (cuo *CertificationUpdateOne) SetCollector(s string) *CertificationUpdateOn
 	return cuo
 }
 
+// SetKnownSince sets the "known_since" field.
+func (cuo *CertificationUpdateOne) SetKnownSince(t time.Time) *CertificationUpdateOne {
+	cuo.mutation.SetKnownSince(t)
+	return cuo
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (cuo *CertificationUpdateOne) SetSource(s *SourceName) *CertificationUpdateOne {
 	return cuo.SetSourceID(s.ID)
@@ -668,6 +684,9 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 	}
 	if value, ok := cuo.mutation.Collector(); ok {
 		_spec.SetField(certification.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.KnownSince(); ok {
+		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
 	}
 	if cuo.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{

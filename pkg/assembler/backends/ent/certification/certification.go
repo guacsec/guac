@@ -32,6 +32,8 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldKnownSince holds the string denoting the known_since field in the database.
+	FieldKnownSince = "known_since"
 	// EdgeSource holds the string denoting the source edge name in mutations.
 	EdgeSource = "source"
 	// EdgePackageVersion holds the string denoting the package_version edge name in mutations.
@@ -83,6 +85,7 @@ var Columns = []string{
 	FieldJustification,
 	FieldOrigin,
 	FieldCollector,
+	FieldKnownSince,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -167,6 +170,11 @@ func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 // ByCollector orders the results by the collector field.
 func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
+}
+
+// ByKnownSince orders the results by the known_since field.
+func ByKnownSince(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldKnownSince, opts...).ToFunc()
 }
 
 // BySourceField orders the results by source field.

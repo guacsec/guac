@@ -3,6 +3,8 @@
 package certification
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -86,6 +88,11 @@ func Origin(v string) predicate.Certification {
 // Collector applies equality check predicate on the "collector" field. It's identical to CollectorEQ.
 func Collector(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldCollector, v))
+}
+
+// KnownSince applies equality check predicate on the "known_since" field. It's identical to KnownSinceEQ.
+func KnownSince(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldKnownSince, v))
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
@@ -421,6 +428,46 @@ func CollectorEqualFold(v string) predicate.Certification {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// KnownSinceEQ applies the EQ predicate on the "known_since" field.
+func KnownSinceEQ(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldKnownSince, v))
+}
+
+// KnownSinceNEQ applies the NEQ predicate on the "known_since" field.
+func KnownSinceNEQ(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldNEQ(FieldKnownSince, v))
+}
+
+// KnownSinceIn applies the In predicate on the "known_since" field.
+func KnownSinceIn(vs ...time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldIn(FieldKnownSince, vs...))
+}
+
+// KnownSinceNotIn applies the NotIn predicate on the "known_since" field.
+func KnownSinceNotIn(vs ...time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldNotIn(FieldKnownSince, vs...))
+}
+
+// KnownSinceGT applies the GT predicate on the "known_since" field.
+func KnownSinceGT(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldGT(FieldKnownSince, v))
+}
+
+// KnownSinceGTE applies the GTE predicate on the "known_since" field.
+func KnownSinceGTE(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldGTE(FieldKnownSince, v))
+}
+
+// KnownSinceLT applies the LT predicate on the "known_since" field.
+func KnownSinceLT(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldLT(FieldKnownSince, v))
+}
+
+// KnownSinceLTE applies the LTE predicate on the "known_since" field.
+func KnownSinceLTE(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldLTE(FieldKnownSince, v))
 }
 
 // HasSource applies the HasEdge predicate on the "source" edge.
