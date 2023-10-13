@@ -95,16 +95,16 @@ var osvCmd = &cobra.Command{
 			defer wg.Done()
 			var totalDocs []*processor.Document
 			const threshold = 1000
-		loop:
-			for {
+			stop := false
+			for !stop {
 				select {
 				case <-ticker.C:
 					if len(totalDocs) > 0 {
 						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 						if err != nil {
-							logger.Errorf("unable to ingest documents: %v", err)
+							stop = true
 							atomic.StoreInt32(&gotErr, 1)
-							break loop
+							logger.Errorf("unable to ingest documents: %v", err)
 						}
 						totalDocs = []*processor.Document{}
 					}
@@ -115,15 +115,15 @@ var osvCmd = &cobra.Command{
 					if len(totalDocs) >= threshold {
 						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 						if err != nil {
+							stop = true
 							atomic.StoreInt32(&gotErr, 1)
 							logger.Errorf("unable to ingest documents: %v", err)
-							break loop
 						}
 						totalDocs = []*processor.Document{}
 						ticker.Reset(tickInterval)
 					}
 				case <-ingestionStop:
-					break loop
+					stop = true
 				case <-ctx.Done():
 					return
 				}
