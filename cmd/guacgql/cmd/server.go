@@ -31,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
 	_ "github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/backends/neptune"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
@@ -46,6 +47,7 @@ const (
 	inmems   = "inmem"
 	ent      = "ent"
 	neptunes = "neptune"
+	keyvalue = "keyvalue"
 )
 
 type optsFunc func() backends.BackendArgs
@@ -60,6 +62,7 @@ func init() {
 	getOpts[neo4js] = getNeo4j
 	getOpts[inmems] = getInMem
 	getOpts[neptunes] = getNeptune
+	getOpts[keyvalue] = getKeyValue
 }
 
 func startServer(cmd *cobra.Command) {
@@ -172,6 +175,10 @@ func getNeo4j() backends.BackendArgs {
 }
 
 func getInMem() backends.BackendArgs {
+	return nil
+}
+
+func getKeyValue() backends.BackendArgs {
 	return nil
 }
 
