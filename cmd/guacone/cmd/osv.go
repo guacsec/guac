@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -88,22 +89,22 @@ var osvCmd = &cobra.Command{
 		tickInterval := 30 * time.Second
 		ticker := time.NewTicker(tickInterval)
 
-		gotErr := false
+		var gotErr int32
 		var wg sync.WaitGroup
 		ingestion := func() {
 			defer wg.Done()
 			var totalDocs []*processor.Document
 			const threshold = 1000
-			stop := false
-			for !stop {
+		loop:
+			for {
 				select {
 				case <-ticker.C:
 					if len(totalDocs) > 0 {
 						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 						if err != nil {
-							stop = true
-							gotErr = true
 							logger.Errorf("unable to ingest documents: %v", err)
+							atomic.StoreInt32(&gotErr, 1)
+							break loop
 						}
 						totalDocs = []*processor.Document{}
 					}
@@ -114,15 +115,15 @@ var osvCmd = &cobra.Command{
 					if len(totalDocs) >= threshold {
 						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 						if err != nil {
-							stop = true
-							gotErr = true
+							atomic.StoreInt32(&gotErr, 1)
 							logger.Errorf("unable to ingest documents: %v", err)
+							break loop
 						}
 						totalDocs = []*processor.Document{}
 						ticker.Reset(tickInterval)
 					}
 				case <-ingestionStop:
-					stop = true
+					break loop
 				case <-ctx.Done():
 					return
 				}
@@ -133,7 +134,7 @@ var osvCmd = &cobra.Command{
 				if len(totalDocs) >= threshold {
 					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 					if err != nil {
-						gotErr = true
+						atomic.StoreInt32(&gotErr, 1)
 						logger.Errorf("unable to ingest documents: %v", err)
 					}
 					totalDocs = []*processor.Document{}
@@ -142,7 +143,7 @@ var osvCmd = &cobra.Command{
 			if len(totalDocs) > 0 {
 				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 				if err != nil {
-					gotErr = true
+					atomic.StoreInt32(&gotErr, 1)
 					logger.Errorf("unable to ingest documents: %v", err)
 				}
 			}
@@ -163,7 +164,7 @@ var osvCmd = &cobra.Command{
 				return true
 			}
 			logger.Errorf("certifier ended with error: %v", err)
-			gotErr = true
+			atomic.StoreInt32(&gotErr, 1)
 			// process documents already captures
 			return true
 		}
@@ -191,7 +192,7 @@ var osvCmd = &cobra.Command{
 		wg.Wait()
 		cf()
 
-		if gotErr {
+		if gotErr == 1 {
 			logger.Errorf("completed ingestion with errors")
 		} else {
 			logger.Infof("completed ingesting %v documents", totalNum)
