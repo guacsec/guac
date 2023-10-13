@@ -88,6 +88,7 @@ var osvCmd = &cobra.Command{
 		tickInterval := 30 * time.Second
 		ticker := time.NewTicker(tickInterval)
 
+		gotErr := false
 		var wg sync.WaitGroup
 		ingestion := func() {
 			defer wg.Done()
@@ -101,6 +102,7 @@ var osvCmd = &cobra.Command{
 						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 						if err != nil {
 							stop = true
+							gotErr = true
 							logger.Errorf("unable to ingest documents: %v", err)
 						}
 						totalDocs = []*processor.Document{}
@@ -113,6 +115,7 @@ var osvCmd = &cobra.Command{
 						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 						if err != nil {
 							stop = true
+							gotErr = true
 							logger.Errorf("unable to ingest documents: %v", err)
 						}
 						totalDocs = []*processor.Document{}
@@ -130,7 +133,7 @@ var osvCmd = &cobra.Command{
 				if len(totalDocs) >= threshold {
 					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 					if err != nil {
-						stop = true
+						gotErr = true
 						logger.Errorf("unable to ingest documents: %v", err)
 					}
 					totalDocs = []*processor.Document{}
@@ -139,10 +142,9 @@ var osvCmd = &cobra.Command{
 			if len(totalDocs) > 0 {
 				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
 				if err != nil {
-					stop = true
+					gotErr = true
 					logger.Errorf("unable to ingest documents: %v", err)
 				}
-				totalDocs = []*processor.Document{}
 			}
 		}
 		wg.Add(1)
@@ -154,7 +156,6 @@ var osvCmd = &cobra.Command{
 			return nil
 		}
 
-		gotErr := false
 		// Collect
 		errHandler := func(err error) bool {
 			if err == nil {
