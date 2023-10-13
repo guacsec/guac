@@ -192,7 +192,7 @@ var osvCmd = &cobra.Command{
 		wg.Wait()
 		cf()
 
-		if gotErr == 1 {
+		if atomic.LoadInt32(&gotErr) == 1 {
 			logger.Errorf("completed ingestion with errors")
 		} else {
 			logger.Infof("completed ingesting %v documents", totalNum)
