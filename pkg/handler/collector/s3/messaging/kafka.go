@@ -51,11 +51,12 @@ func (m *KafkaMessage) GetBucket() (string, error) {
 }
 
 func (m *KafkaMessage) GetItem() (string, error) {
-	info := strings.Split(m.Key, "/")
-	if len(info) < 2 {
-		return "", fmt.Errorf("invalid format of item: %s", m.Key)
+	idx := strings.Index(m.Key, "/")
+	if idx > 0 {
+		return m.Key[idx:], nil
+	} else {
+		return "", fmt.Errorf("invalid format of key: %s", m.Key)
 	}
-	return info[1], nil
 }
 
 func NewKafkaProvider(mpConfig MessageProviderConfig) (KafkaProvider, error) {
