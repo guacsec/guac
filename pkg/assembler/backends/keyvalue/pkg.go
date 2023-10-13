@@ -17,7 +17,6 @@ package keyvalue
 
 import (
 	"context"
-	"crypto/sha256"
 	"errors"
 	"fmt"
 	"reflect"
@@ -27,302 +26,315 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
-// TODO: move this into a unit test for this file
-// func registerAllPackages(client *demoClient) {
-// 	ctx := context.Background()
-
-// 	v11 := "2.11.1"
-// 	v12 := "2.12.0"
-// 	subpath1 := "saved_model_cli.py"
-// 	subpath2 := "__init__.py"
-// 	opensslNamespace := "openssl.org"
-// 	opensslVersion := "3.0.3"
-
-// 	inputs := []model.PkgInputSpec{{
-// 		Type: "pypi",
-// 		Name: "tensorflow",
-// 	}, {
-// 		Type:    "pypi",
-// 		Name:    "tensorflow",
-// 		Version: &v11,
-// 	}, {
-// 		Type:    "pypi",
-// 		Name:    "tensorflow",
-// 		Version: &v12,
-// 	}, {
-// 		Type:    "pypi",
-// 		Name:    "tensorflow",
-// 		Version: &v12,
-// 		Subpath: &subpath1,
-// 	}, {
-// 		Type:    "pypi",
-// 		Name:    "tensorflow",
-// 		Version: &v12,
-// 		Subpath: &subpath2,
-// 	}, {
-// 		Type:    "pypi",
-// 		Name:    "tensorflow",
-// 		Version: &v12,
-// 		Subpath: &subpath1,
-// 	}, {
-// 		Type:      "conan",
-// 		Namespace: &opensslNamespace,
-// 		Name:      "openssl",
-// 		Version:   &opensslVersion,
-// 	}}
-
-// 	for _, input := range inputs {
-// 		_, err := client.IngestPackage(ctx, input)
-// 		if err != nil {
-// 			log.Printf("Error in ingesting: %v\n", err)
-// 		}
-// 	}
-// }
-
 // Internal data: Packages
-type pkgTypeMap map[string]*pkgNamespaceStruct
-type pkgNamespaceStruct struct {
-	id         string
-	typeKey    string
-	namespaces pkgNamespaceMap
+type pkgType struct {
+	ThisID     string
+	Type       string
+	Namespaces []string
 }
-type pkgNamespaceMap map[string]*pkgNameStruct
-type pkgNameStruct struct {
-	id        string
-	parent    string
-	namespace string
-	names     pkgNameMap
+type pkgNamespace struct {
+	ThisID    string
+	Parent    string
+	Namespace string
+	Names     []string
 }
-type pkgNameMap map[string]*pkgVersionStruct
-type pkgVersionStruct struct {
-	id                  string
-	parent              string
-	name                string
-	versions            pkgVersionMap
-	srcMapLinks         []string
-	isDependencyLinks   []string
-	badLinks            []string
-	goodLinks           []string
-	hasMetadataLinks    []string
-	pointOfContactLinks []string
+type pkgName struct {
+	ThisID              string
+	Parent              string
+	Name                string
+	Versions            []string
+	SrcMapLinks         []string
+	IsDependencyLinks   []string
+	BadLinks            []string
+	GoodLinks           []string
+	HasMetadataLinks    []string
+	PointOfContactLinks []string
 }
-type pkgVersionNodeHash string
-type pkgVersionMap map[pkgVersionNodeHash]*pkgVersionNode
-type pkgVersionNode struct {
-	id                  string
-	parent              string
-	version             string
-	subpath             string
-	qualifiers          map[string]string
-	srcMapLinks         []string
-	isDependencyLinks   []string
-	occurrences         []string
-	certifyVulnLinks    []string
-	hasSBOMs            []string
-	vexLinks            []string
-	badLinks            []string
-	goodLinks           []string
-	hasMetadataLinks    []string
-	pointOfContactLinks []string
-	pkgEquals           []string
-	certifyLegals       []string
+type pkgVersion struct {
+	ThisID              string
+	Parent              string
+	Version             string
+	Subpath             string
+	Qualifiers          map[string]string
+	SrcMapLinks         []string
+	IsDependencyLinks   []string
+	Occurrences         []string
+	CertifyVulnLinks    []string
+	HasSBOMs            []string
+	VexLinks            []string
+	BadLinks            []string
+	GoodLinks           []string
+	HasMetadataLinks    []string
+	PointOfContactLinks []string
+	PkgEquals           []string
+	CertifyLegals       []string
 }
 
 // Be type safe, don't use any / interface{}
 type pkgNameOrVersion interface {
-	implementsPkgNameOrVersion()
-	setSrcMapLinks(id string)
+	setSrcMapLinks(ctx context.Context, ID string, c *demoClient) error
 	getSrcMapLinks() []string
-	setIsDependencyLinks(id string)
+	setIsDependencyLinks(ctx context.Context, ID string, c *demoClient) error
 	getIsDependencyLinks() []string
-	setCertifyBadLinks(id string)
+	setCertifyBadLinks(ctx context.Context, ID string, c *demoClient) error
 	getCertifyBadLinks() []string
-	setCertifyGoodLinks(id string)
+	setCertifyGoodLinks(ctx context.Context, ID string, c *demoClient) error
 	getCertifyGoodLinks() []string
-	setHasMetadataLinks(id string)
+	setHasMetadataLinks(ctx context.Context, ID string, c *demoClient) error
 	getHasMetadataLinks() []string
-	setPointOfContactLinks(id string)
+	setPointOfContactLinks(ctx context.Context, ID string, c *demoClient) error
 	getPointOfContactLinks() []string
 
 	node
 }
 
-func (n *pkgNamespaceStruct) ID() string { return n.id }
-func (n *pkgNameStruct) ID() string      { return n.id }
-func (n *pkgVersionStruct) ID() string   { return n.id }
-func (n *pkgVersionNode) ID() string     { return n.id }
+var _ pkgNameOrVersion = &pkgName{}
+var _ pkgNameOrVersion = &pkgVersion{}
 
-func (n *pkgNamespaceStruct) Neighbors(allowedEdges edgeMap) []string {
-	out := make([]string, 0, 1+len(n.namespaces))
-	for _, v := range n.namespaces {
-		out = append(out, v.id)
-	}
+func (n *pkgType) ID() string      { return n.ThisID }
+func (n *pkgNamespace) ID() string { return n.ThisID }
+func (n *pkgName) ID() string      { return n.ThisID }
+func (n *pkgVersion) ID() string   { return n.ThisID }
+
+func (n *pkgType) Neighbors(allowedEdges edgeMap) []string {
+	return n.Namespaces
+}
+func (n *pkgNamespace) Neighbors(allowedEdges edgeMap) []string {
+	out := make([]string, 0, 1+len(n.Names))
+	out = append(out, n.Names...)
+	out = append(out, n.Parent)
 	return out
 }
-func (n *pkgNameStruct) Neighbors(allowedEdges edgeMap) []string {
-	out := make([]string, 0, 1+len(n.names))
-	for _, v := range n.names {
-		out = append(out, v.id)
-	}
-	out = append(out, n.parent)
-	return out
-}
-func (n *pkgVersionStruct) Neighbors(allowedEdges edgeMap) []string {
-	out := []string{n.parent}
-	for _, v := range n.versions {
-		out = append(out, v.id)
-	}
+func (n *pkgName) Neighbors(allowedEdges edgeMap) []string {
+	out := []string{n.Parent}
+	out = append(out, n.Versions...)
 
 	if allowedEdges[model.EdgePackageHasSourceAt] {
-		out = append(out, n.srcMapLinks...)
+		out = append(out, n.SrcMapLinks...)
 	}
 	if allowedEdges[model.EdgePackageIsDependency] {
-		out = append(out, n.isDependencyLinks...)
+		out = append(out, n.IsDependencyLinks...)
 	}
 	if allowedEdges[model.EdgePackageCertifyBad] {
-		out = append(out, n.badLinks...)
+		out = append(out, n.BadLinks...)
 	}
 	if allowedEdges[model.EdgePackageCertifyGood] {
-		out = append(out, n.goodLinks...)
+		out = append(out, n.GoodLinks...)
 	}
 	if allowedEdges[model.EdgePackageHasMetadata] {
-		out = append(out, n.hasMetadataLinks...)
+		out = append(out, n.HasMetadataLinks...)
 	}
 	if allowedEdges[model.EdgePackagePointOfContact] {
-		out = append(out, n.pointOfContactLinks...)
+		out = append(out, n.PointOfContactLinks...)
 	}
 
 	return out
 }
-func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []string {
-	out := []string{n.parent}
+func (n *pkgVersion) Neighbors(allowedEdges edgeMap) []string {
+	out := []string{n.Parent}
 
 	if allowedEdges[model.EdgePackageHasSourceAt] {
-		out = append(out, n.srcMapLinks...)
+		out = append(out, n.SrcMapLinks...)
 	}
 	if allowedEdges[model.EdgePackageIsDependency] {
-		out = append(out, n.isDependencyLinks...)
+		out = append(out, n.IsDependencyLinks...)
 	}
 	if allowedEdges[model.EdgePackageIsOccurrence] {
-		out = append(out, n.occurrences...)
+		out = append(out, n.Occurrences...)
 	}
 	if allowedEdges[model.EdgePackageCertifyVuln] {
-		out = append(out, n.certifyVulnLinks...)
+		out = append(out, n.CertifyVulnLinks...)
 	}
 	if allowedEdges[model.EdgePackageHasSbom] {
-		out = append(out, n.hasSBOMs...)
+		out = append(out, n.HasSBOMs...)
 	}
 	if allowedEdges[model.EdgePackageCertifyVexStatement] {
-		out = append(out, n.vexLinks...)
+		out = append(out, n.VexLinks...)
 	}
 	if allowedEdges[model.EdgePackageCertifyBad] {
-		out = append(out, n.badLinks...)
+		out = append(out, n.BadLinks...)
 	}
 	if allowedEdges[model.EdgePackageCertifyGood] {
-		out = append(out, n.goodLinks...)
+		out = append(out, n.GoodLinks...)
 	}
 	if allowedEdges[model.EdgePackagePkgEqual] {
-		out = append(out, n.pkgEquals...)
+		out = append(out, n.PkgEquals...)
 	}
 	if allowedEdges[model.EdgePackageHasMetadata] {
-		out = append(out, n.hasMetadataLinks...)
+		out = append(out, n.HasMetadataLinks...)
 	}
 	if allowedEdges[model.EdgePackagePointOfContact] {
-		out = append(out, n.pointOfContactLinks...)
+		out = append(out, n.PointOfContactLinks...)
 	}
 	if allowedEdges[model.EdgePackageCertifyLegal] {
-		out = append(out, n.certifyLegals...)
+		out = append(out, n.CertifyLegals...)
 	}
 
 	return out
 }
 
-func (n *pkgNamespaceStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildPackageResponse(n.id, nil)
+func (n *pkgType) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
+	return c.buildPackageResponse(ctx, n.ThisID, nil)
 }
-func (n *pkgNameStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildPackageResponse(n.id, nil)
+func (n *pkgNamespace) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
+	return c.buildPackageResponse(ctx, n.ThisID, nil)
 }
-func (n *pkgVersionStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildPackageResponse(n.id, nil)
+func (n *pkgName) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
+	return c.buildPackageResponse(ctx, n.ThisID, nil)
 }
-func (n *pkgVersionNode) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildPackageResponse(n.id, nil)
+func (n *pkgVersion) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
+	return c.buildPackageResponse(ctx, n.ThisID, nil)
 }
-
-func (p *pkgVersionStruct) implementsPkgNameOrVersion() {}
-func (p *pkgVersionNode) implementsPkgNameOrVersion()   {}
 
 // hasSourceAt back edges
-func (p *pkgVersionStruct) setSrcMapLinks(id string) { p.srcMapLinks = append(p.srcMapLinks, id) }
-func (p *pkgVersionNode) setSrcMapLinks(id string)   { p.srcMapLinks = append(p.srcMapLinks, id) }
-func (p *pkgVersionStruct) getSrcMapLinks() []string { return p.srcMapLinks }
-func (p *pkgVersionNode) getSrcMapLinks() []string   { return p.srcMapLinks }
+func (p *pkgName) setSrcMapLinks(ctx context.Context, id string, c *demoClient) error {
+	p.SrcMapLinks = append(p.SrcMapLinks, id)
+	return setkv(ctx, pkgNameCol, p, c)
+}
+func (p *pkgVersion) setSrcMapLinks(ctx context.Context, id string, c *demoClient) error {
+	p.SrcMapLinks = append(p.SrcMapLinks, id)
+	return setkv(ctx, pkgVerCol, p, c)
+}
+func (p *pkgName) getSrcMapLinks() []string    { return p.SrcMapLinks }
+func (p *pkgVersion) getSrcMapLinks() []string { return p.SrcMapLinks }
 
 // isDependency back edges
-func (p *pkgVersionStruct) setIsDependencyLinks(id string) {
-	p.isDependencyLinks = append(p.isDependencyLinks, id)
+func (p *pkgName) setIsDependencyLinks(ctx context.Context, id string, c *demoClient) error {
+	p.IsDependencyLinks = append(p.IsDependencyLinks, id)
+	return setkv(ctx, pkgNameCol, p, c)
 }
-func (p *pkgVersionNode) setIsDependencyLinks(id string) {
-	p.isDependencyLinks = append(p.isDependencyLinks, id)
+func (p *pkgVersion) setIsDependencyLinks(ctx context.Context, id string, c *demoClient) error {
+	p.IsDependencyLinks = append(p.IsDependencyLinks, id)
+	return setkv(ctx, pkgVerCol, p, c)
 }
-func (p *pkgVersionStruct) getIsDependencyLinks() []string { return p.isDependencyLinks }
-func (p *pkgVersionNode) getIsDependencyLinks() []string   { return p.isDependencyLinks }
+func (p *pkgName) getIsDependencyLinks() []string    { return p.IsDependencyLinks }
+func (p *pkgVersion) getIsDependencyLinks() []string { return p.IsDependencyLinks }
 
 // isOccurrence back edges
-func (p *pkgVersionNode) setOccurrenceLinks(id string) { p.occurrences = append(p.occurrences, id) }
+func (p *pkgVersion) setOccurrenceLinks(ctx context.Context, id string, c *demoClient) error {
+	p.Occurrences = append(p.Occurrences, id)
+	return setkv(ctx, pkgVerCol, p, c)
+}
 
 // certifyVulnerability back edges
-func (p *pkgVersionNode) setVulnerabilityLinks(id string) {
-	p.certifyVulnLinks = append(p.certifyVulnLinks, id)
+func (p *pkgVersion) setVulnerabilityLinks(ctx context.Context, id string, c *demoClient) error {
+	p.CertifyVulnLinks = append(p.CertifyVulnLinks, id)
+	return setkv(ctx, pkgVerCol, p, c)
 }
 
 // certifyVexStatement back edges
-func (p *pkgVersionNode) setVexLinks(id string) {
-	p.vexLinks = append(p.vexLinks, id)
+func (p *pkgVersion) setVexLinks(ctx context.Context, id string, c *demoClient) error {
+	p.VexLinks = append(p.VexLinks, id)
+	return setkv(ctx, pkgVerCol, p, c)
 }
 
 // hasSBOM back edges
-func (p *pkgVersionNode) setHasSBOM(id string) { p.hasSBOMs = append(p.hasSBOMs, id) }
+func (p *pkgVersion) setHasSBOM(ctx context.Context, id string, c *demoClient) error {
+	p.HasSBOMs = append(p.HasSBOMs, id)
+	return setkv(ctx, pkgVerCol, p, c)
+}
 
 // certifyBad back edges
-func (p *pkgVersionStruct) setCertifyBadLinks(id string) { p.badLinks = append(p.badLinks, id) }
-func (p *pkgVersionNode) setCertifyBadLinks(id string)   { p.badLinks = append(p.badLinks, id) }
-func (p *pkgVersionStruct) getCertifyBadLinks() []string { return p.badLinks }
-func (p *pkgVersionNode) getCertifyBadLinks() []string   { return p.badLinks }
+func (p *pkgName) setCertifyBadLinks(ctx context.Context, id string, c *demoClient) error {
+	p.BadLinks = append(p.BadLinks, id)
+	return setkv(ctx, pkgNameCol, p, c)
+}
+func (p *pkgVersion) setCertifyBadLinks(ctx context.Context, id string, c *demoClient) error {
+	p.BadLinks = append(p.BadLinks, id)
+	return setkv(ctx, pkgVerCol, p, c)
+}
+func (p *pkgName) getCertifyBadLinks() []string    { return p.BadLinks }
+func (p *pkgVersion) getCertifyBadLinks() []string { return p.BadLinks }
 
 // certifyGood back edges
-func (p *pkgVersionStruct) setCertifyGoodLinks(id string) { p.goodLinks = append(p.goodLinks, id) }
-func (p *pkgVersionNode) setCertifyGoodLinks(id string)   { p.goodLinks = append(p.goodLinks, id) }
-func (p *pkgVersionStruct) getCertifyGoodLinks() []string { return p.goodLinks }
-func (p *pkgVersionNode) getCertifyGoodLinks() []string   { return p.goodLinks }
+func (p *pkgName) setCertifyGoodLinks(ctx context.Context, id string, c *demoClient) error {
+	p.GoodLinks = append(p.GoodLinks, id)
+	return setkv(ctx, pkgNameCol, p, c)
+}
+func (p *pkgVersion) setCertifyGoodLinks(ctx context.Context, id string, c *demoClient) error {
+	p.GoodLinks = append(p.GoodLinks, id)
+	return setkv(ctx, pkgVerCol, p, c)
+}
+func (p *pkgName) getCertifyGoodLinks() []string    { return p.GoodLinks }
+func (p *pkgVersion) getCertifyGoodLinks() []string { return p.GoodLinks }
 
 // hasMetadata back edges
-func (p *pkgVersionStruct) setHasMetadataLinks(id string) {
-	p.hasMetadataLinks = append(p.hasMetadataLinks, id)
+func (p *pkgName) setHasMetadataLinks(ctx context.Context, id string, c *demoClient) error {
+	p.HasMetadataLinks = append(p.HasMetadataLinks, id)
+	return setkv(ctx, pkgNameCol, p, c)
 }
-func (p *pkgVersionNode) setHasMetadataLinks(id string) {
-	p.hasMetadataLinks = append(p.hasMetadataLinks, id)
+func (p *pkgVersion) setHasMetadataLinks(ctx context.Context, id string, c *demoClient) error {
+	p.HasMetadataLinks = append(p.HasMetadataLinks, id)
+	return setkv(ctx, pkgVerCol, p, c)
 }
-func (p *pkgVersionStruct) getHasMetadataLinks() []string { return p.hasMetadataLinks }
-func (p *pkgVersionNode) getHasMetadataLinks() []string   { return p.hasMetadataLinks }
+func (p *pkgName) getHasMetadataLinks() []string    { return p.HasMetadataLinks }
+func (p *pkgVersion) getHasMetadataLinks() []string { return p.HasMetadataLinks }
 
 // pointOfContact back edges
-func (p *pkgVersionStruct) setPointOfContactLinks(id string) {
-	p.pointOfContactLinks = append(p.pointOfContactLinks, id)
+func (p *pkgName) setPointOfContactLinks(ctx context.Context, id string, c *demoClient) error {
+	p.PointOfContactLinks = append(p.PointOfContactLinks, id)
+	return setkv(ctx, pkgNameCol, p, c)
 }
-func (p *pkgVersionNode) setPointOfContactLinks(id string) {
-	p.pointOfContactLinks = append(p.pointOfContactLinks, id)
+func (p *pkgVersion) setPointOfContactLinks(ctx context.Context, id string, c *demoClient) error {
+	p.PointOfContactLinks = append(p.PointOfContactLinks, id)
+	return setkv(ctx, pkgVerCol, p, c)
 }
-func (p *pkgVersionStruct) getPointOfContactLinks() []string { return p.pointOfContactLinks }
-func (p *pkgVersionNode) getPointOfContactLinks() []string   { return p.pointOfContactLinks }
+func (p *pkgName) getPointOfContactLinks() []string    { return p.PointOfContactLinks }
+func (p *pkgVersion) getPointOfContactLinks() []string { return p.PointOfContactLinks }
 
 // pkgEqual back edges
-func (p *pkgVersionNode) setPkgEquals(id string) { p.pkgEquals = append(p.pkgEquals, id) }
+func (p *pkgVersion) setPkgEquals(ctx context.Context, id string, c *demoClient) error {
+	p.PkgEquals = append(p.PkgEquals, id)
+	return setkv(ctx, pkgVerCol, p, c)
+}
 
-func (p *pkgVersionNode) setCertifyLegals(id string) { p.certifyLegals = append(p.certifyLegals, id) }
+func (p *pkgVersion) setCertifyLegals(ctx context.Context, id string, c *demoClient) error {
+	p.CertifyLegals = append(p.CertifyLegals, id)
+	return setkv(ctx, pkgVerCol, p, c)
+}
+
+func (n *pkgType) Key() string {
+	return n.Type
+}
+
+func (n *pkgType) addNamespace(ctx context.Context, ns string, c *demoClient) error {
+	n.Namespaces = append(n.Namespaces, ns)
+	return setkv(ctx, pkgTypeCol, n, c)
+}
+
+func (n *pkgNamespace) Key() string {
+	return strings.Join([]string{
+		n.Parent,
+		n.Namespace,
+	}, ":")
+}
+
+func (n *pkgNamespace) addName(ctx context.Context, name string, c *demoClient) error {
+	n.Names = append(n.Names, name)
+	return setkv(ctx, pkgNSCol, n, c)
+}
+
+func (n *pkgName) Key() string {
+	return strings.Join([]string{
+		n.Parent,
+		n.Name,
+	}, ":")
+}
+
+func (n *pkgName) addVersion(ctx context.Context, ver string, c *demoClient) error {
+	n.Versions = append(n.Versions, ver)
+	return setkv(ctx, pkgNameCol, n, c)
+}
+
+func (n *pkgVersion) Key() string {
+	return strings.Join([]string{
+		n.Parent,
+		hashVersionHelper(n.Version, n.Subpath, n.Qualifiers),
+	}, ":")
+}
 
 // Ingest Package
 
@@ -339,87 +351,110 @@ func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputS
 }
 
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
-	c.m.RLock()
-	namespacesStruct, hasNamespace := c.packages[input.Type]
-	c.m.RUnlock()
-	if !hasNamespace {
-		c.m.Lock()
-		namespacesStruct, hasNamespace = c.packages[input.Type]
-		if !hasNamespace {
-			namespacesStruct = &pkgNamespaceStruct{
-				id:         c.getNextID(),
-				typeKey:    input.Type,
-				namespaces: pkgNamespaceMap{},
-			}
-			c.index[namespacesStruct.id] = namespacesStruct
-			c.packages[input.Type] = namespacesStruct
-		}
-		c.m.Unlock()
+	inType := &pkgType{
+		Type: input.Type,
 	}
-	namespaces := namespacesStruct.namespaces
-
 	c.m.RLock()
-	namesStruct, hasName := namespaces[nilToEmpty(input.Namespace)]
+	outType, err := byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
 	c.m.RUnlock()
-	if !hasName {
-		c.m.Lock()
-		namesStruct, hasName = namespaces[nilToEmpty(input.Namespace)]
-		if !hasName {
-			namesStruct = &pkgNameStruct{
-				id:        c.getNextID(),
-				parent:    namespacesStruct.id,
-				namespace: nilToEmpty(input.Namespace),
-				names:     pkgNameMap{},
-			}
-			c.index[namesStruct.id] = namesStruct
-			namespaces[nilToEmpty(input.Namespace)] = namesStruct
+	if err != nil {
+		if !errors.Is(err, kv.NotFoundError) {
+			return nil, err
 		}
-		c.m.Unlock()
-	}
-	names := namesStruct.names
-
-	c.m.RLock()
-	versionStruct, hasVersions := names[input.Name]
-	c.m.RUnlock()
-	if !hasVersions {
 		c.m.Lock()
-		versionStruct, hasVersions = names[input.Name]
-		if !hasVersions {
-			versionStruct = &pkgVersionStruct{
-				id:       c.getNextID(),
-				parent:   namesStruct.id,
-				name:     input.Name,
-				versions: pkgVersionMap{},
-			}
-			c.index[versionStruct.id] = versionStruct
-			names[input.Name] = versionStruct
-		}
-		c.m.Unlock()
-	}
-	versions := versionStruct.versions
-
-	c.m.RLock()
-	duplicate, collectedVersion := duplicatePkgVer(versions, input)
-	c.m.RUnlock()
-	if !duplicate {
-		c.m.Lock()
-		duplicate, collectedVersion = duplicatePkgVer(versions, input)
-		if !duplicate {
-			collectedVersion = &pkgVersionNode{
-				id:         c.getNextID(),
-				parent:     versionStruct.id,
-				version:    nilToEmpty(input.Version),
-				subpath:    nilToEmpty(input.Subpath),
-				qualifiers: getQualifiersFromInput(input.Qualifiers),
-			}
-			c.index[collectedVersion.id] = collectedVersion
-
-			versionDigest, err := hashPkgVersionNode(collectedVersion)
-			if err != nil {
-				c.m.Unlock()
+		outType, err = byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
+		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) {
 				return nil, err
 			}
-			versions[versionDigest] = collectedVersion
+			inType.ThisID = c.getNextID()
+			if err := c.addToIndex(ctx, pkgTypeCol, inType); err != nil {
+				return nil, err
+			}
+			if err := setkv(ctx, pkgTypeCol, inType, c); err != nil {
+				return nil, err
+			}
+			outType = inType
+		}
+		c.m.Unlock()
+	}
+
+	inNamespace := &pkgNamespace{
+		Parent:    outType.ThisID,
+		Namespace: nilToEmpty(input.Namespace),
+	}
+	c.m.RLock()
+	outNamespace, err := byKeykv[*pkgNamespace](ctx, pkgNSCol, inNamespace.Key(), c)
+	c.m.RUnlock()
+	if err != nil {
+		c.m.Lock()
+		outNamespace, err = byKeykv[*pkgNamespace](ctx, pkgNSCol, inNamespace.Key(), c)
+		if err != nil {
+			inNamespace.ThisID = c.getNextID()
+			if err := c.addToIndex(ctx, pkgNSCol, inNamespace); err != nil {
+				return nil, err
+			}
+			if err := setkv(ctx, pkgNSCol, inNamespace, c); err != nil {
+				return nil, err
+			}
+			if err := outType.addNamespace(ctx, inNamespace.ThisID, c); err != nil {
+				return nil, err
+			}
+			outNamespace = inNamespace
+		}
+		c.m.Unlock()
+	}
+
+	inName := &pkgName{
+		Parent: outNamespace.ThisID,
+		Name:   input.Name,
+	}
+	c.m.RLock()
+	outName, err := byKeykv[*pkgName](ctx, pkgNameCol, inName.Key(), c)
+	c.m.RUnlock()
+	if err != nil {
+		c.m.Lock()
+		outName, err = byKeykv[*pkgName](ctx, pkgNameCol, inName.Key(), c)
+		if err != nil {
+			inName.ThisID = c.getNextID()
+			if err := c.addToIndex(ctx, pkgNameCol, inName); err != nil {
+				return nil, err
+			}
+			if err := setkv(ctx, pkgNameCol, inName, c); err != nil {
+				return nil, err
+			}
+			if err := outNamespace.addName(ctx, inName.ThisID, c); err != nil {
+				return nil, err
+			}
+			outName = inName
+		}
+		c.m.Unlock()
+	}
+
+	inVersion := &pkgVersion{
+		Parent:     outName.ThisID,
+		Version:    nilToEmpty(input.Version),
+		Subpath:    nilToEmpty(input.Subpath),
+		Qualifiers: getQualifiersFromInput(input.Qualifiers),
+	}
+	c.m.RLock()
+	outVersion, err := byKeykv[*pkgVersion](ctx, pkgVerCol, inVersion.Key(), c)
+	c.m.RUnlock()
+	if err != nil {
+		c.m.Lock()
+		outVersion, err = byKeykv[*pkgVersion](ctx, pkgVerCol, inVersion.Key(), c)
+		if err != nil {
+			inVersion.ThisID = c.getNextID()
+			if err := c.addToIndex(ctx, pkgVerCol, inVersion); err != nil {
+				return nil, err
+			}
+			if err := setkv(ctx, pkgVerCol, inVersion, c); err != nil {
+				return nil, err
+			}
+			if err := outName.addVersion(ctx, inVersion.ThisID, c); err != nil {
+				return nil, err
+			}
+			outVersion = inVersion
 		}
 		c.m.Unlock()
 	}
@@ -427,24 +462,10 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 	// build return GraphQL type
 	c.m.RLock()
 	defer c.m.RUnlock()
-	return c.buildPackageResponse(collectedVersion.id, nil)
+	return c.buildPackageResponse(ctx, outVersion.ThisID, nil)
 }
 
-// hash the canonical representation of a version.
-func hashPkgVersionNode(version *pkgVersionNode) (pkgVersionNodeHash, error) {
-	if version == nil {
-		return "", fmt.Errorf("version is nil")
-	}
-	return hashVersionHelper(version.version, version.subpath, version.qualifiers), nil
-}
-
-// hash the canonical representation of a version
-func hashPkgInputSpecVersion(input model.PkgInputSpec) pkgVersionNodeHash {
-	qualifiers := getQualifiersFromInput(input.Qualifiers)
-	return hashVersionHelper(nilToEmpty(input.Version), nilToEmpty(input.Subpath), qualifiers)
-}
-
-func hashVersionHelper(version string, subpath string, qualifiers map[string]string) pkgVersionNodeHash {
+func hashVersionHelper(version string, subpath string, qualifiers map[string]string) string {
 	// first sort the qualifiers
 	qualifierSlice := make([]string, 0, len(qualifiers))
 	for key, value := range qualifiers {
@@ -454,17 +475,9 @@ func hashVersionHelper(version string, subpath string, qualifiers map[string]str
 	qualifiersStr := strings.Join(qualifierSlice, ",")
 
 	canonicalVersion := fmt.Sprintf("%s,%s,%s", version, subpath, qualifiersStr)
-	digest := sha256.Sum256([]byte(canonicalVersion))
-	return pkgVersionNodeHash(fmt.Sprintf("%x", digest))
-}
-
-func duplicatePkgVer(versions pkgVersionMap, input model.PkgInputSpec) (bool, *pkgVersionNode) {
-	digest := hashPkgInputSpecVersion(input)
-
-	if version, ok := versions[digest]; ok {
-		return true, version
-	}
-	return false, nil
+	return canonicalVersion
+	// digest := sha256.Sum256([]byte(canonicalVersion))
+	// return fmt.Sprintf("%x", digest)
 }
 
 // Query Package
@@ -472,7 +485,7 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 	c.m.RLock()
 	defer c.m.RUnlock()
 	if filter != nil && filter.ID != nil {
-		p, err := c.buildPackageResponse(*filter.ID, filter)
+		p, err := c.buildPackageResponse(ctx, *filter.ID, filter)
 		if err != nil {
 			if errors.Is(err, errNotFound) {
 				// not found
@@ -482,27 +495,38 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 		}
 		return []*model.Package{p}, nil
 	}
-	out := []*model.Package{}
 
+	out := []*model.Package{}
 	if filter != nil && filter.Type != nil {
-		pkgNamespaceStruct, ok := c.packages[*filter.Type]
-		if ok {
-			pNamespaces := buildPkgNamespace(pkgNamespaceStruct, filter)
+		inType := &pkgType{
+			Type: *filter.Type,
+		}
+		pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
+		if err == nil {
+			pNamespaces := c.buildPkgNamespace(ctx, pkgTypeNode, filter)
 			if len(pNamespaces) > 0 {
 				out = append(out, &model.Package{
-					ID:         pkgNamespaceStruct.id,
-					Type:       pkgNamespaceStruct.typeKey,
+					ID:         pkgTypeNode.ThisID,
+					Type:       pkgTypeNode.Type,
 					Namespaces: pNamespaces,
 				})
 			}
 		}
 	} else {
-		for dbType, pkgNamespaceStruct := range c.packages {
-			pNamespaces := buildPkgNamespace(pkgNamespaceStruct, filter)
+		typeKeys, err := c.kv.Keys(ctx, pkgTypeCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, tk := range typeKeys {
+			pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
+			if err != nil {
+				return nil, err
+			}
+			pNamespaces := c.buildPkgNamespace(ctx, pkgTypeNode, filter)
 			if len(pNamespaces) > 0 {
 				out = append(out, &model.Package{
-					ID:         pkgNamespaceStruct.id,
-					Type:       dbType,
+					ID:         pkgTypeNode.ThisID,
+					Type:       pkgTypeNode.Type,
 					Namespaces: pNamespaces,
 				})
 			}
@@ -511,27 +535,35 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 	return out, nil
 }
 
-func buildPkgNamespace(pkgNamespaceStruct *pkgNamespaceStruct, filter *model.PkgSpec) []*model.PackageNamespace {
+func (c *demoClient) buildPkgNamespace(ctx context.Context, pkgTypeNode *pkgType, filter *model.PkgSpec) []*model.PackageNamespace {
 	pNamespaces := []*model.PackageNamespace{}
 	if filter != nil && filter.Namespace != nil {
-		pkgNameStruct, ok := pkgNamespaceStruct.namespaces[*filter.Namespace]
-		if ok {
-			pns := buildPkgName(pkgNameStruct, filter)
+		inNS := &pkgNamespace{
+			Parent:    pkgTypeNode.ThisID,
+			Namespace: *filter.Namespace,
+		}
+		pkgNS, err := byKeykv[*pkgNamespace](ctx, pkgNSCol, inNS.Key(), c)
+		if err == nil {
+			pns := c.buildPkgName(ctx, pkgNS, filter)
 			if len(pns) > 0 {
 				pNamespaces = append(pNamespaces, &model.PackageNamespace{
-					ID:        pkgNameStruct.id,
-					Namespace: pkgNameStruct.namespace,
+					ID:        pkgNS.ThisID,
+					Namespace: pkgNS.Namespace,
 					Names:     pns,
 				})
 			}
 		}
 	} else {
-		for namespace, pkgNameStruct := range pkgNamespaceStruct.namespaces {
-			pns := buildPkgName(pkgNameStruct, filter)
+		for _, nsID := range pkgTypeNode.Namespaces {
+			pkgNS, err := byIDkv[*pkgNamespace](ctx, nsID, c)
+			if err != nil {
+				continue
+			}
+			pns := c.buildPkgName(ctx, pkgNS, filter)
 			if len(pns) > 0 {
 				pNamespaces = append(pNamespaces, &model.PackageNamespace{
-					ID:        pkgNameStruct.id,
-					Namespace: namespace,
+					ID:        pkgNS.ThisID,
+					Namespace: pkgNS.Namespace,
 					Names:     pns,
 				})
 			}
@@ -540,27 +572,35 @@ func buildPkgNamespace(pkgNamespaceStruct *pkgNamespaceStruct, filter *model.Pkg
 	return pNamespaces
 }
 
-func buildPkgName(pkgNameStruct *pkgNameStruct, filter *model.PkgSpec) []*model.PackageName {
+func (c *demoClient) buildPkgName(ctx context.Context, pkgNS *pkgNamespace, filter *model.PkgSpec) []*model.PackageName {
 	pns := []*model.PackageName{}
 	if filter != nil && filter.Name != nil {
-		pkgVersionStruct, ok := pkgNameStruct.names[*filter.Name]
-		if ok {
-			pvs := buildPkgVersion(pkgVersionStruct, filter)
+		inName := &pkgName{
+			Parent: pkgNS.ThisID,
+			Name:   *filter.Name,
+		}
+		pkgNameNode, err := byKeykv[*pkgName](ctx, pkgNameCol, inName.Key(), c)
+		if err == nil {
+			pvs := c.buildPkgVersion(ctx, pkgNameNode, filter)
 			if len(pvs) > 0 {
 				pns = append(pns, &model.PackageName{
-					ID:       pkgVersionStruct.id,
-					Name:     pkgVersionStruct.name,
+					ID:       pkgNameNode.ThisID,
+					Name:     pkgNameNode.Name,
 					Versions: pvs,
 				})
 			}
 		}
 	} else {
-		for name, pkgVersionStruct := range pkgNameStruct.names {
-			pvs := buildPkgVersion(pkgVersionStruct, filter)
+		for _, nameID := range pkgNS.Names {
+			pkgNameNode, err := byIDkv[*pkgName](ctx, nameID, c)
+			if err != nil {
+				continue
+			}
+			pvs := c.buildPkgVersion(ctx, pkgNameNode, filter)
 			if len(pvs) > 0 {
 				pns = append(pns, &model.PackageName{
-					ID:       pkgVersionStruct.id,
-					Name:     name,
+					ID:       pkgNameNode.ThisID,
+					Name:     pkgNameNode.Name,
 					Versions: pvs,
 				})
 			}
@@ -569,23 +609,52 @@ func buildPkgName(pkgNameStruct *pkgNameStruct, filter *model.PkgSpec) []*model.
 	return pns
 }
 
-func buildPkgVersion(pkgVersionStruct *pkgVersionStruct, filter *model.PkgSpec) []*model.PackageVersion {
+func (c *demoClient) buildPkgVersion(ctx context.Context, pkgNameNode *pkgName, filter *model.PkgSpec) []*model.PackageVersion {
 	pvs := []*model.PackageVersion{}
-	for _, v := range pkgVersionStruct.versions {
-		if filter != nil && noMatch(filter.Version, v.version) {
+	if filter != nil &&
+		filter.Version != nil &&
+		filter.Subpath != nil &&
+		((len(filter.Qualifiers) > 0) ||
+			(filter.MatchOnlyEmptyQualifiers != nil && *filter.MatchOnlyEmptyQualifiers)) {
+		inVer := &pkgVersion{
+			Parent:  pkgNameNode.ThisID,
+			Version: *filter.Version,
+			Subpath: *filter.Subpath,
+		}
+		if filter.MatchOnlyEmptyQualifiers == nil || !*filter.MatchOnlyEmptyQualifiers {
+			inVer.Qualifiers = getQualifiersFromFilter(filter.Qualifiers)
+		}
+		pkgVer, err := byKeykv[*pkgVersion](ctx, pkgVerCol, inVer.Key(), c)
+		if err == nil {
+			pvs = append(pvs, &model.PackageVersion{
+				ID:         pkgVer.ThisID,
+				Version:    pkgVer.Version,
+				Subpath:    pkgVer.Subpath,
+				Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
+			})
+		}
+		return pvs
+	}
+
+	for _, verID := range pkgNameNode.Versions {
+		pkgVer, err := byIDkv[*pkgVersion](ctx, verID, c)
+		if err != nil {
 			continue
 		}
-		if filter != nil && noMatch(filter.Subpath, v.subpath) {
+		if filter != nil && noMatch(filter.Version, pkgVer.Version) {
 			continue
 		}
-		if filter != nil && noMatchQualifiers(filter, v.qualifiers) {
+		if filter != nil && noMatch(filter.Subpath, pkgVer.Subpath) {
+			continue
+		}
+		if filter != nil && noMatchQualifiers(filter, pkgVer.Qualifiers) {
 			continue
 		}
 		pvs = append(pvs, &model.PackageVersion{
-			ID:         v.id,
-			Version:    v.version,
-			Subpath:    v.subpath,
-			Qualifiers: getCollectedPackageQualifiers(v.qualifiers),
+			ID:         pkgVer.ThisID,
+			Version:    pkgVer.Version,
+			Subpath:    pkgVer.Subpath,
+			Qualifiers: getCollectedPackageQualifiers(pkgVer.Qualifiers),
 		})
 	}
 	return pvs
@@ -593,124 +662,138 @@ func buildPkgVersion(pkgVersionStruct *pkgVersionStruct, filter *model.PkgSpec) 
 
 // Builds a model.Package to send as GraphQL response, starting from id.
 // The optional filter allows restricting output (on selection operations).
-func (c *demoClient) buildPackageResponse(id string, filter *model.PkgSpec) (*model.Package, error) {
+func (c *demoClient) buildPackageResponse(ctx context.Context, id string, filter *model.PkgSpec) (*model.Package, error) {
 	if filter != nil && filter.ID != nil && *filter.ID != id {
+		return nil, nil
 	}
 
-	node, ok := c.index[id]
-	if !ok {
-		return nil, fmt.Errorf("%w : ID does not match existing node", errNotFound)
-	}
+	currentID := id
 
 	pvl := []*model.PackageVersion{}
-	if versionNode, ok := node.(*pkgVersionNode); ok {
-		if filter != nil && noMatch(filter.Version, versionNode.version) {
+	if versionNode, err := byIDkv[*pkgVersion](ctx, currentID, c); err == nil {
+		if filter != nil && noMatch(filter.Version, versionNode.Version) {
 			return nil, nil
 		}
-		if filter != nil && noMatch(filter.Subpath, versionNode.subpath) {
+		if filter != nil && noMatch(filter.Subpath, versionNode.Subpath) {
 			return nil, nil
 		}
-		if filter != nil && noMatchQualifiers(filter, versionNode.qualifiers) {
+		if filter != nil && noMatchQualifiers(filter, versionNode.Qualifiers) {
 			return nil, nil
 		}
 		pvl = append(pvl, &model.PackageVersion{
-			ID:         versionNode.id,
-			Version:    versionNode.version,
-			Subpath:    versionNode.subpath,
-			Qualifiers: getCollectedPackageQualifiers(versionNode.qualifiers),
+			ID:         versionNode.ThisID,
+			Version:    versionNode.Version,
+			Subpath:    versionNode.Subpath,
+			Qualifiers: getCollectedPackageQualifiers(versionNode.Qualifiers),
 		})
-		node, ok = c.index[versionNode.parent]
-		if !ok {
-			return nil, fmt.Errorf("Internal ID does not match existing node")
-		}
+		currentID = versionNode.Parent
+	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	pnl := []*model.PackageName{}
-	if versionStruct, ok := node.(*pkgVersionStruct); ok {
-		if filter != nil && noMatch(filter.Name, versionStruct.name) {
+	if nameNode, err := byIDkv[*pkgName](ctx, currentID, c); err == nil {
+		if filter != nil && noMatch(filter.Name, nameNode.Name) {
 			return nil, nil
 		}
 		pnl = append(pnl, &model.PackageName{
-			ID:       versionStruct.id,
-			Name:     versionStruct.name,
+			ID:       nameNode.ThisID,
+			Name:     nameNode.Name,
 			Versions: pvl,
 		})
-		node, ok = c.index[versionStruct.parent]
-		if !ok {
-			return nil, fmt.Errorf("Internal ID does not match existing node")
-		}
+		currentID = nameNode.Parent
+	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	pnsl := []*model.PackageNamespace{}
-	if nameStruct, ok := node.(*pkgNameStruct); ok {
-		if filter != nil && noMatch(filter.Namespace, nameStruct.namespace) {
+	if namespaceNode, err := byIDkv[*pkgNamespace](ctx, currentID, c); err == nil {
+		if filter != nil && noMatch(filter.Namespace, namespaceNode.Namespace) {
 			return nil, nil
 		}
 		pnsl = append(pnsl, &model.PackageNamespace{
-			ID:        nameStruct.id,
-			Namespace: nameStruct.namespace,
+			ID:        namespaceNode.ThisID,
+			Namespace: namespaceNode.Namespace,
 			Names:     pnl,
 		})
-		node, ok = c.index[nameStruct.parent]
-		if !ok {
-			return nil, fmt.Errorf("Internal ID does not match existing node")
-		}
+		currentID = namespaceNode.Parent
+	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
 	}
 
-	namespaceStruct, ok := node.(*pkgNamespaceStruct)
-	if !ok {
-		return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
+	typeNode, err := byIDkv[*pkgType](ctx, currentID, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) || errors.Is(err, errTypeNotMatch) {
+			return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
+		} else {
+			return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
+		}
+	}
+	if filter != nil && noMatch(filter.Type, typeNode.Type) {
+		return nil, nil
 	}
 	p := model.Package{
-		ID:         namespaceStruct.id,
-		Type:       namespaceStruct.typeKey,
+		ID:         typeNode.ThisID,
+		Type:       typeNode.Type,
 		Namespaces: pnsl,
-	}
-	if filter != nil && noMatch(filter.Type, p.Type) {
-		return nil, nil
 	}
 	return &p, nil
 }
 
-func getPackageIDFromInput(c *demoClient, input model.PkgInputSpec, pkgMatchType model.MatchFlags) (string, error) {
-	pkgNamespace, pkgHasNamespace := c.packages[input.Type]
-	if !pkgHasNamespace {
-		return "", gqlerror.Errorf("Package type \"%s\" not found", input.Type)
+func (c *demoClient) getPackageNameFromInput(ctx context.Context, input model.PkgInputSpec) (*pkgName, error) {
+	inType := &pkgType{
+		Type: input.Type,
 	}
-	pkgName, pkgHasName := pkgNamespace.namespaces[nilToEmpty(input.Namespace)]
-	if !pkgHasName {
-		return "", gqlerror.Errorf("Package namespace \"%s\" not found", nilToEmpty(input.Namespace))
+	pkgT, err := byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
+	if err != nil {
+		return nil, gqlerror.Errorf("Package type \"%s\" not found", input.Type)
 	}
-	pkgVersion, pkgHasVersion := pkgName.names[input.Name]
-	if !pkgHasVersion {
-		return "", gqlerror.Errorf("Package name \"%s\" not found", input.Name)
+
+	inNS := &pkgNamespace{
+		Parent:    pkgT.ThisID,
+		Namespace: nilToEmpty(input.Namespace),
 	}
-	var packageID string
+	pkgNS, err := byKeykv[*pkgNamespace](ctx, pkgNSCol, inNS.Key(), c)
+	if err != nil {
+		return nil, gqlerror.Errorf("Package namespace \"%s\" not found", nilToEmpty(input.Namespace))
+	}
+
+	inName := &pkgName{
+		Parent: pkgNS.ThisID,
+		Name:   input.Name,
+	}
+	pkgN, err := byKeykv[*pkgName](ctx, pkgNameCol, inName.Key(), c)
+	if err != nil {
+		return nil, gqlerror.Errorf("Package name \"%s\" not found", input.Name)
+	}
+
+	return pkgN, nil
+}
+
+func (c *demoClient) getPackageVerFromInput(ctx context.Context, input model.PkgInputSpec) (*pkgVersion, error) {
+	pkgN, err := c.getPackageNameFromInput(ctx, input)
+	if err != nil {
+		return nil, gqlerror.Errorf("Package name \"%s\" not found", input.Name)
+	}
+
+	inVer := &pkgVersion{
+		Parent:     pkgN.ThisID,
+		Version:    nilToEmpty(input.Version),
+		Subpath:    nilToEmpty(input.Subpath),
+		Qualifiers: getQualifiersFromInput(input.Qualifiers),
+	}
+	pkgVer, err := byKeykv[*pkgVersion](ctx, pkgVerCol, inVer.Key(), c)
+	if err != nil {
+		return nil, gqlerror.Errorf("No package matches input")
+	}
+	return pkgVer, nil
+}
+
+func (c *demoClient) getPackageNameOrVerFromInput(ctx context.Context, input model.PkgInputSpec, pkgMatchType model.MatchFlags) (pkgNameOrVersion, error) {
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		packageID = pkgVersion.id
-	} else {
-		found := false
-		for _, version := range pkgVersion.versions {
-			if noMatchInput(input.Version, version.version) {
-				continue
-			}
-			if noMatchInput(input.Subpath, version.subpath) {
-				continue
-			}
-			if !reflect.DeepEqual(version.qualifiers, getQualifiersFromInput(input.Qualifiers)) {
-				continue
-			}
-			if found {
-				return "", gqlerror.Errorf("More than one package matches input")
-			}
-			packageID = version.id
-			found = true
-		}
-		if !found {
-			return "", gqlerror.Errorf("No package matches input")
-		}
+		return c.getPackageNameFromInput(ctx, input)
 	}
-	return packageID, nil
+	return c.getPackageVerFromInput(ctx, input)
 }
 
 func getCollectedPackageQualifiers(qualifierMap map[string]string) []*model.PackageQualifier {
@@ -728,11 +811,13 @@ func getCollectedPackageQualifiers(qualifierMap map[string]string) []*model.Pack
 
 func getQualifiersFromInput(qualifiersSpec []*model.PackageQualifierInputSpec) map[string]string {
 	qualifiersMap := map[string]string{}
-	if qualifiersSpec == nil {
-		return qualifiersMap
-	}
+	// if qualifiersSpec == nil {
+	// 	return qualifiersMap
+	// }
 	for _, kv := range qualifiersSpec {
-		qualifiersMap[kv.Key] = kv.Value
+		if kv != nil {
+			qualifiersMap[kv.Key] = kv.Value
+		}
 	}
 	return qualifiersMap
 }
@@ -762,67 +847,92 @@ func noMatchQualifiers(filter *model.PkgSpec, v map[string]string) bool {
 	return false
 }
 
-func (c *demoClient) findPackageVersion(filter *model.PkgSpec) ([]*pkgVersionNode, error) {
+func (c *demoClient) findPackageVersion(ctx context.Context, filter *model.PkgSpec) ([]*pkgVersion, error) {
 	if filter == nil {
 		return nil, nil
 	}
 	if filter.ID != nil {
-		if node, ok := c.index[*filter.ID]; ok {
-			if c, ok := node.(*pkgVersionNode); ok {
-				return []*pkgVersionNode{c}, nil
-			}
+		if pkgVer, err := byIDkv[*pkgVersion](ctx, *filter.ID, c); err == nil {
+			return []*pkgVersion{pkgVer}, nil
+		} else { // fixme check if err is not keyerror and bubble up if needed
+			return nil, nil
 		}
 	}
-	out := make([]*pkgVersionNode, 0)
-	if filter.Type != nil && filter.Namespace != nil && filter.Name != nil && filter.Version != nil {
-		tp, ok := c.packages[*filter.Type]
-		if !ok {
-			return nil, nil
+	if filter.Type == nil || filter.Namespace != nil || filter.Name == nil || filter.Version == nil { // search all ver?
+		return nil, nil
+	}
+
+	pkgN, err := c.exactPackageName(ctx, filter)
+	if err != nil {
+		return nil, nil
+	}
+
+	var out []*pkgVersion
+	for _, vID := range pkgN.Versions {
+		pkgVer, err := byIDkv[*pkgVersion](ctx, vID, c)
+		if err != nil {
+			return nil, err
 		}
-		ns, ok := tp.namespaces[*filter.Namespace]
-		if !ok {
-			return nil, nil
+		if *filter.Version != pkgVer.Version ||
+			noMatch(filter.Subpath, pkgVer.Subpath) ||
+			noMatchQualifiers(filter, pkgVer.Qualifiers) {
+			continue
 		}
-		nm, ok := ns.names[*filter.Name]
-		if !ok {
-			return nil, nil
-		}
-		for _, v := range nm.versions {
-			if *filter.Version != v.version ||
-				noMatch(filter.Subpath, v.subpath) ||
-				noMatchQualifiers(filter, v.qualifiers) {
-				continue
-			}
-			out = append(out, v)
-		}
+		out = append(out, pkgVer)
 	}
 	return out, nil
 }
 
-func (c *demoClient) exactPackageName(filter *model.PkgSpec) (*pkgVersionStruct, error) {
+func (c *demoClient) exactPackageName(ctx context.Context, filter *model.PkgSpec) (*pkgName, error) {
 	if filter == nil {
 		return nil, nil
 	}
 	if filter.ID != nil {
-		if node, ok := c.index[*filter.ID]; ok {
-			if c, ok := node.(*pkgVersionStruct); ok {
-				return c, nil
+		if pkgN, err := byIDkv[*pkgName](ctx, *filter.ID, c); err == nil {
+			return pkgN, nil
+		} else {
+			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+				return nil, err
 			}
-		}
-	}
-	if filter.Type != nil && filter.Namespace != nil && filter.Name != nil {
-		tp, ok := c.packages[*filter.Type]
-		if !ok {
 			return nil, nil
 		}
-		ns, ok := tp.namespaces[*filter.Namespace]
-		if !ok {
-			return nil, nil
-		}
-		nm, ok := ns.names[*filter.Name]
-		if !ok {
-			return nm, nil
-		}
 	}
-	return nil, nil
+	if filter.Type == nil || filter.Namespace != nil || filter.Name == nil {
+		return nil, nil
+	}
+	inType := &pkgType{
+		Type: *filter.Type,
+	}
+	pkgT, err := byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
+	if err != nil {
+		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			return nil, err
+		}
+		return nil, nil
+	}
+
+	inNS := &pkgNamespace{
+		Parent:    pkgT.ThisID,
+		Namespace: *filter.Namespace,
+	}
+	pkgNS, err := byKeykv[*pkgNamespace](ctx, pkgNSCol, inNS.Key(), c)
+	if err != nil {
+		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			return nil, err
+		}
+		return nil, nil
+	}
+
+	inName := &pkgName{
+		Parent: pkgNS.ThisID,
+		Name:   *filter.Name,
+	}
+	pkgN, err := byKeykv[*pkgName](ctx, pkgNameCol, inName.Key(), c)
+	if err != nil {
+		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			return nil, err
+		}
+		return nil, nil
+	}
+	return pkgN, nil
 }

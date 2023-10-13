@@ -17,36 +17,49 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
 // Internal data: link between packages and dependent packages (isDependency)
-type isDependencyList []*isDependencyLink
 type isDependencyLink struct {
-	id             string
-	packageID      string
-	depPackageID   string
-	versionRange   string
-	dependencyType model.DependencyType
-	justification  string
-	origin         string
-	collector      string
+	ThisID         string
+	PackageID      string
+	DepPackageID   string
+	VersionRange   string
+	DependencyType model.DependencyType
+	Justification  string
+	Origin         string
+	Collector      string
 }
 
-func (n *isDependencyLink) ID() string { return n.id }
+func (n *isDependencyLink) ID() string { return n.ThisID }
+func (n *isDependencyLink) Key() string {
+	return strings.Join([]string{
+		n.PackageID,
+		n.DepPackageID,
+		n.VersionRange,
+		string(n.DependencyType),
+		n.Justification,
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *isDependencyLink) Neighbors(allowedEdges edgeMap) []string {
 	if allowedEdges[model.EdgeIsDependencyPackage] {
-		return []string{n.packageID, n.depPackageID}
+		return []string{n.PackageID, n.DepPackageID}
 	}
 	return []string{}
 }
 
 func (n *isDependencyLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildIsDependency(n, nil, true)
+	return c.buildIsDependency(ctx, n, nil, true)
 }
 
 // Ingest IngestDependencies
@@ -72,88 +85,64 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 
 func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec, readOnly bool) (*model.IsDependency, error) {
 	funcName := "IngestDependency"
+
+	inLink := &isDependencyLink{
+		VersionRange:   dependency.VersionRange,
+		DependencyType: dependency.DependencyType,
+		Justification:  dependency.Justification,
+		Origin:         dependency.Origin,
+		Collector:      dependency.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
 	// for IsDependency the dependent package will return the ID at the
 	// packageName node. VersionRange will be used to specify the versions are
 	// the attestation relates to
-	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
+	foundPkgVersion, err := c.getPackageVerFromInput(ctx, packageArg)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	foundPkgVersion, err := byID[*pkgVersionNode](packageID, c)
+	inLink.PackageID = foundPkgVersion.ThisID
+
+	depPkg, err := c.getPackageNameOrVerFromInput(ctx, dependentPackageArg, depPkgMatchType)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	packageDependencies := foundPkgVersion.isDependencyLinks
+	inLink.DepPackageID = depPkg.ID()
 
-	depPackageID, err := getPackageIDFromInput(c, dependentPackageArg, depPkgMatchType)
-	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	outLink, err := byKeykv[*isDependencyLink](ctx, isDepCol, inLink.Key(), c)
+	if err == nil {
+		return c.buildIsDependency(ctx, outLink, nil, true)
 	}
-	depPkg, err := byID[pkgNameOrVersion](depPackageID, c)
-	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-	depPackageDependencies := depPkg.getIsDependencyLinks()
-
-	var searchIDs []string
-	if len(packageDependencies) < len(depPackageDependencies) {
-		searchIDs = packageDependencies
-	} else {
-		searchIDs = depPackageDependencies
-	}
-
-	// Don't insert duplicates
-	duplicate := false
-	collectedIsDependencyLink := isDependencyLink{}
-	for _, id := range searchIDs {
-		v, err := byID[*isDependencyLink](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		if packageID == v.packageID && depPackageID == v.depPackageID && dependency.Justification == v.justification &&
-			dependency.Origin == v.origin && dependency.Collector == v.collector &&
-			dependency.VersionRange == v.versionRange && dependency.DependencyType == v.dependencyType {
-
-			collectedIsDependencyLink = *v
-			duplicate = true
-			break
-		}
-	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			d, err := c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return d, err
-		}
-		// store the link
-		collectedIsDependencyLink = isDependencyLink{
-			id:             c.getNextID(),
-			packageID:      packageID,
-			depPackageID:   depPackageID,
-			versionRange:   dependency.VersionRange,
-			dependencyType: dependency.DependencyType,
-			justification:  dependency.Justification,
-			origin:         dependency.Origin,
-			collector:      dependency.Collector,
-		}
-		c.index[collectedIsDependencyLink.id] = &collectedIsDependencyLink
-		c.isDependencies = append(c.isDependencies, &collectedIsDependencyLink)
-		// set the backlinks
-		foundPkgVersion.setIsDependencyLinks(collectedIsDependencyLink.id)
-		depPkg.setIsDependencyLinks(collectedIsDependencyLink.id)
-	}
-
-	// build return GraphQL type
-	foundIsDependency, err := c.buildIsDependency(&collectedIsDependencyLink, nil, true)
-	if err != nil {
+	if !errors.Is(err, kv.NotFoundError) {
 		return nil, err
 	}
 
-	return foundIsDependency, nil
+	if readOnly {
+		c.m.RUnlock()
+		d, err := c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return d, err
+	}
+
+	inLink.ThisID = c.getNextID()
+	if err := c.addToIndex(ctx, isDepCol, inLink); err != nil {
+		return nil, err
+	}
+	if err := foundPkgVersion.setIsDependencyLinks(ctx, inLink.ThisID, c); err != nil {
+		return nil, err
+	}
+	if err := depPkg.setIsDependencyLinks(ctx, inLink.ThisID, c); err != nil {
+		return nil, err
+	}
+	if err := setkv(ctx, isDepCol, inLink, c); err != nil {
+		return nil, err
+	}
+	outLink = inLink
+
+	return c.buildIsDependency(ctx, outLink, nil, true)
 }
 
 // Query IsDependency
@@ -161,13 +150,14 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 	c.m.RLock()
 	defer c.m.RUnlock()
 	funcName := "IsDependency"
+
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*isDependencyLink](*filter.ID, c)
+		link, err := byIDkv[*isDependencyLink](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
-		foundIsDependency, err := c.buildIsDependency(link, filter, true)
+		foundIsDependency, err := c.buildIsDependency(ctx, link, filter, true)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -177,33 +167,33 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 	var search []string
 	foundOne := false
 	if filter != nil && filter.Package != nil {
-		pkgs, err := c.findPackageVersion(filter.Package)
+		pkgs, err := c.findPackageVersion(ctx, filter.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		foundOne = len(pkgs) > 0
 		for _, pkg := range pkgs {
-			search = append(search, pkg.isDependencyLinks...)
+			search = append(search, pkg.IsDependencyLinks...)
 		}
 	}
 	if !foundOne && filter != nil && filter.DependencyPackage != nil {
-		if filter.DependencyPackage.Version == nil {
-			exactPackage, err := c.exactPackageName(filter.DependencyPackage)
+		if filter.DependencyPackage.Version == nil { // FIXME this logic isn't exactly correct
+			exactPackage, err := c.exactPackageName(ctx, filter.DependencyPackage)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if exactPackage != nil {
-				search = append(search, exactPackage.isDependencyLinks...)
+				search = append(search, exactPackage.IsDependencyLinks...)
 				foundOne = true
 			}
 		} else {
-			pkgs, err := c.findPackageVersion(filter.Package)
+			pkgs, err := c.findPackageVersion(ctx, filter.DependencyPackage)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			foundOne = len(pkgs) > 0
 			for _, pkg := range pkgs {
-				search = append(search, pkg.isDependencyLinks...)
+				search = append(search, pkg.IsDependencyLinks...)
 			}
 		}
 	}
@@ -211,19 +201,26 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 	var out []*model.IsDependency
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*isDependencyLink](id, c)
+			link, err := byIDkv[*isDependencyLink](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addDepIfMatch(out, filter, link)
+			out, err = c.addDepIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 		}
 	} else {
-		for _, link := range c.isDependencies {
-			var err error
-			out, err = c.addDepIfMatch(out, filter, link)
+		depKeys, err := c.kv.Keys(ctx, isDepCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, depKey := range depKeys {
+			link, err := byKeykv[*isDependencyLink](ctx, isDepCol, depKey, c)
+			if err != nil {
+				return nil, err
+			}
+			out, err = c.addDepIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -233,17 +230,17 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 	return out, nil
 }
 
-func (c *demoClient) buildIsDependency(link *isDependencyLink, filter *model.IsDependencySpec, ingestOrIDProvided bool) (*model.IsDependency, error) {
+func (c *demoClient) buildIsDependency(ctx context.Context, link *isDependencyLink, filter *model.IsDependencySpec, ingestOrIDProvided bool) (*model.IsDependency, error) {
 	var p *model.Package
 	var dep *model.Package
 	var err error
 	if filter != nil {
-		p, err = c.buildPackageResponse(link.packageID, filter.Package)
+		p, err = c.buildPackageResponse(ctx, link.PackageID, filter.Package)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		p, err = c.buildPackageResponse(link.packageID, nil)
+		p, err = c.buildPackageResponse(ctx, link.PackageID, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -251,12 +248,12 @@ func (c *demoClient) buildIsDependency(link *isDependencyLink, filter *model.IsD
 	if filter != nil && filter.DependencyPackage != nil {
 		depPkgFilter := &model.PkgSpec{Type: filter.DependencyPackage.Type, Namespace: filter.DependencyPackage.Namespace,
 			Name: filter.DependencyPackage.Name}
-		dep, err = c.buildPackageResponse(link.depPackageID, depPkgFilter)
+		dep, err = c.buildPackageResponse(ctx, link.DepPackageID, depPkgFilter)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		dep, err = c.buildPackageResponse(link.depPackageID, nil)
+		dep, err = c.buildPackageResponse(ctx, link.DepPackageID, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -276,38 +273,38 @@ func (c *demoClient) buildIsDependency(link *isDependencyLink, filter *model.IsD
 	}
 
 	foundIsDependency := model.IsDependency{
-		ID:                link.id,
+		ID:                link.ThisID,
 		Package:           p,
 		DependencyPackage: dep,
-		VersionRange:      link.versionRange,
-		DependencyType:    link.dependencyType,
-		Justification:     link.justification,
-		Origin:            link.origin,
-		Collector:         link.collector,
+		VersionRange:      link.VersionRange,
+		DependencyType:    link.DependencyType,
+		Justification:     link.Justification,
+		Origin:            link.Origin,
+		Collector:         link.Collector,
 	}
 	return &foundIsDependency, nil
 }
 
-func (c *demoClient) addDepIfMatch(out []*model.IsDependency,
+func (c *demoClient) addDepIfMatch(ctx context.Context, out []*model.IsDependency,
 	filter *model.IsDependencySpec, link *isDependencyLink) (
 	[]*model.IsDependency, error) {
-	if filter != nil && noMatch(filter.Justification, link.justification) {
+	if filter != nil && noMatch(filter.Justification, link.Justification) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
+	if filter != nil && noMatch(filter.Origin, link.Origin) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
+	if filter != nil && noMatch(filter.Collector, link.Collector) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.VersionRange, link.versionRange) {
+	if filter != nil && noMatch(filter.VersionRange, link.VersionRange) {
 		return out, nil
 	}
-	if filter != nil && filter.DependencyType != nil && *filter.DependencyType != link.dependencyType {
+	if filter != nil && filter.DependencyType != nil && *filter.DependencyType != link.DependencyType {
 		return out, nil
 	}
 
-	foundIsDependency, err := c.buildIsDependency(link, filter, false)
+	foundIsDependency, err := c.buildIsDependency(ctx, link, filter, false)
 	if err != nil {
 		return nil, err
 	}

@@ -17,37 +17,48 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-type vulnerabilityMetadataList []*vulnerabilityMetadataLink
 type vulnerabilityMetadataLink struct {
-	id              string
-	vulnerabilityID string
-	scoreType       model.VulnerabilityScoreType
-	scoreValue      float64
-	timestamp       time.Time
-	origin          string
-	collector       string
+	ThisID          string
+	VulnerabilityID string
+	ScoreType       model.VulnerabilityScoreType
+	ScoreValue      float64
+	Timestamp       time.Time
+	Origin          string
+	Collector       string
 }
 
-func (n *vulnerabilityMetadataLink) ID() string { return n.id }
+func (n *vulnerabilityMetadataLink) ID() string { return n.ThisID }
+func (n *vulnerabilityMetadataLink) Key() string {
+	return strings.Join([]string{
+		n.VulnerabilityID,
+		string(n.ScoreType),
+		fmt.Sprint(n.ScoreValue), // TODO check that fmt.Sprint(float64) is stable for small diffs (epsilon) fmt.Sprintf("%.2f", f)
+		timeKey(n.Timestamp),
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *vulnerabilityMetadataLink) Neighbors(allowedEdges edgeMap) []string {
-	out := make([]string, 0, 1)
 	if allowedEdges[model.EdgeVulnMetadataVulnerability] {
-		out = append(out, n.vulnerabilityID)
+		return []string{n.VulnerabilityID}
 	}
-	return out
+	return nil
 }
 
 func (n *vulnerabilityMetadataLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildVulnerabilityMetadata(n, nil, true)
+	return c.buildVulnerabilityMetadata(ctx, n, nil, true)
 }
 
 // Ingest VulnerabilityMetadata
@@ -69,69 +80,51 @@ func (c *demoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerabil
 
 func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestVulnerabilityMetadata"
+
+	in := &vulnerabilityMetadataLink{
+		Timestamp:  vulnerabilityMetadata.Timestamp,
+		ScoreType:  vulnerabilityMetadata.ScoreType,
+		ScoreValue: (vulnerabilityMetadata.ScoreValue),
+		Origin:     vulnerabilityMetadata.Origin,
+		Collector:  vulnerabilityMetadata.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	var vulnerabilityLinks []string
-
-	vulnID, err := getVulnerabilityIDFromInput(c, vulnerability)
+	foundVulnNode, err := c.getVulnerabilityFromInput(ctx, vulnerability)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	foundVulnNode, err := byID[*vulnIDNode](vulnID, c)
-	if err != nil {
-		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	in.VulnerabilityID = foundVulnNode.ThisID
+
+	out, err := byKeykv[*vulnerabilityMetadataLink](ctx, vulnMDCol, in.Key(), c)
+	if err == nil {
+		return out.ThisID, nil
 	}
-	vulnerabilityLinks = foundVulnNode.vulnMetadataLinks
-
-	searchIDs := vulnerabilityLinks
-
-	// Don't insert duplicates
-	duplicate := false
-	var collectedVulnMetadataLink *vulnerabilityMetadataLink
-	for _, id := range searchIDs {
-		v, err := byID[*vulnerabilityMetadataLink](id, c)
-		if err != nil {
-			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		vulnMatch := false
-		if vulnID != "" && vulnID == v.vulnerabilityID {
-			vulnMatch = true
-		}
-		if vulnMatch && vulnerabilityMetadata.Timestamp.Equal(v.timestamp) && vulnerabilityMetadata.ScoreType == v.scoreType &&
-			floatEqual(vulnerabilityMetadata.ScoreValue, v.scoreValue) &&
-			vulnerabilityMetadata.Origin == v.origin && vulnerabilityMetadata.Collector == v.collector {
-
-			collectedVulnMetadataLink = v
-			duplicate = true
-			break
-		}
+	if !errors.Is(err, kv.NotFoundError) {
+		return "", err
 	}
 
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			cv, err := c.ingestVulnerabilityMetadata(ctx, vulnerability, vulnerabilityMetadata, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return cv, err
-		}
-		// store the link
-		collectedVulnMetadataLink = &vulnerabilityMetadataLink{
-			id:              c.getNextID(),
-			vulnerabilityID: vulnID,
-			timestamp:       vulnerabilityMetadata.Timestamp,
-			scoreType:       vulnerabilityMetadata.ScoreType,
-			scoreValue:      (vulnerabilityMetadata.ScoreValue),
-			origin:          vulnerabilityMetadata.Origin,
-			collector:       vulnerabilityMetadata.Collector,
-		}
-		c.index[collectedVulnMetadataLink.id] = collectedVulnMetadataLink
-		c.vulnerabilityMetadatas = append(c.vulnerabilityMetadatas, collectedVulnMetadataLink)
-		// set the backlinks
-		foundVulnNode.setVulnMetadataLinks(collectedVulnMetadataLink.id)
+	if readOnly {
+		c.m.RUnlock()
+		cv, err := c.ingestVulnerabilityMetadata(ctx, vulnerability, vulnerabilityMetadata, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return cv, err
 	}
 
-	return collectedVulnMetadataLink.id, nil
+	in.ThisID = c.getNextID()
+	if err := c.addToIndex(ctx, vulnMDCol, in); err != nil {
+		return "", err
+	}
+	if err := foundVulnNode.setVulnMetadataLinks(ctx, in.ThisID, c); err != nil {
+		return "", err
+	}
+	if err := setkv(ctx, vulnMDCol, in, c); err != nil {
+		return "", err
+	}
+
+	return in.ThisID, nil
 }
 
 // Query VulnerabilityMetadata
@@ -141,13 +134,13 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 	funcName := "VulnerabilityMetadata"
 
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*vulnerabilityMetadataLink](*filter.ID, c)
+		link, err := byIDkv[*vulnerabilityMetadataLink](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		foundVulnMetadata, err := c.buildVulnerabilityMetadata(link, filter, true)
+		foundVulnMetadata, err := c.buildVulnerabilityMetadata(ctx, link, filter, true)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -158,12 +151,12 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 	foundOne := false
 	if !foundOne && filter != nil && filter.Vulnerability != nil {
 
-		exactVuln, err := c.exactVulnerability(filter.Vulnerability)
+		exactVuln, err := c.exactVulnerability(ctx, filter.Vulnerability)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactVuln != nil {
-			search = append(search, exactVuln.vulnMetadataLinks...)
+			search = append(search, exactVuln.VulnMetadataLinks...)
 			foundOne = true
 		}
 	}
@@ -171,19 +164,26 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 	var out []*model.VulnerabilityMetadata
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*vulnerabilityMetadataLink](id, c)
+			link, err := byIDkv[*vulnerabilityMetadataLink](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addVulnMetadataMatch(out, filter, link)
+			out, err = c.addVulnMetadataMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 		}
 	} else {
-		for _, link := range c.vulnerabilityMetadatas {
-			var err error
-			out, err = c.addVulnMetadataMatch(out, filter, link)
+		vmdKeys, err := c.kv.Keys(ctx, vulnMDCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, vmdk := range vmdKeys {
+			link, err := byKeykv[*vulnerabilityMetadataLink](ctx, vulnMDCol, vmdk, c)
+			if err != nil {
+				return nil, err
+			}
+			out, err = c.addVulnMetadataMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -193,11 +193,11 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 	return out, nil
 }
 
-func (c *demoClient) addVulnMetadataMatch(out []*model.VulnerabilityMetadata,
+func (c *demoClient) addVulnMetadataMatch(ctx context.Context, out []*model.VulnerabilityMetadata,
 	filter *model.VulnerabilityMetadataSpec,
 	link *vulnerabilityMetadataLink) ([]*model.VulnerabilityMetadata, error) {
 
-	if filter != nil && filter.Timestamp != nil && !filter.Timestamp.Equal(link.timestamp) {
+	if filter != nil && filter.Timestamp != nil && !filter.Timestamp.Equal(link.Timestamp) {
 		return out, nil
 	}
 	if filter != nil && filter.Comparator != nil {
@@ -206,34 +206,34 @@ func (c *demoClient) addVulnMetadataMatch(out []*model.VulnerabilityMetadata,
 		}
 		switch *filter.Comparator {
 		case model.ComparatorEqual:
-			if link.scoreValue != *filter.ScoreValue {
+			if link.ScoreValue != *filter.ScoreValue {
 				return out, nil
 			}
 		case model.ComparatorGreater, model.ComparatorGreaterEqual:
-			if link.scoreValue < *filter.ScoreValue {
+			if link.ScoreValue < *filter.ScoreValue {
 				return out, nil
 			}
 		case model.ComparatorLess, model.ComparatorLessEqual:
-			if link.scoreValue > *filter.ScoreValue {
+			if link.ScoreValue > *filter.ScoreValue {
 				return out, nil
 			}
 		}
 	} else {
-		if filter != nil && noMatchFloat(filter.ScoreValue, link.scoreValue) {
+		if filter != nil && noMatchFloat(filter.ScoreValue, link.ScoreValue) {
 			return out, nil
 		}
 	}
-	if filter != nil && filter.ScoreType != nil && *filter.ScoreType != link.scoreType {
+	if filter != nil && filter.ScoreType != nil && *filter.ScoreType != link.ScoreType {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
+	if filter != nil && noMatch(filter.Collector, link.Collector) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
+	if filter != nil && noMatch(filter.Origin, link.Origin) {
 		return out, nil
 	}
 
-	foundVulnMetadata, err := c.buildVulnerabilityMetadata(link, filter, false)
+	foundVulnMetadata, err := c.buildVulnerabilityMetadata(ctx, link, filter, false)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build vuln metadata node from link")
 	}
@@ -243,13 +243,13 @@ func (c *demoClient) addVulnMetadataMatch(out []*model.VulnerabilityMetadata,
 	return append(out, foundVulnMetadata), nil
 }
 
-func (c *demoClient) buildVulnerabilityMetadata(link *vulnerabilityMetadataLink, filter *model.VulnerabilityMetadataSpec, ingestOrIDProvided bool) (*model.VulnerabilityMetadata, error) {
+func (c *demoClient) buildVulnerabilityMetadata(ctx context.Context, link *vulnerabilityMetadataLink, filter *model.VulnerabilityMetadataSpec, ingestOrIDProvided bool) (*model.VulnerabilityMetadata, error) {
 	var vuln *model.Vulnerability
 	var err error
 
 	if filter != nil && filter.Vulnerability != nil {
-		if filter.Vulnerability != nil && link.vulnerabilityID != "" {
-			vuln, err = c.buildVulnResponse(link.vulnerabilityID, filter.Vulnerability)
+		if filter.Vulnerability != nil && link.VulnerabilityID != "" {
+			vuln, err = c.buildVulnResponse(ctx, link.VulnerabilityID, filter.Vulnerability)
 			if err != nil {
 				return nil, err
 			}
@@ -262,15 +262,15 @@ func (c *demoClient) buildVulnerabilityMetadata(link *vulnerabilityMetadataLink,
 			}
 		}
 	} else {
-		if link.vulnerabilityID != "" {
-			vuln, err = c.buildVulnResponse(link.vulnerabilityID, nil)
+		if link.VulnerabilityID != "" {
+			vuln, err = c.buildVulnResponse(ctx, link.VulnerabilityID, nil)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	if link.vulnerabilityID != "" {
+	if link.VulnerabilityID != "" {
 		if vuln == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve vuln via vulnID")
 		} else if vuln == nil && !ingestOrIDProvided {
@@ -279,13 +279,13 @@ func (c *demoClient) buildVulnerabilityMetadata(link *vulnerabilityMetadataLink,
 	}
 
 	vulnMetadata := &model.VulnerabilityMetadata{
-		ID:            link.id,
+		ID:            link.ThisID,
 		Vulnerability: vuln,
-		Timestamp:     link.timestamp,
-		ScoreType:     model.VulnerabilityScoreType(link.scoreType),
-		ScoreValue:    link.scoreValue,
-		Origin:        link.origin,
-		Collector:     link.collector,
+		Timestamp:     link.Timestamp,
+		ScoreType:     model.VulnerabilityScoreType(link.ScoreType),
+		ScoreValue:    link.ScoreValue,
+		Origin:        link.Origin,
+		Collector:     link.Collector,
 	}
 
 	return vulnMetadata, nil

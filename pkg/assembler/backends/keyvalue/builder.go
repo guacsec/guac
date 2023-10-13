@@ -22,20 +22,24 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
-type builderMap map[string]*builderStruct
 type builderStruct struct {
-	id       string
-	uri      string
-	hasSLSAs []string
+	ThisID   string
+	URI      string
+	HasSLSAs []string
 }
 
-func (b *builderStruct) ID() string { return b.id }
+func (n *builderStruct) Key() string {
+	return n.URI
+}
+
+func (b *builderStruct) ID() string { return b.ThisID }
 
 func (b *builderStruct) Neighbors(allowedEdges edgeMap) []string {
 	if allowedEdges[model.EdgeBuilderHasSlsa] {
-		return b.hasSLSAs
+		return b.HasSLSAs
 	}
 	return []string{}
 }
@@ -44,13 +48,16 @@ func (b *builderStruct) BuildModelNode(ctx context.Context, c *demoClient) (mode
 	return c.convBuilder(b), nil
 }
 
-func (n *builderStruct) setHasSLSAs(id string) { n.hasSLSAs = append(n.hasSLSAs, id) }
+func (n *builderStruct) setHasSLSAs(ctx context.Context, id string, c *demoClient) error {
+	n.HasSLSAs = append(n.HasSLSAs, id)
+	return setkv(ctx, builderCol, n, c)
+}
 
-func (c *demoClient) builderByKey(uri string) (*builderStruct, error) {
-	if b, ok := c.builders[uri]; ok {
-		return b, nil
+func (c *demoClient) builderByInput(ctx context.Context, b *model.BuilderInputSpec) (*builderStruct, error) {
+	in := &builderStruct{
+		URI: b.URI,
 	}
-	return nil, errors.New("builder not found")
+	return byKeykv[*builderStruct](ctx, builderCol, in.Key(), c)
 }
 
 // Ingest Builders
@@ -74,47 +81,58 @@ func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderIn
 }
 
 func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.BuilderInputSpec, readOnly bool) (*model.Builder, error) {
+	in := &builderStruct{
+		URI: builder.URI,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	b, err := c.builderByKey(builder.URI)
-	if err != nil {
-		if readOnly {
-			c.m.RUnlock()
-			b, err := c.ingestBuilder(ctx, builder, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return b, err
-		}
-		b = &builderStruct{
-			id:  c.getNextID(),
-			uri: builder.URI,
-		}
-		c.index[b.id] = b
-		c.builders[builder.URI] = b
+	out, err := byKeykv[*builderStruct](ctx, builderCol, in.Key(), c)
+	if err == nil {
+		return c.convBuilder(out), nil
 	}
-	return c.convBuilder(b), nil
+	if !errors.Is(err, kv.NotFoundError) {
+		return nil, err
+	}
+	if readOnly {
+		c.m.RUnlock()
+		b, err := c.ingestBuilder(ctx, builder, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return b, err
+	}
+	in.ThisID = c.getNextID()
+	if err := c.addToIndex(ctx, builderCol, in); err != nil {
+		return nil, err
+	}
+	if err := setkv(ctx, builderCol, in, c); err != nil {
+		return nil, err
+	}
+
+	return c.convBuilder(in), nil
 }
 
 // Query Builder
 func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
-	if builderSpec.ID != nil {
-		b, err := byID[*builderStruct](*builderSpec.ID, c)
-		if err != nil {
-			return nil, nil
-		}
-		return []*model.Builder{c.convBuilder(b)}, nil
+	b, err := c.exactBuilder(ctx, builderSpec)
+	if err != nil {
+		return nil, err
 	}
-	if builderSpec.URI != nil {
-		b, err := c.builderByKey(*builderSpec.URI)
-		if err != nil {
-			return nil, nil
-		}
+	if b != nil {
 		return []*model.Builder{c.convBuilder(b)}, nil
 	}
 	var builders []*model.Builder
-	for _, b := range c.builders {
+	bKeys, err := c.kv.Keys(ctx, builderCol)
+	if err != nil {
+		return nil, err
+	}
+	for _, bk := range bKeys {
+		b, err := byKeykv[*builderStruct](ctx, builderCol, bk, c)
+		if err != nil {
+			return nil, err
+		}
 		builders = append(builders, c.convBuilder(b))
 	}
 	return builders, nil
@@ -122,25 +140,36 @@ func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 
 func (c *demoClient) convBuilder(b *builderStruct) *model.Builder {
 	return &model.Builder{
-		ID:  b.id,
-		URI: b.uri,
+		ID:  b.ThisID,
+		URI: b.URI,
 	}
 }
 
-func (c *demoClient) exactBuilder(filter *model.BuilderSpec) (*builderStruct, error) {
+func (c *demoClient) exactBuilder(ctx context.Context, filter *model.BuilderSpec) (*builderStruct, error) {
 	if filter == nil {
 		return nil, nil
 	}
 	if filter.ID != nil {
-		if node, ok := c.index[*filter.ID]; ok {
-			if b, ok := node.(*builderStruct); ok {
-				return b, nil
-			}
+		b, err := byIDkv[*builderStruct](ctx, *filter.ID, c)
+		if err == nil {
+			return b, nil
 		}
+		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			return nil, err
+		}
+		// id not found
+		return nil, nil
 	}
 	if filter.URI != nil {
-		if b, ok := c.builders[*filter.URI]; ok {
-			return b, nil
+		in := &builderStruct{
+			URI: *filter.URI,
+		}
+		out, err := byKeykv[*builderStruct](ctx, builderCol, in.Key(), c)
+		if err == nil {
+			return out, nil
+		}
+		if !errors.Is(err, kv.NotFoundError) {
+			return nil, err
 		}
 	}
 	return nil, nil

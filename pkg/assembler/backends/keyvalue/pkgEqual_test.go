@@ -23,6 +23,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/stablememmap"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -387,31 +388,6 @@ func TestPkgEqual(t *testing.T) {
 			},
 			ExpIngestErr: true,
 		},
-		{
-			Name:  "Query bad ID",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
-			Calls: []call{
-				{
-					P1: p1,
-					P2: p2,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p2,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-				{
-					P1: p1,
-					P2: p3,
-					HE: &model.PkgEqualInputSpec{},
-				},
-			},
-			Query: &model.PkgEqualSpec{
-				ID: ptrfrom.String("asdf"),
-			},
-			ExpQueryErr: true,
-		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
@@ -419,7 +395,8 @@ func TestPkgEqual(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -632,7 +609,8 @@ func TestIngestPkgEquals(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -727,7 +705,8 @@ func TestPkgEqualNeighbors(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

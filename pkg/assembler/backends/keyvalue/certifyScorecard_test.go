@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/stablememmap"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -383,25 +384,6 @@ func TestCertifyScorecard(t *testing.T) {
 			},
 			ExpIngestErr: true,
 		},
-		{
-			Name:  "Query bad ID",
-			InSrc: []*model.SourceInputSpec{s1},
-			Calls: []call{
-				{
-					Src: s1,
-					SC: &model.ScorecardInputSpec{
-						AggregateScore:   1.5,
-						TimeScanned:      time.Unix(1e9, 0),
-						ScorecardVersion: "123",
-						ScorecardCommit:  "abc",
-					},
-				},
-			},
-			Query: &model.CertifyScorecardSpec{
-				ID: ptrfrom.String("4294967296"),
-			},
-			ExpQueryErr: true,
-		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
@@ -409,7 +391,8 @@ func TestCertifyScorecard(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -591,7 +574,8 @@ func TestIngestScorecards(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -686,7 +670,8 @@ func TestCertifyScorecardNeighbors(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

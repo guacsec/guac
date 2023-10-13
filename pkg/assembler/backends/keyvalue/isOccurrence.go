@@ -17,18 +17,17 @@ package keyvalue
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
+	"errors"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
 // Internal isOccurrence
 
-type isOccurrenceList []*isOccurrenceStruct
 type isOccurrenceStruct struct {
 	ThisID        string
 	Pkg           string
@@ -68,18 +67,6 @@ func (n *isOccurrenceStruct) Key() string {
 		n.Origin,
 		n.Collector,
 	}, ":")
-}
-
-func (c *demoClient) isOccurrenceByKey(ctx context.Context, k string) (*isOccurrenceStruct, error) {
-	strval, err := c.kv.Get(ctx, occCol, k)
-	if err != nil {
-		return nil, err
-	}
-	out := &isOccurrenceStruct{}
-	if err = json.Unmarshal([]byte(strval), out); err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 // Ingest IngestOccurrences
@@ -132,37 +119,33 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 	}
 	in.Artifact = a.ThisID
 
-	var packageID string
+	var pkgVer *pkgVersion
 	if subject.Package != nil {
-		var pmt model.MatchFlags
-		pmt.Pkg = model.PkgMatchTypeSpecificVersion
-		pid, err := getPackageIDFromInput(c, *subject.Package, pmt)
+		var err error
+		pkgVer, err = c.getPackageVerFromInput(ctx, *subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestOccurrence :: %v", err)
 		}
-		packageID = pid
-		in.Pkg = pid
+		in.Pkg = pkgVer.ThisID
 	}
 
-	var sourceID string
+	var src *srcNameNode
 	if subject.Source != nil {
-		sid, err := getSourceIDFromInput(c, *subject.Source)
+		var err error
+		src, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestOccurrence :: %v", err)
 		}
-		sourceID = sid
-		in.Source = sid
+		in.Source = src.ThisID
 	}
 
-	out, err := c.isOccurrenceByKey(ctx, in.Key())
+	out, err := byKeykv[*isOccurrenceStruct](ctx, occCol, in.Key(), c)
 	if err == nil {
-		//fmt.Printf("return existing: %q %q %q\n", in.Artifact, out.Artifact, out.ThisID)
 		return c.convOccurrence(ctx, out)
 	}
-	// FIXME, redis should catch key error and convert to these
-	// if !errors.Is(err, kv.KeyError) && !errors.Is(err, kv.CollectionError) {
-	// 	return nil, err
-	// }
+	if !errors.Is(err, kv.NotFoundError) {
+		return nil, err
+	}
 
 	if readOnly {
 		c.m.RUnlock()
@@ -171,30 +154,22 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 		return o, err
 	}
 	in.ThisID = c.getNextID()
-	if err := c.kv.Set(ctx, indexCol, in.ThisID, in.Key()); err != nil {
-		fmt.Printf("error 1 %v\n", err)
+	if err := c.addToIndex(ctx, occCol, in); err != nil {
 		return nil, err
 	}
-	c.artifactSetOccurrences(ctx, in.Artifact, in.ThisID)
-	if packageID != "" {
-		p, err := byID[*pkgVersionNode](packageID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	if err := a.setOccurrences(ctx, in.ThisID, c); err != nil {
+		return nil, err
+	}
+	if pkgVer != nil {
+		if err := pkgVer.setOccurrenceLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
 		}
-		p.setOccurrenceLinks(in.ThisID)
 	} else {
-		s, err := byID[*srcNameNode](sourceID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		if err := src.setOccurrenceLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
 		}
-		s.setOccurrenceLinks(in.ThisID)
 	}
-	byteval, err := json.Marshal(in)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.kv.Set(ctx, occCol, in.Key(), string(byteval)); err != nil {
-		fmt.Printf("error 2 %v\n", err)
+	if err := setkv(ctx, occCol, in, c); err != nil {
 		return nil, err
 	}
 
@@ -204,7 +179,6 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 func (c *demoClient) convOccurrence(ctx context.Context, in *isOccurrenceStruct) (*model.IsOccurrence, error) {
 	a, err := c.artifactModelByID(ctx, in.Artifact)
 	if err != nil {
-		fmt.Printf("error 6 %v\n", err)
 		return nil, err
 	}
 	o := &model.IsOccurrence{
@@ -215,16 +189,14 @@ func (c *demoClient) convOccurrence(ctx context.Context, in *isOccurrenceStruct)
 		Collector:     in.Collector,
 	}
 	if in.Pkg != "" {
-		p, err := c.buildPackageResponse(in.Pkg, nil)
+		p, err := c.buildPackageResponse(ctx, in.Pkg, nil)
 		if err != nil {
-			fmt.Printf("error 7 %v\n", err)
 			return nil, err
 		}
 		o.Subject = p
 	} else {
-		s, err := c.buildSourceResponse(in.Source, nil)
+		s, err := c.buildSourceResponse(ctx, in.Source, nil)
 		if err != nil {
-			fmt.Printf("error 8 %v\n", err)
 			return nil, err
 		}
 		o.Subject = s
@@ -240,7 +212,7 @@ func (c *demoClient) artifactMatch(ctx context.Context, aID string, artifactSpec
 	if a != nil && a.ID() == aID {
 		return true
 	}
-	m, err := byIDkv[*artStruct](ctx, aID, artCol, c)
+	m, err := byIDkv[*artStruct](ctx, aID, c)
 	if err != nil {
 		return false
 	}
@@ -262,7 +234,7 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 	defer c.m.RUnlock()
 
 	if filter != nil && filter.ID != nil {
-		link, err := byIDkv[*isOccurrenceStruct](ctx, *filter.ID, occCol, c)
+		link, err := byIDkv[*isOccurrenceStruct](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
@@ -288,22 +260,22 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Package != nil {
-		pkgs, err := c.findPackageVersion(filter.Subject.Package)
+		pkgs, err := c.findPackageVersion(ctx, filter.Subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		foundOne = len(pkgs) > 0
 		for _, pkg := range pkgs {
-			search = append(search, pkg.occurrences...)
+			search = append(search, pkg.Occurrences...)
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Source != nil {
-		exactSource, err := c.exactSource(filter.Subject.Source)
+		exactSource, err := c.exactSource(ctx, filter.Subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactSource != nil {
-			search = append(search, exactSource.occurrences...)
+			search = append(search, exactSource.Occurrences...)
 			foundOne = true
 		}
 	}
@@ -311,9 +283,8 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 	var out []*model.IsOccurrence
 	if foundOne {
 		for _, id := range search {
-			link, err := byIDkv[*isOccurrenceStruct](ctx, id, occCol, c)
+			link, err := byIDkv[*isOccurrenceStruct](ctx, id, c)
 			if err != nil {
-				fmt.Printf("error 4 %v\n", err)
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			out, err = c.addOccIfMatch(ctx, out, filter, link)
@@ -327,9 +298,8 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 			return nil, err
 		}
 		for _, ok := range occKeys {
-			link, err := c.isOccurrenceByKey(ctx, ok)
+			link, err := byKeykv[*isOccurrenceStruct](ctx, occCol, ok, c)
 			if err != nil {
-				fmt.Printf("error 3 %v\n", err)
 				return nil, err
 			}
 			out, err = c.addOccIfMatch(ctx, out, filter, link)
@@ -358,7 +328,7 @@ func (c *demoClient) addOccIfMatch(ctx context.Context, out []*model.IsOccurrenc
 			if link.Pkg == "" {
 				return out, nil
 			}
-			p, err := c.buildPackageResponse(link.Pkg, filter.Subject.Package)
+			p, err := c.buildPackageResponse(ctx, link.Pkg, filter.Subject.Package)
 			if err != nil {
 				return nil, err
 			}
@@ -369,7 +339,7 @@ func (c *demoClient) addOccIfMatch(ctx context.Context, out []*model.IsOccurrenc
 			if link.Source == "" {
 				return out, nil
 			}
-			s, err := c.buildSourceResponse(link.Source, filter.Subject.Source)
+			s, err := c.buildSourceResponse(ctx, link.Source, filter.Subject.Source)
 			if err != nil {
 				return nil, err
 			}

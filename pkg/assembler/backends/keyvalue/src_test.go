@@ -36,9 +36,8 @@ var s1out = &model.Source{
 	Namespaces: []*model.SourceNamespace{{
 		Namespace: "github.com/jeff",
 		Names: []*model.SourceName{{
-			Name:   "myrepo",
-			Tag:    ptrfrom.String("v1.0"),
-			Commit: ptrfrom.String(""),
+			Name: "myrepo",
+			Tag:  ptrfrom.String("v1.0"),
 		}},
 	}},
 }
@@ -55,7 +54,6 @@ var s2out = &model.Source{
 		Namespace: "github.com/bob",
 		Names: []*model.SourceName{{
 			Name:   "bobsrepo",
-			Tag:    ptrfrom.String(""),
 			Commit: ptrfrom.String("5e7c41f"),
 		}},
 	}},
@@ -79,10 +77,7 @@ func Test_demoClient_IngestSources(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				sources: srcTypeMap{},
-				index:   indexType{},
-			}
+			c, _ := getBackend(context.Background(), nil)
 			got, err := c.IngestSources(ctx, tt.srcInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSources() error = %v, wantErr %v", err, tt.wantErr)
@@ -149,10 +144,7 @@ func Test_demoClient_Sources(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				sources: srcTypeMap{},
-				index:   indexType{},
-			}
+			c, _ := getBackend(context.Background(), nil)
 			ingestedPkg, err := c.IngestSource(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)

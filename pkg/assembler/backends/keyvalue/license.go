@@ -17,28 +17,35 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
 // Internal data: Licenses
-type licMap map[string]*licStruct
 type licStruct struct {
-	id            string
-	name          string
-	inline        string
-	listVersion   string
-	certifyLegals []string
+	ThisID        string
+	Name          string
+	Inline        string
+	ListVersion   string
+	CertifyLegals []string
 }
 
-func (n *licStruct) ID() string { return n.id }
+func (n *licStruct) ID() string { return n.ThisID }
+func (n *licStruct) Key() string {
+	return strings.Join([]string{
+		n.Name,
+		n.ListVersion,
+	}, ":")
+}
 
 func (n *licStruct) Neighbors(allowedEdges edgeMap) []string {
 	if allowedEdges[model.EdgeLicenseCertifyLegal] {
-		return n.certifyLegals
+		return n.CertifyLegals
 	}
 	return nil
 }
@@ -47,7 +54,18 @@ func (n *licStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.No
 	return c.convLicense(n), nil
 }
 
-func (n *licStruct) setCertifyLegals(id string) { n.certifyLegals = append(n.certifyLegals, id) }
+func (n *licStruct) setCertifyLegals(ctx context.Context, id string, c *demoClient) error {
+	n.CertifyLegals = append(n.CertifyLegals, id)
+	return setkv(ctx, licenseCol, n, c)
+}
+
+func (c *demoClient) licenseByInput(ctx context.Context, b *model.LicenseInputSpec) (*licStruct, error) {
+	in := &licStruct{
+		Name:        b.Name,
+		ListVersion: nilToEmpty(b.ListVersion),
+	}
+	return byKeykv[*licStruct](ctx, licenseCol, in.Key(), c)
+}
 
 // Ingest Licenses
 
@@ -68,69 +86,70 @@ func (c *demoClient) IngestLicense(ctx context.Context, license *model.LicenseIn
 }
 
 func (c *demoClient) ingestLicense(ctx context.Context, license *model.LicenseInputSpec, readOnly bool) (*model.License, error) {
+	in := &licStruct{
+		Name:        license.Name,
+		Inline:      nilToEmpty(license.Inline),
+		ListVersion: nilToEmpty(license.ListVersion),
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	a, ok := c.licenses[licenseKey(license.Name, license.ListVersion)]
-	if !ok {
-		if readOnly {
-			c.m.RUnlock()
-			a, err := c.ingestLicense(ctx, license, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return a, err
-		}
-		a = &licStruct{
-			id:   c.getNextID(),
-			name: license.Name,
-		}
-		if license.Inline != nil {
-			a.inline = *license.Inline
-		}
-		if license.ListVersion != nil {
-			a.listVersion = *license.ListVersion
-		}
-		c.index[a.id] = a
-		c.licenses[licenseKey(license.Name, license.ListVersion)] = a
+	out, err := byKeykv[*licStruct](ctx, licenseCol, in.Key(), c)
+	if err == nil {
+		return c.convLicense(out), nil
+	}
+	if !errors.Is(err, kv.NotFoundError) {
+		return nil, err
+	}
+	if readOnly {
+		c.m.RUnlock()
+		a, err := c.ingestLicense(ctx, license, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return a, err
+	}
+	in.ThisID = c.getNextID()
+
+	if err := c.addToIndex(ctx, licenseCol, in); err != nil {
+		return nil, err
+	}
+	if err := setkv(ctx, licenseCol, in, c); err != nil {
+		return nil, err
 	}
 
-	return c.convLicense(a), nil
+	return c.convLicense(in), nil
 }
 
-func licenseKey(name string, listVersion *string) string {
-	key := name
-	if !strings.HasPrefix(name, "LicenseRef") {
-		key = strings.Join([]string{name, *listVersion}, ":")
+func (c *demoClient) licenseExact(ctx context.Context, licenseSpec *model.LicenseSpec) (*licStruct, error) {
+	if licenseSpec == nil {
+		return nil, nil
 	}
-	return key
-}
-
-func (c *demoClient) licenseExact(licenseSpec *model.LicenseSpec) (*licStruct, error) {
 
 	// If ID is provided, try to look up
 	if licenseSpec.ID != nil {
-		a, err := byID[*licStruct](*licenseSpec.ID, c)
-		if err != nil {
-			// Not found
-			return nil, nil
+		a, err := byIDkv[*licStruct](ctx, *licenseSpec.ID, c)
+		if err == nil {
+			// If found by id, ignore rest of fields in spec and return as a match
+			return a, nil
 		}
-		// If found by id, ignore rest of fields in spec and return as a match
-		return a, nil
+		if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+			return nil, err
+		}
+		// Not found
+		return nil, nil
 	}
 
-	if licenseSpec.Name != nil && strings.HasPrefix(*licenseSpec.Name, "LicenseRef") {
-		if l, ok := c.licenses[licenseKey(*licenseSpec.Name, nil)]; ok {
-			if licenseSpec.Inline == nil ||
-				(licenseSpec.Inline != nil && *licenseSpec.Inline == l.inline) {
-				return l, nil
-			}
+	if licenseSpec.Name != nil {
+		in := &licStruct{
+			Name:        *licenseSpec.Name,
+			ListVersion: nilToEmpty(licenseSpec.ListVersion),
 		}
-	}
-	if licenseSpec.Name != nil &&
-		!strings.HasPrefix(*licenseSpec.Name, "LicenseRef") &&
-		licenseSpec.ListVersion != nil &&
-		licenseSpec.Inline == nil {
-		if l, ok := c.licenses[licenseKey(*licenseSpec.Name, licenseSpec.ListVersion)]; ok {
-			return l, nil
+		out, err := byKeykv[*licStruct](ctx, licenseCol, in.Key(), c)
+		if err == nil {
+			return out, nil
+		}
+		if !errors.Is(err, kv.NotFoundError) {
+			return nil, err
 		}
 	}
 	return nil, nil
@@ -141,7 +160,7 @@ func (c *demoClient) licenseExact(licenseSpec *model.LicenseSpec) (*licStruct, e
 func (c *demoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
-	a, err := c.licenseExact(licenseSpec)
+	a, err := c.licenseExact(ctx, licenseSpec)
 	if err != nil {
 		return nil, gqlerror.Errorf("Licenses :: invalid spec %s", err)
 	}
@@ -150,10 +169,18 @@ func (c *demoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpe
 	}
 
 	var rv []*model.License
-	for _, l := range c.licenses {
-		if noMatch(licenseSpec.Name, l.name) ||
-			noMatch(licenseSpec.ListVersion, l.listVersion) ||
-			noMatch(licenseSpec.Inline, l.inline) {
+	lKeys, err := c.kv.Keys(ctx, licenseCol)
+	if err != nil {
+		return nil, err
+	}
+	for _, lk := range lKeys {
+		l, err := byKeykv[*licStruct](ctx, licenseCol, lk, c)
+		if err != nil {
+			return nil, err
+		}
+		if noMatch(licenseSpec.Name, l.Name) ||
+			noMatch(licenseSpec.ListVersion, l.ListVersion) ||
+			noMatch(licenseSpec.Inline, l.Inline) {
 			continue
 		}
 		rv = append(rv, c.convLicense(l))
@@ -163,14 +190,14 @@ func (c *demoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpe
 
 func (c *demoClient) convLicense(a *licStruct) *model.License {
 	rv := &model.License{
-		ID:   a.id,
-		Name: a.name,
+		ID:   a.ThisID,
+		Name: a.Name,
 	}
-	if a.inline != "" {
-		rv.Inline = &a.inline
+	if a.Inline != "" {
+		rv.Inline = &a.Inline
 	}
-	if a.listVersion != "" {
-		rv.ListVersion = &a.listVersion
+	if a.ListVersion != "" {
+		rv.ListVersion = &a.ListVersion
 	}
 	return rv
 }

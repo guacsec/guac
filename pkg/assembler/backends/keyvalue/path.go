@@ -17,6 +17,8 @@ package keyvalue
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -45,7 +47,7 @@ func (c *demoClient) Path(ctx context.Context, source string, target string, max
 
 func (c *demoClient) Neighbors(ctx context.Context, source string, usingOnly []model.Edge) ([]model.Node, error) {
 	c.m.RLock()
-	neighbors, err := c.neighborsFromId(source, processUsingOnly(usingOnly))
+	neighbors, err := c.neighborsFromId(ctx, source, processUsingOnly(usingOnly))
 	if err != nil {
 		c.m.RUnlock()
 		return nil, err
@@ -54,33 +56,25 @@ func (c *demoClient) Neighbors(ctx context.Context, source string, usingOnly []m
 
 	c.m.RLock()
 	defer c.m.RUnlock()
-	return c.buildModelNodes(ctx, neighbors)
+	return c.Nodes(ctx, neighbors)
 }
 
-func (c *demoClient) buildModelNodes(ctx context.Context, nodeIDs []string) ([]model.Node, error) {
-	out := make([]model.Node, len(nodeIDs))
-
-	for i, nodeID := range nodeIDs {
-		node, ok := c.index[nodeID]
-		if !ok {
-			return nil, gqlerror.Errorf("Internal data error: got invalid node id %q", nodeID)
-		}
-		var err error
-
-		out[i], err = node.BuildModelNode(ctx, c)
-		if err != nil {
-			return nil, err
-		}
+func (c *demoClient) neighborsFromId(ctx context.Context, id string, allowedEdges edgeMap) ([]string, error) {
+	var k string
+	if err := c.kv.Get(ctx, indexCol, id, &k); err != nil {
+		return nil, fmt.Errorf("%w : id not found in index %q", err, id)
 	}
 
-	return out, nil
-}
-
-func (c *demoClient) neighborsFromId(id string, allowedEdges edgeMap) ([]string, error) {
-	node, ok := c.index[id]
-	if !ok {
-		return nil, gqlerror.Errorf("ID does not match existing node")
+	sub := strings.SplitN(k, ":", 2)
+	if len(sub) != 2 {
+		return nil, fmt.Errorf("Bad value was stored in index map: %v", k)
 	}
+
+	node := typeColMap(sub[0])
+	if err := c.kv.Get(ctx, sub[0], sub[1], &node); err != nil {
+		return nil, err
+	}
+
 	return node.Neighbors(allowedEdges), nil
 }
 
@@ -111,7 +105,7 @@ func (c *demoClient) bfs(ctx context.Context, from, to string, maxLength int, al
 			break
 		}
 
-		neighbors, err := c.neighborsFromId(now, allowedEdges)
+		neighbors, err := c.neighborsFromId(ctx, now, allowedEdges)
 		if err != nil {
 			return nil, err
 		}
@@ -152,15 +146,26 @@ func (c *demoClient) bfs(ctx context.Context, from, to string, maxLength int, al
 		path[len(reversedPath)-i-1] = x
 	}
 
-	return c.buildModelNodes(ctx, path)
+	return c.Nodes(ctx, path)
 }
 
-func (c *demoClient) Node(ctx context.Context, source string) (model.Node, error) {
+func (c *demoClient) Node(ctx context.Context, id string) (model.Node, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
-	node, ok := c.index[source]
-	if !ok {
-		return nil, gqlerror.Errorf("Node: got invalid node id %q", source)
+
+	var k string
+	if err := c.kv.Get(ctx, indexCol, id, &k); err != nil {
+		return nil, fmt.Errorf("%w : id not found in index %q", err, id)
+	}
+
+	sub := strings.SplitN(k, ":", 2)
+	if len(sub) != 2 {
+		return nil, fmt.Errorf("Bad value was stored in index map: %v", k)
+	}
+
+	node := typeColMap(sub[0])
+	if err := c.kv.Get(ctx, sub[0], sub[1], &node); err != nil {
+		return nil, err
 	}
 
 	out, err := node.BuildModelNode(ctx, c)

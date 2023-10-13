@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/stablememmap"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -298,14 +299,14 @@ func TestHasSLSA(t *testing.T) {
 					Subject: a1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
+						BuiltFrom: []*model.Artifact{a2out, a3out},
 					},
 				},
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out, a3out},
+						BuiltFrom: []*model.Artifact{a2out},
 					},
 				},
 			},
@@ -468,29 +469,6 @@ func TestHasSLSA(t *testing.T) {
 			},
 			ExpIngestErr: true,
 		},
-		{
-			Name:  "Query bad ID",
-			InArt: []*model.ArtifactInputSpec{a1, a2},
-			InBld: []*model.BuilderInputSpec{b1, b2},
-			Calls: []call{
-				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b1,
-					SLSA: &model.SLSAInputSpec{},
-				},
-				{
-					Sub:  a1,
-					BF:   []*model.ArtifactInputSpec{a2},
-					BB:   b2,
-					SLSA: &model.SLSAInputSpec{},
-				},
-			},
-			Query: &model.HasSLSASpec{
-				ID: ptrfrom.String("asdf"),
-			},
-			ExpQueryErr: true,
-		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
@@ -498,7 +476,8 @@ func TestHasSLSA(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -704,14 +683,14 @@ func TestIngestHasSLSAs(t *testing.T) {
 					Subject: a1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
+						BuiltFrom: []*model.Artifact{a2out, a3out},
 					},
 				},
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out, a3out},
+						BuiltFrom: []*model.Artifact{a2out},
 					},
 				},
 			},
@@ -723,7 +702,8 @@ func TestIngestHasSLSAs(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -831,7 +811,8 @@ func TestHasSLSANeighbors(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

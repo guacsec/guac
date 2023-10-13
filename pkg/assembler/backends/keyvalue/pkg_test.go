@@ -26,7 +26,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func Test_pkgNamespaceStruct_ID(t *testing.T) {
+func Test_pkgType_ID(t *testing.T) {
 	tests := []struct {
 		name string
 		id   string
@@ -38,17 +38,17 @@ func Test_pkgNamespaceStruct_ID(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &pkgNamespaceStruct{
-				id: tt.id,
+			n := &pkgType{
+				ThisID: tt.id,
 			}
 			if got := n.ID(); got != tt.want {
-				t.Errorf("pkgNamespaceStruct.ID() = %v, want %v", got, tt.want)
+				t.Errorf("pkgType.ID() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_pkgNameStruct_ID(t *testing.T) {
+func Test_pkgNamespace_ID(t *testing.T) {
 	tests := []struct {
 		name string
 		id   string
@@ -60,17 +60,17 @@ func Test_pkgNameStruct_ID(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &pkgNameStruct{
-				id: tt.id,
+			n := &pkgNamespace{
+				ThisID: tt.id,
 			}
 			if got := n.ID(); got != tt.want {
-				t.Errorf("pkgNameStruct.ID() = %v, want %v", got, tt.want)
+				t.Errorf("pkgNamespace.ID() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_pkgVersionStruct_ID(t *testing.T) {
+func Test_pkgName_ID(t *testing.T) {
 	tests := []struct {
 		name string
 		id   string
@@ -82,17 +82,17 @@ func Test_pkgVersionStruct_ID(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &pkgVersionStruct{
-				id: tt.id,
+			n := &pkgName{
+				ThisID: tt.id,
 			}
 			if got := n.ID(); got != tt.want {
-				t.Errorf("pkgVersionStruct.ID() = %v, want %v", got, tt.want)
+				t.Errorf("pkgName.ID() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_pkgVersionNode_ID(t *testing.T) {
+func Test_pkgVersion_ID(t *testing.T) {
 	tests := []struct {
 		name string
 		id   string
@@ -104,87 +104,87 @@ func Test_pkgVersionNode_ID(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &pkgVersionNode{
-				id: tt.id,
+			n := &pkgVersion{
+				ThisID: tt.id,
 			}
 			if got := n.ID(); got != tt.want {
-				t.Errorf("pkgVersionNode.ID() = %v, want %v", got, tt.want)
+				t.Errorf("pkgVersion.ID() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_pkgNamespaceStruct_Neighbors(t *testing.T) {
+func Test_PkgType_Neighbors(t *testing.T) {
 	type fields struct {
 		id         string
-		namespaces pkgNamespaceMap
+		namespaces []string
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		want   []string
 	}{{
-		name: "pkgNamespaceStruct Neighbors",
+		name: "PkgType Neighbors",
 		fields: fields{
 			id:         "23",
-			namespaces: pkgNamespaceMap{"test": &pkgNameStruct{id: "24"}},
+			namespaces: []string{"24"},
 		},
 		want: []string{"24"},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &pkgNamespaceStruct{
-				id:         tt.fields.id,
-				namespaces: tt.fields.namespaces,
+			n := &pkgType{
+				ThisID:     tt.fields.id,
+				Namespaces: tt.fields.namespaces,
 			}
 			if got := n.Neighbors(nil); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("pkgNamespaceStruct.Neighbors() = %v, want %v", got, tt.want)
+				t.Errorf("PkgType.Neighbors() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_pkgNameStruct_Neighbors(t *testing.T) {
+func Test_pkgNamespace_Neighbors(t *testing.T) {
 	type fields struct {
 		id        string
 		parent    string
 		namespace string
-		names     pkgNameMap
+		names     []string
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		want   []string
 	}{{
-		name: "pkgNameStruct Neighbors",
+		name: "pkgNamespace Neighbors",
 		fields: fields{
 			id:        "23",
 			parent:    "22",
 			namespace: "test",
-			names:     pkgNameMap{"test": &pkgVersionStruct{id: "24"}},
+			names:     []string{"24"},
 		},
 		want: []string{"24", "22"},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &pkgNameStruct{
-				id:        tt.fields.id,
-				parent:    tt.fields.parent,
-				namespace: tt.fields.namespace,
-				names:     tt.fields.names,
+			n := &pkgNamespace{
+				ThisID:    tt.fields.id,
+				Parent:    tt.fields.parent,
+				Namespace: tt.fields.namespace,
+				Names:     tt.fields.names,
 			}
 			if got := n.Neighbors(nil); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("pkgNameStruct.Neighbors() = %v, want %v", got, tt.want)
+				t.Errorf("pkgNamespace.Neighbors() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_pkgVersionStruct_Neighbors(t *testing.T) {
+func Test_pkgName_Neighbors(t *testing.T) {
 	type fields struct {
 		id                string
 		parent            string
-		versions          pkgVersionMap
+		versions          []string
 		srcMapLinks       []string
 		isDependencyLinks []string
 		badLinks          []string
@@ -200,7 +200,7 @@ func Test_pkgVersionStruct_Neighbors(t *testing.T) {
 		fields: fields{
 			id:          "23",
 			parent:      "22",
-			versions:    pkgVersionMap{"digest-a": &pkgVersionNode{id: "24"}},
+			versions:    []string{"24"},
 			srcMapLinks: []string{"343", "546"},
 		},
 		allowedEdges: edgeMap{model.EdgePackageHasSourceAt: true},
@@ -210,7 +210,7 @@ func Test_pkgVersionStruct_Neighbors(t *testing.T) {
 		fields: fields{
 			id:                "23",
 			parent:            "22",
-			versions:          pkgVersionMap{"digest-a": &pkgVersionNode{id: string("24")}},
+			versions:          []string{"24"},
 			isDependencyLinks: []string{"2324", "1234"},
 		},
 		allowedEdges: edgeMap{model.EdgePackageIsDependency: true},
@@ -220,7 +220,7 @@ func Test_pkgVersionStruct_Neighbors(t *testing.T) {
 		fields: fields{
 			id:       "23",
 			parent:   "22",
-			versions: pkgVersionMap{"digest-a": &pkgVersionNode{id: "24"}},
+			versions: []string{"24"},
 			badLinks: []string{"445", "1232244"},
 		},
 		allowedEdges: edgeMap{model.EdgePackageCertifyBad: true},
@@ -230,7 +230,7 @@ func Test_pkgVersionStruct_Neighbors(t *testing.T) {
 		fields: fields{
 			id:        "23",
 			parent:    "22",
-			versions:  pkgVersionMap{"digest-a": &pkgVersionNode{id: "24"}},
+			versions:  []string{"24"},
 			goodLinks: []string{"987", "9876"},
 		},
 		allowedEdges: edgeMap{model.EdgePackageCertifyGood: true},
@@ -238,23 +238,23 @@ func Test_pkgVersionStruct_Neighbors(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &pkgVersionStruct{
-				id:                tt.fields.id,
-				parent:            tt.fields.parent,
-				versions:          tt.fields.versions,
-				srcMapLinks:       tt.fields.srcMapLinks,
-				isDependencyLinks: tt.fields.isDependencyLinks,
-				badLinks:          tt.fields.badLinks,
-				goodLinks:         tt.fields.goodLinks,
+			n := &pkgName{
+				ThisID:            tt.fields.id,
+				Parent:            tt.fields.parent,
+				Versions:          tt.fields.versions,
+				SrcMapLinks:       tt.fields.srcMapLinks,
+				IsDependencyLinks: tt.fields.isDependencyLinks,
+				BadLinks:          tt.fields.badLinks,
+				GoodLinks:         tt.fields.goodLinks,
 			}
 			if got := n.Neighbors(tt.allowedEdges); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("pkgVersionStruct.Neighbors() = %v, want %v", got, tt.want)
+				t.Errorf("pkgName.Neighbors() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_pkgVersionNode_Neighbors(t *testing.T) {
+func Test_pkgVersion_Neighbors(t *testing.T) {
 	type fields struct {
 		id                string
 		parent            string
@@ -357,21 +357,21 @@ func Test_pkgVersionNode_Neighbors(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &pkgVersionNode{
-				id:                tt.fields.id,
-				parent:            tt.fields.parent,
-				srcMapLinks:       tt.fields.srcMapLinks,
-				isDependencyLinks: tt.fields.isDependencyLinks,
-				occurrences:       tt.fields.occurrences,
-				certifyVulnLinks:  tt.fields.certifyVulnLinks,
-				hasSBOMs:          tt.fields.hasSBOMs,
-				vexLinks:          tt.fields.vexLinks,
-				badLinks:          tt.fields.badLinks,
-				goodLinks:         tt.fields.goodLinks,
-				pkgEquals:         tt.fields.pkgEquals,
+			n := &pkgVersion{
+				ThisID:            tt.fields.id,
+				Parent:            tt.fields.parent,
+				SrcMapLinks:       tt.fields.srcMapLinks,
+				IsDependencyLinks: tt.fields.isDependencyLinks,
+				Occurrences:       tt.fields.occurrences,
+				CertifyVulnLinks:  tt.fields.certifyVulnLinks,
+				HasSBOMs:          tt.fields.hasSBOMs,
+				VexLinks:          tt.fields.vexLinks,
+				BadLinks:          tt.fields.badLinks,
+				GoodLinks:         tt.fields.goodLinks,
+				PkgEquals:         tt.fields.pkgEquals,
 			}
 			if got := n.Neighbors(tt.allowedEdges); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("pkgVersionNode.Neighbors() = %v, want %v", got, tt.want)
+				t.Errorf("pkgVersion.Neighbors() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -516,10 +516,7 @@ func Test_demoClient_Packages(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				packages: pkgTypeMap{},
-				index:    indexType{},
-			}
+			c, _ := getBackend(ctx, nil)
 			ingestedPkg, err := c.IngestPackage(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
@@ -559,10 +556,7 @@ func Test_demoClient_IngestPackages(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				packages: pkgTypeMap{},
-				index:    indexType{},
-			}
+			c, _ := getBackend(ctx, nil)
 			got, err := c.IngestPackages(ctx, tt.pkgInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
@@ -799,10 +793,7 @@ func Test_IngestingVersions(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				packages: pkgTypeMap{},
-				index:    indexType{},
-			}
+			c, _ := getBackend(ctx, nil)
 			_, err := c.IngestPackages(ctx, tt.pkgInputs)
 			if err != nil {
 				t.Errorf("Unexpected demoClient.IngestPackages() error = %v, ", err)

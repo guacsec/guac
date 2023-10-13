@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/guacsec/guac/internal/testing/stablememmap"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -176,7 +177,7 @@ func Test_Nodes(t *testing.T) {
 	}, {
 		name:     "source",
 		srcInput: testdata.S1,
-		want:     []model.Node{testdata.S1out},
+		want:     []model.Node{s1out},
 		wantErr:  false,
 	}, {
 		name:      "vulnerability",
@@ -253,7 +254,7 @@ func Test_Nodes(t *testing.T) {
 			},
 		},
 		want: []model.Node{&model.CertifyScorecard{
-			Source: testdata.S2out,
+			Source: s2out,
 			Scorecard: &model.Scorecard{
 				Checks: []*model.ScorecardCheck{},
 				Origin: "test origin",
@@ -380,7 +381,7 @@ func Test_Nodes(t *testing.T) {
 		},
 		want: []model.Node{&model.HasSourceAt{
 			Package: testdata.P2out,
-			Source:  testdata.S1out,
+			Source:  s1out,
 		}},
 	}, {
 		name:  "isDependency",
@@ -496,7 +497,8 @@ func Test_Nodes(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

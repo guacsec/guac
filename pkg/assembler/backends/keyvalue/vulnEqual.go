@@ -17,36 +17,44 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal data: link between equal vulnerabilities (vulnEqual)
-type (
-	vulnerabilityEqualList []*vulnerabilityEqualLink
-	vulnerabilityEqualLink struct {
-		id              string
-		vulnerabilities []string
-		justification   string
-		origin          string
-		collector       string
-	}
-)
+type vulnerabilityEqualLink struct {
+	ThisID          string
+	Vulnerabilities []string
+	Justification   string
+	Origin          string
+	Collector       string
+}
 
-func (n *vulnerabilityEqualLink) ID() string { return n.id }
+func (n *vulnerabilityEqualLink) ID() string { return n.ThisID }
+func (n *vulnerabilityEqualLink) Key() string {
+	return strings.Join([]string{
+		fmt.Sprint(n.Vulnerabilities),
+		n.Justification,
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *vulnerabilityEqualLink) Neighbors(allowedEdges edgeMap) []string {
-	out := make([]string, 0, 2)
-	if len(n.vulnerabilities) > 0 && allowedEdges[model.EdgeVulnEqualVulnerability] {
-		out = append(out, n.vulnerabilities...)
+	if allowedEdges[model.EdgeVulnEqualVulnerability] {
+		return n.Vulnerabilities
 	}
-	return out
+	return nil
 }
 
 func (n *vulnerabilityEqualLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.convVulnEqual(n)
+	return c.convVulnEqual(ctx, n)
 }
 
 // Ingest IngestVulnEqual
@@ -69,36 +77,35 @@ func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.Vu
 
 func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec, readOnly bool) (*model.VulnEqual, error) {
 	funcName := "ingestVulnEqual"
+
+	in := &vulnerabilityEqualLink{
+		Justification: vulnEqual.Justification,
+		Origin:        vulnEqual.Origin,
+		Collector:     vulnEqual.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
 	vIDs := make([]string, 0, 2)
+	vs := make([]*vulnIDNode, 0, 2)
 	for _, vi := range []model.VulnerabilityInputSpec{vulnerability, otherVulnerability} {
-		vid, err := getVulnerabilityIDFromInput(c, vi)
+		v, err := c.getVulnerabilityFromInput(ctx, vi)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
-		vIDs = append(vIDs, vid)
+		vs = append(vs, v)
+		vIDs = append(vIDs, v.ThisID)
 	}
 	slices.Sort(vIDs)
+	in.Vulnerabilities = vIDs
 
-	vs := make([]*vulnIDNode, 0, 2)
-	for _, vID := range vIDs {
-		v, _ := byID[*vulnIDNode](vID, c)
-		vs = append(vs, v)
+	out, err := byKeykv[*vulnerabilityEqualLink](ctx, vulnEqCol, in.Key(), c)
+	if err == nil {
+		return c.convVulnEqual(ctx, out)
 	}
-
-	for _, id := range vs[0].vulnEqualLinks {
-		ve, err := byID[*vulnerabilityEqualLink](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-		if slices.Equal(ve.vulnerabilities, vIDs) &&
-			ve.justification == vulnEqual.Justification &&
-			ve.origin == vulnEqual.Origin &&
-			ve.collector == vulnEqual.Collector {
-			return c.convVulnEqual(ve)
-		}
+	if !errors.Is(err, kv.NotFoundError) {
+		return nil, err
 	}
 
 	if readOnly {
@@ -108,31 +115,31 @@ func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.Vu
 		return cp, err
 	}
 
-	ve := &vulnerabilityEqualLink{
-		id:              c.getNextID(),
-		vulnerabilities: vIDs,
-		justification:   vulnEqual.Justification,
-		origin:          vulnEqual.Origin,
-		collector:       vulnEqual.Collector,
+	in.ThisID = c.getNextID()
+	if err := c.addToIndex(ctx, vulnEqCol, in); err != nil {
+		return nil, err
 	}
-	c.index[ve.id] = ve
 	for _, v := range vs {
-		v.setVulnEqualLinks(ve.id)
+		if err := v.setVulnEqualLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
 	}
-	c.vulnerabilityEquals = append(c.vulnerabilityEquals, ve)
+	if err := setkv(ctx, vulnEqCol, in, c); err != nil {
+		return nil, err
+	}
 
-	return c.convVulnEqual(ve)
+	return c.convVulnEqual(ctx, in)
 }
 
-func (c *demoClient) convVulnEqual(in *vulnerabilityEqualLink) (*model.VulnEqual, error) {
+func (c *demoClient) convVulnEqual(ctx context.Context, in *vulnerabilityEqualLink) (*model.VulnEqual, error) {
 	out := &model.VulnEqual{
-		ID:            in.id,
-		Justification: in.justification,
-		Origin:        in.origin,
-		Collector:     in.collector,
+		ID:            in.ThisID,
+		Justification: in.Justification,
+		Origin:        in.Origin,
+		Collector:     in.Collector,
 	}
-	for _, id := range in.vulnerabilities {
-		v, err := c.buildVulnResponse(id, nil)
+	for _, id := range in.Vulnerabilities {
+		v, err := c.buildVulnResponse(ctx, id, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -147,13 +154,13 @@ func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 	c.m.RLock()
 	defer c.m.RUnlock()
 	if filter.ID != nil {
-		link, err := byID[*vulnerabilityEqualLink](*filter.ID, c)
+		link, err := byIDkv[*vulnerabilityEqualLink](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		ve, err := c.convVulnEqual(link)
+		ve, err := c.convVulnEqual(ctx, link)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -164,12 +171,12 @@ func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 	foundOne := false
 	for _, v := range filter.Vulnerabilities {
 		if !foundOne {
-			exactVuln, err := c.exactVulnerability(v)
+			exactVuln, err := c.exactVulnerability(ctx, v)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if exactVuln != nil {
-				search = append(search, exactVuln.vulnEqualLinks...)
+				search = append(search, exactVuln.VulnEqualLinks...)
 				foundOne = true
 				break
 			}
@@ -179,19 +186,26 @@ func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 	var out []*model.VulnEqual
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*vulnerabilityEqualLink](id, c)
+			link, err := byIDkv[*vulnerabilityEqualLink](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addVulnIfMatch(out, filter, link)
+			out, err = c.addVulnIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 		}
 	} else {
-		for _, link := range c.vulnerabilityEquals {
-			var err error
-			out, err = c.addVulnIfMatch(out, filter, link)
+		veKeys, err := c.kv.Keys(ctx, vulnEqCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, vek := range veKeys {
+			link, err := byKeykv[*vulnerabilityEqualLink](ctx, vulnEqCol, vek, c)
+			if err != nil {
+				return nil, err
+			}
+			out, err = c.addVulnIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -200,13 +214,13 @@ func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 	return out, nil
 }
 
-func (c *demoClient) addVulnIfMatch(out []*model.VulnEqual,
+func (c *demoClient) addVulnIfMatch(ctx context.Context, out []*model.VulnEqual,
 	filter *model.VulnEqualSpec, link *vulnerabilityEqualLink) (
 	[]*model.VulnEqual, error,
 ) {
-	if noMatch(filter.Justification, link.justification) ||
-		noMatch(filter.Origin, link.origin) ||
-		noMatch(filter.Collector, link.collector) {
+	if noMatch(filter.Justification, link.Justification) ||
+		noMatch(filter.Origin, link.Origin) ||
+		noMatch(filter.Collector, link.Collector) {
 		return out, nil
 	}
 	for _, vs := range filter.Vulnerabilities {
@@ -214,8 +228,8 @@ func (c *demoClient) addVulnIfMatch(out []*model.VulnEqual,
 			continue
 		}
 		found := false
-		for _, vid := range link.vulnerabilities {
-			v, err := c.buildVulnResponse(vid, vs)
+		for _, vid := range link.Vulnerabilities {
+			v, err := c.buildVulnResponse(ctx, vid, vs)
 			if err != nil {
 				return nil, err
 			}
@@ -227,7 +241,7 @@ func (c *demoClient) addVulnIfMatch(out []*model.VulnEqual,
 			return out, nil
 		}
 	}
-	ve, err := c.convVulnEqual(link)
+	ve, err := c.convVulnEqual(ctx, link)
 	if err != nil {
 		return nil, err
 	}

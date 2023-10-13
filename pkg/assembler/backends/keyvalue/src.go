@@ -19,148 +19,157 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
-// TODO: move this into a unit test for this file
-// func registerAllSources(client *demoClient) {
-// 	ctx := context.Background()
-// 	v12 := "v2.12.0"
-// 	commit := "abcdef"
-
-// 	inputs := []model.SourceInputSpec{{
-// 		Type:      "git",
-// 		Namespace: "github.com",
-// 		Name:      "tensorflow",
-// 	}, {
-// 		Type:      "git",
-// 		Namespace: "github.com",
-// 		Name:      "build",
-// 	}, {
-// 		Type:      "git",
-// 		Namespace: "github.com",
-// 		Name:      "tensorflow",
-// 		Tag:       &v12,
-// 	}, {
-// 		Type:      "git",
-// 		Namespace: "github.com",
-// 		Name:      "tensorflow",
-// 		Commit:    &commit,
-// 	}}
-
-// 	for _, input := range inputs {
-// 		_, err := client.IngestSource(ctx, input)
-// 		if err != nil {
-// 			log.Printf("Error in ingesting: %v\n", err)
-// 		}
-// 	}
-// }
-
 // Internal data: Sources
-type srcTypeMap map[string]*srcNamespaceStruct
-type srcNamespaceStruct struct {
-	id         string
-	typeKey    string
-	namespaces srcNamespaceMap
+type srcType struct {
+	ThisID     string
+	Type       string
+	Namespaces []string
 }
-type srcNamespaceMap map[string]*srcNameStruct
-type srcNameStruct struct {
-	id        string
-	parent    string
-	namespace string
-	names     srcNameList
+type srcNamespace struct {
+	ThisID    string
+	Parent    string
+	Namespace string
+	Names     []string
 }
-type srcNameList []*srcNameNode
 type srcNameNode struct {
-	id                  string
-	parent              string
-	name                string
-	tag                 string
-	commit              string
-	srcMapLinks         []string
-	scorecardLinks      []string
-	occurrences         []string
-	badLinks            []string
-	goodLinks           []string
-	hasMetadataLinks    []string
-	pointOfContactLinks []string
-	certifyLegals       []string
+	ThisID              string
+	Parent              string
+	Name                string
+	Tag                 string
+	Commit              string
+	SrcMapLinks         []string
+	ScorecardLinks      []string
+	Occurrences         []string
+	BadLinks            []string
+	GoodLinks           []string
+	HasMetadataLinks    []string
+	PointOfContactLinks []string
+	CertifyLegals       []string
 }
 
-func (n *srcNamespaceStruct) ID() string { return n.id }
-func (n *srcNameStruct) ID() string      { return n.id }
-func (n *srcNameNode) ID() string        { return n.id }
+func (n *srcType) ID() string      { return n.ThisID }
+func (n *srcNamespace) ID() string { return n.ThisID }
+func (n *srcNameNode) ID() string  { return n.ThisID }
 
-func (n *srcNamespaceStruct) Neighbors(allowedEdges edgeMap) []string {
-	out := make([]string, 0, len(n.namespaces))
-	for _, v := range n.namespaces {
-		out = append(out, v.id)
-	}
-	return out
+func (n *srcType) Key() string {
+	return n.Type
 }
-func (n *srcNameStruct) Neighbors(allowedEdges edgeMap) []string {
-	out := make([]string, 0, 1+len(n.names))
-	for _, v := range n.names {
-		out = append(out, v.id)
-	}
-	out = append(out, n.parent)
+
+func (n *srcNamespace) Key() string {
+	return strings.Join([]string{
+		n.Parent,
+		n.Namespace,
+	}, ":")
+}
+
+func (n *srcNameNode) Key() string {
+	return strings.Join([]string{
+		n.Parent,
+		n.Name,
+		n.Tag,
+		n.Commit,
+	}, ":")
+}
+
+func (n *srcType) Neighbors(allowedEdges edgeMap) []string {
+	return n.Namespaces
+}
+func (n *srcNamespace) Neighbors(allowedEdges edgeMap) []string {
+	out := make([]string, 0, 1+len(n.Names))
+	out = append(out, n.Names...)
+	out = append(out, n.Parent)
 	return out
 }
 func (n *srcNameNode) Neighbors(allowedEdges edgeMap) []string {
-	out := []string{n.parent}
+	out := []string{n.Parent}
 
 	if allowedEdges[model.EdgeSourceHasSourceAt] {
-		out = append(out, n.srcMapLinks...)
+		out = append(out, n.SrcMapLinks...)
 	}
 	if allowedEdges[model.EdgeSourceCertifyScorecard] {
-		out = append(out, n.scorecardLinks...)
+		out = append(out, n.ScorecardLinks...)
 	}
 	if allowedEdges[model.EdgeSourceIsOccurrence] {
-		out = append(out, n.occurrences...)
+		out = append(out, n.Occurrences...)
 	}
 	if allowedEdges[model.EdgeSourceCertifyBad] {
-		out = append(out, n.badLinks...)
+		out = append(out, n.BadLinks...)
 	}
 	if allowedEdges[model.EdgeSourceCertifyGood] {
-		out = append(out, n.goodLinks...)
+		out = append(out, n.GoodLinks...)
 	}
 	if allowedEdges[model.EdgeSourceHasMetadata] {
-		out = append(out, n.hasMetadataLinks...)
+		out = append(out, n.HasMetadataLinks...)
 	}
 	if allowedEdges[model.EdgeSourcePointOfContact] {
-		out = append(out, n.pointOfContactLinks...)
+		out = append(out, n.PointOfContactLinks...)
 	}
 	if allowedEdges[model.EdgeSourceCertifyLegal] {
-		out = append(out, n.certifyLegals...)
+		out = append(out, n.CertifyLegals...)
 	}
 
 	return out
 }
 
-func (n *srcNamespaceStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildSourceResponse(n.id, nil)
+func (n *srcType) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
+	return c.buildSourceResponse(ctx, n.ThisID, nil)
 }
-func (n *srcNameStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildSourceResponse(n.id, nil)
+func (n *srcNamespace) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
+	return c.buildSourceResponse(ctx, n.ThisID, nil)
 }
 func (n *srcNameNode) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildSourceResponse(n.id, nil)
+	return c.buildSourceResponse(ctx, n.ThisID, nil)
 }
 
-func (p *srcNameNode) setSrcMapLinks(id string)      { p.srcMapLinks = append(p.srcMapLinks, id) }
-func (p *srcNameNode) setScorecardLinks(id string)   { p.scorecardLinks = append(p.scorecardLinks, id) }
-func (p *srcNameNode) setOccurrenceLinks(id string)  { p.occurrences = append(p.occurrences, id) }
-func (p *srcNameNode) setCertifyBadLinks(id string)  { p.badLinks = append(p.badLinks, id) }
-func (p *srcNameNode) setCertifyGoodLinks(id string) { p.goodLinks = append(p.goodLinks, id) }
-func (p *srcNameNode) setCertifyLegals(id string)    { p.certifyLegals = append(p.certifyLegals, id) }
-func (p *srcNameNode) setHasMetadataLinks(id string) {
-	p.hasMetadataLinks = append(p.hasMetadataLinks, id)
+func (p *srcNameNode) setSrcMapLinks(ctx context.Context, id string, c *demoClient) error {
+	p.SrcMapLinks = append(p.SrcMapLinks, id)
+	return setkv(ctx, srcNameCol, p, c)
 }
-func (p *srcNameNode) setPointOfContactLinks(id string) {
-	p.pointOfContactLinks = append(p.pointOfContactLinks, id)
+func (p *srcNameNode) setScorecardLinks(ctx context.Context, id string, c *demoClient) error {
+	p.ScorecardLinks = append(p.ScorecardLinks, id)
+	return setkv(ctx, srcNameCol, p, c)
+}
+func (p *srcNameNode) setOccurrenceLinks(ctx context.Context, id string, c *demoClient) error {
+	p.Occurrences = append(p.Occurrences, id)
+	return setkv(ctx, srcNameCol, p, c)
+}
+func (p *srcNameNode) setCertifyBadLinks(ctx context.Context, id string, c *demoClient) error {
+	p.BadLinks = append(p.BadLinks, id)
+	return setkv(ctx, srcNameCol, p, c)
+}
+func (p *srcNameNode) setCertifyGoodLinks(ctx context.Context, id string, c *demoClient) error {
+	p.GoodLinks = append(p.GoodLinks, id)
+	return setkv(ctx, srcNameCol, p, c)
+}
+func (p *srcNameNode) setCertifyLegals(ctx context.Context, id string, c *demoClient) error {
+	p.CertifyLegals = append(p.CertifyLegals, id)
+	return setkv(ctx, srcNameCol, p, c)
+}
+func (p *srcNameNode) setHasMetadataLinks(ctx context.Context, id string, c *demoClient) error {
+	p.HasMetadataLinks = append(p.HasMetadataLinks, id)
+	return setkv(ctx, srcNameCol, p, c)
+}
+func (p *srcNameNode) setPointOfContactLinks(ctx context.Context, id string, c *demoClient) error {
+	p.PointOfContactLinks = append(p.PointOfContactLinks, id)
+	return setkv(ctx, srcNameCol, p, c)
+}
+
+func (n *srcType) addNamespace(ctx context.Context, ns string, c *demoClient) error {
+	n.Namespaces = append(n.Namespaces, ns)
+	return setkv(ctx, srcTypeCol, n, c)
+}
+
+func (n *srcNamespace) addName(ctx context.Context, name string, c *demoClient) error {
+	n.Names = append(n.Names, name)
+	return setkv(ctx, srcNSCol, n, c)
 }
 
 // Ingest Source
@@ -178,64 +187,96 @@ func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceI
 }
 
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
-	c.m.RLock()
-	namespacesStruct, hasNamespace := c.sources[input.Type]
-	c.m.RUnlock()
-	if !hasNamespace {
-		c.m.Lock()
-		namespacesStruct, hasNamespace = c.sources[input.Type]
-		if !hasNamespace {
-			namespacesStruct = &srcNamespaceStruct{
-				id:         c.getNextID(),
-				typeKey:    input.Type,
-				namespaces: srcNamespaceMap{},
-			}
-			c.index[namespacesStruct.id] = namespacesStruct
-			c.sources[input.Type] = namespacesStruct
-		}
-		c.m.Unlock()
+	inType := &srcType{
+		Type: input.Type,
 	}
-	namespaces := namespacesStruct.namespaces
-
 	c.m.RLock()
-	namesStruct, hasName := namespaces[input.Namespace]
+	outType, err := byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
 	c.m.RUnlock()
-	if !hasName {
+	if err != nil {
+		if !errors.Is(err, kv.NotFoundError) {
+			return nil, err
+		}
 		c.m.Lock()
-		namesStruct, hasName = namespaces[input.Namespace]
-		if !hasName {
-			namesStruct = &srcNameStruct{
-				id:        c.getNextID(),
-				parent:    namespacesStruct.id,
-				namespace: input.Namespace,
-				names:     srcNameList{},
+		outType, err = byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
+		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) {
+				return nil, err
 			}
-			c.index[namesStruct.id] = namesStruct
-			namespaces[input.Namespace] = namesStruct
+			inType.ThisID = c.getNextID()
+			if err := c.addToIndex(ctx, srcTypeCol, inType); err != nil {
+				return nil, err
+			}
+			if err := setkv(ctx, srcTypeCol, inType, c); err != nil {
+				return nil, err
+			}
+			outType = inType
 		}
 		c.m.Unlock()
 	}
 
+	inNamespace := &srcNamespace{
+		Parent:    outType.ThisID,
+		Namespace: input.Namespace,
+	}
 	c.m.RLock()
-	duplicate, collectedSrcName := duplicateSrcName(namesStruct.names, input)
+	outNamespace, err := byKeykv[*srcNamespace](ctx, srcNSCol, inNamespace.Key(), c)
 	c.m.RUnlock()
-	if !duplicate {
+	if err != nil {
+		if !errors.Is(err, kv.NotFoundError) {
+			return nil, err
+		}
 		c.m.Lock()
-		duplicate, collectedSrcName = duplicateSrcName(namesStruct.names, input)
-		if !duplicate {
-			collectedSrcName = &srcNameNode{
-				id:     c.getNextID(),
-				parent: namesStruct.id,
-				name:   input.Name,
+		outNamespace, err = byKeykv[*srcNamespace](ctx, srcNSCol, inNamespace.Key(), c)
+		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) {
+				return nil, err
 			}
-			c.index[collectedSrcName.id] = collectedSrcName
-			if input.Tag != nil {
-				collectedSrcName.tag = nilToEmpty(input.Tag)
+			inNamespace.ThisID = c.getNextID()
+			if err := c.addToIndex(ctx, srcNSCol, inNamespace); err != nil {
+				return nil, err
 			}
-			if input.Commit != nil {
-				collectedSrcName.commit = nilToEmpty(input.Commit)
+			if err := setkv(ctx, srcNSCol, inNamespace, c); err != nil {
+				return nil, err
 			}
-			namesStruct.names = append(namesStruct.names, collectedSrcName)
+			if err := outType.addNamespace(ctx, inNamespace.ThisID, c); err != nil {
+				return nil, err
+			}
+			outNamespace = inNamespace
+		}
+		c.m.Unlock()
+	}
+
+	inName := &srcNameNode{
+		Parent: outNamespace.ThisID,
+		Name:   input.Name,
+		Tag:    nilToEmpty(input.Tag),
+		Commit: nilToEmpty(input.Commit),
+	}
+	c.m.RLock()
+	outName, err := byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
+	c.m.RUnlock()
+	if err != nil {
+		if !errors.Is(err, kv.NotFoundError) {
+			return nil, err
+		}
+		c.m.Lock()
+		outName, err = byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
+		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) {
+				return nil, err
+			}
+			inName.ThisID = c.getNextID()
+			if err := c.addToIndex(ctx, srcNameCol, inName); err != nil {
+				return nil, err
+			}
+			if err := setkv(ctx, srcNameCol, inName, c); err != nil {
+				return nil, err
+			}
+			if err := outNamespace.addName(ctx, inName.ThisID, c); err != nil {
+				return nil, err
+			}
+			outName = inName
 		}
 		c.m.Unlock()
 	}
@@ -243,23 +284,7 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 	// build return GraphQL type
 	c.m.RLock()
 	defer c.m.RUnlock()
-	return c.buildSourceResponse(collectedSrcName.id, nil)
-}
-
-func duplicateSrcName(names srcNameList, input model.SourceInputSpec) (bool, *srcNameNode) {
-	for _, src := range names {
-		if src.name != input.Name {
-			continue
-		}
-		if noMatchInput(input.Tag, src.tag) {
-			continue
-		}
-		if noMatchInput(input.Commit, src.commit) {
-			continue
-		}
-		return true, src
-	}
-	return false, nil
+	return c.buildSourceResponse(ctx, outName.ThisID, nil)
 }
 
 // Query Source
@@ -268,7 +293,7 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 	c.m.RLock()
 	defer c.m.RUnlock()
 	if filter != nil && filter.ID != nil {
-		s, err := c.buildSourceResponse(*filter.ID, filter)
+		s, err := c.buildSourceResponse(ctx, *filter.ID, filter)
 		if err != nil {
 			if errors.Is(err, errNotFound) {
 				// not found
@@ -281,24 +306,35 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 
 	out := []*model.Source{}
 	if filter != nil && filter.Type != nil {
-		srcNamespaceStruct, ok := c.sources[*filter.Type]
-		if ok {
-			sNamespaces := buildSourceNamespace(srcNamespaceStruct, filter)
+		inType := &srcType{
+			Type: *filter.Type,
+		}
+		srcTypeNode, err := byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
+		if err == nil {
+			sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, filter)
 			if len(sNamespaces) > 0 {
 				out = append(out, &model.Source{
-					ID:         srcNamespaceStruct.id,
-					Type:       srcNamespaceStruct.typeKey,
+					ID:         srcTypeNode.ThisID,
+					Type:       srcTypeNode.Type,
 					Namespaces: sNamespaces,
 				})
 			}
 		}
 	} else {
-		for dbType, srcNamespaceStruct := range c.sources {
-			sNamespaces := buildSourceNamespace(srcNamespaceStruct, filter)
+		typeKeys, err := c.kv.Keys(ctx, srcTypeCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, tk := range typeKeys {
+			srcTypeNode, err := byKeykv[*srcType](ctx, srcTypeCol, tk, c)
+			if err != nil {
+				return nil, err
+			}
+			sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, filter)
 			if len(sNamespaces) > 0 {
 				out = append(out, &model.Source{
-					ID:         srcNamespaceStruct.id,
-					Type:       dbType,
+					ID:         srcTypeNode.ThisID,
+					Type:       srcTypeNode.Type,
 					Namespaces: sNamespaces,
 				})
 			}
@@ -307,27 +343,35 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 	return out, nil
 }
 
-func buildSourceNamespace(srcNamespaceStruct *srcNamespaceStruct, filter *model.SourceSpec) []*model.SourceNamespace {
+func (c *demoClient) buildSourceNamespace(ctx context.Context, srcTypeNode *srcType, filter *model.SourceSpec) []*model.SourceNamespace {
 	sNamespaces := []*model.SourceNamespace{}
 	if filter != nil && filter.Namespace != nil {
-		srcNameStruct, ok := srcNamespaceStruct.namespaces[*filter.Namespace]
-		if ok {
-			sns := buildSourceName(srcNameStruct, filter)
+		inNS := &srcNamespace{
+			Parent:    srcTypeNode.ThisID,
+			Namespace: *filter.Namespace,
+		}
+		srcNS, err := byKeykv[*srcNamespace](ctx, srcNSCol, inNS.Key(), c)
+		if err == nil {
+			sns := c.buildSourceName(ctx, srcNS, filter)
 			if len(sns) > 0 {
 				sNamespaces = append(sNamespaces, &model.SourceNamespace{
-					ID:        srcNameStruct.id,
-					Namespace: srcNameStruct.namespace,
+					ID:        srcNS.ThisID,
+					Namespace: srcNS.Namespace,
 					Names:     sns,
 				})
 			}
 		}
 	} else {
-		for namespace, srcNameStruct := range srcNamespaceStruct.namespaces {
-			sns := buildSourceName(srcNameStruct, filter)
+		for _, nsID := range srcTypeNode.Namespaces {
+			srcNS, err := byIDkv[*srcNamespace](ctx, nsID, c)
+			if err != nil {
+				continue
+			}
+			sns := c.buildSourceName(ctx, srcNS, filter)
 			if len(sns) > 0 {
 				sNamespaces = append(sNamespaces, &model.SourceNamespace{
-					ID:        srcNameStruct.id,
-					Namespace: namespace,
+					ID:        srcNS.ThisID,
+					Namespace: srcNS.Namespace,
 					Names:     sns,
 				})
 			}
@@ -336,157 +380,216 @@ func buildSourceNamespace(srcNamespaceStruct *srcNamespaceStruct, filter *model.
 	return sNamespaces
 }
 
-func buildSourceName(srcNameStruct *srcNameStruct, filter *model.SourceSpec) []*model.SourceName {
+func (c *demoClient) buildSourceName(ctx context.Context, srcNamespace *srcNamespace, filter *model.SourceSpec) []*model.SourceName {
+	if filter != nil &&
+		filter.Name != nil &&
+		(filter.Tag != nil || filter.Commit != nil) {
+		inName := &srcNameNode{
+			Parent: srcNamespace.ThisID,
+			Name:   *filter.Name,
+			Tag:    nilToEmpty(filter.Tag),
+			Commit: nilToEmpty(filter.Commit),
+		}
+		srcName, err := byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
+		if err != nil {
+			return nil
+		}
+		m := &model.SourceName{
+			ID:   srcName.ThisID,
+			Name: srcName.Name,
+		}
+		if srcName.Tag != "" {
+			m.Tag = &srcName.Tag
+		}
+		if srcName.Commit != "" {
+			m.Commit = &srcName.Commit
+		}
+		return []*model.SourceName{m}
+	}
 	sns := []*model.SourceName{}
-	for _, s := range srcNameStruct.names {
-		if filter != nil && noMatch(filter.Name, s.name) {
+	for _, nameID := range srcNamespace.Names {
+		s, err := byIDkv[*srcNameNode](ctx, nameID, c)
+		if err != nil {
+			return nil
+		}
+		if filter != nil && noMatch(filter.Name, s.Name) {
 			continue
 		}
-		if filter != nil && noMatch(filter.Tag, s.tag) {
+		if filter != nil && noMatch(filter.Tag, s.Tag) {
 			continue
 		}
-		if filter != nil && noMatch(filter.Commit, s.commit) {
+		if filter != nil && noMatch(filter.Commit, s.Commit) {
 			continue
 		}
-		sns = append(sns, &model.SourceName{
-			ID:     s.id,
-			Name:   s.name,
-			Tag:    &s.tag,
-			Commit: &s.commit,
-		})
+		m := &model.SourceName{
+			ID:   s.ThisID,
+			Name: s.Name,
+		}
+		if s.Tag != "" {
+			m.Tag = &s.Tag
+		}
+		if s.Commit != "" {
+			m.Commit = &s.Commit
+		}
+		sns = append(sns, m)
 	}
 	return sns
 }
 
 // Builds a model.Source to send as GraphQL response, starting from id.
 // The optional filter allows restricting output (on selection operations).
-func (c *demoClient) buildSourceResponse(id string, filter *model.SourceSpec) (*model.Source, error) {
+func (c *demoClient) buildSourceResponse(ctx context.Context, id string, filter *model.SourceSpec) (*model.Source, error) {
 	if filter != nil && filter.ID != nil && *filter.ID != id {
 		return nil, nil
 	}
 
-	node, ok := c.index[id]
-	if !ok {
-		return nil, fmt.Errorf("%w : ID does not match existing node", errNotFound)
-	}
+	currentID := id
 
 	snl := []*model.SourceName{}
-	if nameNode, ok := node.(*srcNameNode); ok {
-		if filter != nil && noMatch(filter.Name, nameNode.name) {
+	if nameNode, err := byIDkv[*srcNameNode](ctx, currentID, c); err == nil {
+		if filter != nil && noMatch(filter.Name, nameNode.Name) {
 			return nil, nil
 		}
-		if filter != nil && noMatch(filter.Tag, nameNode.tag) {
+		if filter != nil && noMatch(filter.Tag, nameNode.Tag) {
 			return nil, nil
 		}
-		if filter != nil && noMatch(filter.Commit, nameNode.commit) {
+		if filter != nil && noMatch(filter.Commit, nameNode.Commit) {
 			return nil, nil
 		}
-		snl = append(snl, &model.SourceName{
-			// IDs are generated as string even though we ask for integers
-			// See https://github.com/99designs/gqlgen/issues/2561
-			ID:     nameNode.id,
-			Name:   nameNode.name,
-			Tag:    &nameNode.tag,
-			Commit: &nameNode.commit,
-		})
-		node, ok = c.index[nameNode.parent]
-		if !ok {
-			return nil, fmt.Errorf("Internal ID does not match existing node")
+		model := &model.SourceName{
+			ID:   nameNode.ThisID,
+			Name: nameNode.Name,
 		}
+		if nameNode.Tag != "" {
+			model.Tag = &nameNode.Tag
+		}
+		if nameNode.Commit != "" {
+			model.Commit = &nameNode.Commit
+		}
+		snl = append(snl, model)
+		currentID = nameNode.Parent
+	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
 	}
 
 	snsl := []*model.SourceNamespace{}
-	if nameStruct, ok := node.(*srcNameStruct); ok {
-		if filter != nil && noMatch(filter.Namespace, nameStruct.namespace) {
+	if namespaceNode, err := byIDkv[*srcNamespace](ctx, currentID, c); err == nil {
+		if filter != nil && noMatch(filter.Namespace, namespaceNode.Namespace) {
 			return nil, nil
 		}
 		snsl = append(snsl, &model.SourceNamespace{
-			ID:        nameStruct.id,
-			Namespace: nameStruct.namespace,
+			ID:        namespaceNode.ThisID,
+			Namespace: namespaceNode.Namespace,
 			Names:     snl,
 		})
-		node, ok = c.index[nameStruct.parent]
-		if !ok {
-			return nil, fmt.Errorf("Internal ID does not match existing node")
-		}
+		currentID = namespaceNode.Parent
+	} else if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+		return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
 	}
 
-	namespaceStruct, ok := node.(*srcNamespaceStruct)
-	if !ok {
-		return nil, fmt.Errorf("%w: ID does not match expected node type for source namespace", errNotFound)
+	typeNode, err := byIDkv[*srcType](ctx, currentID, c)
+	if err != nil {
+		if errors.Is(err, kv.NotFoundError) || errors.Is(err, errTypeNotMatch) {
+			return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
+		} else {
+			return nil, fmt.Errorf("Error retrieving node for id: %v : %w", currentID, err)
+		}
+	}
+	if filter != nil && noMatch(filter.Type, typeNode.Type) {
+		return nil, nil
 	}
 	s := model.Source{
-		ID:         namespaceStruct.id,
-		Type:       namespaceStruct.typeKey,
+		ID:         typeNode.ThisID,
+		Type:       typeNode.Type,
 		Namespaces: snsl,
-	}
-	if filter != nil && noMatch(filter.Type, s.Type) {
-		return nil, nil
 	}
 	return &s, nil
 }
 
-func getSourceIDFromInput(c *demoClient, input model.SourceInputSpec) (string, error) {
-	srcNamespace, srcHasNamespace := c.sources[input.Type]
-	if !srcHasNamespace {
-		return "", gqlerror.Errorf("Source type \"%s\" not found", input.Type)
+func (c *demoClient) getSourceNameFromInput(ctx context.Context, input model.SourceInputSpec) (*srcNameNode, error) {
+	inType := &srcType{
+		Type: input.Type,
 	}
-	srcName, srcHasName := srcNamespace.namespaces[input.Namespace]
-	if !srcHasName {
-		return "", gqlerror.Errorf("Source namespace \"%s\" not found", input.Namespace)
+	srcT, err := byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
+	if err != nil {
+		return nil, gqlerror.Errorf("Package type \"%s\" not found", input.Type)
 	}
-	found := false
-	var sourceID string
-	for _, src := range srcName.names {
-		if src.name != input.Name {
-			continue
-		}
-		if noMatchInput(input.Tag, src.tag) {
-			continue
-		}
-		if noMatchInput(input.Commit, src.commit) {
-			continue
-		}
-		if found {
-			return "", gqlerror.Errorf("More than one source matches input")
-		}
-		sourceID = src.id
-		found = true
+
+	inNS := &srcNamespace{
+		Parent:    srcT.ThisID,
+		Namespace: input.Namespace,
 	}
-	if !found {
-		return "", gqlerror.Errorf("No source matches input")
+	srcNS, err := byKeykv[*srcNamespace](ctx, srcNSCol, inNS.Key(), c)
+	if err != nil {
+		return nil, gqlerror.Errorf("Package namespace \"%s\" not found", input.Namespace)
 	}
-	return sourceID, nil
+
+	inName := &srcNameNode{
+		Parent: srcNS.ThisID,
+		Name:   input.Name,
+		Tag:    nilToEmpty(input.Tag),
+		Commit: nilToEmpty(input.Commit),
+	}
+	srcN, err := byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
+	if err != nil {
+		return nil, gqlerror.Errorf("Package name \"%s\" not found", input.Name)
+	}
+
+	return srcN, nil
 }
 
-func (c *demoClient) exactSource(filter *model.SourceSpec) (*srcNameNode, error) {
+func (c *demoClient) exactSource(ctx context.Context, filter *model.SourceSpec) (*srcNameNode, error) {
 	if filter == nil {
 		return nil, nil
 	}
 	if filter.ID != nil {
-		if node, ok := c.index[*filter.ID]; ok {
-			if s, ok := node.(*srcNameNode); ok {
-				return s, nil
+		if srcN, err := byIDkv[*srcNameNode](ctx, *filter.ID, c); err == nil {
+			return srcN, nil
+		} else {
+			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+				return nil, err
 			}
+			return nil, nil
 		}
 	}
 	if filter.Type != nil && filter.Namespace != nil && filter.Name != nil && (filter.Tag != nil || filter.Commit != nil) {
-		tp, ok := c.sources[*filter.Type]
-		if !ok {
-			return nil, nil
+		inType := &srcType{
+			Type: *filter.Type,
 		}
-		ns, ok := tp.namespaces[*filter.Namespace]
-		if !ok {
-			return nil, nil
-		}
-		for _, n := range ns.names {
-			if *filter.Name != n.name ||
-				noMatchInput(filter.Tag, n.tag) ||
-				noMatchInput(filter.Commit, n.commit) {
-				continue
+		srcT, err := byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
+		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+				return nil, err
 			}
-			return n, nil
+			return nil, nil
 		}
+
+		inNS := &srcNamespace{
+			Parent:    srcT.ThisID,
+			Namespace: *filter.Namespace,
+		}
+		srcNS, err := byKeykv[*srcNamespace](ctx, srcNSCol, inNS.Key(), c)
+		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+				return nil, err
+			}
+			return nil, nil
+		}
+
+		inName := &srcNameNode{
+			Parent: srcNS.ThisID,
+			Name:   *filter.Name,
+			Tag:    nilToEmpty(filter.Tag),
+			Commit: nilToEmpty(filter.Commit),
+		}
+		srcN, err := byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
+		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) && !errors.Is(err, errTypeNotMatch) {
+				return nil, err
+			}
+			return nil, nil
+		}
+		return srcN, nil
 	}
 	return nil, nil
 }

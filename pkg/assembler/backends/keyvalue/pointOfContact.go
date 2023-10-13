@@ -17,40 +17,55 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
 // Internal data: link that a package/source/artifact is good
-type pointOfContactList []*pointOfContactLink
 type pointOfContactLink struct {
-	id            string
-	packageID     string
-	artifactID    string
-	sourceID      string
-	email         string
-	info          string
-	since         time.Time
-	justification string
-	origin        string
-	collector     string
+	ThisID        string
+	PackageID     string
+	ArtifactID    string
+	SourceID      string
+	Email         string
+	Info          string
+	Since         time.Time
+	Justification string
+	Origin        string
+	Collector     string
 }
 
-func (n *pointOfContactLink) ID() string { return n.id }
+func (n *pointOfContactLink) ID() string { return n.ThisID }
+func (n *pointOfContactLink) Key() string {
+	return strings.Join([]string{
+		n.PackageID,
+		n.ArtifactID,
+		n.SourceID,
+		n.Email,
+		n.Info,
+		timeKey(n.Since),
+		n.Justification,
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *pointOfContactLink) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 1)
-	if n.packageID != "" && allowedEdges[model.EdgePointOfContactPackage] {
-		out = append(out, n.packageID)
+	if n.PackageID != "" && allowedEdges[model.EdgePointOfContactPackage] {
+		out = append(out, n.PackageID)
 	}
-	if n.artifactID != "" && allowedEdges[model.EdgePointOfContactArtifact] {
-		out = append(out, n.artifactID)
+	if n.ArtifactID != "" && allowedEdges[model.EdgePointOfContactArtifact] {
+		out = append(out, n.ArtifactID)
 	}
-	if n.sourceID != "" && allowedEdges[model.EdgePointOfContactSource] {
-		out = append(out, n.sourceID)
+	if n.SourceID != "" && allowedEdges[model.EdgePointOfContactSource] {
+		out = append(out, n.SourceID)
 	}
 	return out
 }
@@ -98,120 +113,84 @@ func (c *demoClient) IngestPointOfContact(ctx context.Context, subject model.Pac
 func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec, readOnly bool) (*model.PointOfContact, error) {
 	funcName := "IngestPointOfContact"
 
+	in := &pointOfContactLink{
+		Email:         pointOfContact.Email,
+		Info:          pointOfContact.Info,
+		Since:         pointOfContact.Since.UTC(),
+		Justification: pointOfContact.Justification,
+		Origin:        pointOfContact.Origin,
+		Collector:     pointOfContact.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	var packageID string
 	var foundPkgNameorVersionNode pkgNameOrVersion
-	var artifactID string
 	var foundArtStrct *artStruct
-	var sourceID string
 	var srcName *srcNameNode
-	searchIDs := []string{}
 	if subject.Package != nil {
 		var err error
-		packageID, err = getPackageIDFromInput(c, *subject.Package, *pkgMatchType)
+		foundPkgNameorVersionNode, err = c.getPackageNameOrVerFromInput(ctx, *subject.Package, *pkgMatchType)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundPkgNameorVersionNode, err = byID[pkgNameOrVersion](packageID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		searchIDs = append(searchIDs, foundPkgNameorVersionNode.getPointOfContactLinks()...)
+		in.PackageID = foundPkgNameorVersionNode.ID()
 	} else if subject.Artifact != nil {
 		var err error
-		artifactID, err = c.artifactIDByInput(ctx, subject.Artifact)
+		foundArtStrct, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundArtStrct, err = byID[*artStruct](artifactID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		searchIDs = append(searchIDs, foundArtStrct.pointOfContactLinks...)
+		in.ArtifactID = foundArtStrct.ThisID
 	} else {
 		var err error
-		sourceID, err = getSourceIDFromInput(c, *subject.Source)
+		srcName, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		srcName, err = byID[*srcNameNode](sourceID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		searchIDs = append(searchIDs, srcName.pointOfContactLinks...)
+		in.SourceID = srcName.ThisID
 	}
 
-	// Don't insert duplicates
-	duplicate := false
-	collectedLink := pointOfContactLink{}
-	for _, id := range searchIDs {
-		v, err := byID[*pointOfContactLink](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		subjectMatch := false
-		if packageID != "" && packageID == v.packageID {
-			subjectMatch = true
-		}
-		if artifactID != "" && artifactID == v.artifactID {
-			subjectMatch = true
-		}
-		if sourceID != "" && sourceID == v.sourceID {
-			subjectMatch = true
-		}
-		if subjectMatch && pointOfContact.Justification == v.justification &&
-			pointOfContact.Email == v.email && pointOfContact.Info == v.info &&
-			pointOfContact.Since.Equal(v.since) &&
-			pointOfContact.Origin == v.origin && pointOfContact.Collector == v.collector {
-
-			collectedLink = *v
-			duplicate = true
-			break
-		}
+	out, err := byKeykv[*pointOfContactLink](ctx, pocCol, in.Key(), c)
+	if err == nil {
+		return c.buildPointOfContact(ctx, out, nil, true)
 	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			b, err := c.ingestPointOfContact(ctx, subject, pkgMatchType, pointOfContact, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return b, err
-		}
-		// store the link
-		collectedLink = pointOfContactLink{
-			id:            c.getNextID(),
-			packageID:     packageID,
-			artifactID:    artifactID,
-			sourceID:      sourceID,
-			email:         pointOfContact.Email,
-			info:          pointOfContact.Info,
-			since:         pointOfContact.Since,
-			justification: pointOfContact.Justification,
-			origin:        pointOfContact.Origin,
-			collector:     pointOfContact.Collector,
-		}
-		c.index[collectedLink.id] = &collectedLink
-		c.pointOfContacts = append(c.pointOfContacts, &collectedLink)
-		// set the backlinks
-		if packageID != "" {
-			foundPkgNameorVersionNode.setPointOfContactLinks(collectedLink.id)
-		}
-		if artifactID != "" {
-			foundArtStrct.setPointOfContactLinks(collectedLink.id)
-		}
-		if sourceID != "" {
-			srcName.setPointOfContactLinks(collectedLink.id)
-		}
-
-	}
-
-	// build return GraphQL type
-	builtPointOfContact, err := c.buildPointOfContact(ctx, &collectedLink, nil, true)
-	if err != nil {
+	if !errors.Is(err, kv.NotFoundError) {
 		return nil, err
 	}
-	return builtPointOfContact, nil
+
+	if readOnly {
+		c.m.RUnlock()
+		b, err := c.ingestPointOfContact(ctx, subject, pkgMatchType, pointOfContact, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return b, err
+	}
+
+	in.ThisID = c.getNextID()
+	if err := c.addToIndex(ctx, pocCol, in); err != nil {
+		return nil, err
+	}
+
+	if foundPkgNameorVersionNode != nil {
+		if err := foundPkgNameorVersionNode.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
+	}
+	if foundArtStrct != nil {
+		if err := foundArtStrct.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
+	}
+	if srcName != nil {
+		if err := srcName.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
+	}
+	if err := setkv(ctx, pocCol, in, c); err != nil {
+		return nil, err
+	}
+
+	return c.buildPointOfContact(ctx, in, nil, true)
 }
 
 // Query PointOfContact
@@ -222,7 +201,7 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 	defer c.m.RUnlock()
 
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*pointOfContactLink](*filter.ID, c)
+		link, err := byIDkv[*pointOfContactLink](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
@@ -244,17 +223,17 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactArtifact != nil {
-			search = append(search, exactArtifact.pointOfContactLinks...)
+			search = append(search, exactArtifact.PointOfContactLinks...)
 			foundOne = true
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Source != nil {
-		exactSource, err := c.exactSource(filter.Subject.Source)
+		exactSource, err := c.exactSource(ctx, filter.Subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactSource != nil {
-			search = append(search, exactSource.pointOfContactLinks...)
+			search = append(search, exactSource.PointOfContactLinks...)
 			foundOne = true
 		}
 	}
@@ -262,7 +241,7 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 	var out []*model.PointOfContact
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*pointOfContactLink](id, c)
+			link, err := byIDkv[*pointOfContactLink](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -272,8 +251,15 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 			}
 		}
 	} else {
-		for _, link := range c.pointOfContacts {
-			var err error
+		pocKeys, err := c.kv.Keys(ctx, pocCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, pk := range pocKeys {
+			link, err := byKeykv[*pointOfContactLink](ctx, pocCol, pk, c)
+			if err != nil {
+				return nil, err
+			}
 			out, err = c.addPOCIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
@@ -286,23 +272,23 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 func (c *demoClient) addPOCIfMatch(ctx context.Context, out []*model.PointOfContact, filter *model.PointOfContactSpec, link *pointOfContactLink) (
 	[]*model.PointOfContact, error) {
 
-	if filter != nil && noMatch(filter.Justification, link.justification) {
+	if filter != nil && noMatch(filter.Justification, link.Justification) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
+	if filter != nil && noMatch(filter.Collector, link.Collector) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
+	if filter != nil && noMatch(filter.Origin, link.Origin) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Email, link.email) {
+	if filter != nil && noMatch(filter.Email, link.Email) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Info, link.info) {
+	if filter != nil && noMatch(filter.Info, link.Info) {
 		return out, nil
 	}
 	// no match if filter time since is after the timestamp
-	if filter != nil && filter.Since != nil && filter.Since.After(link.since) {
+	if filter != nil && filter.Since != nil && filter.Since.After(link.Since) {
 		return out, nil
 	}
 
@@ -322,39 +308,39 @@ func (c *demoClient) buildPointOfContact(ctx context.Context, link *pointOfConta
 	var s *model.Source
 	var err error
 	if filter != nil && filter.Subject != nil {
-		if filter.Subject.Package != nil && link.packageID != "" {
-			p, err = c.buildPackageResponse(link.packageID, filter.Subject.Package)
+		if filter.Subject.Package != nil && link.PackageID != "" {
+			p, err = c.buildPackageResponse(ctx, link.PackageID, filter.Subject.Package)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if filter.Subject.Artifact != nil && link.artifactID != "" {
-			a, err = c.buildArtifactResponse(ctx, link.artifactID, filter.Subject.Artifact)
+		if filter.Subject.Artifact != nil && link.ArtifactID != "" {
+			a, err = c.buildArtifactResponse(ctx, link.ArtifactID, filter.Subject.Artifact)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if filter.Subject.Source != nil && link.sourceID != "" {
-			s, err = c.buildSourceResponse(link.sourceID, filter.Subject.Source)
+		if filter.Subject.Source != nil && link.SourceID != "" {
+			s, err = c.buildSourceResponse(ctx, link.SourceID, filter.Subject.Source)
 			if err != nil {
 				return nil, err
 			}
 		}
 	} else {
-		if link.packageID != "" {
-			p, err = c.buildPackageResponse(link.packageID, nil)
+		if link.PackageID != "" {
+			p, err = c.buildPackageResponse(ctx, link.PackageID, nil)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if link.artifactID != "" {
-			a, err = c.buildArtifactResponse(ctx, link.artifactID, nil)
+		if link.ArtifactID != "" {
+			a, err = c.buildArtifactResponse(ctx, link.ArtifactID, nil)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if link.sourceID != "" {
-			s, err = c.buildSourceResponse(link.sourceID, nil)
+		if link.SourceID != "" {
+			s, err = c.buildSourceResponse(ctx, link.SourceID, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -362,7 +348,7 @@ func (c *demoClient) buildPointOfContact(ctx context.Context, link *pointOfConta
 	}
 
 	var subj model.PackageSourceOrArtifact
-	if link.packageID != "" {
+	if link.PackageID != "" {
 		if p == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve package via packageID")
 		} else if p == nil && !ingestOrIDProvided {
@@ -370,7 +356,7 @@ func (c *demoClient) buildPointOfContact(ctx context.Context, link *pointOfConta
 		}
 		subj = p
 	}
-	if link.artifactID != "" {
+	if link.ArtifactID != "" {
 		if a == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve artifact via artifactID")
 		} else if a == nil && !ingestOrIDProvided {
@@ -378,7 +364,7 @@ func (c *demoClient) buildPointOfContact(ctx context.Context, link *pointOfConta
 		}
 		subj = a
 	}
-	if link.sourceID != "" {
+	if link.SourceID != "" {
 		if s == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve source via sourceID")
 		} else if s == nil && !ingestOrIDProvided {
@@ -388,14 +374,14 @@ func (c *demoClient) buildPointOfContact(ctx context.Context, link *pointOfConta
 	}
 
 	pointOfContact := model.PointOfContact{
-		ID:            link.id,
+		ID:            link.ThisID,
 		Subject:       subj,
-		Email:         link.email,
-		Info:          link.info,
-		Since:         link.since,
-		Justification: link.justification,
-		Origin:        link.origin,
-		Collector:     link.collector,
+		Email:         link.Email,
+		Info:          link.Info,
+		Since:         link.Since,
+		Justification: link.Justification,
+		Origin:        link.Origin,
+		Collector:     link.Collector,
 	}
 	return &pointOfContact, nil
 }

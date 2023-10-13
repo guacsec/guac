@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/stablememmap"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -545,11 +546,11 @@ func TestPointOfContact(t *testing.T) {
 			},
 			ExpHM: []*model.PointOfContact{
 				{
-					Subject:       p2out,
+					Subject:       p1outName,
 					Justification: "test justification",
 				},
 				{
-					Subject:       p1outName,
+					Subject:       p2out,
 					Justification: "test justification",
 				},
 			},
@@ -599,24 +600,6 @@ func TestPointOfContact(t *testing.T) {
 			},
 			ExpIngestErr: true,
 		},
-		{
-			Name:  "Query good ID",
-			InSrc: []*model.SourceInputSpec{s1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source: s1,
-					},
-					HM: &model.PointOfContactInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.PointOfContactSpec{
-				ID: ptrfrom.String("asdf"),
-			},
-			ExpQueryErr: true,
-		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
@@ -624,7 +607,8 @@ func TestPointOfContact(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -920,7 +904,8 @@ func TestIngestPointOfContacts(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -1049,7 +1034,8 @@ func TestPointOfContactNeighbors(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

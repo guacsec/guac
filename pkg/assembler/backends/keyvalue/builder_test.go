@@ -39,7 +39,7 @@ func Test_builderStruct_ID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &builderStruct{
-				id: tt.id,
+				ThisID: tt.id,
 			}
 			if got := b.ID(); got != tt.want {
 				t.Errorf("builderStruct.ID() = %v, want %v", got, tt.want)
@@ -70,9 +70,9 @@ func Test_builderStruct_Neighbors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &builderStruct{
-				id:       tt.fields.id,
-				uri:      tt.fields.uri,
-				hasSLSAs: tt.fields.hasSLSAs,
+				ThisID:   tt.fields.id,
+				URI:      tt.fields.uri,
+				HasSLSAs: tt.fields.hasSLSAs,
 			}
 			if got := b.Neighbors(tt.allowedEdges); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("builderStruct.Neighbors() = %v, want %v", got, tt.want)
@@ -116,15 +116,13 @@ func Test_builderStruct_BuildModelNode(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				builders: builderMap{},
-				index:    indexType{},
-			}
+			c, _ := getBackend(context.Background(), nil)
 			b := &builderStruct{
-				id:  tt.fields.id,
-				uri: tt.fields.uri,
+				ThisID: tt.fields.id,
+				URI:    tt.fields.uri,
 			}
-			got, err := b.BuildModelNode(context.Background(), c)
+			dc := c.(*demoClient)
+			got, err := b.BuildModelNode(context.Background(), dc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("builderStruct.BuildModelNode() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -168,10 +166,7 @@ func Test_demoClient_IngestBuilder(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				builders: builderMap{},
-				index:    indexType{},
-			}
+			c, _ := getBackend(ctx, nil)
 			got, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
@@ -215,10 +210,7 @@ func Test_demoClient_IngestBuilders(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				builders: builderMap{},
-				index:    indexType{},
-			}
+			c, _ := getBackend(ctx, nil)
 			got, err := c.IngestBuilders(ctx, tt.builderInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
@@ -281,10 +273,7 @@ func Test_demoClient_Builders(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				builders: builderMap{},
-				index:    indexType{},
-			}
+			c, _ := getBackend(ctx, nil)
 			ingestedBuilder, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
@@ -323,7 +312,7 @@ func Test_demoClient_exactBuilder(t *testing.T) {
 			URI: ptrfrom.String("https://github.com/CreateFork/HubHostedActions@v1"),
 		},
 		want: &builderStruct{
-			uri: "https://github.com/CreateFork/HubHostedActions@v1",
+			URI: "https://github.com/CreateFork/HubHostedActions@v1",
 		},
 		wantErr: false,
 	}, {
@@ -336,16 +325,13 @@ func Test_demoClient_exactBuilder(t *testing.T) {
 		},
 		idInFilter: true,
 		want: &builderStruct{
-			uri: "https://tekton.dev/chains/v2",
+			URI: "https://tekton.dev/chains/v2",
 		},
 		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &demoClient{
-				builders: builderMap{},
-				index:    indexType{},
-			}
+			c, _ := getBackend(ctx, nil)
 			ingestedBuilder, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
@@ -354,12 +340,13 @@ func Test_demoClient_exactBuilder(t *testing.T) {
 			if tt.idInFilter {
 				tt.builderSpec.ID = &ingestedBuilder.ID
 			}
-			got, err := c.exactBuilder(tt.builderSpec)
+			dc := c.(*demoClient)
+			got, err := dc.exactBuilder(ctx, tt.builderSpec)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.exactBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			tt.want.id = ingestedBuilder.ID
+			tt.want.ThisID = ingestedBuilder.ID
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("demoClient.exactBuilder() = %v, want %v", got, tt.want)
 			}

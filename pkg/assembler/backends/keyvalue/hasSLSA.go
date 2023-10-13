@@ -17,51 +17,74 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"slices"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type (
-	hasSLSAList   []*hasSLSAStruct
 	hasSLSAStruct struct {
-		id         string
-		subject    string
-		builtFrom  []string
-		builtBy    string
-		buildType  string
-		predicates []*model.SLSAPredicate
-		version    string
-		start      *time.Time
-		finish     *time.Time
-		origin     string
-		collector  string
+		ThisID     string
+		Subject    string
+		BuiltFrom  []string
+		BuiltBy    string
+		BuildType  string
+		Predicates []*model.SLSAPredicate
+		Version    string
+		Start      *time.Time
+		Finish     *time.Time
+		Origin     string
+		Collector  string
 	}
 )
 
-func (n *hasSLSAStruct) ID() string { return n.id }
+func (n *hasSLSAStruct) ID() string { return n.ThisID }
+func (n *hasSLSAStruct) Key() string {
+	var st string
+	if n.Start != nil {
+		st = timeKey(*n.Start)
+	}
+	var fn string
+	if n.Finish != nil {
+		fn = timeKey(*n.Finish)
+	}
+	return strings.Join([]string{
+		n.Subject,
+		fmt.Sprint(n.BuiltFrom),
+		n.BuiltBy,
+		n.BuildType,
+		fmt.Sprint(n.Predicates),
+		n.Version,
+		st,
+		fn,
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *hasSLSAStruct) Neighbors(allowedEdges edgeMap) []string {
-	out := make([]string, 0, 2+len(n.builtFrom))
+	out := make([]string, 0, 2+len(n.BuiltFrom))
 	if allowedEdges[model.EdgeHasSlsaSubject] {
-		out = append(out, n.subject)
+		out = append(out, n.Subject)
 	}
 	if allowedEdges[model.EdgeHasSlsaBuiltBy] {
-		out = append(out, n.builtBy)
+		out = append(out, n.BuiltBy)
 	}
 	if allowedEdges[model.EdgeHasSlsaMaterials] {
-		out = append(out, n.builtFrom...)
+		out = append(out, n.BuiltFrom...)
 	}
 	return out
 }
 
 func (n *hasSLSAStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.convSLSA(n)
+	return c.convSLSA(ctx, n)
 }
 
 // Query HasSlsa
@@ -71,13 +94,13 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 	c.m.RLock()
 	defer c.m.RUnlock()
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*hasSLSAStruct](*filter.ID, c)
+		link, err := byIDkv[*hasSLSAStruct](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		hs, err := c.convSLSA(link)
+		hs, err := c.convSLSA(ctx, link)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -98,19 +121,19 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if exactArtifact != nil {
-				search = append(search, exactArtifact.hasSLSAs...)
+				search = append(search, exactArtifact.HasSLSAs...)
 				foundOne = true
 				break
 			}
 		}
 	}
 	if !foundOne && filter != nil && filter.BuiltBy != nil {
-		exactBuilder, err := c.exactBuilder(filter.BuiltBy)
+		exactBuilder, err := c.exactBuilder(ctx, filter.BuiltBy)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactBuilder != nil {
-			search = append(search, exactBuilder.hasSLSAs...)
+			search = append(search, exactBuilder.HasSLSAs...)
 			foundOne = true
 		}
 	}
@@ -118,7 +141,7 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 	var out []*model.HasSlsa
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*hasSLSAStruct](id, c)
+			link, err := byIDkv[*hasSLSAStruct](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -128,8 +151,15 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 			}
 		}
 	} else {
-		for _, link := range c.hasSLSAs {
-			var err error
+		slsaKeys, err := c.kv.Keys(ctx, slsaCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, slsak := range slsaKeys {
+			link, err := byKeykv[*hasSLSAStruct](ctx, slsaCol, slsak, c)
+			if err != nil {
+				return nil, err
+			}
 			out, err = c.addSLSAIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
@@ -177,6 +207,23 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec, readOnly bool) (
 	*model.HasSlsa, error,
 ) {
+	preds := convSLSAP(slsa.SlsaPredicate)
+	in := &hasSLSAStruct{
+		BuildType:  slsa.BuildType,
+		Predicates: preds,
+		Version:    slsa.SlsaVersion,
+		Origin:     slsa.Origin,
+		Collector:  slsa.Collector,
+	}
+	if slsa.StartedOn != nil {
+		t := slsa.StartedOn.UTC()
+		in.Start = &t
+	}
+	if slsa.FinishedOn != nil {
+		t := slsa.FinishedOn.UTC()
+		in.Finish = &t
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
@@ -184,6 +231,8 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	if err != nil {
 		return nil, gqlerror.Errorf("IngestSLSA :: Subject artifact not found")
 	}
+	in.Subject = s.ThisID
+
 	var bfs []*artStruct
 	var bfIDs []string
 	for i, a := range builtFrom {
@@ -195,32 +244,20 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 		bfIDs = append(bfIDs, b.ID())
 	}
 	slices.Sort(bfIDs)
+	in.BuiltFrom = bfIDs
 
-	b, err := c.builderByKey(builtBy.URI)
+	b, err := c.builderByInput(ctx, &builtBy)
 	if err != nil {
 		return nil, gqlerror.Errorf("IngestSLSA :: Builder not found")
 	}
+	in.BuiltBy = b.ThisID
 
-	preds := convSLSAP(slsa.SlsaPredicate)
-
-	// Just picking the first builtFrom found to search the backedges
-	for _, slID := range bfs[0].hasSLSAs {
-		sl, err := byID[*hasSLSAStruct](slID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestSLSA :: Internal db error, bad backedge")
-		}
-		if sl.subject == s.ID() &&
-			slices.Equal(sl.builtFrom, bfIDs) &&
-			sl.builtBy == b.id &&
-			sl.buildType == slsa.BuildType &&
-			cmp.Equal(sl.predicates, preds) &&
-			sl.version == slsa.SlsaVersion &&
-			timePtrEqual(sl.start, slsa.StartedOn) &&
-			timePtrEqual(sl.finish, slsa.FinishedOn) &&
-			sl.origin == slsa.Origin &&
-			sl.collector == slsa.Collector {
-			return c.convSLSA(sl)
-		}
+	out, err := byKeykv[*hasSLSAStruct](ctx, slsaCol, in.Key(), c)
+	if err == nil {
+		return c.convSLSA(ctx, out)
+	}
+	if !errors.Is(err, kv.NotFoundError) {
+		return nil, err
 	}
 
 	if readOnly {
@@ -230,28 +267,27 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 		return s, err
 	}
 
-	sl := &hasSLSAStruct{
-		id:         c.getNextID(),
-		subject:    s.ID(),
-		builtFrom:  bfIDs,
-		builtBy:    b.id,
-		buildType:  slsa.BuildType,
-		predicates: preds,
-		version:    slsa.SlsaVersion,
-		start:      slsa.StartedOn,
-		finish:     slsa.FinishedOn,
-		origin:     slsa.Origin,
-		collector:  slsa.Collector,
-	}
-	c.index[sl.id] = sl
-	c.hasSLSAs = append(c.hasSLSAs, sl)
-	s.setHasSLSAs(sl.id)
-	for _, a := range bfs {
-		a.setHasSLSAs(sl.id)
-	}
-	b.setHasSLSAs(sl.id)
+	in.ThisID = c.getNextID()
 
-	return c.convSLSA(sl)
+	if err := c.addToIndex(ctx, slsaCol, in); err != nil {
+		return nil, err
+	}
+	if err := s.setHasSLSAs(ctx, in.ThisID, c); err != nil {
+		return nil, err
+	}
+	for _, a := range bfs {
+		if err := a.setHasSLSAs(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
+	}
+	if err := b.setHasSLSAs(ctx, in.ThisID, c); err != nil {
+		return nil, err
+	}
+	if err := setkv(ctx, slsaCol, in, c); err != nil {
+		return nil, err
+	}
+
+	return c.convSLSA(ctx, in)
 }
 
 func convSLSAP(in []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
@@ -266,37 +302,37 @@ func convSLSAP(in []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
 	return rv
 }
 
-func (c *demoClient) convSLSA(in *hasSLSAStruct) (*model.HasSlsa, error) {
-	sub, err := byID[*artStruct](in.subject, c)
+func (c *demoClient) convSLSA(ctx context.Context, in *hasSLSAStruct) (*model.HasSlsa, error) {
+	sub, err := byIDkv[*artStruct](ctx, in.Subject, c)
 	if err != nil {
 		return nil, err
 	}
 	var bfs []*model.Artifact
-	for _, id := range in.builtFrom {
-		a, err := byID[*artStruct](id, c)
+	for _, id := range in.BuiltFrom {
+		a, err := byIDkv[*artStruct](ctx, id, c)
 		if err != nil {
 			return nil, err
 		}
 		bfs = append(bfs, c.convArtifact(a))
 	}
-	bb, err := byID[*builderStruct](in.builtBy, c)
+	bb, err := byIDkv[*builderStruct](ctx, in.BuiltBy, c)
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.HasSlsa{
-		ID:      in.id,
+		ID:      in.ThisID,
 		Subject: c.convArtifact(sub),
 		Slsa: &model.Slsa{
 			BuiltFrom:     bfs,
 			BuiltBy:       c.convBuilder(bb),
-			BuildType:     in.buildType,
-			SlsaPredicate: in.predicates,
-			SlsaVersion:   in.version,
-			StartedOn:     in.start,
-			FinishedOn:    in.finish,
-			Origin:        in.origin,
-			Collector:     in.collector,
+			BuildType:     in.BuildType,
+			SlsaPredicate: in.Predicates,
+			SlsaVersion:   in.Version,
+			StartedOn:     in.Start,
+			FinishedOn:    in.Finish,
+			Origin:        in.Origin,
+			Collector:     in.Collector,
 		},
 	}, nil
 }
@@ -305,24 +341,24 @@ func (c *demoClient) addSLSAIfMatch(ctx context.Context, out []*model.HasSlsa,
 	filter *model.HasSLSASpec, link *hasSLSAStruct) (
 	[]*model.HasSlsa, error,
 ) {
-	bb, err := byID[*builderStruct](link.builtBy, c)
+	bb, err := byIDkv[*builderStruct](ctx, link.BuiltBy, c)
 	if err != nil {
 		return nil, err
 	}
-	if noMatch(filter.BuildType, link.buildType) ||
-		noMatch(filter.SlsaVersion, link.version) ||
-		noMatch(filter.Origin, link.origin) ||
-		noMatch(filter.Collector, link.collector) ||
-		(filter.StartedOn != nil && (link.start == nil || !filter.StartedOn.Equal(*link.start))) ||
-		(filter.FinishedOn != nil && (link.finish == nil || !filter.FinishedOn.Equal(*link.finish))) ||
-		(filter.BuiltBy != nil && filter.BuiltBy.ID != nil && *filter.BuiltBy.ID != bb.id) ||
-		(filter.BuiltBy != nil && filter.BuiltBy.URI != nil && *filter.BuiltBy.URI != bb.uri) ||
-		!matchSLSAPreds(link.predicates, filter.Predicate) ||
-		!c.matchArtifacts(ctx, []*model.ArtifactSpec{filter.Subject}, []string{link.subject}) ||
-		!c.matchArtifacts(ctx, filter.BuiltFrom, link.builtFrom) {
+	if noMatch(filter.BuildType, link.BuildType) ||
+		noMatch(filter.SlsaVersion, link.Version) ||
+		noMatch(filter.Origin, link.Origin) ||
+		noMatch(filter.Collector, link.Collector) ||
+		(filter.StartedOn != nil && (link.Start == nil || !filter.StartedOn.Equal(*link.Start))) ||
+		(filter.FinishedOn != nil && (link.Finish == nil || !filter.FinishedOn.Equal(*link.Finish))) ||
+		(filter.BuiltBy != nil && filter.BuiltBy.ID != nil && *filter.BuiltBy.ID != bb.ThisID) ||
+		(filter.BuiltBy != nil && filter.BuiltBy.URI != nil && *filter.BuiltBy.URI != bb.URI) ||
+		!matchSLSAPreds(link.Predicates, filter.Predicate) ||
+		!c.matchArtifacts(ctx, []*model.ArtifactSpec{filter.Subject}, []string{link.Subject}) ||
+		!c.matchArtifacts(ctx, filter.BuiltFrom, link.BuiltFrom) {
 		return out, nil
 	}
-	hs, err := c.convSLSA(link)
+	hs, err := c.convSLSA(ctx, link)
 	if err != nil {
 		return nil, err
 	}

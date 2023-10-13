@@ -17,42 +17,57 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
-type hasSBOMList []*hasSBOMStruct
 type hasSBOMStruct struct {
-	id               string
-	pkg              string
-	artifact         string
-	uri              string
-	algorithm        string
-	digest           string
-	downloadLocation string
-	origin           string
-	collector        string
-	knownSince       time.Time
+	ThisID           string
+	Pkg              string
+	Artifact         string
+	URI              string
+	Algorithm        string
+	Digest           string
+	DownloadLocation string
+	Origin           string
+	Collector        string
+	KnownSince       time.Time
 }
 
-func (n *hasSBOMStruct) ID() string { return n.id }
+func (n *hasSBOMStruct) ID() string { return n.ThisID }
+func (n *hasSBOMStruct) Key() string {
+	return strings.Join([]string{
+		n.Pkg,
+		n.Artifact,
+		n.URI,
+		n.Algorithm,
+		n.Digest,
+		n.DownloadLocation,
+		n.Origin,
+		n.Collector,
+		fmt.Sprint(n.KnownSince.Unix()),
+	}, ":")
+}
 
 func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []string {
-	if n.pkg != "" && allowedEdges[model.EdgeHasSbomPackage] {
-		return []string{n.pkg}
+	if n.Pkg != "" && allowedEdges[model.EdgeHasSbomPackage] {
+		return []string{n.Pkg}
 	}
-	if allowedEdges[model.EdgeHasSbomArtifact] {
-		return []string{n.artifact}
+	if n.Artifact != "" && allowedEdges[model.EdgeHasSbomArtifact] {
+		return []string{n.Artifact}
 	}
 	return []string{}
 }
 
 func (n *hasSBOMStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.convHasSBOM(n)
+	return c.convHasSBOM(ctx, n)
 }
 
 // Ingest HasSBOM
@@ -87,55 +102,47 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 
 func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec, readOnly bool) (*model.HasSbom, error) {
 	funcName := "IngestHasSbom"
+	algorithm := strings.ToLower(input.Algorithm)
+	digest := strings.ToLower(input.Digest)
+
+	in := &hasSBOMStruct{
+		URI:              input.URI,
+		Algorithm:        algorithm,
+		Digest:           digest,
+		DownloadLocation: input.DownloadLocation,
+		Origin:           input.Origin,
+		Collector:        input.Collector,
+		KnownSince:       input.KnownSince.UTC(),
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	var search []string
-	var packageID string
-	var pkg *pkgVersionNode
-	var artID string
+	var pkg *pkgVersion
 	var art *artStruct
+
 	if subject.Package != nil {
-		pmt := model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
 		var err error
-		packageID, err = getPackageIDFromInput(c, *subject.Package, pmt)
+		pkg, err = c.getPackageVerFromInput(ctx, *subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		pkg, err = byID[*pkgVersionNode](packageID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		search = pkg.hasSBOMs
+		in.Pkg = pkg.ThisID
 	} else {
 		var err error
 		art, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		artID = art.ID()
-		search = art.hasSBOMs
+		in.Artifact = art.ThisID
 	}
 
-	algorithm := strings.ToLower(input.Algorithm)
-	digest := strings.ToLower(input.Digest)
-
-	for _, id := range search {
-		h, err := byID[*hasSBOMStruct](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		if h.pkg == packageID &&
-			h.artifact == artID &&
-			h.uri == input.URI &&
-			h.algorithm == algorithm &&
-			h.digest == digest &&
-			h.downloadLocation == input.DownloadLocation &&
-			h.origin == input.Origin &&
-			h.collector == input.Collector &&
-			input.KnownSince.Equal(h.knownSince) {
-			return c.convHasSBOM(h)
-		}
+	out, err := byKeykv[*hasSBOMStruct](ctx, hasSBOMCol, in.Key(), c)
+	if err == nil {
+		return c.convHasSBOM(ctx, out)
+	}
+	if !errors.Is(err, kv.NotFoundError) {
+		return nil, err
 	}
 
 	if readOnly {
@@ -145,51 +152,52 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 		return b, err
 	}
 
-	h := &hasSBOMStruct{
-		id:               c.getNextID(),
-		pkg:              packageID,
-		artifact:         artID,
-		uri:              input.URI,
-		algorithm:        algorithm,
-		digest:           digest,
-		downloadLocation: input.DownloadLocation,
-		origin:           input.Origin,
-		collector:        input.Collector,
-		knownSince:       input.KnownSince.UTC(),
+	in.ThisID = c.getNextID()
+
+	if err := c.addToIndex(ctx, hasSBOMCol, in); err != nil {
+		return nil, err
 	}
-	c.index[h.id] = h
-	c.hasSBOMs = append(c.hasSBOMs, h)
-	if packageID != "" {
-		pkg.setHasSBOM(h.id)
+
+	if pkg != nil {
+		if err := pkg.setHasSBOM(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
 	} else {
-		art.setHasSBOMs(h.id)
+		if err := art.setHasSBOMs(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
 	}
-	return c.convHasSBOM(h)
+
+	if err := setkv(ctx, hasSBOMCol, in, c); err != nil {
+		return nil, err
+	}
+
+	return c.convHasSBOM(ctx, in)
 }
 
-func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
+func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model.HasSbom, error) {
 	out := &model.HasSbom{
-		ID:               in.id,
-		URI:              in.uri,
-		Algorithm:        in.algorithm,
-		Digest:           in.digest,
-		DownloadLocation: in.downloadLocation,
-		Origin:           in.origin,
-		Collector:        in.collector,
-		KnownSince:       in.knownSince.UTC(),
+		ID:               in.ThisID,
+		URI:              in.URI,
+		Algorithm:        in.Algorithm,
+		Digest:           in.Digest,
+		DownloadLocation: in.DownloadLocation,
+		Origin:           in.Origin,
+		Collector:        in.Collector,
+		KnownSince:       in.KnownSince.UTC(),
 	}
-	if in.pkg != "" {
-		p, err := c.buildPackageResponse(in.pkg, nil)
+	if in.Pkg != "" {
+		p, err := c.buildPackageResponse(ctx, in.Pkg, nil)
 		if err != nil {
 			return nil, err
 		}
 		out.Subject = p
 	} else {
-		art, err := byID[*artStruct](in.artifact, c)
+		art, err := c.artifactModelByID(ctx, in.Artifact)
 		if err != nil {
 			return nil, err
 		}
-		out.Subject = c.convArtifact(art)
+		out.Subject = art
 	}
 	return out, nil
 }
@@ -202,13 +210,13 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	defer c.m.RUnlock()
 
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*hasSBOMStruct](*filter.ID, c)
+		link, err := byIDkv[*hasSBOMStruct](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		sb, err := c.convHasSBOM(link)
+		sb, err := c.convHasSBOM(ctx, link)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -218,13 +226,13 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	var search []string
 	foundOne := false
 	if filter != nil && filter.Subject != nil && filter.Subject.Package != nil {
-		pkgs, err := c.findPackageVersion(filter.Subject.Package)
+		pkgs, err := c.findPackageVersion(ctx, filter.Subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		foundOne = len(pkgs) > 0
 		for _, pkg := range pkgs {
-			search = append(search, pkg.hasSBOMs...)
+			search = append(search, pkg.HasSBOMs...)
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Artifact != nil {
@@ -233,7 +241,7 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactArt != nil {
-			search = exactArt.hasSBOMs
+			search = exactArt.HasSBOMs
 			foundOne = true
 		}
 	}
@@ -241,7 +249,7 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	var out []*model.HasSbom
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*hasSBOMStruct](id, c)
+			link, err := byIDkv[*hasSBOMStruct](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -251,8 +259,15 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 			}
 		}
 	} else {
-		for _, link := range c.hasSBOMs {
-			var err error
+		hsks, err := c.kv.Keys(ctx, hasSBOMCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, hsk := range hsks {
+			link, err := byKeykv[*hasSBOMStruct](ctx, hasSBOMCol, hsk, c)
+			if err != nil {
+				return nil, err
+			}
 			out, err = c.addHasSBOMIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
@@ -268,21 +283,21 @@ func (c *demoClient) addHasSBOMIfMatch(ctx context.Context, out []*model.HasSbom
 	[]*model.HasSbom, error) {
 
 	if filter != nil {
-		if noMatch(filter.URI, link.uri) ||
-			noMatch(toLower(filter.Algorithm), link.algorithm) ||
-			noMatch(toLower(filter.Digest), link.digest) ||
-			noMatch(filter.DownloadLocation, link.downloadLocation) ||
-			noMatch(filter.Origin, link.origin) ||
-			noMatch(filter.Collector, link.collector) ||
-			(filter.KnownSince != nil && filter.KnownSince.After(link.knownSince)) {
+		if noMatch(filter.URI, link.URI) ||
+			noMatch(toLower(filter.Algorithm), link.Algorithm) ||
+			noMatch(toLower(filter.Digest), link.Digest) ||
+			noMatch(filter.DownloadLocation, link.DownloadLocation) ||
+			noMatch(filter.Origin, link.Origin) ||
+			noMatch(filter.Collector, link.Collector) ||
+			(filter.KnownSince != nil && filter.KnownSince.After(link.KnownSince)) {
 			return out, nil
 		}
 		if filter.Subject != nil {
 			if filter.Subject.Package != nil {
-				if link.pkg == "" {
+				if link.Pkg == "" {
 					return out, nil
 				}
-				p, err := c.buildPackageResponse(link.pkg, filter.Subject.Package)
+				p, err := c.buildPackageResponse(ctx, link.Pkg, filter.Subject.Package)
 				if err != nil {
 					return nil, err
 				}
@@ -290,16 +305,16 @@ func (c *demoClient) addHasSBOMIfMatch(ctx context.Context, out []*model.HasSbom
 					return out, nil
 				}
 			} else if filter.Subject.Artifact != nil {
-				if link.artifact == "" {
+				if link.Artifact == "" {
 					return out, nil
 				}
-				if !c.artifactMatch(ctx, link.artifact, filter.Subject.Artifact) {
+				if !c.artifactMatch(ctx, link.Artifact, filter.Subject.Artifact) {
 					return out, nil
 				}
 			}
 		}
 	}
-	sb, err := c.convHasSBOM(link)
+	sb, err := c.convHasSBOM(ctx, link)
 	if err != nil {
 		return nil, err
 	}

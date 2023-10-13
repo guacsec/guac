@@ -17,52 +17,68 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal certifyLegal
 
-type (
-	certifyLegalList   []*certifyLegalStruct
-	certifyLegalStruct struct {
-		id                 string
-		pkg                string
-		source             string
-		declaredLicense    string
-		declaredLicenses   []string
-		discoveredLicense  string
-		discoveredLicenses []string
-		attribution        string
-		justification      string
-		timeScanned        time.Time
-		origin             string
-		collector          string
-	}
-)
+type certifyLegalStruct struct {
+	ThisID             string
+	Pkg                string
+	Source             string
+	DeclaredLicense    string
+	DeclaredLicenses   []string
+	DiscoveredLicense  string
+	DiscoveredLicenses []string
+	Attribution        string
+	Justification      string
+	TimeScanned        time.Time
+	Origin             string
+	Collector          string
+}
 
-func (n *certifyLegalStruct) ID() string { return n.id }
+func (n *certifyLegalStruct) ID() string { return n.ThisID }
+func (n *certifyLegalStruct) Key() string {
+	return strings.Join([]string{
+		n.Pkg,
+		n.Source,
+		n.DeclaredLicense,
+		fmt.Sprint(n.DeclaredLicenses),
+		n.DiscoveredLicense,
+		fmt.Sprint(n.DiscoveredLicenses),
+		n.Attribution,
+		n.Justification,
+		timeKey(n.TimeScanned),
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *certifyLegalStruct) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 2)
-	if n.pkg != "" && allowedEdges[model.EdgeCertifyLegalPackage] {
-		out = append(out, n.pkg)
+	if n.Pkg != "" && allowedEdges[model.EdgeCertifyLegalPackage] {
+		out = append(out, n.Pkg)
 	}
-	if n.source != "" && allowedEdges[model.EdgeCertifyLegalSource] {
-		out = append(out, n.source)
+	if n.Source != "" && allowedEdges[model.EdgeCertifyLegalSource] {
+		out = append(out, n.Source)
 	}
 	if allowedEdges[model.EdgeCertifyLegalLicense] {
-		out = append(out, n.declaredLicenses...)
-		out = append(out, n.discoveredLicenses...)
+		out = append(out, n.DeclaredLicenses...)
+		out = append(out, n.DiscoveredLicenses...)
 	}
 	return out
 }
 
 func (n *certifyLegalStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.convLegal(n)
+	return c.convLegal(ctx, n)
 }
 
 func (c *demoClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
@@ -96,158 +112,147 @@ func (c *demoClient) IngestCertifyLegal(ctx context.Context, subject model.Packa
 func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec, readOnly bool) (*model.CertifyLegal, error) {
 	funcName := "IngestCertifyLegal"
 
+	in := &certifyLegalStruct{
+		DeclaredLicense:   certifyLegal.DeclaredLicense,
+		DiscoveredLicense: certifyLegal.DiscoveredLicense,
+		Attribution:       certifyLegal.Attribution,
+		TimeScanned:       certifyLegal.TimeScanned.UTC(),
+		Justification:     certifyLegal.Justification,
+		Origin:            certifyLegal.Origin,
+		Collector:         certifyLegal.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
 	var dec []string
 	for _, lis := range declaredLicenses {
-		l, ok := c.licenses[licenseKey(lis.Name, lis.ListVersion)]
-		if !ok {
-			return nil, gqlerror.Errorf("%v :: License not found %q", funcName, licenseKey(lis.Name, lis.ListVersion))
+		l, err := c.licenseByInput(ctx, lis)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: License not found %q %v", funcName, lis.Name, err)
 		}
-		dec = append(dec, l.id)
+		dec = append(dec, l.ThisID)
 	}
 	slices.Sort(dec)
+	in.DeclaredLicenses = dec
+
 	var dis []string
 	for _, lis := range discoveredLicenses {
-		l, ok := c.licenses[licenseKey(lis.Name, lis.ListVersion)]
-		if !ok {
-			return nil, gqlerror.Errorf("%v :: License not found %q", funcName, licenseKey(lis.Name, lis.ListVersion))
+		l, err := c.licenseByInput(ctx, lis)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: License not found %q %v", funcName, lis.Name, err)
 		}
-		dis = append(dis, l.id)
+		dis = append(dis, l.ThisID)
 	}
 	slices.Sort(dis)
+	in.DiscoveredLicenses = dis
 
-	var backedgeSearch []string
-	var packageID string
-	var pkg *pkgVersionNode
+	var pkg *pkgVersion
 	if subject.Package != nil {
-		var pmt model.MatchFlags
-		pmt.Pkg = model.PkgMatchTypeSpecificVersion
-		pid, err := getPackageIDFromInput(c, *subject.Package, pmt)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-		packageID = pid
-		pkg, err = byID[*pkgVersionNode](packageID, c)
+		var err error
+		pkg, err = c.getPackageVerFromInput(ctx, *subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		backedgeSearch = pkg.certifyLegals
+		in.Pkg = pkg.ThisID
 	}
 
-	var sourceID string
 	var src *srcNameNode
 	if subject.Source != nil {
-		sid, err := getSourceIDFromInput(c, *subject.Source)
+		var err error
+		src, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
-		sourceID = sid
-		src, err = byID[*srcNameNode](sourceID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		backedgeSearch = src.certifyLegals
+		in.Source = src.ThisID
 	}
 
-	for _, id := range backedgeSearch {
-		cl, err := byID[*certifyLegalStruct](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		if cl.pkg == packageID &&
-			cl.source == sourceID &&
-			cl.declaredLicense == certifyLegal.DeclaredLicense &&
-			slices.Equal(cl.declaredLicenses, dec) &&
-			cl.discoveredLicense == certifyLegal.DiscoveredLicense &&
-			slices.Equal(cl.discoveredLicenses, dis) &&
-			cl.attribution == certifyLegal.Attribution &&
-			cl.timeScanned.Equal(certifyLegal.TimeScanned) &&
-			cl.justification == certifyLegal.Justification &&
-			cl.origin == certifyLegal.Origin &&
-			cl.collector == certifyLegal.Collector {
-			return c.convLegal(cl)
-		}
+	out, err := byKeykv[*certifyLegalStruct](ctx, clCol, in.Key(), c)
+	if err == nil {
+		return c.convLegal(ctx, out)
 	}
+	if !errors.Is(err, kv.NotFoundError) {
+		return nil, err
+	}
+
 	if readOnly {
 		c.m.RUnlock()
 		o, err := c.ingestCertifyLegal(ctx, subject, declaredLicenses, discoveredLicenses, certifyLegal, false)
 		c.m.RLock() // relock so that defer unlock does not panic
 		return o, err
 	}
-	cl := &certifyLegalStruct{
-		id:                 c.getNextID(),
-		pkg:                packageID,
-		source:             sourceID,
-		declaredLicense:    certifyLegal.DeclaredLicense,
-		declaredLicenses:   dec,
-		discoveredLicense:  certifyLegal.DiscoveredLicense,
-		discoveredLicenses: dis,
-		attribution:        certifyLegal.Attribution,
-		timeScanned:        certifyLegal.TimeScanned,
-		justification:      certifyLegal.Justification,
-		origin:             certifyLegal.Origin,
-		collector:          certifyLegal.Collector,
+	in.ThisID = c.getNextID()
+
+	if err := c.addToIndex(ctx, clCol, in); err != nil {
+		return nil, err
 	}
-	c.index[cl.id] = cl
-	if packageID != "" {
-		pkg.setCertifyLegals(cl.id)
+	if pkg != nil {
+		if err := pkg.setCertifyLegals(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
 	} else {
-		src.setCertifyLegals(cl.id)
+		if err := src.setCertifyLegals(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
 	}
 	for _, lid := range dec {
-		l, err := byID[*licStruct](lid, c)
+		l, err := byIDkv[*licStruct](ctx, lid, c)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		l.setCertifyLegals(cl.id)
+		if err := l.setCertifyLegals(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
 	}
 	for _, lid := range dis {
-		l, err := byID[*licStruct](lid, c)
+		l, err := byIDkv[*licStruct](ctx, lid, c)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		l.setCertifyLegals(cl.id)
+		if err := l.setCertifyLegals(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
 	}
-	c.certifyLegals = append(c.certifyLegals, cl)
+	if err := setkv(ctx, clCol, in, c); err != nil {
+		return nil, err
+	}
 
-	return c.convLegal(cl)
+	return c.convLegal(ctx, in)
 }
 
-func (c *demoClient) convLegal(in *certifyLegalStruct) (*model.CertifyLegal, error) {
+func (c *demoClient) convLegal(ctx context.Context, in *certifyLegalStruct) (*model.CertifyLegal, error) {
 	cl := &model.CertifyLegal{
-		ID:                in.id,
-		DeclaredLicense:   in.declaredLicense,
-		DiscoveredLicense: in.discoveredLicense,
-		Attribution:       in.attribution,
-		Justification:     in.justification,
-		TimeScanned:       in.timeScanned,
-		Origin:            in.origin,
-		Collector:         in.collector,
+		ID:                in.ThisID,
+		DeclaredLicense:   in.DeclaredLicense,
+		DiscoveredLicense: in.DiscoveredLicense,
+		Attribution:       in.Attribution,
+		Justification:     in.Justification,
+		TimeScanned:       in.TimeScanned,
+		Origin:            in.Origin,
+		Collector:         in.Collector,
 	}
-	for _, lid := range in.declaredLicenses {
-		l, err := byID[*licStruct](lid, c)
+	for _, lid := range in.DeclaredLicenses {
+		l, err := byIDkv[*licStruct](ctx, lid, c)
 		if err != nil {
 			return nil, err
 		}
 		cl.DeclaredLicenses = append(cl.DeclaredLicenses, c.convLicense(l))
 	}
-	for _, lid := range in.discoveredLicenses {
-		l, err := byID[*licStruct](lid, c)
+	for _, lid := range in.DiscoveredLicenses {
+		l, err := byIDkv[*licStruct](ctx, lid, c)
 		if err != nil {
 			return nil, err
 		}
 		cl.DiscoveredLicenses = append(cl.DiscoveredLicenses, c.convLicense(l))
 	}
-	if in.pkg != "" {
-		p, err := c.buildPackageResponse(in.pkg, nil)
+	if in.Pkg != "" {
+		p, err := c.buildPackageResponse(ctx, in.Pkg, nil)
 		if err != nil {
 			return nil, err
 		}
 		cl.Subject = p
 	} else {
-		s, err := c.buildSourceResponse(in.source, nil)
+		s, err := c.buildSourceResponse(ctx, in.Source, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -263,13 +268,13 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 	defer c.m.RUnlock()
 
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*certifyLegalStruct](*filter.ID, c)
+		link, err := byIDkv[*certifyLegalStruct](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		o, err := c.convLegal(link)
+		o, err := c.convLegal(ctx, link)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -279,33 +284,33 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 	var search []string
 	foundOne := false
 	if filter != nil && filter.Subject != nil && filter.Subject.Package != nil {
-		pkgs, err := c.findPackageVersion(filter.Subject.Package)
+		pkgs, err := c.findPackageVersion(ctx, filter.Subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		foundOne = len(pkgs) > 0
 		for _, pkg := range pkgs {
-			search = append(search, pkg.certifyLegals...)
+			search = append(search, pkg.CertifyLegals...)
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Source != nil {
-		exactSource, err := c.exactSource(filter.Subject.Source)
+		exactSource, err := c.exactSource(ctx, filter.Subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactSource != nil {
-			search = append(search, exactSource.certifyLegals...)
+			search = append(search, exactSource.CertifyLegals...)
 			foundOne = true
 		}
 	}
 	if !foundOne && filter != nil {
 		for _, lSpec := range filter.DeclaredLicenses {
-			exactLicense, err := c.licenseExact(lSpec)
+			exactLicense, err := c.licenseExact(ctx, lSpec)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if exactLicense != nil {
-				search = append(search, exactLicense.certifyLegals...)
+				search = append(search, exactLicense.CertifyLegals...)
 				foundOne = true
 				break
 			}
@@ -313,12 +318,12 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 	}
 	if !foundOne && filter != nil {
 		for _, lSpec := range filter.DiscoveredLicenses {
-			exactLicense, err := c.licenseExact(lSpec)
+			exactLicense, err := c.licenseExact(ctx, lSpec)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if exactLicense != nil {
-				search = append(search, exactLicense.certifyLegals...)
+				search = append(search, exactLicense.CertifyLegals...)
 				foundOne = true
 				break
 			}
@@ -328,19 +333,26 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 	var out []*model.CertifyLegal
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*certifyLegalStruct](id, c)
+			link, err := byIDkv[*certifyLegalStruct](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addLegalIfMatch(out, filter, link)
+			out, err = c.addLegalIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 		}
 	} else {
-		for _, link := range c.certifyLegals {
-			var err error
-			out, err = c.addLegalIfMatch(out, filter, link)
+		clKeys, err := c.kv.Keys(ctx, clCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, clk := range clKeys {
+			link, err := byKeykv[*certifyLegalStruct](ctx, clCol, clk, c)
+			if err != nil {
+				return nil, err
+			}
+			out, err = c.addLegalIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -349,27 +361,27 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 	return out, nil
 }
 
-func (c *demoClient) addLegalIfMatch(out []*model.CertifyLegal,
+func (c *demoClient) addLegalIfMatch(ctx context.Context, out []*model.CertifyLegal,
 	filter *model.CertifyLegalSpec, link *certifyLegalStruct) (
 	[]*model.CertifyLegal, error,
 ) {
-	if noMatch(filter.DeclaredLicense, link.declaredLicense) ||
-		noMatch(filter.DiscoveredLicense, link.discoveredLicense) ||
-		noMatch(filter.Attribution, link.attribution) ||
-		noMatch(filter.Justification, link.justification) ||
-		noMatch(filter.Origin, link.origin) ||
-		noMatch(filter.Collector, link.collector) ||
-		(filter.TimeScanned != nil && !link.timeScanned.Equal(*filter.TimeScanned)) ||
-		!c.matchLicenses(filter.DeclaredLicenses, link.declaredLicenses) ||
-		!c.matchLicenses(filter.DiscoveredLicenses, link.discoveredLicenses) {
+	if noMatch(filter.DeclaredLicense, link.DeclaredLicense) ||
+		noMatch(filter.DiscoveredLicense, link.DiscoveredLicense) ||
+		noMatch(filter.Attribution, link.Attribution) ||
+		noMatch(filter.Justification, link.Justification) ||
+		noMatch(filter.Origin, link.Origin) ||
+		noMatch(filter.Collector, link.Collector) ||
+		(filter.TimeScanned != nil && !link.TimeScanned.Equal(*filter.TimeScanned)) ||
+		!c.matchLicenses(ctx, filter.DeclaredLicenses, link.DeclaredLicenses) ||
+		!c.matchLicenses(ctx, filter.DiscoveredLicenses, link.DiscoveredLicenses) {
 		return out, nil
 	}
 	if filter.Subject != nil {
 		if filter.Subject.Package != nil {
-			if link.pkg == "" {
+			if link.Pkg == "" {
 				return out, nil
 			}
-			p, err := c.buildPackageResponse(link.pkg, filter.Subject.Package)
+			p, err := c.buildPackageResponse(ctx, link.Pkg, filter.Subject.Package)
 			if err != nil {
 				return nil, err
 			}
@@ -377,10 +389,10 @@ func (c *demoClient) addLegalIfMatch(out []*model.CertifyLegal,
 				return out, nil
 			}
 		} else if filter.Subject.Source != nil {
-			if link.source == "" {
+			if link.Source == "" {
 				return out, nil
 			}
-			s, err := c.buildSourceResponse(link.source, filter.Subject.Source)
+			s, err := c.buildSourceResponse(ctx, link.Source, filter.Subject.Source)
 			if err != nil {
 				return nil, err
 			}
@@ -389,14 +401,14 @@ func (c *demoClient) addLegalIfMatch(out []*model.CertifyLegal,
 			}
 		}
 	}
-	o, err := c.convLegal(link)
+	o, err := c.convLegal(ctx, link)
 	if err != nil {
 		return nil, err
 	}
 	return append(out, o), nil
 }
 
-func (c *demoClient) matchLicenses(filter []*model.LicenseSpec, value []string) bool {
+func (c *demoClient) matchLicenses(ctx context.Context, filter []*model.LicenseSpec, value []string) bool {
 	val := slices.Clone(value)
 	var matchID []string
 	var matchPartial []*model.LicenseSpec
@@ -404,10 +416,10 @@ func (c *demoClient) matchLicenses(filter []*model.LicenseSpec, value []string) 
 		if aSpec == nil {
 			continue
 		}
-		a, _ := c.licenseExact(aSpec)
+		a, _ := c.licenseExact(ctx, aSpec)
 		// drop error here if ID is bad
 		if a != nil {
-			matchID = append(matchID, a.id)
+			matchID = append(matchID, a.ThisID)
 		} else {
 			matchPartial = append(matchPartial, aSpec)
 		}
@@ -422,13 +434,13 @@ func (c *demoClient) matchLicenses(filter []*model.LicenseSpec, value []string) 
 		match := false
 		remove := -1
 		for i, v := range val {
-			a, err := byID[*licStruct](v, c)
+			a, err := byIDkv[*licStruct](ctx, v, c)
 			if err != nil {
 				return false
 			}
-			if (m.Name == nil || *m.Name == a.name) &&
-				(m.ListVersion == nil || *m.ListVersion == a.listVersion) &&
-				(m.Inline == nil || *m.Inline == a.inline) {
+			if (m.Name == nil || *m.Name == a.Name) &&
+				(m.ListVersion == nil || *m.ListVersion == a.ListVersion) &&
+				(m.Inline == nil || *m.Inline == a.Inline) {
 				match = true
 				remove = i
 				break

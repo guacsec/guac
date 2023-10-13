@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/stablememmap"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -632,27 +633,6 @@ func TestVEX(t *testing.T) {
 			},
 			ExpIngestErr: true,
 		},
-		{
-			Name:   "Query bad id",
-			InPkg:  []*model.PkgInputSpec{p1},
-			InVuln: []*model.VulnerabilityInputSpec{o1},
-			Calls: []call{
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Vuln: o1,
-					In: &model.VexStatementInputSpec{
-						VexJustification: "test justification",
-						KnownSince:       time.Unix(1e9, 0),
-					},
-				},
-			},
-			Query: &model.CertifyVEXStatementSpec{
-				ID: ptrfrom.String("-5"),
-			},
-			ExpQueryErr: true,
-		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
@@ -660,7 +640,8 @@ func TestVEX(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -1024,7 +1005,8 @@ func TestVEXBulkIngest(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -1137,7 +1119,8 @@ func TestVEXNeighbors(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

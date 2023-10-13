@@ -17,10 +17,10 @@ package keyvalue
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
+	"reflect"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -29,7 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
-	"github.com/guacsec/guac/pkg/assembler/kv/redis"
+	"github.com/guacsec/guac/pkg/assembler/kv/memmap"
 )
 
 func init() {
@@ -62,21 +62,117 @@ type node interface {
 
 	// BuildModelNode builds a GraphQL return type for a backend node,
 	BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error)
+
+	Key() string
 }
 
-type indexType map[string]node
+//type indexType map[string]node
 
 var errNotFound = errors.New("not found")
+var errTypeNotMatch = errors.New("Stored type does not match")
 
 // Scorecard scores are in range of 1-10, so a single step at 100 should be
 // plenty big
 var epsilon = math.Nextafter(100, 100.1) - 100
 
 const (
-	indexCol = "index"
-	artCol   = "artifacts"
-	occCol   = "isOccurrences"
+	// Collection names must not have ":" in them
+	indexCol    = "index"
+	artCol      = "artifacts"
+	occCol      = "isOccurrences"
+	pkgTypeCol  = "pkgTypes"
+	pkgNSCol    = "pkgNamespaces"
+	pkgNameCol  = "pkgNames"
+	pkgVerCol   = "pkgVersions"
+	isDepCol    = "isDependencies"
+	hasMDCol    = "hasMetadatas"
+	hasSBOMCol  = "hasSBOMs"
+	srcTypeCol  = "srcTypes"
+	srcNSCol    = "srcNamespaces"
+	srcNameCol  = "srcNames"
+	cgCol       = "certifyGoods"
+	cbCol       = "certifyBads"
+	builderCol  = "builders"
+	licenseCol  = "licenses"
+	clCol       = "certifyLegals"
+	cscCol      = "certifyScorecards"
+	slsaCol     = "hasSLSAs"
+	hsaCol      = "hasSourceAts"
+	hashEqCol   = "hashEquals"
+	pkgEqCol    = "pkgEquals"
+	pocCol      = "pointOfContacts"
+	vulnTypeCol = "vulnTypes"
+	vulnIDCol   = "vulnIDs"
+	vulnEqCol   = "vulnEquals"
+	vulnMDCol   = "vulnMetadatas"
+	cVEXCol     = "certifyVEXs"
+	cVulnCol    = "certifyVulns"
 )
+
+func typeColMap(col string) node {
+	switch col {
+	case artCol:
+		return &artStruct{}
+	case occCol:
+		return &isOccurrenceStruct{}
+	case pkgTypeCol:
+		return &pkgType{}
+	case pkgNSCol:
+		return &pkgNamespace{}
+	case pkgNameCol:
+		return &pkgName{}
+	case pkgVerCol:
+		return &pkgVersion{}
+	case isDepCol:
+		return &isDependencyLink{}
+	case hasMDCol:
+		return &hasMetadataLink{}
+	case hasSBOMCol:
+		return &hasSBOMStruct{}
+	case srcTypeCol:
+		return &srcType{}
+	case srcNSCol:
+		return &srcNamespace{}
+	case srcNameCol:
+		return &srcNameNode{}
+	case cgCol:
+		return &goodLink{}
+	case cbCol:
+		return &badLink{}
+	case builderCol:
+		return &builderStruct{}
+	case licenseCol:
+		return &licStruct{}
+	case clCol:
+		return &certifyLegalStruct{}
+	case cscCol:
+		return &scorecardLink{}
+	case slsaCol:
+		return &hasSLSAStruct{}
+	case hsaCol:
+		return &srcMapLink{}
+	case hashEqCol:
+		return &hashEqualStruct{}
+	case pkgEqCol:
+		return &pkgEqualStruct{}
+	case pocCol:
+		return &pointOfContactLink{}
+	case vulnTypeCol:
+		return &vulnTypeStruct{}
+	case vulnIDCol:
+		return &vulnIDNode{}
+	case vulnEqCol:
+		return &vulnerabilityEqualLink{}
+	case vulnMDCol:
+		return &vulnerabilityMetadataLink{}
+	case cVEXCol:
+		return &vexLink{}
+	case cVulnCol:
+		return &certifyVulnerabilityLink{}
+	}
+	//?
+	return &artStruct{}
+}
 
 // atomic add to ensure ID is not duplicated
 func (c *demoClient) getNextID() string {
@@ -85,48 +181,26 @@ func (c *demoClient) getNextID() string {
 }
 
 type demoClient struct {
-	id    uint32
-	m     sync.RWMutex
-	kv    kv.Store
-	index indexType
-
-	artifacts       artMap
-	builders        builderMap
-	licenses        licMap
-	packages        pkgTypeMap
-	sources         srcTypeMap
-	vulnerabilities vulnTypeMap
-
-	certifyBads            badList
-	certifyGoods           goodList
-	certifyLegals          certifyLegalList
-	certifyVulnerabilities certifyVulnerabilityList
-	hasMetadatas           hasMetadataList
-	hasSBOMs               hasSBOMList
-	hasSLSAs               hasSLSAList
-	hasSources             hasSrcList
-	hashEquals             hashEqualList
-	isDependencies         isDependencyList
-	occurrences            isOccurrenceList
-	pkgEquals              pkgEqualList
-	pointOfContacts        pointOfContactList
-	scorecards             scorecardList
-	vexs                   vexList
-	vulnerabilityEquals    vulnerabilityEqualList
-	vulnerabilityMetadatas vulnerabilityMetadataList
+	id uint32
+	m  sync.RWMutex
+	kv kv.Store
 }
 
-func getBackend(_ context.Context, _ backends.BackendArgs) (backends.Backend, error) {
+func getBackend(ctx context.Context, opts backends.BackendArgs) (backends.Backend, error) {
+
+	store, ok := opts.(kv.Store)
+	if !ok {
+		store = memmap.GetStore()
+	}
+	//kv, err := tikv.GetStore(ctx)
+	// kv, err := memmap.GetStore()
+	// if err != nil {
+	// 	return nil, err
+	// }
 	return &demoClient{
-		kv: &redis.Store{},
-		//kv:              &memmap.Store{},
-		artifacts:       artMap{},
-		builders:        builderMap{},
-		index:           indexType{},
-		licenses:        licMap{},
-		packages:        pkgTypeMap{},
-		sources:         srcTypeMap{},
-		vulnerabilities: vulnTypeMap{},
+		//kv: &redis.Store{},
+		kv: store,
+		//kv:              kv,
 	}, nil
 }
 
@@ -137,12 +211,12 @@ func noMatch(filter *string, value string) bool {
 	return false
 }
 
-func noMatchInput(filter *string, value string) bool {
-	if filter != nil {
-		return value != *filter
-	}
-	return value != ""
-}
+// func noMatchInput(filter *string, value string) bool {
+// 	if filter != nil {
+// 		return value != *filter
+// 	}
+// 	return value != ""
+// }
 
 func nilToEmpty(input *string) string {
 	if input == nil {
@@ -151,15 +225,15 @@ func nilToEmpty(input *string) string {
 	return *input
 }
 
-func timePtrEqual(a, b *time.Time) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a != nil && b != nil {
-		return a.Equal(*b)
-	}
-	return false
-}
+// func timePtrEqual(a, b *time.Time) bool {
+// 	if a == nil && b == nil {
+// 		return true
+// 	}
+// 	if a != nil && b != nil {
+// 		return a.Equal(*b)
+// 	}
+// 	return false
+// }
 
 func toLower(filter *string) *string {
 	if filter != nil {
@@ -176,35 +250,65 @@ func noMatchFloat(filter *float64, value float64) bool {
 	return false
 }
 
-func floatEqual(x float64, y float64) bool {
-	return math.Abs(x-y) < epsilon
+// func floatEqual(x float64, y float64) bool {
+// 	return math.Abs(x-y) < epsilon
+// }
+
+// delete this
+// func byID[E node](id string, c *demoClient) (E, error) {
+// 	var nl E
+// 	o, ok := c.index[id]
+// 	if !ok {
+// 		return nl, fmt.Errorf("%w : id not in index", errNotFound)
+// 	}
+// 	s, ok := o.(E)
+// 	if !ok {
+// 		return nl, fmt.Errorf("%w : node not a %T", errNotFound, nl)
+// 	}
+// 	return s, nil
+// }
+
+func byIDkv[E node](ctx context.Context, id string, c *demoClient) (E, error) {
+	var nl E
+	var k string
+	if err := c.kv.Get(ctx, indexCol, id, &k); err != nil {
+		return nl, fmt.Errorf("%w : id not found in index %q", err, id)
+	}
+	sub := strings.SplitN(k, ":", 2)
+	if len(sub) != 2 {
+		return nl, fmt.Errorf("Bad value was stored in index map: %v", k)
+	}
+	return byKeykv[E](ctx, sub[0], sub[1], c)
 }
 
-func byID[E node](id string, c *demoClient) (E, error) {
+func byKeykv[E node](ctx context.Context, coll string, k string, c *demoClient) (E, error) {
 	var nl E
-	o, ok := c.index[id]
-	if !ok {
-		return nl, fmt.Errorf("%w : id not in index", errNotFound)
-	}
-	s, ok := o.(E)
-	if !ok {
-		return nl, fmt.Errorf("%w : node not a %T", errNotFound, nl)
-	}
-	return s, nil
-}
-
-func byIDkv[E node](ctx context.Context, id string, coll string, c *demoClient) (E, error) {
-	var nl E
-	k, err := c.kv.Get(ctx, indexCol, id)
-	if err != nil {
+	if err := validateType(nl, coll); err != nil {
 		return nl, err
 	}
-	strval, err := c.kv.Get(ctx, coll, k)
-	if err != nil {
-		return nl, err
-	}
-	err = json.Unmarshal(([]byte)(strval), &nl)
+	err := c.kv.Get(ctx, coll, k, &nl)
 	return nl, err
+}
+
+func setkv(ctx context.Context, coll string, n node, c *demoClient) error {
+	// validate type?
+	return c.kv.Set(ctx, coll, n.Key(), n)
+}
+
+func (c *demoClient) addToIndex(ctx context.Context, coll string, n node) error {
+	if err := validateType(n, coll); err != nil {
+		return err
+	}
+	val := strings.Join([]string{coll, n.Key()}, ":")
+	return c.kv.Set(ctx, indexCol, n.ID(), val)
+}
+
+func validateType[E node](n E, c string) error {
+	if reflect.TypeOf(typeColMap(c)) == reflect.TypeOf(n) {
+		return nil
+	}
+	return fmt.Errorf("%w : found: %q want: %q", errTypeNotMatch,
+		reflect.TypeOf(typeColMap(c)), reflect.TypeOf(n))
 }
 
 func lock(m *sync.RWMutex, readOnly bool) {
@@ -221,4 +325,8 @@ func unlock(m *sync.RWMutex, readOnly bool) {
 	} else {
 		m.Unlock()
 	}
+}
+
+func timeKey(t time.Time) string {
+	return fmt.Sprint(t.Unix())
 }

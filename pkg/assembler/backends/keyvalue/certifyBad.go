@@ -17,40 +17,54 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
 // TODO: update the other backends to handle the new timestamp fields beacuse of: https://github.com/guacsec/guac/pull/1338/files#r1343080326
 
 // Internal data: link that a package/source/artifact is bad
-type badList []*badLink
 type badLink struct {
-	id            string
-	packageID     string
-	artifactID    string
-	sourceID      string
-	justification string
-	origin        string
-	collector     string
-	knownSince    time.Time
+	ThisID        string
+	PackageID     string
+	ArtifactID    string
+	SourceID      string
+	Justification string
+	Origin        string
+	Collector     string
+	KnownSince    time.Time
 }
 
-func (n *badLink) ID() string { return n.id }
+func (n *badLink) ID() string { return n.ThisID }
+
+func (n *badLink) Key() string {
+	return strings.Join([]string{
+		n.PackageID,
+		n.ArtifactID,
+		n.SourceID,
+		n.Justification,
+		n.Origin,
+		n.Collector,
+		timeKey(n.KnownSince),
+	}, ":")
+}
 
 func (n *badLink) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 1)
-	if n.packageID != "" && allowedEdges[model.EdgeCertifyBadPackage] {
-		out = append(out, n.packageID)
+	if n.PackageID != "" && allowedEdges[model.EdgeCertifyBadPackage] {
+		out = append(out, n.PackageID)
 	}
-	if n.artifactID != "" && allowedEdges[model.EdgeCertifyBadArtifact] {
-		out = append(out, n.artifactID)
+	if n.ArtifactID != "" && allowedEdges[model.EdgeCertifyBadArtifact] {
+		out = append(out, n.ArtifactID)
 	}
-	if n.sourceID != "" && allowedEdges[model.EdgeCertifyBadSource] {
-		out = append(out, n.sourceID)
+	if n.SourceID != "" && allowedEdges[model.EdgeCertifyBadSource] {
+		out = append(out, n.SourceID)
 	}
 	return out
 }
@@ -96,117 +110,80 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec, readOnly bool) (*model.CertifyBad, error) {
 	funcName := "IngestCertifyBad"
 
+	in := &badLink{
+		Justification: certifyBad.Justification,
+		Origin:        certifyBad.Origin,
+		Collector:     certifyBad.Collector,
+		KnownSince:    certifyBad.KnownSince.UTC(),
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	var packageID string
 	var foundPkgNameorVersionNode pkgNameOrVersion
-	var artifactID string
-	var foundArtStrct *artStruct
-	var sourceID string
-	var srcName *srcNameNode
-	var searchIDs []string
+	var foundArtStruct *artStruct
+	var foundSrcName *srcNameNode
+
 	if subject.Package != nil {
 		var err error
-		packageID, err = getPackageIDFromInput(c, *subject.Package, *pkgMatchType)
+		foundPkgNameorVersionNode, err = c.getPackageNameOrVerFromInput(ctx, *subject.Package, *pkgMatchType)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundPkgNameorVersionNode, err = byID[pkgNameOrVersion](packageID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		searchIDs = foundPkgNameorVersionNode.getCertifyBadLinks()
+		in.PackageID = foundPkgNameorVersionNode.ID()
 	} else if subject.Artifact != nil {
 		var err error
-		artifactID, err = c.artifactIDByInput(ctx, subject.Artifact)
+		foundArtStruct, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundArtStrct, err = byID[*artStruct](artifactID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		searchIDs = foundArtStrct.badLinks
+		in.ArtifactID = foundArtStruct.ThisID
 	} else {
 		var err error
-		sourceID, err = getSourceIDFromInput(c, *subject.Source)
+		foundSrcName, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		srcName, err = byID[*srcNameNode](sourceID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		searchIDs = srcName.badLinks
+		in.SourceID = foundSrcName.ThisID
 	}
 
-	// Don't insert duplicates
-	duplicate := false
-	collectedCertifyBadLink := badLink{}
-	for _, id := range searchIDs {
-		v, err := byID[*badLink](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		subjectMatch := false
-		if packageID != "" && packageID == v.packageID {
-			subjectMatch = true
-		}
-		if artifactID != "" && artifactID == v.artifactID {
-			subjectMatch = true
-		}
-		if sourceID != "" && sourceID == v.sourceID {
-			subjectMatch = true
-		}
-		if subjectMatch && certifyBad.Justification == v.justification &&
-			certifyBad.Origin == v.origin && certifyBad.Collector == v.collector &&
-			certifyBad.KnownSince.Equal(v.knownSince) {
-
-			collectedCertifyBadLink = *v
-			duplicate = true
-			break
-		}
+	out, err := byKeykv[*badLink](ctx, cbCol, in.Key(), c)
+	if err == nil {
+		return c.buildCertifyBad(ctx, out, nil, true)
 	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			b, err := c.ingestCertifyBad(ctx, subject, pkgMatchType, certifyBad, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return b, err
-		}
-		// store the link
-		collectedCertifyBadLink = badLink{
-			id:            c.getNextID(),
-			packageID:     packageID,
-			artifactID:    artifactID,
-			sourceID:      sourceID,
-			justification: certifyBad.Justification,
-			origin:        certifyBad.Origin,
-			collector:     certifyBad.Collector,
-			knownSince:    certifyBad.KnownSince.UTC(),
-		}
-		c.index[collectedCertifyBadLink.id] = &collectedCertifyBadLink
-		c.certifyBads = append(c.certifyBads, &collectedCertifyBadLink)
-		// set the backlinks
-		if packageID != "" {
-			foundPkgNameorVersionNode.setCertifyBadLinks(collectedCertifyBadLink.id)
-		}
-		if artifactID != "" {
-			foundArtStrct.setCertifyBadLinks(collectedCertifyBadLink.id)
-		}
-		if sourceID != "" {
-			srcName.setCertifyBadLinks(collectedCertifyBadLink.id)
-		}
-
-	}
-
-	// build return GraphQL type
-	builtCertifyBad, err := c.buildCertifyBad(ctx, &collectedCertifyBadLink, nil, true)
-	if err != nil {
+	if !errors.Is(err, kv.NotFoundError) {
 		return nil, err
 	}
-	return builtCertifyBad, nil
+
+	if readOnly {
+		c.m.RUnlock()
+		b, err := c.ingestCertifyBad(ctx, subject, pkgMatchType, certifyBad, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return b, err
+	}
+	in.ThisID = c.getNextID()
+
+	if err := c.addToIndex(ctx, cbCol, in); err != nil {
+		return nil, err
+	}
+	if foundPkgNameorVersionNode != nil {
+		if err := foundPkgNameorVersionNode.setCertifyBadLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
+	} else if foundArtStruct != nil {
+		if err := foundArtStruct.setCertifyBadLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := foundSrcName.setCertifyBadLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
+	}
+	if err := setkv(ctx, cbCol, in, c); err != nil {
+		return nil, err
+	}
+
+	return c.buildCertifyBad(ctx, in, nil, true)
 }
 
 // Query CertifyBad
@@ -217,7 +194,7 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 	defer c.m.RUnlock()
 
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*badLink](*filter.ID, c)
+		link, err := byIDkv[*badLink](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
@@ -239,17 +216,17 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactArtifact != nil {
-			search = append(search, exactArtifact.badLinks...)
+			search = append(search, exactArtifact.BadLinks...)
 			foundOne = true
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Source != nil {
-		exactSource, err := c.exactSource(filter.Subject.Source)
+		exactSource, err := c.exactSource(ctx, filter.Subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactSource != nil {
-			search = append(search, exactSource.badLinks...)
+			search = append(search, exactSource.BadLinks...)
 			foundOne = true
 		}
 	}
@@ -257,7 +234,7 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 	var out []*model.CertifyBad
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*badLink](id, c)
+			link, err := byIDkv[*badLink](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -267,8 +244,15 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 			}
 		}
 	} else {
-		for _, link := range c.certifyBads {
-			var err error
+		cgKeys, err := c.kv.Keys(ctx, cbCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, cgk := range cgKeys {
+			link, err := byKeykv[*badLink](ctx, cbCol, cgk, c)
+			if err != nil {
+				return nil, err
+			}
 			out, err = c.addCBIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
@@ -283,10 +267,10 @@ func (c *demoClient) addCBIfMatch(ctx context.Context, out []*model.CertifyBad,
 	[]*model.CertifyBad, error) {
 
 	if filter != nil {
-		if noMatch(filter.Justification, link.justification) ||
-			noMatch(filter.Collector, link.collector) ||
-			noMatch(filter.Origin, link.origin) ||
-			(filter.KnownSince != nil && filter.KnownSince.After(link.knownSince)) {
+		if noMatch(filter.Justification, link.Justification) ||
+			noMatch(filter.Collector, link.Collector) ||
+			noMatch(filter.Origin, link.Origin) ||
+			filter.KnownSince != nil && filter.KnownSince.After(link.KnownSince) {
 			return out, nil
 		}
 	}
@@ -307,39 +291,39 @@ func (c *demoClient) buildCertifyBad(ctx context.Context, link *badLink, filter 
 	var s *model.Source
 	var err error
 	if filter != nil && filter.Subject != nil {
-		if filter.Subject.Package != nil && link.packageID != "" {
-			p, err = c.buildPackageResponse(link.packageID, filter.Subject.Package)
+		if filter.Subject.Package != nil && link.PackageID != "" {
+			p, err = c.buildPackageResponse(ctx, link.PackageID, filter.Subject.Package)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if filter.Subject.Artifact != nil && link.artifactID != "" {
-			a, err = c.buildArtifactResponse(ctx, link.artifactID, filter.Subject.Artifact)
+		if filter.Subject.Artifact != nil && link.ArtifactID != "" {
+			a, err = c.buildArtifactResponse(ctx, link.ArtifactID, filter.Subject.Artifact)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if filter.Subject.Source != nil && link.sourceID != "" {
-			s, err = c.buildSourceResponse(link.sourceID, filter.Subject.Source)
+		if filter.Subject.Source != nil && link.SourceID != "" {
+			s, err = c.buildSourceResponse(ctx, link.SourceID, filter.Subject.Source)
 			if err != nil {
 				return nil, err
 			}
 		}
 	} else {
-		if link.packageID != "" {
-			p, err = c.buildPackageResponse(link.packageID, nil)
+		if link.PackageID != "" {
+			p, err = c.buildPackageResponse(ctx, link.PackageID, nil)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if link.artifactID != "" {
-			a, err = c.buildArtifactResponse(ctx, link.artifactID, nil)
+		if link.ArtifactID != "" {
+			a, err = c.buildArtifactResponse(ctx, link.ArtifactID, nil)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if link.sourceID != "" {
-			s, err = c.buildSourceResponse(link.sourceID, nil)
+		if link.SourceID != "" {
+			s, err = c.buildSourceResponse(ctx, link.SourceID, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -347,7 +331,7 @@ func (c *demoClient) buildCertifyBad(ctx context.Context, link *badLink, filter 
 	}
 
 	var subj model.PackageSourceOrArtifact
-	if link.packageID != "" {
+	if link.PackageID != "" {
 		if p == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve package via packageID")
 		} else if p == nil && !ingestOrIDProvided {
@@ -355,7 +339,7 @@ func (c *demoClient) buildCertifyBad(ctx context.Context, link *badLink, filter 
 		}
 		subj = p
 	}
-	if link.artifactID != "" {
+	if link.ArtifactID != "" {
 		if a == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve artifact via artifactID")
 		} else if a == nil && !ingestOrIDProvided {
@@ -363,7 +347,7 @@ func (c *demoClient) buildCertifyBad(ctx context.Context, link *badLink, filter 
 		}
 		subj = a
 	}
-	if link.sourceID != "" {
+	if link.SourceID != "" {
 		if s == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve source via sourceID")
 		} else if s == nil && !ingestOrIDProvided {
@@ -373,12 +357,12 @@ func (c *demoClient) buildCertifyBad(ctx context.Context, link *badLink, filter 
 	}
 
 	certifyBad := model.CertifyBad{
-		ID:            link.id,
+		ID:            link.ThisID,
 		Subject:       subj,
-		Justification: link.justification,
-		Origin:        link.origin,
-		Collector:     link.collector,
-		KnownSince:    link.knownSince.UTC(),
+		Justification: link.Justification,
+		Origin:        link.Origin,
+		Collector:     link.Collector,
+		KnownSince:    link.KnownSince.UTC(),
 	}
 	return &certifyBad, nil
 }

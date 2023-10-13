@@ -23,6 +23,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/stablememmap"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	jsoniter "github.com/json-iterator/go"
@@ -208,9 +209,7 @@ var s1out = &model.Source{
 	Namespaces: []*model.SourceNamespace{{
 		Namespace: "github.com/jeff",
 		Names: []*model.SourceName{{
-			Name:   "myrepo",
-			Tag:    ptrfrom.String(""),
-			Commit: ptrfrom.String(""),
+			Name: "myrepo",
 		}},
 	}},
 }
@@ -226,9 +225,7 @@ var s2out = &model.Source{
 	Namespaces: []*model.SourceNamespace{{
 		Namespace: "github.com/bob",
 		Names: []*model.SourceName{{
-			Name:   "bobsrepo",
-			Tag:    ptrfrom.String(""),
-			Commit: ptrfrom.String(""),
+			Name: "bobsrepo",
 		}},
 	}},
 }
@@ -542,7 +539,8 @@ func TestOccurrence(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -656,7 +654,8 @@ func TestIngestOccurrences(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -765,7 +764,8 @@ func TestOccurrenceNeighbors(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

@@ -17,32 +17,39 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal hashEqual
 
-type (
-	hashEqualList   []*hashEqualStruct
-	hashEqualStruct struct {
-		id            string
-		artifacts     []string
-		justification string
-		origin        string
-		collector     string
-	}
-)
+type hashEqualStruct struct {
+	ThisID        string
+	Artifacts     []string
+	Justification string
+	Origin        string
+	Collector     string
+}
 
-func (n *hashEqualStruct) ID() string { return n.id }
+func (n *hashEqualStruct) ID() string { return n.ThisID }
+func (n *hashEqualStruct) Key() string {
+	return strings.Join([]string{
+		fmt.Sprint(n.Artifacts),
+		n.Justification,
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *hashEqualStruct) Neighbors(allowedEdges edgeMap) []string {
 	if allowedEdges[model.EdgeHashEqualArtifact] {
-		return n.artifacts
+		return n.Artifacts
 	}
 	return []string{}
 }
@@ -50,27 +57,6 @@ func (n *hashEqualStruct) Neighbors(allowedEdges edgeMap) []string {
 func (n *hashEqualStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
 	return c.convHashEqual(ctx, n)
 }
-
-// TODO convert to unit tests
-// func registerAllHashEqual(client *demoClient) {
-// 	strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
-// 	-client.registerHashEqual([]*model.Artifact{client.artifacts[0], client.artifacts[1], client.artifacts[2]}, "different algorithm for the same artifact", "keyvalue backend", "keyvalue backend")
-// 	client.IngestHashEqual(
-// 		context.Background(),
-// 		model.ArtifactInputSpec{
-// 			Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
-// 			Algorithm: "sha1",
-// 		},
-// 		model.ArtifactInputSpec{
-// 			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-// 			Algorithm: "sha256",
-// 		},
-// 		model.HashEqualInputSpec{
-// 			Justification: "these two are the same",
-// 			Origin:        "keyvalue backend",
-// 			Collector:     "keyvalue backend",
-// 		})
-// }
 
 // Ingest HashEqual
 
@@ -91,6 +77,12 @@ func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.Artifac
 }
 
 func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec, readOnly bool) (*model.HashEqual, error) {
+	in := &hashEqualStruct{
+		Justification: hashEqual.Justification,
+		Origin:        hashEqual.Origin,
+		Collector:     hashEqual.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
@@ -102,25 +94,16 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.Artifac
 	if err != nil {
 		return nil, gqlerror.Errorf("IngestHashEqual :: Artifact not found")
 	}
-	artIDs := []string{aInt1.ID(), aInt2.ID()}
+	artIDs := []string{aInt1.ThisID, aInt2.ThisID}
 	slices.Sort(artIDs)
+	in.Artifacts = artIDs
 
-	// Search backedges for existing.
-	searchHEs := slices.Clone(aInt1.hashEquals)
-	searchHEs = append(searchHEs, aInt2.hashEquals...)
-
-	for _, he := range searchHEs {
-		h, err := byID[*hashEqualStruct](he, c)
-		if err != nil {
-			return nil, gqlerror.Errorf(
-				"IngestHashEqual :: Bad hashEqual id stored on existing artifact: %s", err)
-		}
-		if h.justification == hashEqual.Justification &&
-			h.origin == hashEqual.Origin &&
-			h.collector == hashEqual.Collector &&
-			slices.Equal(h.artifacts, artIDs) {
-			return c.convHashEqual(ctx, h)
-		}
+	out, err := byKeykv[*hashEqualStruct](ctx, hashEqCol, in.Key(), c)
+	if err == nil {
+		return c.convHashEqual(ctx, out)
+	}
+	if !errors.Is(err, kv.NotFoundError) {
+		return nil, err
 	}
 
 	if readOnly {
@@ -130,19 +113,21 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.Artifac
 		return he, err
 	}
 
-	he := &hashEqualStruct{
-		id:            c.getNextID(),
-		artifacts:     artIDs,
-		justification: hashEqual.Justification,
-		origin:        hashEqual.Origin,
-		collector:     hashEqual.Collector,
+	in.ThisID = c.getNextID()
+	if err := c.addToIndex(ctx, hashEqCol, in); err != nil {
+		return nil, err
 	}
-	c.index[he.id] = he
-	c.hashEquals = append(c.hashEquals, he)
-	aInt1.setHashEquals(he.id)
-	aInt2.setHashEquals(he.id)
+	if err := aInt1.setHashEquals(ctx, in.ThisID, c); err != nil {
+		return nil, err
+	}
+	if err := aInt2.setHashEquals(ctx, in.ThisID, c); err != nil {
+		return nil, err
+	}
+	if err := setkv(ctx, hashEqCol, in, c); err != nil {
+		return nil, err
+	}
 
-	return c.convHashEqual(ctx, he)
+	return c.convHashEqual(ctx, in)
 }
 
 func (c *demoClient) matchArtifacts(ctx context.Context, filter []*model.ArtifactSpec, value []string) bool {
@@ -171,7 +156,7 @@ func (c *demoClient) matchArtifacts(ctx context.Context, filter []*model.Artifac
 		match := false
 		remove := -1
 		for i, v := range val {
-			a, err := byID[*artStruct](v, c)
+			a, err := byIDkv[*artStruct](ctx, v, c)
 			if err != nil {
 				return false
 			}
@@ -197,7 +182,7 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 	c.m.RLock()
 	defer c.m.RUnlock()
 	if filter.ID != nil {
-		link, err := byID[*hashEqualStruct](*filter.ID, c)
+		link, err := byIDkv[*hashEqualStruct](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
@@ -219,7 +204,7 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if exactArtifact != nil {
-				search = append(search, exactArtifact.hashEquals...)
+				search = append(search, exactArtifact.HashEquals...)
 				foundOne = true
 				break
 			}
@@ -229,7 +214,7 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 	var out []*model.HashEqual
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*hashEqualStruct](id, c)
+			link, err := byIDkv[*hashEqualStruct](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -239,8 +224,15 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 			}
 		}
 	} else {
-		for _, link := range c.hashEquals {
-			var err error
+		heKeys, err := c.kv.Keys(ctx, hashEqCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, hek := range heKeys {
+			link, err := byKeykv[*hashEqualStruct](ctx, hashEqCol, hek, c)
+			if err != nil {
+				return nil, err
+			}
 			out, err = c.addHEIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
@@ -252,19 +244,19 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 
 func (c *demoClient) convHashEqual(ctx context.Context, h *hashEqualStruct) (*model.HashEqual, error) {
 	var artifacts []*model.Artifact
-	for _, id := range h.artifacts {
-		a, err := byID[*artStruct](id, c)
+	for _, id := range h.Artifacts {
+		a, err := byIDkv[*artStruct](ctx, id, c)
 		if err != nil {
 			return nil, fmt.Errorf("convHashEqual: struct contains bad artifact id")
 		}
 		artifacts = append(artifacts, c.convArtifact(a))
 	}
 	return &model.HashEqual{
-		ID:            h.id,
-		Justification: h.justification,
+		ID:            h.ThisID,
+		Justification: h.Justification,
 		Artifacts:     artifacts,
-		Origin:        h.origin,
-		Collector:     h.collector,
+		Origin:        h.Origin,
+		Collector:     h.Collector,
 	}, nil
 }
 
@@ -272,10 +264,10 @@ func (c *demoClient) addHEIfMatch(ctx context.Context, out []*model.HashEqual,
 	filter *model.HashEqualSpec, link *hashEqualStruct) (
 	[]*model.HashEqual, error,
 ) {
-	if noMatch(filter.Justification, link.justification) ||
-		noMatch(filter.Origin, link.origin) ||
-		noMatch(filter.Collector, link.collector) ||
-		!c.matchArtifacts(ctx, filter.Artifacts, link.artifacts) {
+	if noMatch(filter.Justification, link.Justification) ||
+		noMatch(filter.Origin, link.Origin) ||
+		noMatch(filter.Collector, link.Collector) ||
+		!c.matchArtifacts(ctx, filter.Artifacts, link.Artifacts) {
 		return out, nil
 	}
 	he, err := c.convHashEqual(ctx, link)

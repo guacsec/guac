@@ -25,6 +25,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/stablememmap"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -600,7 +601,8 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -699,20 +701,18 @@ func TestIngestCertifyVulns(t *testing.T) {
 			},
 			ExpVuln: []*model.CertifyVuln{
 				{
-					ID:      "1",
-					Package: p2out,
-					Vulnerability: &model.Vulnerability{
-						Type:             "cve",
-						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
-					},
-					Metadata: vmd1,
-				},
-				{
-					ID:      "10",
 					Package: p1out,
 					Vulnerability: &model.Vulnerability{
 						Type:             "cve",
 						VulnerabilityIDs: []*model.VulnerabilityID{c2out},
+					},
+					Metadata: vmd1,
+				},
+				{
+					Package: p2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 					},
 					Metadata: vmd1,
 				},
@@ -1065,7 +1065,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -1184,7 +1185,8 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := backends.Get("keyvalue", nil, nil)
+			store := stablememmap.GetStore()
+			b, err := backends.Get("keyvalue", nil, store)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

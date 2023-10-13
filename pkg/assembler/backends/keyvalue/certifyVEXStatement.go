@@ -17,41 +17,59 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
-// Internal data: link between a package or an artifact with its corresponding vulnerability VEX statement
-type vexList []*vexLink
+// Internal data: link between a package or an artifact with its corresponding
+// vulnerability VEX statement
 type vexLink struct {
-	id              string
-	packageID       string
-	artifactID      string
-	vulnerabilityID string
-	knownSince      time.Time
-	status          model.VexStatus
-	statement       string
-	statusNotes     string
-	justification   model.VexJustification
-	origin          string
-	collector       string
+	ThisID          string
+	PackageID       string
+	ArtifactID      string
+	VulnerabilityID string
+	KnownSince      time.Time
+	Status          model.VexStatus
+	Statement       string
+	StatusNotes     string
+	Justification   model.VexJustification
+	Origin          string
+	Collector       string
 }
 
-func (n *vexLink) ID() string { return n.id }
+func (n *vexLink) ID() string { return n.ThisID }
+
+func (n *vexLink) Key() string {
+	return strings.Join([]string{
+		n.PackageID,
+		n.ArtifactID,
+		n.VulnerabilityID,
+		timeKey(n.KnownSince),
+		string(n.Status),
+		n.Statement,
+		n.StatusNotes,
+		string(n.Justification),
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *vexLink) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 2)
-	if n.packageID != "" && allowedEdges[model.EdgeCertifyVexStatementPackage] {
-		out = append(out, n.packageID)
+	if n.PackageID != "" && allowedEdges[model.EdgeCertifyVexStatementPackage] {
+		out = append(out, n.PackageID)
 	}
-	if n.artifactID != "" && allowedEdges[model.EdgeCertifyVexStatementArtifact] {
-		out = append(out, n.artifactID)
+	if n.ArtifactID != "" && allowedEdges[model.EdgeCertifyVexStatementArtifact] {
+		out = append(out, n.ArtifactID)
 	}
-	if n.vulnerabilityID != "" && allowedEdges[model.EdgeCertifyVexStatementVulnerability] {
-		out = append(out, n.vulnerabilityID)
+	if allowedEdges[model.EdgeCertifyVexStatementVulnerability] {
+		out = append(out, n.VulnerabilityID)
 	}
 	return out
 }
@@ -93,125 +111,80 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {
 	funcName := "IngestVEXStatement"
 
+	in := &vexLink{
+		KnownSince:    vexStatement.KnownSince.UTC(),
+		Status:        vexStatement.Status,
+		Statement:     vexStatement.Statement,
+		StatusNotes:   vexStatement.StatusNotes,
+		Justification: vexStatement.VexJustification,
+		Origin:        vexStatement.Origin,
+		Collector:     vexStatement.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	var packageID string
-	var foundPkgVersionNode *pkgVersionNode
-	var artifactID string
+	var foundPkgVersionNode *pkgVersion
 	var foundArtStrct *artStruct
-	var subjectVexLinks []string
 	if subject.Package != nil {
 		var err error
-		packageID, err = getPackageIDFromInput(c, *subject.Package, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
+		foundPkgVersionNode, err = c.getPackageVerFromInput(ctx, *subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundPkgVersionNode, err = byID[*pkgVersionNode](packageID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		subjectVexLinks = foundPkgVersionNode.vexLinks
+		in.PackageID = foundPkgVersionNode.ThisID
 	} else {
 		var err error
-		artifactID, err = c.artifactIDByInput(ctx, subject.Artifact)
+		foundArtStrct, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundArtStrct, err = byID[*artStruct](artifactID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		subjectVexLinks = foundArtStrct.vexLinks
+		in.ArtifactID = foundArtStrct.ThisID
 	}
 
-	var vulnerabilityVexLinks []string
-	vulnID, err := getVulnerabilityIDFromInput(c, vulnerability)
+	foundVulnNode, err := c.getVulnerabilityFromInput(ctx, vulnerability)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	foundVulnNode, err := byID[*vulnIDNode](vulnID, c)
-	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-	vulnerabilityVexLinks = foundVulnNode.vexLinks
+	in.VulnerabilityID = foundVulnNode.ThisID
 
-	var searchIDs []string
-	if len(subjectVexLinks) < len(vulnerabilityVexLinks) {
-		searchIDs = subjectVexLinks
-	} else {
-		searchIDs = vulnerabilityVexLinks
+	out, err := byKeykv[*vexLink](ctx, cVEXCol, in.Key(), c)
+	if err == nil {
+		return c.buildCertifyVEXStatement(ctx, out, nil, true)
 	}
-
-	// Don't insert duplicates
-	duplicate := false
-	collectedCertifyVexLink := vexLink{}
-	for _, id := range searchIDs {
-		v, err := byID[*vexLink](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		vulnMatch := false
-		subjectMatch := false
-		if vulnID != "" && vulnID == v.vulnerabilityID {
-			vulnMatch = true
-		}
-		if packageID != "" && packageID == v.packageID {
-			subjectMatch = true
-		}
-		if artifactID != "" && artifactID == v.artifactID {
-			subjectMatch = true
-		}
-		if vulnMatch && subjectMatch && vexStatement.KnownSince.Equal(v.knownSince) && vexStatement.VexJustification == v.justification &&
-			vexStatement.Status == v.status && vexStatement.Statement == v.statement && vexStatement.StatusNotes == v.statusNotes &&
-			vexStatement.Origin == v.origin && vexStatement.Collector == v.collector {
-
-			collectedCertifyVexLink = *v
-			duplicate = true
-			break
-		}
-	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			v, err := c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return v, err
-		}
-		// store the link
-		collectedCertifyVexLink = vexLink{
-			id:              c.getNextID(),
-			packageID:       packageID,
-			artifactID:      artifactID,
-			vulnerabilityID: vulnID,
-			knownSince:      vexStatement.KnownSince.UTC(),
-			status:          vexStatement.Status,
-			justification:   vexStatement.VexJustification,
-			statement:       vexStatement.Statement,
-			statusNotes:     vexStatement.StatusNotes,
-			origin:          vexStatement.Origin,
-			collector:       vexStatement.Collector,
-		}
-		c.index[collectedCertifyVexLink.id] = &collectedCertifyVexLink
-		c.vexs = append(c.vexs, &collectedCertifyVexLink)
-		// set the backlinks
-		if packageID != "" {
-			foundPkgVersionNode.setVexLinks(collectedCertifyVexLink.id)
-		}
-		if artifactID != "" {
-			foundArtStrct.setVexLinks(collectedCertifyVexLink.id)
-		}
-		if vulnID != "" {
-			foundVulnNode.setVexLinks(collectedCertifyVexLink.id)
-		}
-	}
-
-	// build return GraphQL type
-	builtCertifyVex, err := c.buildCertifyVEXStatement(ctx, &collectedCertifyVexLink, nil, true)
-	if err != nil {
+	if !errors.Is(err, kv.NotFoundError) {
 		return nil, err
 	}
-	return builtCertifyVex, nil
+
+	if readOnly {
+		c.m.RUnlock()
+		v, err := c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return v, err
+	}
+
+	in.ThisID = c.getNextID()
+	if err := c.addToIndex(ctx, cVEXCol, in); err != nil {
+		return nil, err
+	}
+	// set the backlinks
+	if foundPkgVersionNode != nil {
+		if err := foundPkgVersionNode.setVexLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := foundArtStrct.setVexLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
+		}
+	}
+	if err := foundVulnNode.setVexLinks(ctx, in.ThisID, c); err != nil {
+		return nil, err
+	}
+	if err := setkv(ctx, cVEXCol, in, c); err != nil {
+		return nil, err
+	}
+
+	return c.buildCertifyVEXStatement(ctx, in, nil, true)
 }
 
 // Query CertifyVex
@@ -221,7 +194,7 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 	funcName := "CertifyVEXStatement"
 
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*vexLink](*filter.ID, c)
+		link, err := byIDkv[*vexLink](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
@@ -243,27 +216,27 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactArtifact != nil {
-			search = append(search, exactArtifact.vexLinks...)
+			search = append(search, exactArtifact.VexLinks...)
 			foundOne = true
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Package != nil {
-		pkgs, err := c.findPackageVersion(filter.Subject.Package)
+		pkgs, err := c.findPackageVersion(ctx, filter.Subject.Package)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		foundOne = len(pkgs) > 0
 		for _, pkg := range pkgs {
-			search = append(search, pkg.vexLinks...)
+			search = append(search, pkg.VexLinks...)
 		}
 	}
 	if !foundOne && filter != nil && filter.Vulnerability != nil {
-		exactVuln, err := c.exactVulnerability(filter.Vulnerability)
+		exactVuln, err := c.exactVulnerability(ctx, filter.Vulnerability)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactVuln != nil {
-			search = append(search, exactVuln.vexLinks...)
+			search = append(search, exactVuln.VexLinks...)
 			foundOne = true
 		}
 	}
@@ -271,7 +244,7 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 	var out []*model.CertifyVEXStatement
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*vexLink](id, c)
+			link, err := byIDkv[*vexLink](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -281,8 +254,15 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 			}
 		}
 	} else {
-		for _, link := range c.vexs {
-			var err error
+		keys, err := c.kv.Keys(ctx, cVEXCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, key := range keys {
+			link, err := byKeykv[*vexLink](ctx, cVEXCol, key, c)
+			if err != nil {
+				return nil, err
+			}
 			out, err = c.addVexIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
@@ -296,25 +276,25 @@ func (c *demoClient) addVexIfMatch(ctx context.Context, out []*model.CertifyVEXS
 	filter *model.CertifyVEXStatementSpec, link *vexLink) (
 	[]*model.CertifyVEXStatement, error) {
 
-	if filter != nil && filter.KnownSince != nil && !filter.KnownSince.Equal(link.knownSince) {
+	if filter != nil && filter.KnownSince != nil && !filter.KnownSince.Equal(link.KnownSince) {
 		return out, nil
 	}
-	if filter != nil && filter.VexJustification != nil && *filter.VexJustification != link.justification {
+	if filter != nil && filter.VexJustification != nil && *filter.VexJustification != link.Justification {
 		return out, nil
 	}
-	if filter != nil && filter.Status != nil && *filter.Status != link.status {
+	if filter != nil && filter.Status != nil && *filter.Status != link.Status {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Statement, link.statement) {
+	if filter != nil && noMatch(filter.Statement, link.Statement) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.StatusNotes, link.statusNotes) {
+	if filter != nil && noMatch(filter.StatusNotes, link.StatusNotes) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
+	if filter != nil && noMatch(filter.Collector, link.Collector) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
+	if filter != nil && noMatch(filter.Origin, link.Origin) {
 		return out, nil
 	}
 
@@ -335,27 +315,27 @@ func (c *demoClient) buildCertifyVEXStatement(ctx context.Context, link *vexLink
 	var vuln *model.Vulnerability
 	var err error
 	if filter != nil && filter.Subject != nil {
-		if filter.Subject.Package != nil && link.packageID != "" {
-			p, err = c.buildPackageResponse(link.packageID, filter.Subject.Package)
+		if filter.Subject.Package != nil && link.PackageID != "" {
+			p, err = c.buildPackageResponse(ctx, link.PackageID, filter.Subject.Package)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if filter.Subject.Artifact != nil && link.artifactID != "" {
-			a, err = c.buildArtifactResponse(ctx, link.artifactID, filter.Subject.Artifact)
+		if filter.Subject.Artifact != nil && link.ArtifactID != "" {
+			a, err = c.buildArtifactResponse(ctx, link.ArtifactID, filter.Subject.Artifact)
 			if err != nil {
 				return nil, err
 			}
 		}
 	} else {
-		if link.packageID != "" {
-			p, err = c.buildPackageResponse(link.packageID, nil)
+		if link.PackageID != "" {
+			p, err = c.buildPackageResponse(ctx, link.PackageID, nil)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if link.artifactID != "" {
-			a, err = c.buildArtifactResponse(ctx, link.artifactID, nil)
+		if link.ArtifactID != "" {
+			a, err = c.buildArtifactResponse(ctx, link.ArtifactID, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -363,15 +343,15 @@ func (c *demoClient) buildCertifyVEXStatement(ctx context.Context, link *vexLink
 	}
 
 	if filter != nil && filter.Vulnerability != nil {
-		if filter.Vulnerability != nil && link.vulnerabilityID != "" {
-			vuln, err = c.buildVulnResponse(link.vulnerabilityID, filter.Vulnerability)
+		if filter.Vulnerability != nil && link.VulnerabilityID != "" {
+			vuln, err = c.buildVulnResponse(ctx, link.VulnerabilityID, filter.Vulnerability)
 			if err != nil {
 				return nil, err
 			}
 		}
 	} else {
-		if link.vulnerabilityID != "" {
-			vuln, err = c.buildVulnResponse(link.vulnerabilityID, nil)
+		if link.VulnerabilityID != "" {
+			vuln, err = c.buildVulnResponse(ctx, link.VulnerabilityID, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -379,7 +359,7 @@ func (c *demoClient) buildCertifyVEXStatement(ctx context.Context, link *vexLink
 	}
 
 	var subj model.PackageOrArtifact
-	if link.packageID != "" {
+	if link.PackageID != "" {
 		if p == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve package via packageID")
 		} else if p == nil && !ingestOrIDProvided {
@@ -387,7 +367,7 @@ func (c *demoClient) buildCertifyVEXStatement(ctx context.Context, link *vexLink
 		}
 		subj = p
 	}
-	if link.artifactID != "" {
+	if link.ArtifactID != "" {
 		if a == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve artifact via artifactID")
 		} else if a == nil && !ingestOrIDProvided {
@@ -396,7 +376,7 @@ func (c *demoClient) buildCertifyVEXStatement(ctx context.Context, link *vexLink
 		subj = a
 	}
 
-	if link.vulnerabilityID != "" {
+	if link.VulnerabilityID != "" {
 		if vuln == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve vuln via vulnID")
 		} else if vuln == nil && !ingestOrIDProvided {
@@ -404,17 +384,16 @@ func (c *demoClient) buildCertifyVEXStatement(ctx context.Context, link *vexLink
 		}
 	}
 
-	certifyVuln := model.CertifyVEXStatement{
-		ID:               link.id,
+	return &model.CertifyVEXStatement{
+		ID:               link.ThisID,
 		Subject:          subj,
 		Vulnerability:    vuln,
-		Status:           link.status,
-		VexJustification: link.justification,
-		Statement:        link.statement,
-		StatusNotes:      link.statusNotes,
-		KnownSince:       link.knownSince,
-		Origin:           link.origin,
-		Collector:        link.collector,
-	}
-	return &certifyVuln, nil
+		Status:           link.Status,
+		VexJustification: link.Justification,
+		Statement:        link.Statement,
+		StatusNotes:      link.StatusNotes,
+		KnownSince:       link.KnownSince,
+		Origin:           link.Origin,
+		Collector:        link.Collector,
+	}, nil
 }

@@ -17,39 +17,54 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
 // Internal data: link between source and scorecard (certifyScorecard)
-type scorecardList []*scorecardLink
 type scorecardLink struct {
-	id               string
-	sourceID         string
-	timeScanned      time.Time
-	aggregateScore   float64
-	checks           map[string]int
-	scorecardVersion string
-	scorecardCommit  string
-	origin           string
-	collector        string
+	ThisID           string
+	SourceID         string
+	TimeScanned      time.Time
+	AggregateScore   float64
+	Checks           map[string]int
+	ScorecardVersion string
+	ScorecardCommit  string
+	Origin           string
+	Collector        string
 }
 
-func (n *scorecardLink) ID() string { return n.id }
+func (n *scorecardLink) ID() string { return n.ThisID }
+func (n *scorecardLink) Key() string {
+	return strings.Join([]string{
+		n.SourceID,
+		timeKey(n.TimeScanned),
+		fmt.Sprint(n.AggregateScore),
+		fmt.Sprint(n.Checks),
+		n.ScorecardVersion,
+		n.ScorecardCommit,
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *scorecardLink) Neighbors(allowedEdges edgeMap) []string {
 	if allowedEdges[model.EdgeCertifyScorecardSource] {
-		return []string{n.sourceID}
+		return []string{n.SourceID}
 	}
-	return []string{}
+	return nil
 }
 
 func (n *scorecardLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildScorecard(n, nil, true)
+	return c.buildScorecard(ctx, n, nil, true)
 }
 
 // Ingest Scorecards
@@ -74,74 +89,53 @@ func (c *demoClient) IngestScorecard(ctx context.Context, source model.SourceInp
 func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec, readOnly bool) (*model.CertifyScorecard, error) {
 	funcName := "CertifyScorecard"
 
+	checksMap := getChecksFromInput(scorecard.Checks)
+	in := &scorecardLink{
+		TimeScanned:      scorecard.TimeScanned.UTC(),
+		AggregateScore:   scorecard.AggregateScore,
+		Checks:           checksMap,
+		ScorecardVersion: scorecard.ScorecardVersion,
+		ScorecardCommit:  scorecard.ScorecardCommit,
+		Origin:           scorecard.Origin,
+		Collector:        scorecard.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	sourceID, err := getSourceIDFromInput(c, source)
+	srcName, err := c.getSourceNameFromInput(ctx, source)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	srcName, err := byID[*srcNameNode](sourceID, c)
-	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-	searchIDs := srcName.scorecardLinks
+	in.SourceID = srcName.ThisID
 
-	checksMap := getChecksFromInput(scorecard.Checks)
-
-	// Don't insert duplicates
-	duplicate := false
-	collectedScorecardLink := scorecardLink{}
-	for _, id := range searchIDs {
-		v, err := byID[*scorecardLink](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		if sourceID == v.sourceID &&
-			scorecard.TimeScanned.Equal(v.timeScanned) &&
-			floatEqual(scorecard.AggregateScore, v.aggregateScore) &&
-			scorecard.ScorecardVersion == v.scorecardVersion &&
-			scorecard.ScorecardCommit == v.scorecardCommit &&
-			scorecard.Origin == v.origin &&
-			scorecard.Collector == v.collector &&
-			reflect.DeepEqual(checksMap, v.checks) {
-			collectedScorecardLink = *v
-			duplicate = true
-			break
-		}
+	out, err := byKeykv[*scorecardLink](ctx, cscCol, in.Key(), c)
+	if err == nil {
+		return c.buildScorecard(ctx, out, nil, true)
 	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			s, err := c.certifyScorecard(ctx, source, scorecard, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return s, err
-		}
-		// store the link
-		collectedScorecardLink = scorecardLink{
-			id:               c.getNextID(),
-			sourceID:         sourceID,
-			timeScanned:      scorecard.TimeScanned.UTC(),
-			aggregateScore:   scorecard.AggregateScore,
-			checks:           checksMap,
-			scorecardVersion: scorecard.ScorecardVersion,
-			scorecardCommit:  scorecard.ScorecardCommit,
-			origin:           scorecard.Origin,
-			collector:        scorecard.Collector,
-		}
-		c.index[collectedScorecardLink.id] = &collectedScorecardLink
-		c.scorecards = append(c.scorecards, &collectedScorecardLink)
-		// set the backlinks
-		srcName.setScorecardLinks(collectedScorecardLink.id)
-	}
-
-	// build return GraphQL type
-	builtCertifyScorecard, err := c.buildScorecard(&collectedScorecardLink, nil, true)
-	if err != nil {
+	if !errors.Is(err, kv.NotFoundError) {
 		return nil, err
 	}
 
-	return builtCertifyScorecard, nil
+	if readOnly {
+		c.m.RUnlock()
+		s, err := c.certifyScorecard(ctx, source, scorecard, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return s, err
+	}
+
+	in.ThisID = c.getNextID()
+	if err := c.addToIndex(ctx, cscCol, in); err != nil {
+		return nil, err
+	}
+	if err := srcName.setScorecardLinks(ctx, in.ThisID, c); err != nil {
+		return nil, err
+	}
+	if err := setkv(ctx, cscCol, in, c); err != nil {
+		return nil, err
+	}
+
+	return c.buildScorecard(ctx, in, nil, true)
 }
 
 // Query CertifyScorecard
@@ -151,12 +145,12 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 	funcName := "Scorecards"
 
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*scorecardLink](*filter.ID, c)
+		link, err := byIDkv[*scorecardLink](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
-		foundCertifyScorecard, err := c.buildScorecard(link, filter, true)
+		foundCertifyScorecard, err := c.buildScorecard(ctx, link, filter, true)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -166,12 +160,12 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 	var search []string
 	foundOne := false
 	if filter != nil && filter.Source != nil {
-		exactSource, err := c.exactSource(filter.Source)
+		exactSource, err := c.exactSource(ctx, filter.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactSource != nil {
-			search = exactSource.scorecardLinks
+			search = exactSource.ScorecardLinks
 			foundOne = true
 		}
 	}
@@ -179,19 +173,26 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 	var out []*model.CertifyScorecard
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*scorecardLink](id, c)
+			link, err := byIDkv[*scorecardLink](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addSCIfMatch(out, filter, link)
+			out, err = c.addSCIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 		}
 	} else {
-		for _, link := range c.scorecards {
-			var err error
-			out, err = c.addSCIfMatch(out, filter, link)
+		cscKeys, err := c.kv.Keys(ctx, cscCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, csck := range cscKeys {
+			link, err := byKeykv[*scorecardLink](ctx, cscCol, csck, c)
+			if err != nil {
+				return nil, err
+			}
+			out, err = c.addSCIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -201,32 +202,32 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 	return out, nil
 }
 
-func (c *demoClient) addSCIfMatch(out []*model.CertifyScorecard,
+func (c *demoClient) addSCIfMatch(ctx context.Context, out []*model.CertifyScorecard,
 	filter *model.CertifyScorecardSpec, link *scorecardLink) (
 	[]*model.CertifyScorecard, error) {
-	if filter != nil && filter.TimeScanned != nil && !filter.TimeScanned.Equal(link.timeScanned) {
+	if filter != nil && filter.TimeScanned != nil && !filter.TimeScanned.Equal(link.TimeScanned) {
 		return out, nil
 	}
-	if filter != nil && noMatchFloat(filter.AggregateScore, link.aggregateScore) {
+	if filter != nil && noMatchFloat(filter.AggregateScore, link.AggregateScore) {
 		return out, nil
 	}
-	if filter != nil && noMatchChecks(filter.Checks, link.checks) {
+	if filter != nil && noMatchChecks(filter.Checks, link.Checks) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.ScorecardVersion, link.scorecardVersion) {
+	if filter != nil && noMatch(filter.ScorecardVersion, link.ScorecardVersion) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.ScorecardCommit, link.scorecardCommit) {
+	if filter != nil && noMatch(filter.ScorecardCommit, link.ScorecardCommit) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
+	if filter != nil && noMatch(filter.Origin, link.Origin) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
+	if filter != nil && noMatch(filter.Collector, link.Collector) {
 		return out, nil
 	}
 
-	foundCertifyScorecard, err := c.buildScorecard(link, filter, false)
+	foundCertifyScorecard, err := c.buildScorecard(ctx, link, filter, false)
 	if err != nil {
 		return nil, err
 	}
@@ -236,16 +237,16 @@ func (c *demoClient) addSCIfMatch(out []*model.CertifyScorecard,
 	return append(out, foundCertifyScorecard), nil
 }
 
-func (c *demoClient) buildScorecard(link *scorecardLink, filter *model.CertifyScorecardSpec, ingestOrIDProvided bool) (*model.CertifyScorecard, error) {
+func (c *demoClient) buildScorecard(ctx context.Context, link *scorecardLink, filter *model.CertifyScorecardSpec, ingestOrIDProvided bool) (*model.CertifyScorecard, error) {
 	var s *model.Source
 	var err error
 	if filter != nil {
-		s, err = c.buildSourceResponse(link.sourceID, filter.Source)
+		s, err = c.buildSourceResponse(ctx, link.SourceID, filter.Source)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		s, err = c.buildSourceResponse(link.sourceID, nil)
+		s, err = c.buildSourceResponse(ctx, link.SourceID, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -259,16 +260,16 @@ func (c *demoClient) buildScorecard(link *scorecardLink, filter *model.CertifySc
 	}
 
 	newScorecard := model.CertifyScorecard{
-		ID:     link.id,
+		ID:     link.ThisID,
 		Source: s,
 		Scorecard: &model.Scorecard{
-			TimeScanned:      link.timeScanned,
-			AggregateScore:   link.aggregateScore,
-			Checks:           getCollectedScorecardChecks(link.checks),
-			ScorecardVersion: link.scorecardVersion,
-			ScorecardCommit:  link.scorecardCommit,
-			Origin:           link.origin,
-			Collector:        link.collector,
+			TimeScanned:      link.TimeScanned,
+			AggregateScore:   link.AggregateScore,
+			Checks:           getCollectedScorecardChecks(link.Checks),
+			ScorecardVersion: link.ScorecardVersion,
+			ScorecardCommit:  link.ScorecardCommit,
+			Origin:           link.Origin,
+			Collector:        link.Collector,
 		},
 	}
 	return &newScorecard, nil

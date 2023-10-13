@@ -17,40 +17,52 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
 // Internal data: link between sources and packages (HasSourceAt)
-type hasSrcList []*srcMapLink
 type srcMapLink struct {
-	id            string
-	sourceID      string
-	packageID     string
-	knownSince    time.Time
-	justification string
-	origin        string
-	collector     string
+	ThisID        string
+	SourceID      string
+	PackageID     string
+	KnownSince    time.Time
+	Justification string
+	Origin        string
+	Collector     string
 }
 
-func (n *srcMapLink) ID() string { return n.id }
+func (n *srcMapLink) ID() string { return n.ThisID }
+func (n *srcMapLink) Key() string {
+	return strings.Join([]string{
+		n.SourceID,
+		n.PackageID,
+		timeKey(n.KnownSince),
+		n.Justification,
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *srcMapLink) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 2)
 	if allowedEdges[model.EdgeHasSourceAtPackage] {
-		out = append(out, n.packageID)
+		out = append(out, n.PackageID)
 	}
 	if allowedEdges[model.EdgeHasSourceAtSource] {
-		out = append(out, n.sourceID)
+		out = append(out, n.SourceID)
 	}
 	return out
 }
 
 func (n *srcMapLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
-	return c.buildHasSourceAt(n, nil, true)
+	return c.buildHasSourceAt(ctx, n, nil, true)
 }
 
 // Ingest HasSourceAt
@@ -74,81 +86,61 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 
 func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec, readOnly bool) (*model.HasSourceAt, error) {
 	funcName := "IngestHasSourceAt"
+
+	in := &srcMapLink{
+		KnownSince:    hasSourceAt.KnownSince.UTC(),
+		Justification: hasSourceAt.Justification,
+		Origin:        hasSourceAt.Origin,
+		Collector:     hasSourceAt.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	sourceID, err := getSourceIDFromInput(c, source)
+	srcName, err := c.getSourceNameFromInput(ctx, source)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	srcName, err := byID[*srcNameNode](sourceID, c)
+	in.SourceID = srcName.ThisID
+
+	pkgNameOrVersionNode, err := c.getPackageNameOrVerFromInput(ctx, packageArg, pkgMatchType)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	sourceHasSourceLinks := srcName.srcMapLinks
+	in.PackageID = pkgNameOrVersionNode.ID()
 
-	packageID, err := getPackageIDFromInput(c, packageArg, pkgMatchType)
-	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	out, err := byKeykv[*srcMapLink](ctx, hsaCol, in.Key(), c)
+	if err == nil {
+		return c.buildHasSourceAt(ctx, out, nil, true)
 	}
-	pkgNameOrVersionNode, err := byID[pkgNameOrVersion](packageID, c)
-	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-	packageHasSourceLinks := pkgNameOrVersionNode.getSrcMapLinks()
-
-	var searchIDs []string
-	if len(packageHasSourceLinks) < len(sourceHasSourceLinks) {
-		searchIDs = packageHasSourceLinks
-	} else {
-		searchIDs = sourceHasSourceLinks
-	}
-
-	// Don't insert duplicates
-	duplicate := false
-	collectedSrcMapLink := srcMapLink{}
-	for _, id := range searchIDs {
-		v, err := byID[*srcMapLink](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		if packageID == v.packageID && sourceID == v.sourceID && hasSourceAt.Justification == v.justification &&
-			hasSourceAt.Origin == v.origin && hasSourceAt.Collector == v.collector && hasSourceAt.KnownSince.Equal(v.knownSince) {
-			collectedSrcMapLink = *v
-			duplicate = true
-			break
-		}
-	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			s, err := c.ingestHasSourceAt(ctx, packageArg, pkgMatchType, source, hasSourceAt, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return s, err
-		}
-		// store the link
-		collectedSrcMapLink = srcMapLink{
-			id:            c.getNextID(),
-			sourceID:      sourceID,
-			packageID:     packageID,
-			knownSince:    hasSourceAt.KnownSince.UTC(),
-			justification: hasSourceAt.Justification,
-			origin:        hasSourceAt.Origin,
-			collector:     hasSourceAt.Collector,
-		}
-		c.index[collectedSrcMapLink.id] = &collectedSrcMapLink
-		c.hasSources = append(c.hasSources, &collectedSrcMapLink)
-		// set the backlinks
-		pkgNameOrVersionNode.setSrcMapLinks(collectedSrcMapLink.id)
-		srcName.setSrcMapLinks(collectedSrcMapLink.id)
-	}
-
-	// build return GraphQL type
-	foundHasSourceAt, err := c.buildHasSourceAt(&collectedSrcMapLink, nil, true)
-	if err != nil {
+	if !errors.Is(err, kv.NotFoundError) {
 		return nil, err
 	}
-	return foundHasSourceAt, nil
+
+	if readOnly {
+		c.m.RUnlock()
+		s, err := c.ingestHasSourceAt(ctx, packageArg, pkgMatchType, source, hasSourceAt, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return s, err
+	}
+
+	in.ThisID = c.getNextID()
+
+	if err := c.addToIndex(ctx, hsaCol, in); err != nil {
+		return nil, err
+	}
+	// set the backlinks
+	if err := pkgNameOrVersionNode.setSrcMapLinks(ctx, in.ThisID, c); err != nil {
+		return nil, err
+	}
+	if err := srcName.setSrcMapLinks(ctx, in.ThisID, c); err != nil {
+		return nil, err
+	}
+	if err := setkv(ctx, hsaCol, in, c); err != nil {
+		return nil, err
+	}
+
+	return c.buildHasSourceAt(ctx, in, nil, true)
 }
 
 // Query HasSourceAt
@@ -157,12 +149,12 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	defer c.m.RUnlock()
 	funcName := "HasSourceAt"
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*srcMapLink](*filter.ID, c)
+		link, err := byIDkv[*srcMapLink](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
-		foundHasSourceAt, err := c.buildHasSourceAt(link, filter, true)
+		foundHasSourceAt, err := c.buildHasSourceAt(ctx, link, filter, true)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
@@ -174,12 +166,12 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	var search []string
 	foundOne := false
 	if filter != nil && filter.Source != nil {
-		exactSource, err := c.exactSource(filter.Source)
+		exactSource, err := c.exactSource(ctx, filter.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactSource != nil {
-			search = append(search, exactSource.srcMapLinks...)
+			search = append(search, exactSource.SrcMapLinks...)
 			foundOne = true
 		}
 	}
@@ -187,19 +179,26 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	var out []*model.HasSourceAt
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*srcMapLink](id, c)
+			link, err := byIDkv[*srcMapLink](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addSrcIfMatch(out, filter, link)
+			out, err = c.addSrcIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 		}
 	} else {
-		for _, link := range c.hasSources {
-			var err error
-			out, err = c.addSrcIfMatch(out, filter, link)
+		hsaKeys, err := c.kv.Keys(ctx, hsaCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, hsak := range hsaKeys {
+			link, err := byKeykv[*srcMapLink](ctx, hsaCol, hsak, c)
+			if err != nil {
+				return nil, err
+			}
+			out, err = c.addSrcIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -209,25 +208,25 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	return out, nil
 }
 
-func (c *demoClient) buildHasSourceAt(link *srcMapLink, filter *model.HasSourceAtSpec, ingestOrIDProvided bool) (*model.HasSourceAt, error) {
+func (c *demoClient) buildHasSourceAt(ctx context.Context, link *srcMapLink, filter *model.HasSourceAtSpec, ingestOrIDProvided bool) (*model.HasSourceAt, error) {
 	var p *model.Package
 	var s *model.Source
 	var err error
 	if filter != nil {
-		p, err = c.buildPackageResponse(link.packageID, filter.Package)
+		p, err = c.buildPackageResponse(ctx, link.PackageID, filter.Package)
 		if err != nil {
 			return nil, err
 		}
-		s, err = c.buildSourceResponse(link.sourceID, filter.Source)
+		s, err = c.buildSourceResponse(ctx, link.SourceID, filter.Source)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		p, err = c.buildPackageResponse(link.packageID, nil)
+		p, err = c.buildPackageResponse(ctx, link.PackageID, nil)
 		if err != nil {
 			return nil, err
 		}
-		s, err = c.buildSourceResponse(link.sourceID, nil)
+		s, err = c.buildSourceResponse(ctx, link.SourceID, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -246,33 +245,33 @@ func (c *demoClient) buildHasSourceAt(link *srcMapLink, filter *model.HasSourceA
 	}
 
 	newHSA := model.HasSourceAt{
-		ID:            link.id,
+		ID:            link.ThisID,
 		Package:       p,
 		Source:        s,
-		KnownSince:    link.knownSince,
-		Justification: link.justification,
-		Origin:        link.origin,
-		Collector:     link.collector,
+		KnownSince:    link.KnownSince,
+		Justification: link.Justification,
+		Origin:        link.Origin,
+		Collector:     link.Collector,
 	}
 	return &newHSA, nil
 }
 
-func (c *demoClient) addSrcIfMatch(out []*model.HasSourceAt,
+func (c *demoClient) addSrcIfMatch(ctx context.Context, out []*model.HasSourceAt,
 	filter *model.HasSourceAtSpec, link *srcMapLink) (
 	[]*model.HasSourceAt, error) {
-	if filter != nil && noMatch(filter.Justification, link.justification) {
+	if filter != nil && noMatch(filter.Justification, link.Justification) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
+	if filter != nil && noMatch(filter.Origin, link.Origin) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
+	if filter != nil && noMatch(filter.Collector, link.Collector) {
 		return out, nil
 	}
-	if filter != nil && filter.KnownSince != nil && !filter.KnownSince.Equal(link.knownSince) {
+	if filter != nil && filter.KnownSince != nil && !filter.KnownSince.Equal(link.KnownSince) {
 		return out, nil
 	}
-	foundHasSourceAt, err := c.buildHasSourceAt(link, filter, false)
+	foundHasSourceAt, err := c.buildHasSourceAt(ctx, link, filter, false)
 	if err != nil {
 		return nil, err
 	}

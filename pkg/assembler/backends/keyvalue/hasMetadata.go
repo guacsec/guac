@@ -17,40 +17,54 @@ package keyvalue
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 )
 
-// Internal data: link that a package/source/artifact is good
-type hasMetadataList []*hasMetadataLink
 type hasMetadataLink struct {
-	id            string
-	packageID     string
-	artifactID    string
-	sourceID      string
-	timestamp     time.Time
-	key           string
-	value         string
-	justification string
-	origin        string
-	collector     string
+	ThisID        string
+	PackageID     string
+	ArtifactID    string
+	SourceID      string
+	Timestamp     time.Time
+	MDKey         string
+	Value         string
+	Justification string
+	Origin        string
+	Collector     string
 }
 
-func (n *hasMetadataLink) ID() string { return n.id }
+func (n *hasMetadataLink) ID() string { return n.ThisID }
+func (n *hasMetadataLink) Key() string {
+	return strings.Join([]string{
+		n.PackageID,
+		n.ArtifactID,
+		n.SourceID,
+		timeKey(n.Timestamp),
+		n.MDKey,
+		n.Value,
+		n.Justification,
+		n.Origin,
+		n.Collector,
+	}, ":")
+}
 
 func (n *hasMetadataLink) Neighbors(allowedEdges edgeMap) []string {
 	out := make([]string, 0, 1)
-	if n.packageID != "" && allowedEdges[model.EdgeHasMetadataPackage] {
-		out = append(out, n.packageID)
+	if n.PackageID != "" && allowedEdges[model.EdgeHasMetadataPackage] {
+		out = append(out, n.PackageID)
 	}
-	if n.artifactID != "" && allowedEdges[model.EdgeHasMetadataArtifact] {
-		out = append(out, n.artifactID)
+	if n.ArtifactID != "" && allowedEdges[model.EdgeHasMetadataArtifact] {
+		out = append(out, n.ArtifactID)
 	}
-	if n.sourceID != "" && allowedEdges[model.EdgeHasMetadataSource] {
-		out = append(out, n.sourceID)
+	if n.SourceID != "" && allowedEdges[model.EdgeHasMetadataSource] {
+		out = append(out, n.SourceID)
 	}
 	return out
 }
@@ -98,120 +112,87 @@ func (c *demoClient) IngestHasMetadata(ctx context.Context, subject model.Packag
 func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec, readOnly bool) (*model.HasMetadata, error) {
 	funcName := "IngestHasMetadata"
 
+	in := &hasMetadataLink{
+		MDKey:         hasMetadata.Key,
+		Value:         hasMetadata.Value,
+		Timestamp:     hasMetadata.Timestamp.UTC(),
+		Justification: hasMetadata.Justification,
+		Origin:        hasMetadata.Origin,
+		Collector:     hasMetadata.Collector,
+	}
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	var packageID string
 	var foundPkgNameorVersionNode pkgNameOrVersion
-	var artifactID string
 	var foundArtStrct *artStruct
-	var sourceID string
 	var srcName *srcNameNode
-	searchIDs := []string{}
 	if subject.Package != nil {
 		var err error
-		packageID, err = getPackageIDFromInput(c, *subject.Package, *pkgMatchType)
+		foundPkgNameorVersionNode, err = c.getPackageNameOrVerFromInput(ctx, *subject.Package, *pkgMatchType)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundPkgNameorVersionNode, err = byID[pkgNameOrVersion](packageID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		searchIDs = append(searchIDs, foundPkgNameorVersionNode.getHasMetadataLinks()...)
+		in.PackageID = foundPkgNameorVersionNode.ID()
 	} else if subject.Artifact != nil {
 		var err error
-		artifactID, err = c.artifactIDByInput(ctx, subject.Artifact)
+		foundArtStrct, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundArtStrct, err = byID[*artStruct](artifactID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		searchIDs = append(searchIDs, foundArtStrct.hasMetadataLinks...)
+		in.ArtifactID = foundArtStrct.ThisID
 	} else {
 		var err error
-		sourceID, err = getSourceIDFromInput(c, *subject.Source)
+		srcName, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		srcName, err = byID[*srcNameNode](sourceID, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		searchIDs = append(searchIDs, srcName.hasMetadataLinks...)
+		in.SourceID = srcName.ThisID
 	}
 
-	// Don't insert duplicates
-	duplicate := false
-	collectedLink := hasMetadataLink{}
-	for _, id := range searchIDs {
-		v, err := byID[*hasMetadataLink](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
-		}
-		subjectMatch := false
-		if packageID != "" && packageID == v.packageID {
-			subjectMatch = true
-		}
-		if artifactID != "" && artifactID == v.artifactID {
-			subjectMatch = true
-		}
-		if sourceID != "" && sourceID == v.sourceID {
-			subjectMatch = true
-		}
-		if subjectMatch && hasMetadata.Justification == v.justification &&
-			hasMetadata.Key == v.key && hasMetadata.Value == v.value &&
-			hasMetadata.Timestamp.Equal(v.timestamp) &&
-			hasMetadata.Origin == v.origin && hasMetadata.Collector == v.collector {
+	out, err := byKeykv[*hasMetadataLink](ctx, hasMDCol, in.Key(), c)
+	if err == nil {
+		return c.buildHasMetadata(ctx, out, nil, true)
+	}
+	if !errors.Is(err, kv.NotFoundError) {
+		return nil, err
+	}
 
-			collectedLink = *v
-			duplicate = true
-			break
+	if readOnly {
+		c.m.RUnlock()
+		b, err := c.ingestHasMetadata(ctx, subject, pkgMatchType, hasMetadata, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return b, err
+	}
+
+	in.ThisID = c.getNextID()
+	if err := c.addToIndex(ctx, hasMDCol, in); err != nil {
+		return nil, err
+	}
+
+	// set the backlinks
+	if foundPkgNameorVersionNode != nil {
+		if err := foundPkgNameorVersionNode.setHasMetadataLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
 		}
 	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			b, err := c.ingestHasMetadata(ctx, subject, pkgMatchType, hasMetadata, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return b, err
+	if foundArtStrct != nil {
+		if err := foundArtStrct.setHasMetadataLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
 		}
-		// store the link
-		collectedLink = hasMetadataLink{
-			id:            c.getNextID(),
-			packageID:     packageID,
-			artifactID:    artifactID,
-			sourceID:      sourceID,
-			key:           hasMetadata.Key,
-			value:         hasMetadata.Value,
-			timestamp:     hasMetadata.Timestamp,
-			justification: hasMetadata.Justification,
-			origin:        hasMetadata.Origin,
-			collector:     hasMetadata.Collector,
+	}
+	if srcName != nil {
+		if err := srcName.setHasMetadataLinks(ctx, in.ThisID, c); err != nil {
+			return nil, err
 		}
-		c.index[collectedLink.id] = &collectedLink
-		c.hasMetadatas = append(c.hasMetadatas, &collectedLink)
-		// set the backlinks
-		if packageID != "" {
-			foundPkgNameorVersionNode.setHasMetadataLinks(collectedLink.id)
-		}
-		if artifactID != "" {
-			foundArtStrct.setHasMetadataLinks(collectedLink.id)
-		}
-		if sourceID != "" {
-			srcName.setHasMetadataLinks(collectedLink.id)
-		}
+	}
 
+	if err := setkv(ctx, hasMDCol, in, c); err != nil {
+		return nil, err
 	}
 
 	// build return GraphQL type
-	builtHasMetadata, err := c.buildHasMetadata(ctx, &collectedLink, nil, true)
-	if err != nil {
-		return nil, err
-	}
-	return builtHasMetadata, nil
+	return c.buildHasMetadata(ctx, in, nil, true)
 }
 
 // Query HasMetadata
@@ -222,7 +203,7 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 	defer c.m.RUnlock()
 
 	if filter != nil && filter.ID != nil {
-		link, err := byID[*hasMetadataLink](*filter.ID, c)
+		link, err := byIDkv[*hasMetadataLink](ctx, *filter.ID, c)
 		if err != nil {
 			// Not found
 			return nil, nil
@@ -244,17 +225,17 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactArtifact != nil {
-			search = append(search, exactArtifact.hasMetadataLinks...)
+			search = append(search, exactArtifact.HasMetadataLinks...)
 			foundOne = true
 		}
 	}
 	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Source != nil {
-		exactSource, err := c.exactSource(filter.Subject.Source)
+		exactSource, err := c.exactSource(ctx, filter.Subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactSource != nil {
-			search = append(search, exactSource.hasMetadataLinks...)
+			search = append(search, exactSource.HasMetadataLinks...)
 			foundOne = true
 		}
 	}
@@ -262,7 +243,7 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 	var out []*model.HasMetadata
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*hasMetadataLink](id, c)
+			link, err := byIDkv[*hasMetadataLink](ctx, id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -272,8 +253,15 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 			}
 		}
 	} else {
-		for _, link := range c.hasMetadatas {
-			var err error
+		hmk, err := c.kv.Keys(ctx, hasMDCol)
+		if err != nil {
+			return nil, err
+		}
+		for _, hk := range hmk {
+			link, err := byKeykv[*hasMetadataLink](ctx, hasMDCol, hk, c)
+			if err != nil {
+				return nil, err
+			}
 			out, err = c.addHMIfMatch(ctx, out, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
@@ -286,23 +274,23 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 func (c *demoClient) addHMIfMatch(ctx context.Context, out []*model.HasMetadata, filter *model.HasMetadataSpec, link *hasMetadataLink) (
 	[]*model.HasMetadata, error) {
 
-	if filter != nil && noMatch(filter.Justification, link.justification) {
+	if filter != nil && noMatch(filter.Justification, link.Justification) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
+	if filter != nil && noMatch(filter.Collector, link.Collector) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
+	if filter != nil && noMatch(filter.Origin, link.Origin) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Key, link.key) {
+	if filter != nil && noMatch(filter.Key, link.MDKey) {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Value, link.value) {
+	if filter != nil && noMatch(filter.Value, link.Value) {
 		return out, nil
 	}
 	// no match if filter time since is after the timestamp
-	if filter != nil && filter.Since != nil && filter.Since.After(link.timestamp) {
+	if filter != nil && filter.Since != nil && filter.Since.After(link.Timestamp) {
 		return out, nil
 	}
 
@@ -322,39 +310,39 @@ func (c *demoClient) buildHasMetadata(ctx context.Context, link *hasMetadataLink
 	var s *model.Source
 	var err error
 	if filter != nil && filter.Subject != nil {
-		if filter.Subject.Package != nil && link.packageID != "" {
-			p, err = c.buildPackageResponse(link.packageID, filter.Subject.Package)
+		if filter.Subject.Package != nil && link.PackageID != "" {
+			p, err = c.buildPackageResponse(ctx, link.PackageID, filter.Subject.Package)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if filter.Subject.Artifact != nil && link.artifactID != "" {
-			a, err = c.buildArtifactResponse(ctx, link.artifactID, filter.Subject.Artifact)
+		if filter.Subject.Artifact != nil && link.ArtifactID != "" {
+			a, err = c.buildArtifactResponse(ctx, link.ArtifactID, filter.Subject.Artifact)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if filter.Subject.Source != nil && link.sourceID != "" {
-			s, err = c.buildSourceResponse(link.sourceID, filter.Subject.Source)
+		if filter.Subject.Source != nil && link.SourceID != "" {
+			s, err = c.buildSourceResponse(ctx, link.SourceID, filter.Subject.Source)
 			if err != nil {
 				return nil, err
 			}
 		}
 	} else {
-		if link.packageID != "" {
-			p, err = c.buildPackageResponse(link.packageID, nil)
+		if link.PackageID != "" {
+			p, err = c.buildPackageResponse(ctx, link.PackageID, nil)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if link.artifactID != "" {
-			a, err = c.buildArtifactResponse(ctx, link.artifactID, nil)
+		if link.ArtifactID != "" {
+			a, err = c.buildArtifactResponse(ctx, link.ArtifactID, nil)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if link.sourceID != "" {
-			s, err = c.buildSourceResponse(link.sourceID, nil)
+		if link.SourceID != "" {
+			s, err = c.buildSourceResponse(ctx, link.SourceID, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -362,7 +350,7 @@ func (c *demoClient) buildHasMetadata(ctx context.Context, link *hasMetadataLink
 	}
 
 	var subj model.PackageSourceOrArtifact
-	if link.packageID != "" {
+	if link.PackageID != "" {
 		if p == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve package via packageID")
 		} else if p == nil && !ingestOrIDProvided {
@@ -370,7 +358,7 @@ func (c *demoClient) buildHasMetadata(ctx context.Context, link *hasMetadataLink
 		}
 		subj = p
 	}
-	if link.artifactID != "" {
+	if link.ArtifactID != "" {
 		if a == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve artifact via artifactID")
 		} else if a == nil && !ingestOrIDProvided {
@@ -378,7 +366,7 @@ func (c *demoClient) buildHasMetadata(ctx context.Context, link *hasMetadataLink
 		}
 		subj = a
 	}
-	if link.sourceID != "" {
+	if link.SourceID != "" {
 		if s == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve source via sourceID")
 		} else if s == nil && !ingestOrIDProvided {
@@ -388,14 +376,14 @@ func (c *demoClient) buildHasMetadata(ctx context.Context, link *hasMetadataLink
 	}
 
 	hasMetadata := model.HasMetadata{
-		ID:            link.id,
+		ID:            link.ThisID,
 		Subject:       subj,
-		Timestamp:     link.timestamp,
-		Key:           link.key,
-		Value:         link.value,
-		Justification: link.justification,
-		Origin:        link.origin,
-		Collector:     link.collector,
+		Timestamp:     link.Timestamp,
+		Key:           link.MDKey,
+		Value:         link.Value,
+		Justification: link.Justification,
+		Origin:        link.Origin,
+		Collector:     link.Collector,
 	}
 	return &hasMetadata, nil
 }
