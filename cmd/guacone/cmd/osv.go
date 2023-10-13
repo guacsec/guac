@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
+	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
@@ -39,10 +40,10 @@ import (
 )
 
 type osvOptions struct {
-	graphqlEndpoint string
-	poll            bool
-	csubAddr        string
-	interval        time.Duration
+	graphqlEndpoint   string
+	poll              bool
+	csubClientOptions client.CsubClientOptions
+	interval          time.Duration
 }
 
 var osvCmd = &cobra.Command{
@@ -57,6 +58,8 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetString("interval"),
 			viper.GetString("csub-addr"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
 		)
 
 		if err != nil {
@@ -70,7 +73,7 @@ var osvCmd = &cobra.Command{
 		}
 
 		// initialize collectsub client
-		csubClient, err := csub_client.NewClient(opts.csubAddr)
+		csubClient, err := csub_client.NewClient(opts.csubClientOptions)
 		if err != nil {
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
@@ -140,7 +143,7 @@ var osvCmd = &cobra.Command{
 	},
 }
 
-func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAddr string) (osvOptions, error) {
+func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAddr string, csubTls bool, csubTlsSkipVerify bool) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.poll = poll
@@ -149,7 +152,12 @@ func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAd
 		return opts, err
 	}
 	opts.interval = i
-	opts.csubAddr = csubAddr
+
+	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	if err != nil {
+		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+	}
+	opts.csubClientOptions = csubOpts
 
 	return opts, nil
 }

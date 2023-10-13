@@ -17,10 +17,13 @@ package client
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -35,9 +38,37 @@ type client struct {
 	conn   *grpc.ClientConn
 }
 
-func NewClient(addr string) (Client, error) {
-	// Set up a connection to the server.
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+type CsubClientOptions struct {
+	Addr          string
+	Tls           bool
+	TlsSkipVerify bool
+}
+
+func ValidateCsubClientFlags(addr string, tls bool, tlsSkipVerify bool) (CsubClientOptions, error) {
+	return CsubClientOptions{
+		Addr:          addr,
+		Tls:           tls,
+		TlsSkipVerify: tlsSkipVerify,
+	}, nil
+}
+
+func NewClient(opts CsubClientOptions) (Client, error) {
+
+	var creds credentials.TransportCredentials
+	if !opts.Tls {
+		// Set up a connection to the server.
+		creds = insecure.NewCredentials()
+	} else {
+		// Get the system certificates.
+		sysPool, err := x509.SystemCertPool()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get system cert: %w", err)
+		}
+		// Connect to the service using TLS.
+		creds = credentials.NewTLS(&tls.Config{RootCAs: sysPool, InsecureSkipVerify: opts.TlsSkipVerify})
+	}
+
+	conn, err := grpc.Dial(opts.Addr, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		return nil, err
 	}

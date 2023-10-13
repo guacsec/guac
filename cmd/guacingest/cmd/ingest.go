@@ -23,6 +23,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -34,9 +35,9 @@ import (
 )
 
 type options struct {
-	natsAddr        string
-	csubAddr        string
-	graphqlEndpoint string
+	natsAddr          string
+	csubClientOptions client.CsubClientOptions
+	graphqlEndpoint   string
 }
 
 func ingest(cmd *cobra.Command, args []string) {
@@ -44,6 +45,8 @@ func ingest(cmd *cobra.Command, args []string) {
 	opts, err := validateFlags(
 		viper.GetString("nats-addr"),
 		viper.GetString("csub-addr"),
+		viper.GetBool("csub-tls"),
+		viper.GetBool("csub-tls-skip-verify"),
 		viper.GetString("gql-addr"),
 		args)
 	if err != nil {
@@ -66,7 +69,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	defer jetStream.Close()
 
 	// initialize collectsub client
-	csubClient, err := csub_client.NewClient(opts.csubAddr)
+	csubClient, err := csub_client.NewClient(opts.csubClientOptions)
 	if err != nil {
 		logger.Errorf("collectsub client initialization failed with error: %v", err)
 		os.Exit(1)
@@ -97,10 +100,14 @@ func ingest(cmd *cobra.Command, args []string) {
 	wg.Wait()
 }
 
-func validateFlags(natsAddr string, csubAddr string, graphqlEndpoint string, args []string) (options, error) {
+func validateFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, graphqlEndpoint string, args []string) (options, error) {
 	var opts options
 	opts.natsAddr = natsAddr
-	opts.csubAddr = csubAddr
+	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	if err != nil {
+		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+	}
+	opts.csubClientOptions = csubOpts
 	opts.graphqlEndpoint = graphqlEndpoint
 
 	return opts, nil
