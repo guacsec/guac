@@ -9,6 +9,7 @@ run:
 linters:
   enable:
     - forcetypeassert
+    - gosec
 issues:
   exclude-rules:
   - path: _test\.go
@@ -19,3 +20,4 @@ issues:
     - unused # getting many unused false positives in neo4j backend
     - forcetypeassert # this backend does this a lot
   max-same-issues: 50
+  new-from-rev: HEAD~1 # only run on changes from last commit
