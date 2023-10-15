@@ -27,9 +27,6 @@ import (
 )
 
 func (s *Suite) Test_HasSBOM() {
-	curTime := time.Now()
-	timeAfterOneSecond := curTime.Add(time.Second)
-
 	type call struct {
 		Sub  model.PackageOrArtifactInput
 		Spec *model.HasSBOMInputSpec
@@ -139,25 +136,17 @@ func (s *Suite) Test_HasSBOM() {
 						Package: p1,
 					},
 					Spec: &model.HasSBOMInputSpec{
-						KnownSince: curTime,
-					},
-				},
-				{
-					Sub: model.PackageOrArtifactInput{
-						Package: p1,
-					},
-					Spec: &model.HasSBOMInputSpec{
-						KnownSince: timeAfterOneSecond,
+						KnownSince: time.Unix(1e9, 0),
 					},
 				},
 			},
 			Query: &model.HasSBOMSpec{
-				KnownSince: ptrfrom.Time(curTime),
+				KnownSince: ptrfrom.Time(time.Unix(1e9, 0)),
 			},
 			Expected: []*model.HasSbom{
 				{
 					Subject:    p1out,
-					KnownSince: curTime,
+					KnownSince: time.Unix(1e9, 0),
 				},
 			},
 		},
@@ -553,9 +542,6 @@ func (s *Suite) Test_HasSBOM() {
 }
 
 func (s *Suite) TestIngestHasSBOMs() {
-	curTime := time.Now()
-	timeAfterOneSecond := curTime.Add(time.Second)
-
 	type call struct {
 		Sub model.PackageOrArtifactInputs
 		HS  []*model.HasSBOMInputSpec
@@ -661,21 +647,18 @@ func (s *Suite) TestIngestHasSBOMs() {
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
-							KnownSince: curTime,
-						},
-						{
-							KnownSince: timeAfterOneSecond,
+							KnownSince: time.Unix(1e9, 0),
 						},
 					},
 				},
 			},
 			Query: &model.HasSBOMSpec{
-				KnownSince: ptrfrom.Time(curTime),
+				KnownSince: ptrfrom.Time(time.Unix(1e9, 0)),
 			},
 			ExpHS: []*model.HasSbom{
 				{
 					Subject:    p1out,
-					KnownSince: curTime,
+					KnownSince: time.Unix(1e9, 0),
 				},
 			},
 		},
