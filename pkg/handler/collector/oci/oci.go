@@ -282,10 +282,14 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 				Repository: image.Repository,
 				Digest:     desc.Digest.String(),
 			}
-			logger.Infof("Fetching %s for platform %s", platformImage.Digest, desc.Platform)
-			if err := o.fetchOCIArtifacts(ctx, repo, rc, platformImage, docChannel); err != nil {
-				errorChan <- fmt.Errorf("failed fetching artifacts for platform specific digest: %w", err)
-				cancel()
+			// check if the platform digest has already been collected
+			if !o.isDigestCollected(repo, platformImage.Digest) {
+				logger.Infof("Fetching %s for platform %s", platformImage.Digest, desc.Platform)
+				if err := o.fetchOCIArtifacts(ctx, repo, rc, platformImage, docChannel); err != nil {
+					errorChan <- fmt.Errorf("failed fetching artifacts for platform specific digest: %w", err)
+					cancel()
+				}
+				o.markDigestAsCollected(repo, platformImage.Digest)
 			}
 		}(p)
 	}
