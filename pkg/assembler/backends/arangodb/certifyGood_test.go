@@ -19,13 +19,14 @@ package arangodb
 
 import (
 	"context"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"strings"
-	"testing"
-	"time"
 )
 
 func TestCertifyGood(t *testing.T) {

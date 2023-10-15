@@ -27,9 +27,6 @@ import (
 )
 
 func (s *Suite) TestCertifyBad() {
-	curTime := time.Now()
-	timeAfterOneSecond := curTime.Add(time.Second)
-
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
@@ -149,31 +146,19 @@ func (s *Suite) TestCertifyBad() {
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification one",
-						KnownSince:    curTime,
-					},
-				},
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Package: p1,
-					},
-					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
-					},
-					CB: &model.CertifyBadInputSpec{
-						Justification: "test justification two",
-						KnownSince:    timeAfterOneSecond,
+						KnownSince:    time.Unix(1e9, 0),
 					},
 				},
 			},
 			Query: &model.CertifyBadSpec{
 				Justification: ptrfrom.String("test justification one"),
-				KnownSince:    ptrfrom.Time(curTime),
+				KnownSince:    ptrfrom.Time(time.Unix(1e9, 0)),
 			},
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       p1out,
 					Justification: "test justification one",
-					KnownSince:    curTime,
+					KnownSince:    time.Unix(1e9, 0),
 				},
 			},
 		},
@@ -613,8 +598,6 @@ func (s *Suite) TestCertifyBad() {
 }
 
 func (s *Suite) TestIngestCertifyBads() {
-	curTime := time.Now()
-
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInputs
 		Match *model.MatchFlags
@@ -733,11 +716,11 @@ func (s *Suite) TestIngestCertifyBads() {
 					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
-							KnownSince:    curTime,
+							KnownSince:    time.Unix(1e9, 0),
 						},
 						{
 							Justification: "test justification",
-							KnownSince:    curTime,
+							KnownSince:    time.Unix(1e9, 0),
 						},
 					},
 				},
@@ -748,7 +731,7 @@ func (s *Suite) TestIngestCertifyBads() {
 					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
-							KnownSince:    curTime,
+							KnownSince:    time.Unix(1e9, 0),
 						},
 					},
 				},
@@ -759,12 +742,13 @@ func (s *Suite) TestIngestCertifyBads() {
 						Version: ptrfrom.String("2.11.1"),
 					},
 				},
+				KnownSince: ptrfrom.Time(time.Unix(1e9, 0)),
 			},
 			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       p2out,
 					Justification: "test justification",
-					KnownSince:    curTime,
+					KnownSince:    time.Unix(1e9, 0),
 				},
 			},
 		},
@@ -951,9 +935,6 @@ func (s *Suite) TestIngestCertifyBads() {
 }
 
 func (s *Suite) TestCertifyGood() {
-	curTime := time.Now()
-	timeAfterOneSecond := curTime.Add(time.Second)
-
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
@@ -1073,7 +1054,7 @@ func (s *Suite) TestCertifyGood() {
 					},
 					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification one",
-						KnownSince:    curTime,
+						KnownSince:    time.Unix(1e9, 0),
 					},
 				},
 				{
@@ -1085,19 +1066,19 @@ func (s *Suite) TestCertifyGood() {
 					},
 					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification two",
-						KnownSince:    timeAfterOneSecond,
+						KnownSince:    time.Unix(1e9, 0),
 					},
 				},
 			},
 			Query: &model.CertifyGoodSpec{
 				Justification: ptrfrom.String("test justification one"),
-				KnownSince:    ptrfrom.Time(curTime),
+				KnownSince:    ptrfrom.Time(time.Unix(1e9, 0)),
 			},
 			ExpCG: []*model.CertifyGood{
 				{
 					Subject:       p1out,
 					Justification: "test justification one",
-					KnownSince:    curTime,
+					KnownSince:    time.Unix(1e9, 0),
 				},
 			},
 		},
