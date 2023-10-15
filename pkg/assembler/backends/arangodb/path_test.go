@@ -28,6 +28,207 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func Test_Path(t *testing.T) {
+	ctx := context.Background()
+	arangoArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangoArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type certifyVulnCall struct {
+		Pkg         *model.PkgInputSpec
+		Vuln        *model.VulnerabilityInputSpec
+		CertifyVuln *model.ScanMetadataInput
+	}
+	type isDepCall struct {
+		P1 *model.PkgInputSpec
+		P2 *model.PkgInputSpec
+		MF model.MatchFlags
+		ID *model.IsDependencyInputSpec
+	}
+	tests := []struct {
+		name            string
+		pkgInput        *model.PkgInputSpec
+		artifactInput   *model.ArtifactInputSpec
+		builderInput    *model.BuilderInputSpec
+		srcInput        *model.SourceInputSpec
+		vulnInput       *model.VulnerabilityInputSpec
+		licenseInput    *model.LicenseInputSpec
+		inPkg           []*model.PkgInputSpec
+		inSrc           []*model.SourceInputSpec
+		inArt           []*model.ArtifactInputSpec
+		inVuln          []*model.VulnerabilityInputSpec
+		inBld           []*model.BuilderInputSpec
+		inLic           []*model.LicenseInputSpec
+		certifyVulnCall *certifyVulnCall
+		isDepCall       *isDepCall
+		edges           []model.Edge
+		want            []model.Node
+		wantErr         bool
+	}{
+		{
+			name:   "certifyVuln - edges not provided",
+			inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			inPkg:  []*model.PkgInputSpec{testdata.P2},
+			edges:  []model.Edge{},
+			certifyVulnCall: &certifyVulnCall{
+				Pkg:  testdata.P2,
+				Vuln: testdata.G1,
+				CertifyVuln: &model.ScanMetadataInput{
+					Collector:      "test collector",
+					Origin:         "test origin",
+					ScannerVersion: "v1.0.0",
+					ScannerURI:     "test scanner uri",
+					DbVersion:      "2023.01.01",
+					DbURI:          "test db uri",
+					TimeScanned:    testdata.T1,
+				},
+			},
+			want: []model.Node{
+				testdata.P2out,
+				&model.CertifyVuln{
+					Package: testdata.P2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "ghsa",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+					},
+					Metadata: vmd1,
+				},
+				&model.Vulnerability{
+					Type:             "ghsa",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+				},
+			},
+		},
+		{
+			name:   "certifyVuln - edges not provided",
+			inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			inPkg:  []*model.PkgInputSpec{testdata.P2},
+			edges:  []model.Edge{model.EdgePackageCertifyVuln, model.EdgeVulnerabilityCertifyVuln},
+			certifyVulnCall: &certifyVulnCall{
+				Pkg:  testdata.P2,
+				Vuln: testdata.G1,
+				CertifyVuln: &model.ScanMetadataInput{
+					Collector:      "test collector",
+					Origin:         "test origin",
+					ScannerVersion: "v1.0.0",
+					ScannerURI:     "test scanner uri",
+					DbVersion:      "2023.01.01",
+					DbURI:          "test db uri",
+					TimeScanned:    testdata.T1,
+				},
+			},
+			want: []model.Node{
+				testdata.P2out,
+				&model.CertifyVuln{
+					Package: testdata.P2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "ghsa",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+					},
+					Metadata: vmd1,
+				},
+				&model.Vulnerability{
+					Type:             "ghsa",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+				},
+			},
+		},
+		{
+			name:  "isDependency",
+			inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			edges: []model.Edge{model.EdgePackageIsDependency, model.EdgeIsDependencyPackage},
+			isDepCall: &isDepCall{
+				P1: testdata.P1,
+				P2: testdata.P2,
+				MF: mAll,
+				ID: &model.IsDependencyInputSpec{},
+			},
+			want: []model.Node{
+				testdata.P1out,
+				&model.IsDependency{
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+				},
+				testdata.P2outName,
+			},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var startID string
+			var stopID string
+			for _, p := range tt.inPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range tt.inSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range tt.inArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, bld := range tt.inBld {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+					t.Fatalf("Could not ingest builder: %v", err)
+				}
+			}
+			for _, a := range tt.inLic {
+				if _, err := b.IngestLicense(ctx, a); err != nil {
+					t.Fatalf("Could not ingest license: %v", err)
+				}
+			}
+			for _, g := range tt.inVuln {
+				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+					t.Fatalf("Could not ingest vulnerability: %a", err)
+				}
+			}
+			if tt.certifyVulnCall != nil {
+				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				startID = found.Package.Namespaces[0].Names[0].Versions[0].ID
+				stopID = found.Vulnerability.VulnerabilityIDs[0].ID
+			}
+			if tt.isDepCall != nil {
+				found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				startID = found.Package.Namespaces[0].Names[0].Versions[0].ID
+				stopID = found.DependencyPackage.Namespaces[0].Names[0].ID
+			}
+			got, err := b.Path(ctx, startID, stopID, 5, tt.edges)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("node query error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func Test_Nodes(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()

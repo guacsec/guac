@@ -18,13 +18,96 @@ package arangodb
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
+	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func (c *arangoClient) Path(ctx context.Context, startNodeID string, targetNodeID string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: Path"))
+	values := map[string]any{}
+	values["startVertex"] = startNodeID
+	values["targetVertex"] = targetNodeID
+	values["maxLength"] = maxPathLength
+
+	var sb strings.Builder
+
+	edgeCollectionWriter := func(sb *strings.Builder, i, j int, edgeCollection string) {
+		values["edgeCollection"+strconv.Itoa(i)+strconv.Itoa(j)] = edgeCollection
+		sb.WriteString("@edgeCollection" + strconv.Itoa(i) + strconv.Itoa(j))
+	}
+
+	query := `
+FOR path
+IN 1..@maxLength ANY K_PATHS
+@startVertex TO @targetVertex `
+	sb.WriteString(query)
+	if len(usingOnly) == 0 {
+		values["graph"] = arangoGraph
+		sb.WriteString("\nGRAPH @graph")
+	} else {
+		for i, edge := range usingOnly {
+			if i == len(usingOnly)-1 {
+				if foundEdgeCollection, ok := mapEdgeToArangoEdgeCollection[edge]; ok {
+					for j, edgeCollection := range foundEdgeCollection {
+						if j == len(foundEdgeCollection)-1 {
+							edgeCollectionWriter(&sb, i, j, edgeCollection)
+						} else {
+							edgeCollectionWriter(&sb, i, j, edgeCollection)
+							sb.WriteString(", ")
+						}
+					}
+				}
+			} else {
+				if foundEdgeCollection, ok := mapEdgeToArangoEdgeCollection[edge]; ok {
+					for j, edgeCollection := range foundEdgeCollection {
+						edgeCollectionWriter(&sb, i, j, edgeCollection)
+						sb.WriteString(", ")
+					}
+				}
+			}
+
+		}
+	}
+	sb.WriteString("\nRETURN { nodes: path.vertices[*]._id }")
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), values, "Path")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query path for startNodeID: %s and targetNodeID: %s with error: %w", startNodeID, targetNodeID, err)
+	}
+	defer cursor.Close()
+
+	type Nodes struct {
+		IDs []string `json:"nodes"`
+	}
+
+	var pathNodes []Nodes
+	for {
+		var doc Nodes
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to nodes from cursor: %w", err)
+			}
+		} else {
+			pathNodes = append(pathNodes, doc)
+		}
+	}
+
+	var foundNodes []model.Node
+	for _, nodes := range pathNodes {
+		for _, id := range nodes.IDs {
+			node, err := c.Node(ctx, id)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get node for nodeID: %s with error: %w", id, err)
+			}
+			foundNodes = append(foundNodes, node)
+		}
+	}
+	return foundNodes, nil
 }
 
 func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly []model.Edge) ([]model.Node, error) {
