@@ -19,86 +19,82 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// TODO: maybe use generics for PkgInputSpec and PkgSpec?
-func ConvertPkgInputSpecToPkgSpec(pkgInput *model.PkgInputSpec) *model.PkgSpec {
-	qualifiers := convertQualifierInputToQualifierSpec(pkgInput.Qualifiers)
-	matchEmpty := false
-	if len(qualifiers) == 0 {
-		matchEmpty = true
-	}
-	var version string = ""
-	if pkgInput.Version != nil {
-		version = *pkgInput.Version
-	}
-	var subpath string = ""
-	if pkgInput.Subpath != nil {
-		subpath = *pkgInput.Subpath
-	}
-	pkgSpec := model.PkgSpec{
-		Type:                     &pkgInput.Type,
-		Namespace:                pkgInput.Namespace,
-		Name:                     &pkgInput.Name,
-		Version:                  &version,
-		Subpath:                  &subpath,
+// Transformer function transforms input specification to specification.
+type Transformer[Input any, Output any] func(input *Input) *Output
+
+// ConvertPkgInputSpecToPkgSpec is a function that transforms PkgInputSpec to PkgSpec.
+var ConvertPkgInputSpecToPkgSpec Transformer[model.PkgInputSpec, model.PkgSpec] = func(input *model.PkgInputSpec) *model.PkgSpec {
+	qualifiers := convertSlice(input.Qualifiers, convertQualifierInputToQualifierSpec)
+	matchEmpty := len(qualifiers) == 0
+	version := ptrOrNil(input.Version)
+	subpath := ptrOrNil(input.Subpath)
+
+	return &model.PkgSpec{
+		Type:                     &input.Type,
+		Namespace:                input.Namespace,
+		Name:                     &input.Name,
+		Version:                  version,
+		Subpath:                  subpath,
 		Qualifiers:               qualifiers,
 		MatchOnlyEmptyQualifiers: &matchEmpty,
 	}
-	return &pkgSpec
 }
 
-func convertQualifierInputToQualifierSpec(qualifiers []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
-	pkgQualifiers := []*model.PackageQualifierSpec{}
-	for _, quali := range qualifiers {
-		pkgQualifier := &model.PackageQualifierSpec{
-			Key:   quali.Key,
-			Value: &quali.Value,
-		}
-		pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+// ConvertSrcInputSpecToSrcSpec is a function that transforms SourceInputSpec to SourceSpec.
+var ConvertSrcInputSpecToSrcSpec Transformer[model.SourceInputSpec, model.SourceSpec] = func(input *model.SourceInputSpec) *model.SourceSpec {
+	tag := ptrOrNil(input.Tag)
+	commit := ptrOrNil(input.Commit)
+
+	return &model.SourceSpec{
+		Type:      &input.Type,
+		Namespace: &input.Namespace,
+		Name:      &input.Name,
+		Tag:       tag,
+		Commit:    commit,
 	}
-	return pkgQualifiers
 }
 
-// TODO: maybe use generics for SourceInputSpec and SourceSpec?
-func ConvertSrcInputSpecToSrcSpec(srcInput *model.SourceInputSpec) *model.SourceSpec {
-	var tag string = ""
-	if srcInput.Tag != nil {
-		tag = *srcInput.Tag
+// ConvertArtInputSpecToArtSpec is a function that transforms ArtifactInputSpec to ArtifactSpec.
+var ConvertArtInputSpecToArtSpec Transformer[model.ArtifactInputSpec, model.ArtifactSpec] = func(input *model.ArtifactInputSpec) *model.ArtifactSpec {
+	return &model.ArtifactSpec{
+		Algorithm: &input.Algorithm,
+		Digest:    &input.Digest,
 	}
-	var commit string = ""
-	if srcInput.Commit != nil {
-		commit = *srcInput.Commit
-	}
-	srcSpec := model.SourceSpec{
-		Type:      &srcInput.Type,
-		Namespace: &srcInput.Namespace,
-		Name:      &srcInput.Name,
-		Tag:       &tag,
-		Commit:    &commit,
-	}
-	return &srcSpec
 }
 
-// TODO: maybe use generics for ArtifactInputSpec and ArtifactSpec?
-func ConvertArtInputSpecToArtSpec(artInput *model.ArtifactInputSpec) *model.ArtifactSpec {
-	artSpec := model.ArtifactSpec{
-		Algorithm: &artInput.Algorithm,
-		Digest:    &artInput.Digest,
-	}
-	return &artSpec
-}
-
-func ConvertBuilderInputSpecToBuilderSpec(input *model.BuilderInputSpec) *model.BuilderSpec {
-	uri := input.URI
-	output := model.BuilderSpec{
-		URI: &uri,
-	}
-	return &output
-}
-
-func ConvertLicenseInputSpecToLicenseSpec(licenseInput *model.LicenseInputSpec) *model.LicenseSpec {
+// ConvertLicenseInputSpecToLicenseSpec is a function that transforms LicenseInputSpec to LicenseSpec.
+var ConvertLicenseInputSpecToLicenseSpec Transformer[model.LicenseInputSpec, model.LicenseSpec] = func(input *model.LicenseInputSpec) *model.LicenseSpec {
 	return &model.LicenseSpec{
-		Name:        &licenseInput.Name,
-		Inline:      licenseInput.Inline,
-		ListVersion: licenseInput.ListVersion,
+		Name:        &input.Name,
+		Inline:      input.Inline,
+		ListVersion: input.ListVersion,
+	}
+}
+
+// ptrOrNil is a function that checks if a pointer is nil.
+// If the pointer is nil, it returns a pointer to an empty value of the same type.
+// If the pointer is not nil, it returns the original pointer.
+func ptrOrNil[T any](ptr *T) *T {
+	if ptr == nil {
+		var empty T
+		return &empty
+	}
+	return ptr
+}
+
+// convertSlice is a function that transforms an input slice to an output slice using a provided converter function.
+func convertSlice[Input any, Output any](inputSlice []*Input, converter Transformer[Input, Output]) []*Output {
+	outputSlice := make([]*Output, len(inputSlice))
+	for i, input := range inputSlice {
+		outputSlice[i] = converter(input)
+	}
+	return outputSlice
+}
+
+// convertQualifierInputToQualifierSpec is a function that transforms PackageQualifierInputSpec to PackageQualifierSpec.
+var convertQualifierInputToQualifierSpec Transformer[model.PackageQualifierInputSpec, model.PackageQualifierSpec] = func(input *model.PackageQualifierInputSpec) *model.PackageQualifierSpec {
+	return &model.PackageQualifierSpec{
+		Key:   input.Key,
+		Value: &input.Value,
 	}
 }
