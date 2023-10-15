@@ -27,6 +27,7 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -88,12 +89,11 @@ var queryKnownCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
-
+		version.DumpVersion()
 		opts, err := validateQueryKnownFlags(
 			viper.GetString("gql-addr"),
 			args,
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -152,9 +152,11 @@ var queryKnownCmd = &cobra.Command{
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, goodLinkStr, packageSubjectType))
 			t.AppendSeparator()
 
-			path = append([]string{pkgResponse.Packages[0].Namespaces[0].Names[0].Id,
+			path = append([]string{
+				pkgResponse.Packages[0].Namespaces[0].Names[0].Id,
 				pkgResponse.Packages[0].Namespaces[0].Id,
-				pkgResponse.Packages[0].Id}, neighborsPath...)
+				pkgResponse.Packages[0].Id,
+			}, neighborsPath...)
 
 			fmt.Println(t.Render())
 			fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
@@ -188,9 +190,11 @@ var queryKnownCmd = &cobra.Command{
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, badLinkStr, packageSubjectType))
 			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, goodLinkStr, packageSubjectType))
-			path = append([]string{pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id,
+			path = append([]string{
+				pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id,
 				pkgResponse.Packages[0].Namespaces[0].Names[0].Id, pkgResponse.Packages[0].Namespaces[0].Id,
-				pkgResponse.Packages[0].Id}, neighborsPath...)
+				pkgResponse.Packages[0].Id,
+			}, neighborsPath...)
 
 			fmt.Println(t.Render())
 			fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
@@ -228,8 +232,10 @@ var queryKnownCmd = &cobra.Command{
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, badLinkStr, sourceSubjectType))
 			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, goodLinkStr, sourceSubjectType))
-			path = append([]string{srcResponse.Sources[0].Namespaces[0].Names[0].Id,
-				srcResponse.Sources[0].Namespaces[0].Id, srcResponse.Sources[0].Id}, neighborsPath...)
+			path = append([]string{
+				srcResponse.Sources[0].Namespaces[0].Names[0].Id,
+				srcResponse.Sources[0].Namespaces[0].Id, srcResponse.Sources[0].Id,
+			}, neighborsPath...)
 
 			fmt.Println(t.Render())
 			fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))

@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/oci"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/regclient/regclient/types/ref"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -50,6 +51,7 @@ var ociCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
+		version.DumpVersion()
 
 		opts, err := validateOCIFlags(
 			viper.GetString("nats-addr"),

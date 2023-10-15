@@ -27,7 +27,6 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/server"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/version"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -43,13 +42,11 @@ var rootCmd = &cobra.Command{
 	Short:   "GUAC collect subscriber service for GUAC collectors",
 	Version: version.Version,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		var opts, err = validateCsubFlags(
+		opts, err := validateCsubFlags(
 			viper.GetInt("csub-listen-port"),
 			viper.GetString("csub-tls-cert-file"),
 			viper.GetString("csub-tls-key-file"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -59,6 +56,7 @@ var rootCmd = &cobra.Command{
 		ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
 		logger := logging.FromContext(ctx)
 
+		version.DumpVersion()
 		// Start csub listening server
 		csubServer, err := server.NewServer(opts.port, opts.tlsCertFile, opts.tlsKeyFile)
 		if err != nil {

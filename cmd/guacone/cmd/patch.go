@@ -28,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/cli"
 	analysis "github.com/guacsec/guac/pkg/guacanalytics"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -47,7 +48,7 @@ var queryPatchCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
-
+		version.DumpVersion()
 		opts, err := validateQueryPatchFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("start-purl"),
@@ -57,7 +58,6 @@ var queryPatchCmd = &cobra.Command{
 			viper.GetBool("is-pkg-version-stop"),
 			args,
 		)
-
 		if err != nil {
 			logger.Fatalf("unable to validate flags: %s\n", err)
 		}
@@ -77,7 +77,6 @@ var queryPatchCmd = &cobra.Command{
 
 		if opts.stopPurl != "" {
 			stopPkg, err := getPkgID(ctx, gqlClient, opts.stopPurl, opts.isPackageVersionStop)
-
 			if err != nil {
 				logger.Fatalf("error getting stop pkg from purl inputted: %s\n", err)
 			}
@@ -87,13 +86,11 @@ var queryPatchCmd = &cobra.Command{
 		}
 
 		bfsMap, path, err := analysis.SearchDependentsFromStartPackage(ctx, gqlClient, startID, stopID, opts.depth)
-
 		if err != nil {
 			logger.Fatalf("error searching dependents-- %s\n", err)
 		}
 
 		frontiers, infoNodes, err := analysis.TopoSortFromBfsNodeMap(ctx, gqlClient, bfsMap)
-
 		if err != nil {
 			fmt.Printf("WARNING: There was cycle detected in the toposort so the results are incomplete: %s\n", err)
 		}
@@ -109,7 +106,6 @@ var queryPatchCmd = &cobra.Command{
 			fmt.Printf("\n---FRONTIER LEVEL %d---\n", level)
 
 			nodesInfo, err := printNodesInfo(ctx, gqlClient, bfsMap, allNodes)
-
 			if err != nil {
 				logger.Fatalf("%s", err)
 			}
@@ -122,7 +118,6 @@ var queryPatchCmd = &cobra.Command{
 			fmt.Printf("no info nodes found\n")
 		} else {
 			nodesInfo, err := printNodesInfo(ctx, gqlClient, bfsMap, infoNodes)
-
 			if err != nil {
 				logger.Fatalf("%s", err)
 			}
@@ -147,7 +142,6 @@ func printNodesInfo(ctx context.Context, gqlClient graphql.Client, bfsMap map[st
 	poc := []string{}
 	for _, id := range nodes {
 		node, err := model.Node(ctx, gqlClient, id)
-
 		if err != nil {
 			fmt.Printf("error: %s \n", err)
 		}
@@ -212,7 +206,6 @@ func makeArtifactPretty(artifact model.NodeNodeArtifact) string {
 
 func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string, isPackageVersion bool) (string, error) {
 	pkgInput, err := helpers.PurlToPkg(purl)
-
 	if err != nil {
 		return "", fmt.Errorf("error getting pkg ID: %s", err)
 	}

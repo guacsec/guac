@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -52,6 +53,8 @@ var depsDevCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
+
+		version.DumpVersion()
 
 		opts, err := validateDepsDevFlags(
 			viper.GetString("nats-addr"),
@@ -109,7 +112,6 @@ func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTl
 	sources := []datasource.Source{}
 	for _, arg := range args {
 		sources = append(sources, datasource.Source{Value: arg})
-
 	}
 
 	var err error

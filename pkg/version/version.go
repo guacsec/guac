@@ -16,8 +16,14 @@
 package version
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os/exec"
+	"strings"
+	"time"
+
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 var (
@@ -39,4 +45,24 @@ func init() {
 func (u uat) RoundTrip(r *http.Request) (*http.Response, error) {
 	r.Header.Set("User-Agent", UserAgent)
 	return u.tr.RoundTrip(r)
+}
+
+// DumpVersion dumps the version information to the log.
+func DumpVersion() {
+	ctx := logging.WithLogger(context.Background())
+	logger := logging.FromContext(ctx)
+	if Commit == "" {
+		commit, _ := exec.Command("git", "rev-parse", "HEAD").Output()
+		Commit = strings.TrimRight(string(commit), "\n")
+		logger.Infof("Commit: dev-%s", Commit)
+	} else {
+		logger.Infof("Commit: %s", Commit)
+	}
+
+	if Date == "" {
+		Date = time.Now().Format("2006-01-02")
+		logger.Infof("Date: %s", Date)
+	} else {
+		logger.Infof("Date: %s", Date)
+	}
 }

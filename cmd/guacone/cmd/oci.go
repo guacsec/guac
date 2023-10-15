@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/regclient/regclient/types/ref"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -48,7 +49,7 @@ var ociCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
-
+		version.DumpVersion()
 		opts, err := validateOCIFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
@@ -83,7 +84,6 @@ var ociCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
-
 			if err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)

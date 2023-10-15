@@ -36,6 +36,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -53,7 +54,7 @@ var osvCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
-
+		version.DumpVersion()
 		opts, err := validateOSVFlags(
 			viper.GetString("gql-addr"),
 			viper.GetBool("poll"),
@@ -62,7 +63,6 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()

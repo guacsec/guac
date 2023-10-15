@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -46,7 +47,6 @@ var filesCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
 	Short: "take a folder of files and create a GUAC graph utilizing Nats pubsub",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		opts, err := validateFilesFlags(
 			viper.GetString("nats-addr"),
 			viper.GetBool("service-poll"),
@@ -59,6 +59,8 @@ var filesCmd = &cobra.Command{
 
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
+
+		version.DumpVersion()
 
 		// Register collector
 		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, 30*time.Second)

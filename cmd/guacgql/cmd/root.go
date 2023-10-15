@@ -92,6 +92,7 @@ var rootCmd = &cobra.Command{
 		flags.neptuneRegion = viper.GetString("neptune-region")
 		flags.neptuneUser = viper.GetString("neptune-user")
 		flags.neptuneRealm = viper.GetString("neptune-realm")
+		version.DumpVersion()
 
 		startServer(cmd)
 	},

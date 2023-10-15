@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -44,12 +45,11 @@ var queryBadCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
-
+		version.DumpVersion()
 		opts, err := validateQueryBadFlags(
 			viper.GetString("gql-addr"),
 			viper.GetInt("search-depth"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -139,10 +139,12 @@ var queryBadCmd = &cobra.Command{
 
 				var fullCertifyBadPath []string
 				for _, version := range pkgVersions {
-					fullCertifyBadPath = append([]string{selectedCertifyBad.Id,
+					fullCertifyBadPath = append([]string{
+						selectedCertifyBad.Id,
 						version.Id,
 						subject.Namespaces[0].Names[0].Id, subject.Namespaces[0].Id,
-						subject.Id}, pkgPath...)
+						subject.Id,
+					}, pkgPath...)
 				}
 				if len(pkgPath) > 0 {
 					path = append(path, fullCertifyBadPath...)
@@ -187,9 +189,11 @@ var queryBadCmd = &cobra.Command{
 				}
 
 				if len(path) > 0 {
-					fullCertifyBadPath := append([]string{selectedCertifyBad.Id,
+					fullCertifyBadPath := append([]string{
+						selectedCertifyBad.Id,
 						subject.Namespaces[0].Names[0].Id,
-						subject.Namespaces[0].Id, subject.Id}, path...)
+						subject.Namespaces[0].Id, subject.Id,
+					}, path...)
 					path = append(path, fullCertifyBadPath...)
 					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
 				} else {
@@ -230,8 +234,10 @@ var queryBadCmd = &cobra.Command{
 					}
 				}
 				if len(path) > 0 {
-					fullCertifyBadPath := append([]string{selectedCertifyBad.Id,
-						subject.Id}, path...)
+					fullCertifyBadPath := append([]string{
+						selectedCertifyBad.Id,
+						subject.Id,
+					}, path...)
 					path = append(path, fullCertifyBadPath...)
 					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
 				} else {

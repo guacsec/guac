@@ -51,7 +51,7 @@ var gcsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
-
+		version.DumpVersion()
 		opts, err := validateGCSFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
@@ -106,7 +106,6 @@ var gcsCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
-
 			if err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)

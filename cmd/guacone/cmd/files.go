@@ -36,6 +36,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/guacsec/guac/pkg/ingestor/verifier/sigstore_verifier"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/sync/errgroup"
@@ -76,7 +77,7 @@ var filesCmd = &cobra.Command{
 			_ = cmd.Help()
 			os.Exit(1)
 		}
-
+		version.DumpVersion()
 		// Register Keystore
 		inmemory := inmemory.NewInmemoryProvider()
 		err = key.RegisterKeyProvider(inmemory, inmemory.Type())
@@ -143,7 +144,6 @@ var filesCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 			err := ingestor.Ingest(filesCtx, d, opts.graphqlEndpoint, csubClient)
-
 			if err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)

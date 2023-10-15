@@ -21,13 +21,13 @@ import (
 	"io"
 	"os"
 
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/collectsub/input"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -48,7 +48,7 @@ var csubClientCmd = &cobra.Command{
 func setupCsubClient(cmd *cobra.Command, args []string) (context.Context, client.Client) {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
-
+	version.DumpVersion()
 	opts, err := client.ValidateCsubClientFlags(
 		viper.GetString("csub-addr"),
 		viper.GetBool("csub-tls"),

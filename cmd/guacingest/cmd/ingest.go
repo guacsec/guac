@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -41,7 +42,6 @@ type options struct {
 }
 
 func ingest(cmd *cobra.Command, args []string) {
-
 	opts, err := validateFlags(
 		viper.GetString("nats-addr"),
 		viper.GetString("csub-addr"),
@@ -57,7 +57,7 @@ func ingest(cmd *cobra.Command, args []string) {
 
 	ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
 	logger := logging.FromContext(ctx)
-
+	version.DumpVersion()
 	// initialize jetstream
 	// TODO: pass in credentials file for NATS secure login
 	jetStream := emitter.NewJetStream(opts.natsAddr, "", "")

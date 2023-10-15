@@ -26,17 +26,16 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/certifier/certify"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
+	"github.com/guacsec/guac/pkg/certifier/scorecard"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
-	"github.com/guacsec/guac/pkg/ingestor"
-
-	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/guacsec/guac/pkg/certifier/scorecard"
-
-	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -54,7 +53,7 @@ var scorecardCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
-
+		version.DumpVersion()
 		opts, err := validateScorecardFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
@@ -63,7 +62,6 @@ var scorecardCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetString("interval"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -71,7 +69,6 @@ var scorecardCmd = &cobra.Command{
 		}
 		// scorecard runner is the scorecard library that runs the scorecard checks
 		scorecardRunner, err := scorecard.NewScorecardRunner(ctx)
-
 		if err != nil {
 			fmt.Printf("unable to create scorecard runner: %v\n", err)
 			_ = cmd.Help()
@@ -92,7 +89,6 @@ var scorecardCmd = &cobra.Command{
 
 		// running and getting the scorecard checks
 		scorecardCertifier, err := scorecard.NewScorecardCertifier(scorecardRunner)
-
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
 			_ = cmd.Help()
@@ -102,7 +98,6 @@ var scorecardCmd = &cobra.Command{
 		// scorecard certifier is the certifier that gets the scorecard data graphQL
 		// setting "daysSinceLastScan" to 0 does not check the timestamp on the scorecard that exist
 		query, err := sc.NewCertifier(gqlclient, 0)
-
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
 			_ = cmd.Help()
@@ -122,7 +117,6 @@ var scorecardCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
-
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
 			}
