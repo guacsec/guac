@@ -51,24 +51,17 @@ func Test_Path(t *testing.T) {
 		ID *model.IsDependencyInputSpec
 	}
 	tests := []struct {
-		name            string
-		pkgInput        *model.PkgInputSpec
-		artifactInput   *model.ArtifactInputSpec
-		builderInput    *model.BuilderInputSpec
-		srcInput        *model.SourceInputSpec
-		vulnInput       *model.VulnerabilityInputSpec
-		licenseInput    *model.LicenseInputSpec
-		inPkg           []*model.PkgInputSpec
-		inSrc           []*model.SourceInputSpec
-		inArt           []*model.ArtifactInputSpec
-		inVuln          []*model.VulnerabilityInputSpec
-		inBld           []*model.BuilderInputSpec
-		inLic           []*model.LicenseInputSpec
-		certifyVulnCall *certifyVulnCall
-		isDepCall       *isDepCall
-		edges           []model.Edge
-		want            []model.Node
-		wantErr         bool
+		name                   string
+		pkgInput               *model.PkgInputSpec
+		vulnInput              *model.VulnerabilityInputSpec
+		inPkg                  []*model.PkgInputSpec
+		inVuln                 []*model.VulnerabilityInputSpec
+		certifyVulnCall        *certifyVulnCall
+		certifyVulnTwoPkgsCall *certifyVulnCall
+		isDepCall              *isDepCall
+		edges                  []model.Edge
+		want                   []model.Node
+		wantErr                bool
 	}{
 		{
 			name:   "certifyVuln - edges not provided",
@@ -139,6 +132,26 @@ func Test_Path(t *testing.T) {
 			},
 		},
 		{
+			name:   "certifyVuln - two packages (one vulnerable)",
+			inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			inPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P3},
+			edges:  []model.Edge{model.EdgePackageCertifyVuln, model.EdgeVulnerabilityCertifyVuln},
+			certifyVulnTwoPkgsCall: &certifyVulnCall{
+				Pkg:  testdata.P2,
+				Vuln: testdata.G1,
+				CertifyVuln: &model.ScanMetadataInput{
+					Collector:      "test collector",
+					Origin:         "test origin",
+					ScannerVersion: "v1.0.0",
+					ScannerURI:     "test scanner uri",
+					DbVersion:      "2023.01.01",
+					DbURI:          "test db uri",
+					TimeScanned:    testdata.T1,
+				},
+			},
+			want: nil,
+		},
+		{
 			name:  "isDependency",
 			inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			edges: []model.Edge{model.EdgePackageIsDependency, model.EdgeIsDependencyPackage},
@@ -165,37 +178,36 @@ func Test_Path(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var startID string
 			var stopID string
-			for _, p := range tt.inPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
-					t.Fatalf("Could not ingest package: %v", err)
-				}
-			}
-			for _, s := range tt.inSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
-					t.Fatalf("Could not ingest source: %v", err)
-				}
-			}
-			for _, a := range tt.inArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
-					t.Fatalf("Could not ingest artifact: %v", err)
-				}
-			}
-			for _, bld := range tt.inBld {
-				if _, err := b.IngestBuilder(ctx, bld); err != nil {
-					t.Fatalf("Could not ingest builder: %v", err)
-				}
-			}
-			for _, a := range tt.inLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
-					t.Fatalf("Could not ingest license: %v", err)
-				}
-			}
 			for _, g := range tt.inVuln {
 				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
+			if tt.certifyVulnTwoPkgsCall != nil {
+				var nonVulnPkgID string
+				for _, p := range tt.inPkg {
+					pkg, err := b.IngestPackage(ctx, *p)
+					if err != nil {
+						t.Fatalf("Could not ingest package: %v", err)
+					}
+					nonVulnPkgID = pkg.Namespaces[0].Names[0].Versions[0].ID
+				}
+				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnTwoPkgsCall.Pkg, *tt.certifyVulnTwoPkgsCall.Vuln, *tt.certifyVulnTwoPkgsCall.CertifyVuln)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				startID = found.ID
+				stopID = nonVulnPkgID
+			}
 			if tt.certifyVulnCall != nil {
+				for _, p := range tt.inPkg {
+					if _, err := b.IngestPackage(ctx, *p); err != nil {
+						t.Fatalf("Could not ingest package: %v", err)
+					}
+				}
 				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
@@ -207,6 +219,11 @@ func Test_Path(t *testing.T) {
 				stopID = found.Vulnerability.VulnerabilityIDs[0].ID
 			}
 			if tt.isDepCall != nil {
+				for _, p := range tt.inPkg {
+					if _, err := b.IngestPackage(ctx, *p); err != nil {
+						t.Fatalf("Could not ingest package: %v", err)
+					}
+				}
 				found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
