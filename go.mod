@@ -144,6 +144,7 @@ require (
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/skeema/knownhosts v1.2.1 // indirect
+	github.com/sosodev/duration v1.1.0 // indirect
 	github.com/spdx/gordf v0.0.0-20221230105357-b735bd5aac89 // indirect
 	github.com/spf13/afero v1.9.5 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
@@ -180,7 +181,7 @@ require (
 require (
 	entgo.io/contrib v0.4.5
 	entgo.io/ent v0.12.4
-	github.com/99designs/gqlgen v0.17.37
+	github.com/99designs/gqlgen v0.17.39
 	github.com/CycloneDX/cyclonedx-go v0.7.2
 	github.com/DATA-DOG/go-txdb v0.1.7
 	github.com/Khan/genqlient v0.6.0
