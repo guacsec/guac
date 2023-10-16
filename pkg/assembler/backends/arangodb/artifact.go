@@ -304,3 +304,113 @@ func (c *arangoClient) buildArtifactResponseByID(ctx context.Context, id string,
 		return nil, fmt.Errorf("id type does not match for artifact query: %s", id)
 	}
 }
+
+func (c *arangoClient) artifactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	if allowedEdges[model.EdgeArtifactHashEqual] {
+		values := map[string]any{}
+		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forOutBound(hashEqualSubjectArtEdgesStr, "hashEqual", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN hashEqual._id`)
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "builderNeighbors")
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for builder: %w", err)
+		}
+		defer cursor.Close()
+		var foundIDsOutBound []string
+		for {
+			var doc string
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					break
+				} else {
+					return nil, fmt.Errorf("failed to get neighbor id from cursor: %w", err)
+				}
+			} else {
+				foundIDsOutBound = append(foundIDsOutBound, doc)
+			}
+		}
+		out = append(out, foundIDsOutBound...)
+
+		values = map[string]any{}
+		arangoQueryBuilder = setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forInBound(hashEqualSubjectArtEdgesStr, "hashEqual", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN hashEqual._id`)
+
+		cursor, err = executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "builderNeighbors")
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for builder: %w", err)
+		}
+		defer cursor.Close()
+		var foundIDsInBound []string
+		for {
+			var doc string
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					break
+				} else {
+					return nil, fmt.Errorf("failed to get neighbor id from cursor: %w", err)
+				}
+			} else {
+				foundIDsInBound = append(foundIDsInBound, doc)
+			}
+		}
+		out = append(out, foundIDsInBound...)
+	}
+	if allowedEdges[model.EdgeArtifactIsOccurrence] {
+		values := map[string]any{}
+		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forOutBound(isOccurrenceArtEdgesStr, "hashEqual", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN hashEqual._id`)
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "builderNeighbors")
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for builder: %w", err)
+		}
+		defer cursor.Close()
+		var foundIDsOutBound []string
+		for {
+			var doc string
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					break
+				} else {
+					return nil, fmt.Errorf("failed to get neighbor id from cursor: %w", err)
+				}
+			} else {
+				foundIDsOutBound = append(foundIDsOutBound, doc)
+			}
+		}
+		out = append(out, foundIDsOutBound...)
+	}
+	if allowedEdges[model.EdgeArtifactHasSbom] {
+		out = append(out, n.hasSBOMs...)
+	}
+	if allowedEdges[model.EdgeArtifactHasSlsa] {
+		out = append(out, n.hasSLSAs...)
+	}
+	if allowedEdges[model.EdgeArtifactCertifyVexStatement] {
+		out = append(out, n.vexLinks...)
+	}
+	if allowedEdges[model.EdgeArtifactCertifyBad] {
+		out = append(out, n.badLinks...)
+	}
+	if allowedEdges[model.EdgeArtifactCertifyGood] {
+		out = append(out, n.goodLinks...)
+	}
+	if allowedEdges[model.EdgeArtifactHasMetadata] {
+		out = append(out, n.hasMetadataLinks...)
+	}
+	if allowedEdges[model.EdgeArtifactPointOfContact] {
+		out = append(out, n.pointOfContactLinks...)
+	}
+
+	return out, nil
+}

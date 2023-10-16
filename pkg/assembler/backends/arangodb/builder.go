@@ -200,7 +200,6 @@ func (c *arangoClient) builderNeighbors(ctx context.Context, nodeID string, allo
 		arangoQueryBuilder.query.WriteString("\n")
 		arangoQueryBuilder.query.WriteString(`RETURN hasSLSA._id`)
 
-		fmt.Println(arangoQueryBuilder.string())
 		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "builderNeighbors")
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for builder: %w", err)
