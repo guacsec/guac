@@ -734,13 +734,16 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			CommitInterval:        ptrfrom.Int64(10 * 60 * 1000),
 			ConsolidationInterval: ptrfrom.Int64(10 * 60 * 1000),
 			Links: driver.ArangoSearchLinks{
+				// Only index the version string since guac files creates a lot of noise in the index
+				// from the name of the file being in the subpath
+				// TODO : would be a good addition to have an excludes from search field instead so files can be filtered
 				pkgVersionsStr: driver.ArangoSearchElementProperties{
 					Analyzers:          []string{"identity", "text_en", "customgram"},
 					IncludeAllFields:   ptrfrom.Bool(false),
 					TrackListPositions: ptrfrom.Bool(false),
 					StoreValues:        driver.ArangoSearchStoreValuesNone,
 					Fields: map[string]driver.ArangoSearchElementProperties{
-						"guacKey": {},
+						"version": {},
 					},
 					InBackground: ptrfrom.Bool(true),
 				},

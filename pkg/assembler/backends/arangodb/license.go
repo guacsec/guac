@@ -293,6 +293,17 @@ func (c *arangoClient) getLicensesByID(ctx context.Context, licIDs []string) ([]
 	return getLicenses(ctx, cursor)
 }
 
+func (c *arangoClient) getLicenseByID(ctx context.Context, licID string) (*model.License, error) {
+	licenses, err := c.getLicensesByID(ctx, []string{licID})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get license by ID for: %s, with error: %w", licID, err)
+	}
+	if len(licenses) != 1 {
+		return nil, fmt.Errorf("number of license nodes found for ID: %s is greater than one", licID)
+	}
+	return licenses[0], nil
+}
+
 func licenseMatch(filters []*model.LicenseSpec, values []*model.License) bool {
 	left := slices.Clone(values)
 

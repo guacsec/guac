@@ -30,7 +30,7 @@ import (
 func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
-	set, err := cli.BuildFlags([]string{"gql-addr", "csub-addr"})
+	set, err := cli.BuildFlags([]string{"gql-addr", "csub-addr", "csub-tls", "csub-tls-skip-verify"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

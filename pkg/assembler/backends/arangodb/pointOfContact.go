@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -32,6 +33,14 @@ const (
 )
 
 func (c *arangoClient) PointOfContact(ctx context.Context, pointOfContactSpec *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
+
+	if pointOfContactSpec != nil && pointOfContactSpec.ID != nil {
+		poc, err := c.buildPointOfContactByID(ctx, *pointOfContactSpec.ID, pointOfContactSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildPointOfContactByID failed with an error: %w", err)
+		}
+		return []*model.PointOfContact{poc}, nil
+	}
 
 	var arangoQueryBuilder *arangoQueryBuilder
 	if pointOfContactSpec.Subject != nil {
@@ -280,7 +289,7 @@ func setPointOfContactMatchValues(arangoQueryBuilder *arangoQueryBuilder, PointO
 	}
 	if PointOfContactSpec.Since != nil {
 		arangoQueryBuilder.filter("pointOfContact", sinceStr, ">=", "@"+sinceStr)
-		queryValues[sinceStr] = *PointOfContactSpec.Since
+		queryValues[sinceStr] = PointOfContactSpec.Since.UTC()
 	}
 	if PointOfContactSpec.Justification != nil {
 		arangoQueryBuilder.filter("pointOfContact", justification, "==", "@"+justification)
@@ -316,7 +325,7 @@ func getPointOfContactQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.M
 
 	values[emailStr] = pointOfContact.Email
 	values[infoStr] = pointOfContact.Info
-	values[sinceStr] = pointOfContact.Since
+	values[sinceStr] = pointOfContact.Since.UTC()
 	values[justification] = pointOfContact.Justification
 	values[origin] = pointOfContact.Origin
 	values[collector] = pointOfContact.Collector
@@ -1001,8 +1010,8 @@ func getPointOfContactFromCursor(ctx context.Context, cursor driver.Cursor) ([]*
 			Info:          createdValue.Info,
 			Since:         createdValue.Since,
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 
 		if pkg != nil {
@@ -1017,4 +1026,133 @@ func getPointOfContactFromCursor(ctx context.Context, cursor driver.Cursor) ([]*
 		pocList = append(pocList, poc)
 	}
 	return pocList, nil
+}
+
+func (c *arangoClient) buildPointOfContactByID(ctx context.Context, id string, filter *model.PointOfContactSpec) (*model.PointOfContact, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == pointOfContactStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.PointOfContactSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryPointOfContactNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for PointOfContact query: %s", id)
+	}
+}
+
+func (c *arangoClient) queryPointOfContactNodeByID(ctx context.Context, filter *model.PointOfContactSpec) (*model.PointOfContact, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pointOfContactStr, "pointOfContact")
+	setPointOfContactMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN pointOfContact`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryPointOfContactNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for pointOfContact: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbPointOfContact struct {
+		PointOfContactID string    `json:"_id"`
+		PackageID        *string   `json:"packageID"`
+		SourceID         *string   `json:"sourceID"`
+		ArtifactID       *string   `json:"artifactID"`
+		Email            string    `json:"email"`
+		Info             string    `json:"info"`
+		Since            time.Time `json:"since"`
+		Justification    string    `json:"justification"`
+		Collector        string    `json:"collector"`
+		Origin           string    `json:"origin"`
+	}
+
+	var collectedValues []dbPointOfContact
+	for {
+		var doc dbPointOfContact
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to pointOfContact from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of pointOfContact nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	pointOfContact := &model.PointOfContact{
+		ID:            collectedValues[0].PointOfContactID,
+		Email:         collectedValues[0].Email,
+		Info:          collectedValues[0].Info,
+		Since:         collectedValues[0].Since,
+		Justification: collectedValues[0].Justification,
+		Origin:        collectedValues[0].Origin,
+		Collector:     collectedValues[0].Collector,
+	}
+
+	if collectedValues[0].PackageID != nil {
+		var builtPackage *model.Package
+		if filter.Subject != nil && filter.Subject.Package != nil {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Subject.Package)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		} else {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		}
+		pointOfContact.Subject = builtPackage
+	} else if collectedValues[0].SourceID != nil {
+		var builtSource *model.Source
+		if filter.Subject != nil && filter.Subject.Source != nil {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, filter.Subject.Source)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		} else {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		}
+		pointOfContact.Subject = builtSource
+	} else if collectedValues[0].ArtifactID != nil {
+		var builtArtifact *model.Artifact
+		if filter.Subject != nil && filter.Subject.Artifact != nil {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, filter.Subject.Artifact)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		} else {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		}
+		pointOfContact.Subject = builtArtifact
+	} else {
+		return nil, fmt.Errorf("failed to get subject from pointOfContact")
+	}
+	return pointOfContact, nil
 }

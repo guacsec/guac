@@ -5,6 +5,6 @@ package runtime
 // The schema-stitching logic is generated in github.com/guacsec/guac/pkg/assembler/backends/ent/runtime.go
 
 const (
-	Version = "v0.12.4-0.20230918073025-797534a0d1ca"           // Version of ent codegen.
-	Sum     = "h1:MXgZqLeGdjoxPfOQO5ewM1MobDMqMYaS9AatFTaFw2Y=" // Sum of ent codegen.
+	Version = "v0.12.4"                                         // Version of ent codegen.
+	Sum     = "h1:LddPnAyxls/O7DTXZvUGDj0NZIdGSu317+aoNLJWbD8=" // Sum of ent codegen.
 )

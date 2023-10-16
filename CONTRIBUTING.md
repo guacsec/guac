@@ -3,9 +3,9 @@
 We'd love to accept your patches and contributions to this project. There are
 just a few small guidelines you need to follow.
 
-Refer to the [GraphQL Guide](./demo/graphql/GraphQL.md) to go through a setup.
-Optionally, you can also consult
-[docker compose documentation](./docs/Compose.md).
+Refer to the [GraphQL Guide](https://docs.guac.sh/guac-graphql/) to go through
+a setup.  Optionally, you can also consult [docker compose
+documentation](https://docs.guac.sh/setup/).
 
 ## Contributor License Agreement
 

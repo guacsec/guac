@@ -767,7 +767,7 @@ func TestPointOfContact(t *testing.T) {
 			Query: &model.PointOfContactSpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -1154,6 +1154,252 @@ func TestIngestPointOfContacts(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.ExpPC, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_buildPointOfContactByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		Sub   model.PackageSourceOrArtifactInput
+		Match *model.MatchFlags
+		POC   *model.PointOfContactInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		Query        *model.PointOfContactSpec
+		ExpPoc       *model.PointOfContact
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{testdata.P4},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P4,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Type:      ptrfrom.String("conan"),
+						Namespace: ptrfrom.String("openssl.org"),
+						Name:      ptrfrom.String("openssl"),
+					},
+				},
+			},
+			ExpPoc: &model.PointOfContact{
+				Subject:       testdata.P4out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Package version ID",
+			InPkg: []*model.PkgInputSpec{testdata.P4},
+			InSrc: []*model.SourceInputSpec{},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P4,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpPoc: &model.PointOfContact{
+				Subject:       testdata.P4out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Source",
+			InSrc: []*model.SourceInputSpec{testdata.S2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Source: testdata.S2,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Source: &model.SourceSpec{
+						Name: ptrfrom.String("bobsrepo"),
+					},
+				},
+			},
+			ExpPoc: &model.PointOfContact{
+				Subject:       testdata.S2out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Source ID",
+			InPkg: []*model.PkgInputSpec{},
+			InSrc: []*model.SourceInputSpec{testdata.S2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Source: testdata.S2,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpPoc: &model.PointOfContact{
+				Subject:       testdata.S2out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Artifact",
+			InArt: []*model.ArtifactInputSpec{testdata.A2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Artifact: testdata.A2,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Artifact: &model.ArtifactSpec{
+						Algorithm: ptrfrom.String("sha1"),
+					},
+				},
+			},
+			ExpPoc: &model.PointOfContact{
+				Subject:       testdata.A2out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query on Artifact ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Artifact: testdata.A2,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpPoc: &model.PointOfContact{
+				Subject:       testdata.A2out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A2},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Artifact: testdata.A2,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpPoc: &model.PointOfContact{
+				Subject:       testdata.A2out,
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Source: testdata.S1,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestPointOfContact(ctx, o.Sub, o.Match, *o.POC)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildPointOfContactByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpPoc, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
 			}
 		})
 	}

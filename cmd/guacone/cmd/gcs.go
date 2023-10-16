@@ -22,6 +22,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/guacsec/guac/pkg/cli"
+	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/gcs"
@@ -35,9 +36,9 @@ import (
 )
 
 type gcsOptions struct {
-	graphqlEndpoint string
-	csubAddr        string
-	bucket          string
+	graphqlEndpoint   string
+	csubClientOptions client.CsubClientOptions
+	bucket            string
 }
 
 const gcsCredentialsPathFlag = "gcp-credentials-path"
@@ -51,7 +52,13 @@ var gcsCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateGCSFlags(viper.GetString("gql-addr"), viper.GetString("csub-addr"), viper.GetString(gcsCredentialsPathFlag), args)
+		opts, err := validateGCSFlags(
+			viper.GetString("gql-addr"),
+			viper.GetString("csub-addr"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
+			viper.GetString(gcsCredentialsPathFlag),
+			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -85,7 +92,7 @@ var gcsCmd = &cobra.Command{
 		}
 
 		// initialize collectsub client
-		csubClient, err := csub_client.NewClient(opts.csubAddr)
+		csubClient, err := csub_client.NewClient(opts.csubClientOptions)
 		if err != nil {
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
@@ -128,10 +135,15 @@ var gcsCmd = &cobra.Command{
 	},
 }
 
-func validateGCSFlags(gqlEndpoint, csubAddr, credentialsPath string, args []string) (gcsOptions, error) {
+func validateGCSFlags(gqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, credentialsPath string, args []string) (gcsOptions, error) {
 	var opts gcsOptions
 	opts.graphqlEndpoint = gqlEndpoint
-	opts.csubAddr = csubAddr
+
+	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	if err != nil {
+		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+	}
+	opts.csubClientOptions = csubOpts
 
 	if len(args) < 1 {
 		return opts, fmt.Errorf("expected positional argument: bucket")

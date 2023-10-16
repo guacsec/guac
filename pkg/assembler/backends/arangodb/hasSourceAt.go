@@ -22,10 +22,20 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
+
+	if hasSourceAtSpec != nil && hasSourceAtSpec.ID != nil {
+		hs, err := c.buildHasSourceAtByID(ctx, *hasSourceAtSpec.ID, hasSourceAtSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildHasSourceAtByID failed with an error: %w", err)
+		}
+		return []*model.HasSourceAt{hs}, nil
+	}
+
 	var arangoQueryBuilder *arangoQueryBuilder
 	if hasSourceAtSpec.Package != nil {
 		var combinedHasSourceAt []*model.HasSourceAt
@@ -165,14 +175,14 @@ func getPkgHasSourceAtForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	return getHasSourceAtFromCursor(ctx, cursor)
 }
 
-func setHasSourceAtMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSourceAtSpec *model.HasSourceAtSpec, queryValues map[string]any) {
+func queryHasSourceAtBasedOnFilter(arangoQueryBuilder *arangoQueryBuilder, hasSourceAtSpec *model.HasSourceAtSpec, queryValues map[string]any) {
 	if hasSourceAtSpec.ID != nil {
 		arangoQueryBuilder.filter("hasSourceAt", "_id", "==", "@hasSourceAtId")
 		queryValues["hasSourceAtId"] = *hasSourceAtSpec.ID
 	}
 	if hasSourceAtSpec.KnownSince != nil {
 		arangoQueryBuilder.filter("hasSourceAt", knownSinceStr, ">=", "@"+knownSinceStr)
-		queryValues[knownSinceStr] = *hasSourceAtSpec.KnownSince
+		queryValues[knownSinceStr] = hasSourceAtSpec.KnownSince.UTC()
 	}
 	if hasSourceAtSpec.Justification != nil {
 		arangoQueryBuilder.filter("hasSourceAt", justification, "==", "@"+justification)
@@ -186,6 +196,10 @@ func setHasSourceAtMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSource
 		arangoQueryBuilder.filter("hasSourceAt", collector, "==", "@"+collector)
 		queryValues[collector] = *hasSourceAtSpec.Collector
 	}
+}
+
+func setHasSourceAtMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSourceAtSpec *model.HasSourceAtSpec, queryValues map[string]any) {
+	queryHasSourceAtBasedOnFilter(arangoQueryBuilder, hasSourceAtSpec, queryValues)
 	if hasSourceAtSpec.Source != nil {
 		arangoQueryBuilder.forOutBound(hasSourceAtEdgesStr, "sName", "hasSourceAt")
 		if hasSourceAtSpec.Source.ID != nil {
@@ -234,7 +248,7 @@ func getHasSourceAtQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 	src := guacSrcId(*source)
 	values["srcNameGuacKey"] = src.NameId
 
-	values[knownSinceStr] = hasSourceAt.KnownSince
+	values[knownSinceStr] = hasSourceAt.KnownSince.UTC()
 	values[justification] = hasSourceAt.Justification
 	values[origin] = hasSourceAt.Origin
 	values[collector] = hasSourceAt.Collector
@@ -723,11 +737,99 @@ func getHasSourceAtFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 			Source:        src,
 			KnownSince:    createdValue.KnownSince,
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 
 		hasSourceAtList = append(hasSourceAtList, hasSourceAt)
 	}
 	return hasSourceAtList, nil
+}
+
+func (c *arangoClient) buildHasSourceAtByID(ctx context.Context, id string, filter *model.HasSourceAtSpec) (*model.HasSourceAt, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == hasSourceAtsStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.HasSourceAtSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryHasSourceAtNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for hasSourceAt query: %s", id)
+	}
+}
+
+func (c *arangoClient) queryHasSourceAtNodeByID(ctx context.Context, filter *model.HasSourceAtSpec) (*model.HasSourceAt, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(hasSourceAtsStr, "hasSourceAt")
+	queryHasSourceAtBasedOnFilter(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN hasSourceAt`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryHasSourceAtNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for hasSourceAt: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbHasSourceAt struct {
+		HasSourceAtID string    `json:"_id"`
+		PackageID     string    `json:"packageID"`
+		SourceID      string    `json:"sourceID"`
+		KnownSince    time.Time `json:"knownSince"`
+		Justification string    `json:"justification"`
+		Collector     string    `json:"collector"`
+		Origin        string    `json:"origin"`
+	}
+
+	var collectedValues []dbHasSourceAt
+	for {
+		var doc dbHasSourceAt
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to hasSourceAt from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of hasSourceAt nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	builtPackage, err := c.buildPackageResponseFromID(ctx, collectedValues[0].PackageID, filter.Package)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", collectedValues[0].PackageID, err)
+	}
+
+	builtSource, err := c.buildSourceResponseFromID(ctx, collectedValues[0].SourceID, filter.Source)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", collectedValues[0].SourceID, err)
+	}
+
+	return &model.HasSourceAt{
+		ID:            collectedValues[0].HasSourceAtID,
+		Package:       builtPackage,
+		Source:        builtSource,
+		KnownSince:    collectedValues[0].KnownSince,
+		Justification: collectedValues[0].Justification,
+		Origin:        collectedValues[0].Origin,
+	}, nil
 }

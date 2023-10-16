@@ -33,6 +33,9 @@ type CertifyVuln func(*sql.Selector)
 // Dependency is the predicate function for dependency builders.
 type Dependency func(*sql.Selector)
 
+// HasMetadata is the predicate function for hasmetadata builders.
+type HasMetadata func(*sql.Selector)
+
 // HasSourceAt is the predicate function for hassourceat builders.
 type HasSourceAt func(*sql.Selector)
 
@@ -62,6 +65,9 @@ type PackageVersion func(*sql.Selector)
 
 // PkgEqual is the predicate function for pkgequal builders.
 type PkgEqual func(*sql.Selector)
+
+// PointOfContact is the predicate function for pointofcontact builders.
+type PointOfContact func(*sql.Selector)
 
 // SLSAAttestation is the predicate function for slsaattestation builders.
 type SLSAAttestation func(*sql.Selector)

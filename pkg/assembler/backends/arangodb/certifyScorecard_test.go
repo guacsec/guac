@@ -506,7 +506,7 @@ func TestCertifyScorecard(t *testing.T) {
 			Query: &model.CertifyScorecardSpec{
 				ID: ptrfrom.String("4294967296"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -760,6 +760,133 @@ func TestIngestScorecards(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.ExpSC, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_buildCertifyScorecardByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		Src *model.SourceInputSpec
+		SC  *model.ScorecardInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InSrc        []*model.SourceInputSpec
+		Calls        []call
+		Query        *model.CertifyScorecardSpec
+		ExpSC        *model.CertifyScorecard
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query Source",
+			InSrc: []*model.SourceInputSpec{testdata.S2},
+			Calls: []call{
+				{
+					Src: testdata.S2,
+					SC: &model.ScorecardInputSpec{
+						Origin: "test origin",
+					},
+				},
+			},
+			Query: &model.CertifyScorecardSpec{
+				Source: &model.SourceSpec{
+					Namespace: ptrfrom.String("github.com/bob"),
+				},
+			},
+			ExpSC: &model.CertifyScorecard{
+				Source: testdata.S2out,
+				Scorecard: &model.Scorecard{
+					Checks: []*model.ScorecardCheck{},
+					Origin: "test origin",
+				},
+			},
+		},
+		{
+			Name:  "Query ID",
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Src: testdata.S1,
+					SC: &model.ScorecardInputSpec{
+						AggregateScore:   1.5,
+						TimeScanned:      time.Unix(1e9, 0),
+						ScorecardVersion: "123",
+						ScorecardCommit:  "abc",
+					},
+				},
+			},
+			ExpSC: &model.CertifyScorecard{
+				Source: testdata.S1out,
+				Scorecard: &model.Scorecard{
+					Checks:           []*model.ScorecardCheck{},
+					AggregateScore:   1.5,
+					TimeScanned:      time.Unix(1e9, 0),
+					ScorecardVersion: "123",
+					ScorecardCommit:  "abc",
+				},
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Src: testdata.S1,
+					SC: &model.ScorecardInputSpec{
+						AggregateScore:   1.5,
+						TimeScanned:      time.Unix(1e9, 0),
+						ScorecardVersion: "123",
+						ScorecardCommit:  "abc",
+					},
+				},
+			},
+			Query: &model.CertifyScorecardSpec{
+				ID: ptrfrom.String("4294967296"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestScorecard(ctx, *o.Src, *o.SC)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+
+				got, err := b.(*arangoClient).buildCertifyScorecardByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpSC, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
 			}
 		})
 	}

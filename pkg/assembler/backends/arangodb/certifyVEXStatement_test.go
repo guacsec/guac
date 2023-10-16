@@ -1319,6 +1319,236 @@ func TestVEXBulkIngest(t *testing.T) {
 	}
 }
 
+func Test_buildCertifyVexByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		Sub  model.PackageOrArtifactInput
+		Vuln *model.VulnerabilityInputSpec
+		In   *model.VexStatementInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InArt        []*model.ArtifactInputSpec
+		InVuln       []*model.VulnerabilityInputSpec
+		Calls        []call
+		Query        *model.CertifyVEXStatementSpec
+		QueryID      bool
+		QueryPkgID   bool
+		QueryArtID   bool
+		QueryVulnID  bool
+		ExpVEX       *model.CertifyVEXStatement
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:   "Query on Package",
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
+			InArt:  []*model.ArtifactInputSpec{},
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Vuln: testdata.O1,
+					In: &model.VexStatementInputSpec{
+						VexJustification: "test justification",
+						KnownSince:       time.Unix(1e9, 0),
+					},
+				},
+			},
+			Query: &model.CertifyVEXStatementSpec{
+				Subject: &model.PackageOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String(""),
+					},
+				},
+			},
+			ExpVEX: &model.CertifyVEXStatement{
+				Subject: testdata.P1out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "osv",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+				},
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		{
+			Name:   "Query on Artifact",
+			InPkg:  []*model.PkgInputSpec{},
+			InArt:  []*model.ArtifactInputSpec{testdata.A1},
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Artifact: testdata.A1,
+					},
+					Vuln: testdata.O1,
+					In: &model.VexStatementInputSpec{
+						VexJustification: "test justification",
+						KnownSince:       time.Unix(1e9, 0),
+					},
+				},
+			},
+			Query: &model.CertifyVEXStatementSpec{
+				Subject: &model.PackageOrArtifactSpec{
+					Artifact: &model.ArtifactSpec{
+						Algorithm: ptrfrom.String("sha256"),
+					},
+				},
+			},
+			ExpVEX: &model.CertifyVEXStatement{
+				Subject: testdata.A1out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "osv",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+				},
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		{
+			Name:   "Query on Artifact",
+			InPkg:  []*model.PkgInputSpec{},
+			InArt:  []*model.ArtifactInputSpec{testdata.A1},
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Artifact: testdata.A1,
+					},
+					Vuln: testdata.O1,
+					In: &model.VexStatementInputSpec{
+						VexJustification: "test justification",
+						KnownSince:       time.Unix(1e9, 0),
+					},
+				},
+			},
+			ExpVEX: &model.CertifyVEXStatement{
+				Subject: testdata.A1out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "osv",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+				},
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		{
+			Name:   "Query on Vuln",
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Vuln: testdata.O1,
+					In: &model.VexStatementInputSpec{
+						VexJustification: "test justification",
+						KnownSince:       time.Unix(1e9, 0),
+					},
+				},
+			},
+			Query: &model.CertifyVEXStatementSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					Type:            ptrfrom.String("osv"),
+					VulnerabilityID: ptrfrom.String("cve-2014-8140"),
+				},
+			},
+			ExpVEX: &model.CertifyVEXStatement{
+				Subject: testdata.P1out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "osv",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+				},
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		{
+			Name:   "Query on ID",
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O2},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Vuln: testdata.O2,
+					In: &model.VexStatementInputSpec{
+						VexJustification: "test justification",
+						KnownSince:       time.Unix(1e9, 0),
+					},
+				},
+			},
+			QueryID: true,
+			ExpVEX: &model.CertifyVEXStatement{
+				Subject: testdata.P1out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "osv",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+				},
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %a", err)
+				}
+			}
+			for _, v := range test.InVuln {
+				if _, err := b.IngestVulnerability(ctx, *v); err != nil {
+					t.Fatalf("Could not ingest vulnerability: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildCertifyVexByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpVEX, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+
+		})
+	}
+}
+
 // TODO (pxp928): add tests back in when implemented
 
 // func TestVEXNeighbors(t *testing.T) {

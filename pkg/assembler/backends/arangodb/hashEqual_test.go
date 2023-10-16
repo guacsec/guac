@@ -464,7 +464,7 @@ func TestHashEqual(t *testing.T) {
 			Query: &model.HashEqualSpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -829,6 +829,104 @@ func TestIngestHashEquals(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_buildHashEqualByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		A1 *model.ArtifactInputSpec
+		A2 *model.ArtifactInputSpec
+		HE *model.HashEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		Query        *model.HashEqualSpec
+		ExpHE        *model.HashEqual
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query on ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
+			Calls: []call{
+				{
+					A1: testdata.A1,
+					A2: testdata.A3,
+					HE: &model.HashEqualInputSpec{},
+				},
+			},
+			ExpHE: &model.HashEqual{
+				Artifacts: []*model.Artifact{testdata.A3out, testdata.A1out},
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
+			Calls: []call{
+				{
+					A1: testdata.A1,
+					A2: testdata.A2,
+					HE: &model.HashEqualInputSpec{},
+				},
+				{
+					A1: testdata.A2,
+					A2: testdata.A3,
+					HE: &model.HashEqualInputSpec{},
+				},
+				{
+					A1: testdata.A1,
+					A2: testdata.A3,
+					HE: &model.HashEqualInputSpec{},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestHashEqual(ctx, *o.A1, *o.A2, *o.HE)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildHashEqualByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
 			}
 		})
 	}

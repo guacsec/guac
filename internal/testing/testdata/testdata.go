@@ -2008,6 +2008,86 @@ var (
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 
+	CollectedForeignTypesNoDeps = `{
+		"CurrentPackage":{
+		   "name":"foreign-types",
+		   "namespace":"",
+		   "qualifiers":null,
+		   "subpath":"",
+		   "type":"cargo",
+		   "version":"0.3.2"
+		},
+		"Scorecard":{
+		   "aggregateScore":4.599999904632568,
+		   "checks":[
+			  {
+				 "check":"Maintained",
+				 "score":5
+			  },
+			  {
+				 "check":"CII-Best-Practices",
+				 "score":0
+			  },
+			  {
+				 "check":"Signed-Releases",
+				 "score":-1
+			  },
+			  {
+				 "check":"Packaging",
+				 "score":-1
+			  },
+			  {
+				 "check":"Dangerous-Workflow",
+				 "score":10
+			  },
+			  {
+				 "check":"Binary-Artifacts",
+				 "score":10
+			  },
+			  {
+				 "check":"Token-Permissions",
+				 "score":0
+			  },
+			  {
+				 "check":"Pinned-Dependencies",
+				 "score":7
+			  },
+			  {
+				 "check":"Fuzzing",
+				 "score":0
+			  },
+			  {
+				 "check":"Vulnerabilities",
+				 "score":10
+			  },
+			  {
+				 "check":"Branch-Protection",
+				 "score":0
+			  },
+			  {
+				 "check":"License",
+				 "score":10
+			  },
+			  {
+				 "check":"Security-Policy",
+				 "score":0
+			  }
+		   ],
+		   "collector":"",
+		   "origin":"",
+		   "scorecardCommit":"6c5de2c32a4b8f60211e8e8eb94f8d3370a11b93",
+		   "scorecardVersion":"v4.10.5-77-g6c5de2c",
+		   "timeScanned":"2022-11-21T17:45:50.52Z"
+		},
+		"Source":{
+		   "commit":null,
+		   "name":"foreign-types",
+		   "namespace":"github.com/sfackler",
+		   "tag":null,
+		   "type":"git"
+		},
+		"UpdateTime":"2022-11-21T17:45:50.52Z"
+	 }`
 	CollectedForeignTypes = `{
 		"CurrentPackage":{
 		   "name":"foreign-types",

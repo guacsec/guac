@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -30,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
+	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
@@ -39,10 +41,10 @@ import (
 )
 
 type osvOptions struct {
-	graphqlEndpoint string
-	poll            bool
-	csubAddr        string
-	interval        time.Duration
+	graphqlEndpoint   string
+	poll              bool
+	csubClientOptions client.CsubClientOptions
+	interval          time.Duration
 }
 
 var osvCmd = &cobra.Command{
@@ -57,6 +59,8 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("poll"),
 			viper.GetString("interval"),
 			viper.GetString("csub-addr"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
 		)
 
 		if err != nil {
@@ -70,7 +74,7 @@ var osvCmd = &cobra.Command{
 		}
 
 		// initialize collectsub client
-		csubClient, err := csub_client.NewClient(opts.csubAddr)
+		csubClient, err := csub_client.NewClient(opts.csubClientOptions)
 		if err != nil {
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
@@ -83,12 +87,76 @@ var osvCmd = &cobra.Command{
 		packageQuery := root_package.NewPackageQuery(gqlclient, 0)
 
 		totalNum := 0
-		var totalDocs []*processor.Document
-		gotErr := false
+		docChan := make(chan *processor.Document)
+		ingestionStop := make(chan bool, 1)
+		tickInterval := 30 * time.Second
+		ticker := time.NewTicker(tickInterval)
+
+		var gotErr int32
+		var wg sync.WaitGroup
+		ingestion := func() {
+			defer wg.Done()
+			var totalDocs []*processor.Document
+			const threshold = 1000
+			stop := false
+			for !stop {
+				select {
+				case <-ticker.C:
+					if len(totalDocs) > 0 {
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						if err != nil {
+							stop = true
+							atomic.StoreInt32(&gotErr, 1)
+							logger.Errorf("unable to ingest documents: %v", err)
+						}
+						totalDocs = []*processor.Document{}
+					}
+					ticker.Reset(tickInterval)
+				case d := <-docChan:
+					totalNum += 1
+					totalDocs = append(totalDocs, d)
+					if len(totalDocs) >= threshold {
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						if err != nil {
+							stop = true
+							atomic.StoreInt32(&gotErr, 1)
+							logger.Errorf("unable to ingest documents: %v", err)
+						}
+						totalDocs = []*processor.Document{}
+						ticker.Reset(tickInterval)
+					}
+				case <-ingestionStop:
+					stop = true
+				case <-ctx.Done():
+					return
+				}
+			}
+			for len(docChan) > 0 {
+				totalNum += 1
+				totalDocs = append(totalDocs, <-docChan)
+				if len(totalDocs) >= threshold {
+					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+					if err != nil {
+						atomic.StoreInt32(&gotErr, 1)
+						logger.Errorf("unable to ingest documents: %v", err)
+					}
+					totalDocs = []*processor.Document{}
+				}
+			}
+			if len(totalDocs) > 0 {
+				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+				if err != nil {
+					atomic.StoreInt32(&gotErr, 1)
+					logger.Errorf("unable to ingest documents: %v", err)
+				}
+			}
+		}
+		wg.Add(1)
+		go ingestion()
+
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
-			totalNum += 1
-			totalDocs = append(totalDocs, d)
+			docChan <- d
 			return nil
 		}
 
@@ -99,13 +167,12 @@ var osvCmd = &cobra.Command{
 				return true
 			}
 			logger.Errorf("certifier ended with error: %v", err)
-			gotErr = true
+			atomic.StoreInt32(&gotErr, 1)
 			// process documents already captures
 			return true
 		}
 
 		ctx, cf := context.WithCancel(ctx)
-		var wg sync.WaitGroup
 		done := make(chan bool, 1)
 		wg.Add(1)
 		go func() {
@@ -120,19 +187,15 @@ var osvCmd = &cobra.Command{
 		select {
 		case s := <-sigs:
 			logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+			cf()
 		case <-done:
 			logger.Infof("All certifiers completed")
 		}
+		ingestionStop <- true
 		wg.Wait()
-
-		err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
-		if err != nil {
-			gotErr = true
-			logger.Errorf("unable to ingest documents: %v", err)
-		}
 		cf()
 
-		if gotErr {
+		if atomic.LoadInt32(&gotErr) == 1 {
 			logger.Errorf("completed ingestion with errors")
 		} else {
 			logger.Infof("completed ingesting %v documents", totalNum)
@@ -140,7 +203,7 @@ var osvCmd = &cobra.Command{
 	},
 }
 
-func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAddr string) (osvOptions, error) {
+func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAddr string, csubTls bool, csubTlsSkipVerify bool) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.poll = poll
@@ -149,7 +212,12 @@ func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAd
 		return opts, err
 	}
 	opts.interval = i
-	opts.csubAddr = csubAddr
+
+	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	if err != nil {
+		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+	}
+	opts.csubClientOptions = csubOpts
 
 	return opts, nil
 }

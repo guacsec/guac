@@ -27,6 +27,7 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
+	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/ingestor"
 
@@ -41,10 +42,10 @@ import (
 )
 
 type scorecardOptions struct {
-	graphqlEndpoint string
-	poll            bool
-	interval        time.Duration
-	csubAddr        string
+	graphqlEndpoint   string
+	poll              bool
+	interval          time.Duration
+	csubClientOptions client.CsubClientOptions
 }
 
 var scorecardCmd = &cobra.Command{
@@ -57,6 +58,8 @@ var scorecardCmd = &cobra.Command{
 		opts, err := validateScorecardFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
 			viper.GetString("interval"),
 		)
@@ -76,7 +79,7 @@ var scorecardCmd = &cobra.Command{
 		}
 
 		// initialize collectsub client
-		csubClient, err := csub_client.NewClient(opts.csubAddr)
+		csubClient, err := csub_client.NewClient(opts.csubClientOptions)
 		if err != nil {
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
@@ -167,10 +170,16 @@ var scorecardCmd = &cobra.Command{
 	},
 }
 
-func validateScorecardFlags(graphqlEndpoint string, csubAddr string, poll bool, interval string) (scorecardOptions, error) {
+func validateScorecardFlags(graphqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, poll bool, interval string) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
-	opts.csubAddr = csubAddr
+
+	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	if err != nil {
+		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+	}
+	opts.csubClientOptions = csubOpts
+
 	opts.poll = poll
 	i, err := time.ParseDuration(interval)
 	if err != nil {

@@ -432,15 +432,15 @@ func Test_buildSourceResponseFromID(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestSource(ctx, *tt.srcInput)
+			ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedPkg.Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = &ingestedSrc.Namespaces[0].Names[0].ID
 			}
-			got, err := b.(*arangoClient).buildSourceResponseFromID(ctx, ingestedPkg.Namespaces[0].Names[0].ID, tt.srcFilter)
+			got, err := b.(*arangoClient).buildSourceResponseFromID(ctx, ingestedSrc.Namespaces[0].Names[0].ID, tt.srcFilter)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.buildSourceResponseFromID() error = %v, wantErr %v", err, tt.wantErr)
 				return

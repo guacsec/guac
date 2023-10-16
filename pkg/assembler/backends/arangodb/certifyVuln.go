@@ -35,6 +35,14 @@ const (
 
 func (c *arangoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
+	if certifyVulnSpec != nil && certifyVulnSpec.ID != nil {
+		cv, err := c.buildCertifyVulnByID(ctx, *certifyVulnSpec.ID, certifyVulnSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildCertifyVulnByID failed with an error: %w", err)
+		}
+		return []*model.CertifyVuln{cv}, nil
+	}
+
 	// TODO (pxp928): Optimization of the query can be done by starting from the vulnerability node (if specified)
 	var arangoQueryBuilder *arangoQueryBuilder
 	if certifyVulnSpec.Package != nil {
@@ -105,7 +113,7 @@ func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVu
 	}
 	if certifyVulnSpec.TimeScanned != nil {
 		arangoQueryBuilder.filter("certifyVuln", timeScannedStr, "==", "@"+timeScannedStr)
-		queryValues[timeScannedStr] = *certifyVulnSpec.TimeScanned
+		queryValues[timeScannedStr] = certifyVulnSpec.TimeScanned.UTC()
 	}
 	if certifyVulnSpec.DbURI != nil {
 		arangoQueryBuilder.filter("certifyVuln", dbUriStr, "==", "@"+dbUriStr)
@@ -170,7 +178,7 @@ func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.Vul
 		values["guacVulnKey"] = vuln.VulnerabilityID
 	}
 
-	values[timeScannedStr] = certifyVuln.TimeScanned
+	values[timeScannedStr] = certifyVuln.TimeScanned.UTC()
 	values[dbUriStr] = certifyVuln.DbURI
 	values[dbVersionStr] = certifyVuln.DbVersion
 	values[scannerUriStr] = certifyVuln.ScannerURI
@@ -467,4 +475,104 @@ func geCertifyVulnFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 		certifyVulnList = append(certifyVulnList, certifyVuln)
 	}
 	return certifyVulnList, nil
+}
+
+func (c *arangoClient) buildCertifyVulnByID(ctx context.Context, id string, filter *model.CertifyVulnSpec) (*model.CertifyVuln, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == certifyVulnsStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.CertifyVulnSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryCertifyVulnNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for certifyVuln query: %s", id)
+	}
+}
+
+func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *model.CertifyVulnSpec) (*model.CertifyVuln, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(certifyVulnsStr, "certifyVuln")
+	setCertifyVulnMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN certifyVuln`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryCertifyVulnNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for certifyVuln: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbVuln struct {
+		CertifyVulnID   string    `json:"_id"`
+		PackageID       *string   `json:"packageID"`
+		VulnerabilityID string    `json:"vulnerabilityID"`
+		TimeScanned     time.Time `json:"timeScanned"`
+		DbUri           string    `json:"dbUri"`
+		DbVersion       string    `json:"dbVersion"`
+		ScannerUri      string    `json:"scannerUri"`
+		ScannerVersion  string    `json:"scannerVersion"`
+		Collector       string    `json:"collector"`
+		Origin          string    `json:"origin"`
+	}
+
+	var collectedValues []dbVuln
+	for {
+		var doc dbVuln
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to certifyVuln from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of certifyVuln nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	certifyVuln := &model.CertifyVuln{
+		ID: collectedValues[0].CertifyVulnID,
+		Metadata: &model.ScanMetadata{
+			TimeScanned:    collectedValues[0].TimeScanned,
+			DbURI:          collectedValues[0].DbUri,
+			DbVersion:      collectedValues[0].DbVersion,
+			ScannerURI:     collectedValues[0].ScannerUri,
+			ScannerVersion: collectedValues[0].ScannerVersion,
+			Origin:         collectedValues[0].Origin,
+			Collector:      collectedValues[0].Collector,
+		},
+	}
+
+	builtVuln, err := c.buildVulnResponseByID(ctx, collectedValues[0].VulnerabilityID, filter.Vulnerability)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vulnerability from ID: %s, with error: %w", collectedValues[0].VulnerabilityID, err)
+	}
+	certifyVuln.Vulnerability = builtVuln
+
+	builtPackage, err := c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Package)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+	}
+
+	certifyVuln.Package = builtPackage
+
+	return certifyVuln, nil
 }

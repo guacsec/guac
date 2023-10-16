@@ -1335,6 +1335,159 @@ func TestIngestVulnMetadatas(t *testing.T) {
 	}
 }
 
+func Test_buildVulnerabilityMetadataByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		Vuln         *model.VulnerabilityInputSpec
+		VulnMetadata *model.VulnerabilityMetadataInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InVuln       []*model.VulnerabilityInputSpec
+		Calls        []call
+		ExpVuln      *model.VulnerabilityMetadata
+		Query        *model.VulnerabilityMetadataSpec
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:   "OSV",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
+			Calls: []call{
+				{
+					Vuln: testdata.O1,
+					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+						ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+						ScoreValue: 7.9,
+						Timestamp:  testdata.T1,
+						Collector:  "test collector",
+						Origin:     "test origin",
+					},
+				},
+			},
+			Query: &model.VulnerabilityMetadataSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					Type: ptrfrom.String("osv"),
+				},
+				Collector: ptrfrom.String("test collector"),
+			},
+			ExpVuln: &model.VulnerabilityMetadata{
+				Vulnerability: &model.Vulnerability{
+					Type:             "osv",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+				},
+				ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+				ScoreValue: 7.9,
+				Timestamp:  testdata.T1,
+				Collector:  "test collector",
+				Origin:     "test origin",
+			},
+		},
+		{
+			Name:   "Certify GHSA",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			Calls: []call{
+				{
+					Vuln: testdata.G1,
+					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+						ScoreType:  model.VulnerabilityScoreTypeEPSSv1,
+						ScoreValue: 0.95,
+						Timestamp:  testdata.T1,
+						Collector:  "test collector",
+						Origin:     "test origin",
+					},
+				},
+			},
+			Query: &model.VulnerabilityMetadataSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					Type: ptrfrom.String("ghsa"),
+				},
+				Collector: ptrfrom.String("test collector"),
+			},
+			ExpVuln: &model.VulnerabilityMetadata{
+				Vulnerability: &model.Vulnerability{
+					Type:             "ghsa",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+				},
+				ScoreType:  model.VulnerabilityScoreTypeEPSSv1,
+				ScoreValue: 0.95,
+				Timestamp:  testdata.T1,
+				Collector:  "test collector",
+				Origin:     "test origin",
+			},
+		},
+		{
+			Name:   "Query on ID",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			Calls: []call{
+				{
+					Vuln: testdata.G1,
+					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+						ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
+						ScoreValue: 8.9,
+						Timestamp:  testdata.T1,
+						Collector:  "test collector",
+						Origin:     "test origin",
+					},
+				},
+			},
+			ExpVuln: &model.VulnerabilityMetadata{
+				Vulnerability: &model.Vulnerability{
+					Type:             "ghsa",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+				},
+				ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
+				ScoreValue: 8.9,
+				Timestamp:  testdata.T1,
+				Collector:  "test collector",
+				Origin:     "test origin",
+			},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, g := range test.InVuln {
+				_, err := b.IngestVulnerability(ctx, *g)
+				if err != nil {
+					t.Fatalf("Could not ingest vulnerability: %a", err)
+				}
+
+			}
+			for _, o := range test.Calls {
+				record, err := b.IngestVulnerabilityMetadata(ctx, *o.Vuln, *o.VulnMetadata)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildVulnerabilityMetadataByID(ctx, record, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpVuln, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+		})
+	}
+}
+
 // TODO (pxp928): add tests back in when implemented
 
 // func TestVulnMetadataNeighbors(t *testing.T) {

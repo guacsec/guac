@@ -298,6 +298,13 @@ func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *a
 }
 
 func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
+	if sourceSpec != nil && sourceSpec.ID != nil {
+		p, err := c.buildSourceResponseFromID(ctx, *sourceSpec.ID, sourceSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildSourceResponseFromID failed with an error: %w", err)
+		}
+		return []*model.Source{p}, nil
+	}
 
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
 	if _, ok := ctx.Value("graphql").(graphql.OperationContext); ok {

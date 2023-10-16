@@ -21,10 +21,20 @@ import (
 	"strings"
 
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
+
+	if certifyGoodSpec != nil && certifyGoodSpec.ID != nil {
+		cg, err := c.buildCertifyGoodByID(ctx, *certifyGoodSpec.ID, certifyGoodSpec)
+		if err != nil {
+			return nil, fmt.Errorf("buildCertifyGoodByID failed with an error: %w", err)
+		}
+		return []*model.CertifyGood{cg}, nil
+	}
+
 	var arangoQueryBuilder *arangoQueryBuilder
 	if certifyGoodSpec.Subject != nil {
 		var combinedCertifyGood []*model.CertifyGood
@@ -928,8 +938,8 @@ func getCertifyGoodFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 		certifyGood := &model.CertifyGood{
 			ID:            createdValue.CertifyGoodID,
 			Justification: createdValue.Justification,
-			Origin:        createdValue.Collector,
-			Collector:     createdValue.Origin,
+			Origin:        createdValue.Origin,
+			Collector:     createdValue.Collector,
 		}
 		if pkg != nil {
 			certifyGood.Subject = pkg
@@ -943,4 +953,127 @@ func getCertifyGoodFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 		certifyGoodList = append(certifyGoodList, certifyGood)
 	}
 	return certifyGoodList, nil
+}
+
+func (c *arangoClient) buildCertifyGoodByID(ctx context.Context, id string, filter *model.CertifyGoodSpec) (*model.CertifyGood, error) {
+	if filter != nil && filter.ID != nil {
+		if *filter.ID != id {
+			return nil, fmt.Errorf("ID does not match filter")
+		}
+	}
+
+	idSplit := strings.Split(id, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", id)
+	}
+
+	if idSplit[0] == certifyGoodsStr {
+		if filter != nil {
+			filter.ID = ptrfrom.String(id)
+		} else {
+			filter = &model.CertifyGoodSpec{
+				ID: ptrfrom.String(id),
+			}
+		}
+		return c.queryCertifyGoodNodeByID(ctx, filter)
+	} else {
+		return nil, fmt.Errorf("id type does not match for certifyGood query: %s", id)
+	}
+}
+
+func (c *arangoClient) queryCertifyGoodNodeByID(ctx context.Context, filter *model.CertifyGoodSpec) (*model.CertifyGood, error) {
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(certifyGoodsStr, "certifyGood")
+	setCertifyGoodMatchValues(arangoQueryBuilder, filter, values)
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN certifyGood`)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "queryCertifyGoodNodeByID")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for certifyGood: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type dbCertifyGood struct {
+		CertifyGoodID string  `json:"_id"`
+		PackageID     *string `json:"packageID"`
+		SourceID      *string `json:"sourceID"`
+		ArtifactID    *string `json:"artifactID"`
+		Justification string  `json:"justification"`
+		Collector     string  `json:"collector"`
+		Origin        string  `json:"origin"`
+	}
+
+	var collectedValues []dbCertifyGood
+	for {
+		var doc dbCertifyGood
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to certifyGood from cursor: %w", err)
+			}
+		} else {
+			collectedValues = append(collectedValues, doc)
+		}
+	}
+
+	if len(collectedValues) != 1 {
+		return nil, fmt.Errorf("number of certifyGood nodes found for ID: %s is greater than one", *filter.ID)
+	}
+
+	certifyGood := &model.CertifyGood{
+		ID:            collectedValues[0].CertifyGoodID,
+		Justification: collectedValues[0].Justification,
+		Origin:        collectedValues[0].Origin,
+		Collector:     collectedValues[0].Collector,
+	}
+
+	if collectedValues[0].PackageID != nil {
+		var builtPackage *model.Package
+		if filter.Subject != nil && filter.Subject.Package != nil {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, filter.Subject.Package)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		} else {
+			builtPackage, err = c.buildPackageResponseFromID(ctx, *collectedValues[0].PackageID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get package from ID: %s, with error: %w", *collectedValues[0].PackageID, err)
+			}
+		}
+		certifyGood.Subject = builtPackage
+	} else if collectedValues[0].SourceID != nil {
+		var builtSource *model.Source
+		if filter.Subject != nil && filter.Subject.Source != nil {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, filter.Subject.Source)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		} else {
+			builtSource, err = c.buildSourceResponseFromID(ctx, *collectedValues[0].SourceID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get source from ID: %s, with error: %w", *collectedValues[0].SourceID, err)
+			}
+		}
+		certifyGood.Subject = builtSource
+	} else if collectedValues[0].ArtifactID != nil {
+		var builtArtifact *model.Artifact
+		if filter.Subject != nil && filter.Subject.Artifact != nil {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, filter.Subject.Artifact)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		} else {
+			builtArtifact, err = c.buildArtifactResponseByID(ctx, *collectedValues[0].ArtifactID, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get artifact from ID: %s, with error: %w", *collectedValues[0].ArtifactID, err)
+			}
+		}
+		certifyGood.Subject = builtArtifact
+	} else {
+		return nil, fmt.Errorf("failed to get subject from certifyGood")
+	}
+	return certifyGood, nil
 }

@@ -1430,6 +1430,233 @@ func TestIngestCertifyVulns(t *testing.T) {
 	}
 }
 
+func Test_buildCertifyVulnByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		Pkg         *model.PkgInputSpec
+		Vuln        *model.VulnerabilityInputSpec
+		CertifyVuln *model.ScanMetadataInput
+	}
+
+	tests := []struct {
+		InPkg        []*model.PkgInputSpec
+		Name         string
+		InVuln       []*model.VulnerabilityInputSpec
+		Calls        []call
+		ExpVuln      *model.CertifyVuln
+		Query        *model.CertifyVulnSpec
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:   "Certify NoVuln",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput},
+			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			Calls: []call{
+				{
+					Pkg:  testdata.P2,
+					Vuln: testdata.NoVulnInput,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					Type: ptrfrom.String("noVuln"),
+				},
+			},
+			ExpVuln: &model.CertifyVuln{
+
+				Package: testdata.P2out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "novuln",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.NoVulnOut},
+				},
+				Metadata: vmd1,
+			},
+		},
+		{
+			Name:   "Certify OSV",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
+			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			Calls: []call{
+				{
+					Pkg:  testdata.P2,
+					Vuln: testdata.O1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					Type: ptrfrom.String("osv"),
+				},
+			},
+			ExpVuln: &model.CertifyVuln{
+				Package: testdata.P2out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "osv",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+				},
+				Metadata: vmd1,
+			},
+		},
+		{
+			Name:   "Certify GHSA",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			Calls: []call{
+				{
+					Pkg:  testdata.P2,
+					Vuln: testdata.G1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					VulnerabilityID: &testdata.G1.VulnerabilityID,
+				},
+			},
+			ExpVuln: &model.CertifyVuln{
+				Package: testdata.P2out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "ghsa",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+				},
+				Metadata: vmd1,
+			},
+		},
+		{
+			Name:   "Query on GHSA",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			Calls: []call{
+				{
+					Pkg:  testdata.P2,
+					Vuln: testdata.G1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				Vulnerability: &model.VulnerabilitySpec{
+					VulnerabilityID: &testdata.G1.VulnerabilityID,
+				},
+			},
+			ExpVuln: &model.CertifyVuln{
+				Package: testdata.P2out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "ghsa",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+				},
+				Metadata: vmd1,
+			},
+		},
+		{
+			Name:   "Query ID",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			Calls: []call{
+				{
+					Pkg:  testdata.P2,
+					Vuln: testdata.G1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+					},
+				},
+			},
+			ExpVuln: &model.CertifyVuln{
+				Package: testdata.P2out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "ghsa",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+				},
+				Metadata: vmd1,
+			},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, g := range test.InVuln {
+				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+					t.Fatalf("Could not ingest vulnerability: %a", err)
+				}
+			}
+			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+				t.Fatalf("Could not ingest packages: %v", err)
+			}
+
+			for _, o := range test.Calls {
+				record, err := b.IngestCertifyVuln(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+
+				got, err := b.(*arangoClient).buildCertifyVulnByID(ctx, record.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpVuln, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+		})
+	}
+}
+
 // TODO (pxp928): add tests back in when implemented
 
 // func TestCertifyVulnNeighbors(t *testing.T) {

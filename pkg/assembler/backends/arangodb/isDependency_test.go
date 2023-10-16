@@ -707,7 +707,7 @@ func TestIsDependency(t *testing.T) {
 			Query: &model.IsDependencySpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 		{
 			Name:  "IsDep from version to version",
@@ -1009,6 +1009,174 @@ func TestIsDependencies(t *testing.T) {
 				got, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpID, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+
+		})
+	}
+}
+
+func Test_buildIsDependencyByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		P1 *model.PkgInputSpec
+		P2 *model.PkgInputSpec
+		MF model.MatchFlags
+		ID *model.IsDependencyInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		Calls        []call
+		Query        *model.IsDependencySpec
+		ExpID        *model.IsDependency
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query on pkg",
+			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P3,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				Package: &model.PkgSpec{
+					Name:    ptrfrom.String("tensorflow"),
+					Version: ptrfrom.String("2.11.1"),
+				},
+			},
+			ExpID: &model.IsDependency{
+				Package:           testdata.P2out,
+				DependencyPackage: testdata.P2outName,
+			},
+		},
+		{
+			Name:  "Query on dep pkg",
+			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P4,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DependencyPackage: &model.PkgSpec{
+					Name: ptrfrom.String("openssl"),
+				},
+			},
+			ExpID: &model.IsDependency{
+				Package:           testdata.P2out,
+				DependencyPackage: testdata.P4outName,
+			},
+		},
+		{
+			Name:  "Query on ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			ExpID: &model.IsDependency{
+				Package:           testdata.P1out,
+				DependencyPackage: testdata.P2outName,
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: true,
+		},
+		{
+			Name:  "Query on pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P4,
+					P2: testdata.P2,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			ExpID: &model.IsDependency{
+				Package:           testdata.P4out,
+				DependencyPackage: testdata.P2out,
+			},
+		},
+		{
+			Name:  "Query on dep pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+			Calls: []call{
+				{
+					P1: testdata.P2,
+					P2: testdata.P4,
+					MF: mSpecific,
+					ID: &model.IsDependencyInputSpec{},
+				},
+			},
+			ExpID: &model.IsDependency{
+				Package:           testdata.P2out,
+				DependencyPackage: testdata.P4out,
+			},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, a := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildIsDependencyByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
 				if err != nil {
 					return

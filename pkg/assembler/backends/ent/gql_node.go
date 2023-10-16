@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
@@ -32,6 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -77,6 +79,9 @@ func (n *CertifyVuln) IsNode() {}
 func (n *Dependency) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
+func (n *HasMetadata) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
 func (n *HasSourceAt) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
@@ -105,6 +110,9 @@ func (n *PackageVersion) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *PkgEqual) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *PointOfContact) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *SLSAAttestation) IsNode() {}
@@ -296,6 +304,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			return nil, err
 		}
 		return n, nil
+	case hasmetadata.Table:
+		query := c.HasMetadata.Query().
+			Where(hasmetadata.ID(id))
+		query, err := query.CollectFields(ctx, "HasMetadata")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	case hassourceat.Table:
 		query := c.HasSourceAt.Query().
 			Where(hassourceat.ID(id))
@@ -408,6 +428,18 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.PkgEqual.Query().
 			Where(pkgequal.ID(id))
 		query, err := query.CollectFields(ctx, "PkgEqual")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case pointofcontact.Table:
+		query := c.PointOfContact.Query().
+			Where(pointofcontact.ID(id))
+		query, err := query.CollectFields(ctx, "PointOfContact")
 		if err != nil {
 			return nil, err
 		}
@@ -729,6 +761,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
+	case hasmetadata.Table:
+		query := c.HasMetadata.Query().
+			Where(hasmetadata.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "HasMetadata")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case hassourceat.Table:
 		query := c.HasSourceAt.Query().
 			Where(hassourceat.IDIn(ids...))
@@ -877,6 +925,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.PkgEqual.Query().
 			Where(pkgequal.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "PkgEqual")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case pointofcontact.Table:
+		query := c.PointOfContact.Query().
+			Where(pointofcontact.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "PointOfContact")
 		if err != nil {
 			return nil, err
 		}
