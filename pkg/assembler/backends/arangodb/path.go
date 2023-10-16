@@ -25,6 +25,20 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+type edgeMap map[model.Edge]bool
+
+func processUsingOnly(usingOnly []model.Edge) edgeMap {
+	m := edgeMap{}
+	allowedEdges := usingOnly
+	if len(usingOnly) == 0 {
+		allowedEdges = model.AllEdge
+	}
+	for _, edge := range allowedEdges {
+		m[edge] = true
+	}
+	return m
+}
+
 func (c *arangoClient) Path(ctx context.Context, startNodeID string, targetNodeID string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
 	values := map[string]any{}
 	values["startVertex"] = startNodeID
@@ -111,7 +125,67 @@ IN 1..@maxLength ANY K_PATHS
 }
 
 func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly []model.Edge) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: Neighbors"))
+	var neighborsID []string
+	var err error
+
+	idSplit := strings.Split(nodeID, "/")
+	if len(idSplit) != 2 {
+		return nil, fmt.Errorf("invalid ID: %s", nodeID)
+	}
+	switch idSplit[0] {
+	case pkgVersionsStr, pkgNamesStr, pkgNamespacesStr, pkgTypesStr:
+		return []model.Node{}, nil
+	case srcNamesStr, srcNamespacesStr, srcTypesStr:
+		return []model.Node{}, nil
+	case vulnerabilitiesStr, vulnTypesStr:
+		return []model.Node{}, nil
+	case buildersStr:
+		neighborsID, err = c.builderNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case artifactsStr:
+		return []model.Node{}, nil
+	case licensesStr:
+		return []model.Node{}, nil
+	case certifyBadsStr:
+		return []model.Node{}, nil
+	case certifyGoodsStr:
+		return []model.Node{}, nil
+	case certifyLegalsStr:
+		return []model.Node{}, nil
+	case scorecardStr:
+		return []model.Node{}, nil
+	case certifyVEXsStr:
+		return []model.Node{}, nil
+	case certifyVulnsStr:
+		return []model.Node{}, nil
+	case hashEqualsStr:
+		return []model.Node{}, nil
+	case hasMetadataStr:
+		return []model.Node{}, nil
+	case hasSBOMsStr:
+		return []model.Node{}, nil
+	case hasSLSAsStr:
+		return []model.Node{}, nil
+	case hasSourceAtsStr:
+		return []model.Node{}, nil
+	case isDependenciesStr:
+		return []model.Node{}, nil
+	case isOccurrencesStr:
+		return []model.Node{}, nil
+	case pkgEqualsStr:
+		return []model.Node{}, nil
+	case pointOfContactStr:
+		return []model.Node{}, nil
+	case vulnEqualsStr:
+		return []model.Node{}, nil
+	case vulnMetadataStr:
+		return []model.Node{}, nil
+	default:
+		return nil, fmt.Errorf("unknown ID for node query: %s", nodeID)
+	}
+	return c.Nodes(ctx, neighborsID)
 }
 
 func (c *arangoClient) Node(ctx context.Context, nodeID string) (model.Node, error) {

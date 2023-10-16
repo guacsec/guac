@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -25,44 +23,115 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// TODO (pxp928): add tests back in when implemented
+func Test_builderNeighbors(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		Sub  *model.ArtifactInputSpec
+		BF   []*model.ArtifactInputSpec
+		BB   *model.BuilderInputSpec
+		SLSA *model.SLSAInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InArt        []*model.ArtifactInputSpec
+		InBld        []*model.BuilderInputSpec
+		Calls        []call
+		QueryOnID    bool
+		ExpHS        []string
+		AllowedEdges edgeMap
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "neighbors",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: testdata.A1,
+					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BB:  testdata.B1,
+					SLSA: &model.SLSAInputSpec{
+						BuildType: "test type one",
+					},
+				},
+			},
+			QueryOnID:    true,
+			AllowedEdges: edgeMap{model.EdgeBuilderHasSlsa: true},
+		},
+		{
+			Name:  "neighbors - wrong allowedEdge",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: testdata.A1,
+					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BB:  testdata.B1,
+					SLSA: &model.SLSAInputSpec{
+						BuildType: "test type one",
+					},
+				},
+			},
+			QueryOnID:    false,
+			ExpHS:        []string{},
+			AllowedEdges: edgeMap{model.EdgeHasSlsaBuiltBy: true},
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				}
+			}
+			for _, bld := range test.InBld {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+					t.Fatalf("Could not ingest builder: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if test.QueryOnID {
+					test.ExpHS = []string{found.ID}
+				}
+				got, err := b.(*arangoClient).builderNeighbors(ctx, found.Slsa.BuiltBy.ID, test.AllowedEdges)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpHS, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
 
-// func Test_builderStruct_Neighbors(t *testing.T) {
-// 	type fields struct {
-// 		id       uint32
-// 		uri      string
-// 		hasSLSAs []uint32
-// 	}
-// 	tests := []struct {
-// 		name         string
-// 		fields       fields
-// 		allowedEdges edgeMap
-// 		want         []uint32
-// 	}{{
-// 		name: "hasSLSAs",
-// 		fields: fields{
-// 			hasSLSAs: []uint32{445, 1232244},
-// 		},
-// 		allowedEdges: edgeMap{model.EdgeBuilderHasSlsa: true},
-// 		want:         []uint32{445, 1232244},
-// 	}}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			b := &builderStruct{
-// 				id:       tt.fields.id,
-// 				uri:      tt.fields.uri,
-// 				hasSLSAs: tt.fields.hasSLSAs,
-// 			}
-// 			if got := b.Neighbors(tt.allowedEdges); !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("builderStruct.Neighbors() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
-
+		})
+	}
+}
 func Test_IngestBuilder(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()
