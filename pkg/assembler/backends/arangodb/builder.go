@@ -193,6 +193,7 @@ func (c *arangoClient) buildBuilderResponseByID(ctx context.Context, id string, 
 }
 
 func (c *arangoClient) builderNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
 	if allowedEdges[model.EdgeBuilderHasSlsa] {
 		values := map[string]any{}
 		arangoQueryBuilder := setBuilderMatchValues(&model.BuilderSpec{ID: &nodeID}, values)
@@ -200,26 +201,11 @@ func (c *arangoClient) builderNeighbors(ctx context.Context, nodeID string, allo
 		arangoQueryBuilder.query.WriteString("\n")
 		arangoQueryBuilder.query.WriteString(`RETURN hasSLSA._id`)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "builderNeighbors")
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for builder: %w", err)
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}
-		defer cursor.Close()
-		var foundIDs []string
-		for {
-			var doc string
-			_, err := cursor.ReadDocument(ctx, &doc)
-			if err != nil {
-				if driver.IsNoMoreDocuments(err) {
-					break
-				} else {
-					return nil, fmt.Errorf("failed to get neighbor id from cursor: %w", err)
-				}
-			} else {
-				foundIDs = append(foundIDs, doc)
-			}
-		}
-		return foundIDs, nil
+		out = append(out, foundIDs...)
 	}
-	return []string{}, nil
+	return out, nil
 }

@@ -314,24 +314,9 @@ func (c *arangoClient) artifactNeighbors(ctx context.Context, nodeID string, all
 		arangoQueryBuilder.query.WriteString("\n")
 		arangoQueryBuilder.query.WriteString(`RETURN hashEqual._id`)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "builderNeighbors")
+		foundIDsOutBound, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for builder: %w", err)
-		}
-		defer cursor.Close()
-		var foundIDsOutBound []string
-		for {
-			var doc string
-			_, err := cursor.ReadDocument(ctx, &doc)
-			if err != nil {
-				if driver.IsNoMoreDocuments(err) {
-					break
-				} else {
-					return nil, fmt.Errorf("failed to get neighbor id from cursor: %w", err)
-				}
-			} else {
-				foundIDsOutBound = append(foundIDsOutBound, doc)
-			}
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}
 		out = append(out, foundIDsOutBound...)
 
@@ -341,76 +326,140 @@ func (c *arangoClient) artifactNeighbors(ctx context.Context, nodeID string, all
 		arangoQueryBuilder.query.WriteString("\n")
 		arangoQueryBuilder.query.WriteString(`RETURN hashEqual._id`)
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "builderNeighbors")
+		foundIDsInBound, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for builder: %w", err)
-		}
-		defer cursor.Close()
-		var foundIDsInBound []string
-		for {
-			var doc string
-			_, err := cursor.ReadDocument(ctx, &doc)
-			if err != nil {
-				if driver.IsNoMoreDocuments(err) {
-					break
-				} else {
-					return nil, fmt.Errorf("failed to get neighbor id from cursor: %w", err)
-				}
-			} else {
-				foundIDsInBound = append(foundIDsInBound, doc)
-			}
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}
 		out = append(out, foundIDsInBound...)
 	}
 	if allowedEdges[model.EdgeArtifactIsOccurrence] {
 		values := map[string]any{}
 		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
-		arangoQueryBuilder.forOutBound(isOccurrenceArtEdgesStr, "hashEqual", "art")
+		arangoQueryBuilder.forInBound(isOccurrenceArtEdgesStr, "isOccurrence", "art")
 		arangoQueryBuilder.query.WriteString("\n")
-		arangoQueryBuilder.query.WriteString(`RETURN hashEqual._id`)
+		arangoQueryBuilder.query.WriteString(`RETURN isOccurrence._id`)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "builderNeighbors")
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for builder: %w", err)
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}
-		defer cursor.Close()
-		var foundIDsOutBound []string
-		for {
-			var doc string
-			_, err := cursor.ReadDocument(ctx, &doc)
-			if err != nil {
-				if driver.IsNoMoreDocuments(err) {
-					break
-				} else {
-					return nil, fmt.Errorf("failed to get neighbor id from cursor: %w", err)
-				}
-			} else {
-				foundIDsOutBound = append(foundIDsOutBound, doc)
-			}
-		}
-		out = append(out, foundIDsOutBound...)
+		out = append(out, foundIDs...)
 	}
 	if allowedEdges[model.EdgeArtifactHasSbom] {
-		out = append(out, n.hasSBOMs...)
+		values := map[string]any{}
+		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forOutBound(hasSBOMArtEdgesStr, "hasSBOM", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN hasSBOM._id`)
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
 	}
 	if allowedEdges[model.EdgeArtifactHasSlsa] {
-		out = append(out, n.hasSLSAs...)
+		values := map[string]any{}
+		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forOutBound(hasSLSASubjectArtEdgesStr, "hasSLSA", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN hasSLSA._id`)
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
 	}
 	if allowedEdges[model.EdgeArtifactCertifyVexStatement] {
-		out = append(out, n.vexLinks...)
+		values := map[string]any{}
+		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forOutBound(certifyVexArtEdgesStr, "certifyVex", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN certifyVex._id`)
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
 	}
 	if allowedEdges[model.EdgeArtifactCertifyBad] {
-		out = append(out, n.badLinks...)
+		values := map[string]any{}
+		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forOutBound(certifyBadArtEdgesStr, "certifyBad", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN certifyBad._id`)
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
 	}
 	if allowedEdges[model.EdgeArtifactCertifyGood] {
-		out = append(out, n.goodLinks...)
+		values := map[string]any{}
+		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forOutBound(certifyGoodArtEdgesStr, "certifyGood", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN certifyGood._id`)
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
 	}
 	if allowedEdges[model.EdgeArtifactHasMetadata] {
-		out = append(out, n.hasMetadataLinks...)
+		values := map[string]any{}
+		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forOutBound(hasMetadataArtEdgesStr, "hasMetadata", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN hasMetadata._id`)
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
 	}
 	if allowedEdges[model.EdgeArtifactPointOfContact] {
-		out = append(out, n.pointOfContactLinks...)
+		values := map[string]any{}
+		arangoQueryBuilder := setArtifactMatchValues(&model.ArtifactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forOutBound(pointOfContactArtEdgesStr, "pointOfContact", "art")
+		arangoQueryBuilder.query.WriteString("\n")
+		arangoQueryBuilder.query.WriteString(`RETURN pointOfContact._id`)
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
 	}
 
 	return out, nil
+}
+
+func (c *arangoClient) getNeighborIDFromCursor(ctx context.Context, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]string, error) {
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "getNeighborIDFromCursor")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query for artifact: %w", err)
+	}
+	defer cursor.Close()
+
+	var foundIDs []string
+	for {
+		var doc string
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to get neighbor id from cursor: %w", err)
+			}
+		} else {
+			foundIDs = append(foundIDs, doc)
+		}
+	}
+	return foundIDs, nil
 }
