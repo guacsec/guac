@@ -169,7 +169,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 			SetJustification(v.Justification).
 			SetOrigin(v.Origin).
 			SetCollector(v.Collector).
-			SetKnownSince(v.KnownSince)
+			SetKnownSince(v.KnownSince.UTC())
 	default:
 		log.Printf("Unknown spec: %+T", v)
 	}

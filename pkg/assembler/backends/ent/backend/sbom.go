@@ -82,7 +82,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			SetDownloadLocation(spec.DownloadLocation).
 			SetOrigin(spec.Origin).
 			SetCollector(spec.Collector).
-			SetKnownSince(spec.KnownSince)
+			SetKnownSince(spec.KnownSince.UTC())
 
 		// If a new column is included in the conflict columns, it must be added to the Indexes() function in the schema
 		conflictColumns := []string{
