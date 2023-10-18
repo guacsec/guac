@@ -68,6 +68,8 @@ type Tx struct {
 	VulnEqual *VulnEqualClient
 	// VulnerabilityID is the client for interacting with the VulnerabilityID builders.
 	VulnerabilityID *VulnerabilityIDClient
+	// VulnerabilityMetadata is the client for interacting with the VulnerabilityMetadata builders.
+	VulnerabilityMetadata *VulnerabilityMetadataClient
 	// VulnerabilityType is the client for interacting with the VulnerabilityType builders.
 	VulnerabilityType *VulnerabilityTypeClient
 
@@ -229,6 +231,7 @@ func (tx *Tx) init() {
 	tx.SourceType = NewSourceTypeClient(tx.config)
 	tx.VulnEqual = NewVulnEqualClient(tx.config)
 	tx.VulnerabilityID = NewVulnerabilityIDClient(tx.config)
+	tx.VulnerabilityMetadata = NewVulnerabilityMetadataClient(tx.config)
 	tx.VulnerabilityType = NewVulnerabilityTypeClient(tx.config)
 }
 

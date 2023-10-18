@@ -214,6 +214,13 @@
 ./pkg/assembler/backends/ent/vulnerabilityid_delete.go
 ./pkg/assembler/backends/ent/vulnerabilityid_query.go
 ./pkg/assembler/backends/ent/vulnerabilityid_update.go
+./pkg/assembler/backends/ent/vulnerabilitymetadata/vulnerabilitymetadata.go
+./pkg/assembler/backends/ent/vulnerabilitymetadata/where.go
+./pkg/assembler/backends/ent/vulnerabilitymetadata.go
+./pkg/assembler/backends/ent/vulnerabilitymetadata_create.go
+./pkg/assembler/backends/ent/vulnerabilitymetadata_delete.go
+./pkg/assembler/backends/ent/vulnerabilitymetadata_update.go
+./pkg/assembler/backends/ent/vulnerabilitymetadata_query.go
 ./pkg/assembler/backends/ent/vulnerabilitytype.go
 ./pkg/assembler/backends/ent/vulnerabilitytype/vulnerabilitytype.go
 ./pkg/assembler/backends/ent/vulnerabilitytype/where.go

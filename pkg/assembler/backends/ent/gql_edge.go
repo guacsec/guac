@@ -632,6 +632,26 @@ func (vi *VulnerabilityID) VulnEquals(ctx context.Context) (result []*VulnEqual,
 	return result, err
 }
 
+func (vi *VulnerabilityID) VulnerabilityMetadata(ctx context.Context) (result []*VulnerabilityMetadata, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = vi.NamedVulnerabilityMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = vi.Edges.VulnerabilityMetadataOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = vi.QueryVulnerabilityMetadata().All(ctx)
+	}
+	return result, err
+}
+
+func (vm *VulnerabilityMetadata) VulnerabilityID(ctx context.Context) (*VulnerabilityID, error) {
+	result, err := vm.Edges.VulnerabilityIDOrErr()
+	if IsNotLoaded(err) {
+		result, err = vm.QueryVulnerabilityID().Only(ctx)
+	}
+	return result, err
+}
+
 func (vt *VulnerabilityType) VulnerabilityIds(ctx context.Context) (result []*VulnerabilityID, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = vt.NamedVulnerabilityIds(graphql.GetFieldContext(ctx).Field.Alias)

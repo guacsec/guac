@@ -43,6 +43,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
@@ -107,6 +108,8 @@ type Client struct {
 	VulnEqual *VulnEqualClient
 	// VulnerabilityID is the client for interacting with the VulnerabilityID builders.
 	VulnerabilityID *VulnerabilityIDClient
+	// VulnerabilityMetadata is the client for interacting with the VulnerabilityMetadata builders.
+	VulnerabilityMetadata *VulnerabilityMetadataClient
 	// VulnerabilityType is the client for interacting with the VulnerabilityType builders.
 	VulnerabilityType *VulnerabilityTypeClient
 	// additional fields for node api
@@ -152,6 +155,7 @@ func (c *Client) init() {
 	c.SourceType = NewSourceTypeClient(c.config)
 	c.VulnEqual = NewVulnEqualClient(c.config)
 	c.VulnerabilityID = NewVulnerabilityIDClient(c.config)
+	c.VulnerabilityMetadata = NewVulnerabilityMetadataClient(c.config)
 	c.VulnerabilityType = NewVulnerabilityTypeClient(c.config)
 }
 
@@ -236,37 +240,38 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		Artifact:          NewArtifactClient(cfg),
-		BillOfMaterials:   NewBillOfMaterialsClient(cfg),
-		Builder:           NewBuilderClient(cfg),
-		Certification:     NewCertificationClient(cfg),
-		CertifyLegal:      NewCertifyLegalClient(cfg),
-		CertifyScorecard:  NewCertifyScorecardClient(cfg),
-		CertifyVex:        NewCertifyVexClient(cfg),
-		CertifyVuln:       NewCertifyVulnClient(cfg),
-		Dependency:        NewDependencyClient(cfg),
-		HasMetadata:       NewHasMetadataClient(cfg),
-		HasSourceAt:       NewHasSourceAtClient(cfg),
-		HashEqual:         NewHashEqualClient(cfg),
-		IsVulnerability:   NewIsVulnerabilityClient(cfg),
-		License:           NewLicenseClient(cfg),
-		Occurrence:        NewOccurrenceClient(cfg),
-		PackageName:       NewPackageNameClient(cfg),
-		PackageNamespace:  NewPackageNamespaceClient(cfg),
-		PackageType:       NewPackageTypeClient(cfg),
-		PackageVersion:    NewPackageVersionClient(cfg),
-		PkgEqual:          NewPkgEqualClient(cfg),
-		PointOfContact:    NewPointOfContactClient(cfg),
-		SLSAAttestation:   NewSLSAAttestationClient(cfg),
-		Scorecard:         NewScorecardClient(cfg),
-		SourceName:        NewSourceNameClient(cfg),
-		SourceNamespace:   NewSourceNamespaceClient(cfg),
-		SourceType:        NewSourceTypeClient(cfg),
-		VulnEqual:         NewVulnEqualClient(cfg),
-		VulnerabilityID:   NewVulnerabilityIDClient(cfg),
-		VulnerabilityType: NewVulnerabilityTypeClient(cfg),
+		ctx:                   ctx,
+		config:                cfg,
+		Artifact:              NewArtifactClient(cfg),
+		BillOfMaterials:       NewBillOfMaterialsClient(cfg),
+		Builder:               NewBuilderClient(cfg),
+		Certification:         NewCertificationClient(cfg),
+		CertifyLegal:          NewCertifyLegalClient(cfg),
+		CertifyScorecard:      NewCertifyScorecardClient(cfg),
+		CertifyVex:            NewCertifyVexClient(cfg),
+		CertifyVuln:           NewCertifyVulnClient(cfg),
+		Dependency:            NewDependencyClient(cfg),
+		HasMetadata:           NewHasMetadataClient(cfg),
+		HasSourceAt:           NewHasSourceAtClient(cfg),
+		HashEqual:             NewHashEqualClient(cfg),
+		IsVulnerability:       NewIsVulnerabilityClient(cfg),
+		License:               NewLicenseClient(cfg),
+		Occurrence:            NewOccurrenceClient(cfg),
+		PackageName:           NewPackageNameClient(cfg),
+		PackageNamespace:      NewPackageNamespaceClient(cfg),
+		PackageType:           NewPackageTypeClient(cfg),
+		PackageVersion:        NewPackageVersionClient(cfg),
+		PkgEqual:              NewPkgEqualClient(cfg),
+		PointOfContact:        NewPointOfContactClient(cfg),
+		SLSAAttestation:       NewSLSAAttestationClient(cfg),
+		Scorecard:             NewScorecardClient(cfg),
+		SourceName:            NewSourceNameClient(cfg),
+		SourceNamespace:       NewSourceNamespaceClient(cfg),
+		SourceType:            NewSourceTypeClient(cfg),
+		VulnEqual:             NewVulnEqualClient(cfg),
+		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
+		VulnerabilityMetadata: NewVulnerabilityMetadataClient(cfg),
+		VulnerabilityType:     NewVulnerabilityTypeClient(cfg),
 	}, nil
 }
 
@@ -284,37 +289,38 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		Artifact:          NewArtifactClient(cfg),
-		BillOfMaterials:   NewBillOfMaterialsClient(cfg),
-		Builder:           NewBuilderClient(cfg),
-		Certification:     NewCertificationClient(cfg),
-		CertifyLegal:      NewCertifyLegalClient(cfg),
-		CertifyScorecard:  NewCertifyScorecardClient(cfg),
-		CertifyVex:        NewCertifyVexClient(cfg),
-		CertifyVuln:       NewCertifyVulnClient(cfg),
-		Dependency:        NewDependencyClient(cfg),
-		HasMetadata:       NewHasMetadataClient(cfg),
-		HasSourceAt:       NewHasSourceAtClient(cfg),
-		HashEqual:         NewHashEqualClient(cfg),
-		IsVulnerability:   NewIsVulnerabilityClient(cfg),
-		License:           NewLicenseClient(cfg),
-		Occurrence:        NewOccurrenceClient(cfg),
-		PackageName:       NewPackageNameClient(cfg),
-		PackageNamespace:  NewPackageNamespaceClient(cfg),
-		PackageType:       NewPackageTypeClient(cfg),
-		PackageVersion:    NewPackageVersionClient(cfg),
-		PkgEqual:          NewPkgEqualClient(cfg),
-		PointOfContact:    NewPointOfContactClient(cfg),
-		SLSAAttestation:   NewSLSAAttestationClient(cfg),
-		Scorecard:         NewScorecardClient(cfg),
-		SourceName:        NewSourceNameClient(cfg),
-		SourceNamespace:   NewSourceNamespaceClient(cfg),
-		SourceType:        NewSourceTypeClient(cfg),
-		VulnEqual:         NewVulnEqualClient(cfg),
-		VulnerabilityID:   NewVulnerabilityIDClient(cfg),
-		VulnerabilityType: NewVulnerabilityTypeClient(cfg),
+		ctx:                   ctx,
+		config:                cfg,
+		Artifact:              NewArtifactClient(cfg),
+		BillOfMaterials:       NewBillOfMaterialsClient(cfg),
+		Builder:               NewBuilderClient(cfg),
+		Certification:         NewCertificationClient(cfg),
+		CertifyLegal:          NewCertifyLegalClient(cfg),
+		CertifyScorecard:      NewCertifyScorecardClient(cfg),
+		CertifyVex:            NewCertifyVexClient(cfg),
+		CertifyVuln:           NewCertifyVulnClient(cfg),
+		Dependency:            NewDependencyClient(cfg),
+		HasMetadata:           NewHasMetadataClient(cfg),
+		HasSourceAt:           NewHasSourceAtClient(cfg),
+		HashEqual:             NewHashEqualClient(cfg),
+		IsVulnerability:       NewIsVulnerabilityClient(cfg),
+		License:               NewLicenseClient(cfg),
+		Occurrence:            NewOccurrenceClient(cfg),
+		PackageName:           NewPackageNameClient(cfg),
+		PackageNamespace:      NewPackageNamespaceClient(cfg),
+		PackageType:           NewPackageTypeClient(cfg),
+		PackageVersion:        NewPackageVersionClient(cfg),
+		PkgEqual:              NewPkgEqualClient(cfg),
+		PointOfContact:        NewPointOfContactClient(cfg),
+		SLSAAttestation:       NewSLSAAttestationClient(cfg),
+		Scorecard:             NewScorecardClient(cfg),
+		SourceName:            NewSourceNameClient(cfg),
+		SourceNamespace:       NewSourceNamespaceClient(cfg),
+		SourceType:            NewSourceTypeClient(cfg),
+		VulnEqual:             NewVulnEqualClient(cfg),
+		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
+		VulnerabilityMetadata: NewVulnerabilityMetadataClient(cfg),
+		VulnerabilityType:     NewVulnerabilityTypeClient(cfg),
 	}, nil
 }
 
@@ -350,7 +356,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
 		c.PointOfContact, c.SLSAAttestation, c.Scorecard, c.SourceName,
 		c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
-		c.VulnerabilityType,
+		c.VulnerabilityMetadata, c.VulnerabilityType,
 	} {
 		n.Use(hooks...)
 	}
@@ -366,7 +372,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
 		c.PointOfContact, c.SLSAAttestation, c.Scorecard, c.SourceName,
 		c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
-		c.VulnerabilityType,
+		c.VulnerabilityMetadata, c.VulnerabilityType,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -431,6 +437,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.VulnEqual.mutate(ctx, m)
 	case *VulnerabilityIDMutation:
 		return c.VulnerabilityID.mutate(ctx, m)
+	case *VulnerabilityMetadataMutation:
+		return c.VulnerabilityMetadata.mutate(ctx, m)
 	case *VulnerabilityTypeMutation:
 		return c.VulnerabilityType.mutate(ctx, m)
 	default:
@@ -5193,6 +5201,22 @@ func (c *VulnerabilityIDClient) QueryVulnEquals(vi *VulnerabilityID) *VulnEqualQ
 	return query
 }
 
+// QueryVulnerabilityMetadata queries the vulnerability_metadata edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryVulnerabilityMetadata(vi *VulnerabilityID) *VulnerabilityMetadataQuery {
+	query := (&VulnerabilityMetadataClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := vi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
+			sqlgraph.To(vulnerabilitymetadata.Table, vulnerabilitymetadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VulnerabilityMetadataTable, vulnerabilityid.VulnerabilityMetadataColumn),
+		)
+		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *VulnerabilityIDClient) Hooks() []Hook {
 	return c.hooks.VulnerabilityID
@@ -5215,6 +5239,155 @@ func (c *VulnerabilityIDClient) mutate(ctx context.Context, m *VulnerabilityIDMu
 		return (&VulnerabilityIDDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown VulnerabilityID mutation op: %q", m.Op())
+	}
+}
+
+// VulnerabilityMetadataClient is a client for the VulnerabilityMetadata schema.
+type VulnerabilityMetadataClient struct {
+	config
+}
+
+// NewVulnerabilityMetadataClient returns a client for the VulnerabilityMetadata from the given config.
+func NewVulnerabilityMetadataClient(c config) *VulnerabilityMetadataClient {
+	return &VulnerabilityMetadataClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `vulnerabilitymetadata.Hooks(f(g(h())))`.
+func (c *VulnerabilityMetadataClient) Use(hooks ...Hook) {
+	c.hooks.VulnerabilityMetadata = append(c.hooks.VulnerabilityMetadata, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `vulnerabilitymetadata.Intercept(f(g(h())))`.
+func (c *VulnerabilityMetadataClient) Intercept(interceptors ...Interceptor) {
+	c.inters.VulnerabilityMetadata = append(c.inters.VulnerabilityMetadata, interceptors...)
+}
+
+// Create returns a builder for creating a VulnerabilityMetadata entity.
+func (c *VulnerabilityMetadataClient) Create() *VulnerabilityMetadataCreate {
+	mutation := newVulnerabilityMetadataMutation(c.config, OpCreate)
+	return &VulnerabilityMetadataCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of VulnerabilityMetadata entities.
+func (c *VulnerabilityMetadataClient) CreateBulk(builders ...*VulnerabilityMetadataCreate) *VulnerabilityMetadataCreateBulk {
+	return &VulnerabilityMetadataCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VulnerabilityMetadataClient) MapCreateBulk(slice any, setFunc func(*VulnerabilityMetadataCreate, int)) *VulnerabilityMetadataCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VulnerabilityMetadataCreateBulk{err: fmt.Errorf("calling to VulnerabilityMetadataClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VulnerabilityMetadataCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VulnerabilityMetadataCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for VulnerabilityMetadata.
+func (c *VulnerabilityMetadataClient) Update() *VulnerabilityMetadataUpdate {
+	mutation := newVulnerabilityMetadataMutation(c.config, OpUpdate)
+	return &VulnerabilityMetadataUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VulnerabilityMetadataClient) UpdateOne(vm *VulnerabilityMetadata) *VulnerabilityMetadataUpdateOne {
+	mutation := newVulnerabilityMetadataMutation(c.config, OpUpdateOne, withVulnerabilityMetadata(vm))
+	return &VulnerabilityMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VulnerabilityMetadataClient) UpdateOneID(id int) *VulnerabilityMetadataUpdateOne {
+	mutation := newVulnerabilityMetadataMutation(c.config, OpUpdateOne, withVulnerabilityMetadataID(id))
+	return &VulnerabilityMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for VulnerabilityMetadata.
+func (c *VulnerabilityMetadataClient) Delete() *VulnerabilityMetadataDelete {
+	mutation := newVulnerabilityMetadataMutation(c.config, OpDelete)
+	return &VulnerabilityMetadataDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VulnerabilityMetadataClient) DeleteOne(vm *VulnerabilityMetadata) *VulnerabilityMetadataDeleteOne {
+	return c.DeleteOneID(vm.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VulnerabilityMetadataClient) DeleteOneID(id int) *VulnerabilityMetadataDeleteOne {
+	builder := c.Delete().Where(vulnerabilitymetadata.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VulnerabilityMetadataDeleteOne{builder}
+}
+
+// Query returns a query builder for VulnerabilityMetadata.
+func (c *VulnerabilityMetadataClient) Query() *VulnerabilityMetadataQuery {
+	return &VulnerabilityMetadataQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVulnerabilityMetadata},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a VulnerabilityMetadata entity by its id.
+func (c *VulnerabilityMetadataClient) Get(ctx context.Context, id int) (*VulnerabilityMetadata, error) {
+	return c.Query().Where(vulnerabilitymetadata.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VulnerabilityMetadataClient) GetX(ctx context.Context, id int) *VulnerabilityMetadata {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryVulnerabilityID queries the vulnerability_id edge of a VulnerabilityMetadata.
+func (c *VulnerabilityMetadataClient) QueryVulnerabilityID(vm *VulnerabilityMetadata) *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := vm.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vulnerabilitymetadata.Table, vulnerabilitymetadata.FieldID, id),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, vulnerabilitymetadata.VulnerabilityIDTable, vulnerabilitymetadata.VulnerabilityIDColumn),
+		)
+		fromV = sqlgraph.Neighbors(vm.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *VulnerabilityMetadataClient) Hooks() []Hook {
+	return c.hooks.VulnerabilityMetadata
+}
+
+// Interceptors returns the client interceptors.
+func (c *VulnerabilityMetadataClient) Interceptors() []Interceptor {
+	return c.inters.VulnerabilityMetadata
+}
+
+func (c *VulnerabilityMetadataClient) mutate(ctx context.Context, m *VulnerabilityMetadataMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VulnerabilityMetadataCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VulnerabilityMetadataUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VulnerabilityMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VulnerabilityMetadataDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown VulnerabilityMetadata mutation op: %q", m.Op())
 	}
 }
 
@@ -5375,7 +5548,7 @@ type (
 		HasSourceAt, HashEqual, IsVulnerability, License, Occurrence, PackageName,
 		PackageNamespace, PackageType, PackageVersion, PkgEqual, PointOfContact,
 		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
-		VulnerabilityID, VulnerabilityType []ent.Hook
+		VulnerabilityID, VulnerabilityMetadata, VulnerabilityType []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
@@ -5383,6 +5556,6 @@ type (
 		HasSourceAt, HashEqual, IsVulnerability, License, Occurrence, PackageName,
 		PackageNamespace, PackageType, PackageVersion, PkgEqual, PointOfContact,
 		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
-		VulnerabilityID, VulnerabilityType []ent.Interceptor
+		VulnerabilityID, VulnerabilityMetadata, VulnerabilityType []ent.Interceptor
 	}
 )
