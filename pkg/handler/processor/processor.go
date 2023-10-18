@@ -87,6 +87,11 @@ const (
 	EncodingUnknown EncodingType = "UNKNOWN"
 )
 
+var EncodingExts = map[string]EncodingType{
+	".bz2": EncodingBzip2,
+	".zst": EncodingZstd,
+}
+
 // SourceInformation provides additional information about where the document comes from
 type SourceInformation struct {
 	// Collector describes the name of the collector providing this information

@@ -22,6 +22,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"path/filepath"
+	"strings"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -216,6 +218,13 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	var reader io.Reader
 	var err error
+	if i.Encoding == "" {
+		ext := filepath.Ext(i.SourceInformation.Source)
+		encoding, ok := processor.EncodingExts[strings.ToLower(ext)]
+		if ok {
+			i.Encoding = encoding
+		}
+	}
 	logger.Infof("Decoding document with encoding:  %v", i.Encoding)
 	switch i.Encoding {
 	case processor.EncodingBzip2:
@@ -225,17 +234,16 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 		if err != nil {
 			return fmt.Errorf("unable to create zstd reader: %w", err)
 		}
-	case processor.EncodingUnknown:
 	}
 	if reader != nil {
-		if err := decompressDocument(ctx, i, reader); err != nil {
+		if err := decompressDocument(i, reader); err != nil {
 			return fmt.Errorf("unable to decode document: %w", err)
 		}
 	}
 	return nil
 }
 
-func decompressDocument(ctx context.Context, i *processor.Document, reader io.Reader) error {
+func decompressDocument(i *processor.Document, reader io.Reader) error {
 	uncompressed, err := io.ReadAll(reader)
 	if err != nil {
 		return fmt.Errorf("unable to decompress document: %w", err)
