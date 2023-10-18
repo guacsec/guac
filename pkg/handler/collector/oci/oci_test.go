@@ -114,6 +114,142 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		},
 		wantErr: false,
 	}, {
+		name: "get OCI referrers",
+		fields: fields{
+			ociValues: []string{
+				"mcr.microsoft.com/oss/kubernetes/kubectl:v1.28.1",
+			},
+			poll:     false,
+			interval: 0,
+		},
+		want: []*processor.Document{
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxAMD64ITE6),
+				Type:   processor.DocumentITE6SLSA,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:395fbca091afd8cd7406a3b9815c2c4054bd06331f7a2a6b2e48798a5365d4f6",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxAMD64SPDX),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:dc365ff2a58436089f1dfcc2dcbf4699a3b9bbb596f5485b70cc75cbd309f020",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxAMD64SPDX1),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:8e20922c8c2c4172879ff18b85e9de011e7bc5d8a93aab8244b8834e6e471e29",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARMV7ITE6),
+				Type:   processor.DocumentITE6SLSA,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:988bec89fa63b1eed4c804e4d8acb7073a97ede89c86768193bca408faad3ed6",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARMV7SPDX),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:264ad11a504bc570eadd7e75c3eeb6432638ecb65ab5203a5b464218dba5b63e",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARM64ITE6),
+				Type:   processor.DocumentITE6SLSA,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:884e5fd916210a1f2fe371fe7e35812e7770787e292134aba104ed1b10d721e9",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARM64SPDX),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:3c48cc52d341cc6a57fcf25225b1d669fbdd32d8942fe669495e6f88de948597",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARM64SPDX1),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:ff231891d6af8af7c5e90b3647a262bd4a8013c74b99dae4a171ccc5480e60c2",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlWindowsAMD64ITE6),
+				Type:   processor.DocumentITE6SLSA,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:61715e8b3d8577fc8fcc54335d4f726803f806475239899498a96170d062b6ea",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlWindowsAMD64ITE6),
+				Type:   processor.DocumentITE6SLSA,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:1b7421f29020b2ff35190e26da222e379c14b457fe23a83be7c2ed44a57c490c",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlWindowsAMD64ITE6),
+				Type:   processor.DocumentITE6SLSA,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:30019e253ab74eb3e38abae7b8997e8e60c420169044ca9bfaf9665f54ad18bc",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARM64SPDX),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:8035089a59a6f8577255f494c1ced250e1206667d8462869fc0deeca98d79427",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARMV7SPDX),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:78efdf2e0abe78a6964b8b5cbcdbfe4496f4564b227992806edd1cac57b68db2",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxAMD64SPDX),
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:64f5e3b86c83acef2fb79e359a942bd2290e30773269f532856421db4e75cc30",
+				},
+			},
+		}}, {
 		name: "tag not specified not polling",
 		fields: fields{
 			ociValues: []string{
@@ -190,11 +326,19 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				t.Fatalf("Collector error handler error: %v", err)
 			}
 
-			for i := range collectedDocs {
-				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i]))
+			for i := range tt.want {
+				collectedDoc := findDocumentBySource(collectedDocs, tt.want[i].SourceInformation.Source)
+				if collectedDoc == nil {
+					t.Errorf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
+				}
+				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDoc), dochelper.DocNode(tt.want[i]))
 				if !result {
 					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
 				}
+			}
+
+			if len(collectedDocs) != len(tt.want) {
+				t.Fatalf("g.RetrieveArtifacts() = %v, want %v", len(collectedDocs), len(tt.want))
 			}
 
 			if g.Type() != OCICollector {
@@ -203,6 +347,16 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 
 		})
 	}
+}
+
+// findDocumentBySource returns the document with the given source
+func findDocumentBySource(docs []*processor.Document, source string) *processor.Document {
+	for _, d := range docs {
+		if d.SourceInformation.Source == source {
+			return d
+		}
+	}
+	return nil
 }
 
 func toDataSource(ociValues []string) datasource.CollectSource {

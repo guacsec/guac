@@ -1,0 +1,484 @@
+{
+ "_type": "https://in-toto.io/Statement/v0.1",
+ "subject": [
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/darwin/amd64/kubectl",
+   "digest": {
+    "sha256": "8202add66a93bcb7219ed7bb16438caf82a80c60348cace2381c678b99d65638"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/darwin/amd64/kubectl-convert",
+   "digest": {
+    "sha256": "b33a9044a3b7094863cba99935fb5d6fd2f58af3569930b50c8321ccaaf9daad"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/darwin/arm64/kubectl",
+   "digest": {
+    "sha256": "8599fc0ea5f7b3f9381c427374041936afe520d50e434ab0126eb10975134108"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/darwin/arm64/kubectl-convert",
+   "digest": {
+    "sha256": "a66e7f75ddf4b2550fc1cea3b21bf61a23a8f7bdf53fb2d14788324622b30015"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/linux/amd64/kubectl",
+   "digest": {
+    "sha256": "6365319dc5b84794df2f292bbc8e7835e9a64cc2923315e0fdb8170105d2c982"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/linux/amd64/kubectl-convert",
+   "digest": {
+    "sha256": "1148efbe381ef4252cf8f097985314426055b29000b310d44caee5294c28c719"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/linux/arm/kubectl",
+   "digest": {
+    "sha256": "9ca1ea80675e0ff5a70d847e0b62504c982870723771aee517780ab2fdd0f8d7"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/linux/arm/kubectl-convert",
+   "digest": {
+    "sha256": "0430c1bdc878d75f0db11068d2d1598cb02d12811c7ac2936e53278168559d42"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/linux/arm64/kubectl",
+   "digest": {
+    "sha256": "4b5f2e6b01ba8305cb4ee13f7a1afee6d0aadc7c8105098c37a2fc6a0de15af0"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/linux/arm64/kubectl-convert",
+   "digest": {
+    "sha256": "cededbc1daeae0b8ca6b8caba21c448bfa53b8f50540479c827edecfbc803cd9"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/windows/amd64/CodeSignSummary-b93a9c08-f6ed-439a-968a-157cab7dc6a3.md",
+   "digest": {
+    "sha256": "5a638d75fe07a875d5fccd05e711b4d051f4ce56aa031b4a92a6a0e8b14f0ec0"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/windows/amd64/kubectl-convert.exe",
+   "digest": {
+    "sha256": "e7f7f5fe1e51be71846c35db23958f36baa1185af71f20bf50b8f9909855704a"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/client/windows/amd64/kubectl.exe",
+   "digest": {
+    "sha256": "10628de5fcfad0a7b005a50de8453cfe9177c42580007d10aa739caa3b781c3a"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-client-darwin-amd64.tar.gz",
+   "digest": {
+    "sha256": "0a99a0a0329353a619d3e6989a1e94f8727436237f66297952e5e2f39677c0c9"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-client-darwin-arm64.tar.gz",
+   "digest": {
+    "sha256": "2d1b93487cfbe9d033a570a40099f396d0ce84626d41dabbe48c5f5821b77f24"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-client-linux-amd64.tar.gz",
+   "digest": {
+    "sha256": "4aba750185c40607976d20bcc0755a981f2b5a4c3cbea7a35302988c7c033ce5"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-client-linux-arm.tar.gz",
+   "digest": {
+    "sha256": "84d8bd83b739f06f4fb8420645fd4e467aa000d2716a040ad5b295a6761c1655"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-client-linux-arm64.tar.gz",
+   "digest": {
+    "sha256": "0d8fc91d594d7ed14d8453a369e132f0b48cb17afcc37ccd4cc535eb09478c65"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-client-windows-amd64.tar.gz",
+   "digest": {
+    "sha256": "7bb66370c3694ff5ba9a10d4aeb7048052c4554045b61f62cb96e122f50c5d0a"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-manifests.tar.gz",
+   "digest": {
+    "sha256": "74e544d7a03c61c9bac4da27bbeb32d5988fe3b50f7a0d69ae51e8925b71cf11"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-node-linux-amd64.tar.gz",
+   "digest": {
+    "sha256": "67ff5ccc6c7687745a62ffd722863bdbbe8ec6e8aca7c9ed7c546f958eb36556"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-node-linux-arm64.tar.gz",
+   "digest": {
+    "sha256": "467bd03e49c7c42dfbb9ce5f34e4b3613eec5f8ec5d0106716c90333c5c6d51e"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-node-windows-amd64.tar.gz",
+   "digest": {
+    "sha256": "4f2c584bd719fc437abdc78afe6297f8b7f167c5757738e3d33f0a61ac804f5e"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-server-linux-amd64.tar.gz",
+   "digest": {
+    "sha256": "554fbb047eb859bacd56c45440c3a319331876382550fc4fd335163e633c6aca"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-server-linux-arm64.tar.gz",
+   "digest": {
+    "sha256": "97634a322f0165ffc3ed63f58cc2c3c6e311e3b126607c9eb7e295ff0b92073e"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-test-darwin-amd64.tar.gz",
+   "digest": {
+    "sha256": "d260519b49f9601cfd3afd12561ac19332058677fbbfe297c02b4fca2eeb9cdc"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-test-darwin-arm64.tar.gz",
+   "digest": {
+    "sha256": "18129497b46898fda1be194502ecdeaf6a584930be1600af9595b7d56292d316"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-test-linux-amd64.tar.gz",
+   "digest": {
+    "sha256": "37c6f3e155b5db5aed8a4f1ec3bcdf211fa6967cc0bc7c04b21f6af0d3ce0177"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-test-linux-arm64.tar.gz",
+   "digest": {
+    "sha256": "7613b3ab57d8606cbb97d7c9e8db51eee49db0254bb10ea1c2e2ab53ef9aee4c"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-test-portable.tar.gz",
+   "digest": {
+    "sha256": "485e1f2a61c11d98e76f12d3417e9ef416cfc4c94e55b9871bb8dfb8687f1dbc"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes-test-windows-amd64.tar.gz",
+   "digest": {
+    "sha256": "7c9eedd1fefaca1a365f45522000da6b343ada7a041fe120d80cdf449266f86c"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/kubernetes.tar.gz",
+   "digest": {
+    "sha256": "dbbbdf42861354bdc14f68a6076a42017623b3fb0adde3e38ef191bbf47b0aba"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/amd64/forked/gotestsum/NOTICE",
+   "digest": {
+    "sha256": "3e3558005731153f0dfef4656b637bef0149a3322fb3acda53d8e2a4a793f385"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/amd64/github.com/google/cadvisor/third_party/containerd/NOTICE",
+   "digest": {
+    "sha256": "03f0b4bcaecfdb491ef5a7d320e2c2adf886c732d34e3fff87d52dbaec64d8c3"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/amd64/kube-log-runner",
+   "digest": {
+    "sha256": "7a29fb0f99fab5f9310f48cd5b0e9454e7f3257b1ad8ee9dfabb5d2dd6b0563e"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/amd64/kube-proxy",
+   "digest": {
+    "sha256": "113925c38d7f87f0359999b3ac6beba85ddb76e704367e0a602fa5d14dad640e"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/amd64/kubeadm",
+   "digest": {
+    "sha256": "4bf179a7d39002a26e4a8c268fc055408cc13395ecce6c5ba6967581b4756fc7"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/amd64/kubectl",
+   "digest": {
+    "sha256": "6365319dc5b84794df2f292bbc8e7835e9a64cc2923315e0fdb8170105d2c982"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/amd64/kubectl-convert",
+   "digest": {
+    "sha256": "1148efbe381ef4252cf8f097985314426055b29000b310d44caee5294c28c719"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/amd64/kubelet",
+   "digest": {
+    "sha256": "0f3634295f0d52dc28f92fcbd4260886866436ed91fde4b17178fe566d05694d"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/amd64/sigs.k8s.io/kustomize/kyaml/internal/forked/github.com/go-yaml/yaml/NOTICE",
+   "digest": {
+    "sha256": "f6c2dd3a67b576eafb89b80200b8b1627230bf3821a0c14cb99a22ac19107d00"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/arm64/forked/gotestsum/NOTICE",
+   "digest": {
+    "sha256": "3e3558005731153f0dfef4656b637bef0149a3322fb3acda53d8e2a4a793f385"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/arm64/github.com/google/cadvisor/third_party/containerd/NOTICE",
+   "digest": {
+    "sha256": "03f0b4bcaecfdb491ef5a7d320e2c2adf886c732d34e3fff87d52dbaec64d8c3"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/arm64/kube-log-runner",
+   "digest": {
+    "sha256": "297ef08e52d3b48c0fd630b7d99637ce51f63ac0ab29a3d2206f5fb3ddb62113"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/arm64/kube-proxy",
+   "digest": {
+    "sha256": "dea34a1f477e8c098000f7d3c05117d6b774272f1b079f6936d60eeb5b577042"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/arm64/kubeadm",
+   "digest": {
+    "sha256": "2cfad22ea32616901d4910fc08eb27e92c707986883ef14ebf7b473bc9cdd429"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/arm64/kubectl",
+   "digest": {
+    "sha256": "4b5f2e6b01ba8305cb4ee13f7a1afee6d0aadc7c8105098c37a2fc6a0de15af0"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/arm64/kubectl-convert",
+   "digest": {
+    "sha256": "cededbc1daeae0b8ca6b8caba21c448bfa53b8f50540479c827edecfbc803cd9"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/arm64/kubelet",
+   "digest": {
+    "sha256": "8021c7dc2736782aae108f55bd1e24c583a1c92e40e6e9f163cf73b9b169768a"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/linux/arm64/sigs.k8s.io/kustomize/kyaml/internal/forked/github.com/go-yaml/yaml/NOTICE",
+   "digest": {
+    "sha256": "f6c2dd3a67b576eafb89b80200b8b1627230bf3821a0c14cb99a22ac19107d00"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/CodeSignSummary-2e446b5d-de39-4530-918b-e0e938de4d72.md",
+   "digest": {
+    "sha256": "bf957524451b172280aa095fe70018c5a09803be06690f751c30a766b927a0a8"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/forked/gotestsum/NOTICE",
+   "digest": {
+    "sha256": "3e3558005731153f0dfef4656b637bef0149a3322fb3acda53d8e2a4a793f385"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/github.com/google/cadvisor/third_party/containerd/NOTICE",
+   "digest": {
+    "sha256": "03f0b4bcaecfdb491ef5a7d320e2c2adf886c732d34e3fff87d52dbaec64d8c3"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/kube-log-runner.exe",
+   "digest": {
+    "sha256": "c7167a8a5e02590f54f8e3472f3eac9aa5ad666a9c33d85f92f00159ca57cd42"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/kube-proxy.exe",
+   "digest": {
+    "sha256": "987732c2c260c10ad658bb56f9c943630cd7c9dda1a6c744b5d25536e9593207"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/kubeadm.exe",
+   "digest": {
+    "sha256": "f31c777b21dc07b62be1846652e350906ff1acf893f70f15e24c27c083f24f41"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/kubectl-convert.exe",
+   "digest": {
+    "sha256": "311fbe145f6e78aec7fabde1a086d28e94b5b7e206021c326295b648ddc7ed4c"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/kubectl.exe",
+   "digest": {
+    "sha256": "cd5b7d5d7d56f1fbebaccec6c96aafde462829053cd79f2a560fea9903943b15"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/kubelet.exe",
+   "digest": {
+    "sha256": "c1aab7062c41805c60c7d071d51f50e184833067192863e4e49589a6bf9c98ae"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/release-tars/node/windows/amd64/sigs.k8s.io/kustomize/kyaml/internal/forked/github.com/go-yaml/yaml/NOTICE",
+   "digest": {
+    "sha256": "f6c2dd3a67b576eafb89b80200b8b1627230bf3821a0c14cb99a22ac19107d00"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/amd64/conformance-amd64.tar",
+   "digest": {
+    "sha256": "f19c7cdd5e9251672545492615e9fce746e9d293f350c465cff3750324ead52b"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/amd64/kube-apiserver-amd64.tar",
+   "digest": {
+    "sha256": "894ef5f088a24a5a5064925cfb08d2757294eaf823f39faf927d92232f9017fc"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/amd64/kube-controller-manager-amd64.tar",
+   "digest": {
+    "sha256": "5f5d480386663fbe9f6068e0b46bca85788df7a8cdbe3800164587e8c2d4c8e6"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/amd64/kube-proxy-amd64.tar",
+   "digest": {
+    "sha256": "cac194261b7f5ed7b228cabf7d638b6ea68515bc939dc1cc7913b8460bc3d08b"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/amd64/kube-scheduler-amd64.tar",
+   "digest": {
+    "sha256": "bb418aba32809a95d8c4e5f122549fa29fe6155de967302290a7764dc392f08c"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/amd64/kubectl-amd64.tar",
+   "digest": {
+    "sha256": "8bdbe9ef6db000e73125bfd8b151ab9f5ca8cfb6bffd6d3520edd91e3bcd97f3"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/arm/kubectl.tar",
+   "digest": {
+    "sha256": "a6361bbd96c6438904cb72d7d145f9de30df4bdda57dc42286c21a9ebc58a8e1"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/arm64/conformance-arm64.tar",
+   "digest": {
+    "sha256": "d1e4ab9c37d3a929450b255724f4d57c7871a4c12dafb7819e4439e6e46749f7"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/arm64/kube-apiserver-arm64.tar",
+   "digest": {
+    "sha256": "b7f63f5ee08d9b2a73e557a1e78609f285edea7baab6f4bae663ce4c062128c1"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/arm64/kube-controller-manager-arm64.tar",
+   "digest": {
+    "sha256": "833dc7fe0227d5ef1deb578f5bac5f60d8b9b98b17bced4ba23895df34a00729"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/arm64/kube-proxy-arm64.tar",
+   "digest": {
+    "sha256": "011e6919a76838d68f87cd3b0f12490c36abdf2886c6b3608f82565beb22f26f"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/arm64/kube-scheduler-arm64.tar",
+   "digest": {
+    "sha256": "2eaf9fbe4472b9d08f4596e8e33391adb64ff035c918b43eaa0cf841a5903e04"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/linux/arm64/kubectl-arm64.tar",
+   "digest": {
+    "sha256": "98ed26a070281fc5c4a93664f855c3bbdd30e18fcd4a532d60754b984b72c73a"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/windows/amd64/kubectl.1809.tar",
+   "digest": {
+    "sha256": "75c20ef5bde7bad27a44728887a0a92967e4bc4bc6b541a8592a2e0a9617e037"
+   }
+  },
+  {
+   "name": "/mnt/vss/_work/1/a/images/windows/amd64/kubectl.ltsc2022.tar",
+   "digest": {
+    "sha256": "51dbdd99ec3c0a3fb344d5504a769b131f52f34f997d3120e0b413415aa1ca53"
+   }
+  }
+ ],
+ "predicateType": "https://slsa.dev/provenance/v0.2",
+ "predicate": {
+  "builder": {
+   "id": "Project Collection Build Service (AzureContainerUpstream)"
+  },
+  "invocation": {
+   "configSource": {
+    "uri": "https://AzureContainerUpstream@dev.azure.com/AzureContainerUpstream/Kubernetes/_git/ado-build-definitions",
+    "digest": {
+     "sha256": "b2ec157721d8e6d507ca6c79d0e8fa096fc2a101"
+    },
+    "entryPoint": "ep"
+   },
+   "parameters": {
+    "checkout.branch": "v1.28.1"
+   }
+  },
+  "metadata": {
+   "buildInvocationID": "119656"
+  },
+  "materials": [
+   {
+    "uri": "https://github.com/kubernetes/kubernetes",
+    "digest": {
+     "sha256": "8dc49c4b984b897d423aab4971090e1879eb4f23"
+    }
+   }
+  ]
+ }
+}
