@@ -212,6 +212,7 @@ func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 		DownloadLocation: sbom.DownloadLocation,
 		Origin:           sbom.Origin,
 		Collector:        sbom.Collector,
+		KnownSince:       sbom.KnownSince,
 	}
 }
 

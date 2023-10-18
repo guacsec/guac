@@ -39,6 +39,7 @@ func (BillOfMaterials) Fields() []ent.Field {
 		field.String("download_location"),
 		field.String("origin"),
 		field.String("collector").Comment("GUAC collector for the document"),
+		field.Time("known_since"),
 	}
 }
 
@@ -53,9 +54,9 @@ func (BillOfMaterials) Edges() []ent.Edge {
 // Indexes of the Material.
 func (BillOfMaterials) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("algorithm", "digest", "uri", "download_location").Edges("package").Unique().
+		index.Fields("algorithm", "digest", "uri", "download_location", "known_since").Edges("package").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND artifact_id IS NULL")).StorageKey("sbom_unique_package"),
-		index.Fields("algorithm", "digest", "uri", "download_location").Edges("artifact").Unique().
+		index.Fields("algorithm", "digest", "uri", "download_location", "known_since").Edges("artifact").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND artifact_id IS NOT NULL")).StorageKey("sbom_unique_artifact"),
 	}
 }

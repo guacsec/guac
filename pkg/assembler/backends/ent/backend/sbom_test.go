@@ -19,6 +19,7 @@ package backend
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -123,6 +124,29 @@ func (s *Suite) Test_HasSBOM() {
 				{
 					Subject: p1out,
 					URI:     "test uri one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: p1,
+					},
+					Spec: &model.HasSBOMInputSpec{
+						KnownSince: time.Unix(1e9, 0),
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				KnownSince: ptrfrom.Time(time.Unix(1e9, 0)),
+			},
+			Expected: []*model.HasSbom{
+				{
+					Subject:    p1out,
+					KnownSince: time.Unix(1e9, 0),
 				},
 			},
 		},
@@ -610,6 +634,31 @@ func (s *Suite) TestIngestHasSBOMs() {
 				{
 					Subject: p1out,
 					URI:     "test uri one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p1},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							KnownSince: time.Unix(1e9, 0),
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				KnownSince: ptrfrom.Time(time.Unix(1e9, 0)),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:    p1out,
+					KnownSince: time.Unix(1e9, 0),
 				},
 			},
 		},

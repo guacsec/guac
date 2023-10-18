@@ -244,6 +244,11 @@ func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphq
 				selectedFields = append(selectedFields, billofmaterials.FieldCollector)
 				fieldSeen[billofmaterials.FieldCollector] = struct{}{}
 			}
+		case "knownSince":
+			if _, ok := fieldSeen[billofmaterials.FieldKnownSince]; !ok {
+				selectedFields = append(selectedFields, billofmaterials.FieldKnownSince)
+				fieldSeen[billofmaterials.FieldKnownSince] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -474,6 +479,11 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 			if _, ok := fieldSeen[certification.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, certification.FieldCollector)
 				fieldSeen[certification.FieldCollector] = struct{}{}
+			}
+		case "knownSince":
+			if _, ok := fieldSeen[certification.FieldKnownSince]; !ok {
+				selectedFields = append(selectedFields, certification.FieldKnownSince)
+				fieldSeen[certification.FieldKnownSince] = struct{}{}
 			}
 		case "id":
 		case "__typename":

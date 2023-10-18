@@ -21,6 +21,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -39,6 +40,8 @@ func TestHasSBOM(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
 	type call struct {
 		Sub model.PackageOrArtifactInput
 		HS  *model.HasSBOMInputSpec
@@ -138,6 +141,41 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject: testdata.P1out,
 					URI:     "test uri one",
+				},
+			},
+		},
+		{
+			Name:  "Query on URI",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: testdata.P1,
+					},
+					HS: &model.HasSBOMInputSpec{
+						URI:        "test uri one",
+						KnownSince: curTime,
+					},
+				},
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: testdata.P1,
+					},
+					HS: &model.HasSBOMInputSpec{
+						URI:        "test uri two",
+						KnownSince: timeAfterOneSecond,
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				URI:        ptrfrom.String("test uri one"),
+				KnownSince: ptrfrom.Time(curTime),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:    testdata.P1out,
+					URI:        "test uri one",
+					KnownSince: curTime,
 				},
 			},
 		},

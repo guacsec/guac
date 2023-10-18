@@ -40,6 +40,7 @@ func (Certification) Fields() []ent.Field {
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
+		field.Time("known_since"),
 	}
 }
 
@@ -55,9 +56,9 @@ func (Certification) Edges() []ent.Edge {
 
 func (Certification) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("type", "justification", "origin", "collector", "source_id").Unique().Annotations(entsql.IndexWhere("source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
-		index.Fields("type", "justification", "origin", "collector", "package_version_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
-		index.Fields("type", "justification", "origin", "collector", "package_name_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL")),
-		index.Fields("type", "justification", "origin", "collector", "artifact_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL")),
+		index.Fields("type", "justification", "origin", "collector", "source_id", "known_since").Unique().Annotations(entsql.IndexWhere("source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
+		index.Fields("type", "justification", "origin", "collector", "package_version_id", "known_since").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
+		index.Fields("type", "justification", "origin", "collector", "package_name_id", "known_since").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL")),
+		index.Fields("type", "justification", "origin", "collector", "artifact_id", "known_since").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL")),
 	}
 }

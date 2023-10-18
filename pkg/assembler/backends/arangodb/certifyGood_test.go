@@ -21,6 +21,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -39,6 +40,8 @@ func TestCertifyGood(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
+	curTime := time.Now()
+	timeAfterOneSecond := curTime.Add(time.Second)
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
@@ -190,6 +193,47 @@ func TestCertifyGood(t *testing.T) {
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification one",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification one",
+						KnownSince:    curTime,
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification two",
+						KnownSince:    timeAfterOneSecond,
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Justification: ptrfrom.String("test justification one"),
+				KnownSince:    ptrfrom.Time(curTime),
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       testdata.P1out,
+					Justification: "test justification one",
+					KnownSince:    curTime,
 				},
 			},
 		},

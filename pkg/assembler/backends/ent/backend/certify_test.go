@@ -19,6 +19,7 @@ package backend
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -129,6 +130,35 @@ func (s *Suite) TestCertifyBad() {
 				{
 					Subject:       p1out,
 					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on Justification",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: p1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						Justification: "test justification one",
+						KnownSince:    time.Unix(1e9, 0),
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				Justification: ptrfrom.String("test justification one"),
+				KnownSince:    ptrfrom.Time(time.Unix(1e9, 0)),
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       p1out,
+					Justification: "test justification one",
+					KnownSince:    time.Unix(1e9, 0),
 				},
 			},
 		},
@@ -672,6 +702,57 @@ func (s *Suite) TestIngestCertifyBads() {
 			},
 		},
 		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1, p2},
+			InSrc: []*model.SourceInputSpec{s1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{p1, p2},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+							KnownSince:    time.Unix(1e9, 0),
+						},
+						{
+							Justification: "test justification",
+							KnownSince:    time.Unix(1e9, 0),
+						},
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Sources: []*model.SourceInputSpec{s1},
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							Justification: "test justification",
+							KnownSince:    time.Unix(1e9, 0),
+						},
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				Subject: &model.PackageSourceOrArtifactSpec{
+					Package: &model.PkgSpec{
+						Version: ptrfrom.String("2.11.1"),
+					},
+				},
+				KnownSince: ptrfrom.Time(time.Unix(1e9, 0)),
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       p2out,
+					Justification: "test justification",
+					KnownSince:    time.Unix(1e9, 0),
+				},
+			},
+		},
+		{
 			Name:  "Query on Package",
 			InPkg: []*model.PkgInputSpec{p1, p2},
 			InSrc: []*model.SourceInputSpec{s1},
@@ -957,6 +1038,47 @@ func (s *Suite) TestCertifyGood() {
 				{
 					Subject:       p1out,
 					Justification: "test justification",
+				},
+			},
+		},
+		{
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{p1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: p1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification one",
+						KnownSince:    time.Unix(1e9, 0),
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: p1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						Justification: "test justification two",
+						KnownSince:    time.Unix(1e9, 0),
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				Justification: ptrfrom.String("test justification one"),
+				KnownSince:    ptrfrom.Time(time.Unix(1e9, 0)),
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:       p1out,
+					Justification: "test justification one",
+					KnownSince:    time.Unix(1e9, 0),
 				},
 			},
 		},

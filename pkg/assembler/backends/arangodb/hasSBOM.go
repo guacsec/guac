@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -119,6 +120,7 @@ func getPkgHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 		'digest': hasSBOM.digest,
 		'downloadLocation': hasSBOM.downloadLocation,
 		'collector': hasSBOM.collector,
+		'knownSince': hasSBOM.knownSince,
 		'origin': hasSBOM.origin  
 	  }`)
 
@@ -145,6 +147,7 @@ func getArtifactHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQuer
 		'digest': hasSBOM.digest,
 		'downloadLocation': hasSBOM.downloadLocation,
 		'collector': hasSBOM.collector,
+		'knownSince': hasSBOM.knownSince,
 		'origin': hasSBOM.origin  
 	  }`)
 
@@ -186,6 +189,11 @@ func setHasSBOMMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSBOMSpec *
 		arangoQueryBuilder.filter("hasSBOM", collector, "==", "@"+collector)
 		queryValues[collector] = *hasSBOMSpec.Collector
 	}
+	if hasSBOMSpec.KnownSince != nil {
+		hasSBOMKnownSince := *hasSBOMSpec.KnownSince
+		arangoQueryBuilder.filter("hasSBOM", "knownSince", ">=", "@"+knownSince)
+		queryValues[knownSince] = hasSBOMKnownSince.UTC()
+	}
 }
 
 func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInputSpec, hasSbom *model.HasSBOMInputSpec) map[string]any {
@@ -205,6 +213,7 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 	values["downloadLocation"] = hasSbom.DownloadLocation
 	values["origin"] = hasSbom.Origin
 	values["collector"] = hasSbom.Collector
+	values[knownSince] = hasSbom.KnownSince.UTC()
 
 	return values
 }
@@ -266,8 +275,8 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		)
 		  
 		  LET hasSBOM = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin } 
-				  INSERT {  packageID:firstPkg.version_id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin } 
+			  UPSERT {  packageID:firstPkg.version_id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+				  INSERT {  packageID:firstPkg.version_id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN NEW
 		  )
@@ -295,6 +304,7 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 			'digest': hasSBOM.digest,
 			'downloadLocation': hasSBOM.downloadLocation,
 			'collector': hasSBOM.collector,
+			'knownSince': hasSBOM.knownSince,
 			'origin': hasSBOM.origin  
 		  }`
 
@@ -346,8 +356,8 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		LET hasSBOM = FIRST(
-			UPSERT { artifactID:artifact._id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin } 
-				INSERT { artifactID:artifact._id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin } 
+			UPSERT { artifactID:artifact._id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+				INSERT { artifactID:artifact._id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 				UPDATE {} IN hasSBOMs
 				RETURN NEW
 		)
@@ -368,6 +378,7 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		  'digest': hasSBOM.digest,
 		  'downloadLocation': hasSBOM.downloadLocation,
 		  'collector': hasSBOM.collector,
+		  'knownSince': hasSBOM.knownSince,
 		  'origin': hasSBOM.origin  
 		}`
 
@@ -395,8 +406,8 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		  LET hasSBOM = FIRST(
-			  UPSERT { artifactID:artifact._id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
-				  INSERT { artifactID:artifact._id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
+			  UPSERT { artifactID:artifact._id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
+				  INSERT { artifactID:artifact._id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN NEW
 		  )
@@ -417,6 +428,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			'digest': hasSBOM.digest,
 			'downloadLocation': hasSBOM.downloadLocation,
 			'collector': hasSBOM.collector,
+			'knownSince': hasSBOM.knownSince,
 			'origin': hasSBOM.origin  
 		  }`
 
@@ -463,8 +475,8 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		)
 		  
 		  LET hasSBOM = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
-				  INSERT {  packageID:firstPkg.version_id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin } 
+			  UPSERT {  packageID:firstPkg.version_id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
+				  INSERT {  packageID:firstPkg.version_id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN NEW
 		  )
@@ -492,6 +504,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			'digest': hasSBOM.digest,
 			'downloadLocation': hasSBOM.downloadLocation,
 			'collector': hasSBOM.collector,
+			'knownSince': hasSBOM.knownSince,
 			'origin': hasSBOM.origin  
 		  }`
 
@@ -525,6 +538,7 @@ func getHasSBOMFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.H
 		DownloadLocation string          `json:"downloadLocation"`
 		Collector        string          `json:"collector"`
 		Origin           string          `json:"origin"`
+		KnownSince       time.Time       `json:"knownSince"`
 	}
 
 	var createdValues []collectedData
@@ -556,8 +570,9 @@ func getHasSBOMFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.H
 			Algorithm:        createdValue.Algorithm,
 			Digest:           createdValue.Digest,
 			DownloadLocation: createdValue.DownloadLocation,
-			Origin:           createdValue.Origin,
-			Collector:        createdValue.Collector,
+			Origin:           createdValue.Collector,
+			Collector:        createdValue.Origin,
+			KnownSince:       createdValue.KnownSince,
 		}
 		if pkg != nil {
 			hasSBOM.Subject = pkg

@@ -37,6 +37,7 @@ const (
 	origin          string        = "origin"
 	collector       string        = "collector"
 	justification   string        = "justification"
+	knownSince      string        = "knownSince"
 	maxRetires      int           = 100
 	retryTimer      time.Duration = time.Microsecond
 	guacEmpty       string        = "guac-empty-@@"

@@ -125,6 +125,7 @@ func queryCertifications(ctx context.Context, client *ent.Client, typ certificat
 		optionalPredicate(filter.Collector, certification.CollectorEQ),
 		optionalPredicate(filter.Origin, certification.OriginEQ),
 		optionalPredicate(filter.Justification, certification.JustificationEQ),
+		optionalPredicate(filter.KnownSince, certification.KnownSinceEQ),
 	}
 
 	if filter.Subject != nil {
@@ -160,13 +161,15 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 			SetType(certification.TypeBAD).
 			SetJustification(v.Justification).
 			SetOrigin(v.Origin).
-			SetCollector(v.Collector)
+			SetCollector(v.Collector).
+			SetKnownSince(v.KnownSince)
 	case model.CertifyGoodInputSpec:
 		insert.
 			SetType(certification.TypeGOOD).
 			SetJustification(v.Justification).
 			SetOrigin(v.Origin).
-			SetCollector(v.Collector)
+			SetCollector(v.Collector).
+			SetKnownSince(v.KnownSince.UTC())
 	default:
 		log.Printf("Unknown spec: %+T", v)
 	}
@@ -176,6 +179,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 		certification.FieldCollector,
 		certification.FieldOrigin,
 		certification.FieldJustification,
+		certification.FieldKnownSince,
 	}
 	var conflictWhere *sql.Predicate
 
@@ -280,6 +284,7 @@ func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
 		Origin:        v.Origin,
 		Collector:     v.Collector,
 		Subject:       sub,
+		KnownSince:    v.KnownSince,
 	}
 }
 
@@ -306,5 +311,6 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 		Origin:        v.Origin,
 		Collector:     v.Collector,
 		Subject:       sub,
+		KnownSince:    v.KnownSince,
 	}
 }

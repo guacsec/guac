@@ -42,6 +42,7 @@ var (
 		{Name: "download_location", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
+		{Name: "known_since", Type: field.TypeTime},
 		{Name: "package_id", Type: field.TypeInt, Nullable: true},
 		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
 	}
@@ -53,13 +54,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "bill_of_materials_package_versions_package",
-				Columns:    []*schema.Column{BillOfMaterialsColumns[7]},
+				Columns:    []*schema.Column{BillOfMaterialsColumns[8]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "bill_of_materials_artifacts_artifact",
-				Columns:    []*schema.Column{BillOfMaterialsColumns[8]},
+				Columns:    []*schema.Column{BillOfMaterialsColumns[9]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -68,7 +69,7 @@ var (
 			{
 				Name:    "sbom_unique_package",
 				Unique:  true,
-				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7]},
+				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NOT NULL AND artifact_id IS NULL",
 				},
@@ -76,7 +77,7 @@ var (
 			{
 				Name:    "sbom_unique_artifact",
 				Unique:  true,
-				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[8]},
+				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NULL AND artifact_id IS NOT NULL",
 				},
@@ -108,6 +109,7 @@ var (
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
+		{Name: "known_since", Type: field.TypeTime},
 		{Name: "source_id", Type: field.TypeInt, Nullable: true},
 		{Name: "package_version_id", Type: field.TypeInt, Nullable: true},
 		{Name: "package_name_id", Type: field.TypeInt, Nullable: true},
@@ -121,58 +123,58 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "certifications_source_names_source",
-				Columns:    []*schema.Column{CertificationsColumns[5]},
+				Columns:    []*schema.Column{CertificationsColumns[6]},
 				RefColumns: []*schema.Column{SourceNamesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "certifications_package_versions_package_version",
-				Columns:    []*schema.Column{CertificationsColumns[6]},
+				Columns:    []*schema.Column{CertificationsColumns[7]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "certifications_package_names_all_versions",
-				Columns:    []*schema.Column{CertificationsColumns[7]},
+				Columns:    []*schema.Column{CertificationsColumns[8]},
 				RefColumns: []*schema.Column{PackageNamesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "certifications_artifacts_artifact",
-				Columns:    []*schema.Column{CertificationsColumns[8]},
+				Columns:    []*schema.Column{CertificationsColumns[9]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certification_type_justification_origin_collector_source_id",
+				Name:    "certification_type_justification_origin_collector_source_id_known_since",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[5]},
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[6], CertificationsColumns[5]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "certification_type_justification_origin_collector_package_version_id",
+				Name:    "certification_type_justification_origin_collector_package_version_id_known_since",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[6]},
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[7], CertificationsColumns[5]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "certification_type_justification_origin_collector_package_name_id",
+				Name:    "certification_type_justification_origin_collector_package_name_id_known_since",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[7]},
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[8], CertificationsColumns[5]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "certification_type_justification_origin_collector_artifact_id",
+				Name:    "certification_type_justification_origin_collector_artifact_id_known_since",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[8]},
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[3], CertificationsColumns[4], CertificationsColumns[9], CertificationsColumns[5]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL",
 				},

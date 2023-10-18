@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -105,6 +106,12 @@ func (bomu *BillOfMaterialsUpdate) SetCollector(s string) *BillOfMaterialsUpdate
 	return bomu
 }
 
+// SetKnownSince sets the "known_since" field.
+func (bomu *BillOfMaterialsUpdate) SetKnownSince(t time.Time) *BillOfMaterialsUpdate {
+	bomu.mutation.SetKnownSince(t)
+	return bomu
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (bomu *BillOfMaterialsUpdate) SetPackage(p *PackageVersion) *BillOfMaterialsUpdate {
 	return bomu.SetPackageID(p.ID)
@@ -185,6 +192,9 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if value, ok := bomu.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := bomu.mutation.KnownSince(); ok {
+		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
 	}
 	if bomu.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -340,6 +350,12 @@ func (bomuo *BillOfMaterialsUpdateOne) SetCollector(s string) *BillOfMaterialsUp
 	return bomuo
 }
 
+// SetKnownSince sets the "known_since" field.
+func (bomuo *BillOfMaterialsUpdateOne) SetKnownSince(t time.Time) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.SetKnownSince(t)
+	return bomuo
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (bomuo *BillOfMaterialsUpdateOne) SetPackage(p *PackageVersion) *BillOfMaterialsUpdateOne {
 	return bomuo.SetPackageID(p.ID)
@@ -450,6 +466,9 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 	}
 	if value, ok := bomuo.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := bomuo.mutation.KnownSince(); ok {
+		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
 	}
 	if bomuo.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{

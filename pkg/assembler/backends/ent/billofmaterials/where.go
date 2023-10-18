@@ -3,6 +3,8 @@
 package billofmaterials
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -91,6 +93,11 @@ func Origin(v string) predicate.BillOfMaterials {
 // Collector applies equality check predicate on the "collector" field. It's identical to CollectorEQ.
 func Collector(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldCollector, v))
+}
+
+// KnownSince applies equality check predicate on the "known_since" field. It's identical to KnownSinceEQ.
+func KnownSince(v time.Time) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldKnownSince, v))
 }
 
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
@@ -541,6 +548,46 @@ func CollectorEqualFold(v string) predicate.BillOfMaterials {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// KnownSinceEQ applies the EQ predicate on the "known_since" field.
+func KnownSinceEQ(v time.Time) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldKnownSince, v))
+}
+
+// KnownSinceNEQ applies the NEQ predicate on the "known_since" field.
+func KnownSinceNEQ(v time.Time) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNEQ(FieldKnownSince, v))
+}
+
+// KnownSinceIn applies the In predicate on the "known_since" field.
+func KnownSinceIn(vs ...time.Time) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldIn(FieldKnownSince, vs...))
+}
+
+// KnownSinceNotIn applies the NotIn predicate on the "known_since" field.
+func KnownSinceNotIn(vs ...time.Time) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNotIn(FieldKnownSince, vs...))
+}
+
+// KnownSinceGT applies the GT predicate on the "known_since" field.
+func KnownSinceGT(v time.Time) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGT(FieldKnownSince, v))
+}
+
+// KnownSinceGTE applies the GTE predicate on the "known_since" field.
+func KnownSinceGTE(v time.Time) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGTE(FieldKnownSince, v))
+}
+
+// KnownSinceLT applies the LT predicate on the "known_since" field.
+func KnownSinceLT(v time.Time) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLT(FieldKnownSince, v))
+}
+
+// KnownSinceLTE applies the LTE predicate on the "known_since" field.
+func KnownSinceLTE(v time.Time) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLTE(FieldKnownSince, v))
 }
 
 // HasPackage applies the HasEdge predicate on the "package" edge.
