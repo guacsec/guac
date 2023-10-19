@@ -1091,6 +1091,37 @@ var (
 			},
 		},
 	}
+	// VulnerabilityMetadataColumns holds the columns for the "vulnerability_metadata" table.
+	VulnerabilityMetadataColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "score_type", Type: field.TypeEnum, Enums: []string{"CVSSv2", "CVSSv3", "EPSSv1", "EPSSv2", "CVSSv31", "CVSSv4", "OWASP", "SSVC"}},
+		{Name: "score_value", Type: field.TypeFloat64},
+		{Name: "timestamp", Type: field.TypeTime},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "vulnerability_id_id", Type: field.TypeInt},
+	}
+	// VulnerabilityMetadataTable holds the schema information for the "vulnerability_metadata" table.
+	VulnerabilityMetadataTable = &schema.Table{
+		Name:       "vulnerability_metadata",
+		Columns:    VulnerabilityMetadataColumns,
+		PrimaryKey: []*schema.Column{VulnerabilityMetadataColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vulnerability_metadata_vulnerability_ids_vulnerability_id",
+				Columns:    []*schema.Column{VulnerabilityMetadataColumns[6]},
+				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "vulnerabilitymetadata_vulnerability_id_id_score_type_score_value_timestamp_origin_collector",
+				Unique:  true,
+				Columns: []*schema.Column{VulnerabilityMetadataColumns[6], VulnerabilityMetadataColumns[1], VulnerabilityMetadataColumns[2], VulnerabilityMetadataColumns[3], VulnerabilityMetadataColumns[4], VulnerabilityMetadataColumns[5]},
+			},
+		},
+	}
 	// VulnerabilityTypesColumns holds the columns for the "vulnerability_types" table.
 	VulnerabilityTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -1289,6 +1320,7 @@ var (
 		SourceTypesTable,
 		VulnEqualsTable,
 		VulnerabilityIdsTable,
+		VulnerabilityMetadataTable,
 		VulnerabilityTypesTable,
 		CertifyLegalDeclaredLicensesTable,
 		CertifyLegalDiscoveredLicensesTable,
@@ -1345,6 +1377,7 @@ func init() {
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
 	VulnerabilityIdsTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
+	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable

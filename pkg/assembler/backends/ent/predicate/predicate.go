@@ -90,5 +90,8 @@ type VulnEqual func(*sql.Selector)
 // VulnerabilityID is the predicate function for vulnerabilityid builders.
 type VulnerabilityID func(*sql.Selector)
 
+// VulnerabilityMetadata is the predicate function for vulnerabilitymetadata builders.
+type VulnerabilityMetadata func(*sql.Selector)
+
 // VulnerabilityType is the predicate function for vulnerabilitytype builders.
 type VulnerabilityType func(*sql.Selector)

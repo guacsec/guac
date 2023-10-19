@@ -35,6 +35,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
@@ -3258,6 +3259,18 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 			vi.WithNamedVulnEquals(alias, func(wq *VulnEqualQuery) {
 				*wq = *query
 			})
+		case "vulnerabilityMetadata":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&VulnerabilityMetadataClient{config: vi.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			vi.WithNamedVulnerabilityMetadata(alias, func(wq *VulnerabilityMetadataQuery) {
+				*wq = *query
+			})
 		case "vulnerabilityID":
 			if _, ok := fieldSeen[vulnerabilityid.FieldVulnerabilityID]; !ok {
 				selectedFields = append(selectedFields, vulnerabilityid.FieldVulnerabilityID)
@@ -3288,6 +3301,109 @@ type vulnerabilityidPaginateArgs struct {
 
 func newVulnerabilityIDPaginateArgs(rv map[string]any) *vulnerabilityidPaginateArgs {
 	args := &vulnerabilityidPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (vm *VulnerabilityMetadataQuery) CollectFields(ctx context.Context, satisfies ...string) (*VulnerabilityMetadataQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return vm, nil
+	}
+	if err := vm.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return vm, nil
+}
+
+func (vm *VulnerabilityMetadataQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(vulnerabilitymetadata.Columns))
+		selectedFields = []string{vulnerabilitymetadata.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "vulnerabilityID":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&VulnerabilityIDClient{config: vm.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			vm.withVulnerabilityID = query
+			if _, ok := fieldSeen[vulnerabilitymetadata.FieldVulnerabilityIDID]; !ok {
+				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldVulnerabilityIDID)
+				fieldSeen[vulnerabilitymetadata.FieldVulnerabilityIDID] = struct{}{}
+			}
+		case "vulnerabilityIDID":
+			if _, ok := fieldSeen[vulnerabilitymetadata.FieldVulnerabilityIDID]; !ok {
+				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldVulnerabilityIDID)
+				fieldSeen[vulnerabilitymetadata.FieldVulnerabilityIDID] = struct{}{}
+			}
+		case "scoreType":
+			if _, ok := fieldSeen[vulnerabilitymetadata.FieldScoreType]; !ok {
+				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldScoreType)
+				fieldSeen[vulnerabilitymetadata.FieldScoreType] = struct{}{}
+			}
+		case "scoreValue":
+			if _, ok := fieldSeen[vulnerabilitymetadata.FieldScoreValue]; !ok {
+				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldScoreValue)
+				fieldSeen[vulnerabilitymetadata.FieldScoreValue] = struct{}{}
+			}
+		case "timestamp":
+			if _, ok := fieldSeen[vulnerabilitymetadata.FieldTimestamp]; !ok {
+				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldTimestamp)
+				fieldSeen[vulnerabilitymetadata.FieldTimestamp] = struct{}{}
+			}
+		case "origin":
+			if _, ok := fieldSeen[vulnerabilitymetadata.FieldOrigin]; !ok {
+				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldOrigin)
+				fieldSeen[vulnerabilitymetadata.FieldOrigin] = struct{}{}
+			}
+		case "collector":
+			if _, ok := fieldSeen[vulnerabilitymetadata.FieldCollector]; !ok {
+				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldCollector)
+				fieldSeen[vulnerabilitymetadata.FieldCollector] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		vm.Select(selectedFields...)
+	}
+	return nil
+}
+
+type vulnerabilitymetadataPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []VulnerabilityMetadataPaginateOption
+}
+
+func newVulnerabilityMetadataPaginateArgs(rv map[string]any) *vulnerabilitymetadataPaginateArgs {
+	args := &vulnerabilitymetadataPaginateArgs{}
 	if rv == nil {
 		return args
 	}
