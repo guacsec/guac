@@ -27,9 +27,12 @@ import (
 	arangodbdriverhttp "github.com/arangodb/go-driver/http"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 const (
+	arangoDB        string        = "guac_db"
+	arangoGraph     string        = "guac"
 	namespaces      string        = "namespaces"
 	names           string        = namespaces + ".names"
 	versions        string        = names + ".versions"
@@ -192,6 +195,79 @@ const (
 	certifyLegalsStr                       string = "certifyLegals"
 )
 
+var mapEdgeToArangoEdgeCollection = map[model.Edge][]string{
+	model.EdgeArtifactCertifyBad:               {certifyBadArtEdgesStr},
+	model.EdgeArtifactCertifyGood:              {certifyGoodArtEdgesStr},
+	model.EdgeArtifactCertifyVexStatement:      {certifyVexArtEdgesStr},
+	model.EdgeArtifactHashEqual:                {hashEqualSubjectArtEdgesStr},
+	model.EdgeArtifactHasMetadata:              {hasMetadataArtEdgesStr},
+	model.EdgeArtifactHasSbom:                  {hasSBOMArtEdgesStr},
+	model.EdgeArtifactHasSlsa:                  {hasSLSASubjectArtEdgesStr},
+	model.EdgeArtifactIsOccurrence:             {isOccurrenceArtEdgesStr},
+	model.EdgeArtifactPointOfContact:           {pointOfContactArtEdgesStr},
+	model.EdgeBuilderHasSlsa:                   {hasSLSABuiltByEdgesStr},
+	model.EdgeLicenseCertifyLegal:              {certifyLegalDeclaredLicensesEdgesStr, certifyLegalDiscoveredLicensesEdgesStr},
+	model.EdgePackageCertifyBad:                {certifyBadPkgVersionEdgesStr, certifyBadPkgNameEdgesStr},
+	model.EdgePackageCertifyGood:               {certifyGoodPkgVersionEdgesStr, certifyGoodPkgNameEdgesStr},
+	model.EdgePackageCertifyLegal:              {certifyLegalPkgEdgesStr},
+	model.EdgePackageCertifyVexStatement:       {certifyVexPkgEdgesStr},
+	model.EdgePackageCertifyVuln:               {certifyVulnPkgEdgesStr},
+	model.EdgePackageHasMetadata:               {hasMetadataPkgNameEdgesStr, hasMetadataPkgVersionEdgesStr},
+	model.EdgePackageHasSbom:                   {hasSBOMPkgEdgesStr},
+	model.EdgePackageHasSourceAt:               {hasMetadataPkgVersionEdgesStr, hasSourceAtPkgNameEdgesStr},
+	model.EdgePackageIsDependency:              {isDependencySubjectPkgEdgesStr},
+	model.EdgePackageIsOccurrence:              {isOccurrenceSubjectPkgEdgesStr},
+	model.EdgePackagePkgEqual:                  {pkgEqualSubjectPkgEdgesStr},
+	model.EdgePackagePointOfContact:            {pointOfContactPkgVersionEdgesStr, pointOfContactPkgNameEdgesStr},
+	model.EdgeSourceCertifyBad:                 {certifyBadSrcEdgesStr},
+	model.EdgeSourceCertifyGood:                {certifyGoodSrcEdgesStr},
+	model.EdgeSourceCertifyLegal:               {certifyLegalSrcEdgesStr},
+	model.EdgeSourceCertifyScorecard:           {scorecardSrcEdgesStr},
+	model.EdgeSourceHasMetadata:                {hasMetadataSrcEdgesStr},
+	model.EdgeSourceHasSourceAt:                {hasSourceAtEdgesStr},
+	model.EdgeSourceIsOccurrence:               {isOccurrenceSubjectSrcEdgesStr},
+	model.EdgeSourcePointOfContact:             {pointOfContactSrcEdgesStr},
+	model.EdgeVulnerabilityCertifyVexStatement: {certifyVexVulnEdgesStr},
+	model.EdgeVulnerabilityCertifyVuln:         {certifyVulnEdgesStr},
+	model.EdgeVulnerabilityVulnEqual:           {vulnEqualVulnEdgesStr},
+	model.EdgeVulnerabilityVulnMetadata:        {vulnMetadataEdgesStr},
+	model.EdgeCertifyBadArtifact:               {certifyBadArtEdgesStr},
+	model.EdgeCertifyBadPackage:                {certifyBadPkgVersionEdgesStr, certifyBadPkgNameEdgesStr},
+	model.EdgeCertifyBadSource:                 {certifyBadSrcEdgesStr},
+	model.EdgeCertifyGoodArtifact:              {certifyGoodArtEdgesStr},
+	model.EdgeCertifyGoodPackage:               {certifyGoodPkgVersionEdgesStr, certifyGoodPkgNameEdgesStr},
+	model.EdgeCertifyGoodSource:                {certifyGoodSrcEdgesStr},
+	model.EdgeCertifyLegalLicense:              {certifyLegalDeclaredLicensesEdgesStr, certifyLegalDiscoveredLicensesEdgesStr},
+	model.EdgeCertifyLegalPackage:              {certifyLegalsStr},
+	model.EdgeCertifyScorecardSource:           {scorecardSrcEdgesStr},
+	model.EdgeCertifyVexStatementArtifact:      {certifyVexArtEdgesStr},
+	model.EdgeCertifyVexStatementPackage:       {certifyVexPkgEdgesStr},
+	model.EdgeCertifyVexStatementVulnerability: {certifyVexVulnEdgesStr},
+	model.EdgeCertifyVulnPackage:               {certifyVulnPkgEdgesStr},
+	model.EdgeCertifyVulnVulnerability:         {certifyVulnsStr},
+	model.EdgeHashEqualArtifact:                {hashEqualArtEdgesStr},
+	model.EdgeHasMetadataArtifact:              {hasMetadataArtEdgesStr},
+	model.EdgeHasMetadataPackage:               {hasMetadataPkgVersionEdgesStr, hasMetadataPkgNameEdgesStr},
+	model.EdgeHasMetadataSource:                {hasMetadataSrcEdgesStr},
+	model.EdgeHasSbomArtifact:                  {hasSBOMArtEdgesStr},
+	model.EdgeHasSbomPackage:                   {hasSBOMPkgEdgesStr},
+	model.EdgeHasSlsaBuiltBy:                   {hasSLSABuiltByEdgesStr},
+	model.EdgeHasSlsaMaterials:                 {hasSLSABuiltFromEdgesStr},
+	model.EdgeHasSlsaSubject:                   {hasSLSASubjectArtEdgesStr},
+	model.EdgeHasSourceAtPackage:               {hasSourceAtPkgVersionEdgesStr, hasSourceAtPkgNameEdgesStr},
+	model.EdgeHasSourceAtSource:                {hasSourceAtEdgesStr},
+	model.EdgeIsDependencyPackage:              {isDependencyDepPkgVersionEdgesStr, isDependencyDepPkgNameEdgesStr},
+	model.EdgeIsOccurrenceArtifact:             {isOccurrenceArtEdgesStr},
+	model.EdgeIsOccurrencePackage:              {isOccurrenceSubjectPkgEdgesStr},
+	model.EdgeIsOccurrenceSource:               {isOccurrenceSubjectSrcEdgesStr},
+	model.EdgePkgEqualPackage:                  {pkgEqualPkgEdgesStr},
+	model.EdgePointOfContactArtifact:           {pointOfContactArtEdgesStr},
+	model.EdgePointOfContactPackage:            {pointOfContactPkgVersionEdgesStr, pointOfContactPkgNameEdgesStr},
+	model.EdgePointOfContactSource:             {pointOfContactSrcEdgesStr},
+	model.EdgeVulnEqualVulnerability:           {vulnEqualVulnEdgesStr},
+	model.EdgeVulnMetadataVulnerability:        {vulnMetadataEdgesStr},
+}
+
 type ArangoConfig struct {
 	User     string
 	Pass     string
@@ -243,12 +319,12 @@ func deleteDatabase(ctx context.Context, args backends.BackendArgs) error {
 	}
 	var db driver.Database
 	// check if database exists
-	dbExists, err := arangodbClient.DatabaseExists(ctx, "guac_db")
+	dbExists, err := arangodbClient.DatabaseExists(ctx, arangoDB)
 	if err != nil {
 		return fmt.Errorf("failed to check %s database with error: %w", config.DBAddr, err)
 	}
 	if dbExists {
-		db, err = arangodbClient.Database(ctx, "guac_db")
+		db, err = arangodbClient.Database(ctx, arangoDB)
 		if err != nil {
 			return fmt.Errorf("failed to connect %s database with error: %w", config.DBAddr, err)
 		}
@@ -271,18 +347,18 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 	}
 	var db driver.Database
 	// check if database exists
-	dbExists, err := arangodbClient.DatabaseExists(ctx, "guac_db")
+	dbExists, err := arangodbClient.DatabaseExists(ctx, arangoDB)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check %s database with error: %w", config.DBAddr, err)
 	}
 	if dbExists {
-		db, err = arangodbClient.Database(ctx, "guac_db")
+		db, err = arangodbClient.Database(ctx, arangoDB)
 		if err != nil {
 			return nil, fmt.Errorf("failed to connect %s database with error: %w", config.DBAddr, err)
 		}
 	} else {
 		// Create database
-		db, err = arangodbClient.CreateDatabase(ctx, "guac_db", nil)
+		db, err = arangodbClient.CreateDatabase(ctx, arangoDB, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create %s database with error: %w", config.DBAddr, err)
 		}
@@ -292,12 +368,12 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 	// check if graph exists
 
-	graphExists, err := db.GraphExists(ctx, "guac")
+	graphExists, err := db.GraphExists(ctx, arangoGraph)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check if graph exists with error: %w", err)
 	}
 	if graphExists {
-		graph, err = db.Graph(ctx, "guac")
+		graph, err = db.Graph(ctx, arangoGraph)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get graph with error: %w", err)
 		}
@@ -603,7 +679,7 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			certifyLegalPkgEdges, certifyLegalSrcEdges, certifyLegalDeclaredLicensesEdges, certifyLegalDiscoveredLicensesEdges}
 
 		// create a graph
-		graph, err = db.CreateGraphV2(ctx, "guac", &options)
+		graph, err = db.CreateGraphV2(ctx, arangoGraph, &options)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create graph: %w", err)
 		}
