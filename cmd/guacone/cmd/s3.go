@@ -43,6 +43,8 @@ type s3Options struct {
 	mp         string // message provider name (sqs or kafka, will default to kafka)
 	mpEndpoint string // endpoint for the message provider (only for polling behaviour)
 	poll       bool   // polling or non-polling behaviour? (defaults to non-polling)
+	graphqlEndpoint   string // endpoint for the graphql server
+	csubClientOptions csub_client.CsubClientOptions // options for the collectsub client
 }
 
 var s3Cmd = &cobra.Command{
@@ -54,6 +56,10 @@ var s3Cmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		s3Opts, err := validateS3Opts(
+			viper.GetString("gql-addr"),
+			viper.GetString("csub-addr"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetString("s3-url"),
 			viper.GetString("s3-bucket"),
 			viper.GetString("s3-region"),
@@ -89,7 +95,7 @@ var s3Cmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		csubClient, err := csub_client.NewClient(viper.GetString("csub-addr"))
+		csubClient, err := csub_client.NewClient(s3Opts.csubClientOptions)
 		if err != nil {
 			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
@@ -100,7 +106,7 @@ var s3Cmd = &cobra.Command{
 		errFound := false
 
 		emit := func(d *processor.Document) error {
-			err := ingestor.Ingest(ctx, d, viper.GetString("gql-addr"), csubClient)
+			err := ingestor.Ingest(ctx, d, s3Opts.graphqlEndpoint, csubClient)
 
 			if err != nil {
 				errFound = true
@@ -130,7 +136,7 @@ var s3Cmd = &cobra.Command{
 	},
 }
 
-func validateS3Opts(s3url string, s3bucket string, region string, s3item string, mp string, mpEndpoint string, queues string, poll bool) (s3Options, error) {
+func validateS3Opts(graphqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, s3url string, s3bucket string, region string, s3item string, mp string, mpEndpoint string, queues string, poll bool) (s3Options, error) {
 	var opts s3Options
 
 	if poll {
@@ -152,7 +158,12 @@ func validateS3Opts(s3url string, s3bucket string, region string, s3item string,
 		return opts, fmt.Errorf("expected s3 bucket")
 	}
 
-	opts = s3Options{s3url, s3bucket, region, s3item, queues, mp, mpEndpoint, poll}
+	csubClientOptions, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	if err != nil {
+		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
+	}
+
+	opts = s3Options{s3url, s3bucket, region, s3item, queues, mp, mpEndpoint, poll, graphqlEndpoint, csubClientOptions}
 
 	return opts, nil
 }
