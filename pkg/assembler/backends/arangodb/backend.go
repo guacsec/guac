@@ -23,6 +23,9 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/arangodb/go-driver"
 	arangodbdriverhttp "github.com/arangodb/go-driver/http"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -194,6 +197,8 @@ const (
 	certifyLegalDiscoveredLicensesEdgesStr string = "certifyLegalDiscoveredLicensesEdges"
 	certifyLegalsStr                       string = "certifyLegals"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 var mapEdgeToArangoEdgeCollection = map[model.Edge][]string{
 	model.EdgeArtifactCertifyBad:               {certifyBadArtEdgesStr},

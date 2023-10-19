@@ -1080,41 +1080,117 @@ func Test_Neighbors(t *testing.T) {
 		VulnMetadata *model.VulnerabilityMetadataInputSpec
 	}
 	tests := []struct {
-		name               string
-		inPkg              []*model.PkgInputSpec
-		inSrc              []*model.SourceInputSpec
-		inArt              []*model.ArtifactInputSpec
-		inVuln             []*model.VulnerabilityInputSpec
-		inBld              []*model.BuilderInputSpec
-		inLic              []*model.LicenseInputSpec
-		queryArtifactID    bool
-		queryBuilderID     bool
-		certifyBadCall     *certifyBadCall
-		certifyGoodCall    *certifyGoodCall
-		certifyLegalCall   *certifyLegalCall
-		scorecardCall      *scorecardCall
-		vexCall            *vexCall
-		certifyVulnCall    *certifyVulnCall
-		hashEqualCall      *hashEqualCall
-		hasMetadataCall    *hasMetadataCall
-		hasSBOMCall        *hasSBOMCall
-		hasSlsaCall        *hasSlsaCall
-		hasSourceAtCall    *hasSourceAtCall
-		isDepCall          *isDepCall
-		isOcurCall         *isOcurCall
-		pkgEqualCall       *pkgEqualCall
-		pointOfContactCall *pointOfContactCall
-		vulnEqualCall      *vulnEqualCall
-		vulnMetadataCall   *vulnMetadataCall
-		usingOnly          []model.Edge
-		want               []model.Node
-		wantErr            bool
+		name                 string
+		pkgInput             *model.PkgInputSpec
+		srcInput             *model.SourceInputSpec
+		vulnInput            *model.VulnerabilityInputSpec
+		licenseInput         *model.LicenseInputSpec
+		inPkg                []*model.PkgInputSpec
+		inSrc                []*model.SourceInputSpec
+		inArt                []*model.ArtifactInputSpec
+		inVuln               []*model.VulnerabilityInputSpec
+		inBld                []*model.BuilderInputSpec
+		inLic                []*model.LicenseInputSpec
+		queryArtifactID      bool
+		queryEqualArtifactID bool
+		queryBuilderID       bool
+		queryPkgTypeID       bool
+		queryPkgNamespaceID  bool
+		queryPkgNameID       bool
+		queryPkgVersionID    bool
+		certifyBadCall       *certifyBadCall
+		certifyGoodCall      *certifyGoodCall
+		certifyLegalCall     *certifyLegalCall
+		scorecardCall        *scorecardCall
+		vexCall              *vexCall
+		certifyVulnCall      *certifyVulnCall
+		hashEqualCall        *hashEqualCall
+		hasMetadataCall      *hasMetadataCall
+		hasSBOMCall          *hasSBOMCall
+		hasSlsaCall          *hasSlsaCall
+		hasSourceAtCall      *hasSourceAtCall
+		isDepCall            *isDepCall
+		isOcurCall           *isOcurCall
+		pkgEqualCall         *pkgEqualCall
+		pointOfContactCall   *pointOfContactCall
+		vulnEqualCall        *vulnEqualCall
+		vulnMetadataCall     *vulnMetadataCall
+		usingOnly            []model.Edge
+		want                 []model.Node
+		wantErr              bool
 	}{{
-		name:  "certifyBad",
-		inPkg: []*model.PkgInputSpec{testdata.P1},
+		name:           "package - pkgType",
+		pkgInput:       testdata.P1,
+		queryPkgTypeID: true,
+		want: []model.Node{&model.Package{
+			Type: "pypi",
+			Namespaces: []*model.PackageNamespace{{
+				Names: []*model.PackageName{},
+			}}}},
+		wantErr: false,
+	}, {
+		name:                "package - pkgNamespace",
+		pkgInput:            testdata.P1,
+		queryPkgNamespaceID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}}},
+			&model.Package{
+				Type:       "pypi",
+				Namespaces: []*model.PackageNamespace{},
+			}},
+		wantErr: false,
+	}, {
+		name:           "package - pkgName",
+		pkgInput:       testdata.P1,
+		queryPkgNameID: true,
+		want: []model.Node{testdata.P1out, &model.Package{
+			Type: "pypi",
+			Namespaces: []*model.PackageNamespace{{
+				Names: []*model.PackageName{},
+			}}}},
+		wantErr: false,
+	}, {
+		name:              "package - pkgVersion",
+		pkgInput:          testdata.P1,
+		queryPkgVersionID: true,
+		want: []model.Node{&model.Package{
+			Type: "pypi",
+			Namespaces: []*model.PackageNamespace{{
+				Names: []*model.PackageName{{
+					Name:     "tensorflow",
+					Versions: []*model.PackageVersion{},
+				}},
+			}}}},
+		wantErr: false,
+	}, {
+		name:     "source",
+		srcInput: testdata.S1,
+		want:     []model.Node{testdata.S1out},
+		wantErr:  false,
+	}, {
+		name:      "vulnerability",
+		vulnInput: testdata.C1,
+		want: []model.Node{&model.Vulnerability{
+			Type:             "cve",
+			VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+		}},
+	}, {
+		name:         "license",
+		licenseInput: testdata.L1,
+		want:         []model.Node{testdata.L1out},
+	}, {
+		name:  "certifyBad - Artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A2},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P1,
+				Artifact: testdata.A2,
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1123,16 +1199,78 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			},
 		},
+		queryArtifactID: true,
 		want: []model.Node{&model.CertifyBad{
-			Subject:       testdata.P1out,
+			Subject:       testdata.A2out,
 			Justification: "test justification",
 		}},
 	}, {
-		name:  "certifyGood",
-		inPkg: []*model.PkgInputSpec{testdata.P1},
+		name:  "certifyBad - PkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPkgNameID: true,
+		want: []model.Node{
+			testdata.P2out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			testdata.P1out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			&model.CertifyBad{
+				Subject:       testdata.P2outName,
+				Justification: "test justification",
+			}},
+	}, {
+		name:  "certifyBad - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPkgVersionID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}},
+			},
+			&model.CertifyBad{
+				Subject:       testdata.P2out,
+				Justification: "test justification",
+			}},
+	}, {
+		name:  "certifyGood - artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A2},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P1,
+				Artifact: testdata.A2,
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1141,12 +1279,74 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			},
 		},
+		queryArtifactID: true,
 		want: []model.Node{&model.CertifyGood{
-			Subject:       testdata.P1out,
+			Subject:       testdata.A2out,
 			Justification: "test justification",
 		}},
 	}, {
-		name:  "certifyLegal",
+		name:  "certifyGood - PkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyGoodCall: &certifyGoodCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			CG: &model.CertifyGoodInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPkgNameID: true,
+		want: []model.Node{
+			testdata.P2out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			testdata.P1out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			&model.CertifyGood{
+				Subject:       testdata.P2outName,
+				Justification: "test justification",
+			}},
+	}, {
+		name:  "certifyGood - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyGoodCall: &certifyGoodCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CG: &model.CertifyGoodInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPkgVersionID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}},
+			},
+			&model.CertifyGood{
+				Subject:       testdata.P2out,
+				Justification: "test justification",
+			}},
+	}, {
+		name:  "certifyLegal - pkgVersion",
 		inPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L1},
 		certifyLegalCall: &certifyLegalCall{
@@ -1158,11 +1358,22 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification 2",
 			},
 		},
-		want: []model.Node{&model.CertifyLegal{
-			Subject:          testdata.P1out,
-			DeclaredLicenses: []*model.License{testdata.L1out},
-			Justification:    "test justification 2",
-		}},
+		queryPkgVersionID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}},
+			},
+			&model.CertifyLegal{
+				Subject:          testdata.P1out,
+				DeclaredLicenses: []*model.License{testdata.L1out},
+				Justification:    "test justification 2",
+			}},
 	}, {
 		name:  "scorecard",
 		inSrc: []*model.SourceInputSpec{testdata.S2},
@@ -1180,7 +1391,31 @@ func Test_Neighbors(t *testing.T) {
 			},
 		}},
 	}, {
-		name:   "vex",
+		name:   "vex - artifact",
+		inArt:  []*model.ArtifactInputSpec{testdata.A2},
+		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
+		vexCall: &vexCall{
+			Sub: model.PackageOrArtifactInput{
+				Artifact: testdata.A2,
+			},
+			Vuln: testdata.O2,
+			In: &model.VexStatementInputSpec{
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		queryArtifactID: true,
+		want: []model.Node{&model.CertifyVEXStatement{
+			Subject: testdata.A2out,
+			Vulnerability: &model.Vulnerability{
+				Type:             "osv",
+				VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+			},
+			VexJustification: "test justification",
+			KnownSince:       time.Unix(1e9, 0),
+		}},
+	}, {
+		name:   "vex - pkgVersion",
 		inPkg:  []*model.PkgInputSpec{testdata.P1},
 		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
 		vexCall: &vexCall{
@@ -1193,17 +1428,28 @@ func Test_Neighbors(t *testing.T) {
 				KnownSince:       time.Unix(1e9, 0),
 			},
 		},
-		want: []model.Node{&model.CertifyVEXStatement{
-			Subject: testdata.P1out,
-			Vulnerability: &model.Vulnerability{
-				Type:             "osv",
-				VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+		queryPkgVersionID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}},
 			},
-			VexJustification: "test justification",
-			KnownSince:       time.Unix(1e9, 0),
-		}},
+			&model.CertifyVEXStatement{
+				Subject: testdata.P1out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "osv",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+				},
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			}},
 	}, {
-		name:   "certifyVuln",
+		name:   "certifyVuln - pkgVersion",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 		inPkg:  []*model.PkgInputSpec{testdata.P2},
 		certifyVulnCall: &certifyVulnCall{
@@ -1219,27 +1465,51 @@ func Test_Neighbors(t *testing.T) {
 				TimeScanned:    testdata.T1,
 			},
 		},
-		want: []model.Node{&model.CertifyVuln{
-			Package: testdata.P2out,
-			Vulnerability: &model.Vulnerability{
-				Type:             "ghsa",
-				VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+		queryPkgVersionID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}},
 			},
-			Metadata: vmd1,
-		}},
+			&model.CertifyVuln{
+				Package: testdata.P2out,
+				Vulnerability: &model.Vulnerability{
+					Type:             "ghsa",
+					VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+				},
+				Metadata: vmd1,
+			}},
 	}, {
-		name:  "hashEqual",
+		name:  "hashEqual - artifact",
 		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
 		hashEqualCall: &hashEqualCall{
 			A1: testdata.A1,
 			A2: testdata.A3,
 			HE: &model.HashEqualInputSpec{},
 		},
+		queryArtifactID: true,
 		want: []model.Node{&model.HashEqual{
 			Artifacts: []*model.Artifact{testdata.A3out, testdata.A1out},
 		}},
 	}, {
-		name:  "hasMetadata",
+		name:  "hashEqual - second artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
+		hashEqualCall: &hashEqualCall{
+			A1: testdata.A1,
+			A2: testdata.A3,
+			HE: &model.HashEqualInputSpec{},
+		},
+		queryEqualArtifactID: true,
+		want: []model.Node{&model.HashEqual{
+			Artifacts: []*model.Artifact{testdata.A3out, testdata.A1out},
+		}},
+	}, {
+		name:  "hasMetadata - artifact",
 		inArt: []*model.ArtifactInputSpec{testdata.A2},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
@@ -1249,28 +1519,116 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			},
 		},
+		queryArtifactID: true,
 		want: []model.Node{&model.HasMetadata{
 			Subject:       testdata.A2out,
 			Justification: "test justification",
 		}},
 	}, {
-		name:  "hasSBOM",
-		inPkg: []*model.PkgInputSpec{testdata.P1},
+		name:  "hasMetadata - pkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		hasMetadataCall: &hasMetadataCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			HM: &model.HasMetadataInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPkgNameID: true,
+		want: []model.Node{
+			testdata.P2out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			testdata.P1out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			&model.HasMetadata{
+				Subject:       testdata.P2outName,
+				Justification: "test justification",
+			}},
+	}, {
+		name:  "hasMetadata - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		hasMetadataCall: &hasMetadataCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			HM: &model.HasMetadataInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPkgVersionID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}},
+			},
+			&model.HasMetadata{
+				Subject:       testdata.P2out,
+				Justification: "test justification",
+			}},
+	}, {
+		name:  "hasSBOM - artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A2},
 		hasSBOMCall: &hasSBOMCall{
-
 			Sub: model.PackageOrArtifactInput{
-				Package: testdata.P1,
+				Artifact: testdata.A2,
 			},
 			HS: &model.HasSBOMInputSpec{
 				DownloadLocation: "location two",
 			},
 		},
+		queryArtifactID: true,
 		want: []model.Node{&model.HasSbom{
-			Subject:          testdata.P1out,
+			Subject:          testdata.A2out,
 			DownloadLocation: "location two",
 		}},
 	}, {
-		name:  "hasSLSA",
+		name:  "hasSBOM - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		hasSBOMCall: &hasSBOMCall{
+			Sub: model.PackageOrArtifactInput{
+				Package: testdata.P2,
+			},
+			HS: &model.HasSBOMInputSpec{
+				DownloadLocation: "location two",
+			},
+		},
+		queryPkgVersionID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}},
+			},
+			&model.HasSbom{
+				Subject:          testdata.P2out,
+				DownloadLocation: "location two",
+			}},
+	}, {
+		name:  "hasSLSA - builder",
 		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 		hasSlsaCall: &hasSlsaCall{
@@ -1288,8 +1646,56 @@ func Test_Neighbors(t *testing.T) {
 			},
 		}},
 	}, {
-		name:  "hasSourceAt",
-		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		name:  "hasSLSA - subject artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
+		hasSlsaCall: &hasSlsaCall{
+			Sub:  testdata.A1,
+			BF:   []*model.ArtifactInputSpec{testdata.A2},
+			BB:   testdata.B2,
+			SLSA: &model.SLSAInputSpec{},
+		},
+		queryArtifactID: true,
+		want: []model.Node{&model.HasSlsa{
+			Subject: testdata.A1out,
+			Slsa: &model.Slsa{
+				BuiltBy:   testdata.B2out,
+				BuiltFrom: []*model.Artifact{testdata.A2out},
+			},
+		}},
+	}, {
+		name:  "hasSourceAt - pkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		hasSourceAtCall: &hasSourceAtCall{
+			Pkg: testdata.P2,
+			Src: testdata.S1,
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			HSA: &model.HasSourceAtInputSpec{},
+		},
+		queryPkgNameID: true,
+		want: []model.Node{
+			testdata.P2out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			testdata.P1out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			&model.HasSourceAt{
+				Package: testdata.P2outName,
+				Source:  testdata.S1out,
+			}},
+	}, {
+		name:  "hasSourceAt - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
 		inSrc: []*model.SourceInputSpec{testdata.S1},
 		hasSourceAtCall: &hasSourceAtCall{
 			Pkg: testdata.P2,
@@ -1299,12 +1705,22 @@ func Test_Neighbors(t *testing.T) {
 			},
 			HSA: &model.HasSourceAtInputSpec{},
 		},
-		want: []model.Node{&model.HasSourceAt{
-			Package: testdata.P2out,
-			Source:  testdata.S1out,
-		}},
+		queryPkgVersionID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}}},
+			&model.HasSourceAt{
+				Package: testdata.P2out,
+				Source:  testdata.S1out,
+			}},
 	}, {
-		name:  "isDependency",
+		name:  "isDependency - pkgName",
 		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
@@ -1312,12 +1728,49 @@ func Test_Neighbors(t *testing.T) {
 			MF: mAll,
 			ID: &model.IsDependencyInputSpec{},
 		},
-		want: []model.Node{&model.IsDependency{
-			Package:           testdata.P1out,
-			DependencyPackage: testdata.P2outName,
-		}},
+		queryPkgNameID: true,
+		want: []model.Node{
+			testdata.P2out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			testdata.P1out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}},
+			&model.IsDependency{
+				Package:           testdata.P1out,
+				DependencyPackage: testdata.P2outName,
+			}},
 	}, {
-		name:  "isOccurrence",
+		name:  "isDependency - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		isDepCall: &isDepCall{
+			P1: testdata.P1,
+			P2: testdata.P2,
+			MF: mSpecific,
+			ID: &model.IsDependencyInputSpec{},
+		},
+		queryPkgVersionID: true,
+		want: []model.Node{
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{{
+						Name:     "tensorflow",
+						Versions: []*model.PackageVersion{},
+					}},
+				}}},
+			&model.IsDependency{
+				Package:           testdata.P1out,
+				DependencyPackage: testdata.P2out,
+			}},
+	}, {
+		name:  "isOccurrence - artifact",
 		inPkg: []*model.PkgInputSpec{testdata.P1},
 		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isOcurCall: &isOcurCall{
@@ -1329,89 +1782,175 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			},
 		},
+		queryArtifactID: true,
 		want: []model.Node{&model.IsOccurrence{
 			Subject:       testdata.P1out,
 			Artifact:      testdata.A1out,
 			Justification: "test justification",
 		}},
-	}, {
-		name:  "pkgEqual",
-		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-		pkgEqualCall: &pkgEqualCall{
-			P1: testdata.P1,
-			P2: testdata.P2,
-			HE: &model.PkgEqualInputSpec{
-				Justification: "test justification two",
-			},
-		},
-		want: []model.Node{&model.PkgEqual{
-
-			Packages:      []*model.Package{testdata.P1out, testdata.P2out},
-			Justification: "test justification two",
-		}},
-	}, {
-		name:  "pointOfContact",
-		inArt: []*model.ArtifactInputSpec{testdata.A2},
-		pointOfContactCall: &pointOfContactCall{
-			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
-			},
-			POC: &model.PointOfContactInputSpec{
-				Justification: "test justification",
-			},
-		},
-		want: []model.Node{&model.PointOfContact{
-			Subject:       testdata.A2out,
-			Justification: "test justification",
-		}},
-	}, {
-		name:   "vulnEqual",
-		inVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.G1},
-		vulnEqualCall: &vulnEqualCall{
-			Vuln:      testdata.O1,
-			OtherVuln: testdata.G1,
-			In: &model.VulnEqualInputSpec{
-				Justification: "test justification",
-			},
-		},
-		want: []model.Node{&model.VulnEqual{
-			Vulnerabilities: []*model.Vulnerability{
-				{
-					Type:             "osv",
-					VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+	},
+		{
+			name:  "isOccurrence - pkgVersion",
+			inPkg: []*model.PkgInputSpec{testdata.P1},
+			inArt: []*model.ArtifactInputSpec{testdata.A1},
+			isOcurCall: &isOcurCall{
+				PkgSrc: model.PackageOrSourceInput{
+					Package: testdata.P1,
 				},
-				{
+				Artifact: testdata.A1,
+				Occurrence: &model.IsOccurrenceInputSpec{
+					Justification: "test justification",
+				},
+			},
+			queryPkgVersionID: true,
+			want: []model.Node{
+				&model.Package{
+					Type: "pypi",
+					Namespaces: []*model.PackageNamespace{{
+						Names: []*model.PackageName{{
+							Name:     "tensorflow",
+							Versions: []*model.PackageVersion{},
+						}},
+					}}},
+				&model.IsOccurrence{
+					Subject:       testdata.P1out,
+					Artifact:      testdata.A1out,
+					Justification: "test justification",
+				}},
+		}, {
+			name:  "pkgEqual",
+			inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			pkgEqualCall: &pkgEqualCall{
+				P1: testdata.P1,
+				P2: testdata.P2,
+				HE: &model.PkgEqualInputSpec{
+					Justification: "test justification two",
+				},
+			},
+			queryPkgVersionID: true,
+			want: []model.Node{
+				&model.Package{
+					Type: "pypi",
+					Namespaces: []*model.PackageNamespace{{
+						Names: []*model.PackageName{{
+							Name:     "tensorflow",
+							Versions: []*model.PackageVersion{},
+						}},
+					}},
+				},
+				&model.PkgEqual{
+					Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+					Justification: "test justification two",
+				}},
+		}, {
+			name:  "pointOfContact - PkgName",
+			inPkg: []*model.PkgInputSpec{testdata.P2},
+			pointOfContactCall: &pointOfContactCall{
+				Sub: model.PackageSourceOrArtifactInput{
+					Package: testdata.P2,
+				},
+				Match: &model.MatchFlags{
+					Pkg: model.PkgMatchTypeAllVersions,
+				},
+				POC: &model.PointOfContactInputSpec{
+					Justification: "test justification",
+				},
+			},
+			queryPkgNameID: true,
+			want: []model.Node{
+				testdata.P2out,
+				&model.Package{
+					Type: "pypi",
+					Namespaces: []*model.PackageNamespace{{
+						Names: []*model.PackageName{},
+					}}},
+				testdata.P1out,
+				&model.Package{
+					Type: "pypi",
+					Namespaces: []*model.PackageNamespace{{
+						Names: []*model.PackageName{},
+					}}},
+				&model.PointOfContact{
+					Subject:       testdata.P2outName,
+					Justification: "test justification",
+				}},
+		}, {
+			name:  "pointOfContact - pkgVersion",
+			inPkg: []*model.PkgInputSpec{testdata.P2},
+			pointOfContactCall: &pointOfContactCall{
+				Sub: model.PackageSourceOrArtifactInput{
+					Package: testdata.P2,
+				},
+				Match: &model.MatchFlags{
+					Pkg: model.PkgMatchTypeSpecificVersion,
+				},
+				POC: &model.PointOfContactInputSpec{
+					Justification: "test justification",
+				},
+			},
+			queryPkgVersionID: true,
+			want: []model.Node{
+				&model.Package{
+					Type: "pypi",
+					Namespaces: []*model.PackageNamespace{{
+						Names: []*model.PackageName{{
+							Name:     "tensorflow",
+							Versions: []*model.PackageVersion{},
+						}},
+					}},
+				},
+				&model.PointOfContact{
+					Subject:       testdata.P2out,
+					Justification: "test justification",
+				}},
+		}, {
+			name:   "vulnEqual",
+			inVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.G1},
+			vulnEqualCall: &vulnEqualCall{
+				Vuln:      testdata.O1,
+				OtherVuln: testdata.G1,
+				In: &model.VulnEqualInputSpec{
+					Justification: "test justification",
+				},
+			},
+			want: []model.Node{&model.VulnEqual{
+				Vulnerabilities: []*model.Vulnerability{
+					{
+						Type:             "osv",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+					},
+					{
+						Type:             "ghsa",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+					},
+				},
+				Justification: "test justification",
+			}},
+		}, {
+			name:   "vulnMetadata",
+			inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+			vulnMetadataCall: &vulnMetadataCall{
+				Vuln: testdata.G1,
+				VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+					ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
+					ScoreValue: 8.9,
+					Timestamp:  testdata.T1,
+					Collector:  "test collector",
+					Origin:     "test origin",
+				},
+			},
+			want: []model.Node{&model.VulnerabilityMetadata{
+				Vulnerability: &model.Vulnerability{
 					Type:             "ghsa",
 					VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
 				},
-			},
-			Justification: "test justification",
-		}},
-	}, {
-		name:   "vulnMetadata",
-		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-		vulnMetadataCall: &vulnMetadataCall{
-			Vuln: testdata.G1,
-			VulnMetadata: &model.VulnerabilityMetadataInputSpec{
 				ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
 				ScoreValue: 8.9,
 				Timestamp:  testdata.T1,
 				Collector:  "test collector",
 				Origin:     "test origin",
-			},
-		},
-		want: []model.Node{&model.VulnerabilityMetadata{
-			Vulnerability: &model.Vulnerability{
-				Type:             "ghsa",
-				VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
-			},
-			ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
-			ScoreValue: 8.9,
-			Timestamp:  testdata.T1,
-			Collector:  "test collector",
-			Origin:     "test origin",
-		}},
-	}}
+			}},
+		}}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
@@ -1448,36 +1987,139 @@ func Test_Neighbors(t *testing.T) {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
-			// if tt.certifyBadCall != nil {
-			// 	found, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.certifyGoodCall != nil {
-			// 	found, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.certifyLegalCall != nil {
-			// 	found, err := b.IngestCertifyLegal(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
+			if tt.pkgInput != nil {
+				ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if tt.queryPkgTypeID {
+					nodeID = ingestedPkg.ID
+					tt.usingOnly = []model.Edge{}
+				}
+				if tt.queryPkgNamespaceID {
+					nodeID = ingestedPkg.Namespaces[0].ID
+					tt.usingOnly = []model.Edge{}
+				}
+				if tt.queryPkgNameID {
+					nodeID = ingestedPkg.Namespaces[0].Names[0].ID
+					tt.usingOnly = []model.Edge{}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.srcInput != nil {
+				ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				nodeID = ingestedSrc.Namespaces[0].Names[0].ID
+			}
+			if tt.vulnInput != nil {
+				ingestVuln, err := b.IngestVulnerability(ctx, *tt.vulnInput)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
+				}
+				nodeID = ingestVuln.VulnerabilityIDs[0].ID
+			}
+			if tt.licenseInput != nil {
+				ingestedLicense, err := b.IngestLicense(ctx, tt.licenseInput)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				nodeID = ingestedLicense.ID
+			}
+			if tt.certifyBadCall != nil {
+				found, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryArtifactID {
+					nodeID = found.Subject.(*model.Artifact).ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactCertifyBad}
+				}
+				if tt.queryPkgNameID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyBad}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyBad}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.certifyGoodCall != nil {
+				found, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryArtifactID {
+					nodeID = found.Subject.(*model.Artifact).ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactCertifyGood}
+				}
+				if tt.queryPkgNameID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyGood}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyGood}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.certifyLegalCall != nil {
+				found, err := b.IngestCertifyLegal(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyLegal}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
 			// if tt.scorecardCall != nil {
 			// 	found, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
 			// 	if (err != nil) != tt.wantErr {
@@ -1488,56 +2130,131 @@ func Test_Neighbors(t *testing.T) {
 			// 	}
 			// 	nodeID = found.ID
 			// }
-			// if tt.vexCall != nil {
-			// 	found, err := b.IngestVEXStatement(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.certifyVulnCall != nil {
-			// 	found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.hashEqualCall != nil {
-			// 	found, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.hasMetadataCall != nil {
-			// 	found, err := b.IngestHasMetadata(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.hasSBOMCall != nil {
-			// 	found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
+			if tt.vexCall != nil {
+				found, err := b.IngestVEXStatement(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryArtifactID {
+					nodeID = found.Subject.(*model.Artifact).ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactCertifyVexStatement}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyVexStatement}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.certifyVulnCall != nil {
+				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Package.Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyVuln}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.hashEqualCall != nil {
+				found, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryArtifactID {
+					nodeID = found.Artifacts[0].ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactHashEqual}
+				}
+				if tt.queryEqualArtifactID {
+					nodeID = found.Artifacts[1].ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactHashEqual}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.hasMetadataCall != nil {
+				found, err := b.IngestHasMetadata(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryArtifactID {
+					nodeID = found.Subject.(*model.Artifact).ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactHasMetadata}
+				}
+				if tt.queryPkgNameID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageHasMetadata}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageHasMetadata}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.hasSBOMCall != nil {
+				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryArtifactID {
+					nodeID = found.Subject.(*model.Artifact).ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactHasSbom}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageHasSbom}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
 			if tt.hasSlsaCall != nil {
 				found, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
 				if (err != nil) != tt.wantErr {
@@ -1550,6 +2267,10 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Slsa.BuiltBy.ID
 					tt.usingOnly = []model.Edge{model.EdgeBuilderHasSlsa}
 				}
+				if tt.queryArtifactID {
+					nodeID = found.Subject.ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactHasSlsa}
+				}
 				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
 				if (err != nil) != tt.wantErr {
 					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
@@ -1559,56 +2280,131 @@ func Test_Neighbors(t *testing.T) {
 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}
-			// if tt.hasSourceAtCall != nil {
-			// 	found, err := b.IngestHasSourceAt(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.isDepCall != nil {
-			// 	found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.isOcurCall != nil {
-			// 	found, err := b.IngestOccurrence(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.pkgEqualCall != nil {
-			// 	found, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
-			// if tt.pointOfContactCall != nil {
-			// 	found, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
-			// 	if (err != nil) != tt.wantErr {
-			// 		t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-			// 	}
-			// 	if err != nil {
-			// 		return
-			// 	}
-			// 	nodeID = found.ID
-			// }
+			if tt.hasSourceAtCall != nil {
+				found, err := b.IngestHasSourceAt(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryPkgNameID {
+					nodeID = found.Package.Namespaces[0].Names[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageHasSourceAt}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Package.Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageHasSourceAt}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.isDepCall != nil {
+				found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryPkgNameID {
+					nodeID = found.DependencyPackage.Namespaces[0].Names[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.DependencyPackage.Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.isOcurCall != nil {
+				found, err := b.IngestOccurrence(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryArtifactID {
+					nodeID = found.Artifact.ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactIsOccurrence}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackageIsOccurrence}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.pkgEqualCall != nil {
+				found, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Packages[0].Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackagePkgEqual}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+			if tt.pointOfContactCall != nil {
+				found, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if tt.queryArtifactID {
+					nodeID = found.Subject.(*model.Artifact).ID
+					tt.usingOnly = []model.Edge{model.EdgeArtifactPointOfContact}
+				}
+				if tt.queryPkgNameID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackagePointOfContact}
+				}
+				if tt.queryPkgVersionID {
+					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					tt.usingOnly = []model.Edge{model.EdgePackagePointOfContact}
+				}
+				got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("neighbors query error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
 			// if tt.vulnEqualCall != nil {
 			// 	found, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
 			// 	if (err != nil) != tt.wantErr {

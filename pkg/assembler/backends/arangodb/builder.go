@@ -198,10 +198,9 @@ func (c *arangoClient) builderNeighbors(ctx context.Context, nodeID string, allo
 		values := map[string]any{}
 		arangoQueryBuilder := setBuilderMatchValues(&model.BuilderSpec{ID: &nodeID}, values)
 		arangoQueryBuilder.forInBound(hasSLSABuiltByEdgesStr, "hasSLSA", "build")
-		arangoQueryBuilder.query.WriteString("\n")
-		arangoQueryBuilder.query.WriteString(`RETURN hasSLSA._id`)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: hasSLSA._id }")
 
-		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values)
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "builderNeighbors")
 		if err != nil {
 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}

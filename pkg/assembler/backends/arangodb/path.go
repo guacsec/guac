@@ -124,6 +124,7 @@ IN 1..@maxLength ANY K_PATHS
 	return foundNodes, nil
 }
 
+// TODO (pxp928): investigate if the individual neighbor queries (within nouns and verbs) can be done co-currently
 func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly []model.Edge) ([]model.Node, error) {
 	var neighborsID []string
 	var err error
@@ -133,11 +134,35 @@ func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly [
 		return nil, fmt.Errorf("invalid ID: %s", nodeID)
 	}
 	switch idSplit[0] {
-	case pkgVersionsStr, pkgNamesStr, pkgNamespacesStr, pkgTypesStr:
+	case pkgVersionsStr:
+		neighborsID, err = c.packageVersionNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case pkgNamesStr:
+		neighborsID, err = c.packageNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case pkgNamespacesStr:
+		neighborsID, err = c.packageNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case pkgTypesStr:
+		neighborsID, err = c.packageTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case srcNamesStr:
 		return []model.Node{}, nil
-	case srcNamesStr, srcNamespacesStr, srcTypesStr:
+	case srcNamespacesStr:
 		return []model.Node{}, nil
-	case vulnerabilitiesStr, vulnTypesStr:
+	case srcTypesStr:
+		return []model.Node{}, nil
+	case vulnerabilitiesStr:
+		return []model.Node{}, nil
+	case vulnTypesStr:
 		return []model.Node{}, nil
 	case buildersStr:
 		neighborsID, err = c.builderNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
