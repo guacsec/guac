@@ -155,15 +155,30 @@ func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly [
 			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 		}
 	case srcNamesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.srcNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case srcNamespacesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.srcNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case srcTypesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.srcTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case vulnerabilitiesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.vulnIdNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case vulnTypesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.vulnTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case buildersStr:
 		neighborsID, err = c.builderNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
@@ -175,7 +190,10 @@ func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly [
 			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 		}
 	case licensesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.licenseNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case certifyBadsStr:
 		return []model.Node{}, nil
 	case certifyGoodsStr:
