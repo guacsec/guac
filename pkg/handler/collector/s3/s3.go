@@ -187,7 +187,12 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 							Source:    "S3",
 						},
 					}
-					docChannel <- doc
+					select {
+					case docChannel <- doc:
+					case <-cncCtx.Done():
+						logger.Infof("Shutting down collector for queue %s...\n", queue)
+						return
+					}
 				}
 			}
 
