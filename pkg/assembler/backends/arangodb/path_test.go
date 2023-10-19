@@ -1161,11 +1161,13 @@ func Test_Neighbors(t *testing.T) {
 		name:           "package - pkgName",
 		pkgInput:       testdata.P1,
 		queryPkgNameID: true,
-		want: []model.Node{testdata.P1out, &model.Package{
-			Type: "pypi",
-			Namespaces: []*model.PackageNamespace{{
-				Names: []*model.PackageName{},
-			}}}},
+		want: []model.Node{
+			testdata.P1out,
+			&model.Package{
+				Type: "pypi",
+				Namespaces: []*model.PackageNamespace{{
+					Names: []*model.PackageName{},
+				}}}},
 		wantErr: false,
 	}, {
 		name:              "package - pkgVersion",
