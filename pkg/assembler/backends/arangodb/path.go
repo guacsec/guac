@@ -200,11 +200,10 @@ func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly [
 			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 		}
 	case certifyGoodsStr:
-		// neighborsID, err = c.certifyGoodNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-		// if err != nil {
-		// 	return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-		// }
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyGoodNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case certifyLegalsStr:
 		return []model.Node{}, nil
 	case scorecardStr:
