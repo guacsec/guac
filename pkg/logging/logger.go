@@ -54,6 +54,9 @@ func InitLogger(level int) {
 }
 
 func WithLogger(ctx context.Context) context.Context {
+	if logger == nil {
+		InitLogger(-1)
+	}
 	return context.WithValue(ctx, loggerKey{}, logger)
 }
 
