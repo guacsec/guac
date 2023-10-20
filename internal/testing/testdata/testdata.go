@@ -81,6 +81,12 @@ var (
 	//go:embed exampledata/busybox-cyclonedx.json
 	CycloneDXBusyboxExample []byte
 
+	//go:embed exampledata/busybox-cyclonedx.json.bz2
+	CycloneDXBz2Example []byte
+
+	//go:embed exampledata/busybox-cyclonedx.json.zst
+	CycloneDXZstdExample []byte
+
 	//go:embed exampledata/big-mongo-cyclonedx.json
 	CycloneDXBigExample []byte
 

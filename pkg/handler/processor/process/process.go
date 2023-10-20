@@ -16,6 +16,7 @@
 package process
 
 import (
+	"bufio"
 	"bytes"
 	"compress/bzip2"
 	"context"
@@ -24,6 +25,7 @@ import (
 	"io"
 	"path/filepath"
 	"strings"
+	"net/http"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -225,6 +227,25 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 			i.Encoding = encoding
 		}
 	}
+	if i.Encoding == "" {
+		var mimeType string
+		var bzipMimeType = "application/x-bzip2"
+		var zstdMimeType = "application/zstd"
+		mimeType, err = detectFileEncoding(i)
+		if err != nil {
+			return fmt.Errorf("failure while attempting to detect file encoding: %w", err)
+		}
+		switch mimeType {
+		case bzipMimeType:
+			i.Encoding = processor.EncodingBzip2
+		case zstdMimeType:
+			i.Encoding = processor.EncodingZstd
+		default:
+		}
+		if i.Encoding != "" {
+			logger.Infof("byte analysis detected encoding:  %v", i.Encoding)
+		}
+	}
 	logger.Infof("Decoding document with encoding:  %v", i.Encoding)
 	switch i.Encoding {
 	case processor.EncodingBzip2:
@@ -250,4 +271,31 @@ func decompressDocument(i *processor.Document, reader io.Reader) error {
 	}
 	i.Blob = uncompressed
 	return nil
+}
+
+func detectFileEncoding(i *processor.Document) (string, error) {
+
+	//create a bufio.Reader so we can 'peek' at the first few bytes without consuming
+	bReader := bytes.NewReader(i.Blob)
+	reader := bufio.NewReader(bReader)
+	blankType := ""
+	if len(i.Blob) >= 16 {
+		testBytes, err := reader.Peek(16)
+		if err != nil {
+			return "", err
+		}
+		//find the content mime-type from the first few bytes
+		contentType := http.DetectContentType(testBytes)
+		//octet-stream is the default meaning that no encoding has been found
+		if contentType == "application/octet-stream" {
+			if testBytes[0] == 0x42 && testBytes[1] == 0x5A && testBytes[2] == 0x68 {
+				return "application/x-bzip2", nil
+			}
+			if testBytes[3] == 0xFD && testBytes[2] == 0x2F && testBytes[1] == 0xB5 && testBytes[0] == 0x28 {
+				return "application/zstd", nil
+			}
+		}
+		return contentType, nil
+	}
+	return blankType, nil
 }
