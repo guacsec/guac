@@ -449,3 +449,22 @@ func (c *arangoClient) queryVulnerabilityMetadataNodeByID(ctx context.Context, f
 		Collector:     collectedValues[0].Collector,
 	}, nil
 }
+
+func (c *arangoClient) vulnMetadataNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 1)
+	if allowedEdges[model.EdgeVulnMetadataVulnerability] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(vulnMetadataStr, "vulnMetadata")
+		arangoQueryBuilder.filter("vulnMetadata", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  vulnMetadata.vulnerabilityID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "vulnMetadataNeighbors - vulnerability")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

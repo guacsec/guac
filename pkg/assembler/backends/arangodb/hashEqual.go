@@ -438,14 +438,14 @@ func (c *arangoClient) hashEqualNeighbors(ctx context.Context, nodeID string, al
 		}
 		defer cursor.Close()
 
-		type dbhashEqualNeighbor struct {
+		type dbHashEqualNeighbor struct {
 			ArtifactID      string `json:"artifactID"`
 			EqualArtifactID string `json:"equalArtifactID"`
 		}
 
-		var foundNeighbors []dbhashEqualNeighbor
+		var foundNeighbors []dbHashEqualNeighbor
 		for {
-			var doc dbhashEqualNeighbor
+			var doc dbHashEqualNeighbor
 			_, err := cursor.ReadDocument(ctx, &doc)
 			if err != nil {
 				if driver.IsNoMoreDocuments(err) {

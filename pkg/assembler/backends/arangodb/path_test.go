@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -1120,6 +1122,10 @@ func Test_Neighbors(t *testing.T) {
 		queryHasSourceAtID       bool
 		queryIsDependencyID      bool
 		queryIsOccurrenceID      bool
+		queryPkgEqualID          bool
+		queryPointOfContactID    bool
+		queryVulnEqualID         bool
+		queryVulnMetadataID      bool
 		certifyBadCall           *certifyBadCall
 		certifyGoodCall          *certifyGoodCall
 		certifyLegalCall         *certifyLegalCall
@@ -2760,6 +2766,38 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification two",
 			}},
 	}, {
+		name:  "pkgEqual - pkgEqualID",
+		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		pkgEqualCall: &pkgEqualCall{
+			P1: testdata.P1,
+			P2: testdata.P2,
+			HE: &model.PkgEqualInputSpec{
+				Justification: "test justification two",
+			},
+		},
+		queryPkgEqualID: true,
+		usingOnly:       []model.Edge{model.EdgePkgEqualPackage},
+		want:            []model.Node{testdata.P1out, testdata.P2out},
+	}, {
+		name:  "pointOfContact - artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Artifact: testdata.A1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryArtifactID: true,
+		want: []model.Node{&model.PointOfContact{
+			Subject:       testdata.A1out,
+			Justification: "test justification",
+		}},
+	}, {
 		name:  "pointOfContact - PkgName",
 		inPkg: []*model.PkgInputSpec{testdata.P2},
 		pointOfContactCall: &pointOfContactCall{
@@ -2848,6 +2886,74 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			}},
 	}, {
+		name:  "pointOfContact - pointOfContactID - artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Artifact: testdata.A1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPointOfContactID: true,
+		usingOnly:             []model.Edge{model.EdgePointOfContactArtifact},
+		want:                  []model.Node{testdata.A1out},
+	}, {
+		name:  "pointOfContact - pointOfContactID - PkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPointOfContactID: true,
+		usingOnly:             []model.Edge{model.EdgePointOfContactPackage},
+		want:                  []model.Node{testdata.P2outName},
+	}, {
+		name:  "pointOfContact - pointOfContactID - srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Source: testdata.S1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPointOfContactID: true,
+		usingOnly:             []model.Edge{model.EdgePointOfContactSource},
+		want:                  []model.Node{testdata.S1out},
+	}, {
+		name:  "pointOfContact - pointOfContactID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPointOfContactID: true,
+		usingOnly:             []model.Edge{model.EdgePointOfContactPackage},
+		want:                  []model.Node{testdata.P2out},
+	}, {
 		name:   "vulnEqual - vulnID",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.G1},
 		vulnEqualCall: &vulnEqualCall{
@@ -2906,6 +3012,26 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			}},
 	}, {
+		name:   "vulnEqual - vulnEqualID",
+		inVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.G1},
+		vulnEqualCall: &vulnEqualCall{
+			Vuln:      testdata.O1,
+			OtherVuln: testdata.G1,
+			In: &model.VulnEqualInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryVulnEqualID: true,
+		usingOnly:        []model.Edge{model.EdgeVulnEqualVulnerability},
+		want: []model.Node{&model.Vulnerability{
+			Type:             "osv",
+			VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+		},
+			&model.Vulnerability{
+				Type:             "ghsa",
+				VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+			}},
+	}, {
 		name:   "vulnMetadata - vulnID",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 		vulnMetadataCall: &vulnMetadataCall{
@@ -2935,6 +3061,25 @@ func Test_Neighbors(t *testing.T) {
 				Collector:  "test collector",
 				Origin:     "test origin",
 			}},
+	}, {
+		name:   "vulnMetadata - vulnMetadataID",
+		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+		vulnMetadataCall: &vulnMetadataCall{
+			Vuln: testdata.G1,
+			VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+				ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
+				ScoreValue: 8.9,
+				Timestamp:  testdata.T1,
+				Collector:  "test collector",
+				Origin:     "test origin",
+			},
+		},
+		queryVulnMetadataID: true,
+		usingOnly:           []model.Edge{model.EdgeVulnMetadataVulnerability},
+		want: []model.Node{&model.Vulnerability{
+			Type:             "ghsa",
+			VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+		}},
 	}}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
@@ -3355,6 +3500,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Packages[1].Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackagePkgEqual}
 				}
+				if tt.queryPkgEqualID {
+					nodeID = found.ID
+				}
 			}
 			if tt.pointOfContactCall != nil {
 				found, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
@@ -3380,6 +3528,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourcePointOfContact}
 				}
+				if tt.queryPointOfContactID {
+					nodeID = found.ID
+				}
 			}
 			if tt.vulnEqualCall != nil {
 				found, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
@@ -3397,6 +3548,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Vulnerabilities[1].VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityVulnEqual}
 				}
+				if tt.queryVulnEqualID {
+					nodeID = found.ID
+				}
 			}
 			if tt.vulnMetadataCall != nil {
 				ingestedVuln, err := b.IngestVulnerability(ctx, *tt.inVuln[0])
@@ -3404,7 +3558,7 @@ func Test_Neighbors(t *testing.T) {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 
-				_, err = b.IngestVulnerabilityMetadata(ctx, *tt.vulnMetadataCall.Vuln, *tt.vulnMetadataCall.VulnMetadata)
+				vulnMetadataID, err := b.IngestVulnerabilityMetadata(ctx, *tt.vulnMetadataCall.Vuln, *tt.vulnMetadataCall.VulnMetadata)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3414,6 +3568,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.queryVulnID {
 					nodeID = ingestedVuln.VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnMetadataVulnerability}
+				}
+				if tt.queryVulnMetadataID {
+					nodeID = vulnMetadataID
 				}
 			}
 			got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)

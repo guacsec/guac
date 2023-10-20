@@ -1156,3 +1156,45 @@ func (c *arangoClient) queryPointOfContactNodeByID(ctx context.Context, filter *
 	}
 	return pointOfContact, nil
 }
+
+func (c *arangoClient) pointOfContactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 1)
+
+	if allowedEdges[model.EdgePointOfContactPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pointOfContactStr, "pointOfContact")
+		setPointOfContactMatchValues(arangoQueryBuilder, &model.PointOfContactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  pointOfContact.packageID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "pointOfContactNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePointOfContactArtifact] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pointOfContactStr, "pointOfContact")
+		setPointOfContactMatchValues(arangoQueryBuilder, &model.PointOfContactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  pointOfContact.artifactID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "pointOfContactNeighbors - artifact")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePointOfContactSource] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pointOfContactStr, "pointOfContact")
+		setPointOfContactMatchValues(arangoQueryBuilder, &model.PointOfContactSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  pointOfContact.sourceID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "pointOfContactNeighbors - source")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	return out, nil
+}

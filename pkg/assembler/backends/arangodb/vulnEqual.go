@@ -540,3 +540,47 @@ func (c *arangoClient) queryVulnEqualNodeByID(ctx context.Context, filter *model
 		Collector:       collectedValues[0].Collector,
 	}, nil
 }
+
+func (c *arangoClient) vulnEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 2)
+	if allowedEdges[model.EdgeVulnEqualVulnerability] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(vulnEqualsStr, "vulnEqual")
+		setVulnEqualMatchValues(arangoQueryBuilder, &model.VulnEqualSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { vulnerabilityID:  vulnEqual.vulnerabilityID, equalVulnerabilityID: vulnEqual.equalVulnerabilityID }")
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "getNeighborIDFromCursor - vulnEqualNeighbors")
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "vulnEqualNeighbors", err)
+		}
+		defer cursor.Close()
+
+		type dbVulnEqualNeighbor struct {
+			VulnerabilityID      string `json:"vulnerabilityID"`
+			EqualVulnerabilityID string `json:"equalVulnerabilityID"`
+		}
+
+		var foundNeighbors []dbVulnEqualNeighbor
+		for {
+			var doc dbVulnEqualNeighbor
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					break
+				} else {
+					return nil, fmt.Errorf("failed to get neighbor id from cursor for %s with error: %w", "vulnEqualNeighbors", err)
+				}
+			} else {
+				foundNeighbors = append(foundNeighbors, doc)
+			}
+		}
+
+		var foundIDs []string
+		for _, foundNeighbor := range foundNeighbors {
+			foundIDs = append(foundIDs, foundNeighbor.VulnerabilityID)
+			foundIDs = append(foundIDs, foundNeighbor.EqualVulnerabilityID)
+		}
+		out = append(out, foundIDs...)
+	}
+	return out, nil
+}

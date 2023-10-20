@@ -260,13 +260,25 @@ func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly [
 			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 		}
 	case pkgEqualsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.pkgEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case pointOfContactStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.pointOfContactNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case vulnEqualsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.vulnEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case vulnMetadataStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.vulnMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	default:
 		return nil, fmt.Errorf("unknown ID for node query: %s", nodeID)
 	}
