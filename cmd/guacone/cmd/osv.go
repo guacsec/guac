@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/cenkalti/backoff"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -47,13 +48,20 @@ type osvOptions struct {
 	interval          time.Duration
 }
 
+const (
+	maxIntervalTime    = 1 * time.Minute
+	randFactorForRetry = 0.5
+	multiplierForRetry = 1.5
+)
+
 var osvCmd = &cobra.Command{
 	Use:   "osv [flags]",
 	Short: "runs the osv certifier",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
-
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 		opts, err := validateOSVFlags(
 			viper.GetString("gql-addr"),
 			viper.GetBool("poll"),
@@ -62,7 +70,6 @@ var osvCmd = &cobra.Command{
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -160,30 +167,66 @@ var osvCmd = &cobra.Command{
 			return nil
 		}
 
-		// Collect
+		// Create a channel to handle errors
+		errChan := make(chan error, 1)
+
+		// Define an error handler function
+		// This function logs the error and sends it to the error channel
+		// If there is no error, it logs a success message and sends nil to the error channel
+		// It always returns true to indicate that the error has been handled
 		errHandler := func(err error) bool {
-			if err == nil {
-				logger.Info("certifier ended gracefully")
+			if err != nil {
+				logger.Errorf("certifier ended with error: %v", err)
+				atomic.StoreInt32(&gotErr, 1)
+				errChan <- err
 				return true
 			}
-			logger.Errorf("certifier ended with error: %v", err)
-			atomic.StoreInt32(&gotErr, 1)
-			// process documents already captures
+			logger.Info("certifier ended gracefully")
+			errChan <- nil
 			return true
 		}
 
+		// Collect
 		ctx, cf := context.WithCancel(ctx)
 		done := make(chan bool, 1)
 		wg.Add(1)
+
+		// exponential backoff retry
 		go func() {
 			defer wg.Done()
-			if err := certify.Certify(ctx, packageQuery, emit, errHandler, opts.poll, opts.interval); err != nil {
-				logger.Errorf("Unhandled error in the certifier: %s", err)
+			defer close(errChan) // Close the errChan
+
+			// Initialize exponential backoff settings
+			expBackOff := backoff.NewExponentialBackOff()
+			expBackOff.MaxElapsedTime = maxIntervalTime
+			expBackOff.RandomizationFactor = randFactorForRetry
+			expBackOff.Multiplier = multiplierForRetry
+
+			// Define the operation to be retried on failure
+			backoffOperation := func() error {
+				// Call the certify method. This method does not return an error.
+				certify.Certify(ctx, packageQuery, emit, errHandler, opts.poll, opts.interval) //nolint:errcheck
+				// Return the error received from the error channel
+				// We use an error channel because the certify method does not return an error
+				// Instead, errors are propagated through the error channel via the errHandler
+				return <-errChan
 			}
+
+			// Retry the operation with exponential backoff
+			err := backoff.Retry(backoffOperation, expBackOff)
+			if err != nil {
+				// Log the error and update the error flag
+				logger.Errorf("unable to certify: %v", err)
+				atomic.StoreInt32(&gotErr, 1)
+				// Signal that the operation is done
+				done <- true
+				// Exit the program with a non-zero status code
+				os.Exit(1)
+			}
+
+			// Signal that the operation is done
 			done <- true
 		}()
-		sigs := make(chan os.Signal, 1)
-		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 		select {
 		case s := <-sigs:
 			logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
