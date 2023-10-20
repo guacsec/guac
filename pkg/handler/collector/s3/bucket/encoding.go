@@ -22,7 +22,7 @@ import (
 )
 
 func ExtractEncoding(encoding string, filename string) processor.EncodingType {
-	switch encoding {
+	switch strings.ToUpper(encoding) {
 	case "BZIP2":
 		return processor.EncodingBzip2
 	case "ZSTD":
