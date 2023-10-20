@@ -35,15 +35,15 @@ import (
 
 // s3Options flags for configuring the command
 type s3Options struct {
-	s3url      string // base url of the s3 to collect from
-	s3bucket   string // name of bucket to collect from
-	s3item     string // s3 item (only for non-polling behaviour)
-	region     string // AWS region, for s3/sqs configuration (defaults to us-east-1)
-	queues     string // comma-separated list of queues/topics (only for polling behaviour)
-	mp         string // message provider name (sqs or kafka, will default to kafka)
-	mpEndpoint string // endpoint for the message provider (only for polling behaviour)
-	poll       bool   // polling or non-polling behaviour? (defaults to non-polling)
-	graphqlEndpoint   string // endpoint for the graphql server
+	s3url             string                        // base url of the s3 to collect from
+	s3bucket          string                        // name of bucket to collect from
+	s3item            string                        // s3 item (only for non-polling behaviour)
+	region            string                        // AWS region, for s3/sqs configuration (defaults to us-east-1)
+	queues            string                        // comma-separated list of queues/topics (only for polling behaviour)
+	mp                string                        // message provider name (sqs or kafka, will default to kafka)
+	mpEndpoint        string                        // endpoint for the message provider (only for polling behaviour)
+	poll              bool                          // polling or non-polling behaviour? (defaults to non-polling)
+	graphqlEndpoint   string                        // endpoint for the graphql server
 	csubClientOptions csub_client.CsubClientOptions // options for the collectsub client
 }
 

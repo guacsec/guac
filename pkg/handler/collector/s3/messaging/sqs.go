@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/guacsec/guac/pkg/logging"
@@ -89,7 +90,7 @@ func NewSqsProvider(mpConfig MessageProviderConfig) (SqsProvider, error) {
 
 	client := sqs.NewFromConfig(cfg, func(o *sqs.Options) {
 		if mpConfig.Endpoint != "" {
-			o.EndpointResolver = sqs.EndpointResolverFromURL(mpConfig.Endpoint)
+			o.BaseEndpoint = aws.String(mpConfig.Endpoint)
 		}
 		if mpConfig.Region != "" {
 			o.Region = mpConfig.Region

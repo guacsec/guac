@@ -20,10 +20,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -63,11 +61,10 @@ func NewTestProvider(queue string) TestProvider {
 }
 
 func (t *TestProvider) ReceiveMessage(context.Context) (messaging.Message, error) {
-	fmt.Printf("returning message for queue %s\n", t.queue)
 	time.Sleep(2 * time.Second)
 
 	return &TestMessage{
-		item:   "item",
+		item:   "test-message",
 		bucket: t.queue,
 		event:  messaging.PUT,
 	}, nil
@@ -88,27 +85,31 @@ func (tb *TestMpBuilder) GetMessageProvider(config messaging.MessageProviderConf
 
 // Test Bucket
 type TestBucket struct {
+	operations []string
 }
 
 func (td *TestBucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {
-	fmt.Printf("downloading file with bucket %s and name %s\n", bucket, item)
-	return []byte{1, 2, 3}, nil
+	return []byte("{\"key\": \"value\"}"), nil
 }
 
 func (td *TestBucket) GetEncoding(ctx context.Context, bucket string, item string) (string, error) {
-	return "", nil
+	return "application/json", nil
 }
 
 type TestBucketBuilder struct {
 }
 
-func (td *TestBucketBuilder) GetDownloader(hostname string, port string, region string) bucket.Bucket {
+func (td *TestBucketBuilder) GetDownloader(url string, region string) bucket.Bucket {
 	return &TestBucket{}
 }
 
-func TestQueuesSplitPolling(t *testing.T) {
+func TestS3Collector(t *testing.T) {
 	ctx := context.Background()
+	testNoPolling(t, ctx)
+	testQueuesSplitPolling(t, ctx)
+}
 
+func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
 	sigChan := make(chan os.Signal, 1)
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		Queues:        "q1,q2",
@@ -122,20 +123,6 @@ func TestQueuesSplitPolling(t *testing.T) {
 		!errors.Is(err, collector.ErrCollectorOverwrite) {
 		t.Fatalf("could not register collector: %v", err)
 	}
-
-	// redirect stdout to read it
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-	outC := make(chan string)
-	go func() {
-		var buf bytes.Buffer
-		_, err := io.Copy(&buf, r)
-		if err != nil {
-			return
-		}
-		outC <- buf.String()
-	}()
 
 	// create fake emitter and handler
 	var s []*processor.Document
@@ -160,27 +147,22 @@ func TestQueuesSplitPolling(t *testing.T) {
 	// shut down collector
 	signal.Notify(sigChan, syscall.SIGINT)
 
-	w.Close()
-	os.Stdout = oldStdout // restoring the real stdout
-	out := <-outC
+	if len(s) == 0 {
+		t.Errorf("no documents returned")
+	}
 
-	if !strings.Contains(out, "returning message for queue q1") {
-		t.Errorf("message for q1 not returned")
-	}
-	if !strings.Contains(out, "returning message for queue q2") {
-		t.Errorf("message for q2 not returned")
-	}
-	if !strings.Contains(out, "downloading file with bucket q1 and name item") {
-		t.Errorf("not downloading from bucket q1")
-	}
-	if !strings.Contains(out, "downloading file with bucket q2 and name item") {
-		t.Errorf("not downloading from bucket q2")
+	for _, doc := range s {
+		if doc.Blob != nil && !bytes.Equal(doc.Blob, []byte("{\"key\": \"value\"}")) {
+			t.Errorf("wrong item returned")
+		}
+
+		if doc.Encoding != "UNKNOWN" {
+			t.Errorf("wrong encoding returned: %s", doc.Encoding)
+		}
 	}
 }
 
-func TestNoPolling(t *testing.T) {
-	ctx := context.Background()
-
+func testNoPolling(t *testing.T, ctx context.Context) {
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		BucketBuilder: &TestBucketBuilder{},
 		S3Bucket:      "no-poll-bucket",
@@ -211,8 +193,8 @@ func TestNoPolling(t *testing.T) {
 	if len(s) == 0 {
 		t.Errorf("no documents returned")
 	}
-	if len(s[0].Blob) != 3 {
-		t.Errorf("wrong document returned")
-	}
 
+	if s[0].Blob != nil && !bytes.Equal(s[0].Blob, []byte("{\"key\": \"value\"}")) {
+		t.Errorf("wrong item returned")
+	}
 }
