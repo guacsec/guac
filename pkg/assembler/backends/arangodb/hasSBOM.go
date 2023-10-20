@@ -699,3 +699,34 @@ func (c *arangoClient) queryHasSbomNodeByID(ctx context.Context, filter *model.H
 	}
 	return hasSBOM, nil
 }
+
+func (c *arangoClient) hasSbomNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 1)
+
+	if allowedEdges[model.EdgeHasSbomPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(hasSBOMsStr, "hasSBOM")
+		setHasSBOMMatchValues(arangoQueryBuilder, &model.HasSBOMSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSBOM.packageID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSbomNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeHasSbomArtifact] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(hasSBOMsStr, "hasSBOM")
+		setHasSBOMMatchValues(arangoQueryBuilder, &model.HasSBOMSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSBOM.artifactID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSbomNeighbors - artifact")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

@@ -1115,6 +1115,8 @@ func Test_Neighbors(t *testing.T) {
 		queryCertifyVulnID       bool
 		queryHashEqualID         bool
 		queryHasMetadataID       bool
+		queryHasSbomID           bool
+		queryHasSlsaID           bool
 		certifyBadCall           *certifyBadCall
 		certifyGoodCall          *certifyGoodCall
 		certifyLegalCall         *certifyLegalCall
@@ -2200,7 +2202,7 @@ func Test_Neighbors(t *testing.T) {
 		usingOnly:          []model.Edge{model.EdgeHasMetadataPackage},
 		want:               []model.Node{testdata.P2outName},
 	}, {
-		name:  "hasMetadata - pkgVersion",
+		name:  "hasMetadata - hasMetadataID - pkgVersion",
 		inPkg: []*model.PkgInputSpec{testdata.P2},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
@@ -2217,7 +2219,7 @@ func Test_Neighbors(t *testing.T) {
 		usingOnly:          []model.Edge{model.EdgeHasMetadataPackage},
 		want:               []model.Node{testdata.P2out},
 	}, {
-		name:  "hasMetadata - srcName",
+		name:  "hasMetadata - hasMetadataID - srcName",
 		inSrc: []*model.SourceInputSpec{testdata.S1},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
@@ -2276,6 +2278,34 @@ func Test_Neighbors(t *testing.T) {
 				DownloadLocation: "location two",
 			}},
 	}, {
+		name:  "hasSBOM - hasSbomID - artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A2},
+		hasSBOMCall: &hasSBOMCall{
+			Sub: model.PackageOrArtifactInput{
+				Artifact: testdata.A2,
+			},
+			HS: &model.HasSBOMInputSpec{
+				DownloadLocation: "location two",
+			},
+		},
+		queryHasSbomID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSbomArtifact},
+		want:           []model.Node{testdata.A2out},
+	}, {
+		name:  "hasSBOM - hasSbomID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		hasSBOMCall: &hasSBOMCall{
+			Sub: model.PackageOrArtifactInput{
+				Package: testdata.P2,
+			},
+			HS: &model.HasSBOMInputSpec{
+				DownloadLocation: "location two",
+			},
+		},
+		queryHasSbomID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSbomPackage},
+		want:           []model.Node{testdata.P2out},
+	}, {
 		name:  "hasSLSA - builder",
 		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
@@ -2311,6 +2341,45 @@ func Test_Neighbors(t *testing.T) {
 				BuiltFrom: []*model.Artifact{testdata.A2out},
 			},
 		}},
+	}, {
+		name:  "hasSLSA - hasSlsaID - builder",
+		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
+		hasSlsaCall: &hasSlsaCall{
+			Sub:  testdata.A1,
+			BF:   []*model.ArtifactInputSpec{testdata.A2},
+			BB:   testdata.B2,
+			SLSA: &model.SLSAInputSpec{},
+		},
+		queryHasSlsaID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSlsaBuiltBy},
+		want:           []model.Node{testdata.B2out},
+	}, {
+		name:  "hasSLSA - hasSlsaID - subject artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
+		hasSlsaCall: &hasSlsaCall{
+			Sub:  testdata.A1,
+			BF:   []*model.ArtifactInputSpec{testdata.A2},
+			BB:   testdata.B2,
+			SLSA: &model.SLSAInputSpec{},
+		},
+		queryHasSlsaID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSlsaSubject},
+		want:           []model.Node{testdata.A1out},
+	}, {
+		name:  "hasSLSA - hasSlsaID - builtFrom",
+		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
+		hasSlsaCall: &hasSlsaCall{
+			Sub:  testdata.A1,
+			BF:   []*model.ArtifactInputSpec{testdata.A2},
+			BB:   testdata.B2,
+			SLSA: &model.SLSAInputSpec{},
+		},
+		queryHasSlsaID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSlsaMaterials},
+		want:           []model.Node{testdata.A2out},
 	}, {
 		name:  "hasSourceAt - pkgName",
 		inPkg: []*model.PkgInputSpec{testdata.P2},
@@ -3058,6 +3127,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageHasSbom}
 				}
+				if tt.queryHasSbomID {
+					nodeID = found.ID
+				}
 			}
 			if tt.hasSlsaCall != nil {
 				found, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
@@ -3074,6 +3146,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.queryArtifactID {
 					nodeID = found.Subject.ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactHasSlsa}
+				}
+				if tt.queryHasSlsaID {
+					nodeID = found.ID
 				}
 			}
 			if tt.hasSourceAtCall != nil {

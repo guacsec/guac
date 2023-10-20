@@ -1083,12 +1083,12 @@ func (c *arangoClient) certifyLegalNeighbors(ctx context.Context, nodeID string,
 		}
 
 		var foundIDs []string
-		for _, foundLieNeighbor := range foundLicenseNeighbors {
-			if foundLieNeighbor.Declared != nil {
-				foundIDs = append(foundIDs, foundLieNeighbor.Declared...)
+		for _, foundLicNeighbor := range foundLicenseNeighbors {
+			if foundLicNeighbor.Declared != nil {
+				foundIDs = append(foundIDs, foundLicNeighbor.Declared...)
 			}
-			if foundLieNeighbor.Discovered != nil {
-				foundIDs = append(foundIDs, foundLieNeighbor.Discovered...)
+			if foundLicNeighbor.Discovered != nil {
+				foundIDs = append(foundIDs, foundLicNeighbor.Discovered...)
 			}
 		}
 
