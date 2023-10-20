@@ -1145,3 +1145,381 @@ func (c *arangoClient) queryPkgTypeNodeByID(ctx context.Context, id string, filt
 		Namespaces: pnsl,
 	}, nil
 }
+
+func (c *arangoClient) packageTypeNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pkgTypesStr, "pType")
+	arangoQueryBuilder.filter("pType", "_id", "==", "@id")
+	values["id"] = nodeID
+	arangoQueryBuilder.forOutBound(pkgHasNamespaceStr, "pNs", "pType")
+	arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: pNs._id }")
+
+	foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageTypeNeighbors")
+	if err != nil {
+		return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+	}
+	out = append(out, foundIDs...)
+	return out, nil
+}
+
+func (c *arangoClient) packageNamespaceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pkgNamespacesStr, "pNs")
+	arangoQueryBuilder.filter("pNs", "_id", "==", "@id")
+	values["id"] = nodeID
+	arangoQueryBuilder.forOutBound(pkgHasNameStr, "pName", "pNs")
+	arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: pName._id, parent: pNs._parent }")
+
+	foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageNamespaceNeighbors")
+	if err != nil {
+		return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+	}
+	out = append(out, foundIDs...)
+	return out, nil
+}
+
+func (c *arangoClient) packageNameNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
+	arangoQueryBuilder.filter("pName", "_id", "==", "@id")
+	values["id"] = nodeID
+	arangoQueryBuilder.forOutBound(pkgHasVersionStr, "pVersion", "pName")
+	arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: pVersion._id, parent: pName._parent}")
+
+	foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageNameNeighbors")
+	if err != nil {
+		return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+	}
+	out = append(out, foundIDs...)
+
+	if allowedEdges[model.EdgePackageHasSourceAt] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
+		arangoQueryBuilder.filter("pName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(hasSourceAtPkgNameEdgesStr, "hasSourceAt", "pName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: hasSourceAt._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageIsDependency] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
+		arangoQueryBuilder.filter("pName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forInBound(isDependencyDepPkgNameEdgesStr, "isDependency", "pName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: isDependency._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageCertifyBad] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
+		arangoQueryBuilder.filter("pName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyBadPkgNameEdgesStr, "certifyBad", "pName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyBad._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageCertifyGood] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
+		arangoQueryBuilder.filter("pName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyGoodPkgNameEdgesStr, "certifyGood", "pName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyGood._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageHasMetadata] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
+		arangoQueryBuilder.filter("pName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(hasMetadataPkgNameEdgesStr, "hasMetadata", "pName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: hasMetadata._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackagePointOfContact] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pkgNamesStr, "pName")
+		arangoQueryBuilder.filter("pName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(pointOfContactPkgNameEdgesStr, "pointOfContact", "pName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: pointOfContact._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	return out, nil
+}
+
+func (c *arangoClient) packageVersionNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(pkgVersionsStr, "pVersion")
+	arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+	values["id"] = nodeID
+	arangoQueryBuilder.query.WriteString("\nRETURN { parent: pVersion._parent}")
+
+	foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+	if err != nil {
+		return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+	}
+	out = append(out, foundIDs...)
+
+	if allowedEdges[model.EdgePackageHasSourceAt] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(hasSourceAtPkgVersionEdgesStr, "hasSourceAt", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: hasSourceAt._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageIsDependency] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(isDependencySubjectPkgEdgesStr, "isDependency", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: isDependency._id }")
+
+		foundSubjectIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundSubjectIDs...)
+
+		values = map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forInBound(isDependencyDepPkgVersionEdgesStr, "isDependency", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: isDependency._id }")
+
+		foundDependencyPkgIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+
+		out = append(out, foundDependencyPkgIDs...)
+	}
+	if allowedEdges[model.EdgePackageIsOccurrence] {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(isOccurrenceSubjectPkgEdgesStr, "isOccurrence", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: isOccurrence._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageCertifyVuln] {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyVulnPkgEdgesStr, "certifyVuln", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyVuln._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageHasSbom] {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(hasSBOMPkgEdgesStr, "hasSBOM", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: hasSBOM._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageCertifyVexStatement] {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyVexPkgEdgesStr, "certifyVex", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyVex._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageCertifyBad] {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyBadPkgVersionEdgesStr, "certifyBad", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyBad._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageCertifyGood] {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyGoodPkgVersionEdgesStr, "certifyGood", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyGood._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackagePkgEqual] {
+		// pkgEqualSubjectPkgEdgesStr collection query
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(pkgEqualSubjectPkgEdgesStr, "pkgEqual", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: pkgEqual._id }")
+
+		foundSubjectIDsOutBound, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors - pkgEqualSubjectPkgEdges outbound")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundSubjectIDsOutBound...)
+
+		values = map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forInBound(pkgEqualSubjectPkgEdgesStr, "pkgEqual", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  pkgEqual._id }")
+
+		foundSubjectIDsInBound, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors - pkgEqualSubjectPkgEdges inbound")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundSubjectIDsInBound...)
+
+		//pkgEqualPkgEdgesStr collection query
+
+		values = map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(pkgEqualPkgEdgesStr, "pkgEqual", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  pkgEqual._id }")
+
+		foundEqualIDsOutBound, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors - pkgEqualPkgEdges outbound")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundEqualIDsOutBound...)
+
+		values = map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forInBound(pkgEqualPkgEdgesStr, "pkgEqual", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  pkgEqual._id }")
+
+		foundEqualIDsInBound, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors - pkgEqualPkgEdges inbound")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundEqualIDsInBound...)
+	}
+	if allowedEdges[model.EdgePackageHasMetadata] {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(hasMetadataPkgVersionEdgesStr, "hasMetadata", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: hasMetadata._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackagePointOfContact] {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(pointOfContactPkgVersionEdgesStr, "pointOfContact", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: pointOfContact._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgePackageCertifyLegal] {
+		values := map[string]any{}
+		arangoQueryBuilder = newForQuery(pkgVersionsStr, "pVersion")
+		arangoQueryBuilder.filter("pVersion", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyLegalPkgEdgesStr, "certifyLegal", "pVersion")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyLegal._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "packageVersionNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

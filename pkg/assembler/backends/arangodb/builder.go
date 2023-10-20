@@ -191,3 +191,20 @@ func (c *arangoClient) buildBuilderResponseByID(ctx context.Context, id string, 
 		return nil, fmt.Errorf("id type does not match for builder query: %s", id)
 	}
 }
+
+func (c *arangoClient) builderNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	if allowedEdges[model.EdgeBuilderHasSlsa] {
+		values := map[string]any{}
+		arangoQueryBuilder := setBuilderMatchValues(&model.BuilderSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.forInBound(hasSLSABuiltByEdgesStr, "hasSLSA", "build")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: hasSLSA._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "builderNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	return out, nil
+}

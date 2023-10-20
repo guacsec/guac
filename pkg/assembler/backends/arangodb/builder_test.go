@@ -28,41 +28,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// TODO (pxp928): add tests back in when implemented
-
-// func Test_builderStruct_Neighbors(t *testing.T) {
-// 	type fields struct {
-// 		id       uint32
-// 		uri      string
-// 		hasSLSAs []uint32
-// 	}
-// 	tests := []struct {
-// 		name         string
-// 		fields       fields
-// 		allowedEdges edgeMap
-// 		want         []uint32
-// 	}{{
-// 		name: "hasSLSAs",
-// 		fields: fields{
-// 			hasSLSAs: []uint32{445, 1232244},
-// 		},
-// 		allowedEdges: edgeMap{model.EdgeBuilderHasSlsa: true},
-// 		want:         []uint32{445, 1232244},
-// 	}}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			b := &builderStruct{
-// 				id:       tt.fields.id,
-// 				uri:      tt.fields.uri,
-// 				hasSLSAs: tt.fields.hasSLSAs,
-// 			}
-// 			if got := b.Neighbors(tt.allowedEdges); !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("builderStruct.Neighbors() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
-
 func Test_IngestBuilder(t *testing.T) {
 	ctx := context.Background()
 	arangArg := getArangoConfig()

@@ -773,3 +773,167 @@ func (c *arangoClient) querySrcTypeNodeByID(ctx context.Context, id string, filt
 		Namespaces: snsl,
 	}, nil
 }
+
+func (c *arangoClient) srcTypeNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(srcTypesStr, "sType")
+	arangoQueryBuilder.filter("sType", "_id", "==", "@id")
+	values["id"] = nodeID
+	arangoQueryBuilder.forOutBound(srcHasNamespaceStr, "sNs", "sType")
+	arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: sNs._id }")
+
+	foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcTypeNeighbors")
+	if err != nil {
+		return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+	}
+	out = append(out, foundIDs...)
+	return out, nil
+}
+
+func (c *arangoClient) srcNamespaceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(srcNamespacesStr, "sNs")
+	arangoQueryBuilder.filter("sNs", "_id", "==", "@id")
+	values["id"] = nodeID
+	arangoQueryBuilder.forOutBound(srcHasNameStr, "sName", "sNs")
+	arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: sName._id, parent: sNs._parent }")
+
+	foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNamespaceNeighbors")
+	if err != nil {
+		return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+	}
+	out = append(out, foundIDs...)
+	return out, nil
+}
+
+func (c *arangoClient) srcNameNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery(srcNamesStr, "sName")
+	arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+	values["id"] = nodeID
+	arangoQueryBuilder.query.WriteString("\nRETURN { parent: sName._parent}")
+
+	foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNameNeighbors")
+	if err != nil {
+		return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+	}
+	out = append(out, foundIDs...)
+
+	if allowedEdges[model.EdgeSourceHasSourceAt] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(srcNamesStr, "sName")
+		arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forInBound(hasSourceAtEdgesStr, "hasSourceAt", "sName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: hasSourceAt._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeSourceCertifyScorecard] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(srcNamesStr, "sName")
+		arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(scorecardSrcEdgesStr, "scorecard", "sName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: scorecard._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeSourceIsOccurrence] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(srcNamesStr, "sName")
+		arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(isOccurrenceSubjectSrcEdgesStr, "isOccurrence", "sName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: isOccurrence._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeSourceCertifyBad] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(srcNamesStr, "sName")
+		arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyBadSrcEdgesStr, "certifyBad", "sName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyBad._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeSourceCertifyGood] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(srcNamesStr, "sName")
+		arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyGoodSrcEdgesStr, "certifyGood", "sName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyGood._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeSourceHasMetadata] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(srcNamesStr, "sName")
+		arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(hasMetadataSrcEdgesStr, "hasMetadata", "sName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: hasMetadata._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeSourcePointOfContact] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(srcNamesStr, "sName")
+		arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(pointOfContactSrcEdgesStr, "pointOfContact", "sName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: pointOfContact._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeSourceCertifyLegal] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(srcNamesStr, "sName")
+		arangoQueryBuilder.filter("sName", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forOutBound(certifyLegalSrcEdgesStr, "certifyLegal", "sName")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyLegal._id }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "srcNameNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

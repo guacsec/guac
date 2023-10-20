@@ -329,3 +329,40 @@ func licenseMatch(filters []*model.LicenseSpec, values []*model.License) bool {
 	}
 	return true
 }
+
+func (c *arangoClient) licenseNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+
+	if allowedEdges[model.EdgeLicenseCertifyLegal] {
+		// certifyLegalDeclaredLicensesEdges
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(licensesStr, "lic")
+		arangoQueryBuilder.filter("lic", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forInBound(certifyLegalDeclaredLicensesEdgesStr, "certifyLegal", "lic")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyLegal._id }")
+
+		foundDeclaredIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "licenseNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundDeclaredIDs...)
+
+		// certifyLegalDiscoveredLicensesEdges
+
+		values = map[string]any{}
+		arangoQueryBuilder = newForQuery(licensesStr, "lic")
+		arangoQueryBuilder.filter("lic", "_id", "==", "@id")
+		values["id"] = nodeID
+		arangoQueryBuilder.forInBound(certifyLegalDiscoveredLicensesEdgesStr, "certifyLegal", "lic")
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor: certifyLegal._id }")
+
+		foundDiscoveredLicenseIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "licenseNeighbors")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundDiscoveredLicenseIDs...)
+	}
+
+	return out, nil
+}
