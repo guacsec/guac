@@ -1117,6 +1117,9 @@ func Test_Neighbors(t *testing.T) {
 		queryHasMetadataID       bool
 		queryHasSbomID           bool
 		queryHasSlsaID           bool
+		queryHasSourceAtID       bool
+		queryIsDependencyID      bool
+		queryIsOccurrenceID      bool
 		certifyBadCall           *certifyBadCall
 		certifyGoodCall          *certifyGoodCall
 		certifyLegalCall         *certifyLegalCall
@@ -2466,6 +2469,51 @@ func Test_Neighbors(t *testing.T) {
 				Source:  testdata.S1out,
 			}},
 	}, {
+		name:  "hasSourceAt - hasSourceAtID - pkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		hasSourceAtCall: &hasSourceAtCall{
+			Pkg: testdata.P2,
+			Src: testdata.S1,
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			HSA: &model.HasSourceAtInputSpec{},
+		},
+		queryHasSourceAtID: true,
+		usingOnly:          []model.Edge{model.EdgeHasSourceAtPackage},
+		want:               []model.Node{testdata.P2outName},
+	}, {
+		name:  "hasSourceAt - hasSourceAtID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		hasSourceAtCall: &hasSourceAtCall{
+			Pkg: testdata.P2,
+			Src: testdata.S1,
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			HSA: &model.HasSourceAtInputSpec{},
+		},
+		queryHasSourceAtID: true,
+		usingOnly:          []model.Edge{model.EdgeHasSourceAtPackage},
+		want:               []model.Node{testdata.P2out},
+	}, {
+		name:  "hasSourceAt - hasSourceAtID - srcName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		hasSourceAtCall: &hasSourceAtCall{
+			Pkg: testdata.P2,
+			Src: testdata.S1,
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			HSA: &model.HasSourceAtInputSpec{},
+		},
+		queryHasSourceAtID: true,
+		usingOnly:          []model.Edge{model.EdgeHasSourceAtSource},
+		want:               []model.Node{testdata.S1out},
+	}, {
 		name:  "isDependency - pkgName",
 		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
@@ -2515,6 +2563,30 @@ func Test_Neighbors(t *testing.T) {
 				Package:           testdata.P1out,
 				DependencyPackage: testdata.P2out,
 			}},
+	}, {
+		name:  "isDependency - isDependencyID - pkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		isDepCall: &isDepCall{
+			P1: testdata.P1,
+			P2: testdata.P2,
+			MF: mAll,
+			ID: &model.IsDependencyInputSpec{},
+		},
+		queryIsDependencyID: true,
+		usingOnly:           []model.Edge{model.EdgeIsDependencyPackage},
+		want:                []model.Node{testdata.P1out, testdata.P2outName},
+	}, {
+		name:  "isDependency - isDependencyID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		isDepCall: &isDepCall{
+			P1: testdata.P1,
+			P2: testdata.P2,
+			MF: mSpecific,
+			ID: &model.IsDependencyInputSpec{},
+		},
+		queryIsDependencyID: true,
+		usingOnly:           []model.Edge{model.EdgeIsDependencyPackage},
+		want:                []model.Node{testdata.P1out, testdata.P2out},
 	}, {
 		name:  "isOccurrence - artifact",
 		inPkg: []*model.PkgInputSpec{testdata.P1},
@@ -2589,6 +2661,54 @@ func Test_Neighbors(t *testing.T) {
 				Artifact:      testdata.A1out,
 				Justification: "test justification",
 			}},
+	}, {
+		name:  "isOccurrence - isOccurrenceID - artifact",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		isOcurCall: &isOcurCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Artifact: testdata.A1,
+			Occurrence: &model.IsOccurrenceInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryIsOccurrenceID: true,
+		usingOnly:           []model.Edge{model.EdgeIsOccurrenceArtifact},
+		want:                []model.Node{testdata.A1out},
+	}, {
+		name:  "isOccurrence - isOccurrenceID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		isOcurCall: &isOcurCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Artifact: testdata.A1,
+			Occurrence: &model.IsOccurrenceInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryIsOccurrenceID: true,
+		usingOnly:           []model.Edge{model.EdgeIsOccurrencePackage},
+		want:                []model.Node{testdata.P1out},
+	}, {
+		name:  "isOccurrence - isOccurrenceID - srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		isOcurCall: &isOcurCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Source: testdata.S1,
+			},
+			Artifact: testdata.A1,
+			Occurrence: &model.IsOccurrenceInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryIsOccurrenceID: true,
+		usingOnly:           []model.Edge{model.EdgeIsOccurrenceSource},
+		want:                []model.Node{testdata.S1out},
 	}, {
 		name:  "pkgEqual",
 		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
@@ -3171,6 +3291,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Source.Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceHasSourceAt}
 				}
+				if tt.queryHasSourceAtID {
+					nodeID = found.ID
+				}
 			}
 			if tt.isDepCall != nil {
 				found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
@@ -3187,6 +3310,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.queryPkgVersionID {
 					nodeID = found.DependencyPackage.Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency}
+				}
+				if tt.queryIsDependencyID {
+					nodeID = found.ID
 				}
 			}
 			if tt.isOcurCall != nil {
@@ -3208,6 +3334,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.querySrcNameID {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceIsOccurrence}
+				}
+				if tt.queryIsOccurrenceID {
+					nodeID = found.ID
 				}
 			}
 			if tt.pkgEqualCall != nil {

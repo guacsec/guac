@@ -245,11 +245,20 @@ func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly [
 			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 		}
 	case hasSourceAtsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.hasSourceAtNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case isDependenciesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.isDependencyNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case isOccurrencesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.isOccurrenceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case pkgEqualsStr:
 		return []model.Node{}, nil
 	case pointOfContactStr:
