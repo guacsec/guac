@@ -576,3 +576,33 @@ func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *mod
 
 	return certifyVuln, nil
 }
+
+func (c *arangoClient) certifyVulnNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 2)
+	if allowedEdges[model.EdgeCertifyVulnPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyVulnsStr, "certifyVuln")
+		setCertifyVulnMatchValues(arangoQueryBuilder, &model.CertifyVulnSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyVuln.packageID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyVulnNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeCertifyVulnVulnerability] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyVulnsStr, "certifyVuln")
+		setCertifyVulnMatchValues(arangoQueryBuilder, &model.CertifyVulnSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyVuln.vulnerabilityID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyVulnNeighbors - vulnerability")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

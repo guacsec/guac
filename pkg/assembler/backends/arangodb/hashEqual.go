@@ -423,3 +423,47 @@ func (c *arangoClient) queryHashEqualNodeByID(ctx context.Context, filter *model
 
 	return hashEqual, nil
 }
+
+func (c *arangoClient) hashEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := []string{}
+	if allowedEdges[model.EdgeHashEqualArtifact] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(hashEqualsStr, "hashEqual")
+		setHashEqualMatchValues(arangoQueryBuilder, &model.HashEqualSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { artifactID:  hashEqual.artifactID, equalArtifactID: hashEqual.equalArtifactID }")
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "getNeighborIDFromCursor - hashEqualNeighbors")
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hashEqualNeighbors", err)
+		}
+		defer cursor.Close()
+
+		type dbhashEqualNeighbor struct {
+			ArtifactID      string `json:"artifactID"`
+			EqualArtifactID string `json:"equalArtifactID"`
+		}
+
+		var foundNeighbors []dbhashEqualNeighbor
+		for {
+			var doc dbhashEqualNeighbor
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					break
+				} else {
+					return nil, fmt.Errorf("failed to get neighbor id from cursor for %s with error: %w", "hashEqualNeighbors", err)
+				}
+			} else {
+				foundNeighbors = append(foundNeighbors, doc)
+			}
+		}
+
+		var foundIDs []string
+		for _, foundNeighbor := range foundNeighbors {
+			foundIDs = append(foundIDs, foundNeighbor.ArtifactID)
+			foundIDs = append(foundIDs, foundNeighbor.EqualArtifactID)
+		}
+		out = append(out, foundIDs...)
+	}
+	return out, nil
+}
