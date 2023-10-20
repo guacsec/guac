@@ -1109,6 +1109,9 @@ func Test_Neighbors(t *testing.T) {
 		queryDiscoveredLicenseID bool
 		queryCertifyBadID        bool
 		queryCertifyGoodID       bool
+		queryCertifyLegalID      bool
+		queryScorecardID         bool
+		queryCertifyVexID        bool
 		certifyBadCall           *certifyBadCall
 		certifyGoodCall          *certifyGoodCall
 		certifyLegalCall         *certifyLegalCall
@@ -1673,6 +1676,70 @@ func Test_Neighbors(t *testing.T) {
 				Justification:      "test justification 2",
 			}},
 	}, {
+		name:  "certifyLegal - query certifyLegalID pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inLic: []*model.LicenseInputSpec{testdata.L1},
+		certifyLegalCall: &certifyLegalCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Dec: []*model.LicenseInputSpec{testdata.L1},
+			Legal: &model.CertifyLegalInputSpec{
+				Justification: "test justification 2",
+			},
+		},
+		queryCertifyLegalID: true,
+		usingOnly:           []model.Edge{model.EdgeCertifyLegalPackage},
+		want:                []model.Node{testdata.P1out},
+	}, {
+		name:  "certifyLegal - srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		inLic: []*model.LicenseInputSpec{testdata.L1},
+		certifyLegalCall: &certifyLegalCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Source: testdata.S1,
+			},
+			Dec: []*model.LicenseInputSpec{testdata.L1},
+			Legal: &model.CertifyLegalInputSpec{
+				Justification: "test justification 2",
+			},
+		},
+		queryCertifyLegalID: true,
+		usingOnly:           []model.Edge{model.EdgeCertifyLegalSource},
+		want:                []model.Node{testdata.S1out},
+	}, {
+		name:  "certifyLegal - Declared License",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inLic: []*model.LicenseInputSpec{testdata.L2},
+		certifyLegalCall: &certifyLegalCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Dec: []*model.LicenseInputSpec{testdata.L2},
+			Legal: &model.CertifyLegalInputSpec{
+				Justification: "test justification 2",
+			},
+		},
+		queryCertifyLegalID: true,
+		usingOnly:           []model.Edge{model.EdgeCertifyLegalLicense},
+		want:                []model.Node{testdata.L2out},
+	}, {
+		name:  "certifyLegal - Discovered License",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inLic: []*model.LicenseInputSpec{testdata.L3},
+		certifyLegalCall: &certifyLegalCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Dis: []*model.LicenseInputSpec{testdata.L3},
+			Legal: &model.CertifyLegalInputSpec{
+				Justification: "test justification 2",
+			},
+		},
+		queryCertifyLegalID: true,
+		usingOnly:           []model.Edge{model.EdgeCertifyLegalLicense},
+		want:                []model.Node{testdata.L3out},
+	}, {
 		name:  "scorecard",
 		inSrc: []*model.SourceInputSpec{testdata.S2},
 		scorecardCall: &scorecardCall{
@@ -1697,6 +1764,18 @@ func Test_Neighbors(t *testing.T) {
 					Origin: "test origin",
 				},
 			}},
+	}, {
+		name:  "scorecard - certifyScoreID",
+		inSrc: []*model.SourceInputSpec{testdata.S2},
+		scorecardCall: &scorecardCall{
+			Src: testdata.S2,
+			SC: &model.ScorecardInputSpec{
+				Origin: "test origin",
+			},
+		},
+		queryScorecardID: true,
+		usingOnly:        []model.Edge{model.EdgeCertifyScorecardSource},
+		want:             []model.Node{testdata.S2out},
 	}, {
 		name:   "vex - artifact",
 		inArt:  []*model.ArtifactInputSpec{testdata.A2},
@@ -1784,6 +1863,60 @@ func Test_Neighbors(t *testing.T) {
 				VexJustification: "test justification",
 				KnownSince:       time.Unix(1e9, 0),
 			}},
+	}, {
+		name:   "vex - certifyVexID - artifact",
+		inArt:  []*model.ArtifactInputSpec{testdata.A2},
+		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
+		vexCall: &vexCall{
+			Sub: model.PackageOrArtifactInput{
+				Artifact: testdata.A2,
+			},
+			Vuln: testdata.O2,
+			In: &model.VexStatementInputSpec{
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		queryCertifyVexID: true,
+		usingOnly:         []model.Edge{model.EdgeCertifyVexStatementArtifact},
+		want:              []model.Node{testdata.A2out},
+	}, {
+		name:   "vex - certifyVexID - pkgVersion",
+		inPkg:  []*model.PkgInputSpec{testdata.P1},
+		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
+		vexCall: &vexCall{
+			Sub: model.PackageOrArtifactInput{
+				Package: testdata.P1,
+			},
+			Vuln: testdata.O2,
+			In: &model.VexStatementInputSpec{
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		queryCertifyVexID: true,
+		usingOnly:         []model.Edge{model.EdgeCertifyVexStatementPackage},
+		want:              []model.Node{testdata.P1out},
+	}, {
+		name:   "vex - certifyVexID - vulnID",
+		inPkg:  []*model.PkgInputSpec{testdata.P1},
+		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+		vexCall: &vexCall{
+			Sub: model.PackageOrArtifactInput{
+				Package: testdata.P1,
+			},
+			Vuln: testdata.G1,
+			In: &model.VexStatementInputSpec{
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		queryCertifyVexID: true,
+		usingOnly:         []model.Edge{model.EdgeCertifyVexStatementVulnerability},
+		want: []model.Node{&model.Vulnerability{
+			Type:             "ghsa",
+			VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+		}},
 	}, {
 		name:   "certifyVuln - pkgVersion",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
@@ -2675,6 +2808,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.DiscoveredLicenses[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeLicenseCertifyLegal}
 				}
+				if tt.queryCertifyLegalID {
+					nodeID = found.ID
+				}
 			}
 			if tt.scorecardCall != nil {
 				found, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
@@ -2687,6 +2823,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.querySrcNameID {
 					nodeID = found.Source.Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyScorecard}
+				}
+				if tt.queryScorecardID {
+					nodeID = found.ID
 				}
 			}
 			if tt.vexCall != nil {
@@ -2708,6 +2847,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.queryVulnID {
 					nodeID = found.Vulnerability.VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityCertifyVexStatement}
+				}
+				if tt.queryCertifyVexID {
+					nodeID = found.ID
 				}
 			}
 			if tt.certifyVulnCall != nil {

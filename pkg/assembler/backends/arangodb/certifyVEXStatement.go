@@ -854,3 +854,45 @@ func (c *arangoClient) queryCertifyVexNodeByID(ctx context.Context, filter *mode
 	}
 	return vex, nil
 }
+
+func (c *arangoClient) certifyVexNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 2)
+	if allowedEdges[model.EdgeCertifyVexStatementPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyVEXsStr, "certifyVex")
+		setVexMatchValues(arangoQueryBuilder, &model.CertifyVEXStatementSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyVex.packageID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyScorecardNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeCertifyVexStatementArtifact] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyVEXsStr, "certifyVex")
+		setVexMatchValues(arangoQueryBuilder, &model.CertifyVEXStatementSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyVex.artifactID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyScorecardNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeCertifyVexStatementVulnerability] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyVEXsStr, "certifyVex")
+		setVexMatchValues(arangoQueryBuilder, &model.CertifyVEXStatementSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyVex.vulnerabilityID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyScorecardNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

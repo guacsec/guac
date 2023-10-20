@@ -1023,3 +1023,77 @@ func (c *arangoClient) queryCertifyLegalNodeByID(ctx context.Context, filter *mo
 	}
 	return certifyLegal, nil
 }
+
+func (c *arangoClient) certifyLegalNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 2)
+	if allowedEdges[model.EdgeCertifyLegalPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyLegalsStr, "certifyLegal")
+		setCertifyLegalMatchValues(arangoQueryBuilder, &model.CertifyLegalSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyLegal.packageID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyLegalNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeCertifyLegalSource] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyLegalsStr, "certifyLegal")
+		setCertifyLegalMatchValues(arangoQueryBuilder, &model.CertifyLegalSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyLegal.sourceID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyLegalNeighbors - source")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeCertifyLegalLicense] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyLegalsStr, "certifyLegal")
+		setCertifyLegalMatchValues(arangoQueryBuilder, &model.CertifyLegalSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { declared:  certifyLegal.declaredLicenses, discovered: certifyLegal.discoveredLicenses }")
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "getNeighborIDFromCursor - certifyLegalNeighbors")
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "certifyLegalNeighbors", err)
+		}
+		defer cursor.Close()
+
+		type dbLicenseNeighbor struct {
+			Declared   []string `json:"declared"`
+			Discovered []string `json:"discovered"`
+		}
+
+		var foundLicenseNeighbors []dbLicenseNeighbor
+		for {
+			var doc dbLicenseNeighbor
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					break
+				} else {
+					return nil, fmt.Errorf("failed to get neighbor id from cursor for %s with error: %w", "certifyLegalNeighbors", err)
+				}
+			} else {
+				foundLicenseNeighbors = append(foundLicenseNeighbors, doc)
+			}
+		}
+
+		var foundIDs []string
+		for _, foundLieNeighbor := range foundLicenseNeighbors {
+			if foundLieNeighbor.Declared != nil {
+				foundIDs = append(foundIDs, foundLieNeighbor.Declared...)
+			}
+			if foundLieNeighbor.Discovered != nil {
+				foundIDs = append(foundIDs, foundLieNeighbor.Discovered...)
+			}
+		}
+
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

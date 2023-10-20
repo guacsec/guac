@@ -205,11 +205,20 @@ func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly [
 			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 		}
 	case certifyLegalsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyLegalNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case scorecardStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyScorecardNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case certifyVEXsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyVexNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case certifyVulnsStr:
 		return []model.Node{}, nil
 	case hashEqualsStr:
