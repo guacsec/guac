@@ -28,8 +28,6 @@ import (
 )
 
 func InitConfig() {
-	ctx := logging.WithLogger(context.Background())
-	logger := logging.FromContext(ctx)
 
 	home, err := homedir.Dir()
 	if err != nil {
@@ -49,7 +47,15 @@ func InitConfig() {
 	// The POSIX standard does not allow - in env variables
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
-	if err := viper.ReadInConfig(); err == nil {
+	err = viper.ReadInConfig()
+
+	// init after reading in config to account for log level
+	logging.InitLogger(viper.GetInt(ConfigLogLevelVar))
+	ctx := logging.WithLogger(context.Background())
+	logger := logging.FromContext(ctx)
+
+	if err == nil {
 		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
+
 }

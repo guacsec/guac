@@ -17,16 +17,27 @@ package logging
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var logger *zap.SugaredLogger
 
 type loggerKey struct{}
 
-func init() {
-	zapLogger, _ := zap.NewProduction()
+func InitLogger(level int) {
+	zapLevel, envVarErr := parseLevel(level)
+	var zapLogger *zap.Logger
+
+	if zapLevel == zapcore.DebugLevel {
+		zapLogger = zap.Must(zap.NewDevelopment())
+	} else {
+		config := zap.NewProductionConfig()
+		config.Level.SetLevel(zapLevel)
+		zapLogger = zap.Must(config.Build())
+	}
 
 	// flushes buffer, if any
 	defer func() {
@@ -35,6 +46,11 @@ func init() {
 	}()
 
 	logger = zapLogger.Sugar()
+
+	if envVarErr != nil {
+		logger.Info(envVarErr)
+	}
+	logger.Infof("Logging at %s level", zapLogger.Level())
 }
 
 func WithLogger(ctx context.Context) context.Context {
@@ -47,4 +63,13 @@ func FromContext(ctx context.Context) *zap.SugaredLogger {
 	}
 
 	return zap.NewNop().Sugar()
+}
+
+// maps the integer level to a zapcore.Level
+// if the input is invalid, the info level is returned
+func parseLevel(level int) (zapcore.Level, error) {
+	if level < -1 || level > 5 {
+		return zapcore.Level(0), fmt.Errorf("The log level %v is not in [-1, 5].", level)
+	}
+	return zapcore.Level(level), nil
 }
