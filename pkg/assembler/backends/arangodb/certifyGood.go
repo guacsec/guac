@@ -1098,3 +1098,45 @@ func (c *arangoClient) queryCertifyGoodNodeByID(ctx context.Context, filter *mod
 	}
 	return certifyGood, nil
 }
+
+func (c *arangoClient) certifyGoodNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 1)
+
+	if allowedEdges[model.EdgeCertifyGoodPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyGoodsStr, "certifyGood")
+		setCertifyGoodMatchValues(arangoQueryBuilder, &model.CertifyGoodSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyGood.packageID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyGoodNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeCertifyGoodArtifact] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyGoodsStr, "certifyGood")
+		setCertifyGoodMatchValues(arangoQueryBuilder, &model.CertifyGoodSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyGood.artifactID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyGoodNeighbors - artifact")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeCertifyGoodSource] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyGoodsStr, "certifyGood")
+		setCertifyGoodMatchValues(arangoQueryBuilder, &model.CertifyGoodSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyGood.sourceID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyGoodNeighbors - source")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	return out, nil
+}
