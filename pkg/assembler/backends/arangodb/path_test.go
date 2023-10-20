@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -1109,6 +1107,7 @@ func Test_Neighbors(t *testing.T) {
 		queryEqualVulnID         bool
 		queryDeclaredLicenseID   bool
 		queryDiscoveredLicenseID bool
+		queryCertifyBadID        bool
 		certifyBadCall           *certifyBadCall
 		certifyGoodCall          *certifyGoodCall
 		certifyLegalCall         *certifyLegalCall
@@ -1341,6 +1340,70 @@ func Test_Neighbors(t *testing.T) {
 				Subject:       testdata.S1out,
 				Justification: "test justification",
 			}},
+	}, {
+		name:  "certifyBad - query certifyBadID artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A2},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Artifact: testdata.A2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyBadID: true,
+		want:              []model.Node{testdata.A2out},
+	}, {
+		name:  "certifyBad - query certifyBadID PkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyBadID: true,
+		want:              []model.Node{testdata.P2outName},
+	}, {
+		name:  "certifyBad - query certifyBadID pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyBadID: true,
+		want:              []model.Node{testdata.P2out},
+	}, {
+		name:  "certifyBad - query certifyBadID srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Source: testdata.S1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyBadID: true,
+		want:              []model.Node{testdata.S1out},
 	}, {
 		name:  "certifyGood - artifact",
 		inArt: []*model.ArtifactInputSpec{testdata.A2},
@@ -2488,6 +2551,10 @@ func Test_Neighbors(t *testing.T) {
 				if tt.querySrcNameID {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyBad}
+				}
+				if tt.queryCertifyBadID {
+					nodeID = found.ID
+					tt.usingOnly = []model.Edge{model.EdgeCertifyBadPackage, model.EdgeCertifyBadArtifact, model.EdgeCertifyBadSource}
 				}
 			}
 			if tt.certifyGoodCall != nil {
