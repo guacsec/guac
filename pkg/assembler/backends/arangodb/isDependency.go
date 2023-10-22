@@ -929,3 +929,48 @@ func (c *arangoClient) queryIsDependencyNodeByID(ctx context.Context, filter *mo
 		Collector:         collectedValues[0].Origin,
 	}, nil
 }
+
+func (c *arangoClient) isDependencyNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 2)
+	if allowedEdges[model.EdgeIsDependencyPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(isDependenciesStr, "isDependency")
+		queryIsDependencyBasedOnFilter(arangoQueryBuilder, &model.IsDependencySpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { packageID:  isDependency.packageID, depPackageID: isDependency.depPackageID }")
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "getNeighborIDFromCursor - isDependencyNeighbors")
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "isDependencyNeighbors", err)
+		}
+		defer cursor.Close()
+
+		type dbIsDepNeighbor struct {
+			PackageID    string `json:"packageID"`
+			DepPackageID string `json:"depPackageID"`
+		}
+
+		var foundNeighbors []dbIsDepNeighbor
+		for {
+			var doc dbIsDepNeighbor
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					break
+				} else {
+					return nil, fmt.Errorf("failed to get neighbor id from cursor for %s with error: %w", "isDependencyNeighbors", err)
+				}
+			} else {
+				foundNeighbors = append(foundNeighbors, doc)
+			}
+		}
+
+		var foundIDs []string
+		for _, foundNeighbor := range foundNeighbors {
+			foundIDs = append(foundIDs, foundNeighbor.PackageID)
+			foundIDs = append(foundIDs, foundNeighbor.DepPackageID)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

@@ -833,3 +833,33 @@ func (c *arangoClient) queryHasSourceAtNodeByID(ctx context.Context, filter *mod
 		Origin:        collectedValues[0].Origin,
 	}, nil
 }
+
+func (c *arangoClient) hasSourceAtNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 2)
+	if allowedEdges[model.EdgeHasSourceAtPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(hasSourceAtsStr, "hasSourceAt")
+		queryHasSourceAtBasedOnFilter(arangoQueryBuilder, &model.HasSourceAtSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSourceAt.packageID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSourceAtNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeHasSourceAtSource] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(hasSourceAtsStr, "hasSourceAt")
+		queryHasSourceAtBasedOnFilter(arangoQueryBuilder, &model.HasSourceAtSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSourceAt.sourceID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSourceAtNeighbors - source")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

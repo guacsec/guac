@@ -1085,3 +1085,45 @@ func (c *arangoClient) queryCertifyBadNodeByID(ctx context.Context, filter *mode
 	}
 	return certifyBad, nil
 }
+
+func (c *arangoClient) certifyBadNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 1)
+
+	if allowedEdges[model.EdgeCertifyBadPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyBadsStr, "certifyBad")
+		setCertifyBadMatchValues(arangoQueryBuilder, &model.CertifyBadSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyBad.packageID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyBadNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeCertifyBadArtifact] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyBadsStr, "certifyBad")
+		setCertifyBadMatchValues(arangoQueryBuilder, &model.CertifyBadSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyBad.artifactID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyBadNeighbors - artifact")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeCertifyBadSource] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(certifyBadsStr, "certifyBad")
+		setCertifyBadMatchValues(arangoQueryBuilder, &model.CertifyBadSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyBad.sourceID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyBadNeighbors - source")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	return out, nil
+}

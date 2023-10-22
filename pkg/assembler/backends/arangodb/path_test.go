@@ -1109,6 +1109,23 @@ func Test_Neighbors(t *testing.T) {
 		queryEqualVulnID         bool
 		queryDeclaredLicenseID   bool
 		queryDiscoveredLicenseID bool
+		queryCertifyBadID        bool
+		queryCertifyGoodID       bool
+		queryCertifyLegalID      bool
+		queryScorecardID         bool
+		queryCertifyVexID        bool
+		queryCertifyVulnID       bool
+		queryHashEqualID         bool
+		queryHasMetadataID       bool
+		queryHasSbomID           bool
+		queryHasSlsaID           bool
+		queryHasSourceAtID       bool
+		queryIsDependencyID      bool
+		queryIsOccurrenceID      bool
+		queryPkgEqualID          bool
+		queryPointOfContactID    bool
+		queryVulnEqualID         bool
+		queryVulnMetadataID      bool
 		certifyBadCall           *certifyBadCall
 		certifyGoodCall          *certifyGoodCall
 		certifyLegalCall         *certifyLegalCall
@@ -1342,6 +1359,70 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			}},
 	}, {
+		name:  "certifyBad - query certifyBadID artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A2},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Artifact: testdata.A2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyBadID: true,
+		want:              []model.Node{testdata.A2out},
+	}, {
+		name:  "certifyBad - query certifyBadID PkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyBadID: true,
+		want:              []model.Node{testdata.P2outName},
+	}, {
+		name:  "certifyBad - query certifyBadID pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyBadID: true,
+		want:              []model.Node{testdata.P2out},
+	}, {
+		name:  "certifyBad - query certifyBadID srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		certifyBadCall: &certifyBadCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Source: testdata.S1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CB: &model.CertifyBadInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyBadID: true,
+		want:              []model.Node{testdata.S1out},
+	}, {
 		name:  "certifyGood - artifact",
 		inArt: []*model.ArtifactInputSpec{testdata.A2},
 		certifyGoodCall: &certifyGoodCall{
@@ -1449,6 +1530,70 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			}},
 	}, {
+		name:  "certifyGood - query certifyGoodID artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A2},
+		certifyGoodCall: &certifyGoodCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Artifact: testdata.A2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CG: &model.CertifyGoodInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyGoodID: true,
+		want:               []model.Node{testdata.A2out},
+	}, {
+		name:  "certifyGood - query certifyGoodID PkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyGoodCall: &certifyGoodCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			CG: &model.CertifyGoodInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyGoodID: true,
+		want:               []model.Node{testdata.P2outName},
+	}, {
+		name:  "certifyGood - query certifyGoodID pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		certifyGoodCall: &certifyGoodCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CG: &model.CertifyGoodInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyGoodID: true,
+		want:               []model.Node{testdata.P2out},
+	}, {
+		name:  "certifyGood - query certifyGoodID srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		certifyGoodCall: &certifyGoodCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Source: testdata.S1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			CG: &model.CertifyGoodInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryCertifyGoodID: true,
+		want:               []model.Node{testdata.S1out},
+	}, {
 		name:  "certifyLegal - pkgVersion",
 		inPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L1},
@@ -1545,6 +1690,70 @@ func Test_Neighbors(t *testing.T) {
 				Justification:      "test justification 2",
 			}},
 	}, {
+		name:  "certifyLegal - query certifyLegalID pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inLic: []*model.LicenseInputSpec{testdata.L1},
+		certifyLegalCall: &certifyLegalCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Dec: []*model.LicenseInputSpec{testdata.L1},
+			Legal: &model.CertifyLegalInputSpec{
+				Justification: "test justification 2",
+			},
+		},
+		queryCertifyLegalID: true,
+		usingOnly:           []model.Edge{model.EdgeCertifyLegalPackage},
+		want:                []model.Node{testdata.P1out},
+	}, {
+		name:  "certifyLegal - srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		inLic: []*model.LicenseInputSpec{testdata.L1},
+		certifyLegalCall: &certifyLegalCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Source: testdata.S1,
+			},
+			Dec: []*model.LicenseInputSpec{testdata.L1},
+			Legal: &model.CertifyLegalInputSpec{
+				Justification: "test justification 2",
+			},
+		},
+		queryCertifyLegalID: true,
+		usingOnly:           []model.Edge{model.EdgeCertifyLegalSource},
+		want:                []model.Node{testdata.S1out},
+	}, {
+		name:  "certifyLegal - Declared License",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inLic: []*model.LicenseInputSpec{testdata.L2},
+		certifyLegalCall: &certifyLegalCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Dec: []*model.LicenseInputSpec{testdata.L2},
+			Legal: &model.CertifyLegalInputSpec{
+				Justification: "test justification 2",
+			},
+		},
+		queryCertifyLegalID: true,
+		usingOnly:           []model.Edge{model.EdgeCertifyLegalLicense},
+		want:                []model.Node{testdata.L2out},
+	}, {
+		name:  "certifyLegal - Discovered License",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inLic: []*model.LicenseInputSpec{testdata.L3},
+		certifyLegalCall: &certifyLegalCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Dis: []*model.LicenseInputSpec{testdata.L3},
+			Legal: &model.CertifyLegalInputSpec{
+				Justification: "test justification 2",
+			},
+		},
+		queryCertifyLegalID: true,
+		usingOnly:           []model.Edge{model.EdgeCertifyLegalLicense},
+		want:                []model.Node{testdata.L3out},
+	}, {
 		name:  "scorecard",
 		inSrc: []*model.SourceInputSpec{testdata.S2},
 		scorecardCall: &scorecardCall{
@@ -1569,6 +1778,18 @@ func Test_Neighbors(t *testing.T) {
 					Origin: "test origin",
 				},
 			}},
+	}, {
+		name:  "scorecard - certifyScoreID",
+		inSrc: []*model.SourceInputSpec{testdata.S2},
+		scorecardCall: &scorecardCall{
+			Src: testdata.S2,
+			SC: &model.ScorecardInputSpec{
+				Origin: "test origin",
+			},
+		},
+		queryScorecardID: true,
+		usingOnly:        []model.Edge{model.EdgeCertifyScorecardSource},
+		want:             []model.Node{testdata.S2out},
 	}, {
 		name:   "vex - artifact",
 		inArt:  []*model.ArtifactInputSpec{testdata.A2},
@@ -1657,6 +1878,60 @@ func Test_Neighbors(t *testing.T) {
 				KnownSince:       time.Unix(1e9, 0),
 			}},
 	}, {
+		name:   "vex - certifyVexID - artifact",
+		inArt:  []*model.ArtifactInputSpec{testdata.A2},
+		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
+		vexCall: &vexCall{
+			Sub: model.PackageOrArtifactInput{
+				Artifact: testdata.A2,
+			},
+			Vuln: testdata.O2,
+			In: &model.VexStatementInputSpec{
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		queryCertifyVexID: true,
+		usingOnly:         []model.Edge{model.EdgeCertifyVexStatementArtifact},
+		want:              []model.Node{testdata.A2out},
+	}, {
+		name:   "vex - certifyVexID - pkgVersion",
+		inPkg:  []*model.PkgInputSpec{testdata.P1},
+		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
+		vexCall: &vexCall{
+			Sub: model.PackageOrArtifactInput{
+				Package: testdata.P1,
+			},
+			Vuln: testdata.O2,
+			In: &model.VexStatementInputSpec{
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		queryCertifyVexID: true,
+		usingOnly:         []model.Edge{model.EdgeCertifyVexStatementPackage},
+		want:              []model.Node{testdata.P1out},
+	}, {
+		name:   "vex - certifyVexID - vulnID",
+		inPkg:  []*model.PkgInputSpec{testdata.P1},
+		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+		vexCall: &vexCall{
+			Sub: model.PackageOrArtifactInput{
+				Package: testdata.P1,
+			},
+			Vuln: testdata.G1,
+			In: &model.VexStatementInputSpec{
+				VexJustification: "test justification",
+				KnownSince:       time.Unix(1e9, 0),
+			},
+		},
+		queryCertifyVexID: true,
+		usingOnly:         []model.Edge{model.EdgeCertifyVexStatementVulnerability},
+		want: []model.Node{&model.Vulnerability{
+			Type:             "ghsa",
+			VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+		}},
+	}, {
 		name:   "certifyVuln - pkgVersion",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 		inPkg:  []*model.PkgInputSpec{testdata.P2},
@@ -1724,6 +1999,49 @@ func Test_Neighbors(t *testing.T) {
 				Metadata: vmd1,
 			}},
 	}, {
+		name:   "certifyVuln - certifyVulnID -  pkgVersion",
+		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+		inPkg:  []*model.PkgInputSpec{testdata.P2},
+		certifyVulnCall: &certifyVulnCall{
+			Pkg:  testdata.P2,
+			Vuln: testdata.G1,
+			CertifyVuln: &model.ScanMetadataInput{
+				Collector:      "test collector",
+				Origin:         "test origin",
+				ScannerVersion: "v1.0.0",
+				ScannerURI:     "test scanner uri",
+				DbVersion:      "2023.01.01",
+				DbURI:          "test db uri",
+				TimeScanned:    testdata.T1,
+			},
+		},
+		queryCertifyVulnID: true,
+		usingOnly:          []model.Edge{model.EdgeCertifyVulnPackage},
+		want:               []model.Node{testdata.P2out},
+	}, {
+		name:   "certifyVuln - vulnID",
+		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+		inPkg:  []*model.PkgInputSpec{testdata.P2},
+		certifyVulnCall: &certifyVulnCall{
+			Pkg:  testdata.P2,
+			Vuln: testdata.G1,
+			CertifyVuln: &model.ScanMetadataInput{
+				Collector:      "test collector",
+				Origin:         "test origin",
+				ScannerVersion: "v1.0.0",
+				ScannerURI:     "test scanner uri",
+				DbVersion:      "2023.01.01",
+				DbURI:          "test db uri",
+				TimeScanned:    testdata.T1,
+			},
+		},
+		queryCertifyVulnID: true,
+		usingOnly:          []model.Edge{model.EdgeCertifyVulnVulnerability},
+		want: []model.Node{&model.Vulnerability{
+			Type:             "ghsa",
+			VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+		}},
+	}, {
 		name:  "hashEqual - artifact",
 		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
 		hashEqualCall: &hashEqualCall{
@@ -1747,6 +2065,16 @@ func Test_Neighbors(t *testing.T) {
 		want: []model.Node{&model.HashEqual{
 			Artifacts: []*model.Artifact{testdata.A3out, testdata.A1out},
 		}},
+	}, {
+		name:  "hashEqual - hashEqualID",
+		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
+		hashEqualCall: &hashEqualCall{
+			A1: testdata.A1,
+			A2: testdata.A3,
+			HE: &model.HashEqualInputSpec{},
+		},
+		queryHashEqualID: true,
+		want:             []model.Node{testdata.A3out, testdata.A1out},
 	}, {
 		name:  "hasMetadata - artifact",
 		inArt: []*model.ArtifactInputSpec{testdata.A2},
@@ -1852,6 +2180,71 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			}},
 	}, {
+		name:  "hasMetadata - hasMetadataID - artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A2},
+		hasMetadataCall: &hasMetadataCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Artifact: testdata.A2,
+			},
+			HM: &model.HasMetadataInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryHasMetadataID: true,
+		usingOnly:          []model.Edge{model.EdgeHasMetadataArtifact},
+		want:               []model.Node{testdata.A2out},
+	}, {
+		name:  "hasMetadata - hasMetadataID - pkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		hasMetadataCall: &hasMetadataCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			HM: &model.HasMetadataInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryHasMetadataID: true,
+		usingOnly:          []model.Edge{model.EdgeHasMetadataPackage},
+		want:               []model.Node{testdata.P2outName},
+	}, {
+		name:  "hasMetadata - hasMetadataID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		hasMetadataCall: &hasMetadataCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			HM: &model.HasMetadataInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryHasMetadataID: true,
+		usingOnly:          []model.Edge{model.EdgeHasMetadataPackage},
+		want:               []model.Node{testdata.P2out},
+	}, {
+		name:  "hasMetadata - hasMetadataID - srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		hasMetadataCall: &hasMetadataCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Source: testdata.S1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			HM: &model.HasMetadataInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryHasMetadataID: true,
+		usingOnly:          []model.Edge{model.EdgeHasMetadataSource},
+		want:               []model.Node{testdata.S1out},
+	}, {
 		name:  "hasSBOM - artifact",
 		inArt: []*model.ArtifactInputSpec{testdata.A2},
 		hasSBOMCall: &hasSBOMCall{
@@ -1894,6 +2287,34 @@ func Test_Neighbors(t *testing.T) {
 				DownloadLocation: "location two",
 			}},
 	}, {
+		name:  "hasSBOM - hasSbomID - artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A2},
+		hasSBOMCall: &hasSBOMCall{
+			Sub: model.PackageOrArtifactInput{
+				Artifact: testdata.A2,
+			},
+			HS: &model.HasSBOMInputSpec{
+				DownloadLocation: "location two",
+			},
+		},
+		queryHasSbomID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSbomArtifact},
+		want:           []model.Node{testdata.A2out},
+	}, {
+		name:  "hasSBOM - hasSbomID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		hasSBOMCall: &hasSBOMCall{
+			Sub: model.PackageOrArtifactInput{
+				Package: testdata.P2,
+			},
+			HS: &model.HasSBOMInputSpec{
+				DownloadLocation: "location two",
+			},
+		},
+		queryHasSbomID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSbomPackage},
+		want:           []model.Node{testdata.P2out},
+	}, {
 		name:  "hasSLSA - builder",
 		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
@@ -1929,6 +2350,45 @@ func Test_Neighbors(t *testing.T) {
 				BuiltFrom: []*model.Artifact{testdata.A2out},
 			},
 		}},
+	}, {
+		name:  "hasSLSA - hasSlsaID - builder",
+		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
+		hasSlsaCall: &hasSlsaCall{
+			Sub:  testdata.A1,
+			BF:   []*model.ArtifactInputSpec{testdata.A2},
+			BB:   testdata.B2,
+			SLSA: &model.SLSAInputSpec{},
+		},
+		queryHasSlsaID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSlsaBuiltBy},
+		want:           []model.Node{testdata.B2out},
+	}, {
+		name:  "hasSLSA - hasSlsaID - subject artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
+		hasSlsaCall: &hasSlsaCall{
+			Sub:  testdata.A1,
+			BF:   []*model.ArtifactInputSpec{testdata.A2},
+			BB:   testdata.B2,
+			SLSA: &model.SLSAInputSpec{},
+		},
+		queryHasSlsaID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSlsaSubject},
+		want:           []model.Node{testdata.A1out},
+	}, {
+		name:  "hasSLSA - hasSlsaID - builtFrom",
+		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
+		hasSlsaCall: &hasSlsaCall{
+			Sub:  testdata.A1,
+			BF:   []*model.ArtifactInputSpec{testdata.A2},
+			BB:   testdata.B2,
+			SLSA: &model.SLSAInputSpec{},
+		},
+		queryHasSlsaID: true,
+		usingOnly:      []model.Edge{model.EdgeHasSlsaMaterials},
+		want:           []model.Node{testdata.A2out},
 	}, {
 		name:  "hasSourceAt - pkgName",
 		inPkg: []*model.PkgInputSpec{testdata.P2},
@@ -2015,6 +2475,51 @@ func Test_Neighbors(t *testing.T) {
 				Source:  testdata.S1out,
 			}},
 	}, {
+		name:  "hasSourceAt - hasSourceAtID - pkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		hasSourceAtCall: &hasSourceAtCall{
+			Pkg: testdata.P2,
+			Src: testdata.S1,
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			HSA: &model.HasSourceAtInputSpec{},
+		},
+		queryHasSourceAtID: true,
+		usingOnly:          []model.Edge{model.EdgeHasSourceAtPackage},
+		want:               []model.Node{testdata.P2outName},
+	}, {
+		name:  "hasSourceAt - hasSourceAtID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		hasSourceAtCall: &hasSourceAtCall{
+			Pkg: testdata.P2,
+			Src: testdata.S1,
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			HSA: &model.HasSourceAtInputSpec{},
+		},
+		queryHasSourceAtID: true,
+		usingOnly:          []model.Edge{model.EdgeHasSourceAtPackage},
+		want:               []model.Node{testdata.P2out},
+	}, {
+		name:  "hasSourceAt - hasSourceAtID - srcName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		hasSourceAtCall: &hasSourceAtCall{
+			Pkg: testdata.P2,
+			Src: testdata.S1,
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			HSA: &model.HasSourceAtInputSpec{},
+		},
+		queryHasSourceAtID: true,
+		usingOnly:          []model.Edge{model.EdgeHasSourceAtSource},
+		want:               []model.Node{testdata.S1out},
+	}, {
 		name:  "isDependency - pkgName",
 		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
@@ -2064,6 +2569,30 @@ func Test_Neighbors(t *testing.T) {
 				Package:           testdata.P1out,
 				DependencyPackage: testdata.P2out,
 			}},
+	}, {
+		name:  "isDependency - isDependencyID - pkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		isDepCall: &isDepCall{
+			P1: testdata.P1,
+			P2: testdata.P2,
+			MF: mAll,
+			ID: &model.IsDependencyInputSpec{},
+		},
+		queryIsDependencyID: true,
+		usingOnly:           []model.Edge{model.EdgeIsDependencyPackage},
+		want:                []model.Node{testdata.P1out, testdata.P2outName},
+	}, {
+		name:  "isDependency - isDependencyID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		isDepCall: &isDepCall{
+			P1: testdata.P1,
+			P2: testdata.P2,
+			MF: mSpecific,
+			ID: &model.IsDependencyInputSpec{},
+		},
+		queryIsDependencyID: true,
+		usingOnly:           []model.Edge{model.EdgeIsDependencyPackage},
+		want:                []model.Node{testdata.P1out, testdata.P2out},
 	}, {
 		name:  "isOccurrence - artifact",
 		inPkg: []*model.PkgInputSpec{testdata.P1},
@@ -2139,6 +2668,54 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			}},
 	}, {
+		name:  "isOccurrence - isOccurrenceID - artifact",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		isOcurCall: &isOcurCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Artifact: testdata.A1,
+			Occurrence: &model.IsOccurrenceInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryIsOccurrenceID: true,
+		usingOnly:           []model.Edge{model.EdgeIsOccurrenceArtifact},
+		want:                []model.Node{testdata.A1out},
+	}, {
+		name:  "isOccurrence - isOccurrenceID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		isOcurCall: &isOcurCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P1,
+			},
+			Artifact: testdata.A1,
+			Occurrence: &model.IsOccurrenceInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryIsOccurrenceID: true,
+		usingOnly:           []model.Edge{model.EdgeIsOccurrencePackage},
+		want:                []model.Node{testdata.P1out},
+	}, {
+		name:  "isOccurrence - isOccurrenceID - srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		isOcurCall: &isOcurCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Source: testdata.S1,
+			},
+			Artifact: testdata.A1,
+			Occurrence: &model.IsOccurrenceInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryIsOccurrenceID: true,
+		usingOnly:           []model.Edge{model.EdgeIsOccurrenceSource},
+		want:                []model.Node{testdata.S1out},
+	}, {
 		name:  "pkgEqual",
 		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		pkgEqualCall: &pkgEqualCall{
@@ -2188,6 +2765,38 @@ func Test_Neighbors(t *testing.T) {
 				Packages:      []*model.Package{testdata.P1out, testdata.P2out},
 				Justification: "test justification two",
 			}},
+	}, {
+		name:  "pkgEqual - pkgEqualID",
+		inPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		pkgEqualCall: &pkgEqualCall{
+			P1: testdata.P1,
+			P2: testdata.P2,
+			HE: &model.PkgEqualInputSpec{
+				Justification: "test justification two",
+			},
+		},
+		queryPkgEqualID: true,
+		usingOnly:       []model.Edge{model.EdgePkgEqualPackage},
+		want:            []model.Node{testdata.P1out, testdata.P2out},
+	}, {
+		name:  "pointOfContact - artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Artifact: testdata.A1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryArtifactID: true,
+		want: []model.Node{&model.PointOfContact{
+			Subject:       testdata.A1out,
+			Justification: "test justification",
+		}},
 	}, {
 		name:  "pointOfContact - PkgName",
 		inPkg: []*model.PkgInputSpec{testdata.P2},
@@ -2277,6 +2886,74 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			}},
 	}, {
+		name:  "pointOfContact - pointOfContactID - artifact",
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Artifact: testdata.A1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPointOfContactID: true,
+		usingOnly:             []model.Edge{model.EdgePointOfContactArtifact},
+		want:                  []model.Node{testdata.A1out},
+	}, {
+		name:  "pointOfContact - pointOfContactID - PkgName",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPointOfContactID: true,
+		usingOnly:             []model.Edge{model.EdgePointOfContactPackage},
+		want:                  []model.Node{testdata.P2outName},
+	}, {
+		name:  "pointOfContact - pointOfContactID - srcName",
+		inSrc: []*model.SourceInputSpec{testdata.S1},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Source: testdata.S1,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPointOfContactID: true,
+		usingOnly:             []model.Edge{model.EdgePointOfContactSource},
+		want:                  []model.Node{testdata.S1out},
+	}, {
+		name:  "pointOfContact - pointOfContactID - pkgVersion",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		pointOfContactCall: &pointOfContactCall{
+			Sub: model.PackageSourceOrArtifactInput{
+				Package: testdata.P2,
+			},
+			Match: &model.MatchFlags{
+				Pkg: model.PkgMatchTypeSpecificVersion,
+			},
+			POC: &model.PointOfContactInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryPointOfContactID: true,
+		usingOnly:             []model.Edge{model.EdgePointOfContactPackage},
+		want:                  []model.Node{testdata.P2out},
+	}, {
 		name:   "vulnEqual - vulnID",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.G1},
 		vulnEqualCall: &vulnEqualCall{
@@ -2335,6 +3012,26 @@ func Test_Neighbors(t *testing.T) {
 				Justification: "test justification",
 			}},
 	}, {
+		name:   "vulnEqual - vulnEqualID",
+		inVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.G1},
+		vulnEqualCall: &vulnEqualCall{
+			Vuln:      testdata.O1,
+			OtherVuln: testdata.G1,
+			In: &model.VulnEqualInputSpec{
+				Justification: "test justification",
+			},
+		},
+		queryVulnEqualID: true,
+		usingOnly:        []model.Edge{model.EdgeVulnEqualVulnerability},
+		want: []model.Node{&model.Vulnerability{
+			Type:             "osv",
+			VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+		},
+			&model.Vulnerability{
+				Type:             "ghsa",
+				VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+			}},
+	}, {
 		name:   "vulnMetadata - vulnID",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 		vulnMetadataCall: &vulnMetadataCall{
@@ -2364,6 +3061,25 @@ func Test_Neighbors(t *testing.T) {
 				Collector:  "test collector",
 				Origin:     "test origin",
 			}},
+	}, {
+		name:   "vulnMetadata - vulnMetadataID",
+		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
+		vulnMetadataCall: &vulnMetadataCall{
+			Vuln: testdata.G1,
+			VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+				ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
+				ScoreValue: 8.9,
+				Timestamp:  testdata.T1,
+				Collector:  "test collector",
+				Origin:     "test origin",
+			},
+		},
+		queryVulnMetadataID: true,
+		usingOnly:           []model.Edge{model.EdgeVulnMetadataVulnerability},
+		want: []model.Node{&model.Vulnerability{
+			Type:             "ghsa",
+			VulnerabilityIDs: []*model.VulnerabilityID{testdata.G1out},
+		}},
 	}}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
@@ -2489,6 +3205,10 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyBad}
 				}
+				if tt.queryCertifyBadID {
+					nodeID = found.ID
+					tt.usingOnly = []model.Edge{model.EdgeCertifyBadPackage, model.EdgeCertifyBadArtifact, model.EdgeCertifyBadSource}
+				}
 			}
 			if tt.certifyGoodCall != nil {
 				found, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
@@ -2513,6 +3233,10 @@ func Test_Neighbors(t *testing.T) {
 				if tt.querySrcNameID {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyGood}
+				}
+				if tt.queryCertifyGoodID {
+					nodeID = found.ID
+					tt.usingOnly = []model.Edge{model.EdgeCertifyGoodPackage, model.EdgeCertifyGoodArtifact, model.EdgeCertifyGoodSource}
 				}
 			}
 			if tt.certifyLegalCall != nil {
@@ -2539,6 +3263,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.DiscoveredLicenses[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeLicenseCertifyLegal}
 				}
+				if tt.queryCertifyLegalID {
+					nodeID = found.ID
+				}
 			}
 			if tt.scorecardCall != nil {
 				found, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
@@ -2551,6 +3278,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.querySrcNameID {
 					nodeID = found.Source.Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyScorecard}
+				}
+				if tt.queryScorecardID {
+					nodeID = found.ID
 				}
 			}
 			if tt.vexCall != nil {
@@ -2573,6 +3303,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Vulnerability.VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityCertifyVexStatement}
 				}
+				if tt.queryCertifyVexID {
+					nodeID = found.ID
+				}
 			}
 			if tt.certifyVulnCall != nil {
 				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
@@ -2590,6 +3323,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Vulnerability.VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityCertifyVuln}
 				}
+				if tt.queryCertifyVulnID {
+					nodeID = found.ID
+				}
 			}
 			if tt.hashEqualCall != nil {
 				found, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
@@ -2606,6 +3342,10 @@ func Test_Neighbors(t *testing.T) {
 				if tt.queryEqualArtifactID {
 					nodeID = found.Artifacts[1].ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactHashEqual}
+				}
+				if tt.queryHashEqualID {
+					nodeID = found.ID
+					tt.usingOnly = []model.Edge{model.EdgeHashEqualArtifact}
 				}
 			}
 			if tt.hasMetadataCall != nil {
@@ -2632,6 +3372,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceHasMetadata}
 				}
+				if tt.queryHasMetadataID {
+					nodeID = found.ID
+				}
 			}
 			if tt.hasSBOMCall != nil {
 				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS)
@@ -2649,6 +3392,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageHasSbom}
 				}
+				if tt.queryHasSbomID {
+					nodeID = found.ID
+				}
 			}
 			if tt.hasSlsaCall != nil {
 				found, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
@@ -2665,6 +3411,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.queryArtifactID {
 					nodeID = found.Subject.ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactHasSlsa}
+				}
+				if tt.queryHasSlsaID {
+					nodeID = found.ID
 				}
 			}
 			if tt.hasSourceAtCall != nil {
@@ -2687,6 +3436,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Source.Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceHasSourceAt}
 				}
+				if tt.queryHasSourceAtID {
+					nodeID = found.ID
+				}
 			}
 			if tt.isDepCall != nil {
 				found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
@@ -2703,6 +3455,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.queryPkgVersionID {
 					nodeID = found.DependencyPackage.Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency}
+				}
+				if tt.queryIsDependencyID {
+					nodeID = found.ID
 				}
 			}
 			if tt.isOcurCall != nil {
@@ -2725,6 +3480,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceIsOccurrence}
 				}
+				if tt.queryIsOccurrenceID {
+					nodeID = found.ID
+				}
 			}
 			if tt.pkgEqualCall != nil {
 				found, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
@@ -2741,6 +3499,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.queryEqualPkgID {
 					nodeID = found.Packages[1].Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackagePkgEqual}
+				}
+				if tt.queryPkgEqualID {
+					nodeID = found.ID
 				}
 			}
 			if tt.pointOfContactCall != nil {
@@ -2767,6 +3528,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourcePointOfContact}
 				}
+				if tt.queryPointOfContactID {
+					nodeID = found.ID
+				}
 			}
 			if tt.vulnEqualCall != nil {
 				found, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
@@ -2784,6 +3548,9 @@ func Test_Neighbors(t *testing.T) {
 					nodeID = found.Vulnerabilities[1].VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityVulnEqual}
 				}
+				if tt.queryVulnEqualID {
+					nodeID = found.ID
+				}
 			}
 			if tt.vulnMetadataCall != nil {
 				ingestedVuln, err := b.IngestVulnerability(ctx, *tt.inVuln[0])
@@ -2791,7 +3558,7 @@ func Test_Neighbors(t *testing.T) {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 
-				_, err = b.IngestVulnerabilityMetadata(ctx, *tt.vulnMetadataCall.Vuln, *tt.vulnMetadataCall.VulnMetadata)
+				vulnMetadataID, err := b.IngestVulnerabilityMetadata(ctx, *tt.vulnMetadataCall.Vuln, *tt.vulnMetadataCall.VulnMetadata)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -2801,6 +3568,9 @@ func Test_Neighbors(t *testing.T) {
 				if tt.queryVulnID {
 					nodeID = ingestedVuln.VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnMetadataVulnerability}
+				}
+				if tt.queryVulnMetadataID {
+					nodeID = vulnMetadataID
 				}
 			}
 			got, err := b.Neighbors(ctx, nodeID, tt.usingOnly)

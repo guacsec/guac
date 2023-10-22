@@ -195,39 +195,90 @@ func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly [
 			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 		}
 	case certifyBadsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyBadNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case certifyGoodsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyGoodNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case certifyLegalsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyLegalNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case scorecardStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyScorecardNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case certifyVEXsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyVexNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case certifyVulnsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.certifyVulnNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case hashEqualsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.hashEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case hasMetadataStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.hasMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case hasSBOMsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.hasSbomNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case hasSLSAsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.hasSlsaNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case hasSourceAtsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.hasSourceAtNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case isDependenciesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.isDependencyNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case isOccurrencesStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.isOccurrenceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case pkgEqualsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.pkgEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case pointOfContactStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.pointOfContactNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case vulnEqualsStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.vulnEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case vulnMetadataStr:
-		return []model.Node{}, nil
+		neighborsID, err = c.vulnMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	default:
 		return nil, fmt.Errorf("unknown ID for node query: %s", nodeID)
 	}

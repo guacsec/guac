@@ -618,3 +618,73 @@ func (c *arangoClient) queryHasSlsaNodeByID(ctx context.Context, filter *model.H
 		Slsa:    slsa,
 	}, nil
 }
+
+func (c *arangoClient) hasSlsaNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 1)
+	if allowedEdges[model.EdgeHasSlsaSubject] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
+		setHasSLSAMatchValues(arangoQueryBuilder, &model.HasSLSASpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSLSA.subjectID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSlsaNeighbors - artifact")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeHasSlsaBuiltBy] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
+		setHasSLSAMatchValues(arangoQueryBuilder, &model.HasSLSASpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSLSA.builtByID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSlsaNeighbors - builder")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeHasSlsaMaterials] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
+		setHasSLSAMatchValues(arangoQueryBuilder, &model.HasSLSASpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { builtFrom:  hasSLSA.builtFrom }")
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "getNeighborIDFromCursor - hasSlsaNeighbors")
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hasSlsaNeighbors", err)
+		}
+		defer cursor.Close()
+
+		type dbSlsaMaterialsNeighbor struct {
+			BuiltFrom []string `json:"builtFrom"`
+		}
+
+		var foundSlsaMaterialNeighbors []dbSlsaMaterialsNeighbor
+		for {
+			var doc dbSlsaMaterialsNeighbor
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					break
+				} else {
+					return nil, fmt.Errorf("failed to get neighbor id from cursor for %s with error: %w", "hasSlsaNeighbors", err)
+				}
+			} else {
+				foundSlsaMaterialNeighbors = append(foundSlsaMaterialNeighbors, doc)
+			}
+		}
+
+		var foundIDs []string
+		for _, foundMaterial := range foundSlsaMaterialNeighbors {
+			if foundMaterial.BuiltFrom != nil {
+				foundIDs = append(foundIDs, foundMaterial.BuiltFrom...)
+			}
+		}
+
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

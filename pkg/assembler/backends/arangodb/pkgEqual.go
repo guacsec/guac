@@ -721,3 +721,47 @@ func (c *arangoClient) queryPkgEqualNodeByID(ctx context.Context, filter *model.
 		Collector:     collectedValues[0].Origin,
 	}, nil
 }
+
+func (c *arangoClient) pkgEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 2)
+	if allowedEdges[model.EdgePkgEqualPackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(pkgEqualsStr, "pkgEqual")
+		setPkgEqualMatchValues(arangoQueryBuilder, &model.PkgEqualSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { packageID:  pkgEqual.packageID, equalPackageID: pkgEqual.equalPackageID }")
+
+		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "getNeighborIDFromCursor - pkgEqualNeighbors")
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "pkgEqualNeighbors", err)
+		}
+		defer cursor.Close()
+
+		type dbPkgEqualNeighbor struct {
+			PackageID      string `json:"packageID"`
+			EqualPackageID string `json:"equalPackageID"`
+		}
+
+		var foundNeighbors []dbPkgEqualNeighbor
+		for {
+			var doc dbPkgEqualNeighbor
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					break
+				} else {
+					return nil, fmt.Errorf("failed to get neighbor id from cursor for %s with error: %w", "pkgEqualNeighbors", err)
+				}
+			} else {
+				foundNeighbors = append(foundNeighbors, doc)
+			}
+		}
+
+		var foundIDs []string
+		for _, foundNeighbor := range foundNeighbors {
+			foundIDs = append(foundIDs, foundNeighbor.PackageID)
+			foundIDs = append(foundIDs, foundNeighbor.EqualPackageID)
+		}
+		out = append(out, foundIDs...)
+	}
+	return out, nil
+}

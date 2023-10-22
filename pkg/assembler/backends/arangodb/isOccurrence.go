@@ -777,3 +777,45 @@ func (c *arangoClient) queryIsOccurrenceNodeByID(ctx context.Context, filter *mo
 	}
 	return isOccurrence, nil
 }
+
+func (c *arangoClient) isOccurrenceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 3)
+	if allowedEdges[model.EdgeIsOccurrencePackage] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(isOccurrencesStr, "isOccurrence")
+		queryIsOccurrenceBasedOnFilter(arangoQueryBuilder, &model.IsOccurrenceSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  isOccurrence.packageID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "isOccurrenceNeighbors - package")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeIsOccurrenceSource] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(isOccurrencesStr, "isOccurrence")
+		queryIsOccurrenceBasedOnFilter(arangoQueryBuilder, &model.IsOccurrenceSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  isOccurrence.sourceID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "isOccurrenceNeighbors - source")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+	if allowedEdges[model.EdgeIsOccurrenceArtifact] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(isOccurrencesStr, "isOccurrence")
+		queryIsOccurrenceBasedOnFilter(arangoQueryBuilder, &model.IsOccurrenceSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  isOccurrence.artifactID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "isOccurrenceNeighbors - artifact")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}

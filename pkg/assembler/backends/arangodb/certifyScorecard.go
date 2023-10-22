@@ -524,3 +524,21 @@ func (c *arangoClient) queryCertifyScorecardNodeByID(ctx context.Context, filter
 		Scorecard: scorecard,
 	}, nil
 }
+
+func (c *arangoClient) certifyScorecardNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+	out := make([]string, 0, 1)
+	if allowedEdges[model.EdgeCertifyScorecardSource] {
+		values := map[string]any{}
+		arangoQueryBuilder := newForQuery(scorecardStr, "scorecard")
+		setCertifyScorecardMatchValues(arangoQueryBuilder, &model.CertifyScorecardSpec{ID: &nodeID}, values)
+		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  scorecard.sourceID }")
+
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyScorecardNeighbors - source")
+		if err != nil {
+			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+		}
+		out = append(out, foundIDs...)
+	}
+
+	return out, nil
+}
