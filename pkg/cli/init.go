@@ -49,14 +49,21 @@ func InitConfig() {
 
 	err = viper.ReadInConfig()
 
+	viper.SetDefault("log-level", string(logging.Info))
+
 	// initialize logging after reading in the config
-	viper.SetDefault("log-level", logging.InfoLevel)
-	logging.InitLogger(viper.GetString(ConfigLogLevelVar))
+	level, logErr := logging.ParseLevel(viper.GetString(ConfigLogLevelVar))
+	if logErr != nil {
+		level = logging.Info
+	}
+	logging.InitLogger(level)
+
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
-
+	if logErr != nil {
+		logger.Infof("Error setting up logging: %v", logErr)
+	}
 	if err == nil {
 		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
-
 }

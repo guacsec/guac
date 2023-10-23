@@ -16,7 +16,6 @@
 package cli_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -26,37 +25,36 @@ import (
 
 var envVar string = "GUAC_LOG_LEVEL"
 
-// tests that the log level env var is picked up correctly
-func Test_InitConfig_EnvVarSet(t *testing.T) {
+func Test_InitConfig(t *testing.T) {
 	prevVal := os.Getenv(envVar)
 	defer func() { os.Setenv(envVar, prevVal) }()
 
-	envVarValue := "warn"
-
-	err := os.Setenv(envVar, fmt.Sprintf("%v", envVarValue))
-	if err != nil {
-		t.Fatalf("Unexpected error setting up the test: %v", err)
+	tests := []struct {
+		name                string
+		expectedEnvVarValue string
+		setEnvVar           func() error
+	}{
+		{
+			name:                "env var is picked up",
+			expectedEnvVarValue: "warn",
+			setEnvVar:           func() error { return os.Setenv(envVar, "warn") },
+		},
+		{
+			name:                "the default log level env var is info",
+			expectedEnvVarValue: "info",
+			setEnvVar:           func() error { return os.Unsetenv(envVar) },
+		},
 	}
 
-	cli.InitConfig()
-	if actual := viper.GetString(cli.ConfigLogLevelVar); actual != envVarValue {
-		t.Errorf("unexpected viper.GetString result: Expected %v, got %v", envVarValue, actual)
-	}
-}
+	for _, test := range tests {
+		err := test.setEnvVar()
+		if err != nil {
+			t.Fatalf("Unexpected error setting up the test: %v", err)
+		}
+		cli.InitConfig()
 
-// tests that the default for the log level env var is info
-func Test_InitConfig_EnvVarNotSet(t *testing.T) {
-	prevVal := os.Getenv(envVar)
-	defer func() { os.Setenv(envVar, prevVal) }()
-
-	err := os.Unsetenv(envVar)
-	if err != nil {
-		t.Fatalf("Unexpected error setting up the test: %v", err)
-	}
-
-	cli.InitConfig()
-	envVarValue := "info"
-	if actual := viper.GetString(cli.ConfigLogLevelVar); actual != envVarValue {
-		t.Errorf("unexpected viper.GetString result: Expected %v, got %v", envVarValue, actual)
+		if actual := viper.GetString(cli.ConfigLogLevelVar); actual != test.expectedEnvVarValue {
+			t.Errorf("unexpected viper result: Expected %v, got %v", test.expectedEnvVarValue, actual)
+		}
 	}
 }

@@ -23,62 +23,77 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func Test_InitLogger(t *testing.T) {
+func Test_ParseLevel(t *testing.T) {
 	tests := []struct {
-		name     string
-		inLevel  string
-		outLevel zapcore.Level
+		name        string
+		inLevel     string
+		expected    logging.LogLevel
+		expectedErr bool
 	}{
 		{
-			name:     "invalid level leads to info level",
-			inLevel:  "1",
-			outLevel: zapcore.InfoLevel,
+			name:        "invalid level",
+			inLevel:     "1",
+			expectedErr: true,
 		},
 		{
-			name:     "empty level leads to info level",
-			inLevel:  "",
-			outLevel: zapcore.InfoLevel,
+			name:        "empty level leads to invalid",
+			inLevel:     "",
+			expectedErr: true,
 		},
 		{
 			name:     "debug level",
 			inLevel:  "Debug",
-			outLevel: zapcore.DebugLevel,
+			expected: logging.Debug,
 		},
 		{
 			name:     "warn level",
-			inLevel:  "warn",
-			outLevel: zapcore.WarnLevel,
+			inLevel:  "WARN",
+			expected: logging.Warn,
 		},
 		{
 			name:     "error level",
 			inLevel:  "error",
-			outLevel: zapcore.ErrorLevel,
+			expected: logging.Error,
 		},
 		{
 			name:     "DPanic level",
-			inLevel:  "DPanic",
-			outLevel: zapcore.DPanicLevel,
+			inLevel:  "dpanic",
+			expected: logging.DPanic,
 		},
 		{
 			name:     "PanicLevel level",
-			inLevel:  "panic",
-			outLevel: zapcore.PanicLevel,
+			inLevel:  "Panic",
+			expected: logging.Panic,
 		},
 		{
 			name:     "Fatal level",
 			inLevel:  "fatal",
-			outLevel: zapcore.FatalLevel,
+			expected: logging.Fatal,
 		},
 	}
 
 	for _, test := range tests {
-		logging.InitLogger(test.inLevel)
 
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
+		res, err := logging.ParseLevel(test.inLevel)
+		if test.expectedErr {
+			if err == nil {
+				t.Error("Expected error but did not get one")
+			}
+		} else if res != test.expected {
+			t.Errorf("Expected %v, got %v", test.expected, res)
 
-		if logger.Level() != test.outLevel {
-			t.Errorf("Expected %v, got %v", test.outLevel, logger.Level())
 		}
+	}
+}
+
+func Test_InitLogger(t *testing.T) {
+
+	logging.InitLogger(logging.Warn)
+
+	ctx := logging.WithLogger(context.Background())
+	logger := logging.FromContext(ctx)
+
+	if logger.Level() != zapcore.WarnLevel {
+		t.Errorf("Expected %v, got %v", zapcore.WarnLevel, logger.Level())
 	}
 }
