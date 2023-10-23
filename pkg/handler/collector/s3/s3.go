@@ -18,7 +18,6 @@ package s3
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"sync"
 
@@ -46,7 +45,6 @@ type S3CollectorConfig struct {
 	Queues                  string                           // optional (comma-separated list of queues/topics)
 	MpBuilder               messaging.MessageProviderBuilder // optional
 	BucketBuilder           bucket.BuildBucket               // optional
-	SigChan                 chan os.Signal                   // optional
 	Poll                    bool
 }
 
@@ -105,16 +103,6 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 	logger := logging.FromContext(ctx)
 	downloader := getDownloader(s)
 	queues := strings.Split(s.config.Queues, ",")
-	sigChan := s.config.SigChan
-
-	cancelCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	// Send cancellation in case of receiving SIGINT/SIGTERM
-	go func(cancel context.CancelFunc) {
-		<-sigChan
-		cancel()
-	}(cancel)
 
 	var wg sync.WaitGroup
 	for _, queue := range queues {
@@ -196,7 +184,7 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 				}
 			}
 
-		}(&wg, cancelCtx, queue)
+		}(&wg, ctx, queue)
 	}
 
 	wg.Wait()

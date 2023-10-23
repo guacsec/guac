@@ -86,7 +86,6 @@ var s3Cmd = &cobra.Command{
 			MessageProvider:         s3Opts.mp,
 			MessageProviderEndpoint: s3Opts.mpEndpoint,
 			Queues:                  s3Opts.queues,
-			SigChan:                 signals,
 			Poll:                    s3Opts.poll,
 		})
 
@@ -124,7 +123,15 @@ var s3Cmd = &cobra.Command{
 			return false
 		}
 
-		if err := collector.Collect(ctx, emit, errHandler); err != nil {
+		cancelCtx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		// Send cancellation in case of receiving SIGINT/SIGTERM
+		go func(cancel context.CancelFunc) {
+			cancel()
+		}(cancel)
+
+		if err := collector.Collect(cancelCtx, emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
 

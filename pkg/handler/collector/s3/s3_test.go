@@ -20,9 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
+	"sync"
 	"testing"
 	"time"
 
@@ -85,7 +83,6 @@ func (tb *TestMpBuilder) GetMessageProvider(config messaging.MessageProviderConf
 
 // Test Bucket
 type TestBucket struct {
-	operations []string
 }
 
 func (td *TestBucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {
@@ -110,12 +107,10 @@ func TestS3Collector(t *testing.T) {
 }
 
 func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
-	sigChan := make(chan os.Signal, 1)
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		Queues:        "q1,q2",
 		MpBuilder:     &TestMpBuilder{},
 		BucketBuilder: &TestBucketBuilder{},
-		SigChan:       sigChan,
 		Poll:          true,
 	})
 
@@ -135,17 +130,25 @@ func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
 	}
 
 	// spawn collector
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	cancelCtx, cancel := context.WithCancel(ctx)
 	go func() {
-		err := collector.Collect(ctx, em, eh)
+		err := collector.Collect(cancelCtx, em, eh)
 		if err != nil {
 			fmt.Printf("error collecting: %v", err)
 		}
+		wg.Done()
 	}()
 
 	// wait for a while to get some messages
 	time.Sleep(5 * time.Second)
+
 	// shut down collector
-	signal.Notify(sigChan, syscall.SIGINT)
+	cancel()
+
+	wg.Wait()
 
 	if len(s) == 0 {
 		t.Errorf("no documents returned")
