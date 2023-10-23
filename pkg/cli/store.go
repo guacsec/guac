@@ -24,7 +24,7 @@ import (
 
 var flagStore = make(map[string]*pflag.Flag)
 
-var (
+const (
 	ConfigLogLevelVar = "log-level"
 )
 

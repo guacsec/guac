@@ -31,7 +31,7 @@ func Test_InitConfig_EnvVarSet(t *testing.T) {
 	prevVal := os.Getenv(envVar)
 	defer func() { os.Setenv(envVar, prevVal) }()
 
-	envVarValue := 2
+	envVarValue := "warn"
 
 	err := os.Setenv(envVar, fmt.Sprintf("%v", envVarValue))
 	if err != nil {
@@ -39,12 +39,12 @@ func Test_InitConfig_EnvVarSet(t *testing.T) {
 	}
 
 	cli.InitConfig()
-	if actual := viper.GetInt(cli.ConfigLogLevelVar); actual != envVarValue {
-		t.Errorf("unexpected viper.GetInt result: Expected %v, got %v", envVarValue, actual)
+	if actual := viper.GetString(cli.ConfigLogLevelVar); actual != envVarValue {
+		t.Errorf("unexpected viper.GetString result: Expected %v, got %v", envVarValue, actual)
 	}
 }
 
-// tests that the default for the log level env var is 0
+// tests that the default for the log level env var is info
 func Test_InitConfig_EnvVarNotSet(t *testing.T) {
 	prevVal := os.Getenv(envVar)
 	defer func() { os.Setenv(envVar, prevVal) }()
@@ -55,8 +55,8 @@ func Test_InitConfig_EnvVarNotSet(t *testing.T) {
 	}
 
 	cli.InitConfig()
-	envVarValue := 0
-	if actual := viper.GetInt(cli.ConfigLogLevelVar); actual != envVarValue {
-		t.Errorf("unexpected viper.GetInt result: Expected %v, got %v", envVarValue, actual)
+	envVarValue := "info"
+	if actual := viper.GetString(cli.ConfigLogLevelVar); actual != envVarValue {
+		t.Errorf("unexpected viper.GetString result: Expected %v, got %v", envVarValue, actual)
 	}
 }

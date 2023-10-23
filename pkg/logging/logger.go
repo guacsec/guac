@@ -17,7 +17,6 @@ package logging
 
 import (
 	"context"
-	"fmt"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -25,13 +24,21 @@ import (
 
 var logger *zap.SugaredLogger
 
+const (
+	InfoLevel  string = "info"
+	DebugLevel string = "debug"
+)
+
 type loggerKey struct{}
 
-// Initializes the logger with the input level, defaulting to Info
+// Initializes the logger with the input level, defaulting to Info if the input is invalid
 func InitLogger(level string) {
-	zapLevel, configErr := parseLevel(level)
-	var zapLogger *zap.Logger
+	zapLevel, levelErr := zapcore.ParseLevel(level)
+	if levelErr != nil {
+		zapLevel = zapcore.InfoLevel
+	}
 
+	var zapLogger *zap.Logger
 	if zapLevel == zapcore.DebugLevel {
 		zapLogger = zap.Must(zap.NewDevelopment())
 	} else {
@@ -48,8 +55,8 @@ func InitLogger(level string) {
 
 	logger = zapLogger.Sugar()
 
-	if configErr != nil {
-		logger.Info(configErr)
+	if levelErr != nil {
+		logger.Infof("Invalid log level %s: ", level, levelErr)
 	}
 	logger.Infof("Logging at %s level", zapLogger.Level())
 }
@@ -58,7 +65,7 @@ func WithLogger(ctx context.Context) context.Context {
 	if logger == nil {
 		// defaults to Debug if InitLogger has not been called.
 		// all cli commands should call InitLogger, so this should mostly be for unit tests
-		InitLogger("Debug")
+		InitLogger(DebugLevel)
 		logger.Debugf("InitLogger has not been called. Defaulting to debug log level")
 	}
 	return context.WithValue(ctx, loggerKey{}, logger)
@@ -70,20 +77,4 @@ func FromContext(ctx context.Context) *zap.SugaredLogger {
 	}
 
 	return zap.NewNop().Sugar()
-}
-
-// returns a zapcore log level.
-// If the input is invalid, the info level and a message to log is returned
-func parseLevel(level string) (zapcore.Level, error) {
-	if level == "" {
-		envVar := "GUAC_LOG_LEVEL"
-		configVar := "log-level"
-		err := fmt.Errorf("The log level is not configured: Either set the env var %s or %s in the config file.", envVar, configVar)
-		return zapcore.InfoLevel, err
-	}
-	zapLevel, err := zapcore.ParseLevel(level)
-	if err != nil {
-		return zapcore.InfoLevel, fmt.Errorf("Error parsing the configured log level: %v", err)
-	}
-	return zapLevel, nil
 }

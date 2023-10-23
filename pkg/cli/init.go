@@ -49,7 +49,8 @@ func InitConfig() {
 
 	err = viper.ReadInConfig()
 
-	// init after reading in config to account for log level
+	// initialize logging after reading in the config
+	viper.SetDefault("log-level", logging.InfoLevel)
 	logging.InitLogger(viper.GetString(ConfigLogLevelVar))
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
