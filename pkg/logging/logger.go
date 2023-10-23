@@ -55,7 +55,9 @@ func InitLogger(level int) {
 
 func WithLogger(ctx context.Context) context.Context {
 	if logger == nil {
+		// defaults to Debug if InitLogger has not been called
 		InitLogger(-1)
+		logger.Debugf("InitLogger has not been called. Defaulting to debug log level")
 	}
 	return context.WithValue(ctx, loggerKey{}, logger)
 }

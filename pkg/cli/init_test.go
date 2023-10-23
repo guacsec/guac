@@ -16,43 +16,47 @@
 package cli_test
 
 import (
-	"context"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/logging"
-	"go.uber.org/zap/zapcore"
+	"github.com/spf13/viper"
 )
 
 var envVar string = "GUAC_LOG_LEVEL"
 
-// tests that InitConfig sets up logging correctly with configuration from an env var
+// tests that the log level env var is picked up correctly
 func Test_InitConfig_EnvVarSet(t *testing.T) {
 	prevVal := os.Getenv(envVar)
 	defer func() { os.Setenv(envVar, prevVal) }()
-	os.Setenv(envVar, "-1")
+
+	envVarValue := 2
+
+	err := os.Setenv(envVar, fmt.Sprintf("%v", envVarValue))
+	if err != nil {
+		t.Fatalf("Unexpected error setting up the test: %v", err)
+	}
 
 	cli.InitConfig()
-	ctx := logging.WithLogger(context.Background())
-	logger := logging.FromContext(ctx)
-
-	if logger.Level() != zapcore.DebugLevel {
-		t.Errorf("Expected %s, got %s", zapcore.DebugLevel, logger.Level())
+	if actual := viper.GetInt(cli.ConfigLogLevelVar); actual != envVarValue {
+		t.Errorf("unexpected viper.GetInt result: Expected %v, got %v", envVarValue, actual)
 	}
 }
 
-// tests that InitConfig sets up logging correctly when no env var is set
+// tests that the default for the log level env var is 0
 func Test_InitConfig_EnvVarNotSet(t *testing.T) {
 	prevVal := os.Getenv(envVar)
 	defer func() { os.Setenv(envVar, prevVal) }()
-	os.Unsetenv(envVar)
+
+	err := os.Unsetenv(envVar)
+	if err != nil {
+		t.Fatalf("Unexpected error setting up the test: %v", err)
+	}
 
 	cli.InitConfig()
-	ctx := logging.WithLogger(context.Background())
-	logger := logging.FromContext(ctx)
-
-	if logger.Level() != zapcore.InfoLevel {
-		t.Errorf("Expected %s, got %s", zapcore.InfoLevel, logger.Level())
+	envVarValue := 0
+	if actual := viper.GetInt(cli.ConfigLogLevelVar); actual != envVarValue {
+		t.Errorf("unexpected viper.GetInt result: Expected %v, got %v", envVarValue, actual)
 	}
 }
