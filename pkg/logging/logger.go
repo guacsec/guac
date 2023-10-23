@@ -27,8 +27,9 @@ var logger *zap.SugaredLogger
 
 type loggerKey struct{}
 
-func InitLogger(level int) {
-	zapLevel, envVarErr := parseLevel(level)
+// Initializes the logger with the input level, defaulting to Info
+func InitLogger(level string) {
+	zapLevel, configErr := parseLevel(level)
 	var zapLogger *zap.Logger
 
 	if zapLevel == zapcore.DebugLevel {
@@ -47,16 +48,17 @@ func InitLogger(level int) {
 
 	logger = zapLogger.Sugar()
 
-	if envVarErr != nil {
-		logger.Info(envVarErr)
+	if configErr != nil {
+		logger.Info(configErr)
 	}
 	logger.Infof("Logging at %s level", zapLogger.Level())
 }
 
 func WithLogger(ctx context.Context) context.Context {
 	if logger == nil {
-		// defaults to Debug if InitLogger has not been called
-		InitLogger(-1)
+		// defaults to Debug if InitLogger has not been called.
+		// all cli commands should call InitLogger, so this should mostly be for unit tests
+		InitLogger("Debug")
 		logger.Debugf("InitLogger has not been called. Defaulting to debug log level")
 	}
 	return context.WithValue(ctx, loggerKey{}, logger)
@@ -70,11 +72,18 @@ func FromContext(ctx context.Context) *zap.SugaredLogger {
 	return zap.NewNop().Sugar()
 }
 
-// maps the integer level to a zapcore.Level
-// if the input is invalid, the info level is returned
-func parseLevel(level int) (zapcore.Level, error) {
-	if level < -1 || level > 5 {
-		return zapcore.Level(0), fmt.Errorf("The log level %v is not in [-1, 5].", level)
+// returns a zapcore log level.
+// If the input is invalid, the info level and a message to log is returned
+func parseLevel(level string) (zapcore.Level, error) {
+	if level == "" {
+		envVar := "GUAC_LOG_LEVEL"
+		configVar := "log-level"
+		err := fmt.Errorf("The log level is not configured: Either set the env var %s or %s in the config file.", envVar, configVar)
+		return zapcore.InfoLevel, err
 	}
-	return zapcore.Level(level), nil
+	zapLevel, err := zapcore.ParseLevel(level)
+	if err != nil {
+		return zapcore.InfoLevel, fmt.Errorf("Error parsing the configured log level: %v", err)
+	}
+	return zapLevel, nil
 }

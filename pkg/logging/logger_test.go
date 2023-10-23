@@ -26,42 +26,47 @@ import (
 func Test_InitLogger(t *testing.T) {
 	tests := []struct {
 		name     string
-		inLevel  int
+		inLevel  string
 		outLevel zapcore.Level
 	}{
 		{
 			name:     "invalid level leads to info level",
-			inLevel:  -2,
+			inLevel:  "1",
+			outLevel: zapcore.InfoLevel,
+		},
+		{
+			name:     "empty level leads to info level",
+			inLevel:  "",
 			outLevel: zapcore.InfoLevel,
 		},
 		{
 			name:     "debug level",
-			inLevel:  -1,
+			inLevel:  "Debug",
 			outLevel: zapcore.DebugLevel,
 		},
 		{
 			name:     "warn level",
-			inLevel:  1,
+			inLevel:  "warn",
 			outLevel: zapcore.WarnLevel,
 		},
 		{
 			name:     "error level",
-			inLevel:  2,
+			inLevel:  "error",
 			outLevel: zapcore.ErrorLevel,
 		},
 		{
 			name:     "DPanic level",
-			inLevel:  3,
+			inLevel:  "DPanic",
 			outLevel: zapcore.DPanicLevel,
 		},
 		{
 			name:     "PanicLevel level",
-			inLevel:  4,
+			inLevel:  "panic",
 			outLevel: zapcore.PanicLevel,
 		},
 		{
 			name:     "Fatal level",
-			inLevel:  5,
+			inLevel:  "fatal",
 			outLevel: zapcore.FatalLevel,
 		},
 	}

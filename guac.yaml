@@ -34,4 +34,4 @@ gql-addr: http://localhost:8080/query
 service-poll: true
 use-csub: true
 
-log-level: 0
+log-level: Info
