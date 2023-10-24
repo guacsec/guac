@@ -82,7 +82,7 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 	funcName := "IngestVulnerabilityMetadata"
 
 	in := &vulnerabilityMetadataLink{
-		Timestamp:  vulnerabilityMetadata.Timestamp,
+		Timestamp:  vulnerabilityMetadata.Timestamp.UTC(),
 		ScoreType:  vulnerabilityMetadata.ScoreType,
 		ScoreValue: (vulnerabilityMetadata.ScoreValue),
 		Origin:     vulnerabilityMetadata.Origin,
@@ -287,7 +287,7 @@ func (c *demoClient) buildVulnerabilityMetadata(ctx context.Context, link *vulne
 	vulnMetadata := &model.VulnerabilityMetadata{
 		ID:            link.ThisID,
 		Vulnerability: vuln,
-		Timestamp:     link.Timestamp,
+		Timestamp:     link.Timestamp.UTC(),
 		ScoreType:     model.VulnerabilityScoreType(link.ScoreType),
 		ScoreValue:    link.ScoreValue,
 		Origin:        link.Origin,

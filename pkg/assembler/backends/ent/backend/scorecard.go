@@ -124,7 +124,7 @@ func upsertScorecard(ctx context.Context, client *ent.Tx, source model.SourceInp
 		Create().
 		SetChecks(checks).
 		SetAggregateScore(scorecardInput.AggregateScore).
-		SetTimeScanned(scorecardInput.TimeScanned).
+		SetTimeScanned(scorecardInput.TimeScanned.UTC()).
 		SetScorecardVersion(scorecardInput.ScorecardVersion).
 		SetScorecardCommit(scorecardInput.ScorecardCommit).
 		SetOrigin(scorecardInput.Origin).
@@ -201,7 +201,7 @@ func toModelScorecard(record *ent.Scorecard) *model.Scorecard {
 	return &model.Scorecard{
 		Checks:           record.Checks,
 		AggregateScore:   record.AggregateScore,
-		TimeScanned:      record.TimeScanned,
+		TimeScanned:      record.TimeScanned.UTC(),
 		ScorecardVersion: record.ScorecardVersion,
 		ScorecardCommit:  record.ScorecardCommit,
 		Origin:           record.Origin,

@@ -729,7 +729,7 @@ func getCertifyBadFromCursor(ctx context.Context, cursor driver.Cursor, ingestio
 			Justification: createdValue.Justification,
 			Origin:        createdValue.Collector,
 			Collector:     createdValue.Origin,
-			KnownSince:    createdValue.KnownSince,
+			KnownSince:    createdValue.KnownSince.UTC(),
 		}
 
 		if pkg != nil {

@@ -113,7 +113,7 @@ func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVu
 	}
 	if certifyVulnSpec.TimeScanned != nil {
 		arangoQueryBuilder.filter("certifyVuln", timeScannedStr, "==", "@"+timeScannedStr)
-		queryValues[timeScannedStr] = certifyVulnSpec.TimeScanned.UTC()
+		queryValues[timeScannedStr] = certifyVulnSpec.TimeScanned
 	}
 	if certifyVulnSpec.DbURI != nil {
 		arangoQueryBuilder.filter("certifyVuln", dbUriStr, "==", "@"+dbUriStr)
