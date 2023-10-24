@@ -15,17 +15,18 @@ services:
   #     - "7687:7687"
   #   restart: on-failure
 
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: guac
-      POSTGRES_PASSWORD: guac
-      POSTGRES_HOST_AUTH_METHOD: trust
-    networks: [frontend]
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./container_files/pg:/var/lib/postgresql/data
+  # Ent on postgres is turned down for now since we are currently only using the in memory backend
+  # postgres:
+  #  image: docker.io/library/postgres:16
+  #  environment:
+  #    POSTGRES_USER: guac
+  #    POSTGRES_PASSWORD: guac
+  #    POSTGRES_HOST_AUTH_METHOD: trust
+  #  networks: [frontend]
+  #  ports:
+  #    - "5432:5432"
+  #  volumes:
+  #    - ./container_files/pg:/var/lib/postgresql/data
 
   nats:
     networks: [frontend]
