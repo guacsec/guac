@@ -773,7 +773,7 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		}
 
 		// index for certifyLegal
-		if err := createIndexPerCollection(ctx, db, certifyLegalsStr, []string{"packageID", "sourceID", "declaredLicense", "discoveredLicense", "justification", "timeScanned"}, true, "certifyLegal"); err != nil {
+		if err := createIndexPerCollection(ctx, db, certifyLegalsStr, []string{"packageID", "sourceID", "declaredLicense", "discoveredLicense", "justification", "timeScanned", "origin"}, true, "certifyLegal"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for certifyLegal: %w", err)
 		}
 
