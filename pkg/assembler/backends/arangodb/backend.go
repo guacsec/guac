@@ -762,19 +762,44 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 
-		// index for certifyBad
-		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"artifactID", "packageID", "sourceID", "justification", "knownSince"}, true, "certifyBad"); err != nil {
+		// index for certifyBad - Artifact
+		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"artifactID", "justification", "knownSince"}, false, "certifyBadArtifactID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for certifyBad: %w", err)
 		}
 
-		// index for certifyGood
-		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"artifactID", "packageID", "sourceID", "justification", "knownSince"}, true, "certifyGood"); err != nil {
+		// index for certifyBad - Package
+		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"packageID", "justification", "knownSince"}, false, "certifyBadPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyBad: %w", err)
+		}
+
+		// index for certifyBad - Source
+		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"sourceID", "justification", "knownSince"}, false, "certifyBadSourceID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyBad: %w", err)
+		}
+
+		// index for certifyGood - Artifact
+		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"artifactID", "justification", "knownSince"}, false, "certifyGoodArtifactID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for certifyGood: %w", err)
 		}
 
-		// index for certifyLegal
-		if err := createIndexPerCollection(ctx, db, certifyLegalsStr, []string{"packageID", "sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, true, "certifyLegal"); err != nil {
+		// index for certifyGood - Package
+		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"packageID", "justification", "knownSince"}, false, "certifyGoodPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyGood: %w", err)
+		}
+
+		// index for certifyGood - Source
+		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"sourceID", "justification", "knownSince"}, false, "certifyGoodSourceID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyGood: %w", err)
+		}
+
+		// index for certifyLegal - Package
+		if err := createIndexPerCollection(ctx, db, certifyLegalsStr, []string{"packageID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false, "certifyLegalPackageID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for certifyLegal: %w", err)
+		}
+
+		// index for certifyLegal - Source
+		if err := createIndexPerCollection(ctx, db, certifyLegalsStr, []string{"sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false, "certifyLegalSourceID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 
 		// index for certifyScorecard
@@ -782,9 +807,14 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for certifyScorecard: %w", err)
 		}
 
-		// index for certifyVex
-		if err := createIndexPerCollection(ctx, db, certifyVEXsStr, []string{"packageID", "artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, true, "certifyVex"); err != nil {
+		// index for certifyVex - Package
+		if err := createIndexPerCollection(ctx, db, certifyVEXsStr, []string{"packageID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false, "certifyVexPackageID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for certifyVex: %w", err)
+		}
+
+		// index for certifyVex - Artifact
+		if err := createIndexPerCollection(ctx, db, certifyVEXsStr, []string{"artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false, "certifyVexArtifactID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 
 		// index for certifyVuln
@@ -797,13 +827,28 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
 		}
 
-		// index for hashMetadata
-		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"artifactID", "packageID", "sourceID", "key", "value", "timestamp", "justification", "origin"}, true, "hashMetadata"); err != nil {
+		// index for hashMetadata - Artifact
+		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"artifactID", "key", "value", "timestamp", "justification", "origin"}, false, "hashMetadataArtifactID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hashMetadata: %w", err)
 		}
 
-		// index for hasSbom
-		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"artifactID", "packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, true, "hasSbom"); err != nil {
+		// index for hashMetadata - Package
+		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"packageID", "key", "value", "timestamp", "justification", "origin"}, false, "hashMetadataPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hashMetadata: %w", err)
+		}
+
+		// index for hashMetadata - Source
+		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"sourceID", "key", "value", "timestamp", "justification", "origin"}, false, "hashMetadataSourceID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hashMetadata: %w", err)
+		}
+
+		// index for hasSbom - Artifact
+		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"artifactID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false, "hasSbomArtifactID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hasSbom: %w", err)
+		}
+
+		// index for hasSbom - Package
+		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false, "hasSbomPackageID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hasSbom: %w", err)
 		}
 
@@ -822,8 +867,18 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for pkgEqual: %w", err)
 		}
 
-		// index for pointOfContact
-		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"artifactID", "packageID", "sourceID", "email", "info", "since", "justification", "origin"}, true, "pointOfContactArtifactID"); err != nil {
+		// index for pointOfContact - Artifact
+		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"artifactID", "email", "info", "since", "justification", "origin"}, false, "pointOfContactArtifactID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for pointOfContact: %w", err)
+		}
+
+		// index for pointOfContact - Package
+		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"packageID", "email", "info", "since", "justification", "origin"}, false, "pointOfContactPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for pointOfContact: %w", err)
+		}
+
+		// index for pointOfContact - Source
+		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"sourceID", "email", "info", "since", "justification", "origin"}, false, "pointOfContactSourceID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pointOfContact: %w", err)
 		}
 
