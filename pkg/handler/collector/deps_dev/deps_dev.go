@@ -23,9 +23,6 @@ import (
 	"sync"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-	"golang.org/x/exp/maps"
-
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
@@ -33,6 +30,8 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/version"
+	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/exp/maps"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -568,7 +567,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 				logger.Debugf("The project key was not found in the map: %v", projectReq.ProjectKey)
 				project, err = d.client.GetProject(ctx, projectReq)
 				if err != nil {
-					logger.Debugf("unable to get project for: %v, error: %v", projectReq.ProjectKey.Id, err)
+					logger.Infof("unable to get project for: %v, error: %v", projectReq.ProjectKey.Id, err)
 					continue
 				}
 			}

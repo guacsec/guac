@@ -23,6 +23,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/dochelper"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
@@ -449,6 +450,13 @@ func TestProjectKey(t *testing.T) {
 			},
 			expected: nil,
 		},
+		{
+			name: "source repo link with .git suffix",
+			links: []*pb.Link{
+				{Label: "SOURCE_REPO", Url: "https://github.com/org/repo.git"},
+			},
+			expected: &pb.ProjectKey{Id: "github.com/org/repo"},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -458,6 +466,51 @@ func TestProjectKey(t *testing.T) {
 			key := d.projectKey(version)
 			if key.GetId() != tc.expected.GetId() {
 				t.Errorf("Expected %v, got %v", tc.expected, key)
+			}
+		})
+	}
+}
+
+func TestDepsCollector_collectAdditionalMetadata(t *testing.T) {
+	tests := []struct {
+		testName     string
+		pkgType      string
+		namespace    *string
+		name         string
+		version      *string
+		pkgComponent *PackageComponent
+		wantErr      bool
+	}{
+		{
+			testName:     "npm package with .git suffix",
+			pkgType:      "npm",
+			namespace:    ptrfrom.String("@webassemblyjs"),
+			name:         "wasm-parser",
+			version:      ptrfrom.String("1.11.6"),
+			pkgComponent: &PackageComponent{},
+			wantErr:      false,
+		},
+		{
+			testName:     "golang package without .git suffix",
+			pkgType:      "golang",
+			namespace:    ptrfrom.String("github.com/google"),
+			name:         "wire",
+			version:      ptrfrom.String("v0.5.0"),
+			pkgComponent: &PackageComponent{},
+			wantErr:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			c, err := NewDepsCollector(ctx, toPurlSource([]string{}), false, true, 5*time.Second)
+			if err != nil {
+				t.Errorf("NewDepsCollector() error = %v", err)
+				return
+			}
+			if err := c.collectAdditionalMetadata(context.Background(), tt.pkgType, tt.namespace, tt.name, tt.version, tt.pkgComponent); (err != nil) != tt.wantErr {
+				t.Errorf("collectAdditionalMetadata() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
