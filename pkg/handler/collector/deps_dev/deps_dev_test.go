@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
@@ -63,127 +64,135 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		interval           time.Duration
 		wantErr            bool
 		errMessage         error
-	}{{
-		name:     "no packages",
-		packages: []string{},
-		want:     []*processor.Document{},
-		poll:     false,
-		wantErr:  false,
-	}, {
-		name:     "org.webjars.npm:a maven package",
-		packages: []string{"pkg:maven/org.webjars.npm/a@2.1.2"},
-		want: []*processor.Document{
-			{
-				Blob:   []byte(testdata.CollectedMavenWebJars),
-				Type:   processor.DocumentDepsDev,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: DepsCollector,
-					Source:    DepsCollector,
+	}{
+		{
+			name:     "no packages",
+			packages: []string{},
+			want:     []*processor.Document{},
+			poll:     false,
+			wantErr:  false,
+		},
+		{
+			name:     "org.webjars.npm:a maven package",
+			packages: []string{"pkg:maven/org.webjars.npm/a@2.1.2"},
+			want: []*processor.Document{
+				{
+					Blob:   []byte(testdata.CollectedMavenWebJars),
+					Type:   processor.DocumentDepsDev,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: DepsCollector,
+						Source:    DepsCollector,
+					},
 				},
 			},
+			poll:    false,
+			wantErr: false,
 		},
-		poll:    false,
-		wantErr: false,
-	}, {
-		name:     "wheel-axle-runtime pypi package",
-		packages: []string{"pkg:pypi/wheel-axle-runtime@0.0.4.dev20230415195356"},
-		want: []*processor.Document{
-			{
-				Blob:   []byte(testdata.CollectedPypiWheelAxle),
-				Type:   processor.DocumentDepsDev,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: DepsCollector,
-					Source:    DepsCollector,
+		{
+			name:     "wheel-axle-runtime pypi package",
+			packages: []string{"pkg:pypi/wheel-axle-runtime@0.0.4"},
+			want: []*processor.Document{
+				{
+					Blob:   []byte(testdata.CollectedPypiWheelAxle),
+					Type:   processor.DocumentDepsDev,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: DepsCollector,
+						Source:    DepsCollector,
+					},
 				},
 			},
+			poll:    false,
+			wantErr: false,
 		},
-		poll:    false,
-		wantErr: false,
-	}, {
-		name:     "NPM React package version 17.0.0",
-		packages: []string{"pkg:npm/react@17.0.0"},
-		want: []*processor.Document{
-			{
-				Blob:   []byte(testdata.CollectedNPMReact),
-				Type:   processor.DocumentDepsDev,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: DepsCollector,
-					Source:    DepsCollector,
+		{
+			name:     "NPM React package version 17.0.0",
+			packages: []string{"pkg:npm/react@17.0.0"},
+			want: []*processor.Document{
+				{
+					Blob:   []byte(testdata.CollectedNPMReact),
+					Type:   processor.DocumentDepsDev,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: DepsCollector,
+						Source:    DepsCollector,
+					},
 				},
 			},
+			poll:    false,
+			wantErr: false,
 		},
-		poll:    false,
-		wantErr: false,
-	}, {
-		name:     "github.com/makenowjust/heredoc go package",
-		packages: []string{"pkg:golang/github.com/makenowjust/heredoc@v1.0.0"},
-		want: []*processor.Document{
-			{
-				Blob:   []byte(testdata.CollectedGoLangMakeNowJust),
-				Type:   processor.DocumentDepsDev,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: DepsCollector,
-					Source:    DepsCollector,
+		{
+			name:     "github.com/makenowjust/heredoc go package",
+			packages: []string{"pkg:golang/github.com/makenowjust/heredoc@v1.0.0"},
+			want: []*processor.Document{
+				{
+					Blob:   []byte(testdata.CollectedGoLangMakeNowJust),
+					Type:   processor.DocumentDepsDev,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: DepsCollector,
+						Source:    DepsCollector,
+					},
 				},
 			},
+			poll:    false,
+			wantErr: false,
 		},
-		poll:    false,
-		wantErr: false,
-	}, {
-		name:     "yargs-parser package npm package",
-		packages: []string{"pkg:npm/yargs-parser@4.2.1"},
-		want: []*processor.Document{
-			{
-				Blob:   []byte(testdata.CollectedYargsParser),
-				Type:   processor.DocumentDepsDev,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: DepsCollector,
-					Source:    DepsCollector,
+		{
+			name:     "yargs-parser package npm package",
+			packages: []string{"pkg:npm/yargs-parser@4.2.1"},
+			want: []*processor.Document{
+				{
+					Blob:   []byte(testdata.CollectedYargsParser),
+					Type:   processor.DocumentDepsDev,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: DepsCollector,
+						Source:    DepsCollector,
+					},
 				},
 			},
+			poll:    false,
+			wantErr: false,
 		},
-		poll:    false,
-		wantErr: false,
-	}, {
-		name:     "duplicate npm package",
-		packages: []string{"pkg:npm/yargs-parser@4.2.1", "pkg:npm/yargs-parser@4.2.1"},
-		want: []*processor.Document{
-			{
-				Blob:   []byte(testdata.CollectedYargsParser),
-				Type:   processor.DocumentDepsDev,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: DepsCollector,
-					Source:    DepsCollector,
+		{
+			name:     "duplicate npm package",
+			packages: []string{"pkg:npm/yargs-parser@4.2.1", "pkg:npm/yargs-parser@4.2.1"},
+			want: []*processor.Document{
+				{
+					Blob:   []byte(testdata.CollectedYargsParser),
+					Type:   processor.DocumentDepsDev,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: DepsCollector,
+						Source:    DepsCollector,
+					},
 				},
 			},
+			poll:    false,
+			wantErr: false,
 		},
-		poll:    false,
-		wantErr: false,
-	}, {
-		name:     "foreign-types package cargo package",
-		packages: []string{"pkg:cargo/foreign-types@0.3.2"},
-		want: []*processor.Document{
-			{
-				Blob:   []byte(testdata.CollectedForeignTypes),
-				Type:   processor.DocumentDepsDev,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: DepsCollector,
-					Source:    DepsCollector,
+		{
+			name:     "foreign-types package cargo package",
+			packages: []string{"pkg:cargo/foreign-types@0.3.2"},
+			want: []*processor.Document{
+				{
+					Blob:   []byte(testdata.CollectedForeignTypes),
+					Type:   processor.DocumentDepsDev,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: DepsCollector,
+						Source:    DepsCollector,
+					},
 				},
 			},
+			poll:       true,
+			interval:   time.Second,
+			wantErr:    true,
+			errMessage: context.DeadlineExceeded,
 		},
-		poll:       true,
-		interval:   time.Second,
-		wantErr:    true,
-		errMessage: context.DeadlineExceeded,
-	},
 		{
 			name:     "disable getting deps -- only metadata is retrieved",
 			packages: []string{"pkg:cargo/foreign-types@0.3.2"},
@@ -247,6 +256,9 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 			if c.Type() != DepsCollector {
 				t.Errorf("g.Type() = %s, want %s", c.Type(), DepsCollector)
 			}
+			if len(collectedDocs) != len(tt.want) {
+				t.Errorf("Wanted %v elements, but got %v", len(tt.want), len(collectedDocs))
+			}
 			for i := range collectedDocs {
 				collectedDocs[i].Blob, err = normalizeTimeStampAndScorecard(collectedDocs[i].Blob)
 				if err != nil {
@@ -258,13 +270,13 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				}
 				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i]))
 				if !result {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+					t.Errorf("Failed to match expected result: %s and the diff is %s", tt.name, cmp.Diff(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i])))
 				}
 			}
-
 		})
 	}
 }
+
 func TestPerformanceDepsCollector(t *testing.T) {
 	tests := struct {
 		name                 string
@@ -277,7 +289,8 @@ func TestPerformanceDepsCollector(t *testing.T) {
 		ignoreResultsForPerf bool
 	}{
 		name: "large number of packages",
-		packages: []string{"pkg:golang/github.com/rhysd/actionlint@v1.6.15",
+		packages: []string{
+			"pkg:golang/github.com/rhysd/actionlint@v1.6.15",
 			"pkg:golang/gotest.tools@v2.2.0+incompatible",
 			"pkg:golang/cloud.google.com/go/bigquery@v1.53.0",
 			"pkg:golang/cloud.google.com/go/monitoring@v1.15.1",
@@ -312,7 +325,8 @@ func TestPerformanceDepsCollector(t *testing.T) {
 			"pkg:golang/gopkg.in/yaml.v3@v3.0.1",
 			"pkg:golang/mvdan.cc/sh/v3@v3.7.0",
 			"pkg:golang/github.com/Masterminds/semver/v3@v3.2.1",
-			"pkg:golang/github.com/caarlos0/env/v6@v6.10.0"},
+			"pkg:golang/github.com/caarlos0/env/v6@v6.10.0",
+		},
 		poll:                 true,
 		interval:             time.Second * 3,
 		wantErr:              false,

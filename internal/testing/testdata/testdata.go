@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/guacsec/guac/internal/testing/keyutil"
@@ -34,6 +32,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
@@ -1034,7 +1033,8 @@ var (
 				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
 			},
 			IsOccurrence: isOccurrenceJustifyTopPkg,
-		}, {
+		},
+		{
 			Pkg: cdxResteasyPack,
 			Artifact: &model.ArtifactInputSpec{
 				Algorithm: "md5",
@@ -1433,258 +1433,74 @@ var (
 	// Deps.dev
 
 	CollectedPypiWheelAxle = `{
-	   "CurrentPackage":{
-		  "type":"pypi",
-		  "namespace":"",
-		  "name":"wheel-axle-runtime",
-		  "version":"0.0.4.dev20230415195356",
-		  "qualifiers":null,
-		  "subpath":""
-	   },
-	   "Source":{
-		  "type":"git",
-		  "namespace":"github.com/karellen",
-		  "name":"wheel-axle-runtime",
-		  "tag":null,
-		  "commit":null
-	   },
-	   "Scorecard":{
-		  "checks":[
-			 {
-				"check":"Maintained",
-				"score":5
-			 },
-			 {
-				"check":"Code-Review",
-				"score":0
-			 },
-			 {
-				"check":"CII-Best-Practices",
-				"score":0
-			 },
-			 {
-				"check":"License",
-				"score":10
-			 },
-			 {
-				"check":"Branch-Protection",
-				"score":-1
-			 },
-			 {
-				"check":"Signed-Releases",
-				"score":-1
-			 },
-			 {
-				"check":"Dangerous-Workflow",
-				"score":10
-			 },
-			 {
-				"check":"Binary-Artifacts",
-				"score":9
-			 },
-			 {
-				"check":"Packaging",
-				"score":-1
-			 },
-			 {
-				"check":"Token-Permissions",
-				"score":0
-			 },
-			 {
-				"check":"Pinned-Dependencies",
-				"score":8
-			 },
-			 {
-				"check":"Fuzzing",
-				"score":0
-			 },
-			 {
-				"check":"Vulnerabilities",
-				"score":10
-			 },
-			 {
-				"check":"Security-Policy",
-				"score":0
-			 },
-			 {
-				"check":"SAST",
-				"score":0
-			 }
-		  ],
-		  "aggregateScore":4.800000190734863,
-		  "timeScanned":"2023-08-21T00:00:00Z",
-		  "scorecardVersion":"v4.12.0-29-gf05496b9",
-		  "scorecardCommit":"f05496b9942a18b5914ddb10af067af6b3e74b9d",
-		  "origin":"",
-		  "collector":""
-	   },
-	   "IsDepPackages":[
-		  {
-			 "CurrentPackageInput":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"wheel-axle-runtime",
-				"version":"0.0.4.dev20230415195356",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "DepPackageInput":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"filelock",
-				"version":"3.12.3",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "IsDependency":{
-				"versionRange":"",
-				"dependencyType":"DIRECT",
-				"justification":"dependency data collected via deps.dev",
-				"origin":"",
-				"collector":""
-			 }
-		  },
-		  {
-			 "CurrentPackageInput":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"filelock",
-				"version":"3.12.3",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "DepPackageInput":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"typing-extensions",
-				"version":"4.7.1",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "IsDependency":{
-				"versionRange":"\u003e=4.7.1",
-				"dependencyType":"DIRECT",
-				"justification":"dependency data collected via deps.dev",
-				"origin":"",
-				"collector":""
-			 }
-		  }
-	   ],
-	   "DepPackages":[
-		  {
-			 "CurrentPackage":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"filelock",
-				"version":"3.12.3",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "Source":{
-				"type":"git",
-				"namespace":"github.com/tox-dev",
-				"name":"py-filelock",
-				"tag":null,
-				"commit":null
-			 },
-			 "Scorecard":{
-				"checks":[
-				   {
-					  "check":"Code-Review",
-					  "score":2
-				   },
-				   {
-					  "check":"Maintained",
-					  "score":10
-				   },
-				   {
-					  "check":"CII-Best-Practices",
-					  "score":0
-				   },
-				   {
-					  "check":"License",
-					  "score":9
-				   },
-				   {
-					  "check":"Branch-Protection",
-					  "score":-1
-				   },
-				   {
-					  "check":"Signed-Releases",
-					  "score":-1
-				   },
-				   {
-					  "check":"Security-Policy",
-					  "score":10
-				   },
-				   {
-					  "check":"Binary-Artifacts",
-					  "score":10
-				   },
-				   {
-					  "check":"Dangerous-Workflow",
-					  "score":10
-				   },
-				   {
-					  "check":"Token-Permissions",
-					  "score":0
-				   },
-				   {
-					  "check":"Pinned-Dependencies",
-					  "score":6
-				   },
-				   {
-					  "check":"Vulnerabilities",
-					  "score":10
-				   },
-				   {
-					  "check":"Fuzzing",
-					  "score":0
-				   },
-				   {
-					  "check":"Packaging",
-					  "score":10
-				   },
-				   {
-					  "check":"SAST",
-					  "score":0
-				   }
-				],
-				"aggregateScore":6.400000095367432,
-				"timeScanned":"2023-08-21T00:00:00Z",
-				"scorecardVersion":"v4.12.0-29-gf05496b9",
-				"scorecardCommit":"f05496b9942a18b5914ddb10af067af6b3e74b9d",
-				"origin":"",
-				"collector":""
-			 },
-			 "IsDepPackages":null,
-			 "DepPackages":null,
-			 "UpdateTime":"2023-08-29T12:50:53.228040583Z"
-		  },
-		  {
-			 "CurrentPackage":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"typing-extensions",
-				"version":"4.7.1",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "Source":{
-				"type":"git",
-				"namespace":"github.com/python",
-				"name":"typing_extensions",
-				"tag":null,
-				"commit":null
-			 },
-			 "Scorecard":null,
-			 "IsDepPackages":null,
-			 "DepPackages":null,
-			 "UpdateTime":"2023-08-29T12:50:53.308617853Z"
-		  }
-	   ],
-	   "UpdateTime":"2023-08-29T12:50:53.081287053Z"
-	}`
+   "CurrentPackage":{
+      "name":"wheel-axle-runtime",
+      "namespace":"",
+      "qualifiers":null,
+      "subpath":"",
+      "type":"pypi",
+      "version":"0.0.4"
+   },
+   "DepPackages":[
+      {
+         "CurrentPackage":{
+            "name":"filelock",
+            "namespace":"",
+            "qualifiers":null,
+            "subpath":"",
+            "type":"pypi",
+            "version":null
+         },
+         "DepPackages":null,
+         "IsDepPackages":null,
+         "Scorecard":null,
+         "Source":{
+            "commit":null,
+            "name":"py-filelock",
+            "namespace":"github.com/tox-dev",
+            "tag":null,
+            "type":"git"
+         },
+         "UpdateTime":"2022-11-21T17:45:50.52Z"
+      }
+   ],
+   "IsDepPackages":[
+      {
+         "CurrentPackageInput":{
+            "name":"wheel-axle-runtime",
+            "namespace":"",
+            "qualifiers":null,
+            "subpath":"",
+            "type":"pypi",
+            "version":null
+         },
+         "DepPackageInput":{
+            "name":"filelock",
+            "namespace":"",
+            "qualifiers":null,
+            "subpath":"",
+            "type":"pypi",
+            "version":null
+         },
+         "IsDependency":{
+            "collector":"",
+            "dependencyType":"DIRECT",
+            "justification":"dependency data collected via deps.dev",
+            "origin":"",
+            "versionRange":""
+         }
+      }
+   ],
+   "Scorecard":null,
+   "Source":{
+      "commit":null,
+      "name":"wheel-axle-runtime",
+      "namespace":"github.com/karellen",
+      "tag":null,
+      "type":"git"
+   },
+   "UpdateTime":"2022-11-21T17:45:50.52Z"
+}`
 
 	CollectedMavenWebJars = `{
 		"CurrentPackage":{
@@ -3040,6 +2856,7 @@ func certifyLegalInputSpecLess(e1, e2 assembler.CertifyLegalIngest) bool {
 func licenseInputSpecLess(e1, e2 generated.LicenseInputSpec) bool {
 	return gLess(e1, e2)
 }
+
 func hasMetadataLess(e1, e2 assembler.HasMetadataIngest) bool {
 	return gLess(e1, e2)
 }
