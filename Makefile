@@ -130,7 +130,7 @@ start-service: check-docker-compose-tool-check
 	# not handle that well.
 	#
 	# if container images are missing, run `make container` first
-	$(CONTAINER) compose up --force-recreate
+	$(CONTAINER) compose -f docker-compose.yml -f container_files/mem.yaml up --force-recreate
 
 # to flush state, service-stop must be used else state is taken from old containers
 .PHONY: stop-service
