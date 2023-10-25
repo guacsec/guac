@@ -24,7 +24,6 @@ import (
 )
 
 func TestVcsUriToSrc(t *testing.T) {
-
 	testCases := []struct {
 		uri      string
 		wantErr  bool
@@ -49,7 +48,8 @@ func TestVcsUriToSrc(t *testing.T) {
 			uri:      "git+https://github.com/kubernetes@main",
 			wantErr:  false,
 			expected: src("git", "github.com", "kubernetes", nil, strP("main")),
-		}, {
+		},
+		{
 			uri:      "https://github.com/sfackler/rust-openssl",
 			wantErr:  false,
 			expected: src("git", "github.com/sfackler", "rust-openssl", nil, nil),
@@ -80,10 +80,14 @@ func TestVcsUriToSrc(t *testing.T) {
 			uri:     "github.com/kubernetes@@main",
 			wantErr: true,
 		},
+		{
+			uri:      "git+https://github.com/kubernetes/kubernetes.git",
+			wantErr:  false,
+			expected: src("git", "github.com/kubernetes", "kubernetes", nil, nil),
+		},
 	}
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("parsing %s", tt.uri), func(t *testing.T) {
-
 			// err == nil should be equivalent to IsVcs
 			if IsVcs(tt.uri) == tt.wantErr {
 				t.Errorf("expected err but IsVcs returned valid vcs uri")

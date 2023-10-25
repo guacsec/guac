@@ -614,7 +614,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 				logger.Debugf("The project key was not found in the map: %v", projectReq.ProjectKey)
 				project, err = d.client.GetProject(ctx, projectReq)
 				if err != nil {
-					logger.Debugf("unable to get project for: %v, error: %v", projectReq.ProjectKey.Id, err)
+					logger.Infof("unable to get project for: %v, error: %v", projectReq.ProjectKey.Id, err)
 					continue
 				}
 			}
