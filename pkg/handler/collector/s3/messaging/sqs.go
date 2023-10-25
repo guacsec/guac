@@ -133,7 +133,7 @@ func (s *SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	default:
 		receiveOutput, err := s.client.ReceiveMessage(ctx, receiveInput)
 		if err != nil {
-			return &SqsMessage{}, fmt.Errorf("error receiving message, skipping: %w\n", err)
+			return &SqsMessage{}, fmt.Errorf("error receiving message, skipping: %w", err)
 		}
 
 		messages := receiveOutput.Messages
