@@ -716,10 +716,6 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for licenses: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID", "justification"}, true, "byArtIDEqualArtIDJust"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
-		}
-
 		if err := createIndexPerCollection(ctx, db, pkgTypesStr, []string{"type"}, true, "byPkgType"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for pkgTypes: %w", err)
 		}
@@ -756,12 +752,144 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for srcNames: %w", err)
 		}
 
+		// index for isDependency
 		if err := createIndexPerCollection(ctx, db, isDependenciesStr, []string{"packageID", "depPackageID", "versionRange", "origin"}, false, "byPkgIDDepPkgIDversionRangeOrigin"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
+		// index for isOccurrence
 		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "justification", "origin"}, true, "byPkgIDArtIDOriginJust"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
+		}
+
+		// index for certifyBad - Artifact
+		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"artifactID", "justification", "knownSince"}, false, "certifyBadArtifactID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyBad: %w", err)
+		}
+
+		// index for certifyBad - Package
+		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"packageID", "justification", "knownSince"}, false, "certifyBadPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyBad: %w", err)
+		}
+
+		// index for certifyBad - Source
+		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"sourceID", "justification", "knownSince"}, false, "certifyBadSourceID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyBad: %w", err)
+		}
+
+		// index for certifyGood - Artifact
+		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"artifactID", "justification", "knownSince"}, false, "certifyGoodArtifactID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyGood: %w", err)
+		}
+
+		// index for certifyGood - Package
+		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"packageID", "justification", "knownSince"}, false, "certifyGoodPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyGood: %w", err)
+		}
+
+		// index for certifyGood - Source
+		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"sourceID", "justification", "knownSince"}, false, "certifyGoodSourceID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyGood: %w", err)
+		}
+
+		// index for certifyLegal - Package
+		if err := createIndexPerCollection(ctx, db, certifyLegalsStr, []string{"packageID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false, "certifyLegalPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyLegal: %w", err)
+		}
+
+		// index for certifyLegal - Source
+		if err := createIndexPerCollection(ctx, db, certifyLegalsStr, []string{"sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false, "certifyLegalSourceID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
+		}
+
+		// index for certifyScorecard
+		if err := createIndexPerCollection(ctx, db, scorecardStr, []string{"sourceID", "checks", "aggregateScore", "timeScanned", "origin"}, true, "certifyScorecard"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyScorecard: %w", err)
+		}
+
+		// index for certifyVex - Package
+		if err := createIndexPerCollection(ctx, db, certifyVEXsStr, []string{"packageID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false, "certifyVexPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyVex: %w", err)
+		}
+
+		// index for certifyVex - Artifact
+		if err := createIndexPerCollection(ctx, db, certifyVEXsStr, []string{"artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false, "certifyVexArtifactID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
+		}
+
+		// index for certifyVuln
+		if err := createIndexPerCollection(ctx, db, certifyVulnsStr, []string{"packageID", "vulnerabilityID", "ScannerVersion", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "timeScanned", "origin"}, true, "certifyVuln"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for certifyVuln: %w", err)
+		}
+
+		// index for hashEquals
+		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID", "justification", "origin"}, true, "hashEquals"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
+		}
+
+		// index for hashMetadata - Artifact
+		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"artifactID", "key", "value", "timestamp", "justification", "origin"}, false, "hashMetadataArtifactID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hashMetadata: %w", err)
+		}
+
+		// index for hashMetadata - Package
+		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"packageID", "key", "value", "timestamp", "justification", "origin"}, false, "hashMetadataPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hashMetadata: %w", err)
+		}
+
+		// index for hashMetadata - Source
+		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"sourceID", "key", "value", "timestamp", "justification", "origin"}, false, "hashMetadataSourceID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hashMetadata: %w", err)
+		}
+
+		// index for hasSbom - Artifact
+		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"artifactID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false, "hasSbomArtifactID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hasSbom: %w", err)
+		}
+
+		// index for hasSbom - Package
+		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false, "hasSbomPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hasSbom: %w", err)
+		}
+
+		// index for hasSlsa
+		if err := createIndexPerCollection(ctx, db, hasSLSAsStr, []string{"subjectID", "builtByID", "buildType", "builtFrom", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin"}, true, "hasSlsa"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hasSlsa: %w", err)
+		}
+
+		// index for hasSourceAt
+		if err := createIndexPerCollection(ctx, db, hasSourceAtsStr, []string{"packageID", "sourceID", "justification", "knownSince", "origin"}, true, "hasSourceAt"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hasSourceAt: %w", err)
+		}
+
+		// index for pkgEqual
+		if err := createIndexPerCollection(ctx, db, pkgEqualsStr, []string{"packageID", "equalPackageID", "justification", "origin"}, true, "pkgEqual"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for pkgEqual: %w", err)
+		}
+
+		// index for pointOfContact - Artifact
+		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"artifactID", "email", "info", "since", "justification", "origin"}, false, "pointOfContactArtifactID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for pointOfContact: %w", err)
+		}
+
+		// index for pointOfContact - Package
+		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"packageID", "email", "info", "since", "justification", "origin"}, false, "pointOfContactPackageID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for pointOfContact: %w", err)
+		}
+
+		// index for pointOfContact - Source
+		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"sourceID", "email", "info", "since", "justification", "origin"}, false, "pointOfContactSourceID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for pointOfContact: %w", err)
+		}
+
+		// index for vulnEqual
+		if err := createIndexPerCollection(ctx, db, vulnEqualsStr, []string{"vulnerabilityID", "equalVulnerabilityID", "justification", "origin"}, true, "vulnEqual"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for vulnEqual: %w", err)
+		}
+
+		// index for vulnMetadata
+		if err := createIndexPerCollection(ctx, db, vulnMetadataStr, []string{"vulnerabilityID", "scoreType", "scoreValue", "timestamp", "origin"}, true, "vulnMetadata"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for vulnMetadata: %w", err)
 		}
 
 		// GUAC key indices for package

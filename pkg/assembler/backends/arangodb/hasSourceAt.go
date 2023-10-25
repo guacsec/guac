@@ -641,8 +641,8 @@ func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.Pkg
 		)
 		  
 		  LET hasSourceAt = FIRST(
-			  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, key:doc.key, value:doc.value, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, key:doc.key, value:doc.value, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN hasSourceAts
 				  RETURN NEW
 		  )

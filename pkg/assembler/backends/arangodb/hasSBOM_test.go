@@ -145,7 +145,7 @@ func TestHasSBOM(t *testing.T) {
 			},
 		},
 		{
-			Name:  "Query on URI",
+			Name:  "Query on URI and KnownSince",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
