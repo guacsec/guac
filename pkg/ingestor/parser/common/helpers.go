@@ -101,13 +101,13 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 	return isDeps
 }
 
-func CreateTopLevelHasSBOM(topLevel *model.PkgInputSpec, sbomDoc *processor.Document, timeStamp time.Time) assembler.HasSBOMIngest {
+func CreateTopLevelHasSBOM(topLevel *model.PkgInputSpec, sbomDoc *processor.Document, uri string, timeStamp time.Time) assembler.HasSBOMIngest {
 	sha256sum := sha256.Sum256(sbomDoc.Blob)
 	hash := hex.EncodeToString(sha256sum[:])
 	return assembler.HasSBOMIngest{
 		Pkg: topLevel,
 		HasSBOM: &model.HasSBOMInputSpec{
-			Uri:              sbomDoc.SourceInformation.Source,
+			Uri:              uri,
 			Algorithm:        "sha256",
 			Digest:           hash,
 			DownloadLocation: sbomDoc.SourceInformation.Source,
