@@ -113,9 +113,7 @@ func (s *SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 	// Get URL of queue
 	urlResult, err := s.client.GetQueueUrl(ctx, gQInput)
 	if err != nil {
-		fmt.Println("Got an error getting the queue URL:")
-		fmt.Println(err)
-		return nil, err
+		return nil, fmt.Errorf("Got an error getting the queue URL : %w", err)
 	}
 
 	addr := urlResult.QueueUrl
@@ -155,7 +153,7 @@ func (s *SqsProvider) ReceiveMessage(ctx context.Context) (Message, error) {
 			}
 			_, err = s.client.DeleteMessage(context.TODO(), deleteInput)
 			if err != nil {
-				logger.Errorf("error deleting message: %v\n", err)
+				return nil, fmt.Errorf("error deleting message: %w", err)
 			}
 			logger.Debugf("Message deleted from the queue")
 

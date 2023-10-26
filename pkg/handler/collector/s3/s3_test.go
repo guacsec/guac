@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -137,7 +136,7 @@ func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
 	go func() {
 		err := collector.Collect(cancelCtx, em, eh)
 		if err != nil {
-			fmt.Printf("error collecting: %v", err)
+			t.Errorf("error collecting: %v", err)
 		}
 		wg.Done()
 	}()
@@ -190,7 +189,7 @@ func testNoPolling(t *testing.T, ctx context.Context) {
 
 	err := collector.Collect(ctx, em, eh)
 	if err != nil {
-		fmt.Printf("error collecting: %v", err)
+		t.Errorf("error collecting: %v", err)
 	}
 
 	if len(s) == 0 {

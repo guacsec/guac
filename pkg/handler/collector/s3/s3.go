@@ -113,7 +113,7 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 
 			defer func() {
 				if r := recover(); r != nil {
-					fmt.Println("recovered from panic:", r)
+					logger.Errorf("recovered from panic: %v", r)
 				}
 			}()
 
