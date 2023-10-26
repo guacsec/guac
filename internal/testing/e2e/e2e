@@ -69,7 +69,7 @@ diff -u "${SCRIPT_DIR}/expectPkgQ1.json" "${GUAC_DIR}/gotPkgQ1.json"
 cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ2 | jq ' .packages[].namespaces |= sort ' > "${GUAC_DIR}/gotPkgQ2.json"
 diff -u "${SCRIPT_DIR}/expectPkgQ2.json" "${GUAC_DIR}/gotPkgQ2.json"
 
-cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ3 | jq ' del(.. | .id?) | .packages[].namespaces |= sort_by(.namespace) | .packages[].namespaces[].names[].versions |= sort_by(.version) | .packages[].namespaces[].names[].versions[].qualifiers |= sort_by(.key) ' > "${GUAC_DIR}/gotPkgQ3.json"
+cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ3 | jq ' .packages[].namespaces |= sort_by(.namespace) | .packages[].namespaces[].names[].versions |= sort_by(.id) | .packages[].namespaces[].names[].versions[].qualifiers |= sort_by(.key) | del(.. | .id?) ' > "${GUAC_DIR}/gotPkgQ3.json"
 diff -u "${SCRIPT_DIR}/expectPkgQ3.json" "${GUAC_DIR}/gotPkgQ3.json"
 
 cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ4 | jq ' del(.. | .id?) '> "${GUAC_DIR}/gotPkgQ4.json"

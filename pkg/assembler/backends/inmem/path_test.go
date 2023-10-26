@@ -335,21 +335,50 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "hasSBOM",
-		inPkg: []*model.PkgInputSpec{testdata.P1},
+		inPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
+		isDepCall: &isDepCall{
+			P1: testdata.P2,
+			P2: testdata.P4,
+			MF: mSpecific,
+			ID: &model.IsDependencyInputSpec{
+				Justification: "test justification",
+			},
+		},
+		isOcurCall: &isOcurCall{
+			PkgSrc: model.PackageOrSourceInput{
+				Package: testdata.P4,
+			},
+			Artifact: testdata.A1,
+			Occurrence: &model.IsOccurrenceInputSpec{
+				Justification: "test justification",
+			},
+		},
 		hasSBOMCall: &hasSBOMCall{
-
 			Sub: model.PackageOrArtifactInput{
-				Package: testdata.P1,
+				Package: testdata.P2,
 			},
 			HS: &model.HasSBOMInputSpec{
 				DownloadLocation: "location two",
 			},
 		},
 		want: []model.Node{&model.HasSbom{
-			Subject:          testdata.P1out,
+			Subject:          testdata.P2out,
 			DownloadLocation: "location two",
+			IncludedSoftware: []model.PackageOrArtifact{testdata.P2out, testdata.P4out, testdata.A1out},
+			IncludedDependencies: []*model.IsDependency{{
+				Package:           testdata.P2out,
+				DependencyPackage: testdata.P4out,
+				Justification:     "test justification",
+			}},
+			IncludedOccurrences: []*model.IsOccurrence{{
+				Subject:       testdata.P4out,
+				Artifact:      testdata.A1out,
+				Justification: "test justification",
+			}},
 		}},
 	}, {
+
 		name:  "hasSLSA",
 		inArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
@@ -501,9 +530,12 @@ func Test_Nodes(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			var nodeID string
+			includes := model.HasSBOMIncludesInputSpec{}
 			for _, p := range tt.inPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkg, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					includes.Software = append(includes.Software, pkg.Namespaces[0].Names[0].Versions[0].ID)
 				}
 			}
 			for _, s := range tt.inSrc {
@@ -512,8 +544,10 @@ func Test_Nodes(t *testing.T) {
 				}
 			}
 			for _, a := range tt.inArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if art, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
+				} else {
+					includes.Software = append(includes.Software, art.ID)
 				}
 			}
 			for _, bld := range tt.inBld {
@@ -538,6 +572,7 @@ func Test_Nodes(t *testing.T) {
 					return
 				}
 				nodeID = ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				includes.Software = append(includes.Software, nodeID)
 			}
 			if tt.artifactInput != nil {
 				ingestedArt, err := b.IngestArtifact(ctx, tt.artifactInput)
@@ -658,16 +693,6 @@ func Test_Nodes(t *testing.T) {
 				}
 				nodeID = found.ID
 			}
-			if tt.hasSBOMCall != nil {
-				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS)
-				if (err != nil) != tt.wantErr {
-					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
-				}
-				if err != nil {
-					return
-				}
-				nodeID = found.ID
-			}
 			if tt.hasSlsaCall != nil {
 				found, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
 				if (err != nil) != tt.wantErr {
@@ -697,9 +722,22 @@ func Test_Nodes(t *testing.T) {
 					return
 				}
 				nodeID = found.ID
+				includes.Dependencies = append(includes.Dependencies, nodeID)
 			}
 			if tt.isOcurCall != nil {
 				found, err := b.IngestOccurrence(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				}
+				if err != nil {
+					return
+				}
+				nodeID = found.ID
+				includes.Occurrences = append(includes.Occurrences, nodeID)
+			}
+			if tt.hasSBOMCall != nil {
+				// After isDepCall and isOcurCall so they can set up includes.
+				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, includes)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}

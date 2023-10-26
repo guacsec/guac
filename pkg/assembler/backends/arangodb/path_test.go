@@ -883,7 +883,8 @@ func Test_Nodes(t *testing.T) {
 				nodeID = found.ID
 			}
 			if tt.hasSBOMCall != nil {
-				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS)
+				// TODO (knrc) handle includes
+				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3377,7 +3378,8 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.hasSBOMCall != nil {
-				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS)
+				// TODO (knrc) handle includes
+				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}

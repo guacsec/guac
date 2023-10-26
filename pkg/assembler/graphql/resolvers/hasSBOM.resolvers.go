@@ -13,7 +13,7 @@ import (
 )
 
 // IngestHasSbom is the resolver for the ingestHasSBOM field.
-func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (string, error) {
+func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
 	if err := helper.ValidatePackageOrArtifactInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
@@ -22,7 +22,7 @@ func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.Pack
 		return "", gqlerror.Errorf("hasSbom.KnownSince is a zero time")
 	}
 
-	ingestedHasSbom, err := r.Backend.IngestHasSbom(ctx, subject, hasSbom)
+	ingestedHasSbom, err := r.Backend.IngestHasSbom(ctx, subject, hasSbom, includes)
 	if err != nil {
 		return "", err
 	}
@@ -30,7 +30,7 @@ func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.Pack
 }
 
 // IngestHasSBOMs is the resolver for the ingestHasSBOMs field.
-func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
 	funcName := "IngestHasSBOMs"
 	valuesDefined := 0
 	ingestedHasSBOMSIDS := []string{}
@@ -56,7 +56,10 @@ func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.Pa
 		}
 	}
 
-	ingestedHasSBOMs, err := r.Backend.IngestHasSBOMs(ctx, subjects, hasSBOMs)
+	if len(hasSBOMs) != len(includes) {
+		return ingestedHasSBOMSIDS, gqlerror.Errorf("%v :: uneven hasSBOMs and includes for ingestion", funcName)
+	}
+	ingestedHasSBOMs, err := r.Backend.IngestHasSBOMs(ctx, subjects, hasSBOMs, includes)
 	if err == nil {
 		for _, hasSBOM := range ingestedHasSBOMs {
 			ingestedHasSBOMSIDS = append(ingestedHasSBOMSIDS, hasSBOM.ID)

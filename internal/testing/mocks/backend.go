@@ -486,33 +486,33 @@ func (mr *MockBackendMockRecorder) IngestHasMetadata(ctx, subject, pkgMatchType,
 }
 
 // IngestHasSBOMs mocks base method.
-func (m *MockBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
+func (m *MockBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]*model.HasSbom, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IngestHasSBOMs", ctx, subjects, hasSBOMs)
+	ret := m.ctrl.Call(m, "IngestHasSBOMs", ctx, subjects, hasSBOMs, includes)
 	ret0, _ := ret[0].([]*model.HasSbom)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // IngestHasSBOMs indicates an expected call of IngestHasSBOMs.
-func (mr *MockBackendMockRecorder) IngestHasSBOMs(ctx, subjects, hasSBOMs interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) IngestHasSBOMs(ctx, subjects, hasSBOMs, includes interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestHasSBOMs", reflect.TypeOf((*MockBackend)(nil).IngestHasSBOMs), ctx, subjects, hasSBOMs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestHasSBOMs", reflect.TypeOf((*MockBackend)(nil).IngestHasSBOMs), ctx, subjects, hasSBOMs, includes)
 }
 
 // IngestHasSbom mocks base method.
-func (m *MockBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
+func (m *MockBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (*model.HasSbom, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IngestHasSbom", ctx, subject, hasSbom)
+	ret := m.ctrl.Call(m, "IngestHasSbom", ctx, subject, hasSbom, includes)
 	ret0, _ := ret[0].(*model.HasSbom)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // IngestHasSbom indicates an expected call of IngestHasSbom.
-func (mr *MockBackendMockRecorder) IngestHasSbom(ctx, subject, hasSbom interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) IngestHasSbom(ctx, subject, hasSbom, includes interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestHasSbom", reflect.TypeOf((*MockBackend)(nil).IngestHasSbom), ctx, subject, hasSbom)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestHasSbom", reflect.TypeOf((*MockBackend)(nil).IngestHasSbom), ctx, subject, hasSbom, includes)
 }
 
 // IngestHasSourceAt mocks base method.

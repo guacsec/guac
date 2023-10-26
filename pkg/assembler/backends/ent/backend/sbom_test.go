@@ -30,6 +30,7 @@ func (s *Suite) Test_HasSBOM() {
 	type call struct {
 		Sub  model.PackageOrArtifactInput
 		Spec *model.HasSBOMInputSpec
+		Inc  *model.HasSBOMIncludesInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -505,7 +506,8 @@ func (s *Suite) Test_HasSBOM() {
 
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				dep, err := b.IngestHasSbom(ctx, o.Sub, *o.Spec)
+				// TODO (knrc) handle includes
+				dep, err := b.IngestHasSbom(ctx, o.Sub, *o.Spec, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != test.ExpIngestErr {
 					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -545,6 +547,7 @@ func (s *Suite) TestIngestHasSBOMs() {
 	type call struct {
 		Sub model.PackageOrArtifactInputs
 		HS  []*model.HasSBOMInputSpec
+		Inc []*model.HasSBOMIncludesInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -768,7 +771,7 @@ func (s *Suite) TestIngestHasSBOMs() {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHasSBOMs(ctx, o.Sub, o.HS)
+				_, err := b.IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

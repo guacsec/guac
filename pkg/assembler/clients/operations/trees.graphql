@@ -273,6 +273,21 @@ fragment AllHasSBOMTree on HasSBOM {
   origin
   collector
   knownSince
+  includedSoftware {
+    __typename
+    ... on Artifact {
+      ...AllArtifactTree
+    }
+    ... on Package {
+      ...AllPkgTree
+    }
+  }
+  includedDependencies {
+    ...AllIsDependencyTree
+  }
+  includedOccurrences {
+    ...AllIsOccurrencesTree
+  }
 }
 
 fragment AllHasSourceAt on HasSourceAt {

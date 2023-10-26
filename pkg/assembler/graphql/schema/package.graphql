@@ -116,6 +116,16 @@ type PackageQualifier {
 }
 
 """
+The IDs of the ingested package
+"""
+type PackageIDs {
+  packageTypeID: ID!
+  packageNamespaceID: ID!
+  packageNameID: ID!
+  packageVersionID: ID!
+}
+
+"""
 PkgSpec allows filtering the list of sources to return in a query.
 
 Each field matches a qualifier from pURL. Use null to match on all values at
@@ -181,8 +191,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string."
-  ingestPackage(pkg: PkgInputSpec!): ID!
-  "Bulk ingests packages and returns the list of corresponding package trie path. The returned array of IDs can be a an array of empty string."
-  ingestPackages(pkgs: [PkgInputSpec!]!): [ID!]!
+  "Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string."
+  ingestPackage(pkg: PkgInputSpec!): PackageIDs!
+  "Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings."
+  ingestPackages(pkgs: [PkgInputSpec!]!): [PackageIDs!]!
 }

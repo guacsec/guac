@@ -65,6 +65,15 @@ type SourceName {
 }
 
 """
+The IDs of the ingested pacsourcekage
+"""
+type SourceIDs {
+  sourceTypeID: ID!
+  sourceNamespaceID: ID!
+  sourceNameID: ID!
+}
+
+"""
 SourceSpec allows filtering the list of sources to return in a query.
 
 Empty string at a field means matching with the empty string. Missing field
@@ -108,7 +117,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string."
-  ingestSource(source: SourceInputSpec!): ID!
+  ingestSource(source: SourceInputSpec!): SourceIDs!
   "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string."
-  ingestSources(sources: [SourceInputSpec!]!): [ID!]!
+  ingestSources(sources: [SourceInputSpec!]!): [SourceIDs!]!
 }
