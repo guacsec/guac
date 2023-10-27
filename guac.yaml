@@ -33,3 +33,5 @@ gql-addr: http://localhost:8080/query
 # Collector behavior
 service-poll: true
 use-csub: true
+
+log-level: Info

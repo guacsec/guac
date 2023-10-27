@@ -17,16 +17,44 @@ package logging
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var logger *zap.SugaredLogger
 
+type LogLevel string
+
+const (
+	Debug  LogLevel = "debug"
+	Info   LogLevel = "info"
+	Warn   LogLevel = "warn"
+	Error  LogLevel = "error"
+	DPanic LogLevel = "dpanic"
+	Panic  LogLevel = "panic"
+	Fatal  LogLevel = "fatal"
+)
+
 type loggerKey struct{}
 
-func init() {
-	zapLogger, _ := zap.NewProduction()
+// Initializes the logger with the input level, defaulting to Info if the input is invalid
+func InitLogger(level LogLevel) {
+	zapLevel, levelErr := zapcore.ParseLevel(string(level))
+	if levelErr != nil {
+		zapLevel = zapcore.InfoLevel
+	}
+
+	var zapLogger *zap.Logger
+	if zapLevel == zapcore.DebugLevel {
+		zapLogger = zap.Must(zap.NewDevelopment())
+	} else {
+		config := zap.NewProductionConfig()
+		config.Level.SetLevel(zapLevel)
+		zapLogger = zap.Must(config.Build())
+	}
 
 	// flushes buffer, if any
 	defer func() {
@@ -35,9 +63,42 @@ func init() {
 	}()
 
 	logger = zapLogger.Sugar()
+
+	if levelErr != nil {
+		logger.Infof("Invalid log level %s: ", level, levelErr)
+	}
+	logger.Infof("Logging at %s level", zapLogger.Level())
+}
+
+// convert a string to the LogLevel type
+func ParseLevel(level string) (LogLevel, error) {
+	switch strings.ToLower(level) {
+	case "debug":
+		return Debug, nil
+	case "info":
+		return Info, nil
+	case "warn":
+		return Warn, nil
+	case "error":
+		return Error, nil
+	case "dpanic":
+		return DPanic, nil
+	case "panic":
+		return Panic, nil
+	case "fatal":
+		return Fatal, nil
+	default:
+		return Info, fmt.Errorf("%s is not a valid level", level)
+	}
 }
 
 func WithLogger(ctx context.Context) context.Context {
+	if logger == nil {
+		// defaults to Debug if InitLogger has not been called.
+		// all cli commands should call InitLogger, so this should mostly be for unit tests
+		InitLogger(Debug)
+		logger.Debugf("InitLogger has not been called. Defaulting to debug log level")
+	}
 	return context.WithValue(ctx, loggerKey{}, logger)
 }
 

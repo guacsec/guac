@@ -24,6 +24,10 @@ import (
 
 var flagStore = make(map[string]*pflag.Flag)
 
+const (
+	ConfigLogLevelVar = "log-level"
+)
+
 var NotFound = errors.New("Flag not found")
 
 func init() {
