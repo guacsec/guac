@@ -84,6 +84,10 @@ func (tb *TestMpBuilder) GetMessageProvider(config messaging.MessageProviderConf
 type TestBucket struct {
 }
 
+func (td *TestBucket) ListFiles(ctx context.Context, bucket string, token *string, max int32) ([]string, *string, error) {
+	return []string{"no-poll-item"}, nil, nil
+}
+
 func (td *TestBucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {
 	return []byte("{\"key\": \"value\"}"), nil
 }
