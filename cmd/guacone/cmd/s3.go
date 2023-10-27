@@ -155,10 +155,6 @@ func validateS3Opts(graphqlEndpoint string, csubAddr string, csubTls bool, csubT
 		if len(queues) == 0 {
 			return opts, fmt.Errorf("expected at least one queue")
 		}
-	} else {
-		if len(s3item) == 0 {
-			return opts, fmt.Errorf("expected s3 item")
-		}
 	}
 
 	if len(s3bucket) == 0 {

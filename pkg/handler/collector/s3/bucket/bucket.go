@@ -42,6 +42,7 @@ func (bd *BucketBuilder) GetBucket(url string, region string) Bucket {
 }
 
 type Bucket interface {
+	ListFiles(ctx context.Context, bucket string, token *string, max int32) ([]string, *string, error)
 	DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error)
 	GetEncoding(ctx context.Context, bucket string, item string) (string, error)
 }
@@ -53,6 +54,40 @@ type s3Bucket struct {
 
 func GetDefaultBucket(url string, region string) Bucket {
 	return &s3Bucket{url, region}
+}
+
+func (d *s3Bucket) ListFiles(ctx context.Context, bucket string, token *string, max int32) ([]string, *string, error) {
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error loading AWS SDK config: %w", err)
+	}
+
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.UsePathStyle = true
+		if d.url != "" {
+			o.BaseEndpoint = aws.String(d.url)
+		}
+
+		if d.region != "" {
+			o.Region = d.region
+		}
+	})
+
+	input := &s3.ListObjectsV2Input{
+		Bucket:            &bucket,
+		ContinuationToken: token,
+		MaxKeys:           max,
+	}
+	resp, err := client.ListObjectsV2(ctx, input)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error listing files: %w", err)
+	}
+
+	var files []string
+	for _, item := range resp.Contents {
+		files = append(files, *item.Key)
+	}
+	return files, resp.NextContinuationToken, nil
 }
 
 func (d *s3Bucket) DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error) {

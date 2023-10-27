@@ -71,30 +71,74 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 	downloader := getDownloader(s)
 
 	item := s.config.S3Item
+	if len(item) > 0 {
+		blob, err := downloader.DownloadFile(ctx, s.config.S3Bucket, item)
+		if err != nil {
+			logger.Errorf("could not download item %v: %v", item, err)
+			return err
+		}
 
-	blob, err := downloader.DownloadFile(ctx, s.config.S3Bucket, item)
-	if err != nil {
-		logger.Errorf("could not download item %v: %v", item, err)
-		return err
-	}
+		enc, err := downloader.GetEncoding(ctx, s.config.S3Bucket, item)
+		if err != nil {
+			logger.Errorf("could not get encoding for item %v: %v", item, err)
+			return err
+		}
 
-	enc, err := downloader.GetEncoding(ctx, s.config.S3Bucket, item)
-	if err != nil {
-		logger.Errorf("could not get encoding for item %v: %v", item, err)
-		return err
-	}
+		doc := &processor.Document{
+			Blob:     blob,
+			Type:     processor.DocumentUnknown,
+			Format:   processor.FormatUnknown,
+			Encoding: bucket.ExtractEncoding(enc, item),
+			SourceInformation: processor.SourceInformation{
+				Collector: S3CollectorType,
+				Source:    "S3",
+			},
+		}
+		docChannel <- doc
+	} else {
+		var token *string
+		const MaxKeys = 100
+		for {
+			files, t, err := downloader.ListFiles(ctx, s.config.S3Bucket, token, MaxKeys)
+			if err != nil {
+				logger.Errorf("could not list files %v: %v", item, err)
+				return err
+			}
+			token = t
 
-	doc := &processor.Document{
-		Blob:     blob,
-		Type:     processor.DocumentUnknown,
-		Format:   processor.FormatUnknown,
-		Encoding: bucket.ExtractEncoding(enc, item),
-		SourceInformation: processor.SourceInformation{
-			Collector: S3CollectorType,
-			Source:    "S3",
-		},
+			for _, item := range files {
+				blob, err := downloader.DownloadFile(ctx, s.config.S3Bucket, item)
+				if err != nil {
+					logger.Errorf("could not download item %v, skipping: %v", item, err)
+					continue
+				}
+
+				enc, err := downloader.GetEncoding(ctx, s.config.S3Bucket, item)
+				if err != nil {
+					logger.Errorf("could not get encoding for item %v, skipping: %v", item, err)
+					continue
+				}
+
+				doc := &processor.Document{
+					Blob:     blob,
+					Type:     processor.DocumentUnknown,
+					Format:   processor.FormatUnknown,
+					Encoding: bucket.ExtractEncoding(enc, item),
+					SourceInformation: processor.SourceInformation{
+						Collector: S3CollectorType,
+						Source:    "S3",
+					},
+				}
+				docChannel <- doc
+			}
+
+			if len(files) < MaxKeys {
+				break
+			}
+
+		}
+
 	}
-	docChannel <- doc
 
 	return nil
 }
