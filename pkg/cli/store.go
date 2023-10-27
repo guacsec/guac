@@ -95,6 +95,15 @@ func init() {
 	// Google Cloud platform flags
 	set.String("gcp-credentials-path", "", "Path to the Google Cloud service account credentials json file.\nAlternatively you can set GOOGLE_APPLICATION_CREDENTIALS=<path> in your environment.")
 
+	// S3 flags
+	set.String("s3-url", "", "url of the s3 endpoint")
+	set.String("s3-bucket", "", "bucket in the s3 provider")
+	set.String("s3-item", "", "item in the s3 provider")
+	set.String("s3-mp", "kafka", "message provider (sqs or kafka)")
+	set.String("s3-mp-endpoint", "", "endpoint for the message provider")
+	set.String("s3-queues", "", "comma-separated list of queue/topic names")
+	set.String("s3-region", "us-east-1", "aws region")
+
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f
 	})
