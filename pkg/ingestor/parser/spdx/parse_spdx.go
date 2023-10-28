@@ -249,7 +249,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 			return nil
 		}
 		for _, topLevelPkg := range topLevel {
-			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(topLevelPkg, s.doc, timestamp))
+			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(topLevelPkg, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
 		}
 
 		if s.topLevelIsHeuristic {

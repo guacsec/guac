@@ -146,7 +146,7 @@ func Test_spdxParser(t *testing.T) {
 							Subpath:   &packageOfEmptyString,
 						},
 						HasSBOM: &generated.HasSBOMInputSpec{
-							Uri:              "TestSource",
+							Uri:              "https://anchore.com/syft/image/alpine-latest-e78eca08-d9f4-49c7-97e0-6d4b9bfa99c2",
 							Algorithm:        "sha256",
 							Digest:           "ba096464061993bbbdfc30a26b42cd8beb1bfff301726fe6c58cb45d468c7648",
 							DownloadLocation: "TestSource",

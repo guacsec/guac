@@ -750,7 +750,7 @@ var (
 		{
 			Pkg: topLevelPack,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "https://anchore.com/syft/image/alpine-latest-e78eca08-d9f4-49c7-97e0-6d4b9bfa99c2",
 				Algorithm:        "sha256",
 				Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
 				DownloadLocation: "TestSource",
@@ -972,7 +972,7 @@ var (
 		{
 			Pkg: cdxTopLevelPack,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "urn:uuid:6a44e622-2983-4566-bf90-f87b6103ebaf",
 				Algorithm:        "sha256",
 				Digest:           "01942b5eefd3c15b50318c66d8d16627be573197c877e8a286a8cb12de7939cb",
 				DownloadLocation: "TestSource",
@@ -1066,7 +1066,7 @@ var (
 		{
 			Pkg: cdxTopQuarkusPack,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
 				Algorithm:        "sha256",
 				Digest:           "036a9f51468f5ce6eec7c310583164ed0ab9f58d7c03380a3fe19d420609e3de",
 				DownloadLocation: "TestSource",
@@ -1104,7 +1104,7 @@ var (
 		{
 			Pkg: cdxWebAppPackage,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "",
 				Algorithm:        "sha256",
 				Digest:           "35363f03c80f26a88db6f2400771bdcc6624bb7b61b96da8503be0f757605fde",
 				DownloadLocation: "TestSource",
@@ -1125,7 +1125,7 @@ var (
 		{
 			Pkg: quarkusParentPackage,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "urn:uuid:8a689387-e9b4-4ba2-835c-a2c3dde6181d",
 				Algorithm:        "sha256",
 				Digest:           "fcd4d1f9c83c274fbc2dabdca4e7de749b23fab1aa15dc2854880a13479fa74e",
 				DownloadLocation: "TestSource",
