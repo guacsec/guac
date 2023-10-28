@@ -6,9 +6,10 @@ csub-addr: guac-collectsub:2782
 csub-listen-port: 2782
 
 # graphql
-gql-backend: inmem
+gql-backend: arango
 gql-listen-port: 8080
 gql-debug: true
+gql-test-data: false
 gql-addr: http://guac-graphql:8080/query
 
 # collector polling
@@ -18,3 +19,8 @@ use-csub: true
 # certifier polling
 poll: true
 interval: 5m
+
+# arangodb
+arango-user: root
+arango-pass: test123
+arango-addr: http://arangodb:8529

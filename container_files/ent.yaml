@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: docker.io/library/postgres:16
+    environment:
+      POSTGRES_USER: guac
+      POSTGRES_PASSWORD: guac
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks: [frontend]
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./container_files/pg:/var/lib/postgresql/data
+
+
+  guac-graphql:
+    networks: [frontend]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacgql"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      nats:
+        condition: service_healthy
+    ports:
+      - "$GUAC_API_PORT:8080"
+    volumes:
+      - ./container_files/ent:/guac:z
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s    

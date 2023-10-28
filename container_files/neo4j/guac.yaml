@@ -6,9 +6,10 @@ csub-addr: guac-collectsub:2782
 csub-listen-port: 2782
 
 # graphql
-gql-backend: inmem
+gql-backend: neo4j
 gql-listen-port: 8080
 gql-debug: true
+gql-test-data: false
 gql-addr: http://guac-graphql:8080/query
 
 # collector polling
@@ -18,3 +19,9 @@ use-csub: true
 # certifier polling
 poll: true
 interval: 5m
+
+# Neo4j details
+neo4j-user: neo4j
+neo4j-pass: s3cr3t
+neo4j-addr: neo4j://localhost:7687
+neo4j-realm: neo4j

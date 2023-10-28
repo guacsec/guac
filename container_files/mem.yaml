@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+
+  guac-graphql:
+    networks: [frontend]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacgql"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      nats:
+        condition: service_healthy
+    ports:
+      - "$GUAC_API_PORT:8080"
+    volumes:
+      - ./container_files/guac:/guac:z
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s

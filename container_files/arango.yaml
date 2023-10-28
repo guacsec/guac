@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 volumes:
   arangodb_data_container:
@@ -19,7 +19,7 @@ services:
     ports:
       - "$GUAC_API_PORT:8080"
     volumes:
-      - ./container_files/guac:/guac
+      - ./container_files/arango:/guac
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:8080"]
       interval: 10s

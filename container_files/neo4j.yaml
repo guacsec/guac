@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+
+  neo4j:
+    image: "neo4j:4.4.9-community"
+    environment:
+      NEO4J_AUTH: "neo4j/s3cr3t"
+      NEO4J_apoc_export_file_enabled: true
+      NEO4J_apoc_import_file_enabled: true
+      NEO4J_apoc_import_file_use__neo4j__config: true
+      NEO4JLABS_PLUGINS: '["apoc"]'
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    restart: on-failure
+
+
+  guac-graphql:
+    networks: [frontend]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacgql"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      nats:
+        condition: service_healthy
+    ports:
+      - "$GUAC_API_PORT:8080"
+    volumes:
+      - ./container_files/neo4j:/guac:z
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
