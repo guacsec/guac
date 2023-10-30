@@ -42,6 +42,7 @@ func collect(ctx context.Context, ref name.Reference, docChannel chan<- *process
 	g, ctx := errgroup.WithContext(ctx)
 	for collectorName, collector := range collectors {
 		collector := collector
+		collectorName := collectorName
 		g.Go(func() error {
 			logger := logging.FromContext(ctx)
 			logger.Infof("collecting artifacts from %s", collectorName)
