@@ -22,6 +22,9 @@ import (
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 func ptr[T any](s T) *T {
@@ -39,3 +42,25 @@ var ignoreEmptySlices = cmp.FilterValues(func(x, y interface{}) bool {
 	}
 	return false
 }, cmp.Ignore())
+
+var IngestPredicatesCmpOpts = []cmp.Option{
+	ignoreID,
+	cmpopts.EquateEmpty(),
+	cmpopts.SortSlices(isDependencyLess),
+	cmpopts.SortSlices(packageLess),
+	cmpopts.SortSlices(certifyVulnLess),
+}
+
+func isDependencyLess(e1, e2 *model.IsDependency) bool {
+	return packageLess(e1.Package, e2.Package)
+}
+
+func packageLess(e1, e2 *model.Package) bool {
+	purl1 := helpers.PkgToPurl(e1.Type, e1.Namespaces[0].Namespace, e1.Namespaces[0].Names[0].Name, e1.Namespaces[0].Names[0].Versions[0].Version, e1.Namespaces[0].Names[0].Versions[0].Subpath, nil)
+	purl2 := helpers.PkgToPurl(e2.Type, e2.Namespaces[0].Namespace, e2.Namespaces[0].Names[0].Name, e2.Namespaces[0].Names[0].Versions[0].Version, e2.Namespaces[0].Names[0].Versions[0].Subpath, nil)
+	return purl1 < purl2
+}
+
+func certifyVulnLess(e1, e2 *model.CertifyVuln) bool {
+	return packageLess(e1.Package, e2.Package)
+}

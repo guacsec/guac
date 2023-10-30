@@ -34,6 +34,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -103,12 +104,20 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
 	// FIXME: (ivanvanderbyl) This will be suboptimal because we can't batch insert relations with upserts. See Readme.
 	models := make([]*model.Package, len(pkgs))
-	for i, pkg := range pkgs {
-		p, err := b.IngestPackage(ctx, *pkg)
-		if err != nil {
-			return nil, err
-		}
-		models[i] = p
+	eg, ctx := errgroup.WithContext(ctx)
+	for i := range pkgs {
+		index := i
+		pkg := pkgs[index]
+		concurrently(eg, func() error {
+			p, err := b.IngestPackage(ctx, *pkg)
+			if err == nil {
+				models[index] = p
+			}
+			return err
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return models, nil
 }

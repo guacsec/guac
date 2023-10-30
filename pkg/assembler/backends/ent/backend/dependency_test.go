@@ -726,9 +726,6 @@ func (s *Suite) TestIngestDependencies() {
 			},
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	ctx := s.Ctx
 	for _, test := range tests {
 		s.Run(test.Name, func() {
@@ -760,7 +757,7 @@ func (s *Suite) TestIngestDependencies() {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpID, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpID, got, IngestPredicatesCmpOpts...); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

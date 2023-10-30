@@ -227,7 +227,7 @@ func (s *Suite) Test_IngestPackages() {
 				s.T().Errorf("demoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(tt.want, got, IngestPredicatesCmpOpts...); diff != "" {
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
