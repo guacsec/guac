@@ -20,9 +20,25 @@ test: generate
 	echo 'mode: atomic' > coverage.txt && go test -covermode=atomic -coverprofile=coverage.txt -v -race -timeout=30s ./...
 
 # Run the integration tests. Requires github token for scorecard (GITHUB_AUTH_TOKEN=<your token>)
+# To run it locally you can run the following command: make start-integration-service
 .PHONY: integration-test
 integration-test: generate check-env
 	go test -tags=integration ./...
+
+# Runs the integration tests locally using docker-compose to start the dependencies and cleans up after itself.
+.PHONY: integration-test-local
+integration-test-local: generate check-env start-integration-service
+	# wait for the service to start which is a http server at 8080 port
+	@echo "Waiting for the service to start"
+	@counter=0; \
+	while [ $$counter -lt 15 ] && ! curl --silent --head --output /dev/null --fail http://localhost:8080; do \
+		printf '.'; \
+		sleep 1; \
+		counter=$$((counter+1)); \
+	done; \
+	[ $$counter -eq 15 ] && { echo "Service did not start in time"; exit 1; } || echo "Service is up!"
+	ENT_TEST_DATABASE_URL='postgresql://guac:guac@localhost/guac?sslmode=disable' go test -tags=integration ./...
+	$(CONTAINER) compose down
 
 .PHONY: integration-merge-test
 integration-merge-test: generate check-env
@@ -136,6 +152,11 @@ start-service: check-docker-compose-tool-check
 .PHONY: stop-service
 stop-service:
 	$(CONTAINER) compose down
+
+# This is a helper target to run the integration tests locally. 
+.PHONY: start-integration-service
+start-integration-service: check-docker-compose-tool-check
+	$(CONTAINER) compose -f integration.docker-compose.yaml up 	--force-recreate -d
 
 .PHONY: check-docker-tool-check
 check-docker-tool-check:

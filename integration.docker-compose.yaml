@@ -1,0 +1,59 @@
+version: "3.8"
+
+volumes:
+  arangodb_data_container:
+  arangodb_apps_data_container:
+  prometheus_data:
+  grafana_data:
+
+services:
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: guac
+      POSTGRES_PASSWORD: guac
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks: [frontend]
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./container_files/pg:/var/lib/postgresql/data
+
+  guac-graphql:
+    image: "local-organic-guac"
+    command: "/opt/guac/guacgql --gql-debug --gql-backend arango"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      arangodb:
+        condition: service_healthy
+    ports:
+      - "$GUAC_API_PORT:8080"
+    volumes:
+      - ./container_files/guac:/guac
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  arangodb:
+    image: arangodb:latest
+    environment:
+      ARANGO_ROOT_PASSWORD: test123
+    ports:
+      - 8529:8529
+    volumes:
+      - arangodb_data_container:/var/lib/arangodb3
+      - arangodb_apps_data_container:/var/lib/arangodb3-apps
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8529"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 1s
+networks:
+  frontend:
+    driver: bridge
