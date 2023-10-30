@@ -24,6 +24,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/sigstore/cosign/v2/pkg/oci"
 	cosign_remote "github.com/sigstore/cosign/v2/pkg/oci/remote"
+	"golang.org/x/sync/errgroup"
 	"slices"
 	"strings"
 	"sync"
@@ -79,6 +80,8 @@ type ociCollector struct {
 	poll              bool
 	interval          time.Duration
 }
+
+var collectors = map[string]Collector{}
 
 // NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
 // Note: OCI collector can be called upon by a upstream registry collector in the future to collect from all
@@ -179,11 +182,13 @@ func (o *ociCollector) populateRepoTags(ctx context.Context, repoRefs map[string
 }
 
 func (o *ociCollector) fetch(ctx context.Context, refs []name.Reference, docChannel chan<- *processor.Document) error {
-	var fetchErr error
+	g, ctx := errgroup.WithContext(ctx)
 	for _, r := range refs {
-		fetchErr = errors.Join(o.fetchOCIArtifacts(ctx, r, docChannel))
+		g.Go(func() error {
+			return o.fetchOCIArtifacts(ctx, r, docChannel)
+		})
 	}
-	return fetchErr
+	return g.Wait()
 }
 
 func (o *ociCollector) getTags(ctx context.Context, repo name.Repository) ([]name.Reference, error) {
@@ -238,27 +243,6 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, ref name.Reference
 		}
 	}
 	return processErr
-}
-
-func pushBlobData(ref name.Reference, blobData []byte, artifactType string, docChannel chan<- *processor.Document) {
-	docType := processor.DocumentUnknown
-	docFormat := processor.FormatUnknown
-
-	if wellKnownArtifactType, ok := wellKnownOCIArtifactTypes[artifactType]; ok {
-		docType = wellKnownArtifactType.documentType
-		docFormat = wellKnownArtifactType.formatType
-	}
-
-	doc := &processor.Document{
-		Blob:   blobData,
-		Type:   docType,
-		Format: docFormat,
-		SourceInformation: processor.SourceInformation{
-			Collector: OCICollector,
-			Source:    ref.String(),
-		},
-	}
-	docChannel <- doc
 }
 
 // Type is the collector type of the collector
