@@ -41,9 +41,12 @@ const (
 
 // OCI artifact types
 const (
-	SpdxJson              = "application/spdx+json"
-	InTotoJson            = "application/vnd.in-toto+json"
-	dsseEnvelopeMediaType = "application/vnd.dsse.envelope.v1+json"
+	// used by referrer sboms
+	TextSpdxJson = "text/spdx+json"
+	// used by cosign sboms
+	SpdxJson = "spdx+json"
+	//InTotoJson       = "application/vnd.in-toto+json"
+	DsseEnvelopeJson = "application/vnd.dsse.envelope.v1+json"
 )
 
 // wellKnownOCIArtifactTypes is a map of OCI media types to document type and format
@@ -52,12 +55,20 @@ var wellKnownOCIArtifactTypes = map[string]struct {
 	documentType processor.DocumentType
 	formatType   processor.FormatType
 }{
+	TextSpdxJson: {
+		documentType: processor.DocumentSPDX,
+		formatType:   processor.FormatJSON,
+	},
 	SpdxJson: {
 		documentType: processor.DocumentSPDX,
 		formatType:   processor.FormatJSON,
 	},
-	InTotoJson: {
-		documentType: processor.DocumentITE6SLSA,
+	//InTotoJson: {
+	//	documentType: processor.DocumentITE6Generic,
+	//	formatType:   processor.FormatJSON,
+	//},
+	DsseEnvelopeJson: {
+		documentType: processor.DocumentDSSE,
 		formatType:   processor.FormatJSON,
 	},
 }
@@ -205,14 +216,14 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, ref name.Reference
 
 	switch signed := signedEntity.(type) {
 	case oci.SignedImage:
-		processErr = errors.Join(processErr, process(ctx, ref, docChannel, defaultOpts...))
+		processErr = errors.Join(processErr, collect(ctx, ref, docChannel, defaultOpts...))
 	case oci.SignedImageIndex:
 		indexDigest, err := signed.Digest()
 		processErr = errors.Join(err)
 		indexRef := ref.Context().Digest(indexDigest.String())
-		processErr = errors.Join(process(ctx, indexRef, docChannel, remoteDefaultOpts(ctx)...))
+		processErr = errors.Join(collect(ctx, indexRef, docChannel, remoteDefaultOpts(ctx)...))
 
-		// process manifests of index
+		// collect manifests of index
 		indexManifest, err := signed.IndexManifest()
 		if err != nil {
 			return err
@@ -223,7 +234,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, ref name.Reference
 			if m.Platform != nil {
 				manifestRemoteOpts = append(manifestRemoteOpts, remote.WithPlatform(*m.Platform))
 			}
-			processErr = errors.Join(process(ctx, manifestRef, docChannel, manifestRemoteOpts...))
+			processErr = errors.Join(collect(ctx, manifestRef, docChannel, manifestRemoteOpts...))
 		}
 	}
 	return processErr

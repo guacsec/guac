@@ -56,8 +56,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		want: []*processor.Document{
 			{
 				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIGoSPDXMulti1),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
 					Source:    "ghcr.io/guacsec/go-multi-test:sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10.sbom",
@@ -65,8 +65,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			},
 			{
 				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIGoSPDXMulti2),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
 					Source:    "ghcr.io/guacsec/go-multi-test:sha256-1bc7e53e25de5c00ecaeca1473ab56bfaf4e39cea747edcf7db467389a287931.sbom",
@@ -74,8 +74,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			},
 			{
 				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIGoSPDXMulti3),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
 					Source:    "ghcr.io/guacsec/go-multi-test:sha256-534035553d1270a98dab3512fde0987e7709ec6b878c8fd60fdaf0d8e1611979.sbom",
@@ -95,8 +95,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		want: []*processor.Document{
 			{
 				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIDsseAttExample),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
+				Type:   processor.DocumentDSSE,
+				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
 					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
@@ -104,8 +104,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			},
 			{
 				Blob:   dochelper.ConsistentJsonBytes(testdata.OCISPDXExample),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
 					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
@@ -127,19 +127,19 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			{
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCICosignPRSPDX),
-				SourceInformation: processor.SourceInformation{
-					Collector: OCICollector,
-					Source:    "ghcr.io/jdolitsky/cosign-pr-demo@sha256:e952330096c5349c253bb11c09a25c546ca35d4b2a1bfaac805fee90cbe8fde1",
-				},
-			},
-			{
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
 				Blob:   dochelper.ConsistentJsonBytes(testdata.OCICosignPRSig),
 				SourceInformation: processor.SourceInformation{
 					Collector: OCICollector,
 					Source:    "ghcr.io/jdolitsky/cosign-pr-demo@sha256:478cf2f3284811b500cc3aee71b7d8c3a744917e863a78922674211c75b1e36c",
+				},
+			},
+			{
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCICosignPRSPDX),
+				SourceInformation: processor.SourceInformation{
+					Collector: OCICollector,
+					Source:    "ghcr.io/jdolitsky/cosign-pr-demo@sha256:e952330096c5349c253bb11c09a25c546ca35d4b2a1bfaac805fee90cbe8fde1",
 				},
 			},
 		}}, {
@@ -154,8 +154,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		want: []*processor.Document{
 			{
 				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIDsseAttExample),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
+				Type:   processor.DocumentDSSE,
+				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
 					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
@@ -163,8 +163,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			},
 			{
 				Blob:   dochelper.ConsistentJsonBytes(testdata.OCISPDXExample),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
+				Type:   processor.DocumentSPDX,
+				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
 					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
@@ -172,18 +172,21 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			},
 		},
 		wantErr: false,
-	}, {
-		name: "tag empty string",
-		fields: fields{
-			ociValues: []string{
-				"ghcr.io/guacsec/guac-test-image:",
-			},
-			poll:     false,
-			interval: 0,
-		},
-		errMessage: errors.New("image tag not specified to fetch"),
-		wantErr:    true,
-	}}
+	},
+	// TODO(hown3d): this is a valid oci reference in google/go-containerregistry.
+	//{
+	//	name: "tag empty string",
+	//	fields: fields{
+	//		ociValues: []string{
+	//			"ghcr.io/guacsec/guac-test-image:",
+	//		},
+	//		poll:     false,
+	//		interval: 0,
+	//	},
+	//	errMessage: errors.New("image tag not specified to fetch"),
+	//	wantErr:    true,
+	//},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, tt.fields.interval)
@@ -226,7 +229,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				}
 				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDoc), dochelper.DocNode(tt.want[i]))
 				if !result {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+					t.Errorf("g.RetrieveArtifacts() = %+v, want %+v", collectedDocs[i], tt.want[i])
 				}
 			}
 

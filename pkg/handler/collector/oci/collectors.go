@@ -9,19 +9,18 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	json "github.com/json-iterator/go"
 	cosign_remote "github.com/sigstore/cosign/v2/pkg/oci/remote"
 	"io"
 )
 
-func process(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, remoteOpts ...remote.Option) error {
-	attestationErr := processAttestations(ref, docChannel, remoteOpts...)
-	sbomErr := processSBOM(ctx, ref, docChannel, remoteOpts...)
-	referrerErr := processFallbackArtifacts(ref, docChannel, remoteOpts...)
+func collect(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, remoteOpts ...remote.Option) error {
+	attestationErr := collectAttestations(ref, docChannel, remoteOpts...)
+	sbomErr := collectSBOM(ctx, ref, docChannel, remoteOpts...)
+	referrerErr := collectFromReferrers(ref, docChannel, remoteOpts...)
 	return errors.Join(attestationErr, sbomErr, referrerErr)
 }
 
-func processFallbackArtifacts(ref name.Reference, docChannel chan<- *processor.Document, remoteOpts ...remote.Option) error {
+func collectFromReferrers(ref name.Reference, docChannel chan<- *processor.Document, remoteOpts ...remote.Option) error {
 	digest, err := cosign_remote.ResolveDigest(ref, cosign_remote.WithRemoteOptions(remoteOpts...))
 	if err != nil {
 		return err
@@ -43,12 +42,12 @@ func processFallbackArtifacts(ref name.Reference, docChannel chan<- *processor.D
 		if err != nil {
 			processErr = errors.Join(processErr, err)
 		}
-		processErr = errors.Join(processErr, processLayersOfImage(manifestDigest, img, docChannel))
+		processErr = errors.Join(processErr, collecetLayersOfImage(manifestDigest, img, docChannel))
 	}
 	return processErr
 }
 
-func processSBOM(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, opts ...remote.Option) error {
+func collectSBOM(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, opts ...remote.Option) error {
 	sbomTag, err := cosign_remote.SBOMTag(ref, cosign_remote.WithRemoteOptions(opts...))
 	if err != nil {
 		return fmt.Errorf("failed retrieving tag for sbom oci manifest: %w", err)
@@ -58,10 +57,10 @@ func processSBOM(ctx context.Context, ref name.Reference, docChannel chan<- *pro
 		logging.FromContext(ctx).Infof("image does not have a sbom tag at reference: %s", sbomTag)
 		return nil
 	}
-	return processLayersOfImage(sbomTag, img, docChannel)
+	return collecetLayersOfImage(sbomTag, img, docChannel)
 }
 
-func processLayersOfImage(ref name.Reference, img v1.Image, docChannel chan<- *processor.Document) error {
+func collecetLayersOfImage(ref name.Reference, img v1.Image, docChannel chan<- *processor.Document) error {
 	manifest, err := img.Manifest()
 	if err != nil {
 		return err
@@ -82,7 +81,13 @@ func processLayersOfImage(ref name.Reference, img v1.Image, docChannel chan<- *p
 			return fmt.Errorf("failed reading blob: %w", err)
 		}
 		artifactType := "unknown"
+		// referrers store their artifactType inside the manifest mediatype
 		if mediaType := manifest.Config.MediaType; mediaType != "" {
+			artifactType = string(mediaType)
+		}
+		// attestations and sbom store their artifactType in the layer mediatype
+		mediaType, err := layer.MediaType()
+		if err == nil && mediaType != "" {
 			artifactType = string(mediaType)
 		}
 		pushBlobData(ref, blobData, artifactType, docChannel)
@@ -90,16 +95,7 @@ func processLayersOfImage(ref name.Reference, img v1.Image, docChannel chan<- *p
 	return nil
 }
 
-type dsseEnvelope struct {
-	Payload     []byte
-	PayloadType string
-	Signatures  []struct {
-		KeyID string
-		Sig   []byte
-	}
-}
-
-func processAttestations(ref name.Reference, docChannel chan<- *processor.Document, remoteOpts ...remote.Option) error {
+func collectAttestations(ref name.Reference, docChannel chan<- *processor.Document, remoteOpts ...remote.Option) error {
 	signedEntity, err := cosign_remote.SignedEntity(ref, cosign_remote.WithRemoteOptions(remoteOpts...))
 	atts, err := signedEntity.Attestations()
 	if err != nil {
@@ -123,24 +119,17 @@ func processAttestations(ref name.Reference, docChannel chan<- *processor.Docume
 			processErr = errors.Join(processErr, fmt.Errorf("getting payload for signature: %w", err))
 			continue
 		}
-		mediaType, err := signature.MediaType()
+		artifactType, err := signature.MediaType()
 		if err != nil {
 			processErr = errors.Join(processErr, err)
 			continue
 		}
-		// skipping attestations that are not in dsse envelope style
-		if mediaType != dsseEnvelopeMediaType {
-			continue
-		}
-
-		var envelope *dsseEnvelope
-		err = json.Unmarshal(payload, &envelope)
 		if err != nil {
 			processErr = errors.Join(processErr, err)
 			continue
 		}
 
-		pushBlobData(attRef, envelope.Payload, envelope.PayloadType, docChannel)
+		pushBlobData(attRef, payload, string(artifactType), docChannel)
 	}
 	return processErr
 }

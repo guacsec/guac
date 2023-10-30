@@ -122,6 +122,7 @@ var (
 
 	//go:embed exampledata/oci-cosign-pr-demo-sbom.json
 	OCICosignPRSPDX []byte
+
 	//go:embed exampledata/oci-cosign-pr-demo-sig.json
 	OCICosignPRSig []byte
 
