@@ -184,6 +184,7 @@ func (o *ociCollector) populateRepoTags(ctx context.Context, repoRefs map[string
 func (o *ociCollector) fetch(ctx context.Context, refs []name.Reference, docChannel chan<- *processor.Document) error {
 	g, ctx := errgroup.WithContext(ctx)
 	for _, r := range refs {
+		r := r
 		g.Go(func() error {
 			return o.fetchOCIArtifacts(ctx, r, docChannel)
 		})
@@ -217,16 +218,18 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, ref name.Reference
 		return fmt.Errorf("failed retrieving manifest head: %w", err)
 	}
 
-	var processErr error
+	var collectErr error
 
 	switch signed := signedEntity.(type) {
 	case oci.SignedImage:
-		processErr = errors.Join(processErr, collect(ctx, ref, docChannel, defaultOpts...))
+		collectErr = errors.Join(collectErr, collect(ctx, ref, docChannel, defaultOpts...))
 	case oci.SignedImageIndex:
 		indexDigest, err := signed.Digest()
-		processErr = errors.Join(err)
+		if err != nil {
+			return err
+		}
 		indexRef := ref.Context().Digest(indexDigest.String())
-		processErr = errors.Join(collect(ctx, indexRef, docChannel, remoteDefaultOpts(ctx)...))
+		collectErr = errors.Join(collectErr, collect(ctx, indexRef, docChannel, remoteDefaultOpts(ctx)...))
 
 		// collect manifests of index
 		indexManifest, err := signed.IndexManifest()
@@ -239,10 +242,10 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, ref name.Reference
 			if m.Platform != nil {
 				manifestRemoteOpts = append(manifestRemoteOpts, remote.WithPlatform(*m.Platform))
 			}
-			processErr = errors.Join(collect(ctx, manifestRef, docChannel, manifestRemoteOpts...))
+			collectErr = errors.Join(collectErr, collect(ctx, manifestRef, docChannel, manifestRemoteOpts...))
 		}
 	}
-	return processErr
+	return collectErr
 }
 
 // Type is the collector type of the collector
