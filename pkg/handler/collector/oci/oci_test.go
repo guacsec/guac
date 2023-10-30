@@ -117,136 +117,29 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		name: "get OCI referrers",
 		fields: fields{
 			ociValues: []string{
-				"mcr.microsoft.com/oss/kubernetes/kubectl:v1.28.1",
+				// used from here: https://github.com/sigstore/cosign/pull/2684
+				"ghcr.io/jdolitsky/cosign-pr-demo@sha256:97d731da806109c4f61ac32e8830e13952ca2c65bc7fbfe32babd7d267e633bf",
 			},
 			poll:     false,
 			interval: 0,
 		},
 		want: []*processor.Document{
 			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxAMD64ITE6),
-				Type:   processor.DocumentITE6SLSA,
-				Format: processor.FormatJSON,
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCICosignPRSPDX),
 				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:395fbca091afd8cd7406a3b9815c2c4054bd06331f7a2a6b2e48798a5365d4f6",
+					Collector: OCICollector,
+					Source:    "ghcr.io/jdolitsky/cosign-pr-demo@sha256:e952330096c5349c253bb11c09a25c546ca35d4b2a1bfaac805fee90cbe8fde1",
 				},
 			},
 			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxAMD64SPDX),
-				Type:   processor.DocumentSPDX,
-				Format: processor.FormatJSON,
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCICosignPRSig),
 				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:dc365ff2a58436089f1dfcc2dcbf4699a3b9bbb596f5485b70cc75cbd309f020",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxAMD64SPDX1),
-				Type:   processor.DocumentSPDX,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:8e20922c8c2c4172879ff18b85e9de011e7bc5d8a93aab8244b8834e6e471e29",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARMV7ITE6),
-				Type:   processor.DocumentITE6SLSA,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:988bec89fa63b1eed4c804e4d8acb7073a97ede89c86768193bca408faad3ed6",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARMV7SPDX),
-				Type:   processor.DocumentSPDX,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:264ad11a504bc570eadd7e75c3eeb6432638ecb65ab5203a5b464218dba5b63e",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARM64ITE6),
-				Type:   processor.DocumentITE6SLSA,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:884e5fd916210a1f2fe371fe7e35812e7770787e292134aba104ed1b10d721e9",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARM64SPDX),
-				Type:   processor.DocumentSPDX,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:3c48cc52d341cc6a57fcf25225b1d669fbdd32d8942fe669495e6f88de948597",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARM64SPDX1),
-				Type:   processor.DocumentSPDX,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:ff231891d6af8af7c5e90b3647a262bd4a8013c74b99dae4a171ccc5480e60c2",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlWindowsAMD64ITE6),
-				Type:   processor.DocumentITE6SLSA,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:61715e8b3d8577fc8fcc54335d4f726803f806475239899498a96170d062b6ea",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlWindowsAMD64ITE6),
-				Type:   processor.DocumentITE6SLSA,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:1b7421f29020b2ff35190e26da222e379c14b457fe23a83be7c2ed44a57c490c",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlWindowsAMD64ITE6),
-				Type:   processor.DocumentITE6SLSA,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:30019e253ab74eb3e38abae7b8997e8e60c420169044ca9bfaf9665f54ad18bc",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARM64SPDX),
-				Type:   processor.DocumentSPDX,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:8035089a59a6f8577255f494c1ced250e1206667d8462869fc0deeca98d79427",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxARMV7SPDX),
-				Type:   processor.DocumentSPDX,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:78efdf2e0abe78a6964b8b5cbcdbfe4496f4564b227992806edd1cac57b68db2",
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIKubectlLinuxAMD64SPDX),
-				Type:   processor.DocumentSPDX,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(OCICollector),
-					Source:    "mcr.microsoft.com/oss/kubernetes/kubectl@sha256:64f5e3b86c83acef2fb79e359a942bd2290e30773269f532856421db4e75cc30",
+					Collector: OCICollector,
+					Source:    "ghcr.io/jdolitsky/cosign-pr-demo@sha256:478cf2f3284811b500cc3aee71b7d8c3a744917e863a78922674211c75b1e36c",
 				},
 			},
 		}}, {

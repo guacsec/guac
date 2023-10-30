@@ -120,32 +120,10 @@ var (
 	//go:embed exampledata/certify-novuln.json
 	ITE6NoVulnExample []byte
 
-	//go:embed exampledata/oci-kubectl-linux-amd64-in-toto.json
-	OCIKubectlLinuxAMD64ITE6 []byte
-
-	//go:embed exampledata/oci-kubectl-linux-amd64-spdx.json
-	OCIKubectlLinuxAMD64SPDX []byte
-
-	//go:embed exampledata/oci-kubectl-linux-amd64-spdx-1.json
-	OCIKubectlLinuxAMD64SPDX1 []byte
-
-	//go:embed exampledata/oci-kubectl-linux-arm-v7-in-toto.json
-	OCIKubectlLinuxARMV7ITE6 []byte
-
-	//go:embed exampledata/oci-kubectl-linux-arm-v7-spdx.json
-	OCIKubectlLinuxARMV7SPDX []byte
-
-	//go:embed exampledata/oci-kubectl-linux-arm64-in-toto.json
-	OCIKubectlLinuxARM64ITE6 []byte
-
-	//go:embed exampledata/oci-kubectl-linux-arm64-spdx.json
-	OCIKubectlLinuxARM64SPDX []byte
-
-	//go:embed exampledata/oci-kubectl-linux-arm64-spdx-1.json
-	OCIKubectlLinuxARM64SPDX1 []byte
-
-	//go:embed exampledata/oci-kubectl-windows-amd64-in-toto.json
-	OCIKubectlWindowsAMD64ITE6 []byte
+	//go:embed exampledata/oci-cosign-pr-demo-sbom.json
+	OCICosignPRSPDX []byte
+	//go:embed exampledata/oci-cosign-pr-demo-sig.json
+	OCICosignPRSig []byte
 
 	//go:embed exampledata/oci-dsse-att.json
 	OCIDsseAttExample []byte

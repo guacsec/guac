@@ -1,0 +1,1 @@
+{"critical":{"identity":{"docker-reference":"ghcr.io/jdolitsky/cosign-pr-demo"},"image":{"docker-manifest-digest":"sha256:97d731da806109c4f61ac32e8830e13952ca2c65bc7fbfe32babd7d267e633bf"},"type":"cosign container image signature"},"optional":null}
