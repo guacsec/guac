@@ -9,7 +9,8 @@ volumes:
 services:
 
   guac-graphql:
-    image: "local-organic-guac"
+    networks: [frontend]
+    image: $GUAC_IMAGE
     command: "/opt/guac/guacgql --gql-debug --gql-backend arango"
     working_dir: /guac
     restart: on-failure
@@ -19,7 +20,7 @@ services:
     ports:
       - "$GUAC_API_PORT:8080"
     volumes:
-      - ./container_files/arango:/guac
+      - ./container_files/arango:/guac:z
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:8080"]
       interval: 10s
@@ -28,6 +29,7 @@ services:
       start_period: 5s
 
   arangodb:
+    networks: [frontend]
     image: arangodb:latest
     environment:
       ARANGO_ROOT_PASSWORD: test123

@@ -1,0 +1,175 @@
+#
+# Copyright 2022 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: db-performance-test
+
+on:
+  workflow_call:
+    inputs:
+      ingestion_data:
+        description: 'data to ingest for testing'
+        default: './guac-data/docs/'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/reusable-local-build.yaml
+    with:
+      repository: 'guacsec/guac'
+      ref: 'main'
+  
+  db-performance:
+    needs: [build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        database:
+          - inmem
+          - arango
+          - ent
+    outputs:
+      elapsed_time: ${{ steps.run_test.outputs.elapsed_time }}
+      query_time: ${{ steps.query_test.outputs.elapsed_time }}
+    name: performance test for backends DBs
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
+      - name: Checkout guac-data
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+        with:
+          repository: 'guacsec/guac-data'
+          ref: 'main'
+          path: 'guac-data'
+      - name: Download artifact files
+        uses: actions/download-artifact@v3
+        with:
+          name: guac-artifacts
+          path: ./bin
+      - name: Fix permissions and display downloaded artifact files
+        run: |
+          chmod +x *
+          ls -la
+        working-directory: ./bin
+      - name: Load images 
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          ls -la ./bin
+          docker load < ./bin/local-organic-guac.tar
+      - name: Setup ${{ matrix.database }}
+        env:
+            ENT_TEST_DATABASE_URL: 'postgresql://guac:guac@localhost/guac?sslmode=disable'
+            GUAC_IMAGE: 'local-organic-guac'
+            GUAC_API_PORT: '8080'
+        run: |
+          if [ ${{ matrix.database }} == "inmem" ]; then
+            make start-inmem-db
+          elif [ ${{ matrix.database }} == "arango" ]; then
+            make start-arango-db
+          elif [ ${{ matrix.database }} == "ent" ]; then
+            make start-ent-db
+          fi
+      - name: Run performance tests with ${{ matrix.database }}
+        id: run_test
+        shell: bash
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          echo "Running performance tests..."
+          start=$(date -u +%s)
+          #./bin/guacone collect files ${{ inputs.ingestion_data }} > output 2>&1
+          ./bin/guacone collect files ./guac-data/docs/ > output 2>&1
+          grep "completed ingesting" output
+          end=$(date -u +%s)
+          elapsed_time=$((end - start))
+  
+          printf "%-15s%-20s%-15s%s seconds\n" "Ingestion" "${{ matrix.database }}" "$elapsed_time"
+          echo "elapsed_time=$elapsed_time" >> $GITHUB_OUTPUT
+      ## Write for matrix outputs workaround 
+      - uses: cloudposse/github-action-matrix-outputs-write@main
+        id: out-ingestion
+        with:
+          matrix-step-name: run_test
+          matrix-key: ${{ matrix.database }}
+          outputs: |-
+            elapsed_time: ${{ steps.run_test.outputs.elapsed_time }}
+      - name: Run query tests with ${{ matrix.database }}
+        id: query_test
+        run: |
+          if [ ${{ matrix.database }} == "inmem" ]; then
+            #!/usr/bin/env bash
+            set -euo pipefail
+            echo "Running query tests..."
+            start=$(date -u +%s)
+            ./bin/guacone certifier osv > output 2>&1
+            ./bin/guacone query vuln "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" > output 2>&1
+            grep "Visualizer url" output
+            end=$(date -u +%s)
+            query_time=$((end - start))
+  
+            printf "%-15s%-20s%-15s%s seconds\n" "Query" "${{ matrix.database }}" "$query_time"
+            echo "query_time=$query_time" >> $GITHUB_OUTPUT
+          fi
+      ## Write for matrix outputs workaround 
+      - uses: cloudposse/github-action-matrix-outputs-write@main
+        id: out-query
+        with:
+          matrix-step-name: query_test
+          matrix-key: ${{ matrix.database }}
+          outputs: |-
+            query_time: ${{ steps.query_test.outputs.query_time }}
+  ## Read matrix outputs 
+  read:
+    runs-on: ubuntu-latest
+    needs: [db-performance]
+    steps:
+      - uses: cloudposse/github-action-matrix-outputs-read@main
+        id: ingestion
+        with:
+          matrix-step-name: run_test
+      - run: |
+          echo "result: ${{ steps.ingestion.outputs.result }}" 
+      - uses: cloudposse/github-action-matrix-outputs-read@main
+        id: query
+        with:
+          matrix-step-name: query_test
+      - run: |
+          echo "result: ${{ steps.query.outputs.result }}" 
+    outputs:
+      result: "${{ steps.ingestion.outputs.result }}"
+      query_result: "${{ steps.query.outputs.result }}"
+  report:
+    runs-on: ubuntu-latest
+    needs: [read]
+    steps:
+      - run: |
+          echo -e "\n\n\n"
+          printf "%-15s%-20s%s\n" "Test" "Deployment Env" "Time"
+          printf "%-15s%-20s%s\n" "----" "--------------" "----"
+          printf "%-15s%-20s%s seconds\n" "Ingestion" "inmem" "${{ env.inmem }}"
+          printf "%-15s%-20s%s seconds\n" "Ingestion" "arango" "${{ env.arango }}"
+          printf "%-15s%-20s%s seconds\n" "Ingestion" "ent" "${{ env.ent }}"
+          printf "%-15s%-20s%s seconds\n" "Query" "inmem" "${{ env.inmem_query }}"
+          printf "%-15s%-20s%s seconds\n" "Query" "arango" "${{ env.arango_query }}"
+          printf "%-15s%-20s%s seconds\n" "Query" "ent" "${{ env.ent_query }}"
+        env:
+          inmem: ${{ fromJson(needs.read.outputs.result).elapsed_time.inmem }}
+          arango: ${{ fromJson(needs.read.outputs.result).elapsed_time.arango }}
+          ent: ${{ fromJson(needs.read.outputs.result).elapsed_time.ent }}
+          inmem_query: ${{ fromJson(needs.read.outputs.query_result).query_time.inmem }}
+          arango_query: ${{ fromJson(needs.read.outputs.query_result).query_time.arango }}
+          ent_query: ${{ fromJson(needs.read.outputs.query_result).query_time.ent }}
