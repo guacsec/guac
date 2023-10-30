@@ -61,5 +61,6 @@ func (PackageVersion) Indexes() []ent.Index {
 		index.Fields("qualifiers").Annotations(
 			entsql.IndexTypes(map[string]string{dialect.Postgres: "GIN"}),
 		),
+		index.Fields("version", "subpath", "qualifiers").Edges("name").Unique(),
 	}
 }

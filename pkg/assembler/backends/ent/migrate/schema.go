@@ -806,6 +806,11 @@ var (
 					},
 				},
 			},
+			{
+				Name:    "packageversion_version_subpath_qualifiers_name_id",
+				Unique:  true,
+				Columns: []*schema.Column{PackageVersionsColumns[1], PackageVersionsColumns[2], PackageVersionsColumns[3], PackageVersionsColumns[5]},
+			},
 		},
 	}
 	// PkgEqualsColumns holds the columns for the "pkg_equals" table.
