@@ -185,9 +185,15 @@ func (o *ociCollector) fetch(ctx context.Context, refs []name.Reference, docChan
 	g, ctx := errgroup.WithContext(ctx)
 	for _, r := range refs {
 		r := r
-		g.Go(func() error {
-			return o.fetchOCIArtifacts(ctx, r, docChannel)
-		})
+		digest, err := cosign_remote.ResolveDigest(r, cosign_remote.WithRemoteOptions(remoteDefaultOpts(ctx)...))
+		if err != nil {
+			return err
+		}
+		if !o.isDigestCollected(digest.Context(), digest) {
+			g.Go(func() error {
+				return o.fetchOCIArtifacts(ctx, digest, docChannel)
+			})
+		}
 	}
 	return g.Wait()
 }
@@ -210,10 +216,10 @@ func (o *ociCollector) getTags(ctx context.Context, repo name.Repository) ([]nam
 
 // Note: fetchOCIArtifacts currently does not re-check if a new sbom or attestation get reuploaded during polling with the same image digest.
 // A workaround for this would be to run the collector again with a specific tag without polling and ingest like normal
-func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document) error {
+func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, digest name.Digest, docChannel chan<- *processor.Document) error {
 	defaultOpts := remoteDefaultOpts(ctx)
 
-	signedEntity, err := cosign_remote.SignedEntity(ref, cosign_remote.WithRemoteOptions(defaultOpts...))
+	signedEntity, err := cosign_remote.SignedEntity(digest, cosign_remote.WithRemoteOptions(defaultOpts...))
 	if err != nil {
 		return fmt.Errorf("failed retrieving manifest head: %w", err)
 	}
@@ -222,14 +228,11 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, ref name.Reference
 
 	switch signed := signedEntity.(type) {
 	case oci.SignedImage:
-		collectErr = errors.Join(collectErr, collect(ctx, ref, docChannel, defaultOpts...))
+		collectErr = errors.Join(collectErr, collect(ctx, digest, docChannel, defaultOpts...))
+		o.markDigestAsCollected(digest.Context(), digest)
 	case oci.SignedImageIndex:
-		indexDigest, err := signed.Digest()
-		if err != nil {
-			return err
-		}
-		indexRef := ref.Context().Digest(indexDigest.String())
-		collectErr = errors.Join(collectErr, collect(ctx, indexRef, docChannel, remoteDefaultOpts(ctx)...))
+		collectErr = errors.Join(collectErr, collect(ctx, digest, docChannel, defaultOpts...))
+		o.markDigestAsCollected(digest.Context(), digest)
 
 		// collect manifests of index
 		indexManifest, err := signed.IndexManifest()
@@ -237,12 +240,13 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, ref name.Reference
 			return err
 		}
 		for _, m := range indexManifest.Manifests {
-			manifestRef := ref.Context().Digest(m.Digest.String())
+			manifestRef := digest.Context().Digest(m.Digest.String())
 			manifestRemoteOpts := remoteDefaultOpts(ctx)
 			if m.Platform != nil {
 				manifestRemoteOpts = append(manifestRemoteOpts, remote.WithPlatform(*m.Platform))
 			}
 			collectErr = errors.Join(collectErr, collect(ctx, manifestRef, docChannel, manifestRemoteOpts...))
+			o.markDigestAsCollected(manifestRef.Repository, manifestRef)
 		}
 	}
 	return collectErr
@@ -255,12 +259,12 @@ func (o *ociCollector) Type() string {
 
 // markDigestAsCollected adds the given digest to the list of collected digests for the given repository.
 // If the repository is not yet in the checkedDigest map, it will be added with an empty slice of digests.
-func (o *ociCollector) markDigestAsCollected(repo string, digest string) {
+func (o *ociCollector) markDigestAsCollected(repo name.Repository, digest name.Digest) {
 	collectedDigests, ok := o.checkedDigest.Load(repo)
 	if !ok {
-		o.checkedDigest.Store(repo, []string{})
+		o.checkedDigest.Store(repo, []name.Digest{})
 	}
-	digests, ok := collectedDigests.([]string)
+	digests, ok := collectedDigests.([]name.Digest)
 	if !ok {
 		return
 	}
@@ -269,13 +273,13 @@ func (o *ociCollector) markDigestAsCollected(repo string, digest string) {
 
 // isDigestCollected checks if a given digest has already been collected for a given repository.
 // It returns true if the digest has been collected, false otherwise.
-func (o *ociCollector) isDigestCollected(repo string, digest string) bool {
+func (o *ociCollector) isDigestCollected(repo name.Repository, digest name.Digest) bool {
 	collectedDigests, ok := o.checkedDigest.Load(repo)
 	if !ok {
-		o.checkedDigest.Store(repo, []string{})
+		o.checkedDigest.Store(repo, []name.Digest{})
 		return false
 	} else {
-		digests, ok := collectedDigests.([]string)
+		digests, ok := collectedDigests.([]name.Digest)
 		if !ok {
 			return false
 		}
