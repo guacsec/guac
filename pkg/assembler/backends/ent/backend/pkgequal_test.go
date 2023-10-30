@@ -742,7 +742,7 @@ func (s *Suite) TestIngestPkgEquals() {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpHE, got, IngestPredicatesCmpOpts...); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

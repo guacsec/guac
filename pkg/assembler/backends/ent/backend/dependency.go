@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencySpec) ([]*model.IsDependency, error) {
@@ -74,13 +75,24 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
 	// TODO: This looks like a good candidate for using BulkCreate()
 
-	var modelIsDependencies []*model.IsDependency
+	var modelIsDependencies = make([]*model.IsDependency, len(dependencies))
+	eg, ctx := errgroup.WithContext(ctx)
 	for i := range dependencies {
-		isDependency, err := b.IngestDependency(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
-		if err != nil {
-			return nil, Errorf("IngestDependency failed with err: %v", err)
-		}
-		modelIsDependencies = append(modelIsDependencies, isDependency)
+		index := i
+		pkg := *pkgs[index]
+		depPkg := *depPkgs[index]
+		dpmt := depPkgMatchType
+		dep := *dependencies[index]
+		concurrently(eg, func() error {
+			p, err := b.IngestDependency(ctx, pkg, depPkg, dpmt, dep)
+			if err == nil {
+				modelIsDependencies[index] = &model.IsDependency{ID: p.ID}
+			}
+			return err
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return modelIsDependencies, nil
 }

@@ -41,6 +41,10 @@ func init() {
 	}
 
 	txdb.Register("txdb", "postgres", db)
+	err := os.Setenv("MAX_CONCURRENT_BULK_INGESTION", "1")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 type Suite struct {
