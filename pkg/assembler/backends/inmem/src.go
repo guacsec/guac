@@ -96,23 +96,31 @@ func (n *srcNameStruct) ID() uint32      { return n.id }
 func (n *srcNameNode) ID() uint32        { return n.id }
 
 func (n *srcNamespaceStruct) Neighbors(allowedEdges edgeMap) []uint32 {
-	out := make([]uint32, 0, len(n.namespaces))
-	for _, v := range n.namespaces {
-		out = append(out, v.id)
+	var out []uint32
+	if allowedEdges[model.EdgeSourceTypeSourceNamespace] {
+		for _, v := range n.namespaces {
+			out = append(out, v.id)
+		}
 	}
 	return out
 }
 func (n *srcNameStruct) Neighbors(allowedEdges edgeMap) []uint32 {
-	out := make([]uint32, 0, 1+len(n.names))
-	for _, v := range n.names {
-		out = append(out, v.id)
+	var out []uint32
+	if allowedEdges[model.EdgeSourceNamespaceSourceName] {
+		for _, v := range n.names {
+			out = append(out, v.id)
+		}
 	}
-	out = append(out, n.parent)
+	if allowedEdges[model.EdgeSourceNamespaceSourceType] {
+		out = append(out, n.parent)
+	}
 	return out
 }
 func (n *srcNameNode) Neighbors(allowedEdges edgeMap) []uint32 {
-	out := []uint32{n.parent}
-
+	var out []uint32
+	if allowedEdges[model.EdgeSourceNameSourceNamespace] {
+		out = append(out, n.parent)
+	}
 	if allowedEdges[model.EdgeSourceHasSourceAt] {
 		out = append(out, n.srcMapLinks...)
 	}

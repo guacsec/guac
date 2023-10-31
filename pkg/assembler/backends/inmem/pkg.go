@@ -156,26 +156,36 @@ func (n *pkgVersionStruct) ID() uint32   { return n.id }
 func (n *pkgVersionNode) ID() uint32     { return n.id }
 
 func (n *pkgNamespaceStruct) Neighbors(allowedEdges edgeMap) []uint32 {
-	out := make([]uint32, 0, 1+len(n.namespaces))
-	for _, v := range n.namespaces {
-		out = append(out, v.id)
+	var out []uint32
+	if allowedEdges[model.EdgePackageTypePackageNamespace] {
+		for _, v := range n.namespaces {
+			out = append(out, v.id)
+		}
 	}
 	return out
 }
 func (n *pkgNameStruct) Neighbors(allowedEdges edgeMap) []uint32 {
-	out := make([]uint32, 0, 1+len(n.names))
-	for _, v := range n.names {
-		out = append(out, v.id)
+	var out []uint32
+	if allowedEdges[model.EdgePackageNamespacePackageName] {
+		for _, v := range n.names {
+			out = append(out, v.id)
+		}
 	}
-	out = append(out, n.parent)
+	if allowedEdges[model.EdgePackageNamespacePackageType] {
+		out = append(out, n.parent)
+	}
 	return out
 }
 func (n *pkgVersionStruct) Neighbors(allowedEdges edgeMap) []uint32 {
-	out := []uint32{n.parent}
-	for _, v := range n.versions {
-		out = append(out, v.id)
+	var out []uint32
+	if allowedEdges[model.EdgePackageNamePackageNamespace] {
+		out = append(out, n.parent)
 	}
-
+	if allowedEdges[model.EdgePackageNamePackageVersion] {
+		for _, v := range n.versions {
+			out = append(out, v.id)
+		}
+	}
 	if allowedEdges[model.EdgePackageHasSourceAt] {
 		out = append(out, n.srcMapLinks...)
 	}
@@ -198,8 +208,10 @@ func (n *pkgVersionStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	return out
 }
 func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []uint32 {
-	out := []uint32{n.parent}
-
+	var out []uint32
+	if allowedEdges[model.EdgePackageVersionPackageName] {
+		out = append(out, n.parent)
+	}
 	if allowedEdges[model.EdgePackageHasSourceAt] {
 		out = append(out, n.srcMapLinks...)
 	}
