@@ -1288,11 +1288,6 @@ func Test_Neighbors(t *testing.T) {
 		queryPkgNameID: true,
 		want: []model.Node{
 			testdata.P2out,
-			&model.Package{
-				Type: "pypi",
-				Namespaces: []*model.PackageNamespace{{
-					Names: []*model.PackageName{},
-				}}},
 			testdata.P1out,
 			&model.Package{
 				Type: "pypi",
@@ -1459,11 +1454,6 @@ func Test_Neighbors(t *testing.T) {
 		queryPkgNameID: true,
 		want: []model.Node{
 			testdata.P2out,
-			&model.Package{
-				Type: "pypi",
-				Namespaces: []*model.PackageNamespace{{
-					Names: []*model.PackageName{},
-				}}},
 			testdata.P1out,
 			&model.Package{
 				Type: "pypi",
@@ -2109,11 +2099,6 @@ func Test_Neighbors(t *testing.T) {
 		queryPkgNameID: true,
 		want: []model.Node{
 			testdata.P2out,
-			&model.Package{
-				Type: "pypi",
-				Namespaces: []*model.PackageNamespace{{
-					Names: []*model.PackageName{},
-				}}},
 			testdata.P1out,
 			&model.Package{
 				Type: "pypi",
@@ -2405,11 +2390,6 @@ func Test_Neighbors(t *testing.T) {
 		queryPkgNameID: true,
 		want: []model.Node{
 			testdata.P2out,
-			&model.Package{
-				Type: "pypi",
-				Namespaces: []*model.PackageNamespace{{
-					Names: []*model.PackageName{},
-				}}},
 			testdata.P1out,
 			&model.Package{
 				Type: "pypi",
@@ -2532,11 +2512,6 @@ func Test_Neighbors(t *testing.T) {
 		queryPkgNameID: true,
 		want: []model.Node{
 			testdata.P2out,
-			&model.Package{
-				Type: "pypi",
-				Namespaces: []*model.PackageNamespace{{
-					Names: []*model.PackageName{},
-				}}},
 			testdata.P1out,
 			&model.Package{
 				Type: "pypi",
@@ -2815,11 +2790,6 @@ func Test_Neighbors(t *testing.T) {
 		queryPkgNameID: true,
 		want: []model.Node{
 			testdata.P2out,
-			&model.Package{
-				Type: "pypi",
-				Namespaces: []*model.PackageNamespace{{
-					Names: []*model.PackageName{},
-				}}},
 			testdata.P1out,
 			&model.Package{
 				Type: "pypi",
@@ -3196,15 +3166,15 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgNameID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageCertifyBad}
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyBad, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageCertifyBad}
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyBad, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyBad}
+					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyBad, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryCertifyBadID {
 					nodeID = found.ID
@@ -3225,15 +3195,15 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgNameID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageCertifyGood}
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyGood, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageCertifyGood}
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyGood, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyGood}
+					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyGood, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryCertifyGoodID {
 					nodeID = found.ID
@@ -3250,11 +3220,11 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageCertifyLegal}
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyLegal, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyLegal}
+					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyLegal, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryDeclaredLicenseID {
 					nodeID = found.DeclaredLicenses[0].ID
@@ -3278,7 +3248,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.querySrcNameID {
 					nodeID = found.Source.Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyScorecard}
+					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyScorecard, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryScorecardID {
 					nodeID = found.ID
@@ -3298,11 +3268,11 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageCertifyVexStatement}
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyVexStatement, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryVulnID {
 					nodeID = found.Vulnerability.VulnerabilityIDs[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityCertifyVexStatement}
+					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityCertifyVexStatement, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryCertifyVexID {
 					nodeID = found.ID
@@ -3318,11 +3288,11 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Package.Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageCertifyVuln}
+					tt.usingOnly = []model.Edge{model.EdgePackageCertifyVuln, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryVulnID {
 					nodeID = found.Vulnerability.VulnerabilityIDs[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityCertifyVuln}
+					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityCertifyVuln, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryCertifyVulnID {
 					nodeID = found.ID
@@ -3363,15 +3333,15 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgNameID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageHasMetadata}
+					tt.usingOnly = []model.Edge{model.EdgePackageHasMetadata, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageHasMetadata}
+					tt.usingOnly = []model.Edge{model.EdgePackageHasMetadata, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeSourceHasMetadata}
+					tt.usingOnly = []model.Edge{model.EdgeSourceHasMetadata, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryHasMetadataID {
 					nodeID = found.ID
@@ -3392,7 +3362,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageHasSbom}
+					tt.usingOnly = []model.Edge{model.EdgePackageHasSbom, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryHasSbomID {
 					nodeID = found.ID
@@ -3428,15 +3398,15 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgNameID {
 					nodeID = found.Package.Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageHasSourceAt}
+					tt.usingOnly = []model.Edge{model.EdgePackageHasSourceAt, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Package.Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageHasSourceAt}
+					tt.usingOnly = []model.Edge{model.EdgePackageHasSourceAt, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
 					nodeID = found.Source.Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeSourceHasSourceAt}
+					tt.usingOnly = []model.Edge{model.EdgeSourceHasSourceAt, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryHasSourceAtID {
 					nodeID = found.ID
@@ -3452,11 +3422,11 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgNameID {
 					nodeID = found.DependencyPackage.Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency}
+					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.DependencyPackage.Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency}
+					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryIsDependencyID {
 					nodeID = found.ID
@@ -3476,11 +3446,11 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackageIsOccurrence}
+					tt.usingOnly = []model.Edge{model.EdgePackageIsOccurrence, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeSourceIsOccurrence}
+					tt.usingOnly = []model.Edge{model.EdgeSourceIsOccurrence, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryIsOccurrenceID {
 					nodeID = found.ID
@@ -3496,11 +3466,11 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Packages[0].Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackagePkgEqual}
+					tt.usingOnly = []model.Edge{model.EdgePackagePkgEqual, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryEqualPkgID {
 					nodeID = found.Packages[1].Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackagePkgEqual}
+					tt.usingOnly = []model.Edge{model.EdgePackagePkgEqual, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryPkgEqualID {
 					nodeID = found.ID
@@ -3520,15 +3490,15 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryPkgNameID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackagePointOfContact}
+					tt.usingOnly = []model.Edge{model.EdgePackagePointOfContact, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
 					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
-					tt.usingOnly = []model.Edge{model.EdgePackagePointOfContact}
+					tt.usingOnly = []model.Edge{model.EdgePackagePointOfContact, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
 					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeSourcePointOfContact}
+					tt.usingOnly = []model.Edge{model.EdgeSourcePointOfContact, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryPointOfContactID {
 					nodeID = found.ID
@@ -3544,11 +3514,11 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryVulnID {
 					nodeID = found.Vulnerabilities[0].VulnerabilityIDs[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityVulnEqual}
+					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityVulnEqual, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryEqualVulnID {
 					nodeID = found.Vulnerabilities[1].VulnerabilityIDs[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityVulnEqual}
+					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityVulnEqual, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryVulnEqualID {
 					nodeID = found.ID
@@ -3569,7 +3539,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 				if tt.queryVulnID {
 					nodeID = ingestedVuln.VulnerabilityIDs[0].ID
-					tt.usingOnly = []model.Edge{model.EdgeVulnMetadataVulnerability}
+					tt.usingOnly = []model.Edge{model.EdgeVulnMetadataVulnerability, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryVulnMetadataID {
 					nodeID = vulnMetadataID

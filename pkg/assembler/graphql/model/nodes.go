@@ -1646,8 +1646,14 @@ const (
 	EdgePackageHasSourceAt               Edge = "PACKAGE_HAS_SOURCE_AT"
 	EdgePackageIsDependency              Edge = "PACKAGE_IS_DEPENDENCY"
 	EdgePackageIsOccurrence              Edge = "PACKAGE_IS_OCCURRENCE"
+	EdgePackageNamePackageNamespace      Edge = "PACKAGE_NAME_PACKAGE_NAMESPACE"
+	EdgePackageNamePackageVersion        Edge = "PACKAGE_NAME_PACKAGE_VERSION"
+	EdgePackageNamespacePackageName      Edge = "PACKAGE_NAMESPACE_PACKAGE_NAME"
+	EdgePackageNamespacePackageType      Edge = "PACKAGE_NAMESPACE_PACKAGE_TYPE"
 	EdgePackagePkgEqual                  Edge = "PACKAGE_PKG_EQUAL"
 	EdgePackagePointOfContact            Edge = "PACKAGE_POINT_OF_CONTACT"
+	EdgePackageTypePackageNamespace      Edge = "PACKAGE_TYPE_PACKAGE_NAMESPACE"
+	EdgePackageVersionPackageName        Edge = "PACKAGE_VERSION_PACKAGE_NAME"
 	EdgeSourceCertifyBad                 Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood                Edge = "SOURCE_CERTIFY_GOOD"
 	EdgeSourceCertifyLegal               Edge = "SOURCE_CERTIFY_LEGAL"
@@ -1655,9 +1661,15 @@ const (
 	EdgeSourceHasMetadata                Edge = "SOURCE_HAS_METADATA"
 	EdgeSourceHasSourceAt                Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence               Edge = "SOURCE_IS_OCCURRENCE"
+	EdgeSourceNameSourceNamespace        Edge = "SOURCE_NAME_SOURCE_NAMESPACE"
+	EdgeSourceNamespaceSourceName        Edge = "SOURCE_NAMESPACE_SOURCE_NAME"
+	EdgeSourceNamespaceSourceType        Edge = "SOURCE_NAMESPACE_SOURCE_TYPE"
 	EdgeSourcePointOfContact             Edge = "SOURCE_POINT_OF_CONTACT"
+	EdgeSourceTypeSourceNamespace        Edge = "SOURCE_TYPE_SOURCE_NAMESPACE"
 	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
 	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
+	EdgeVulnerabilityIDVulnerabilityType Edge = "VULNERABILITY_ID_VULNERABILITY_TYPE"
+	EdgeVulnerabilityTypeVulnerabilityID Edge = "VULNERABILITY_TYPE_VULNERABILITY_ID"
 	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
 	EdgeVulnerabilityVulnMetadata        Edge = "VULNERABILITY_VULN_METADATA"
 	EdgeCertifyBadArtifact               Edge = "CERTIFY_BAD_ARTIFACT"
@@ -1723,8 +1735,14 @@ var AllEdge = []Edge{
 	EdgePackageHasSourceAt,
 	EdgePackageIsDependency,
 	EdgePackageIsOccurrence,
+	EdgePackageNamePackageNamespace,
+	EdgePackageNamePackageVersion,
+	EdgePackageNamespacePackageName,
+	EdgePackageNamespacePackageType,
 	EdgePackagePkgEqual,
 	EdgePackagePointOfContact,
+	EdgePackageTypePackageNamespace,
+	EdgePackageVersionPackageName,
 	EdgeSourceCertifyBad,
 	EdgeSourceCertifyGood,
 	EdgeSourceCertifyLegal,
@@ -1732,9 +1750,15 @@ var AllEdge = []Edge{
 	EdgeSourceHasMetadata,
 	EdgeSourceHasSourceAt,
 	EdgeSourceIsOccurrence,
+	EdgeSourceNameSourceNamespace,
+	EdgeSourceNamespaceSourceName,
+	EdgeSourceNamespaceSourceType,
 	EdgeSourcePointOfContact,
+	EdgeSourceTypeSourceNamespace,
 	EdgeVulnerabilityCertifyVexStatement,
 	EdgeVulnerabilityCertifyVuln,
+	EdgeVulnerabilityIDVulnerabilityType,
+	EdgeVulnerabilityTypeVulnerabilityID,
 	EdgeVulnerabilityVulnEqual,
 	EdgeVulnerabilityVulnMetadata,
 	EdgeCertifyBadArtifact,
@@ -1780,7 +1804,7 @@ var AllEdge = []Edge{
 
 func (e Edge) IsValid() bool {
 	switch e {
-	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasMetadata, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeLicenseCertifyLegal, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyLegal, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasMetadata, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgePackagePointOfContact, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyLegal, EdgeSourceCertifyScorecard, EdgeSourceHasMetadata, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourcePointOfContact, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityVulnEqual, EdgeVulnerabilityVulnMetadata, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyLegalLicense, EdgeCertifyLegalPackage, EdgeCertifyLegalSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementPackage, EdgeCertifyVexStatementVulnerability, EdgeCertifyVulnPackage, EdgeCertifyVulnVulnerability, EdgeHashEqualArtifact, EdgeHasMetadataArtifact, EdgeHasMetadataPackage, EdgeHasMetadataSource, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSbomIncludedSoftware, EdgeHasSbomIncludedDependencies, EdgeHasSbomIncludedOccurrences, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgePkgEqualPackage, EdgePointOfContactArtifact, EdgePointOfContactPackage, EdgePointOfContactSource, EdgeVulnEqualVulnerability, EdgeVulnMetadataVulnerability:
+	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasMetadata, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeArtifactPointOfContact, EdgeBuilderHasSlsa, EdgeLicenseCertifyLegal, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyLegal, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasMetadata, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackageNamePackageNamespace, EdgePackageNamePackageVersion, EdgePackageNamespacePackageName, EdgePackageNamespacePackageType, EdgePackagePkgEqual, EdgePackagePointOfContact, EdgePackageTypePackageNamespace, EdgePackageVersionPackageName, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyLegal, EdgeSourceCertifyScorecard, EdgeSourceHasMetadata, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeSourceNameSourceNamespace, EdgeSourceNamespaceSourceName, EdgeSourceNamespaceSourceType, EdgeSourcePointOfContact, EdgeSourceTypeSourceNamespace, EdgeVulnerabilityCertifyVexStatement, EdgeVulnerabilityCertifyVuln, EdgeVulnerabilityIDVulnerabilityType, EdgeVulnerabilityTypeVulnerabilityID, EdgeVulnerabilityVulnEqual, EdgeVulnerabilityVulnMetadata, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyLegalLicense, EdgeCertifyLegalPackage, EdgeCertifyLegalSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementPackage, EdgeCertifyVexStatementVulnerability, EdgeCertifyVulnPackage, EdgeCertifyVulnVulnerability, EdgeHashEqualArtifact, EdgeHasMetadataArtifact, EdgeHasMetadataPackage, EdgeHasMetadataSource, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSbomIncludedSoftware, EdgeHasSbomIncludedDependencies, EdgeHasSbomIncludedOccurrences, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgePkgEqualPackage, EdgePointOfContactArtifact, EdgePointOfContactPackage, EdgePointOfContactSource, EdgeVulnEqualVulnerability, EdgeVulnMetadataVulnerability:
 		return true
 	}
 	return false
