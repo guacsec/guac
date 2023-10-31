@@ -49,8 +49,6 @@ services:
     depends_on:
       guac-collectsub:
         condition: service_healthy
-      guac-graphql:
-        condition: service_healthy
     volumes:
       - ./container_files/guac:/guac:z
 
@@ -62,8 +60,6 @@ services:
     restart: on-failure
     depends_on:
       guac-collectsub:
-        condition: service_healthy
-      guac-graphql:
         condition: service_healthy
     volumes:
       - ./container_files/guac:/guac:z
@@ -79,8 +75,6 @@ services:
     depends_on:
       guac-collectsub:
         condition: service_healthy
-      guac-graphql:
-        condition: service_healthy
     volumes:
       - ./container_files/guac:/guac:z
 
@@ -92,8 +86,6 @@ services:
     restart: on-failure
     depends_on:
       guac-collectsub:
-        condition: service_healthy
-      guac-graphql:
         condition: service_healthy
     volumes:
       - ./container_files/guac:/guac:z
