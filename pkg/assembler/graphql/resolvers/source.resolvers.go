@@ -31,7 +31,7 @@ func (r *mutationResolver) IngestSources(ctx context.Context, sources []*model.S
 	ingestedSources, err := r.Backend.IngestSources(ctx, sources)
 	if err == nil {
 		results := helpers.GetSourceAsIds(ingestedSources)
-		if len(results) != len(ingestedSources) {
+		if len(results) != len(sources) {
 			return nil, fmt.Errorf("could no derive correct package ID information for ingested packages, expected to return 1 but have %d", len(results))
 		}
 		return results, nil
