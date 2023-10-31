@@ -138,7 +138,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nats-io/jwt/v2 v2.5.2 // indirect
-	github.com/nats-io/nkeys v0.4.5 // indirect
+	github.com/nats-io/nkeys v0.4.6 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
@@ -221,11 +221,11 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.4.8
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/json-iterator/go v1.1.12
-	github.com/klauspost/compress v1.17.0
+	github.com/klauspost/compress v1.17.2
 	github.com/lib/pq v1.10.9
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nats-io/nats-server/v2 v2.10.3
+	github.com/nats-io/nats-server/v2 v2.10.4
 	github.com/nats-io/nats.go v1.31.0
 	github.com/openvex/go-vex v0.2.5
 	github.com/ossf/scorecard/v4 v4.13.0
