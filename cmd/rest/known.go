@@ -21,11 +21,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Khan/genqlient/graphql"
-	"github.com/gin-gonic/gin"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
+
+	"github.com/Khan/genqlient/graphql"
+	"github.com/gin-gonic/gin"
 )
 
 func artifactHandlerForArtifact(ctx context.Context) func(c *gin.Context) {
@@ -116,7 +117,7 @@ func packageHandlerForHash(ctx context.Context) func(c *gin.Context) {
 		// Convert package URL to package input
 		pkgInput, err := helpers.PurlToPkg(hash)
 		if err != nil {
-			c.String(400, "invalid purl")
+			c.String(400, "invalid hash")
 			return
 		}
 
