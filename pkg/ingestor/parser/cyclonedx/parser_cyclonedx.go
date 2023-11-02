@@ -36,8 +36,6 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-const topCdxPurlGuac string = "pkg:guac/cdx/"
-
 var zeroTime = time.Unix(0, 0)
 
 var vexStatusMap = map[cdx.ImpactAnalysisState]model.VexStatus{
@@ -469,12 +467,16 @@ func guacCDXFilePurl(fileName string, version string, topLevel bool) string {
 		if version != "" {
 			splitVersion := strings.Split(version, ":")
 			if len(splitVersion) == 2 {
-				s := fmt.Sprintf(topCdxPurlGuac+"%s:%s", strings.ToLower(splitVersion[0]), splitVersion[1])
+				s := fmt.Sprintf("pkg:guac/cdx/"+"%s:%s", strings.ToLower(splitVersion[0]), splitVersion[1])
 				s += fmt.Sprintf("#%s", escapedName)
 				return s
 			}
 		}
-		return topCdxPurlGuac + escapedName
+		if strings.HasPrefix(escapedName, "/") {
+			return fmt.Sprintf("pkg:guac/cdx%s", escapedName)
+		} else {
+			return fmt.Sprintf("pkg:guac/cdx/%s", escapedName)
+		}
 	} else {
 		if version != "" {
 			splitVersion := strings.Split(version, ":")
@@ -482,7 +484,11 @@ func guacCDXFilePurl(fileName string, version string, topLevel bool) string {
 				return asmhelpers.GuacFilePurl(splitVersion[0], splitVersion[1], &escapedName)
 			}
 		}
-		return asmhelpers.PurlFilesGuac + escapedName
+		if strings.HasPrefix(escapedName, "/") {
+			return fmt.Sprintf("pkg:guac/files%s", escapedName)
+		} else {
+			return fmt.Sprintf("pkg:guac/files/%s", escapedName)
+		}
 	}
 }
 
@@ -491,7 +497,7 @@ func guacCDXPkgPurl(componentName string, version string, tag string, topLevel b
 	typeNamespaceString := ""
 	escapedName := asmhelpers.SanitizeString(componentName)
 	if topLevel {
-		typeNamespaceString = topCdxPurlGuac
+		typeNamespaceString = "pkg:guac/cdx/"
 	} else {
 		typeNamespaceString = asmhelpers.PurlPkgGuac
 	}
