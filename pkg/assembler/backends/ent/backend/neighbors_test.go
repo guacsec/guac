@@ -41,8 +41,8 @@ func (s *Suite) TestNode() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Expected: []interface{}{
 				a1out,
-				p4outNamespace,
-				s1outNamespace,
+				p4out,
+				s1out,
 				b1out,
 			},
 		},
@@ -74,26 +74,26 @@ func (s *Suite) TestNode() {
 			}
 
 			for _, inP := range test.InPkg {
-				if p, err := b.IngestPackage(ctx, *inP); err != nil {
+				if id, err := b.IngestPackageID(ctx, *inP); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				} else {
-					ids = append(ids, p.ID)
+					ids = append(ids, id)
 				}
 			}
 
 			for _, inSrc := range test.InSrc {
-				if src, err := b.IngestSource(ctx, *inSrc); err != nil {
+				if id, err := b.IngestSourceID(ctx, *inSrc); err != nil {
 					s.T().Fatalf("Could not ingest source: %v", err)
 				} else {
-					ids = append(ids, src.ID)
+					ids = append(ids, id)
 				}
 			}
 
 			for _, inBLD := range test.InBld {
-				if bld, err := b.IngestBuilder(ctx, inBLD); err != nil {
+				if id, err := b.IngestBuilderID(ctx, inBLD); err != nil {
 					s.T().Fatalf("Could not ingest builder: %v", err)
 				} else {
-					ids = append(ids, bld.ID)
+					ids = append(ids, id)
 				}
 			}
 
@@ -116,8 +116,12 @@ func (s *Suite) TestNodes() {
 	v, err := be.IngestArtifactID(s.Ctx, a1)
 	s.Require().NoError(err)
 
-		p, err := be.IngestPackage(s.Ctx, *p4)
-		s.Require().NoError(err)
+	id, err := be.IngestPackageID(s.Ctx, *p4)
+	s.Require().NoError(err)
+
+	pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
+	s.Require().NoError(err)
+	p := pkgs[0]
 
 	nodes, err := be.Nodes(s.Ctx, []string{v, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
 	s.Require().NoError(err)

@@ -565,11 +565,11 @@ func (s *Suite) TestIngestCertifyVulnerability() {
 			}
 
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
 			}
 
@@ -1032,10 +1032,10 @@ func (s *Suite) TestIngestCertifyVulns() {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
 
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerabilities: %a", err)
 			}
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
 			}
 

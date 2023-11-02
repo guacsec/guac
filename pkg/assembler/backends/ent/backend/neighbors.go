@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -103,6 +104,17 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 			return nil, err
 		}
 		return toModelSource(s), nil
+	case *ent.SourceName:
+		s, err := b.client.SourceName.Query().
+			Where(sourcename.IDIn(v.ID)).
+			WithNamespace(func(q *ent.SourceNamespaceQuery) {
+				q.WithSourceType()
+			}).
+			Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return toModelSourceName(s), nil
 	case *ent.Builder:
 		return toModelBuilder(v), nil
 	case *ent.VulnerabilityType:
