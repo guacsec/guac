@@ -56,9 +56,9 @@ func (HasMetadata) Edges() []ent.Edge {
 
 func (HasMetadata) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("timestamp", "key", "value", "justification", "origin", "collector", "source_id").Unique().Annotations(entsql.IndexWhere("source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
-		index.Fields("timestamp", "key", "value", "justification", "origin", "collector", "package_version_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
-		index.Fields("timestamp", "key", "value", "justification", "origin", "collector", "package_name_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL")),
-		index.Fields("timestamp", "key", "value", "justification", "origin", "collector", "artifact_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL")),
+		index.Fields("key", "value", "justification", "origin", "collector", "source_id").Unique().Annotations(entsql.IndexWhere("source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
+		index.Fields("key", "value", "justification", "origin", "collector", "package_version_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
+		index.Fields("key", "value", "justification", "origin", "collector", "package_name_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL")),
+		index.Fields("key", "value", "justification", "origin", "collector", "artifact_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL")),
 	}
 }
