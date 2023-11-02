@@ -19,7 +19,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// Return a package structure containing only IDs
+// Flattens the trie and returns a flat package structure containing only IDs
 func GetPackageAsIds(packages []*model.Package) []*model.PackageIDs {
 	results := []*model.PackageIDs{}
 	for _, pkg := range packages {
@@ -41,7 +41,7 @@ func GetPackageAsIds(packages []*model.Package) []*model.PackageIDs {
 	return results
 }
 
-// Return a source structure containing only IDs
+// Flattens the trie and returns a flat source structure containing only IDs
 func GetSourceAsIds(sources []*model.Source) []*model.SourceIDs {
 	results := []*model.SourceIDs{}
 	for _, src := range sources {
