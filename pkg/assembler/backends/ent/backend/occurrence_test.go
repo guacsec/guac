@@ -19,6 +19,7 @@ package backend
 
 import (
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -184,13 +185,6 @@ var s1out = &model.Source{
 	}},
 }
 
-var s1outNamespace = &model.Source{
-	Type: "git",
-	Namespaces: []*model.SourceNamespace{{
-		Namespace: "github.com/jeff",
-	}},
-}
-
 var s2 = &model.SourceInputSpec{
 	Type:      "git",
 	Namespace: "github.com/bob",
@@ -213,7 +207,7 @@ func (s *Suite) TestOccurrenceHappyPath() {
 	be, err := GetBackend(s.Client)
 	s.Require().NoError(err)
 
-	_, err = be.IngestPackage(s.Ctx, *p1)
+	_, err = be.IngestPackageID(s.Ctx, *p1)
 	s.Require().NoError(err)
 
 	_, err = be.IngestArtifactID(s.Ctx, a1)
@@ -571,13 +565,13 @@ func (s *Suite) TestOccurrence() {
 			}
 
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				}
 			}
 
 			for _, src := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *src); err != nil {
+				if _, err := b.IngestSourceID(ctx, *src); err != nil {
 					s.T().Fatalf("Could not ingest source: %v", err)
 				}
 			}

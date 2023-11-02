@@ -618,10 +618,10 @@ func (s *Suite) TestIsDependency() {
 
 			pksIDs := make([]string, len(test.InPkg))
 			for i, a := range test.InPkg {
-				if p, err := b.IngestPackage(ctx, *a); err != nil {
+				if id, err := b.IngestPackageID(ctx, *a); err != nil {
 					s.Require().NoError(err, "Could not ingest pkg")
 				} else {
-					pksIDs[i] = p.ID
+					pksIDs[i] = id
 				}
 			}
 
@@ -739,7 +739,7 @@ func (s *Suite) TestIngestDependencies() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
+				if _, err := b.IngestPackageID(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}

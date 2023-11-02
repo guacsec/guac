@@ -40,7 +40,7 @@ func (s *Suite) TestCreateSoftwareTree() {
 	s.NoError(err)
 
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-	pkg, err := be.IngestPackage(s.Ctx, model.PkgInputSpec{
+	id, err2 := be.IngestPackageID(s.Ctx, model.PkgInputSpec{
 		Type:      "apk",
 		Namespace: ptr("alpine"),
 		Name:      "apk",
@@ -50,7 +50,11 @@ func (s *Suite) TestCreateSoftwareTree() {
 			{Key: "arch", Value: "x86"},
 		},
 	})
-	s.NoError(err)
+	s.NoError(err2)
+	pkgs, err3 := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
+	s.NoError(err3)
+	pkg := pkgs[0]
+	s.NoError(err3)
 	s.NotNil(pkg)
 	s.Equal("apk", pkg.Type)
 
@@ -67,7 +71,7 @@ func (s *Suite) TestCreateSoftwareTree() {
 	}
 
 	// Ingest a second time should only create a new version
-	pkg, err = be.IngestPackage(s.Ctx, model.PkgInputSpec{
+	id, err2 = be.IngestPackageID(s.Ctx, model.PkgInputSpec{
 		Type:      "apk",
 		Namespace: ptr("alpine"),
 		Name:      "apk",
@@ -78,7 +82,11 @@ func (s *Suite) TestCreateSoftwareTree() {
 		},
 	})
 	// Ensure that we don't get a duplicate row error
+	s.NoError(err2)
+
+	pkgs, err = be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
 	s.NoError(err)
+	pkg = pkgs[0]
 	s.NotNil(pkg)
 
 	if s.Len(pkg.Namespaces, 1) {
@@ -99,7 +107,7 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 	s.NoError(err)
 
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-	pkg1, err := be.IngestPackage(s.Ctx, model.PkgInputSpec{
+	id, err2 := be.IngestPackageID(s.Ctx, model.PkgInputSpec{
 		Type:       "apk",
 		Namespace:  ptr("alpine"),
 		Name:       "apk",
@@ -107,7 +115,10 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 		Subpath:    nil,
 		Qualifiers: []*model.PackageQualifierInputSpec{{Key: "arch", Value: "x86"}},
 	})
-	s.NoError(err)
+	s.NoError(err2)
+	pkgs, err3 := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
+	pkg1 := pkgs[0]
+	s.NoError(err3)
 	s.NotNil(pkg1)
 	s.Equal("", pkg1.Namespaces[0].Names[0].Versions[0].Subpath)
 
@@ -121,8 +132,11 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 		Qualifiers: []*model.PackageQualifierInputSpec{{Key: "arch", Value: "arm64"}},
 	}
 
-	pkg2, err := be.IngestPackage(s.Ctx, spec2)
-	s.NoError(err)
+	id2, err4 := be.IngestPackageID(s.Ctx, spec2)
+	s.NoError(err4)
+	pkgs, err3 = be.Packages(s.Ctx, &model.PkgSpec{ID: &id2})
+	s.NoError(err3)
+	pkg2 := pkgs[0]
 	s.NotNil(pkg2)
 }
 
@@ -130,7 +144,7 @@ func (s *Suite) TestIngestOccurrence_Package() {
 	be, err := GetBackend(s.Client)
 	s.NoError(err)
 
-	_, err = be.IngestPackage(s.Ctx, *p1)
+	_, err = be.IngestPackageID(s.Ctx, *p1)
 	s.NoError(err)
 
 	_, err = be.IngestArtifactID(s.Ctx, &model.ArtifactInputSpec{

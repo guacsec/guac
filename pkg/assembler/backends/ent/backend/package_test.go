@@ -91,11 +91,11 @@ func (s *Suite) Test_get_package_helpers() {
 		Subpath:   ptr("subpath"),
 	}
 
-	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p2Spec)
 	})
 	s.Require().NoError(err)
-	pkgVersionID, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	pkgVersionID, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p1Spec)
 	})
 	s.Require().NoError(err)
@@ -147,14 +147,14 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		},
 	}
 
-	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
 	})
 	s.Require().NoError(err)
 	s.Require().NotNil(pkg)
 
 	// Ingest twice to ensure upserts are working
-	pkg, err = WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	pkg, err = WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
 	})
 	s.Require().NoError(err)
@@ -166,7 +166,7 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 
 	s.Run("No Qualifiers", func() {
 		spec.Qualifiers = nil
-		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
 			return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
 		})
 		s.Require().NoError(err)
@@ -222,12 +222,15 @@ func (s *Suite) Test_IngestPackages() {
 			c, err := GetBackend(s.Client)
 			s.NoError(err)
 
-			got, err := c.IngestPackages(ctx, tt.pkgInputs)
+			got, err := c.IngestPackageIDs(ctx, tt.pkgInputs)
 			if (err != nil) != tt.wantErr {
 				s.T().Errorf("demoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+
+			// Here we check if all parameters are present and if they are alla different each other see https://github.com/guacsec/guac/pull/1330
+			if len(got) != 4 || (got[0] == got[1] || got[1] == got[2] || got[2] == got[3]) {
+				diff := cmp.Diff(tt.want, got, ignoreID)
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -281,6 +284,15 @@ func (s *Suite) Test_Packages() {
 			want: []*model.Package{p3out},
 		},
 		{
+			name:     "tensorflow with version and subpath but query without subpath",
+			pkgInput: p3,
+			pkgFilter: &model.PkgSpec{
+				Type: ptrfrom.String("pypi"),
+				Name: ptrfrom.String("tensorflow"),
+			},
+			want: []*model.Package{p3out},
+		},
+		{
 			name:     "tensorflow without subpath",
 			pkgInput: p2,
 			pkgFilter: &model.PkgSpec{
@@ -305,13 +317,14 @@ func (s *Suite) Test_Packages() {
 			t := s.T()
 			be, err := GetBackend(s.Client)
 			s.NoError(err)
-			ingestedPkg, err := be.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgID, err := be.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if tt.idInFilter && ingestedPkg != nil {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+
+			if tt.idInFilter && ingestedPkgID != "" {
+				tt.pkgFilter.ID = &ingestedPkgID
 			}
 			got, err := be.Packages(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -320,6 +333,66 @@ func (s *Suite) Test_Packages() {
 			}
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+// This test is to traverse the other branches of the upsert, not covered by the happy path at the insertion,
+// when the create fails due to the presence of the input in the store, and a where query is used in the error branch
+func (s *Suite) TestPackagesIngestSameTwice() {
+
+	tests := []struct {
+		name          string
+		pkgInputsSpec []model.PkgInputSpec
+	}{{
+		name: "IngestSameTwice",
+		pkgInputsSpec: []model.PkgInputSpec{
+			{
+				Type:      "apk",
+				Namespace: ptr("test"),
+				Name:      "alpine",
+				Version:   ptr("1.0.0"),
+				Subpath:   ptr("subpath"),
+				Qualifiers: []*model.PackageQualifierInputSpec{
+					{Key: "arch", Value: "amd64"},
+					{Key: "ac", Value: "dc"},
+				},
+			},
+			{
+				Type:      "apk",
+				Namespace: ptr("test"),
+				Name:      "alpine",
+				Version:   ptr("1.0.0"),
+				Subpath:   ptr("subpath"),
+				Qualifiers: []*model.PackageQualifierInputSpec{
+					{Key: "arch", Value: "amd64"},
+					{Key: "ac", Value: "dc"},
+				},
+			},
+		},
+	}}
+
+	ctx := s.Ctx
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+
+			for _, bIn := range tt.pkgInputsSpec {
+				if _, err := b.IngestPackageID(ctx, bIn); err != nil {
+					t.Fatalf("Could not ingest package: %v , err: %v", bIn, err)
+				}
+			}
+			items, err := b.Packages(ctx, &model.PkgSpec{})
+			if err != nil {
+				t.Fatalf("Error on load Packages %v", err)
+			}
+			if len(items) == 2 {
+				t.Fatalf("Wrong ingestions, ingest same twice found two")
 			}
 		})
 	}
