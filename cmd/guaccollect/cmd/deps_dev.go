@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -30,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -43,6 +45,10 @@ type depsDevOptions struct {
 	poll bool
 	// query for dependencies
 	retrieveDependencies bool
+	// enable prometheus server
+	enablePrometheus bool
+	// prometheus address
+	promeAddr string
 }
 
 var depsDevCmd = &cobra.Command{
@@ -61,13 +67,20 @@ var depsDevCmd = &cobra.Command{
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("retrieve-dependencies"),
-			args)
+			args,
+			viper.GetBool("enable-prometheus"),
+			viper.GetString("prometheus-address"),
+		)
+		//print out all the flags
+		logger.Infof("viewing flags: %+v", opts)
+		logger.Infof("prometheus address: %s %s", opts.promeAddr, viper.GetString("prometheus-addr"))
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
-
+		ctx = metrics.WithMetrics(ctx)
+		m := metrics.FromContext(ctx)
 		// Register collector
 		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second)
 		if err != nil {
@@ -77,17 +90,28 @@ var depsDevCmd = &cobra.Command{
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
+		if opts.enablePrometheus {
+			go func() {
+				http.Handle("/metrics", m.MetricsHandler())
+				if err := http.ListenAndServe(opts.promeAddr, nil); err != nil {
+					logger.Fatalf("Error starting HTTP server: %v", err)
+				}
+			}()
+		}
 
 		initializeNATsandCollector(ctx, opts.natsAddr)
 	},
 }
 
-func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, retrieveDependencies bool, args []string) (depsDevOptions, error) {
+func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, retrieveDependencies bool, args []string,
+	enablePrometheus bool, prometheusServerAddress string,
+) (depsDevOptions, error) {
 	var opts depsDevOptions
 	opts.natsAddr = natsAddr
 	opts.poll = poll
 	opts.retrieveDependencies = retrieveDependencies
-
+	opts.enablePrometheus = enablePrometheus
+	opts.promeAddr = prometheusServerAddress
 	if useCsub {
 		csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 		if err != nil {
@@ -109,7 +133,6 @@ func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTl
 	sources := []datasource.Source{}
 	for _, arg := range args {
 		sources = append(sources, datasource.Source{Value: arg})
-
 	}
 
 	var err error
@@ -124,7 +147,7 @@ func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTl
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"retrieve-dependencies"})
+	set, err := cli.BuildFlags([]string{"retrieve-dependencies", "enable-prometheus", "prometheus-address"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

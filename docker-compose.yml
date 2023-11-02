@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   nats:
-    networks: [frontend]
+    networks: [ frontend ]
     image: "docker.io/library/nats:2.9.17-alpine"
     command: "--config /config/nats/js.conf -m 8222"
     ports:
@@ -14,14 +14,20 @@ services:
       - ./container_files/nats:/config/nats:z
     restart: on-failure
     healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:8222/healthz"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "http://localhost:8222/healthz"
+        ]
       interval: 10s
       timeout: 10s
       retries: 3
       start_period: 5s
 
   guac-collectsub:
-    networks: [frontend]
+    networks: [ frontend ]
     image: $GUAC_IMAGE
     command: "/opt/guac/guaccsub"
     working_dir: /guac
@@ -34,14 +40,14 @@ services:
     volumes:
       - ./container_files/guac:/guac:z
     healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:2782"]
+      test: [ "CMD", "wget", "--spider", "http://localhost:2782" ]
       interval: 10s
       timeout: 10s
       retries: 3
       start_period: 5s
 
   guac-ingestor:
-    networks: [frontend]
+    networks: [ frontend ]
     image: $GUAC_IMAGE
     command: "/opt/guac/guacingest"
     working_dir: /guac
@@ -53,7 +59,7 @@ services:
       - ./container_files/guac:/guac:z
 
   oci-collector:
-    networks: [frontend]
+    networks: [ frontend ]
     image: $GUAC_IMAGE
     command: "/opt/guac/guaccollect image"
     working_dir: /guac
@@ -65,7 +71,7 @@ services:
       - ./container_files/guac:/guac:z
 
   depsdev-collector:
-    networks: [frontend]
+    networks: [ frontend ]
     image: $GUAC_IMAGE
     command: "/opt/guac/guaccollect deps_dev"
     working_dir: /guac
@@ -77,9 +83,11 @@ services:
         condition: service_healthy
     volumes:
       - ./container_files/guac:/guac:z
+    ports:
+      - "9091:9091" # for prometheus metrics
 
   osv-certifier:
-    networks: [frontend]
+    networks: [ frontend ]
     image: $GUAC_IMAGE
     command: "/opt/guac/guacone certifier osv"
     working_dir: /guac

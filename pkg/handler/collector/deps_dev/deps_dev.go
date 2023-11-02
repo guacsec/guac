@@ -23,16 +23,16 @@ import (
 	"sync"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-	"golang.org/x/exp/maps"
-
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	pb "github.com/guacsec/guac/pkg/handler/collector/deps_dev/internal"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/guacsec/guac/pkg/version"
+	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/exp/maps"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -40,11 +40,13 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
-	DepsCollector = "deps.dev"
-	goUpperCase   = "GO"
-	golang        = "golang"
-	maven         = "maven"
-	sourceRepo    = "SOURCE_REPO"
+	DepsCollector               = "deps.dev"
+	goUpperCase                 = "GO"
+	golang                      = "golang"
+	maven                       = "maven"
+	sourceRepo                  = "SOURCE_REPO"
+	GetProjectDurationHistogram = "http_deps_dev_project_duration"
+	GetVersionErrorsCounter     = "http_deps_dev_version_errors"
 )
 
 type IsDepPackage struct {
@@ -68,12 +70,15 @@ type depsCollector struct {
 	poll                 bool
 	retrieveDependencies bool
 	interval             time.Duration
+	metrics              metrics.MetricCollector
 	checkedPurls         map[string]*PackageComponent
 	ingestedSource       map[string]*model.SourceInputSpec
 	projectInfoMap       map[string]*pb.Project
 	versions             map[string]*pb.Version
 	dependencies         map[string]*pb.Dependencies
 }
+
+var registerOnce sync.Once
 
 func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, retrieveDependencies bool, interval time.Duration) (*depsCollector, error) {
 	// Get the system certificates.
@@ -94,6 +99,11 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	// Create a new Insights Client.
 	client := pb.NewInsightsClient(conn)
 
+	// Initialize the metrics collector
+	metricsCollector := metrics.FromContext(ctx)
+	if err := registerMetricsOnce(ctx, metricsCollector); err != nil {
+		return nil, fmt.Errorf("unable to register metrics: %w", err)
+	}
 	return &depsCollector{
 		collectDataSource:    collectDataSource,
 		client:               client,
@@ -105,6 +115,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		projectInfoMap:       map[string]*pb.Project{},
 		versions:             map[string]*pb.Version{},
 		dependencies:         map[string]*pb.Dependencies{},
+		metrics:              metricsCollector,
 	}, nil
 }
 
@@ -127,7 +138,6 @@ func (d *depsCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			return fmt.Errorf("unable to retrieve purls from collector subscriber: %w", err)
 		}
 	}
-
 	return nil
 }
 
@@ -146,14 +156,10 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 		return nil
 	}
 
-	start := time.Now()
 	err = d.getAllDependencies(ctx, ds.PurlDataSources)
 	if err != nil {
 		return fmt.Errorf("failed to get all dependencies: %w", err)
 	}
-	elapsed := time.Since(start)
-	// this is to know how long it takes to get all the dependencies for testing purposes
-	fmt.Printf("time taken to get all dependencies: %v \n", elapsed) // TODO: remove this when metrics are added
 	for _, purl := range ds.PurlDataSources {
 		err := d.fetchDependencies(ctx, purl.Value, docChannel)
 		if err != nil {
@@ -171,8 +177,8 @@ func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *pr
 func (d *depsCollector) validatePurls(ctx context.Context, datasources []datasource.Source) (map[string]*pb.VersionKey, map[string]*model.PkgInputSpec) {
 	logger := logging.FromContext(ctx)
 
-	validVersionKeys := map[string]*pb.VersionKey{}
-	validPackageInputs := map[string]*model.PkgInputSpec{}
+	validVersionKeys := make(map[string]*pb.VersionKey)
+	validPackageInputs := make(map[string]*model.PkgInputSpec)
 
 	for _, ds := range datasources {
 		purl := ds.Value
@@ -535,6 +541,9 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 		logger.Debugf("The version key was not found in the map: %v", versionKey)
 		versionResponse, err = d.client.GetVersion(ctx, versionReq)
 		if err != nil {
+			if err := d.metrics.AddCounter(ctx, GetVersionErrorsCounter, 1, pkgType, *namespace, name); err != nil {
+				logger.Errorf("failed to add counter: %v", err)
+			}
 			return fmt.Errorf("failed to get version information: %w", err)
 		}
 	}
@@ -693,7 +702,6 @@ func (d *depsCollector) getVersions(ctx context.Context, inputs <-chan *pb.Versi
 
 			packageVersion, err := d.getVersion(ctx, input)
 			if err != nil {
-				// TODO - when metrics are added, add a metric for this
 				return
 			}
 			projectKey := d.projectKey(packageVersion)
@@ -719,6 +727,7 @@ func (d *depsCollector) getVersions(ctx context.Context, inputs <-chan *pb.Versi
 
 // getProject fetches project info for a given project URL.
 func (d *depsCollector) getProject(ctx context.Context, v *pb.ProjectKey) (*pb.Project, error) {
+	defer d.metrics.MeasureFunctionExecutionTime(ctx, GetProjectDurationHistogram) // nolint:errcheck
 	return d.client.GetProject(ctx, &pb.GetProjectRequest{
 		ProjectKey: v,
 	})
@@ -726,6 +735,7 @@ func (d *depsCollector) getProject(ctx context.Context, v *pb.ProjectKey) (*pb.P
 
 // getVersions fetches version info from deps.dev.
 func (d *depsCollector) getVersion(ctx context.Context, v *pb.VersionKey) (*pb.Version, error) {
+	defer d.metrics.MeasureFunctionExecutionTime(ctx, "getVersion") // nolint:errcheck
 	return d.client.GetVersion(ctx, &pb.GetVersionRequest{
 		VersionKey: v,
 	})
@@ -750,4 +760,22 @@ func (d *depsCollector) projectKey(versionResponse *pb.Version) *pb.ProjectKey {
 		}
 	}
 	return nil
+}
+
+// registerMetrics registers the metrics for the collector.
+func registerMetrics(ctx context.Context, m metrics.MetricCollector) error {
+	// Registering counter for get version errors
+	if _, err := m.RegisterCounter(ctx, GetVersionErrorsCounter, "pkgtype", "namespace", "name"); err != nil {
+		return fmt.Errorf("failed to register counter for get version errors: %w", err)
+	}
+	return nil
+}
+
+// registerMetricsOnce registers the metrics for the collector once.
+func registerMetricsOnce(ctx context.Context, metricsCollector metrics.MetricCollector) error {
+	var err error
+	registerOnce.Do(func() {
+		err = registerMetrics(ctx, metricsCollector)
+	})
+	return err
 }

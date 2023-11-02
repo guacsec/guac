@@ -16,60 +16,174 @@
 package metrics
 
 import (
+	"context"
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type prom struct {
-	counters map[string]prometheus.Counter
-	summary  map[string]prometheus.Summary
+const (
+	functionDuration = "function_duration_seconds"
+	collectorKey     = "metrics"
+)
+
+type metrics string
+
+// prometheusCollector is a struct that holds the maps for histograms, gauges, and counters.
+type prometheusCollector struct {
+	// histograms is a map that holds the HistogramVec objects.
+	histograms map[string]*prometheus.HistogramVec
+	// gauges is a map that holds the GaugeVec objects.
+	gauges map[string]*prometheus.GaugeVec
+	// counters is a map that holds the CounterVec objects.
+	counters map[string]*prometheus.CounterVec
 }
 
-// NewPrometheus returns a new prometheus metrics implementation
-func NewPrometheus() Metrics {
-	return &prom{
-		counters: make(map[string]prometheus.Counter),
-		summary:  make(map[string]prometheus.Summary),
+// SetGauge sets a gauge metric with a given name, value, and labels.
+func (p *prometheusCollector) SetGauge(ctx context.Context, name string, value float64, labels ...string) error {
+	if _, ok := p.gauges[name]; !ok {
+		return fmt.Errorf("gauge '%s' not found", name)
 	}
+	p.gauges[name].WithLabelValues(labels...).Set(value)
+	return nil
 }
 
-// NewCounter creates a new counter metric
-func (p *prom) NewCounter(name string) error {
+// AddHistogram increments a histogram metric with a given name, value, and labels.
+func (p *prometheusCollector) AddHistogram(ctx context.Context, name string, value float64, labels ...string) error {
+	if _, ok := p.histograms[name]; !ok {
+		return fmt.Errorf("histogram '%s' not found", name)
+	}
+	p.histograms[name].WithLabelValues(labels...).Observe(value)
+	return nil
+}
+
+// AddCounter increments a counter metric with a given name, value, and labels.
+// It returns an error if the counter is not found.
+func (p *prometheusCollector) AddCounter(ctx context.Context, name string, value float64, labels ...string) error {
+	if _, ok := p.counters[name]; !ok {
+		return fmt.Errorf("counter '%s' not found", name)
+	}
+	p.counters[name].WithLabelValues(labels...).Add(value)
+	return nil
+}
+
+// MetricsHandler returns an http.Handler for the prometheus metrics.
+func (p *prometheusCollector) MetricsHandler() http.Handler {
+	return promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{
+		EnableOpenMetrics: true,
+	})
+}
+
+// NewPrometheus creates a new prometheusCollector with empty sync.Maps for histograms, gauges, and counters.
+func NewPrometheus() MetricCollector {
+	functionDuration := prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "function_duration_seconds",
+			Help:    "Time spent executing functions.",
+			Buckets: prometheus.DefBuckets,
+		},
+		[]string{"function"},
+	)
+	p := &prometheusCollector{
+		histograms: make(map[string]*prometheus.HistogramVec),
+		gauges:     make(map[string]*prometheus.GaugeVec),
+		counters:   make(map[string]*prometheus.CounterVec),
+	}
+	p.histograms["function_duration_seconds"] = functionDuration
+	return p
+}
+
+// RegisterGauge registers a gauge metric with the given name and labels.
+func (p *prometheusCollector) RegisterGauge(ctx context.Context, name string, labels ...string) (Counter, error) {
+	if _, ok := p.gauges[name]; ok {
+		return nil, fmt.Errorf("gauge '%s' already registered", name)
+	}
+	gaugeVec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name:      name,
+		Help:      "Gauge for " + name,
+		Namespace: "guac",
+	}, labels)
+	p.gauges[name] = gaugeVec
+	if err := prometheus.Register(gaugeVec); err != nil {
+		return nil, fmt.Errorf("failed to register gauge '%s': %v", name, err)
+	}
+	return gaugeVec.WithLabelValues(labels...), nil
+}
+
+// RegisterCounter registers a counter metric with the given name and labels.
+func (p *prometheusCollector) RegisterCounter(ctx context.Context, name string, labels ...string) (Counter, error) {
 	if _, ok := p.counters[name]; ok {
-		return fmt.Errorf("counter %s already exists", name)
+		return nil, fmt.Errorf("counter '%s' already registered", name)
 	}
-	counter := prometheus.NewCounter(
-		prometheus.CounterOpts{
-			Name: fmt.Sprintf("%s_total", name),
-			Help: fmt.Sprintf("The total number of %s function calls", name),
-		})
-	prometheus.MustRegister(counter)
-	p.counters[name] = counter
+	counterVec := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name:      name,
+		Help:      "Counter for " + name,
+		Namespace: "guac",
+	}, labels)
+	p.counters[name] = counterVec
+	if err := prometheus.Register(counterVec); err != nil {
+		return nil, fmt.Errorf("failed to register counter '%s': %v", name, err)
+	}
+	return counterVec.WithLabelValues(labels...), nil
+}
+
+// RegisterHistogram registers a histogram metric with the given name and labels.
+func (p *prometheusCollector) RegisterHistogram(ctx context.Context, name string, labels ...string) (Observable, error) {
+	if _, ok := p.histograms[name]; ok {
+		return nil, fmt.Errorf("histogram '%s' already registered", name)
+	}
+	histogramVec := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name:      name,
+		Help:      "Histogram for " + name,
+		Namespace: "guac",
+	}, labels)
+	p.histograms[name] = histogramVec
+
+	if err := prometheus.Register(histogramVec); err != nil {
+		return nil, fmt.Errorf("failed to register histogram '%s': %v", name, err)
+	}
+	return histogramVec.WithLabelValues(labels...), nil
+}
+
+// WithMetrics returns a new context with a prometheusCollector.
+func WithMetrics(ctx context.Context) context.Context {
+	metricsCollector := NewPrometheus()
+	return context.WithValue(ctx, metrics(collectorKey), metricsCollector)
+}
+
+// MeasureFunctionExecutionTime measures the time duration of a function execution.
+// It can be used with defer to measure the duration of a function.
+// Example usage:
+//
+//	defer p.MeasureFunctionExecutionTime(ctx, "myFunction", "label1", "label2")()
+func (p *prometheusCollector) MeasureFunctionExecutionTime(ctx context.Context, name string) (func(), error) {
+	if _, ok := p.histograms[functionDuration]; !ok {
+		return nil, fmt.Errorf("histogram '%s' not found", name)
+	}
+	start := time.Now()
+	return func() {
+		duration := time.Since(start)
+		p.histograms[functionDuration].WithLabelValues([]string{name}...).Observe(duration.Seconds())
+	}, nil
+}
+
+// ObserveHistogram observes a histogram metric with a given name, value, and labels.
+func (p *prometheusCollector) ObserveHistogram(ctx context.Context, name string, value float64, labels ...string) error {
+	if _, ok := p.histograms[name]; !ok {
+		return fmt.Errorf("histogram '%s' not found", name)
+	}
+	p.histograms[name].WithLabelValues(labels...).Observe(value)
 	return nil
 }
 
-// IncrementCounter increments a counter metric
-func (p *prom) IncrementCounter(funcName string) {
-	p.counters[funcName].Inc()
-}
-
-// NewSummary creates a new summary metric
-func (p *prom) NewSummary(name string) error {
-	if _, ok := p.summary[name]; ok {
-		return fmt.Errorf("summary %s already exists", name)
+// FromContext returns the MetricCollector from the context.
+func FromContext(ctx context.Context) MetricCollector {
+	c := metrics(collectorKey)
+	if met, ok := ctx.Value(c).(MetricCollector); ok {
+		return met
 	}
-	summary := prometheus.NewSummary(
-		prometheus.SummaryOpts{
-			Name: fmt.Sprintf("%s_summary", name),
-			Help: fmt.Sprintf("The summary of %s function calls", name),
-		})
-	prometheus.MustRegister(summary)
-	p.summary[name] = summary
-	return nil
-}
-
-// ObserveSummary records a value for a summary metric
-func (p *prom) ObserveSummary(funcName string, duration float64) {
-	p.summary[funcName].Observe(duration)
+	return NewPrometheus()
 }
