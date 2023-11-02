@@ -494,7 +494,7 @@ func (s *Suite) Test_HasSBOM() {
 				s.T().Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				}
 			}
@@ -761,7 +761,7 @@ func (s *Suite) TestIngestHasSBOMs() {
 				s.T().Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
