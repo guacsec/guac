@@ -516,7 +516,7 @@ func (s *Suite) TestHasSLSA() {
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
@@ -752,7 +752,7 @@ func (s *Suite) TestIngestHasSLSAs() {
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}

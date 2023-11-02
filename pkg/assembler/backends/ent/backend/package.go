@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"slices"
 	"sort"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -34,7 +35,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -42,10 +42,6 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	// query := b.client.PackageVersion.Query().Limit(MaxPageSize)
-
-	// query.Where(packageVersionQuery(pkgSpec))
-	// query.WithName(withPackageNameTree())
 	query := b.client.PackageType.Query().Limit(MaxPageSize)
 
 	paths, isGQL := getPreloads(ctx)
@@ -94,36 +90,24 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		return nil, err
 	}
 
-	// return collect(pkgs, func(v *ent.PackageVersion) *model.Package {
-	// 	return toModelPackage(backReferencePackageVersion(v))
-	// }), nil
-
 	return collect(pkgs, toModelPackage), nil
 }
 
-func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
+func (b *EntBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error) {
 	// FIXME: (ivanvanderbyl) This will be suboptimal because we can't batch insert relations with upserts. See Readme.
-	models := make([]*model.Package, len(pkgs))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range pkgs {
-		index := i
-		pkg := pkgs[index]
-		concurrently(eg, func() error {
-			p, err := b.IngestPackage(ctx, *pkg)
-			if err == nil {
-				models[index] = p
-			}
-			return err
-		})
+	pkgsID := make([]string, len(pkgs))
+	for i, pkg := range pkgs {
+		p, err := b.IngestPackageID(ctx, *pkg)
+		if err != nil {
+			return nil, err
+		}
+		pkgsID[i] = p
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
-	return models, nil
+	return pkgsID, nil
 }
 
-func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
-	pkgVersion, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.PackageVersion, error) {
+func (b *EntBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec) (string, error) {
+	pkgVersionID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), pkg)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to upsert package")
@@ -131,15 +115,16 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 		return p, nil
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelPackage(backReferencePackageVersion(pkgVersion.Unwrap())), nil
+	return strconv.Itoa(*pkgVersionID), nil
 }
 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
-func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
+func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*int, error) {
+
 	pkgID, err := client.PackageType.Create().
 		SetType(pkg.Type).
 		OnConflict(sql.ConflictColumns(packagetype.FieldType)).
@@ -228,14 +213,7 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 		}
 	}
 
-	pv, err := client.PackageVersion.Query().Where(packageversion.ID(id)).
-		WithName(withPackageNameTree()).
-		Only(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "get package version")
-	}
-
-	return pv, nil
+	return &id, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {
