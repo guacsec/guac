@@ -468,33 +468,33 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "hasmetadata_timestamp_key_value_justification_origin_collector_source_id",
+				Name:    "hasmetadata_key_value_justification_origin_collector_source_id",
 				Unique:  true,
-				Columns: []*schema.Column{HasMetadataColumns[1], HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[7]},
+				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[7]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "hasmetadata_timestamp_key_value_justification_origin_collector_package_version_id",
+				Name:    "hasmetadata_key_value_justification_origin_collector_package_version_id",
 				Unique:  true,
-				Columns: []*schema.Column{HasMetadataColumns[1], HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[8]},
+				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "hasmetadata_timestamp_key_value_justification_origin_collector_package_name_id",
+				Name:    "hasmetadata_key_value_justification_origin_collector_package_name_id",
 				Unique:  true,
-				Columns: []*schema.Column{HasMetadataColumns[1], HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[9]},
+				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "hasmetadata_timestamp_key_value_justification_origin_collector_artifact_id",
+				Name:    "hasmetadata_key_value_justification_origin_collector_artifact_id",
 				Unique:  true,
-				Columns: []*schema.Column{HasMetadataColumns[1], HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[10]},
+				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL",
 				},

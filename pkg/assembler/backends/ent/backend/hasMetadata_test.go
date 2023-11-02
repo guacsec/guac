@@ -992,7 +992,7 @@ func (s *Suite) TestIngestBulkHasMetadata() {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHM, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpHM, got, IngestPredicatesCmpOpts...); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

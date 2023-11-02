@@ -28,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
@@ -59,8 +60,11 @@ func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.Packag
 }
 
 func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
-	var results []string
+	var results = make([]string, len(hasMetadataList))
+	eg, ctx := errgroup.WithContext(ctx)
 	for i := range hasMetadataList {
+		index := i
+		hmSpec := *hasMetadataList[i]
 		var subject model.PackageSourceOrArtifactInput
 		if len(subjects.Packages) > 0 {
 			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
@@ -69,11 +73,18 @@ func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 		} else {
 			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
 		}
-		hm, err := b.IngestHasMetadata(ctx, subject, pkgMatchType, *hasMetadataList[i])
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestBulkHasMetadata failed with element #%v with err: %v", i, err)
-		}
-		results = append(results, hm.ID)
+		concurrently(eg, func() error {
+			hm, err := b.IngestHasMetadata(ctx, subject, pkgMatchType, hmSpec)
+			if err == nil {
+				results[index] = hm.ID
+				return err
+			} else {
+				return gqlerror.Errorf("IngestBulkHasMetadata failed with element #%v %+v with err: %v", i, *subject.Package, err)
+			}
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return results, nil
 }
@@ -115,7 +126,6 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 		SetCollector(spec.Collector)
 
 	conflictColumns := []string{
-		hasmetadata.FieldTimestamp,
 		hasmetadata.FieldKey,
 		hasmetadata.FieldValue,
 		hasmetadata.FieldJustification,
@@ -253,7 +263,6 @@ func hasMetadataInputPredicate(subject model.PackageSourceOrArtifactInput, pkgMa
 	}
 	return hasMetadataPredicate(&model.HasMetadataSpec{
 		Subject:       subjectSpec,
-		Since:         &filter.Timestamp,
 		Key:           &filter.Key,
 		Value:         &filter.Value,
 		Justification: &filter.Justification,
