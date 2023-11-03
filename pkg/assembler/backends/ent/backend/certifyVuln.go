@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, spec model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
@@ -90,13 +91,25 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSp
 }
 
 func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
-	var modelCertifyVulns []*model.CertifyVuln
-	for i, certifyVuln := range certifyVulns {
-		modelCertifyVuln, err := b.IngestCertifyVuln(ctx, *pkgs[i], *vulnerabilities[i], *certifyVuln)
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestVulnerability failed with err: %v", err)
-		}
-		modelCertifyVulns = append(modelCertifyVulns, modelCertifyVuln)
+	var modelCertifyVulns = make([]*model.CertifyVuln, len(vulnerabilities))
+	eg, ctx := errgroup.WithContext(ctx)
+	for i := range certifyVulns {
+		index := i
+		pkg := *pkgs[index]
+		vuln := *vulnerabilities[index]
+		certifyVuln := *certifyVulns[index]
+		concurrently(eg, func() error {
+			modelCertifyVuln, err := b.IngestCertifyVuln(ctx, pkg, vuln, certifyVuln)
+			if err == nil {
+				modelCertifyVulns[index] = modelCertifyVuln
+				return err
+			} else {
+				return gqlerror.Errorf("IngestCertifyVulns failed with err: %v", err)
+			}
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return modelCertifyVulns, nil
 }

@@ -1063,7 +1063,7 @@ func (s *Suite) TestVEXBulkIngest() {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpVEX, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpVEX, got, IngestPredicatesCmpOpts...); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
@@ -139,19 +140,30 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 }
 
 func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
-	var ids []string
+	var ids = make([]string, len(vexStatements))
+	eg, ctx := errgroup.WithContext(ctx)
 	for i := range vexStatements {
+		index := i
 		var subject model.PackageOrArtifactInput
 		if len(subjects.Packages) > 0 {
-			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
+			subject = model.PackageOrArtifactInput{Package: subjects.Packages[index]}
 		} else {
-			subject = model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
+			subject = model.PackageOrArtifactInput{Artifact: subjects.Artifacts[index]}
 		}
-		statement, err := b.IngestVEXStatement(ctx, subject, *vulnerabilities[i], *vexStatements[i])
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestVEXStatements failed with element #%v with err: %v", i, err)
-		}
-		ids = append(ids, statement.ID)
+		vuln := *vulnerabilities[index]
+		vexStatement := *vexStatements[index]
+		concurrently(eg, func() error {
+			statement, err := b.IngestVEXStatement(ctx, subject, vuln, vexStatement)
+			if err == nil {
+				ids[index] = statement.ID
+				return err
+			} else {
+				return gqlerror.Errorf("IngestVEXStatements failed with element #%v with err: %v", i, err)
+			}
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return ids, nil
 }

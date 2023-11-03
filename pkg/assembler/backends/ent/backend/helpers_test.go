@@ -49,6 +49,8 @@ var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.SortSlices(isDependencyLess),
 	cmpopts.SortSlices(packageLess),
 	cmpopts.SortSlices(certifyVulnLess),
+	cmpopts.SortSlices(certifyVexLess),
+	cmpopts.SortSlices(vulnerabilityLess),
 }
 
 func isDependencyLess(e1, e2 *model.IsDependency) bool {
@@ -63,4 +65,20 @@ func packageLess(e1, e2 *model.Package) bool {
 
 func certifyVulnLess(e1, e2 *model.CertifyVuln) bool {
 	return packageLess(e1.Package, e2.Package)
+}
+
+func certifyVexLess(e1, e2 *model.CertifyVEXStatement) bool {
+	return e1.Vulnerability.VulnerabilityIDs[0].VulnerabilityID < e2.Vulnerability.VulnerabilityIDs[0].VulnerabilityID
+}
+
+func vulnerabilityLess(e1, e2 *model.Vulnerability) bool {
+	e1String := e1.Type
+	if len(e1.VulnerabilityIDs) > 0 {
+		e1String += e1.VulnerabilityIDs[0].VulnerabilityID
+	}
+	e2String := e1.Type
+	if len(e2.VulnerabilityIDs) > 0 {
+		e2String += e2.VulnerabilityIDs[0].VulnerabilityID
+	}
+	return e1String < e2String
 }
