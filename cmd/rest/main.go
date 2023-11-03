@@ -24,10 +24,10 @@ import (
 )
 
 const (
-	gqlServerURL = "http://localhost:8080/query"
-	httpTimeout  = 10 * time.Second
-	guacType     = "guac"
-	noVulnType   = "novuln"
+	gqlDefaultServerURL = "http://localhost:8080/query"
+	httpTimeout         = 10 * time.Second
+	guacType            = "guac"
+	noVulnType          = "novuln"
 )
 
 func main() {
@@ -38,8 +38,22 @@ func main() {
 	r.GET("/known/source/*vcs", sourceHandlerForVCS(ctx))
 	r.GET("/known/artifact/*artifact", artifactHandlerForArtifact(ctx))
 	r.GET("/vuln/*purl", vulnerabilityHandler(ctx))
+	r.GET("/bad", badHandler(ctx))
 
 	if err := r.Run(":9000"); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}
+}
+
+func removeDuplicateValuesFromPath(path []string) []string {
+	keys := make(map[string]bool)
+	var list []string
+
+	for _, entry := range path {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
 }
