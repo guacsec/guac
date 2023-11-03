@@ -225,5 +225,10 @@ func GuacFilePurl(alg string, digest string, filename *string) string {
 }
 
 func GuacGenericPurl(s string) string {
-	return fmt.Sprintf("pkg:guac/generic/%s", SanitizeString(s))
+	sanitizedString := SanitizeString(s)
+	if strings.HasPrefix(sanitizedString, "/") {
+		return fmt.Sprintf("pkg:guac/generic%s", sanitizedString)
+	} else {
+		return fmt.Sprintf("pkg:guac/generic/%s", sanitizedString)
+	}
 }

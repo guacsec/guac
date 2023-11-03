@@ -115,7 +115,7 @@ func Test_spdxParser(t *testing.T) {
 						Pkg: &generated.PkgInputSpec{
 							Type:      "guac",
 							Namespace: &packageOfns,
-							Name:      "sbom-sha256%3Aa743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+							Name:      "sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
 							Version:   &packageOfEmptyString,
 							Subpath:   &packageOfEmptyString,
 						},
@@ -141,7 +141,7 @@ func Test_spdxParser(t *testing.T) {
 						Pkg: &generated.PkgInputSpec{
 							Type:      "guac",
 							Namespace: &packageOfns,
-							Name:      "sbom-sha256%3Aa743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+							Name:      "sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
 							Version:   &packageOfEmptyString,
 							Subpath:   &packageOfEmptyString,
 						},
