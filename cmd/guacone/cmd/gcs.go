@@ -22,7 +22,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/gcs"
@@ -37,7 +36,7 @@ import (
 
 type gcsOptions struct {
 	graphqlEndpoint   string
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions csub_client.CsubClientOptions
 	bucket            string
 }
 
@@ -105,7 +104,7 @@ var gcsCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient, nil)
 
 			if err != nil {
 				gotErr = true
@@ -139,7 +138,7 @@ func validateGCSFlags(gqlEndpoint string, csubAddr string, csubTls bool, csubTls
 	var opts gcsOptions
 	opts.graphqlEndpoint = gqlEndpoint
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}

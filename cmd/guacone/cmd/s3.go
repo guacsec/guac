@@ -105,7 +105,7 @@ var s3Cmd = &cobra.Command{
 		errFound := false
 
 		emit := func(d *processor.Document) error {
-			err := ingestor.Ingest(ctx, d, s3Opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, s3Opts.graphqlEndpoint, csubClient, nil)
 
 			if err != nil {
 				errFound = true

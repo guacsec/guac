@@ -77,7 +77,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	defer csubClient.Close()
 
 	emit := func(d *processor.Document) error {
-		return ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+		return ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient, nil)
 	}
 
 	// Assuming that publisher and consumer are different processes.

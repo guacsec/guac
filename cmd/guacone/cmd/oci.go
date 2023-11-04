@@ -21,7 +21,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
@@ -38,7 +37,7 @@ import (
 type ociOptions struct {
 	graphqlEndpoint   string
 	dataSource        datasource.CollectSource
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions csub_client.CsubClientOptions
 }
 
 var ociCmd = &cobra.Command{
@@ -82,7 +81,7 @@ var ociCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient, nil)
 
 			if err != nil {
 				gotErr = true
@@ -116,7 +115,7 @@ func validateOCIFlags(gqlEndpoint string, csubAddr string, csubTls bool, csubTls
 	var opts ociOptions
 	opts.graphqlEndpoint = gqlEndpoint
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}

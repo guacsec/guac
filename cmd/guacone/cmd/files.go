@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
+
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -53,7 +53,7 @@ type fileOptions struct {
 	// gql endpoint
 	graphqlEndpoint string
 	// csub client options for identifier strings
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions csub_client.CsubClientOptions
 }
 
 var filesCmd = &cobra.Command{
@@ -142,7 +142,7 @@ var filesCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(filesCtx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(filesCtx, d, opts.graphqlEndpoint, csubClient, files)
 
 			if err != nil {
 				gotErr = true
@@ -198,7 +198,7 @@ func validateFilesFlags(keyPath string, keyID string, graphqlEndpoint string, cs
 		return opts, fmt.Errorf("expected positional argument for file_path")
 	}
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}

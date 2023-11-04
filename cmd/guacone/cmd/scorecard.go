@@ -27,7 +27,6 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/ingestor"
 
@@ -45,7 +44,7 @@ type scorecardOptions struct {
 	graphqlEndpoint   string
 	poll              bool
 	interval          time.Duration
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions csub_client.CsubClientOptions
 }
 
 var scorecardCmd = &cobra.Command{
@@ -121,7 +120,7 @@ var scorecardCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient, nil)
 
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
@@ -174,7 +173,7 @@ func validateScorecardFlags(graphqlEndpoint string, csubAddr string, csubTls boo
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}

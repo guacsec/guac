@@ -31,7 +31,6 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor"
@@ -43,7 +42,7 @@ import (
 type osvOptions struct {
 	graphqlEndpoint   string
 	poll              bool
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions csub_client.CsubClientOptions
 	interval          time.Duration
 }
 
@@ -213,7 +212,7 @@ func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAd
 	}
 	opts.interval = i
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}

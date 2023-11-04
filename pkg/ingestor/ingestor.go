@@ -31,11 +31,11 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
+	"golang.org/x/sync/errgroup"
 )
 
-// Synchronously ingest document using GraphQL endpoint
-func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
-	logger := logging.FromContext(ctx)
+// ingest document using GraphQL endpoint synchronously. If the errGroup is specified that allows for concurrent ingestion per document
+func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, csubClient csub_client.Client, files *errgroup.Group) error {
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
 	ingestorFunc := GetIngestor(ctx)
@@ -43,6 +43,25 @@ func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, 
 	assemblerFunc := GetAssembler(ctx, graphqlEndpoint)
 
 	start := time.Now()
+	if files != nil {
+		files.Go(func() error {
+			if ctx.Err() != nil {
+				return fmt.Errorf("context error")
+			}
+			return ingestDocument(ctx, d, start, processorFunc, ingestorFunc, collectSubEmitFunc, assemblerFunc)
+		})
+	} else {
+		return ingestDocument(ctx, d, start, processorFunc, ingestorFunc, collectSubEmitFunc, assemblerFunc)
+	}
+	return nil
+}
+
+// Synchronously ingest document using GraphQL endpoint
+func ingestDocument(ctx context.Context, d *processor.Document, start time.Time, processorFunc func(*processor.Document) (processor.DocumentTree, error),
+	ingestorFunc func(processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error),
+	collectSubEmitFunc func([]*parser_common.IdentifierStrings) error, assemblerFunc func([]assembler.IngestPredicates) error) error {
+
+	logger := logging.FromContext(ctx)
 
 	docTree, err := processorFunc(d)
 	if err != nil {
@@ -67,6 +86,7 @@ func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, 
 	elapsed := t.Sub(start)
 	logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
 	return nil
+
 }
 
 func MergedIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
