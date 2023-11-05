@@ -17,6 +17,7 @@ package oci
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
@@ -25,9 +26,9 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type referrerCollector struct{}
+type referrerRetriever struct{}
 
-func (c *referrerCollector) Collect(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, opts ...remote.Option) error {
+func (c *referrerRetriever) RetrieveArtifacts(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, opts ...remote.Option) error {
 	digest, err := cosign_remote.ResolveDigest(ref, cosign_remote.WithRemoteOptions(opts...))
 	if err != nil {
 		return err
@@ -41,27 +42,23 @@ func (c *referrerCollector) Collect(ctx context.Context, ref name.Reference, doc
 		return err
 	}
 
-	g := new(errgroup.Group)
+	g, ctx := errgroup.WithContext(ctx)
 
 	for _, manifest := range indexManifest.Manifests {
-		manifest := manifest //https://golang.org/doc/faq#closures_and_goroutines
+		manifest := manifest // https://golang.org/doc/faq#closures_and_goroutines
 		g.Go(func() error {
-			manifestDigest := ref.Context().Digest(manifest.Digest.String())
-			img, err := remote.Image(manifestDigest)
-			if err != nil {
-				return err
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+				manifestDigest := ref.Context().Digest(manifest.Digest.String())
+				img, err := remote.Image(manifestDigest)
+				if err != nil {
+					return fmt.Errorf("failed to lookup image for oci ref %s: %w", manifestDigest, err)
+				}
+				return retrieveFromLayer(manifestDigest, img, docChannel)
 			}
-			return collectLayersOfImage(manifestDigest, img, docChannel)
 		})
 	}
 	return g.Wait()
-}
-
-func (c *referrerCollector) Type() string {
-	return "referrer"
-}
-
-func init() {
-	c := &referrerCollector{}
-	collectors[c.Type()] = c
 }

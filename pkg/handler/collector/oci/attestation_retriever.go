@@ -26,9 +26,9 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type attestationCollector struct{}
+type attestationRetriever struct{}
 
-func (c *attestationCollector) Collect(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, opts ...remote.Option) error {
+func (c *attestationRetriever) RetrieveArtifacts(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, opts ...remote.Option) error {
 	signedEntity, err := cosign_remote.SignedEntity(ref, cosign_remote.WithRemoteOptions(opts...))
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (c *attestationCollector) Collect(ctx context.Context, ref name.Reference, 
 
 	g := new(errgroup.Group)
 	for _, signature := range signatures {
-		signature := signature //https://golang.org/doc/faq#closures_and_goroutines
+		signature := signature // https://golang.org/doc/faq#closures_and_goroutines
 		g.Go(func() error {
 			payload, err := signature.Payload()
 			if err != nil {
@@ -60,21 +60,9 @@ func (c *attestationCollector) Collect(ctx context.Context, ref name.Reference, 
 			if err != nil {
 				return err
 			}
-			if err != nil {
-				return err
-			}
-			pushBlobData(attRef, payload, string(artifactType), docChannel)
+			processBlobData(attRef, payload, string(artifactType), docChannel)
 			return nil
 		})
 	}
 	return g.Wait()
-}
-
-func (c *attestationCollector) Type() string {
-	return "attestation"
-}
-
-func init() {
-	c := &attestationCollector{}
-	collectors[c.Type()] = c
 }

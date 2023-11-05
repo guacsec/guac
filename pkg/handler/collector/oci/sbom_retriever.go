@@ -26,9 +26,9 @@ import (
 	cosign_remote "github.com/sigstore/cosign/v2/pkg/oci/remote"
 )
 
-type sbomCollector struct{}
+type sbomRetriever struct{}
 
-func (c *sbomCollector) Collect(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, opts ...remote.Option) error {
+func (c *sbomRetriever) RetrieveArtifacts(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, opts ...remote.Option) error {
 	sbomTag, err := cosign_remote.SBOMTag(ref, cosign_remote.WithRemoteOptions(opts...))
 	if err != nil {
 		return fmt.Errorf("failed retrieving tag for sbom oci manifest: %w", err)
@@ -38,13 +38,5 @@ func (c *sbomCollector) Collect(ctx context.Context, ref name.Reference, docChan
 		logging.FromContext(ctx).Infof("image does not have a sbom tag at reference: %s", sbomTag)
 		return nil
 	}
-	return collectLayersOfImage(sbomTag, img, docChannel)
-}
-func (c *sbomCollector) Type() string {
-	return "sbom"
-}
-
-func init() {
-	c := &sbomCollector{}
-	collectors[c.Type()] = c
+	return retrieveFromLayer(sbomTag, img, docChannel)
 }

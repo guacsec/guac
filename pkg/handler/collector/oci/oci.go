@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"slices"
 	"strings"
 	"sync"
@@ -26,6 +27,7 @@ import (
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
+	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/sigstore/cosign/v2/pkg/oci"
 	cosign_remote "github.com/sigstore/cosign/v2/pkg/oci/remote"
@@ -47,7 +49,7 @@ const (
 	TextSpdxJson = "text/spdx+json"
 	// used by cosign sboms
 	SpdxJson = "spdx+json"
-	//InTotoJson       = "application/vnd.in-toto+json"
+	// InTotoJson       = "application/vnd.in-toto+json"
 	DsseEnvelopeJson = "application/vnd.dsse.envelope.v1+json"
 )
 
@@ -76,13 +78,12 @@ var wellKnownOCIArtifactTypes = map[string]struct {
 }
 
 type ociCollector struct {
-	collectDataSource datasource.CollectSource
-	checkedDigest     sync.Map
-	poll              bool
-	interval          time.Duration
+	collectDataSource  datasource.CollectSource
+	artifactRetrievers map[string]ArtifactRetriever
+	checkedDigest      sync.Map
+	interval           time.Duration
+	poll               bool
 }
-
-var collectors = map[string]Collector{}
 
 // NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
 // Note: OCI collector can be called upon by a upstream registry collector in the future to collect from all
@@ -95,6 +96,11 @@ func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSo
 		checkedDigest:     sync.Map{},
 		poll:              poll,
 		interval:          interval,
+		artifactRetrievers: map[string]ArtifactRetriever{
+			"sbom":        &sbomRetriever{},
+			"attestation": &attestationRetriever{},
+			"referrer":    &referrerRetriever{},
+		},
 	}
 }
 
@@ -107,25 +113,30 @@ func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 			return fmt.Errorf("unable to populate repotags: %w", err)
 		}
 		for repo, refs := range repoRefs {
-			// when polling if tags are specified, it will never get any new tags
-			// that might be added after the fact. Defeating the point of the polling
-			if len(refs) > 0 && o.poll {
-				return errors.New("image tag should not specified when using polling")
-			}
-			repo, err := name.NewRepository(repo)
-			if err != nil {
-				return err
-			}
-
-			if len(refs) == 0 {
-				refs, err = o.getTags(ctx, repo)
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+				// when polling if tags are specified, it will never get any new tags
+				// that might be added after the fact. Defeating the point of the polling
+				if len(refs) > 0 && o.poll {
+					return errors.New("image tag should not specified when using polling")
+				}
+				repo, err := name.NewRepository(repo)
 				if err != nil {
 					return err
 				}
+
+				if len(refs) == 0 {
+					refs, err = o.getTags(ctx, repo)
+					if err != nil {
+						return err
+					}
+				}
+
+				return o.retrieveArtifactsForRefs(ctx, refs, docChannel)
+
 			}
-
-			return o.fetch(ctx, refs, docChannel)
-
 		}
 		return nil
 	}
@@ -176,24 +187,28 @@ func (o *ociCollector) populateRepoTags(ctx context.Context, repoRefs map[string
 			if repoRefs[repositoryName] == nil || len(repoRefs[repositoryName]) > 0 {
 				repoRefs[repositoryName] = append(repoRefs[repositoryName], imageRef)
 			}
-
 		}
 	}
 	return nil
 }
 
-func (o *ociCollector) fetch(ctx context.Context, refs []name.Reference, docChannel chan<- *processor.Document) error {
+func (o *ociCollector) retrieveArtifactsForRefs(ctx context.Context, refs []name.Reference, docChannel chan<- *processor.Document) error {
 	g, ctx := errgroup.WithContext(ctx)
 	for _, r := range refs {
-		r := r
-		digest, err := cosign_remote.ResolveDigest(r, cosign_remote.WithRemoteOptions(remoteDefaultOpts(ctx)...))
-		if err != nil {
-			return err
-		}
-		if !o.isDigestCollected(digest.Context(), digest) {
-			g.Go(func() error {
-				return o.fetchOCIArtifacts(ctx, digest, docChannel)
-			})
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			r := r
+			digest, err := cosign_remote.ResolveDigest(r, cosign_remote.WithRemoteOptions(remoteDefaultOpts(ctx)...))
+			if err != nil {
+				return err
+			}
+			if !o.isDigestCollected(digest.Context(), digest) {
+				g.Go(func() error {
+					return o.retrieveArtifactsForDigest(ctx, digest, docChannel)
+				})
+			}
 		}
 	}
 	return g.Wait()
@@ -215,9 +230,9 @@ func (o *ociCollector) getTags(ctx context.Context, repo name.Repository) ([]nam
 	return tagRefs, nil
 }
 
-// Note: fetchOCIArtifacts currently does not re-check if a new sbom or attestation get reuploaded during polling with the same image digest.
+// Note: retrieveArtifactsForDigest currently does not re-check if a new sbom or attestation get reuploaded during polling with the same image digest.
 // A workaround for this would be to run the collector again with a specific tag without polling and ingest like normal
-func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, digest name.Digest, docChannel chan<- *processor.Document) error {
+func (o *ociCollector) retrieveArtifactsForDigest(ctx context.Context, digest name.Digest, docChannel chan<- *processor.Document) error {
 	defaultOpts := remoteDefaultOpts(ctx)
 
 	signedEntity, err := cosign_remote.SignedEntity(digest, cosign_remote.WithRemoteOptions(defaultOpts...))
@@ -225,14 +240,16 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, digest name.Digest
 		return fmt.Errorf("failed retrieving manifest head: %w", err)
 	}
 
-	var collectErr error
-
 	switch signed := signedEntity.(type) {
 	case oci.SignedImage:
-		collectErr = errors.Join(collectErr, collect(ctx, digest, docChannel, defaultOpts...))
+		err := o.retrieveFromArtifactRetrievers(ctx, digest, docChannel, defaultOpts...)
+		if err != nil {
+			return fmt.Errorf("failed retrieving artifacts from oci ref %s: %w", digest, err)
+		}
 		o.markDigestAsCollected(digest.Context(), digest)
 	case oci.SignedImageIndex:
-		collectErr = errors.Join(collectErr, collect(ctx, digest, docChannel, defaultOpts...))
+		var collectErr error
+		collectErr = errors.Join(collectErr, o.retrieveFromArtifactRetrievers(ctx, digest, docChannel, defaultOpts...))
 		o.markDigestAsCollected(digest.Context(), digest)
 
 		// collect manifests of index
@@ -246,11 +263,32 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, digest name.Digest
 			if m.Platform != nil {
 				manifestRemoteOpts = append(manifestRemoteOpts, remote.WithPlatform(*m.Platform))
 			}
-			collectErr = errors.Join(collectErr, collect(ctx, manifestRef, docChannel, manifestRemoteOpts...))
+			err := o.retrieveFromArtifactRetrievers(ctx, manifestRef, docChannel, manifestRemoteOpts...)
+			if err != nil {
+				collectErr = errors.Join(collectErr, fmt.Errorf("failed retrieving artifacts from oci manifest: %s: %w", manifestRef, err))
+			}
 			o.markDigestAsCollected(manifestRef.Repository, manifestRef)
 		}
+
+		if collectErr != nil {
+			return collectErr
+		}
 	}
-	return collectErr
+	return nil
+}
+
+func (o *ociCollector) retrieveFromArtifactRetrievers(ctx context.Context, ref name.Reference, docChannel chan<- *processor.Document, remoteOpts ...remote.Option) error {
+	g, ctx := errgroup.WithContext(ctx)
+	for collectorName, collector := range o.artifactRetrievers {
+		collector := collector
+		collectorName := collectorName
+		g.Go(func() error {
+			logger := logging.FromContext(ctx)
+			logger.Infof("collecting artifacts from %s", collectorName)
+			return collector.RetrieveArtifacts(ctx, ref, docChannel, remoteOpts...)
+		})
+	}
+	return g.Wait()
 }
 
 // Type is the collector type of the collector
@@ -298,7 +336,7 @@ func isRepositoryReference(r name.Reference) bool {
 		{
 			return ref.TagStr() == name.DefaultTag && !strings.HasSuffix(ref.String(), name.DefaultTag)
 		}
-		// if reference is parsed as a digest, there is always a specific hash specified
+		// if reference is parsed as a digest, there is always a specific image specified
 	case name.Digest:
 		return false
 	}
@@ -311,4 +349,61 @@ func remoteDefaultOpts(ctx context.Context) []remote.Option {
 		remote.WithUserAgent(version.UserAgent),
 		remote.WithContext(ctx),
 	}
+}
+
+func processBlobData(ref name.Reference, blobData []byte, artifactType string, docChannel chan<- *processor.Document) {
+	docType := processor.DocumentUnknown
+	docFormat := processor.FormatUnknown
+
+	if wellKnownArtifactType, ok := wellKnownOCIArtifactTypes[artifactType]; ok {
+		docType = wellKnownArtifactType.documentType
+		docFormat = wellKnownArtifactType.formatType
+	}
+
+	doc := &processor.Document{
+		Blob:   blobData,
+		Type:   docType,
+		Format: docFormat,
+		SourceInformation: processor.SourceInformation{
+			Collector: OCICollector,
+			Source:    ref.String(),
+		},
+	}
+	docChannel <- doc
+}
+
+func retrieveFromLayer(ref name.Reference, img v1.Image, docChannel chan<- *processor.Document) error {
+	manifest, err := img.Manifest()
+	if err != nil {
+		return err
+	}
+
+	layers, err := img.Layers()
+	if err != nil {
+		return err
+	}
+	for _, layer := range layers {
+		blob, err := layer.Compressed()
+		if err != nil {
+			return err
+		}
+		defer blob.Close()
+		blobData, err := io.ReadAll(blob)
+		if err != nil {
+			return fmt.Errorf("failed reading blob: %w", err)
+		}
+		artifactType := "unknown"
+		// referrers store their artifactType inside the manifest mediatype
+		// https://github.com/opencontainers/image-spec/blob/main/manifest.md#guidelines-for-artifact-usage
+		if mediaType := manifest.Config.MediaType; mediaType != "" {
+			artifactType = string(mediaType)
+		}
+		// attestations and sbom store their artifactType in the layer mediatype
+		mediaType, err := layer.MediaType()
+		if err == nil && mediaType != "" {
+			artifactType = string(mediaType)
+		}
+		processBlobData(ref, blobData, artifactType, docChannel)
+	}
+	return nil
 }
