@@ -33,6 +33,7 @@ The following endpoints will be provided:
 - `/known/source/*vcs`: This endpoint will retrieve information about a known source based on its VCS. The response will include details about the source and its neighbors.
 - `/known/artifact/*artifact`: This endpoint will retrieve information about a known artifact based on the artifact provided. The response will include details about the artifact and its neighbors.
 - `/vuln/*purl`: This endpoint will retrieve information about a vulnerability based on its purl. The response will include details about the vulnerability and its neighbors.
+- `/bad`: This endpoint will handle bad requests.
 
 ### Data Models
 

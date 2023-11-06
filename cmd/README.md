@@ -61,6 +61,13 @@ services:
   - polling options
   - flag to toggle retrieving deps
 
+**guacrest**
+
+- what it does: runs a REST API server
+- options:
+  - listening port
+  - gql endpoint
+
 ## Collectors and Certifiers
 
 These appear both in `guacone` and in `guaccollect`. The difference is that

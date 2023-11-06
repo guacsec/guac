@@ -20,3 +20,4 @@
 - `/known/source/*vcs`
 - `/known/artifact/*artifact`
 - `/vuln/*purl`
+- `/bad`
