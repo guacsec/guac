@@ -19,8 +19,10 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	stdsql "database/sql"
 	"fmt"
 	"sort"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -28,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -68,36 +71,35 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 	return collect(records, toModelHasSLSA), nil
 }
 
-func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	att, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SLSAAttestation, error) {
+func (b *EntBackend) IngestSLSAID(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
+	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		return upsertSLSA(ctx, ent.TxFromContext(ctx), subject, builtFrom, builtBy, slsa)
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelHasSLSA(att), nil
+	return strconv.Itoa(*id), nil
 }
 
-func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
-	var modelHasSlsas []*model.HasSlsa
+func (b *EntBackend) IngestSLSAIDs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+	var ids []string
 	for i, slsa := range slsaList {
-		modelHasSlsa, err := b.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsa)
+		id, err := b.IngestSLSAID(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsa)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestSLSAs failed with err: %v", err)
 		}
-		modelHasSlsas = append(modelHasSlsas, modelHasSlsa)
+		ids = append(ids, id)
 	}
-	return modelHasSlsas, nil
+	return ids, nil
 }
 
-func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*ent.SLSAAttestation, error) {
+func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*int, error) {
 	builder, err := client.Builder.Query().Where(builderInputQueryPredicate(builtBy)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// artifacts, err := ingestArtifacts(ctx, client.Client(), builtFrom)
 	artifacts, err := client.Artifact.Query().Where(
 		artifact.Or(collect(fromPtrSlice(builtFrom), artifactQueryInputPredicates)...),
 	).All(ctx)
@@ -137,18 +139,26 @@ func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInput
 				slsaattestation.FieldBuiltFromHash,
 			),
 		).
-		UpdateNewValues().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert SLSAttestation")
+		}
+		id, err = client.SLSAAttestation.Query().
+			Where(slsaattestation.BuiltByID(builder.ID),
+				slsaattestation.OriginEQ(slsa.Origin),
+				slsaattestation.CollectorEQ(slsa.Collector),
+				slsaattestation.BuildTypeEQ(slsa.BuildType),
+				slsaattestation.SlsaVersionEQ(slsa.SlsaVersion),
+				slsaattestation.BuiltFromHashEQ(hashBuiltFromVersion(artifacts))).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get SLSAttestation ID")
+		}
 	}
 
-	return client.SLSAAttestation.Query().
-		Where(slsaattestation.IDEQ(id)).
-		WithBuiltBy().
-		WithBuiltFrom().
-		WithSubject().
-		Only(ctx)
+	return &id, nil
 }
 
 func toSLSAInputPredicate(rows []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
