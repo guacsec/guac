@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/Khan/genqlient/graphql"
-	"github.com/gin-gonic/gin"
-	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/Khan/genqlient/graphql"
+	"github.com/gin-gonic/gin"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
 func badHandler(ctx context.Context) func(c *gin.Context) {
@@ -69,7 +71,9 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 							subject.Id}, pkgPath...)
 					}
 
-					c.String(http.StatusOK, "Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
+					c.JSON(http.StatusOK, gin.H{
+						"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), `,`)),
+					})
 				} else {
 					c.String(http.StatusNotFound, "No paths to bad package found!\n")
 				}
@@ -117,7 +121,9 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 						subject.Namespaces[0].Names[0].Id,
 						subject.Namespaces[0].Id, subject.Id}, path...)
 					path = append(path, fullCertifyBadPath...)
-					c.String(http.StatusOK, "Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
+					c.JSON(http.StatusOK, gin.H{
+						"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), `,`)),
+					})
 				} else {
 					c.String(http.StatusNotFound, "No paths to bad source found!\n")
 				}
@@ -161,7 +167,9 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 
 				if len(path) > 0 {
 					path = append(path, append([]string{certifyBad.Id, subject.Id}, path...)...)
-					c.String(http.StatusOK, "Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
+					c.JSON(http.StatusOK, gin.H{
+						"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), `,`)),
+					})
 				} else {
 					c.String(http.StatusNotFound, "No paths to bad artifact found!\n")
 				}

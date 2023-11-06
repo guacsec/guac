@@ -31,8 +31,10 @@ import (
 
 func artifactHandlerForArtifact(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
+		graphqlEndpoint, err := parseKnownQueryParameters(c)
+
 		httpClient := &http.Client{Timeout: httpTimeout}
-		gqlclient := graphql.NewClient(gqlServerURL, httpClient)
+		gqlclient := graphql.NewClient(graphqlEndpoint, httpClient)
 
 		artifact := strings.TrimLeft(c.Param("artifact"), "/") // Retrieve and trim the artifact from the URL parameter
 
@@ -42,8 +44,8 @@ func artifactHandlerForArtifact(ctx context.Context) func(c *gin.Context) {
 			return
 		}
 		artifactFilter := &model.ArtifactSpec{
-			Algorithm: ptrfrom.String(strings.ToLower(string(split[0]))),
-			Digest:    ptrfrom.String(strings.ToLower(string(split[1]))),
+			Algorithm: ptrfrom.String(strings.ToLower(split[0])),
+			Digest:    ptrfrom.String(strings.ToLower(split[1])),
 		}
 
 		artifactResponse, err := model.Artifacts(ctx, gqlclient, *artifactFilter)
@@ -55,20 +57,27 @@ func artifactHandlerForArtifact(ctx context.Context) func(c *gin.Context) {
 			c.String(http.StatusInternalServerError, "failed to located artifacts based on (algorithm:digest)")
 			return
 		}
-		artifactNeighbors, _, err := queryKnownNeighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id)
+		artifactNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "error querying for artifact neighbors: %v", err)
 			return
 		}
 
-		c.IndentedJSON(200, JsonResponse{NeighborsData: []*Neighbors{artifactNeighbors}})
+		path := append([]string{artifactResponse.Artifacts[0].Id}, neighborsPath...)
+
+		c.IndentedJSON(200, gin.H{
+			"NeighborsData":  artifactNeighbors,
+			"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), ",")),
+		})
 	}
 }
 
 func sourceHandlerForVCS(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
+		graphqlEndpoint, err := parseKnownQueryParameters(c)
+
 		httpClient := &http.Client{Timeout: httpTimeout}
-		gqlclient := graphql.NewClient(gqlServerURL, httpClient)
+		gqlclient := graphql.NewClient(graphqlEndpoint, httpClient)
 
 		vcs := strings.TrimLeft(c.Param("vcs"), "/") // Retrieve and trim the vcs from the URL parameter
 
@@ -97,20 +106,28 @@ func sourceHandlerForVCS(ctx context.Context) func(c *gin.Context) {
 			return
 		}
 
-		sourceNeighbors, _, err := queryKnownNeighbors(ctx, gqlclient, srcResponse.Sources[0].Namespaces[0].Names[0].Id)
+		sourceNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, srcResponse.Sources[0].Namespaces[0].Names[0].Id)
 		if err != nil {
 			c.String(500, "Error querying for source Neighbors: %v", err)
 			return
 		}
 
-		c.IndentedJSON(200, JsonResponse{NeighborsData: []*Neighbors{sourceNeighbors}})
+		path := append([]string{srcResponse.Sources[0].Namespaces[0].Names[0].Id,
+			srcResponse.Sources[0].Namespaces[0].Id, srcResponse.Sources[0].Id}, neighborsPath...)
+
+		c.IndentedJSON(200, gin.H{
+			"NeighborsData":  sourceNeighbors,
+			"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), ",")),
+		})
 	}
 }
 
 func packageHandlerForHash(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
+		graphqlEndpoint, err := parseKnownQueryParameters(c)
+
 		httpClient := &http.Client{Timeout: httpTimeout}
-		gqlclient := graphql.NewClient(gqlServerURL, httpClient)
+		gqlclient := graphql.NewClient(graphqlEndpoint, httpClient)
 
 		hash := strings.TrimLeft(c.Param("hash"), "/") // Retrieve and trim the hash from the URL parameter
 
@@ -123,7 +140,7 @@ func packageHandlerForHash(ctx context.Context) func(c *gin.Context) {
 
 		pkgFilter := createPackageFilter(pkgInput)
 
-		// Query for the package
+		// Query for the package using the package filter
 		pkgResponse, err := model.Packages(ctx, gqlclient, *pkgFilter)
 		if err != nil {
 			c.String(500, "Error querying package: %v", err)
@@ -136,14 +153,35 @@ func packageHandlerForHash(ctx context.Context) func(c *gin.Context) {
 		}
 
 		// Query for the package's neighbors
-		res, err := queryNeighborsForPackage(ctx, gqlclient, pkgResponse.Packages[0])
+		res, path, err := queryNeighborsForPackage(ctx, gqlclient, pkgResponse.Packages[0])
 		if err != nil {
 			c.String(500, "Error querying Neighbors: %v", err)
 			return
 		}
 
-		c.IndentedJSON(200, JsonResponse{NeighborsData: res})
+		// Convert []*string to []string
+		var pathStrings []string
+		for _, s := range path {
+			if s != nil {
+				pathStrings = append(pathStrings, *s)
+			}
+		}
+
+		c.IndentedJSON(200, gin.H{
+			"NeighborsData":  res,
+			"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(pathStrings), ",")),
+		})
 	}
+}
+
+func parseKnownQueryParameters(c *gin.Context) (string, error) {
+	graphqlEndpoint := c.Query("gql_addr")
+
+	if graphqlEndpoint == "" {
+		graphqlEndpoint = gqlDefaultServerURL
+	}
+
+	return graphqlEndpoint, nil
 }
 
 // createPackageFilter generates a package filter from a given package input.
@@ -172,22 +210,41 @@ func createPackageFilter(pkgInput *model.PkgInputSpec) *model.PkgSpec {
 // queryNeighborsForPackage is a function that queries for the neighbors of a given package.
 // It takes in a context, a graphql client, and a package model.
 // It returns a slice of pointers to Neighbors and an error.
-func queryNeighborsForPackage(ctx context.Context, gqlclient graphql.Client, pkg model.PackagesPackagesPackage) ([]*Neighbors, error) {
+func queryNeighborsForPackage(ctx context.Context, gqlclient graphql.Client, pkg model.PackagesPackagesPackage) ([]*Neighbors, []*string, error) {
 	var res []*Neighbors
+	var path []*string
 
-	pkgNameNeighbors, _, err := queryKnownNeighbors(ctx, gqlclient, pkg.Namespaces[0].Names[0].Id)
+	// Query for the package's name neighbors
+	pkgNameNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, pkg.Namespaces[0].Names[0].Id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+
 	res = append(res, pkgNameNeighbors)
 
+	path = append(path, &pkg.Namespaces[0].Names[0].Id,
+		&pkg.Namespaces[0].Id, &pkg.Id)
+
+	for _, neighborPath := range neighborsPath {
+		path = append(path, &neighborPath)
+	}
+
+	// Query for the package's version neighbors
 	pkgNameNeighbors, _, err = queryKnownNeighbors(ctx, gqlclient, pkg.Namespaces[0].Names[0].Versions[0].Id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+
 	res = append(res, pkgNameNeighbors)
 
-	return res, nil
+	path = append(path, []*string{&pkg.Namespaces[0].Names[0].Versions[0].Id,
+		&pkg.Namespaces[0].Names[0].Id, &pkg.Namespaces[0].Id, &pkg.Id}...)
+
+	for _, neighborPath := range neighborsPath {
+		path = append(path, &neighborPath)
+	}
+
+	return res, path, nil
 }
 
 type Neighbors struct {
@@ -204,14 +261,13 @@ type Neighbors struct {
 	PkgEquals    []*model.NeighborsNeighborsPkgEqual            `json:",omitempty"`
 }
 
-// JsonResponse represents the JSON response structure.
-type JsonResponse struct {
-	NeighborsData []*Neighbors `json:"neighborsData"`
-}
-
+// queryKnownNeighbors is a function that queries for the neighbors of a given subject.
+// It takes in a context, a graphql client, and a subject query ID.
+// It returns a Neighbors struct and an error.
 func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQueryID string) (*Neighbors, []string, error) {
 	collectedNeighbors := &Neighbors{}
 	var path []string
+	// Query for neighbors using the subject query ID
 	neighborResponse, err := model.Neighbors(ctx, gqlclient, subjectQueryID, []model.Edge{})
 	if err != nil {
 		return nil, nil, fmt.Errorf("error querying Neighbors: %v", err)
