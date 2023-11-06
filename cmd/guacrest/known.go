@@ -32,6 +32,10 @@ import (
 func artifactHandlerForArtifact(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		graphqlEndpoint, err := parseKnownQueryParameters(c)
+		if err != nil {
+			c.String(http.StatusBadRequest, "error parsing query parameters: %v", err)
+			return
+		}
 
 		httpClient := &http.Client{Timeout: httpTimeout}
 		gqlclient := graphql.NewClient(graphqlEndpoint, httpClient)
@@ -75,6 +79,10 @@ func artifactHandlerForArtifact(ctx context.Context) func(c *gin.Context) {
 func sourceHandlerForVCS(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		graphqlEndpoint, err := parseKnownQueryParameters(c)
+		if err != nil {
+			c.String(http.StatusBadRequest, "error parsing query parameters: %v", err)
+			return
+		}
 
 		httpClient := &http.Client{Timeout: httpTimeout}
 		gqlclient := graphql.NewClient(graphqlEndpoint, httpClient)
@@ -125,6 +133,10 @@ func sourceHandlerForVCS(ctx context.Context) func(c *gin.Context) {
 func packageHandlerForHash(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		graphqlEndpoint, err := parseKnownQueryParameters(c)
+		if err != nil {
+			c.String(http.StatusBadRequest, "error parsing query parameters: %v", err)
+			return
+		}
 
 		httpClient := &http.Client{Timeout: httpTimeout}
 		gqlclient := graphql.NewClient(graphqlEndpoint, httpClient)

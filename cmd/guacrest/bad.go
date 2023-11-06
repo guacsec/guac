@@ -1,3 +1,18 @@
+//
+// Copyright 2023 The GUAC Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
@@ -13,6 +28,7 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
+// badHandler is a function that returns a gin.HandlerFunc. It handles requests to the /bad endpoint.
 func badHandler(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		graphqlEndpoint, searchDepth, err := parseBadQueryParameters(c)
@@ -31,7 +47,9 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 			return
 		}
 
+		// Iterate over the bad certifications.
 		for _, certifyBad := range certifyBadResponse.CertifyBad {
+			// Handle the different types of subjects.
 			switch subject := certifyBad.Subject.(type) {
 			case *model.AllCertifyBadSubjectPackage:
 				var path []string
@@ -178,6 +196,7 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 	}
 }
 
+// parseBadQueryParameters is a helper function that parses the query parameters from a request.
 func parseBadQueryParameters(c *gin.Context) (string, int, error) {
 	graphqlEndpoint := c.Query("gql_addr")
 
@@ -188,12 +207,12 @@ func parseBadQueryParameters(c *gin.Context) (string, int, error) {
 	var searchDepth int
 	var err error
 
-	// if the search depth is not specified, we will use the default value of 0
+	// Parse the search depth from the query parameters.
 	searchDepthString := c.Query("search_depth")
 	if searchDepthString != "" {
 		searchDepth, err = strconv.Atoi(searchDepthString)
 		if err != nil && searchDepthString != "" {
-			// if the search depth is not an integer, we will return an error
+			// If the search depth is not an integer, return an error.
 			return "", 0, errors.New("invalid search depth")
 		}
 	}
