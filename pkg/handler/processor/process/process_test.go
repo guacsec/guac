@@ -600,13 +600,11 @@ func Test_validateFormat(t *testing.T) {
 	}
 }
 
-
-
 func Test_guessEncoding(t *testing.T) {
 	tests := []struct {
-		name    string
-		doc     processor.Document
-		wantErr bool
+		name         string
+		doc          processor.Document
+		wantErr      bool
 		wantMimeType string
 	}{
 		{
@@ -620,7 +618,7 @@ func Test_guessEncoding(t *testing.T) {
 					Source:    "a-source",
 				},
 			},
-			wantErr: false,
+			wantErr:      false,
 			wantMimeType: "application/x-bzip2",
 		},
 		{
@@ -634,7 +632,7 @@ func Test_guessEncoding(t *testing.T) {
 					Source:    "a-source",
 				},
 			},
-			wantErr: false,
+			wantErr:      false,
 			wantMimeType: "application/zstd",
 		},
 	}
@@ -644,7 +642,7 @@ func Test_guessEncoding(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("detectFileEncoding() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if mimeType !=  tt.wantMimeType {
+			if mimeType != tt.wantMimeType {
 				t.Errorf("detectFileEncoding() incorrect mimeType = %v", mimeType)
 			}
 		})

@@ -23,9 +23,9 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"net/http"
 	"path/filepath"
 	"strings"
-	"net/http"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/emitter"
