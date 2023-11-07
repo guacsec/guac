@@ -147,11 +147,59 @@ start-service: check-docker-compose-tool-check
 	#
 	# if container images are missing, run `make container` first
 	$(CONTAINER) compose -f docker-compose.yml -f container_files/mem.yaml up --force-recreate
+	@echo "Waiting for the service to start"
+	@counter=0; \
+	while [ $$counter -lt 15 ] && ! curl --silent --head --output /dev/null --fail http://localhost:8080; do \
+		printf '.'; \
+		sleep 1; \
+		counter=$$((counter+1)); \
+	done; \
+ 	[ $$counter -eq 15 ] && { echo "Inmem GUAC service did not start in time"; exit 1; } || echo "Inmem GUAC service is up!"
 
 # to flush state, service-stop must be used else state is taken from old containers
 .PHONY: stop-service
 stop-service:
 	$(CONTAINER) compose down
+
+# start graphQL server with inmem backend
+.PHONY: start-inmem-db
+start-inmem-db: check-docker-compose-tool-check
+	$(CONTAINER) compose -f docker-compose.yml -f container_files/mem.yaml up -d 2>&1
+	@echo "Waiting for the service to start"
+	@counter=0; \
+	while [ $$counter -lt 15 ] && ! curl --silent --head --output /dev/null --fail http://localhost:8080; do \
+		printf '.'; \
+		sleep 1; \
+		counter=$$((counter+1)); \
+	done; \
+	[ $$counter -eq 15 ] && { echo "Arango GUAC service did not start in time"; exit 1; } || echo "Inmem GUAC service is up!"
+
+# start graphQL server with arango backend
+.PHONY: start-arango-db
+start-arango-db: check-docker-compose-tool-check
+	$(CONTAINER) compose -f docker-compose.yml -f container_files/arango.yaml up -d 2>&1
+	@echo "Waiting for the service to start"
+	@counter=0; \
+	while [ $$counter -lt 15 ] && ! curl --silent --head --output /dev/null --fail http://localhost:8080; do \
+		printf '.'; \
+		sleep 1; \
+		counter=$$((counter+1)); \
+	done; \
+	[ $$counter -eq 15 ] && { echo "Arango GUAC service did not start in time"; exit 1; } || echo "Arango GUAC service is up!"
+
+# start graphQL server with ent backend
+.PHONY: start-ent-db
+start-ent-db: check-docker-compose-tool-check
+	$(CONTAINER) compose -f docker-compose.yml -f container_files/ent.yaml up -d 2>&1
+	@echo "Waiting for the service to start"
+	@counter=0; \
+	while [ $$counter -lt 15 ] && ! curl --silent --head --output /dev/null --fail http://localhost:8080; do \
+		printf '.'; \
+		sleep 1; \
+		counter=$$((counter+1)); \
+	done; \
+	[ $$counter -eq 15 ] && { echo "Ent GUAC service did not start in time"; exit 1; } || echo "Ent GUAC service is up!"
+
 
 # This is a helper target to run the integration tests locally. 
 .PHONY: start-integration-service

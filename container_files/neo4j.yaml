@@ -3,6 +3,7 @@ version: "3.9"
 services:
 
   neo4j:
+    networks: [frontend]
     image: "neo4j:4.4.9-community"
     environment:
       NEO4J_AUTH: "neo4j/s3cr3t"
