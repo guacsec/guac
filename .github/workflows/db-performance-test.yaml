@@ -15,12 +15,13 @@
 name: db-performance-test
 
 on:
-  workflow_call:
-    inputs:
-      ingestion_data:
-        description: 'data to ingest for testing'
-        default: './guac-data/docs/'
-        type: string
+  workflow_dispatch:
+    # inputs:
+    #   logLevel:
+    #     description: 'guac-data to ingest'
+    #     required: true
+    #     default: './guac-data/docs/'
+    #     type: string
 
 permissions:
   contents: read
