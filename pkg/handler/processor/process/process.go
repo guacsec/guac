@@ -225,25 +225,24 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 		encoding, ok := processor.EncodingExts[strings.ToLower(ext)]
 		if ok {
 			i.Encoding = encoding
-		}
-	}
-	if i.Encoding == "" {
-		var mimeType string
-		var bzipMimeType = "application/x-bzip2"
-		var zstdMimeType = "application/zstd"
-		mimeType, err = detectFileEncoding(i)
-		if err != nil {
-			return fmt.Errorf("failure while attempting to detect file encoding: %w", err)
-		}
-		switch mimeType {
-		case bzipMimeType:
-			i.Encoding = processor.EncodingBzip2
-		case zstdMimeType:
-			i.Encoding = processor.EncodingZstd
-		default:
-		}
-		if i.Encoding != "" {
-			logger.Infof("byte analysis detected encoding:  %v", i.Encoding)
+		} else {
+			var mimeType string
+			var bzipMimeType = "application/x-bzip2"
+			var zstdMimeType = "application/zstd"
+			mimeType, err = detectFileEncoding(i)
+			if err != nil {
+				return fmt.Errorf("failure while attempting to detect file encoding: %w", err)
+			}
+			switch mimeType {
+			case bzipMimeType:
+				i.Encoding = processor.EncodingBzip2
+			case zstdMimeType:
+				i.Encoding = processor.EncodingZstd
+			default:
+			}
+			if i.Encoding != "" {
+				logger.Infof("byte analysis detected encoding:  %v", i.Encoding)
+			}
 		}
 	}
 	logger.Infof("Decoding document with encoding:  %v", i.Encoding)
@@ -284,8 +283,9 @@ func detectFileEncoding(i *processor.Document) (string, error) {
 		if err != nil {
 			return "", err
 		}
+
 		//find the content mime-type from the first few bytes
-		contentType := http.DetectContentType(testBytes)
+		contentType := http.DetectContentType(i.Blob)
 		//octet-stream is the default meaning that no encoding has been found
 		if contentType == "application/octet-stream" {
 			if testBytes[0] == 0x42 && testBytes[1] == 0x5A && testBytes[2] == 0x68 {
