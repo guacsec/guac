@@ -30,7 +30,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/backends/neptune"
@@ -44,7 +43,6 @@ import (
 const (
 	arango   = "arango"
 	neo4js   = "neo4j"
-	inmems   = "inmem"
 	ent      = "ent"
 	neptunes = "neptune"
 	keyvalue = "keyvalue"
@@ -60,7 +58,6 @@ func init() {
 	}
 	getOpts[arango] = getArango
 	getOpts[neo4js] = getNeo4j
-	getOpts[inmems] = getInMem
 	getOpts[neptunes] = getNeptune
 	getOpts[keyvalue] = getKeyValue
 }
@@ -172,10 +169,6 @@ func getNeo4j() backends.BackendArgs {
 		Realm:  flags.nRealm,
 		DBAddr: flags.nAddr,
 	}
-}
-
-func getInMem() backends.BackendArgs {
-	return nil
 }
 
 func getKeyValue() backends.BackendArgs {

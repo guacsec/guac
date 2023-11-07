@@ -45,7 +45,7 @@ func init() {
 	set.String("csub-tls-cert-file", "", "path to the TLS certificate in PEM format for collect-sub service")
 	set.String("csub-tls-key-file", "", "path to the TLS key in PEM format for collect-sub service")
 
-	set.String("gql-backend", "inmem", "backend used for graphql api server: [inmem | arango (experimental) | ent (experimental) | neo4j (unmaintained)]")
+	set.String("gql-backend", "keyvalue", "backend used for graphql api server: [keyvalue | arango (experimental) | ent (experimental) | neo4j (unmaintained)]")
 	set.Int("gql-listen-port", 8080, "port used for graphql api server")
 	set.String("gql-tls-cert-file", "", "path to the TLS certificate in PEM format for graphql api server")
 	set.String("gql-tls-key-file", "", "path to the TLS key in PEM format for graphql api server")
