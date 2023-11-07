@@ -1,5 +1,7 @@
 # REST API Documentation 
 
+## The guacrest is currently an EXPERIMENTAL Feature!
+
 ## Implementation:
 
 * Using gin-gonic gin framework for building REST API

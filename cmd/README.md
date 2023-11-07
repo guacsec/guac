@@ -63,6 +63,8 @@ services:
 
 **guacrest**
 
+**The guacrest is currently an EXPERIMENTAL Feature!**
+
 - what it does: runs a REST API server
 - options:
   - listening port

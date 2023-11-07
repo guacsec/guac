@@ -18,6 +18,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,10 @@ const (
 )
 
 func main() {
+	if os.Getenv("GUAC_EXPERIMENTAL") != "true" {
+        log.Fatalf("GUAC_EXPERIMENTAL is not set to true. Exiting.")
+    }
+
 	r := gin.Default()
 	ctx := context.Background()
 

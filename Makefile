@@ -263,3 +263,8 @@ check-goreleaser-tool-check:
 # Check that all the tools are installed.
 .PHONY: check-tools
 check-tools: check-docker-tool-check check-docker-buildx-tool-check check-docker-compose-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check check-goreleaser-tool-check
+
+# Runs the experimental REST API
+.PHONY: rest
+rest: 
+	GUAC_EXPERIMENTAL=true go run ./cmd/guacrest
