@@ -17,6 +17,8 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
+	"strconv"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
@@ -68,7 +70,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 	return collect(records, toModelHasSBOM), nil
 }
 
-func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec) (*model.HasSbom, error) {
+func (b *EntBackend) IngestHasSbomID(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
 
 	sbomId, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
@@ -126,36 +128,31 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			ID(ctx)
 		if err != nil {
-			return nil, Errorf("%v ::  %s", funcName, err)
+			if err != stdsql.ErrNoRows {
+				return nil, errors.Wrap(err, "IngestHasSbomID")
+			}
+			id, err = client.BillOfMaterials.Query().
+				Where(billofmaterials.URIEQ(spec.URI)).
+				OnlyID(ctx)
+			if err != nil {
+				return nil, Errorf("%v ::  %s", funcName, err)
+			}
+
 		}
 		return &id, nil
 	})
 	if err != nil {
-		return nil, Errorf("%v :: %s", funcName, err)
+		return "", Errorf("%v :: %s", funcName, err)
 	}
 
-	sbom, err := b.client.BillOfMaterials.Query().
-		Where(billofmaterials.ID(*sbomId)).
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
-		}).
-		WithArtifact().
-		Only(ctx)
-	if err != nil {
-		return nil, Errorf("%v :: %s", funcName, err)
-	}
-	return toModelHasSBOM(sbom), nil
+	return strconv.Itoa(*sbomId), nil
 }
 
-func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]*model.HasSbom, error) {
-	var modelHasSboms []*model.HasSbom
+func (b *EntBackend) IngestHasSBOMIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]string, error) {
+	var modelHasSboms []string
 	for i, hasSbom := range hasSBOMs {
 		var subject model.PackageOrArtifactInput
 		if len(subjects.Artifacts) > 0 {
@@ -163,7 +160,7 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 		} else {
 			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
 		}
-		modelHasSbom, err := b.IngestHasSbom(ctx, subject, *hasSbom)
+		modelHasSbom, err := b.IngestHasSbomID(ctx, subject, *hasSbom)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
 		}
