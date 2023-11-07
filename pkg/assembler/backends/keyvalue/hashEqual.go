@@ -142,6 +142,9 @@ func (c *demoClient) matchArtifacts(ctx context.Context, filter []*model.Artifac
 		// drop error here if ID is bad
 		if a != nil {
 			matchID = append(matchID, a.ID())
+		} else if aSpec.ID != nil {
+			// We had an id but it didn't match
+			return false
 		} else if aSpec.Algorithm != nil || aSpec.Digest != nil {
 			matchPartial = append(matchPartial, aSpec)
 		}

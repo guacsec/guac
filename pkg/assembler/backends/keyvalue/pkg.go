@@ -936,3 +936,59 @@ func (c *demoClient) exactPackageName(ctx context.Context, filter *model.PkgSpec
 	}
 	return pkgN, nil
 }
+
+func (c *demoClient) matchPackages(ctx context.Context, filter []*model.PkgSpec, pkgs []string) bool {
+	pkgs = slices.Clone(pkgs)
+	pkgs = sortAndRemoveDups(pkgs)
+
+	for _, pvSpec := range filter {
+		if pvSpec != nil {
+			if pvSpec.ID != nil {
+				// Check by ID if present
+				if !c.isIDPresent(*pvSpec.ID, pkgs) {
+					return false
+				}
+			} else {
+				// Otherwise match spec information
+				match := false
+				for _, pkgId := range pkgs {
+					id := pkgId
+					pkgVersion, err := byIDkv[*pkgVersion](ctx, id, c)
+					if err == nil {
+						if noMatch(pvSpec.Subpath, pkgVersion.Subpath) || noMatchQualifiers(pvSpec, pkgVersion.Qualifiers) || noMatch(pvSpec.Version, pkgVersion.Version) {
+							continue
+						}
+						id = pkgVersion.Parent
+					}
+					pkgName, err := byIDkv[*pkgName](ctx, id, c)
+					if err == nil {
+						if noMatch(pvSpec.Name, pkgName.Name) {
+							continue
+						}
+						id = pkgName.Parent
+					}
+					pkgNamespace, err := byIDkv[*pkgNamespace](ctx, id, c)
+					if err == nil {
+						if noMatch(pvSpec.Namespace, pkgNamespace.Namespace) {
+							continue
+						}
+						id = pkgNamespace.Parent
+					}
+					pkgType, err := byIDkv[*pkgType](ctx, id, c)
+					if err == nil {
+						if noMatch(pvSpec.Type, pkgType.Type) {
+							continue
+						} else {
+							match = true
+							break
+						}
+					}
+				}
+				if !match {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
