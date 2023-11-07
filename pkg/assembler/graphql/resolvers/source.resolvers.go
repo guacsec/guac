@@ -21,7 +21,7 @@ func (r *mutationResolver) IngestSource(ctx context.Context, source model.Source
 	}
 	results := helpers.GetSourceAsIds([]*model.Source{ingestedSource})
 	if len(results) != 1 {
-		return nil, fmt.Errorf("could no derive correct package ID information for ingested packages, expected to return 1 but have %d", len(results))
+		return nil, fmt.Errorf("could no derive correct source ID information for ingested sources, expected to return 1 but have %d", len(results))
 	}
 	return results[0], nil
 }
@@ -31,8 +31,8 @@ func (r *mutationResolver) IngestSources(ctx context.Context, sources []*model.S
 	ingestedSources, err := r.Backend.IngestSources(ctx, sources)
 	if err == nil {
 		results := helpers.GetSourceAsIds(ingestedSources)
-		if len(results) != len(ingestedSources) {
-			return nil, fmt.Errorf("could no derive correct package ID information for ingested packages, expected to return 1 but have %d", len(results))
+		if len(results) != len(sources) {
+			return nil, fmt.Errorf("could no derive correct source ID information for ingested sources, expected to return %d but have %d", len(sources), len(results))
 		}
 		return results, nil
 	}
