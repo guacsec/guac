@@ -137,7 +137,9 @@ func Test_PkgType_Neighbors(t *testing.T) {
 				ThisID:     tt.fields.id,
 				Namespaces: tt.fields.namespaces,
 			}
-			if got := n.Neighbors(nil); !reflect.DeepEqual(got, tt.want) {
+			if got := n.Neighbors(edgeMap{
+				model.EdgePackageTypePackageNamespace: true,
+			}); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("PkgType.Neighbors() = %v, want %v", got, tt.want)
 			}
 		})
@@ -173,7 +175,10 @@ func Test_pkgNamespace_Neighbors(t *testing.T) {
 				Namespace: tt.fields.namespace,
 				Names:     tt.fields.names,
 			}
-			if got := n.Neighbors(nil); !reflect.DeepEqual(got, tt.want) {
+			if got := n.Neighbors(edgeMap{
+				model.EdgePackageNamespacePackageType: true,
+				model.EdgePackageNamespacePackageName: true,
+			}); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("pkgNamespace.Neighbors() = %v, want %v", got, tt.want)
 			}
 		})
@@ -195,47 +200,74 @@ func Test_pkgName_Neighbors(t *testing.T) {
 		allowedEdges edgeMap
 		fields       fields
 		want         []string
-	}{{
-		name: "srcMapLinks",
-		fields: fields{
-			id:          "23",
-			parent:      "22",
-			versions:    []string{"24"},
-			srcMapLinks: []string{"343", "546"},
+	}{
+		{
+			name: "packageNamespace",
+			fields: fields{
+				id:          "23",
+				parent:      "22",
+				versions:    []string{"24"},
+				srcMapLinks: []string{"343", "546"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageNamePackageNamespace: true},
+			want:         []string{"22"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageHasSourceAt: true},
-		want:         []string{"22", "24", "343", "546"},
-	}, {
-		name: "isDependencyLinks",
-		fields: fields{
-			id:                "23",
-			parent:            "22",
-			versions:          []string{"24"},
-			isDependencyLinks: []string{"2324", "1234"},
+		{
+			name: "packageVersion",
+			fields: fields{
+				id:          "23",
+				parent:      "22",
+				versions:    []string{"24"},
+				srcMapLinks: []string{"343", "546"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageNamePackageVersion: true},
+			want:         []string{"24"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageIsDependency: true},
-		want:         []string{"22", "24", "2324", "1234"},
-	}, {
-		name: "badLinks",
-		fields: fields{
-			id:       "23",
-			parent:   "22",
-			versions: []string{"24"},
-			badLinks: []string{"445", "1232244"},
+		{
+			name: "srcMapLinks",
+			fields: fields{
+				id:          "23",
+				parent:      "22",
+				versions:    []string{"24"},
+				srcMapLinks: []string{"343", "546"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageHasSourceAt: true},
+			want:         []string{"343", "546"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageCertifyBad: true},
-		want:         []string{"22", "24", "445", "1232244"},
-	}, {
-		name: "goodLinks",
-		fields: fields{
-			id:        "23",
-			parent:    "22",
-			versions:  []string{"24"},
-			goodLinks: []string{"987", "9876"},
+		{
+			name: "isDependencyLinks",
+			fields: fields{
+				id:                "23",
+				parent:            "22",
+				versions:          []string{"24"},
+				isDependencyLinks: []string{"2324", "1234"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageIsDependency: true},
+			want:         []string{"2324", "1234"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageCertifyGood: true},
-		want:         []string{"22", "24", "987", "9876"},
-	}}
+		{
+			name: "badLinks",
+			fields: fields{
+				id:       "23",
+				parent:   "22",
+				versions: []string{"24"},
+				badLinks: []string{"445", "1232244"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageCertifyBad: true},
+			want:         []string{"445", "1232244"},
+		},
+		{
+			name: "goodLinks",
+			fields: fields{
+				id:        "23",
+				parent:    "22",
+				versions:  []string{"24"},
+				goodLinks: []string{"987", "9876"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageCertifyGood: true},
+			want:         []string{"987", "9876"},
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			n := &pkgName{
@@ -273,88 +305,108 @@ func Test_pkgVersion_Neighbors(t *testing.T) {
 		allowedEdges edgeMap
 		fields       fields
 		want         []string
-	}{{
-		name: "srcMapLinks",
-		fields: fields{
-			id:          "23",
-			parent:      "22",
-			srcMapLinks: []string{"343", "546"},
+	}{
+		{
+			name: "packageName",
+			fields: fields{
+				id:          "23",
+				parent:      "22",
+				srcMapLinks: []string{"343", "546"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageVersionPackageName: true},
+			want:         []string{"22"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageHasSourceAt: true},
-		want:         []string{"22", "343", "546"},
-	}, {
-		name: "isDependencyLinks",
-		fields: fields{
-			id:                "23",
-			parent:            "22",
-			isDependencyLinks: []string{"2324", "1234"},
+		{
+			name: "srcMapLinks",
+			fields: fields{
+				id:          "23",
+				parent:      "22",
+				srcMapLinks: []string{"343", "546"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageHasSourceAt: true},
+			want:         []string{"343", "546"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageIsDependency: true},
-		want:         []string{"22", "2324", "1234"},
-	}, {
-		name: "occurrences",
-		fields: fields{
-			id:          "23",
-			parent:      "22",
-			occurrences: []string{"2324", "1234"},
+		{
+			name: "isDependencyLinks",
+			fields: fields{
+				id:                "23",
+				parent:            "22",
+				isDependencyLinks: []string{"2324", "1234"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageIsDependency: true},
+			want:         []string{"2324", "1234"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageIsOccurrence: true},
-		want:         []string{"22", "2324", "1234"},
-	}, {
-		name: "certifyVulnLinks",
-		fields: fields{
-			id:               "23",
-			parent:           "22",
-			certifyVulnLinks: []string{"2324", "1234"},
+		{
+			name: "occurrences",
+			fields: fields{
+				id:          "23",
+				parent:      "22",
+				occurrences: []string{"2324", "1234"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageIsOccurrence: true},
+			want:         []string{"2324", "1234"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageCertifyVuln: true},
-		want:         []string{"22", "2324", "1234"},
-	}, {
-		name: "hasSBOMs",
-		fields: fields{
-			id:       "23",
-			parent:   "22",
-			hasSBOMs: []string{"2324", "1234"},
+		{
+			name: "certifyVulnLinks",
+			fields: fields{
+				id:               "23",
+				parent:           "22",
+				certifyVulnLinks: []string{"2324", "1234"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageCertifyVuln: true},
+			want:         []string{"2324", "1234"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageHasSbom: true},
-		want:         []string{"22", "2324", "1234"},
-	}, {
-		name: "vexLinks",
-		fields: fields{
-			id:       "23",
-			parent:   "22",
-			vexLinks: []string{"2324", "1234"},
+		{
+			name: "hasSBOMs",
+			fields: fields{
+				id:       "23",
+				parent:   "22",
+				hasSBOMs: []string{"2324", "1234"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageHasSbom: true},
+			want:         []string{"2324", "1234"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageCertifyVexStatement: true},
-		want:         []string{"22", "2324", "1234"},
-	}, {
-		name: "badLinks",
-		fields: fields{
-			id:       "23",
-			parent:   "22",
-			badLinks: []string{"445", "1232244"},
+		{
+			name: "vexLinks",
+			fields: fields{
+				id:       "23",
+				parent:   "22",
+				vexLinks: []string{"2324", "1234"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageCertifyVexStatement: true},
+			want:         []string{"2324", "1234"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageCertifyBad: true},
-		want:         []string{"22", "445", "1232244"},
-	}, {
-		name: "goodLinks",
-		fields: fields{
-			id:        "23",
-			parent:    "22",
-			goodLinks: []string{"987", "9876"},
+		{
+			name: "badLinks",
+			fields: fields{
+				id:       "23",
+				parent:   "22",
+				badLinks: []string{"445", "1232244"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageCertifyBad: true},
+			want:         []string{"445", "1232244"},
 		},
-		allowedEdges: edgeMap{model.EdgePackageCertifyGood: true},
-		want:         []string{"22", "987", "9876"},
-	}, {
-		name: "pkgEquals",
-		fields: fields{
-			id:        "23",
-			parent:    "22",
-			pkgEquals: []string{"987", "9876"},
+		{
+			name: "goodLinks",
+			fields: fields{
+				id:        "23",
+				parent:    "22",
+				goodLinks: []string{"987", "9876"},
+			},
+			allowedEdges: edgeMap{model.EdgePackageCertifyGood: true},
+			want:         []string{"987", "9876"},
 		},
-		allowedEdges: edgeMap{model.EdgePackagePkgEqual: true},
-		want:         []string{"22", "987", "9876"},
-	}}
+		{
+			name: "pkgEquals",
+			fields: fields{
+				id:        "23",
+				parent:    "22",
+				pkgEquals: []string{"987", "9876"},
+			},
+			allowedEdges: edgeMap{model.EdgePackagePkgEqual: true},
+			want:         []string{"987", "9876"},
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			n := &pkgVersion{

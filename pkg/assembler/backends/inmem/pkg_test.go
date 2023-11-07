@@ -200,77 +200,79 @@ func Test_pkgVersionStruct_Neighbors(t *testing.T) {
 		allowedEdges edgeMap
 		fields       fields
 		want         []uint32
-	}{{
-		name: "packageNamespace",
-		fields: fields{
-			id:          uint32(23),
-			parent:      uint32(22),
-			versions:    pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
-			srcMapLinks: []uint32{343, 546},
+	}{
+		{
+			name: "packageNamespace",
+			fields: fields{
+				id:          uint32(23),
+				parent:      uint32(22),
+				versions:    pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
+				srcMapLinks: []uint32{343, 546},
+			},
+			allowedEdges: edgeMap{model.EdgePackageNamePackageNamespace: true},
+			want:         []uint32{22},
 		},
-		allowedEdges: edgeMap{model.EdgePackageNamePackageNamespace: true},
-		want:         []uint32{22},
-	}, {
-		name: "packageVersion",
-		fields: fields{
-			id:          uint32(23),
-			parent:      uint32(22),
-			versions:    pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
-			srcMapLinks: []uint32{343, 546},
-		},
-		allowedEdges: edgeMap{model.EdgePackageNamePackageVersion: true},
-		want:         []uint32{24},
-	}, {
-		name: "srcMapLinks",
-		fields: fields{
-			id:          uint32(23),
-			parent:      uint32(22),
-			versions:    pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
-			srcMapLinks: []uint32{343, 546},
-		},
-		allowedEdges: edgeMap{model.EdgePackageHasSourceAt: true},
-		want:         []uint32{343, 546},
-	}, {
-		name: "isDependencyLinks",
-		fields: fields{
-			id:                uint32(23),
-			parent:            uint32(22),
-			versions:          pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
-			isDependencyLinks: []uint32{2324, 1234},
-		},
-		allowedEdges: edgeMap{model.EdgePackageIsDependency: true},
-		want:         []uint32{2324, 1234},
-	}, {
-		name: "badLinks",
-		fields: fields{
-			id:       uint32(23),
-			parent:   uint32(22),
-			versions: pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
-			badLinks: []uint32{445, 1232244},
-		},
-		allowedEdges: edgeMap{model.EdgePackageCertifyBad: true},
-		want:         []uint32{445, 1232244},
-	}, {
-		name: "goodLinks",
-		fields: fields{
-			id:        uint32(23),
-			parent:    uint32(22),
-			versions:  pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
-			goodLinks: []uint32{987, 9876},
-		},
-		allowedEdges: edgeMap{model.EdgePackageCertifyGood: true},
-		want:         []uint32{987, 9876},
-	}, {
-		name: "goodLinks",
-		fields: fields{
-			id:        uint32(23),
-			parent:    uint32(22),
-			versions:  pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
-			goodLinks: []uint32{987, 9876},
-		},
-		allowedEdges: edgeMap{model.EdgePackageCertifyGood: true},
-		want:         []uint32{987, 9876},
-	}}
+		{
+			name: "packageVersion",
+			fields: fields{
+				id:          uint32(23),
+				parent:      uint32(22),
+				versions:    pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
+				srcMapLinks: []uint32{343, 546},
+			},
+			allowedEdges: edgeMap{model.EdgePackageNamePackageVersion: true},
+			want:         []uint32{24},
+		}, {
+			name: "srcMapLinks",
+			fields: fields{
+				id:          uint32(23),
+				parent:      uint32(22),
+				versions:    pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
+				srcMapLinks: []uint32{343, 546},
+			},
+			allowedEdges: edgeMap{model.EdgePackageHasSourceAt: true},
+			want:         []uint32{343, 546},
+		}, {
+			name: "isDependencyLinks",
+			fields: fields{
+				id:                uint32(23),
+				parent:            uint32(22),
+				versions:          pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
+				isDependencyLinks: []uint32{2324, 1234},
+			},
+			allowedEdges: edgeMap{model.EdgePackageIsDependency: true},
+			want:         []uint32{2324, 1234},
+		}, {
+			name: "badLinks",
+			fields: fields{
+				id:       uint32(23),
+				parent:   uint32(22),
+				versions: pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
+				badLinks: []uint32{445, 1232244},
+			},
+			allowedEdges: edgeMap{model.EdgePackageCertifyBad: true},
+			want:         []uint32{445, 1232244},
+		}, {
+			name: "goodLinks",
+			fields: fields{
+				id:        uint32(23),
+				parent:    uint32(22),
+				versions:  pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
+				goodLinks: []uint32{987, 9876},
+			},
+			allowedEdges: edgeMap{model.EdgePackageCertifyGood: true},
+			want:         []uint32{987, 9876},
+		}, {
+			name: "goodLinks",
+			fields: fields{
+				id:        uint32(23),
+				parent:    uint32(22),
+				versions:  pkgVersionMap{"digest-a": &pkgVersionNode{id: uint32(24)}},
+				goodLinks: []uint32{987, 9876},
+			},
+			allowedEdges: edgeMap{model.EdgePackageCertifyGood: true},
+			want:         []uint32{987, 9876},
+		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			n := &pkgVersionStruct{

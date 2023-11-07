@@ -100,18 +100,29 @@ func (n *pkgName) ID() string      { return n.ThisID }
 func (n *pkgVersion) ID() string   { return n.ThisID }
 
 func (n *pkgType) Neighbors(allowedEdges edgeMap) []string {
-	return n.Namespaces
+	if allowedEdges[model.EdgePackageTypePackageNamespace] {
+		return n.Namespaces
+	}
+	return nil
 }
 func (n *pkgNamespace) Neighbors(allowedEdges edgeMap) []string {
-	out := make([]string, 0, 1+len(n.Names))
-	out = append(out, n.Names...)
-	out = append(out, n.Parent)
+	var out []string
+	if allowedEdges[model.EdgePackageNamespacePackageName] {
+		out = append(out, n.Names...)
+	}
+	if allowedEdges[model.EdgePackageNamespacePackageType] {
+		out = append(out, n.Parent)
+	}
 	return out
 }
 func (n *pkgName) Neighbors(allowedEdges edgeMap) []string {
-	out := []string{n.Parent}
-	out = append(out, n.Versions...)
-
+	var out []string
+	if allowedEdges[model.EdgePackageNamePackageNamespace] {
+		out = append(out, n.Parent)
+	}
+	if allowedEdges[model.EdgePackageNamePackageVersion] {
+		out = append(out, n.Versions...)
+	}
 	if allowedEdges[model.EdgePackageHasSourceAt] {
 		out = append(out, n.SrcMapLinks...)
 	}
@@ -134,8 +145,10 @@ func (n *pkgName) Neighbors(allowedEdges edgeMap) []string {
 	return out
 }
 func (n *pkgVersion) Neighbors(allowedEdges edgeMap) []string {
-	out := []string{n.Parent}
-
+	var out []string
+	if allowedEdges[model.EdgePackageVersionPackageName] {
+		out = append(out, n.Parent)
+	}
 	if allowedEdges[model.EdgePackageHasSourceAt] {
 		out = append(out, n.SrcMapLinks...)
 	}
@@ -828,7 +841,7 @@ func getQualifiersFromFilter(qualifiersSpec []*model.PackageQualifierSpec) map[s
 		return qualifiersMap
 	}
 	for _, kv := range qualifiersSpec {
-		qualifiersMap[kv.Key] = *kv.Value
+		qualifiersMap[kv.Key] = nilToEmpty(kv.Value)
 	}
 	return qualifiersMap
 }

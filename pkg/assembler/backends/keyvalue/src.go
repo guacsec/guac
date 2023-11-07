@@ -80,17 +80,27 @@ func (n *srcNameNode) Key() string {
 }
 
 func (n *srcType) Neighbors(allowedEdges edgeMap) []string {
-	return n.Namespaces
+	if allowedEdges[model.EdgeSourceTypeSourceNamespace] {
+		return n.Namespaces
+	}
+	return nil
 }
 func (n *srcNamespace) Neighbors(allowedEdges edgeMap) []string {
-	out := make([]string, 0, 1+len(n.Names))
-	out = append(out, n.Names...)
-	out = append(out, n.Parent)
+	var out []string
+	if allowedEdges[model.EdgeSourceNamespaceSourceName] {
+		out = append(out, n.Names...)
+	}
+	if allowedEdges[model.EdgeSourceNamespaceSourceType] {
+		out = append(out, n.Parent)
+	}
 	return out
 }
 func (n *srcNameNode) Neighbors(allowedEdges edgeMap) []string {
-	out := []string{n.Parent}
+	var out []string
 
+	if allowedEdges[model.EdgeSourceNameSourceNamespace] {
+		out = append(out, n.Parent)
+	}
 	if allowedEdges[model.EdgeSourceHasSourceAt] {
 		out = append(out, n.SrcMapLinks...)
 	}
