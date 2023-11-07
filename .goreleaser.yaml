@@ -141,6 +141,17 @@ builds:
         goarch: arm64
       - goos: windows
         goarch: arm
+  - main: ./cmd/guacrest
+    id: guacrest
+    binary: guacrest-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+      - arm
 
 universal_binaries:
   - replace: true
