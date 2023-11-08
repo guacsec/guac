@@ -152,6 +152,11 @@ builds:
       - amd64
       - arm64
       - arm
+    ignore:
+    - goos: windows
+      goarch: arm64
+    - goos: windows
+      goarch: arm
 
 universal_binaries:
   - replace: true
