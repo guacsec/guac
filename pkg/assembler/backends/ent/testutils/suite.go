@@ -18,6 +18,7 @@ package testutils
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
@@ -110,7 +111,11 @@ func (s *Suite) BeforeTest(suiteName, testName string) {
 }
 
 func (s *Suite) AfterTest(suiteName, testName string) {
-	s.Client.Close()
+	err := s.Client.Close()
+	if err != nil {
+		fmt.Printf("WARN: %v/%v error while closing the Ent client :: %s", suiteName, testName, err)
+		return
+	}
 }
 
 var _ suite.BeforeTest = (*Suite)(nil)
