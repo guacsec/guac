@@ -17,6 +17,10 @@ package backend
 
 import (
 	"context"
+<<<<<<< HEAD
+=======
+	stdsql "database/sql"
+>>>>>>> 13283a5 (Ent - OccurrenceID)
 	"strconv"
 
 	"entgo.io/ent/dialect/sql"
@@ -98,8 +102,8 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 	return models, nil
 }
 
-func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	var models []*model.IsOccurrence
+func (b *EntBackend) IngestOccurrenceIDs(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+	var ids []string
 	for i := range occurrences {
 		var subject model.PackageOrSourceInput
 		if len(subjects.Packages) > 0 {
@@ -107,20 +111,20 @@ func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.Packa
 		} else {
 			subject = model.PackageOrSourceInput{Source: subjects.Sources[i]}
 		}
-		modelOccurrence, err := b.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
+		id, err := b.IngestOccurrenceID(ctx, subject, *artifacts[i], *occurrences[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestOccurrences failed with element #%v with err: %v", i, err)
 		}
-		models = append(models, modelOccurrence)
+		ids = append(ids, id)
 	}
-	return models, nil
+	return ids, nil
 }
 
-func (b *EntBackend) IngestOccurrence(ctx context.Context,
+func (b *EntBackend) IngestOccurrenceID(ctx context.Context,
 	subject model.PackageOrSourceInput,
 	art model.ArtifactInputSpec,
 	spec model.IsOccurrenceInputSpec,
-) (*model.IsOccurrence, error) {
+) (string, error) {
 	funcName := "IngestOccurrence"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
@@ -186,39 +190,28 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			UpdateNewValues().
+			DoNothing().
 			ID(ctx)
 		if err != nil {
-			return nil, err
+			if err != stdsql.ErrNoRows {
+				return nil, errors.Wrap(err, "upsertPackageEqual")
+			}
+			id, err = client.Occurrence.Query().
+				Where(occurrence.ArtifactIDEQ(artRecord.ID),
+					occurrence.JustificationEQ(spec.Justification),
+					occurrence.OriginEQ(spec.Origin),
+					occurrence.CollectorEQ(spec.Collector)).
+				OnlyID(ctx)
+			if err != nil {
+				return nil, errors.Wrap(err, "get Scorecard ID")
+			}
 		}
 
 		return &id, nil
 	})
 	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+		return "", gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	// TODO: Prepare response using a resusable resolver that accounts for preloads.
-
-	record, err := b.client.Occurrence.Query().
-		Where(occurrence.ID(*recordID)).
-		WithArtifact().
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
-		}).
-		WithSource(func(q *ent.SourceNameQuery) {
-			q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
-				q.WithSourceType()
-			})
-		}).
-		Only(ctx)
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
-	}
-
-	return toModelIsOccurrenceWithSubject(record), nil
+	return strconv.Itoa(*recordID), nil
 }

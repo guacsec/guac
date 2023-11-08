@@ -661,7 +661,11 @@ func TestIngestOccurrences(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
+<<<<<<< HEAD
 				_, err := b.IngestOccurrenceIDs(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+=======
+				got, err := b.IngestOccurrenceIDs(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+>>>>>>> 13283a5 (Ent - OccurrenceID)
 				if (err != nil) != test.ExpIngestErr {
 					t.Errorf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

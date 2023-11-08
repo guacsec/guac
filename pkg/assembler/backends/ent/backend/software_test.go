@@ -164,6 +164,7 @@ func (s *Suite) TestIngestOccurrence_Package() {
 			},
 			model.ArtifactInputSpec{
 				Algorithm: "sha256", Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+<<<<<<< HEAD
 			},
 			model.IsOccurrenceInputSpec{
 				Justification: "this artifact is an occurrence of this openssl",
@@ -174,4 +175,25 @@ func (s *Suite) TestIngestOccurrence_Package() {
 		s.NoError(err)
 		s.NotNil(oc)
 	})
+=======
+			})
+		s.NoError(err)
+
+	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
+	oc, err := be.IngestOccurrenceID(s.Ctx,
+		model.PackageOrSourceInput{
+			Package: p1,
+		},
+		model.ArtifactInputSpec{
+			Algorithm: "sha256", Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+		},
+		model.IsOccurrenceInputSpec{
+			Justification: "this artifact is an occurrence of this openssl",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	)
+	s.NoError(err)
+	s.NotNil(oc)
+>>>>>>> 13283a5 (Ent - OccurrenceID)
 }

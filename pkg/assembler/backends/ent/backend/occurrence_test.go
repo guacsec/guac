@@ -19,7 +19,6 @@ package backend
 
 import (
 	"github.com/google/go-cmp/cmp"
-
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -214,19 +213,27 @@ func (s *Suite) TestOccurrenceHappyPath() {
 		_, err = be.IngestArtifactID(s.Ctx, a1)
 		s.Require().NoError(err)
 
-		occ, err := be.IngestOccurrence(s.Ctx,
-			model.PackageOrSourceInput{
-				Package: p1,
-			},
-			*a1,
-			model.IsOccurrenceInputSpec{
-				Justification: "test justification",
-			},
-		)
-		s.Require().NoError(err)
-		s.Require().NotNil(occ)
-		s.Equal("test justification", occ.Justification)
-		s.Equal(a1.Digest, occ.Artifact.Digest)
+	id, err := be.IngestOccurrenceID(s.Ctx,
+		model.PackageOrSourceInput{
+			Package: p1,
+		},
+		*a1,
+		model.IsOccurrenceInputSpec{
+			Justification: "test justification",
+		},
+	)
+
+	occs, errR := be.IsOccurrence(s.Ctx, &model.IsOccurrenceSpec{
+		ID: &id,
+	})
+	if errR != nil {
+		s.Failf("fail", "error reading occurrence with id: %s", id, errR)
+	}
+	occ := occs[0]
+	s.Require().NoError(err)
+	s.Require().NotNil(occ)
+	s.Equal("test justification", occ.Justification)
+	s.Equal(a1.Digest, occ.Artifact.Digest)
 
 		if pkgSrc, ok := occ.Subject.(*model.Package); ok && pkgSrc != nil {
 			s.Equal(p1.Type, pkgSrc.Type)
@@ -579,7 +586,7 @@ func (s *Suite) TestOccurrence() {
 			}
 
 			for _, o := range test.Calls {
-				_, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
+				_, err := b.IngestOccurrenceID(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
 				if test.ExpIngestErr {
 					s.Require().Error(err, "Expected ingest error")
 				} else {
