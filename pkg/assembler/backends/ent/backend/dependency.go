@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -71,21 +72,21 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 	return collect(deps, toModelIsDependencyWithBackrefs), nil
 }
 
-func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+func (b *EntBackend) IngestDependencieIDs(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO: This looks like a good candidate for using BulkCreate()
 
-	var modelIsDependencies []*model.IsDependency
+	var ids []string
 	for i := range dependencies {
-		isDependency, err := b.IngestDependency(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
+		isDependency, err := b.IngestDependencyID(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
 		if err != nil {
 			return nil, Errorf("IngestDependency failed with err: %v", err)
 		}
-		modelIsDependencies = append(modelIsDependencies, isDependency)
+		ids = append(ids, isDependency)
 	}
-	return modelIsDependencies, nil
+	return ids, nil
 }
 
-func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (*model.IsDependency, error) {
+func (b *EntBackend) IngestDependencyID(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
 	funcName := "IngestDependency"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
@@ -150,10 +151,10 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 		return &id, nil
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, funcName)
+		return "", errors.Wrap(err, funcName)
 	}
 
-	return &model.IsDependency{ID: nodeID(*recordID)}, nil
+	return strconv.Itoa(*recordID), nil
 }
 
 func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
