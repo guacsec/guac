@@ -19,14 +19,17 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	stdsql "database/sql"
 	"fmt"
 	"sort"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -42,30 +45,30 @@ func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]
 	return collect(records, toModelPkgEqual), nil
 }
 
-func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.PkgEqual, error) {
+func (b *EntBackend) IngestPkgEqualID(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
+	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		return upsertPackageEqual(ctx, ent.TxFromContext(ctx), pkg, depPkg, pkgEqual)
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelPkgEqual(record), nil
+	return strconv.Itoa(*id), nil
 }
 
 func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
 	var ids []string
 	for i, pkgEqual := range pkgEquals {
-		pe, err := b.IngestPkgEqual(ctx, *pkgs[i], *otherPackages[i], *pkgEqual)
+		id, err := b.IngestPkgEqualID(ctx, *pkgs[i], *otherPackages[i], *pkgEqual)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestPkgEquals failed with err: %v", err)
 		}
-		ids = append(ids, pe.ID)
+		ids = append(ids, id)
 	}
 	return ids, nil
 }
 
-func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInputSpec, pkgB model.PkgInputSpec, spec model.PkgEqualInputSpec) (*ent.PkgEqual, error) {
+func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInputSpec, pkgB model.PkgInputSpec, spec model.PkgEqualInputSpec) (*int, error) {
 	pkgARecord, err := client.PackageVersion.Query().Where(packageVersionInputQuery(pkgA)).Only(ctx)
 	if err != nil {
 		return nil, err
@@ -85,8 +88,6 @@ func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInput
 	})
 
 	id, err := client.PkgEqual.Create().
-		// SetPackage(sortedPackages[0]).
-		// SetDependantPackage(sortedPackages[1]).
 		AddPackages(sortedPackages...).
 		SetPackagesHash(hashPackages(sortedPackages)).
 		SetCollector(spec.Collector).
@@ -94,34 +95,30 @@ func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInput
 		SetOrigin(spec.Origin).
 		OnConflict(
 			sql.ConflictColumns(
-				// pkgequal.FieldPackageVersionID,
-				// pkgequal.FieldEqualPackageID,
-
 				pkgequal.FieldPackagesHash,
 				pkgequal.FieldOrigin,
 				pkgequal.FieldCollector,
 				pkgequal.FieldJustification,
 			),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsertPackageEqual")
+		}
+		id, err = client.PkgEqual.Query().
+			Where(pkgequal.CollectorEQ(spec.Collector),
+				pkgequal.OriginEQ(spec.Origin),
+				pkgequal.JustificationEQ(spec.Justification),
+				pkgequal.PackagesHashEQ(hashPackages(sortedPackages))).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get Scorecard ID")
+		}
 	}
 
-	pkgEqual, err := client.PkgEqual.Query().Where(
-		pkgequal.ID(id),
-		// pkgequal.HasPackageWith(packageversion.ID(pkgARecord.ID)),
-		// pkgequal.HasDependantPackageWith(packageversion.ID(pkgBRecord.ID)),
-	).
-		WithPackages(withPackageVersionTree()).
-		// WithDependantPackage(withPackageVersionTree()).WithPackage(withPackageVersionTree()).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return pkgEqual, nil
+	return &id, nil
 }
 
 func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {
