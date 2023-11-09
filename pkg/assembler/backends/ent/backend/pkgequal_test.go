@@ -511,7 +511,7 @@ func (s *Suite) TestPkgEqual() {
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.PkgEqual)
+				id, err := b.IngestPkgEqualID(ctx, *o.P1, *o.P2, *o.PkgEqual)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -519,7 +519,7 @@ func (s *Suite) TestPkgEqual() {
 					return
 				}
 
-				ids[i] = v.ID
+				ids[i] = id
 			}
 			afterCount := s.Client.PkgEqual.Query().CountX(ctx)
 
@@ -831,7 +831,7 @@ func (s *Suite) TestPkgEqualNeighbors() {
 				}
 			}
 			for _, o := range test.Calls {
-				if _, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE); err != nil {
+				if _, err := b.IngestPkgEqualID(ctx, *o.P1, *o.P2, *o.HE); err != nil {
 					t.Fatalf("Could not ingest PkgEqual: %v", err)
 				}
 			}
