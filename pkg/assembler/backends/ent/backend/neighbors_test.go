@@ -119,7 +119,11 @@ func (s *Suite) TestNodes() {
 		id, err := be.IngestPackageID(s.Ctx, *p4)
 		s.Require().NoError(err)
 
+<<<<<<< HEAD
 		pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
+=======
+		pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
+>>>>>>> 33a3e3e (Ent - OccurrenceID)
 		s.Require().NoError(err)
 		p := pkgs[0]
 

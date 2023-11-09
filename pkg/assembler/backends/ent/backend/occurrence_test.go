@@ -19,6 +19,7 @@ package backend
 
 import (
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -213,27 +214,27 @@ func (s *Suite) TestOccurrenceHappyPath() {
 		_, err = be.IngestArtifactID(s.Ctx, a1)
 		s.Require().NoError(err)
 
-	id, err := be.IngestOccurrenceID(s.Ctx,
-		model.PackageOrSourceInput{
-			Package: p1,
-		},
-		*a1,
-		model.IsOccurrenceInputSpec{
-			Justification: "test justification",
-		},
-	)
+		id, err := be.IngestOccurrenceID(s.Ctx,
+			model.PackageOrSourceInput{
+				Package: p1,
+			},
+			*a1,
+			model.IsOccurrenceInputSpec{
+				Justification: "test justification",
+			},
+		)
 
-	occs, errR := be.IsOccurrence(s.Ctx, &model.IsOccurrenceSpec{
-		ID: &id,
-	})
-	if errR != nil {
-		s.Failf("fail", "error reading occurrence with id: %s", id, errR)
-	}
-	occ := occs[0]
-	s.Require().NoError(err)
-	s.Require().NotNil(occ)
-	s.Equal("test justification", occ.Justification)
-	s.Equal(a1.Digest, occ.Artifact.Digest)
+		occs, errR := be.IsOccurrence(s.Ctx, &model.IsOccurrenceSpec{
+			ID: &id,
+		})
+		if errR != nil {
+			s.Failf("fail", "error reading occurrence with id: %s", id, errR)
+		}
+		occ := occs[0]
+		s.Require().NoError(err)
+		s.Require().NotNil(occ)
+		s.Equal("test justification", occ.Justification)
+		s.Equal(a1.Digest, occ.Artifact.Digest)
 
 		if pkgSrc, ok := occ.Subject.(*model.Package); ok && pkgSrc != nil {
 			s.Equal(p1.Type, pkgSrc.Type)
@@ -682,9 +683,14 @@ func (s *Suite) TestIngestOccurrences() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
+<<<<<<< HEAD
 				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+=======
+				if _, err = b.IngestPackageID(ctx, *p); err != nil {
+>>>>>>> 33a3e3e (Ent - OccurrenceID)
 					t.Fatalf("Could not ingest package: %v", err)
 				}
+
 			}
 			for _, s := range test.InSrc {
 				if _, err := b.IngestSourceID(ctx, *s); err != nil {
@@ -696,15 +702,21 @@ func (s *Suite) TestIngestOccurrences() {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
-			for _, o := range test.Calls {
-				got, err := b.IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+			for i, o := range test.Calls {
+				ids, err := b.IngestOccurrenceIDs(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+				id := ids[i]
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				if diff := cmp.Diff(test.ExpOcc, got, ignoreID); diff != "" {
+				got, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: &id})
+				if err != nil {
+					t.Fatalf("Occurence not found: %v", err)
+				}
+
+				if diff := cmp.Diff(test.ExpOcc[i], got[i], ignoreID); diff != "" {
 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}

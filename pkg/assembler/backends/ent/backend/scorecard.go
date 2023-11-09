@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"strconv"
 
 	"entgo.io/ent/dialect/sql"
@@ -85,6 +86,18 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 	}
 
 	return collect(records, toModelCertifyScorecard), nil
+}
+
+func (b *EntBackend) IngestScorecardIDs(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+	var scs []string
+	for i, sc := range scorecards {
+		id, err := b.IngestScorecardID(ctx, *sources[i], *sc)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestScorecards failed with err: %v", err)
+		}
+		scs = append(scs, id)
+	}
+	return scs, nil
 }
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)

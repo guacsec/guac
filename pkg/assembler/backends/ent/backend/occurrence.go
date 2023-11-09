@@ -120,24 +120,6 @@ func (b *EntBackend) IngestOccurrenceIDs(ctx context.Context, subjects model.Pac
 	return ids, nil
 }
 
-func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	var models []*model.IsOccurrence
-	for i := range occurrences {
-		var subject model.PackageOrSourceInput
-		if len(subjects.Packages) > 0 {
-			subject = model.PackageOrSourceInput{Package: subjects.Packages[i]}
-		} else {
-			subject = model.PackageOrSourceInput{Source: subjects.Sources[i]}
-		}
-		modelOccurrence, err := b.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestOccurrences failed with element #%v with err: %v", i, err)
-		}
-		models = append(models, modelOccurrence)
-	}
-	return models, nil
-}
-
 func (b *EntBackend) IngestOccurrenceID(ctx context.Context,
 	subject model.PackageOrSourceInput,
 	art model.ArtifactInputSpec,
@@ -172,9 +154,11 @@ func (b *EntBackend) IngestOccurrenceID(ctx context.Context,
 		}
 
 		var conflictWhere *sql.Predicate
+		var pkgVersion *ent.PackageVersion
+		var srcNameID *int
 
 		if subject.Package != nil {
-			pkgVersion, err := getPkgVersion(ctx, client, *subject.Package)
+			pkgVersion, err = getPkgVersion(ctx, client, *subject.Package)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get package version")
 			}
@@ -185,7 +169,7 @@ func (b *EntBackend) IngestOccurrenceID(ctx context.Context,
 				sql.IsNull(occurrence.FieldSourceID),
 			)
 		} else if subject.Source != nil {
-			srcNameID, err := upsertSource(ctx, tx, *subject.Source)
+			srcNameID, err = upsertSource(ctx, tx, *subject.Source)
 			if err != nil {
 				return nil, err
 			}
@@ -210,18 +194,28 @@ func (b *EntBackend) IngestOccurrenceID(ctx context.Context,
 			).
 			DoNothing().
 			ID(ctx)
+
 		if err != nil {
 			if err != stdsql.ErrNoRows {
 				return nil, errors.Wrap(err, "upsertPackageEqual")
 			}
-			id, err = client.Occurrence.Query().
-				Where(occurrence.ArtifactIDEQ(artRecord.ID),
-					occurrence.JustificationEQ(spec.Justification),
-					occurrence.OriginEQ(spec.Origin),
-					occurrence.CollectorEQ(spec.Collector)).
-				OnlyID(ctx)
+			predicates := []predicate.Occurrence{
+				occurrence.ArtifactIDEQ(artRecord.ID),
+				occurrence.JustificationEQ(spec.Justification),
+				occurrence.OriginEQ(spec.Origin),
+				occurrence.CollectorEQ(spec.Collector),
+			}
+
+			if subject.Package != nil {
+				predicates = append(predicates, occurrence.PackageIDEQ(pkgVersion.ID))
+			} else if subject.Source != nil {
+				predicates = append(predicates, occurrence.SourceIDEQ(*srcNameID))
+			}
+
+			id, err = client.Occurrence.Query().Where(predicates...).OnlyID(ctx)
+
 			if err != nil {
-				return nil, errors.Wrap(err, "get Scorecard ID")
+				return nil, errors.Wrap(err, "get Occurrence ID")
 			}
 		}
 

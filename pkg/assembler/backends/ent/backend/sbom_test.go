@@ -571,6 +571,11 @@ func (s *Suite) TestIngestHasSBOMs() {
 							URI: "test uri",
 						},
 					},
+					Inc: []*model.HasSBOMIncludesInputSpec{
+						{
+							Software: []string{"Software 1"},
+						},
+					},
 				},
 			},
 			Query: &model.HasSBOMSpec{
@@ -597,6 +602,14 @@ func (s *Suite) TestIngestHasSBOMs() {
 						},
 						{
 							URI: "test uri",
+						},
+					},
+					Inc: []*model.HasSBOMIncludesInputSpec{
+						{
+							Software: []string{"Software 1"},
+						},
+						{
+							Software: []string{"Software 2"},
 						},
 					},
 				},
@@ -627,6 +640,14 @@ func (s *Suite) TestIngestHasSBOMs() {
 							URI: "test uri two",
 						},
 					},
+					Inc: []*model.HasSBOMIncludesInputSpec{
+						{
+							Software: []string{"Software 1"},
+						},
+						{
+							Software: []string{"Software 2"},
+						},
+					},
 				},
 			},
 			Query: &model.HasSBOMSpec{
@@ -650,6 +671,14 @@ func (s *Suite) TestIngestHasSBOMs() {
 					HS: []*model.HasSBOMInputSpec{
 						{
 							KnownSince: time.Unix(1e9, 0),
+						},
+					},
+					Inc: []*model.HasSBOMIncludesInputSpec{
+						{
+							Software: []string{"Software 1"},
+						},
+						{
+							Software: []string{"Software 2"},
 						},
 					},
 				},
@@ -681,6 +710,14 @@ func (s *Suite) TestIngestHasSBOMs() {
 							URI: "test uri",
 						},
 					},
+					Inc: []*model.HasSBOMIncludesInputSpec{
+						{
+							Software: []string{"Software 1"},
+						},
+						{
+							Software: []string{"Software 2"},
+						},
+					},
 				},
 				{
 					Sub: model.PackageOrArtifactInputs{
@@ -689,6 +726,14 @@ func (s *Suite) TestIngestHasSBOMs() {
 					HS: []*model.HasSBOMInputSpec{
 						{
 							URI: "test uri",
+						},
+					},
+					Inc: []*model.HasSBOMIncludesInputSpec{
+						{
+							Software: []string{"Software 1"},
+						},
+						{
+							Software: []string{"Software 2"},
 						},
 					},
 				},
@@ -721,6 +766,14 @@ func (s *Suite) TestIngestHasSBOMs() {
 							URI: "test uri",
 						},
 					},
+					Inc: []*model.HasSBOMIncludesInputSpec{
+						{
+							Software: []string{"Software 1"},
+						},
+						{
+							Software: []string{"Software 2"},
+						},
+					},
 				},
 				{
 					Sub: model.PackageOrArtifactInputs{
@@ -732,6 +785,14 @@ func (s *Suite) TestIngestHasSBOMs() {
 						},
 						{
 							URI: "test uri",
+						},
+					},
+					Inc: []*model.HasSBOMIncludesInputSpec{
+						{
+							Software: []string{"Software 1"},
+						},
+						{
+							Software: []string{"Software 2"},
 						},
 					},
 				},
@@ -770,7 +831,12 @@ func (s *Suite) TestIngestHasSBOMs() {
 				}
 			}
 			for _, o := range test.Calls {
+<<<<<<< HEAD
 				_, err := b.IngestHasSBOMIDs(ctx, o.Sub, o.HS, nil)
+=======
+
+				_, err := b.IngestHasSBOMIDs(ctx, o.Sub, o.HS, o.Inc)
+>>>>>>> 33a3e3e (Ent - OccurrenceID)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
