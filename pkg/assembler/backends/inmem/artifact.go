@@ -99,29 +99,30 @@ func (n *artStruct) setPointOfContactLinks(id uint32) {
 
 // Ingest Artifacts
 
-func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	var modelArtifacts []*model.Artifact
+func (c *demoClient) IngestArtifactIDs(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+	var artifactIDs []string
 	for _, art := range artifacts {
-		modelArt, err := c.IngestArtifact(ctx, art)
+		artifactID, err := c.IngestArtifactID(ctx, art)
 		if err != nil {
-			return nil, gqlerror.Errorf("ingestArtifact failed with err: %v", err)
+			return nil, gqlerror.Errorf("IngestArtifactID failed with err: %v", err)
 		}
-		modelArtifacts = append(modelArtifacts, modelArt)
+		artifactIDs = append(artifactIDs, artifactID)
 	}
-	return modelArtifacts, nil
+	return artifactIDs, nil
 }
 
-func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
+func (c *demoClient) IngestArtifactID(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
 	return c.ingestArtifact(ctx, artifact, true)
 }
 
-func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, readOnly bool) (*model.Artifact, error) {
+func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, readOnly bool) (string, error) {
 	algorithm := strings.ToLower(artifact.Algorithm)
 	digest := strings.ToLower(artifact.Digest)
 
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
+	// get artifact by its hash
 	a, err := c.artifactByKey(algorithm, digest)
 	if err != nil {
 		if readOnly {
@@ -139,7 +140,7 @@ func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.Artifac
 		c.artifacts[strings.Join([]string{algorithm, digest}, ":")] = a
 	}
 
-	return c.convArtifact(a), nil
+	return nodeID(a.id), nil
 }
 
 func (c *demoClient) artifactByKey(alg, dig string) (*artStruct, error) {

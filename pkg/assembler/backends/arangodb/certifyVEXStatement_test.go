@@ -861,7 +861,7 @@ func TestVEX(t *testing.T) {
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %a", err)
 				}
 			}
@@ -1289,7 +1289,7 @@ func TestVEXBulkIngest(t *testing.T) {
 				t.Fatalf("Could not ingest package: %v", err)
 			}
 
-			if _, err := b.IngestArtifacts(ctx, test.InArt); err != nil {
+			if _, err := b.IngestArtifactIDs(ctx, test.InArt); err != nil {
 				t.Fatalf("Could not ingest artifact: %a", err)
 			}
 
@@ -1405,7 +1405,7 @@ func TestVEXBulkIngest(t *testing.T) {
 // 				}
 // 			}
 // 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
+// 				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 // 					t.Fatalf("Could not ingest artifact: %a", err)
 // 				}
 // 			}
