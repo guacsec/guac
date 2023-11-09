@@ -628,14 +628,14 @@ func (s *Suite) TestIsDependency() {
 			depIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
 
-				dep, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
+				id, err := b.IngestDependencyID(ctx, *o.P1, *o.P2, o.MF, *o.ID)
 				if (err != nil) != test.ExpIngestErr {
 					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				depIDs[i] = dep.ID
+				depIDs[i] = id
 			}
 
 			if test.Query.ID != nil {
@@ -744,7 +744,7 @@ func (s *Suite) TestIngestDependencies() {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
+				_, err := b.IngestDependencyIDs(ctx, o.P1s, o.P2s, o.MF, o.IDs)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
