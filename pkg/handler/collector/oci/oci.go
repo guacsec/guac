@@ -45,6 +45,16 @@ const (
 	InTotoJson = "application/vnd.in-toto+json"
 )
 
+// docker annotations
+const (
+	dockerReferenceType        = "vnd.docker.reference.type"
+	dockerReferenceAttestation = "attestation-manifest"
+)
+
+type ManifestList struct {
+	platformList []*platform.Platform
+}
+
 // wellKnownOCIArtifactTypes is a map of OCI media types to document type and format
 // document and format is returned as a tuple
 var wellKnownOCIArtifactTypes = map[string]struct {
@@ -237,6 +247,18 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	return nil
 }
 
+func (o *ociCollector) fetchArtifactFromManifest(ctx context.Context, rc *regclient.RegClient, image ref.Ref, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
+
+	logger.Info("fetching artifacts from manifest")
+	if err := fetchOCIArtifactBlobs(ctx, rc, image.CommonName(), "unknown", docChannel); err != nil {
+		return err
+	}
+	o.markDigestAsCollected(image.Repository, image.Digest)
+
+	return nil
+}
+
 // fetchManifestList fetches the manifest list for the given image and fetches all the platform manifests in parallel.
 // It then fetches the artifacts for each platform and sends them to the docChannel.
 // It returns an error if any error occurs during the process.
@@ -284,12 +306,22 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 			}
 			// check if the platform digest has already been collected
 			if !o.isDigestCollected(repo, platformImage.Digest) {
-				logger.Infof("Fetching %s for platform %s", platformImage.Digest, desc.Platform)
-				if err := o.fetchOCIArtifacts(ctx, repo, rc, platformImage, docChannel); err != nil {
-					errorChan <- fmt.Errorf("failed fetching artifacts for platform specific digest: %w", err)
-					cancel()
+				if isAttestationManifest(desc) {
+					err := o.fetchArtifactFromManifest(ctx, rc, platformImage, docChannel)
+					if err != nil {
+						errorChan <- fmt.Errorf("failed fetching artifacts for platform specific digest: %w", err)
+						cancel()
+					}
+					o.markDigestAsCollected(repo, platformImage.Digest)
+
+				} else {
+					logger.Infof("Fetching %s for platform %s", platformImage.Digest, desc.Platform)
+					if err := o.fetchOCIArtifacts(ctx, repo, rc, platformImage, docChannel); err != nil {
+						errorChan <- fmt.Errorf("failed fetching artifacts for platform specific digest: %w", err)
+						cancel()
+					}
+					o.markDigestAsCollected(repo, platformImage.Digest)
 				}
-				o.markDigestAsCollected(repo, platformImage.Digest)
 			}
 		}(p)
 	}
@@ -307,6 +339,13 @@ func (o *ociCollector) fetchManifestList(ctx context.Context, repo string, rc *r
 	}
 
 	return nil
+}
+
+func isAttestationManifest(desc *types.Descriptor) bool {
+	if desc.Annotations != nil && desc.Annotations[dockerReferenceType] == dockerReferenceAttestation {
+		return true
+	}
+	return false
 }
 
 // fetchFallbackArtifacts fetches fallback artifacts for the given image manifest and sends them to the docChannel.

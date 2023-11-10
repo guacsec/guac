@@ -58,6 +58,7 @@ const (
 	DocumentITE6Vul          DocumentType = "ITE6VUL"
 	DocumentDSSE             DocumentType = "DSSE"
 	DocumentSPDX             DocumentType = "SPDX"
+	DocumentITE6SPDX         DocumentType = "ITE6SPDX"
 	DocumentJsonLines        DocumentType = "JSON_LINES"
 	DocumentScorecard        DocumentType = "SCORECARD"
 	DocumentCycloneDX        DocumentType = "CycloneDX"
