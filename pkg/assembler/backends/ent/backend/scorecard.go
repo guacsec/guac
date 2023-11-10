@@ -17,6 +17,8 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -26,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 )
 
 func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
@@ -85,28 +88,19 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 // IngestScorecard takes a scorecard and a source and creates a certifyScorecard
-func (b *EntBackend) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
-	csc, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.CertifyScorecard, error) {
+func (b *EntBackend) IngestScorecardID(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+	cscID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		return upsertScorecard(ctx, ent.TxFromContext(ctx), source, scorecard)
 	})
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	csc, err = b.client.CertifyScorecard.Query().
-		Where(certifyscorecard.IDEQ(csc.ID)).
-		WithScorecard().
-		WithSource(withSourceNameTreeQuery()).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return toModelCertifyScorecard(csc), nil
+	return strconv.Itoa(*cscID), nil
 }
 
-func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.SourceInputSpec, scorecardInput model.ScorecardInputSpec) (*ent.CertifyScorecard, error) {
+func upsertScorecard(ctx context.Context, client *ent.Tx, source model.SourceInputSpec, scorecardInput model.ScorecardInputSpec) (*int, error) {
 	checks := make([]*model.ScorecardCheck, len(scorecardInput.Checks))
 	for i, check := range scorecardInput.Checks {
 		checks[i] = &model.ScorecardCheck{
@@ -115,7 +109,7 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.SourceInputSp
 		}
 	}
 
-	sc, err := tx.Scorecard.
+	sc, err := client.Scorecard.
 		Create().
 		SetChecks(checks).
 		SetAggregateScore(scorecardInput.AggregateScore).
@@ -127,32 +121,57 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.SourceInputSp
 		OnConflict(
 			sql.ConflictColumns(scorecard.FieldOrigin, scorecard.FieldCollector, scorecard.FieldScorecardCommit, scorecard.FieldScorecardVersion, scorecard.FieldAggregateScore),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert Scorecard")
+		}
+		sc, err = client.Scorecard.Query().
+			Where(scorecard.TimeScannedEQ(scorecardInput.TimeScanned),
+				scorecard.ScorecardVersionEQ(scorecardInput.ScorecardVersion),
+				scorecard.ScorecardCommitEQ(scorecardInput.ScorecardCommit)).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get Scorecard ID")
+		}
 	}
 
 	// NOTE: This might be better as a query, but using insert here since the spec is an inputspec
-	srcID, err := upsertSource(ctx, tx, source)
+	srcID, err := upsertSource(ctx, client, source)
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert Source")
+		}
+		*srcID, err = client.SourceName.Query().
+			Where(sourcename.Name(source.Name)).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get Source ID")
+		}
 	}
 
-	id, err := tx.CertifyScorecard.Create().
+	id, err := client.CertifyScorecard.Create().
 		SetScorecardID(sc).
 		SetSourceID(*srcID).
 		OnConflict(
 			sql.ConflictColumns(certifyscorecard.FieldScorecardID, certifyscorecard.FieldSourceID),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert Scorecard")
+		}
+		id, err = client.Scorecard.Query().
+			Where(scorecard.IDEQ(*srcID)).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get Scorecard ID")
+		}
 	}
-
-	return tx.CertifyScorecard.Get(ctx, id)
+	return &id, nil
 }
 
 func toModelCertifyScorecard(record *ent.CertifyScorecard) *model.CertifyScorecard {
