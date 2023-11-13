@@ -200,6 +200,11 @@ func TestPurlConvert(t *testing.T) {
 		}, {
 			purlUri:  "pkg:swift/github.com/RxSwiftCommunity/RxFlow@2.12.4",
 			expected: pkg("swift", "github.com/RxSwiftCommunity", "RxFlow", "2.12.4", "", map[string]string{}),
+		}, {
+			purlUri: "pkg:oci/ubi9-container@sha256:8614ce95268b970880a1eca97dddfce5154fab35418d839c5f75012cccaca0d9?repository_url=registry.redhat.io/ubi9&tag=9.2-489",
+			expected: pkg("oci", "registry.redhat.io/ubi9", "ubi9-container", "sha256:8614ce95268b970880a1eca97dddfce5154fab35418d839c5f75012cccaca0d9", "", map[string]string{
+				"tag": "9.2-489",
+			}),
 		},
 	}
 
