@@ -75,7 +75,7 @@ The following are [GraphQL backends](pkg/assembler/backends) that are implemente
 3. Optimized: The backend has gone through a level of optimization to help improve performance.
 
 The enumerated backends are:
-- [inmem (supported, complete, optimized)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/inmem): a non-persistent in-memory backend that doesn't require any additional infrastructure. Also acts as a conformance backend for API implementations. We recommend starting with this if you're just starting with GUAC!
+- [keyvalue (supported, complete, optimized)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/keyvalue): a non-persistent in-memory backend that doesn't require any additional infrastructure. Also acts as a conformance backend for API implementations. We recommend starting with this if you're just starting with GUAC!
 - [arangoDB (supported, incomplete, optimized)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/arangodb): a persistent backend based on [ArangoDB](https://arangodb.com/)
 - [ent (supported, incomplete)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/ent): a persistent backend based on [ent](https://entgo.io/) that can run on various SQL backends such as [PostgreSQL](https://www.postgresql.org/), [MySQL](https://www.mysql.com/) and [SQLite](https://www.sqlite.org/index.html).
 - [neo4j/openCypher (unsupported, incomplete)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/neo4j): a persistent backend based on [neo4j](https://neo4j.com/) and [openCypher](https://opencypher.org/). This backend should work with any database that supported openCypher queries.

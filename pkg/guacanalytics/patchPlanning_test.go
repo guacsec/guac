@@ -29,7 +29,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/backends"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
@@ -1702,9 +1702,9 @@ func startTestServer() (*http.Server, error) {
 
 func getGraphqlTestServer() (*handler.Server, error) {
 	var topResolver resolvers.Resolver
-	backend, err := backends.Get("inmem", nil, nil)
+	backend, err := backends.Get("keyvalue", nil, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating inmem backend: %w", err)
+		return nil, fmt.Errorf("error creating keyvalue backend: %w", err)
 	}
 
 	topResolver = resolvers.Resolver{Backend: backend}

@@ -25,7 +25,7 @@ csub-addr: localhost:2782
 csub-listen-port: 2782
 
 # GQL setup
-gql-backend: inmem
+gql-backend: keyvalue
 gql-listen-port: 8080
 gql-debug: true
 gql-addr: http://localhost:8080/query

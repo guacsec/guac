@@ -30,7 +30,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/arangodb"
-	_ "github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	_ "github.com/guacsec/guac/pkg/assembler/backends/keyvalue"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/backends/neptune"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
@@ -43,9 +43,9 @@ import (
 const (
 	arango   = "arango"
 	neo4js   = "neo4j"
-	inmems   = "inmem"
 	ent      = "ent"
 	neptunes = "neptune"
+	keyvalue = "keyvalue"
 )
 
 type optsFunc func() backends.BackendArgs
@@ -58,8 +58,8 @@ func init() {
 	}
 	getOpts[arango] = getArango
 	getOpts[neo4js] = getNeo4j
-	getOpts[inmems] = getInMem
 	getOpts[neptunes] = getNeptune
+	getOpts[keyvalue] = getKeyValue
 }
 
 func startServer(cmd *cobra.Command) {
@@ -171,7 +171,7 @@ func getNeo4j() backends.BackendArgs {
 	}
 }
 
-func getInMem() backends.BackendArgs {
+func getKeyValue() backends.BackendArgs {
 	return nil
 }
 
