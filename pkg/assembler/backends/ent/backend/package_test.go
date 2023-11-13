@@ -83,25 +83,14 @@ func (s *Suite) Test_get_package_helpers() {
 			{Key: "a", Value: "b"},
 		},
 	}
-	p2Spec := model.PkgInputSpec{
-		Type:      "apk",
-		Namespace: ptr("test"),
-		Name:      "alpine",
-		Version:   ptr("1.0.0"),
-		Subpath:   ptr("subpath"),
-	}
-
-	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p2Spec)
+	s.Run("HappyPath", func() {
+		ingestP2(s)
+		ingestP1(s)
 	})
-	s.Require().NoError(err)
-	pkgVersionID, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p1Spec)
-	})
-	s.Require().NoError(err)
-	s.Require().NotNil(pkgVersionID)
 
 	s.Run("getPkgName", func() {
+		ingestP2(s)
+		ingestP1(s)
 		pkgName, err := getPkgName(s.Ctx, s.Client, model.PkgInputSpec{
 			Type:      "apk",
 			Namespace: ptr("test"),
@@ -113,12 +102,16 @@ func (s *Suite) Test_get_package_helpers() {
 	})
 
 	s.Run("getPkgVersion", func() {
+		ingestP2(s)
+		ingestP1(s)
 		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, p1Spec)
 		s.Require().NoError(err)
 		s.Require().NotNil(pkgVersion)
 	})
 
 	s.Run("pkgTreeFromVersion", func() {
+		ingestP2(s)
+		ingestP1(s)
 		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, p1Spec)
 		s.Require().NoError(err)
 		pkgTree, err := pkgTreeFromVersion(s.Ctx, pkgVersion)
@@ -134,6 +127,21 @@ func (s *Suite) Test_get_package_helpers() {
 	})
 }
 
+func ingestP2(s *Suite) {
+	p2Spec := model.PkgInputSpec{
+		Type:      "apk",
+		Namespace: ptr("test"),
+		Name:      "alpine",
+		Version:   ptr("1.0.0"),
+		Subpath:   ptr("subpath"),
+	}
+
+	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p2Spec)
+	})
+	s.Require().NoError(err)
+}
+
 func (s *Suite) TestEmptyQualifiersPredicate() {
 	spec := model.PkgInputSpec{
 		Type:      "apk",
@@ -147,24 +155,26 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		},
 	}
 
-	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
+	s.Run("HappyPath", func() {
+		ingestP1(s)
 	})
-	s.Require().NoError(err)
-	s.Require().NotNil(pkg)
-
-	// Ingest twice to ensure upserts are working
-	pkg, err = WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
+	s.Run("Ingest twice", func() {
+		ingestP1(s)
+		// Ingest twice to ensure upserts are working
+		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+			return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
+		})
+		s.Require().NoError(err)
+		s.Require().NotNil(pkg)
 	})
-	s.Require().NoError(err)
-	s.Require().NotNil(pkg)
 
 	s.Run("Empty keys", func() {
+		ingestP1(s)
 		s.Empty(s.Client.PackageVersion.Query().Where(packageversion.QualifiersIsEmpty()).AllX(s.Ctx))
 	})
 
 	s.Run("No Qualifiers", func() {
+		ingestP1(s)
 		spec.Qualifiers = nil
 		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
 			return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
@@ -176,16 +186,19 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 	})
 
 	s.Run("Single key", func() {
+		ingestP1(s)
 		versions := s.Client.PackageVersion.Query().Where(packageversion.QualifiersWithKeys("arch", "a")).AllX(s.Ctx)
 		s.NotEmpty(versions)
 	})
 
 	s.Run("Multiple keys", func() {
+		ingestP1(s)
 		versions := s.Client.PackageVersion.Query().Where(packageversion.QualifiersContains("arch", "arm64")).AllX(s.Ctx)
 		s.NotEmpty(versions)
 	})
 
 	s.Run("Using spec - Null value", func() {
+		ingestP1(s)
 		versions := s.Client.PackageVersion.Query().Where(
 			packageversion.QualifiersMatch([]*model.PackageQualifierSpec{{Key: "arch"}}, false),
 		).AllX(s.Ctx)
@@ -193,6 +206,7 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 	})
 
 	s.Run("Using spec - Multiple", func() {
+		ingestP1(s)
 		versions := s.Client.PackageVersion.Query().Where(
 			packageversion.QualifiersMatch([]*model.PackageQualifierSpec{
 				{Key: "arch"},
@@ -202,6 +216,25 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		s.NotEmpty(versions)
 	})
 
+}
+
+func ingestP1(s *Suite) {
+	p1Spec := model.PkgInputSpec{
+		Type:      "apk",
+		Namespace: ptr("test"),
+		Name:      "alpine",
+		Version:   ptr("1.0.0"),
+		Subpath:   ptr("subpath"),
+		Qualifiers: []*model.PackageQualifierInputSpec{
+			{Key: "arch", Value: "arm64"},
+			{Key: "a", Value: "b"},
+		},
+	}
+	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p1Spec)
+	})
+	s.Require().NoError(err)
+	s.Require().NotNil(pkg)
 }
 
 func (s *Suite) Test_IngestPackages() {

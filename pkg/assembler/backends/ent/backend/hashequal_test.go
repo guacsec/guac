@@ -643,7 +643,7 @@ func (s *Suite) TestIngestHashEquals() {
 			},
 			Query: &model.HashEqualSpec{
 				Artifacts: []*model.ArtifactSpec{{
-					ID: ptrfrom.String("9"),
+					ID: ptrfrom.String("3"),
 				}},
 			},
 			ExpHE: []*model.HashEqual{
@@ -667,7 +667,7 @@ func (s *Suite) TestIngestHashEquals() {
 			},
 			Query: &model.HashEqualSpec{
 				Artifacts: []*model.ArtifactSpec{{
-					ID: ptrfrom.String("10"),
+					ID: ptrfrom.String("1"),
 				}},
 			},
 			ExpHE: []*model.HashEqual{
@@ -748,7 +748,7 @@ func (s *Suite) TestIngestHashEquals() {
 						Digest:    ptrfrom.String("7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
 					},
 					{
-						ID: ptrfrom.String("21"),
+						ID: ptrfrom.String("3"),
 					},
 				},
 			},
