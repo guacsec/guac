@@ -210,35 +210,37 @@ var s2out = &model.Source{
 }
 
 func (s *Suite) TestOccurrenceHappyPath() {
-	be, err := GetBackend(s.Client)
-	s.Require().NoError(err)
+	s.Run("HappyPath", func() {
+		be, err := GetBackend(s.Client)
+		s.Require().NoError(err)
 
-	_, err = be.IngestPackage(s.Ctx, *p1)
-	s.Require().NoError(err)
+		_, err = be.IngestPackage(s.Ctx, *p1)
+		s.Require().NoError(err)
 
-	_, err = be.IngestArtifact(s.Ctx, a1)
-	s.Require().NoError(err)
+		_, err = be.IngestArtifact(s.Ctx, a1)
+		s.Require().NoError(err)
 
-	occ, err := be.IngestOccurrence(s.Ctx,
-		model.PackageOrSourceInput{
-			Package: p1,
-		},
-		*a1,
-		model.IsOccurrenceInputSpec{
-			Justification: "test justification",
-		},
-	)
-	s.Require().NoError(err)
-	s.Require().NotNil(occ)
-	s.Equal("test justification", occ.Justification)
-	s.Equal(a1.Digest, occ.Artifact.Digest)
+		occ, err := be.IngestOccurrence(s.Ctx,
+			model.PackageOrSourceInput{
+				Package: p1,
+			},
+			*a1,
+			model.IsOccurrenceInputSpec{
+				Justification: "test justification",
+			},
+		)
+		s.Require().NoError(err)
+		s.Require().NotNil(occ)
+		s.Equal("test justification", occ.Justification)
+		s.Equal(a1.Digest, occ.Artifact.Digest)
 
-	if pkgSrc, ok := occ.Subject.(*model.Package); ok && pkgSrc != nil {
-		s.Equal(p1.Type, pkgSrc.Type)
-		s.NotEmpty(pkgSrc.Namespaces[0].Names[0].Versions[0].ID)
-	} else {
-		s.Failf("fail", "subject is not a package, got %T", occ.Subject)
-	}
+		if pkgSrc, ok := occ.Subject.(*model.Package); ok && pkgSrc != nil {
+			s.Equal(p1.Type, pkgSrc.Type)
+			s.NotEmpty(pkgSrc.Namespaces[0].Names[0].Versions[0].ID)
+		} else {
+			s.Failf("fail", "subject is not a package, got %T", occ.Subject)
+		}
+	})
 }
 
 func (s *Suite) TestOccurrence() {
