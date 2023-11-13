@@ -136,7 +136,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 		}
 
 		delete(qs, "repository_url")
-		ns = strings.TrimRight(ns, "/"+p.Name)
+		ns = strings.TrimSuffix(ns, "/"+p.Name)
 		r := pkg(p.Type, ns, p.Name, p.Version, p.Subpath, qs)
 		return r, nil
 	case purl.TypeDocker:
