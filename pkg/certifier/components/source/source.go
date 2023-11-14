@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"path"
 	"strings"
 	"time"
 
@@ -83,7 +84,7 @@ func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interfac
 				}
 				if !scoreCardFound {
 					sourceNode := SourceNode{
-						Repo:   names.Name,
+						Repo:   path.Join(namespace.Namespace, names.Name),
 						Commit: trimAlgorithm(nilOrEmpty(names.Commit)),
 						Tag:    nilOrEmpty(names.Tag),
 					}
