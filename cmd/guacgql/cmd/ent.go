@@ -18,6 +18,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 )
@@ -29,7 +31,7 @@ func init() {
 	getOpts[ent] = getEnt
 }
 
-func getEnt() backends.BackendArgs {
+func getEnt(_ context.Context) backends.BackendArgs {
 	return &entbackend.BackendOptions{
 		DriverName:  flags.dbDriver,
 		Address:     flags.dbAddress,

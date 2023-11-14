@@ -64,10 +64,9 @@ type node interface {
 	// BuildModelNode builds a GraphQL return type for a backend node,
 	BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error)
 
+	// Key is used to store the node in the key value store.
 	Key() string
 }
-
-//type indexType map[string]node
 
 var errNotFound = errors.New("not found")
 var errTypeNotMatch = errors.New("Stored type does not match")
@@ -171,7 +170,6 @@ func typeColMap(col string) node {
 	case cVulnCol:
 		return &certifyVulnerabilityLink{}
 	}
-	//?
 	return &artStruct{}
 }
 
@@ -193,16 +191,7 @@ func getBackend(ctx context.Context, opts backends.BackendArgs) (backends.Backen
 	if !ok {
 		store = memmap.GetStore()
 	}
-	//kv, err := tikv.GetStore(ctx)
-	// kv, err := memmap.GetStore()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	return &demoClient{
-		//kv: &redis.Store{},
-		kv: store,
-		//kv:              kv,
-	}, nil
+	return &demoClient{kv: store}, nil
 }
 
 func noMatch(filter *string, value string) bool {
@@ -212,29 +201,12 @@ func noMatch(filter *string, value string) bool {
 	return false
 }
 
-// func noMatchInput(filter *string, value string) bool {
-// 	if filter != nil {
-// 		return value != *filter
-// 	}
-// 	return value != ""
-// }
-
 func nilToEmpty(input *string) string {
 	if input == nil {
 		return ""
 	}
 	return *input
 }
-
-// func timePtrEqual(a, b *time.Time) bool {
-// 	if a == nil && b == nil {
-// 		return true
-// 	}
-// 	if a != nil && b != nil {
-// 		return a.Equal(*b)
-// 	}
-// 	return false
-// }
 
 func toLower(filter *string) *string {
 	if filter != nil {
@@ -250,24 +222,6 @@ func noMatchFloat(filter *float64, value float64) bool {
 	}
 	return false
 }
-
-// func floatEqual(x float64, y float64) bool {
-// 	return math.Abs(x-y) < epsilon
-// }
-
-// delete this
-// func byID[E node](id string, c *demoClient) (E, error) {
-// 	var nl E
-// 	o, ok := c.index[id]
-// 	if !ok {
-// 		return nl, fmt.Errorf("%w : id not in index", errNotFound)
-// 	}
-// 	s, ok := o.(E)
-// 	if !ok {
-// 		return nl, fmt.Errorf("%w : node not a %T", errNotFound, nl)
-// 	}
-// 	return s, nil
-// }
 
 func byIDkv[E node](ctx context.Context, id string, c *demoClient) (E, error) {
 	var nl E
