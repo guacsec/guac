@@ -73,10 +73,10 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 	testSourceDjangoTag.Type = "git"
 	testSourceDjangoTag.Namespaces = append(testSourceDjangoTag.Namespaces, generated.AllSourceTreeNamespacesSourceNamespace{
 		Id:        "",
-		Namespace: "github",
+		Namespace: "github.com/django",
 		Names: []generated.AllSourceTreeNamespacesSourceNamespaceNamesSourceName{
 			{
-				Name:   "https://github.com/django/django",
+				Name:   "django",
 				Commit: ptrfrom.String(""),
 				Tag:    ptrfrom.String("1.11.1"),
 			},
@@ -87,10 +87,10 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 	testSourceDjangoCommit.Type = "git"
 	testSourceDjangoCommit.Namespaces = append(testSourceDjangoCommit.Namespaces, generated.AllSourceTreeNamespacesSourceNamespace{
 		Id:        "",
-		Namespace: "github",
+		Namespace: "github.com/django",
 		Names: []generated.AllSourceTreeNamespacesSourceNamespaceNamesSourceName{
 			{
-				Name:   "https://github.com/django/django",
+				Name:   "django",
 				Commit: ptrfrom.String("e829b0a239cffdeab5781df450a6b0e0026faa2d"),
 				Tag:    ptrfrom.String(""),
 			},
@@ -101,10 +101,10 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 	testSourceDjangoCommitWithAlgo.Type = "git"
 	testSourceDjangoCommitWithAlgo.Namespaces = append(testSourceDjangoCommitWithAlgo.Namespaces, generated.AllSourceTreeNamespacesSourceNamespace{
 		Id:        "",
-		Namespace: "github",
+		Namespace: "github.com/django",
 		Names: []generated.AllSourceTreeNamespacesSourceNamespaceNamesSourceName{
 			{
-				Name:   "https://github.com/django/django",
+				Name:   "django",
 				Commit: ptrfrom.String("sha1:e829b0a239cffdeab5781df450a6b0e0026faa2d"),
 				Tag:    ptrfrom.String(""),
 			},
@@ -115,10 +115,10 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 	testSourceKubeTestTag.Type = "git"
 	testSourceKubeTestTag.Namespaces = append(testSourceKubeTestTag.Namespaces, generated.AllSourceTreeNamespacesSourceNamespace{
 		Id:        "",
-		Namespace: "github",
+		Namespace: "github.com/vapor-ware",
 		Names: []generated.AllSourceTreeNamespacesSourceNamespaceNamesSourceName{
 			{
-				Name:   "https://github.com/vapor-ware/kubetest",
+				Name:   "kubetest",
 				Commit: ptrfrom.String(""),
 				Tag:    ptrfrom.String("0.9.5"),
 			},
@@ -158,7 +158,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 			},
 			wantSourceNode: []*SourceNode{
 				{
-					Repo:   "https://github.com/django/django",
+					Repo:   "github.com/django/django",
 					Commit: "",
 					Tag:    "1.11.1",
 				},
@@ -179,7 +179,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 			},
 			wantSourceNode: []*SourceNode{
 				{
-					Repo:   "https://github.com/django/django",
+					Repo:   "github.com/django/django",
 					Commit: "e829b0a239cffdeab5781df450a6b0e0026faa2d",
 					Tag:    "",
 				},
@@ -200,7 +200,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 			},
 			wantSourceNode: []*SourceNode{
 				{
-					Repo:   "https://github.com/django/django",
+					Repo:   "github.com/django/django",
 					Commit: "e829b0a239cffdeab5781df450a6b0e0026faa2d",
 					Tag:    "",
 				},
@@ -236,7 +236,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 			},
 			wantSourceNode: []*SourceNode{
 				{
-					Repo:   "https://github.com/django/django",
+					Repo:   "github.com/django/django",
 					Commit: "",
 					Tag:    "1.11.1",
 				},
@@ -272,15 +272,15 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 			},
 			wantSourceNode: []*SourceNode{
 				{
-					Repo:   "https://github.com/django/django",
+					Repo:   "github.com/django/django",
 					Commit: "",
 					Tag:    "1.11.1",
 				}, {
-					Repo:   "https://github.com/django/django",
+					Repo:   "github.com/django/django",
 					Commit: "e829b0a239cffdeab5781df450a6b0e0026faa2d",
 					Tag:    "",
 				}, {
-					Repo:   "https://github.com/vapor-ware/kubetest",
+					Repo:   "github.com/vapor-ware/kubetest",
 					Commit: "",
 					Tag:    "0.9.5",
 				},
