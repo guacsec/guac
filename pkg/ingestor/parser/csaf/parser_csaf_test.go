@@ -50,8 +50,7 @@ func Test_csafParser(t *testing.T) {
 			},
 		},
 		wantPredicates: &assembler.IngestPredicates{
-			Vex:         testdata.CsafVexIngest,
-			CertifyVuln: testdata.CsafCertifyVulnIngest,
+			Vex: testdata.CsafVexIngest,
 		},
 		wantErr: false,
 	}}
