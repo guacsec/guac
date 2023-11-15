@@ -33,6 +33,7 @@ type Store interface {
 
 	// Returns a slice of all keys for a collection. If collection does not
 	// exist, return a nil slice.
+	// TODO(jeffmendoza) implement scanning in kv interface
 	Keys(ctx context.Context, collection string) ([]string, error)
 }
 

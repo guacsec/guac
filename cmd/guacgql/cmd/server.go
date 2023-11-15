@@ -35,6 +35,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/neptune"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
+	"github.com/guacsec/guac/pkg/assembler/kv"
+	"github.com/guacsec/guac/pkg/assembler/kv/redis"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
@@ -48,7 +50,7 @@ const (
 	keyvalue = "keyvalue"
 )
 
-type optsFunc func() backends.BackendArgs
+type optsFunc func(context.Context) backends.BackendArgs
 
 var getOpts map[string]optsFunc
 
@@ -131,13 +133,16 @@ func validateFlags() error {
 	if !slices.Contains(backends.List(), flags.backend) {
 		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
 	}
+	if !slices.Contains([]string{"memmap", "redis", "tikv"}, flags.kvStore) {
+		return fmt.Errorf("invalid kv store specified: %v", flags.kvStore)
+	}
 	return nil
 }
 
 func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	var topResolver resolvers.Resolver
 
-	backend, err := backends.Get(flags.backend, ctx, getOpts[flags.backend]())
+	backend, err := backends.Get(flags.backend, ctx, getOpts[flags.backend](ctx))
 	if err != nil {
 		return nil, fmt.Errorf("Error creating %v backend: %w", flags.backend, err)
 	}
@@ -154,7 +159,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, "Server is healthy")
 }
 
-func getArango() backends.BackendArgs {
+func getArango(_ context.Context) backends.BackendArgs {
 	return &arangodb.ArangoConfig{
 		User:   flags.arangoUser,
 		Pass:   flags.arangoPass,
@@ -162,7 +167,7 @@ func getArango() backends.BackendArgs {
 	}
 }
 
-func getNeo4j() backends.BackendArgs {
+func getNeo4j(_ context.Context) backends.BackendArgs {
 	return &neo4j.Neo4jConfig{
 		User:   flags.nUser,
 		Pass:   flags.nPass,
@@ -171,11 +176,34 @@ func getNeo4j() backends.BackendArgs {
 	}
 }
 
-func getKeyValue() backends.BackendArgs {
+var tikvGS func(context.Context, string) (kv.Store, error)
+
+func getKeyValue(ctx context.Context) backends.BackendArgs {
+	logger := logging.FromContext(ctx)
+	switch flags.kvStore {
+	case "memmap":
+		// default is memmap
+		return nil
+	case "redis":
+		s, err := redis.GetStore(flags.kvRedis)
+		if err != nil {
+			logger.Fatalf("error with Redis: %v", err)
+		}
+		return s
+	case "tikv":
+		if tikvGS == nil {
+			logger.Fatal("TiKV not supported on 32-bit")
+		}
+		s, err := tikvGS(ctx, flags.kvTiKV)
+		if err != nil {
+			logger.Fatalf("error with TiKV: %v", err)
+		}
+		return s
+	}
 	return nil
 }
 
-func getNeptune() backends.BackendArgs {
+func getNeptune(_ context.Context) backends.BackendArgs {
 	return &neptune.NeptuneConfig{
 		Endpoint: flags.neptuneEndpoint,
 		Port:     flags.neptunePort,
