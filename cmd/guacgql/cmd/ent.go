@@ -22,6 +22,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
+	"github.com/guacsec/guac/pkg/assembler/kv/tikv"
 )
 
 func init() {
@@ -29,6 +30,9 @@ func init() {
 		getOpts = make(map[string]optsFunc)
 	}
 	getOpts[ent] = getEnt
+
+	// TiKV does not support 32 bit either
+	tikvGS = tikv.GetStore
 }
 
 func getEnt(_ context.Context) backends.BackendArgs {

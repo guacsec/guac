@@ -35,8 +35,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/neptune"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
+	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/guacsec/guac/pkg/assembler/kv/redis"
-	"github.com/guacsec/guac/pkg/assembler/kv/tikv"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
@@ -176,6 +176,8 @@ func getNeo4j(_ context.Context) backends.BackendArgs {
 	}
 }
 
+var tikvGS func(context.Context, string) (kv.Store, error)
+
 func getKeyValue(ctx context.Context) backends.BackendArgs {
 	logger := logging.FromContext(ctx)
 	switch flags.kvStore {
@@ -189,7 +191,10 @@ func getKeyValue(ctx context.Context) backends.BackendArgs {
 		}
 		return s
 	case "tikv":
-		s, err := tikv.GetStore(ctx, flags.kvTiKV)
+		if tikvGS == nil {
+			logger.Fatal("TiKV not supported on 32-bit")
+		}
+		s, err := tikvGS(ctx, flags.kvTiKV)
 		if err != nil {
 			logger.Fatalf("error with TiKV: %v", err)
 		}
