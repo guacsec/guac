@@ -13,29 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !(386 || arm || mips)
+//go:build !(386 || arm || mips || darwin)
 
 package cmd
 
-import (
-	"context"
-
-	"github.com/guacsec/guac/pkg/assembler/backends"
-	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
-)
+import "github.com/guacsec/guac/pkg/assembler/kv/tikv"
 
 func init() {
-	if getOpts == nil {
-		getOpts = make(map[string]optsFunc)
-	}
-	getOpts[ent] = getEnt
-}
-
-func getEnt(_ context.Context) backends.BackendArgs {
-	return &entbackend.BackendOptions{
-		DriverName:  flags.dbDriver,
-		Address:     flags.dbAddress,
-		Debug:       flags.dbDebug,
-		AutoMigrate: flags.dbMigrate,
-	}
+	// TiKV does not support 32 bit. Also darwin required CGO and cross compile
+	// using xcode...
+	tikvGS = tikv.GetStore
 }
