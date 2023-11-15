@@ -29,12 +29,24 @@ import (
 )
 
 // badHandler is a function that returns a gin.HandlerFunc. It handles requests to the /bad endpoint.
+// This comment is for Swagger documentation
+// @Summary Vulnerability handler
+// @Description Handles the vulnerability based on the context
+// @Tags Vulnerabilities
+// @Accept  json
+// @Produce  json
+// @Param   purl   path    string     true  "PURL"
+// @Success 200 {object} Response
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router /vuln/{purl} [get]
 func badHandler(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		graphqlEndpoint, searchDepth, err := parseBadQueryParameters(c)
 
 		if err != nil {
-			c.String(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, HTTPError{http.StatusBadRequest, fmt.Sprintf("error parsing query parameters: %v", err)})
 			return
 		}
 
@@ -43,7 +55,7 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 
 		certifyBadResponse, err := model.CertifyBads(ctx, gqlclient, model.CertifyBadSpec{})
 		if err != nil {
-			c.String(http.StatusInternalServerError, "error querying for package: %v", err)
+			c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("error querying for package: %v", err)})
 			return
 		}
 
@@ -63,11 +75,11 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 					}
 					pkgResponse, err := model.Packages(ctx, gqlclient, *pkgFilter)
 					if err != nil {
-						c.String(http.StatusInternalServerError, "error querying for package: %v", err)
+						c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("error querying for package: %v", err)})
 						return
 					}
 					if len(pkgResponse.Packages) != 1 {
-						c.String(http.StatusInternalServerError, "failed to located package based on package from certifyBad")
+						c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, "failed to located package based on package from certifyBad"})
 						return
 					}
 					pkgVersions = pkgResponse.Packages[0].Namespaces[0].Names[0].Versions
@@ -77,7 +89,7 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 
 				pkgPath, err := searchDependencyPackagesReverse(ctx, gqlclient, "", pkgVersions[0].Id, searchDepth)
 				if err != nil {
-					c.String(http.StatusInternalServerError, "error searching dependency packages match: %v", err)
+					c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("error searching dependency packages match: %v", err)})
 					return
 				}
 
@@ -89,11 +101,12 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 							subject.Id}, pkgPath...)
 					}
 
-					c.JSON(http.StatusOK, gin.H{
-						"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), `,`)),
-					})
+					response := Response{
+						VisualizerURL: fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), `,`)),
+					}
+					c.IndentedJSON(http.StatusOK, response)
 				} else {
-					c.String(http.StatusNotFound, "No paths to bad package found!\n")
+					c.JSON(http.StatusNotFound, HTTPError{http.StatusNotFound, "No paths to bad package found!\n"})
 				}
 			case *model.AllCertifyBadSubjectSource:
 				var path []string
@@ -106,17 +119,17 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 				}
 				srcResponse, err := model.Sources(ctx, gqlclient, *srcFilter)
 				if err != nil {
-					c.String(http.StatusInternalServerError, "error querying for sources: %v", err)
+					c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("error querying for sources: %v", err)})
 					return
 				}
 				if len(srcResponse.Sources) != 1 {
-					c.String(http.StatusInternalServerError, "failed to located sources based on vcs")
+					c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, "failed to located sources based on vcs"})
 					return
 				}
 
 				neighborResponse, err := model.Neighbors(ctx, gqlclient, srcResponse.Sources[0].Namespaces[0].Names[0].Id, []model.Edge{model.EdgeSourceHasSourceAt, model.EdgeSourceIsOccurrence})
 				if err != nil {
-					c.String(http.StatusInternalServerError, "error querying neighbors: %v", err)
+					c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("error querying neighbors: %v", err)})
 					return
 				}
 				for _, neighbor := range neighborResponse.Neighbors {
@@ -139,11 +152,12 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 						subject.Namespaces[0].Names[0].Id,
 						subject.Namespaces[0].Id, subject.Id}, path...)
 					path = append(path, fullCertifyBadPath...)
-					c.JSON(http.StatusOK, gin.H{
-						"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), `,`)),
-					})
+					response := Response{
+						VisualizerURL: fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), `,`)),
+					}
+					c.IndentedJSON(http.StatusOK, response)
 				} else {
-					c.String(http.StatusNotFound, "No paths to bad source found!\n")
+					c.JSON(http.StatusNotFound, HTTPError{http.StatusNotFound, "No paths to bad source found!\n"})
 				}
 
 			case *model.AllCertifyBadSubjectArtifact:
@@ -155,16 +169,16 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 
 				artifactResponse, err := model.Artifacts(ctx, gqlclient, *artifactFilter)
 				if err != nil {
-					c.String(http.StatusInternalServerError, "error querying for artifacts: %v", err)
+					c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("error querying for artifacts: %v", err)})
 					return
 				}
 				if len(artifactResponse.Artifacts) != 1 {
-					c.String(http.StatusInternalServerError, "failed to located artifacts based on (algorithm:digest)")
+					c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, "failed to located artifacts based on (algorithm:digest)"})
 					return
 				}
 				neighborResponse, err := model.Neighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id, []model.Edge{model.EdgeArtifactHashEqual, model.EdgeArtifactIsOccurrence})
 				if err != nil {
-					c.String(http.StatusInternalServerError, "error querying neighbors: %v", err)
+					c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("error querying neighbors: %v", err)})
 					return
 				}
 				for _, neighbor := range neighborResponse.Neighbors {
@@ -185,11 +199,12 @@ func badHandler(ctx context.Context) func(c *gin.Context) {
 
 				if len(path) > 0 {
 					path = append(path, append([]string{certifyBad.Id, subject.Id}, path...)...)
-					c.JSON(http.StatusOK, gin.H{
-						"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), `,`)),
-					})
+					response := Response{
+						VisualizerURL: fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), `,`)),
+					}
+					c.IndentedJSON(http.StatusOK, response)
 				} else {
-					c.String(http.StatusNotFound, "No paths to bad artifact found!\n")
+					c.JSON(http.StatusNotFound, HTTPError{http.StatusNotFound, "No paths to bad artifact found!\n"})
 				}
 			}
 		}

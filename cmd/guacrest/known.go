@@ -29,11 +29,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// This comment is for Swagger documentation
+// @Summary Known artifact handler for artifact
+// @Description Handles the known artifact based on the artifact
+// @Tags Known
+// @Accept  json
+// @Produce  json
+// @Param   artifact   path    string     true  "Artifact"
+// @Success      200  {object}  Response
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router /known/artifact/{artifact} [get]
 func artifactHandlerForArtifact(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		graphqlEndpoint, err := parseKnownQueryParameters(c)
 		if err != nil {
-			c.String(http.StatusBadRequest, "error parsing query parameters: %v", err)
+			c.JSON(http.StatusBadRequest, HTTPError{http.StatusBadRequest, fmt.Sprintf("error parsing query parameters: %v", err)})
 			return
 		}
 
@@ -44,7 +56,7 @@ func artifactHandlerForArtifact(ctx context.Context) func(c *gin.Context) {
 
 		split := strings.Split(artifact, ":")
 		if len(split) != 2 {
-			c.String(http.StatusInternalServerError, "failed to parse artifact. Needs to be in algorithm:digest form")
+			c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, "failed to parse artifact. Needs to be in algorithm:digest form"})
 			return
 		}
 		artifactFilter := &model.ArtifactSpec{
@@ -54,33 +66,46 @@ func artifactHandlerForArtifact(ctx context.Context) func(c *gin.Context) {
 
 		artifactResponse, err := model.Artifacts(ctx, gqlclient, *artifactFilter)
 		if err != nil {
-			c.String(http.StatusInternalServerError, "error querying for artifacts: %v", err)
+			c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("error querying for artifacts: %v", err)})
 			return
 		}
 		if len(artifactResponse.Artifacts) != 1 {
-			c.String(http.StatusInternalServerError, "failed to located artifacts based on (algorithm:digest)")
+			c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, "failed to located artifacts based on (algorithm:digest)"})
 			return
 		}
 		artifactNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id)
 		if err != nil {
-			c.String(http.StatusInternalServerError, "error querying for artifact neighbors: %v", err)
+			c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("error querying for artifact neighbors: %v", err)})
 			return
 		}
 
 		path := append([]string{artifactResponse.Artifacts[0].Id}, neighborsPath...)
 
-		c.IndentedJSON(200, gin.H{
-			"NeighborsData":  artifactNeighbors,
-			"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), ",")),
-		})
+		response := Response{
+			NeighborsData: artifactNeighbors,
+			VisualizerURL: fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), ",")),
+		}
+		c.IndentedJSON(200, response)
 	}
 }
 
+// This comment is for Swagger documentation
+// @Summary Known source handler for VCS
+// @Description Handles the known source based on the VCS
+// @Tags Known
+// @Accept  json
+// @Produce  json
+// @Param   vcs   path    string     true  "VCS"
+// @Success      200  {object}  Response
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router /known/source/{vcs} [get]
 func sourceHandlerForVCS(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		graphqlEndpoint, err := parseKnownQueryParameters(c)
 		if err != nil {
-			c.String(http.StatusBadRequest, "error parsing query parameters: %v", err)
+			c.JSON(http.StatusBadRequest, HTTPError{http.StatusBadRequest, fmt.Sprintf("error parsing query parameters: %v", err)})
 			return
 		}
 
@@ -91,7 +116,7 @@ func sourceHandlerForVCS(ctx context.Context) func(c *gin.Context) {
 
 		srcInput, err := helpers.VcsToSrc(vcs)
 		if err != nil {
-			c.String(400, "invalid vcs")
+			c.JSON(http.StatusBadRequest, HTTPError{http.StatusBadRequest, "invalid vcs"})
 			return
 		}
 
@@ -105,36 +130,49 @@ func sourceHandlerForVCS(ctx context.Context) func(c *gin.Context) {
 
 		srcResponse, err := model.Sources(ctx, gqlclient, *srcFilter)
 		if err != nil {
-			c.String(500, "Error querying source: %v", err)
+			c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("Error querying source: %v", err)})
 			return
 		}
 
 		if len(srcResponse.Sources) != 1 {
-			c.String(404, "No source found for the given vcs")
+			c.JSON(http.StatusNotFound, HTTPError{http.StatusNotFound, "No source found for the given vcs"})
 			return
 		}
 
 		sourceNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, srcResponse.Sources[0].Namespaces[0].Names[0].Id)
 		if err != nil {
-			c.String(500, "Error querying for source Neighbors: %v", err)
+			c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("Error querying for source Neighbors: %v", err)})
 			return
 		}
 
 		path := append([]string{srcResponse.Sources[0].Namespaces[0].Names[0].Id,
 			srcResponse.Sources[0].Namespaces[0].Id, srcResponse.Sources[0].Id}, neighborsPath...)
 
-		c.IndentedJSON(200, gin.H{
-			"NeighborsData":  sourceNeighbors,
-			"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), ",")),
-		})
+		response := Response{
+			NeighborsData: sourceNeighbors,
+			VisualizerURL: fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(path), ",")),
+		}
+		c.IndentedJSON(200, response)
 	}
 }
 
+// This comment is for Swagger documentation
+// @Summary Known package handler for hash
+// @Description Handles the known package based on the hash
+// @Tags Known
+// @Accept  json
+// @Produce  json
+// @Param   hash   path    string     true  "Hash"
+// @Success      200  {object}  Response
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router /known/package/{hash} [get]
 func packageHandlerForHash(ctx context.Context) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		graphqlEndpoint, err := parseKnownQueryParameters(c)
 		if err != nil {
-			c.String(http.StatusBadRequest, "error parsing query parameters: %v", err)
+			c.JSON(http.StatusBadRequest, HTTPError{http.StatusBadRequest, fmt.Sprintf("error parsing query parameters: %v", err)})
 			return
 		}
 
@@ -146,7 +184,7 @@ func packageHandlerForHash(ctx context.Context) func(c *gin.Context) {
 		// Convert package URL to package input
 		pkgInput, err := helpers.PurlToPkg(hash)
 		if err != nil {
-			c.String(400, "invalid hash")
+			c.JSON(http.StatusBadRequest, HTTPError{http.StatusBadRequest, "invalid hash"})
 			return
 		}
 
@@ -155,19 +193,19 @@ func packageHandlerForHash(ctx context.Context) func(c *gin.Context) {
 		// Query for the package using the package filter
 		pkgResponse, err := model.Packages(ctx, gqlclient, *pkgFilter)
 		if err != nil {
-			c.String(500, "Error querying package: %v", err)
+			c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("Error querying package: %v", err)})
 			return
 		}
 
 		if len(pkgResponse.Packages) != 1 {
-			c.String(404, "No package found for the given hash")
+			c.JSON(http.StatusNotFound, HTTPError{http.StatusNotFound, "No package found for the given hash"})
 			return
 		}
 
 		// Query for the package's neighbors
 		res, path, err := queryNeighborsForPackage(ctx, gqlclient, pkgResponse.Packages[0])
 		if err != nil {
-			c.String(500, "Error querying Neighbors: %v", err)
+			c.JSON(http.StatusInternalServerError, HTTPError{http.StatusInternalServerError, fmt.Sprintf("Error querying Neighbors: %v", err)})
 			return
 		}
 
@@ -179,10 +217,11 @@ func packageHandlerForHash(ctx context.Context) func(c *gin.Context) {
 			}
 		}
 
-		c.IndentedJSON(200, gin.H{
-			"NeighborsData":  res,
-			"Visualizer url": fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(pathStrings), ",")),
-		})
+		response := Response{
+			NeighborsData: res,
+			VisualizerURL: fmt.Sprintf("http://localhost:3000/?path=%v", strings.Join(removeDuplicateValuesFromPath(pathStrings), ",")),
+		}
+		c.IndentedJSON(200, response)
 	}
 }
 

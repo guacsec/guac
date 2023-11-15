@@ -24,6 +24,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Response struct {
+	NeighborsData interface{} `json:"NeighborsData"`
+	VisualizerURL string      `json:"Visualizer url"`
+}
+
+type HTTPError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 const (
 	gqlDefaultServerURL = "http://localhost:8080/query"
 	httpTimeout         = 10 * time.Second
@@ -31,6 +41,20 @@ const (
 	noVulnType          = "novuln"
 )
 
+// This comment is for Swagger documentation
+// Using https://github.com/swaggo/swag to generate the Swagger docs
+// Use the command `swag init -g **/**/*.go` to generate docs because there are variables from outside the package guacrest.
+// @title GUAC API
+// @version 1.0
+// @description This is the GUAC API server.
+// @termsOfService http://www.apache.org/licenses/LICENSE-2.0
+// @contact.name GUAC Support
+// @contact.url http://www.guac.com/support
+// @contact.email support@guac.com
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @host localhost:9000
+// @BasePath /
 func main() {
 	if os.Getenv("GUAC_EXPERIMENTAL") != "true" {
 		log.Fatalf("GUAC_EXPERIMENTAL is not set to true. Exiting.")

@@ -1,0 +1,150 @@
+definitions:
+  main.HTTPError:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  main.Response:
+    properties:
+      NeighborsData: {}
+      Visualizer url:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /known/artifact/{artifact}:
+    get:
+      consumes:
+      - application/json
+      description: Handles the known artifact based on the artifact
+      parameters:
+      - description: Artifact
+        in: path
+        name: artifact
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+      summary: Known artifact handler for artifact
+      tags:
+      - Known
+  /known/package/{hash}:
+    get:
+      consumes:
+      - application/json
+      description: Handles the known package based on the hash
+      parameters:
+      - description: Hash
+        in: path
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+      summary: Known package handler for hash
+      tags:
+      - Known
+  /known/source/{vcs}:
+    get:
+      consumes:
+      - application/json
+      description: Handles the known source based on the VCS
+      parameters:
+      - description: VCS
+        in: path
+        name: vcs
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+      summary: Known source handler for VCS
+      tags:
+      - Known
+  /vuln/{purl}:
+    get:
+      consumes:
+      - application/json
+      description: Handles the vulnerability based on the context
+      parameters:
+      - description: PURL
+        in: path
+        name: purl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+      summary: Vulnerability handler
+      tags:
+      - Vulnerabilities
+swagger: "2.0"
