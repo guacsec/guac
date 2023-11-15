@@ -1,3 +1,4 @@
+./cmd/guacrest/docs/docs.go
 ./internal/testing/mocks/backend.go
 ./internal/testing/mocks/documentparser.go
 ./internal/testing/mocks/scorecard.go
