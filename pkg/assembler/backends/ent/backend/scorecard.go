@@ -18,8 +18,10 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
-	"github.com/vektah/gqlparser/v2/gqlerror"
+
 	"strconv"
+
+	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
