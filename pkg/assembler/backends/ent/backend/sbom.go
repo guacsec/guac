@@ -71,7 +71,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 	return collect(records, toModelHasSBOM), nil
 }
 
-func (b *EntBackend) IngestHasSbomID(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec) (string, error) {
+func (b *EntBackend) IngestHasSbomID(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
 
 	sbomId, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
@@ -155,7 +155,7 @@ func (b *EntBackend) IngestHasSbomID(ctx context.Context, subject model.PackageO
 	return strconv.Itoa(*sbomId), nil
 }
 
-func (b *EntBackend) IngestHasSBOMIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) ([]string, error) {
+func (b *EntBackend) IngestHasSBOMIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
 	var modelHasSboms []string
 	for i, hasSbom := range hasSBOMs {
 		var subject model.PackageOrArtifactInput
@@ -164,7 +164,7 @@ func (b *EntBackend) IngestHasSBOMIDs(ctx context.Context, subjects model.Packag
 		} else {
 			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
 		}
-		modelHasSbom, err := b.IngestHasSbomID(ctx, subject, *hasSbom)
+		modelHasSbom, err := b.IngestHasSbomID(ctx, subject, *hasSbom, *includes[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
 		}
