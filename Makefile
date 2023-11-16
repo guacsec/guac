@@ -263,3 +263,10 @@ check-goreleaser-tool-check:
 # Check that all the tools are installed.
 .PHONY: check-tools
 check-tools: check-docker-tool-check check-docker-buildx-tool-check check-docker-compose-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check check-goreleaser-tool-check
+
+.PHONY: fmt-local
+fmt-local:
+	@echo "Testing formatting and imports"
+	test -z "$(shell git diff --name-status main | grep '.go$$' | grep -v '^D' | grep -v '*.pb.go' | grep -v 'vendor/*' | cut -f 2- | xargs -n 1 -P 4 goimports -l -e)"
+	@echo "Testing copyright notice"
+	test -z "$(shell git diff --name-status main | grep '.go$$' | grep -v '^D' | grep -v '*.pb.go' | grep -v 'vendor/*' | cut -f 2- | xargs -n 1 -P 4 .github/scripts/copyright.sh)"
