@@ -214,7 +214,7 @@ func (s *Suite) TestOccurrenceHappyPath() {
 		_, err = be.IngestArtifactID(s.Ctx, a1)
 		s.Require().NoError(err)
 
-		occ, err := be.IngestOccurrence(s.Ctx,
+		id, err := be.IngestOccurrenceID(s.Ctx,
 			model.PackageOrSourceInput{
 				Package: p1,
 			},
@@ -223,6 +223,14 @@ func (s *Suite) TestOccurrenceHappyPath() {
 				Justification: "test justification",
 			},
 		)
+
+		occs, errR := be.IsOccurrence(s.Ctx, &model.IsOccurrenceSpec{
+			ID: &id,
+		})
+		if errR != nil {
+			s.Failf("fail", "error reading occurrence with id: %s", id, errR)
+		}
+		occ := occs[0]
 		s.Require().NoError(err)
 		s.Require().NotNil(occ)
 		s.Equal("test justification", occ.Justification)
@@ -579,7 +587,7 @@ func (s *Suite) TestOccurrence() {
 			}
 
 			for _, o := range test.Calls {
-				_, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
+				_, err := b.IngestOccurrenceID(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
 				if test.ExpIngestErr {
 					s.Require().Error(err, "Expected ingest error")
 				} else {
