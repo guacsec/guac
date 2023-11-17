@@ -741,12 +741,12 @@ func Test_Nodes(t *testing.T) {
 				}
 			}
 			for _, bld := range tt.inBld {
-				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
 			for _, a := range tt.inLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
@@ -772,12 +772,12 @@ func Test_Nodes(t *testing.T) {
 				nodeID = ingestedArtID
 			}
 			if tt.builderInput != nil {
-				ingestedBuilder, err := b.IngestBuilder(ctx, tt.builderInput)
+				ingestedBuilderID, err := b.IngestBuilderID(ctx, tt.builderInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestBuilderID() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedBuilder.ID
+				nodeID = ingestedBuilderID
 			}
 			if tt.srcInput != nil {
 				ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
@@ -795,12 +795,12 @@ func Test_Nodes(t *testing.T) {
 				nodeID = ingestVuln.VulnerabilityIDs[0].ID
 			}
 			if tt.licenseInput != nil {
-				ingestedLicense, err := b.IngestLicense(ctx, tt.licenseInput)
+				ingestedLicenseID, err := b.IngestLicenseID(ctx, tt.licenseInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestLicenseID() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedLicense.ID
+				nodeID = ingestedLicenseID
 			}
 			if tt.certifyBadCall != nil {
 				found, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
@@ -3074,12 +3074,12 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			for _, bld := range tt.inBld {
-				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
 			for _, a := range tt.inLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
@@ -3145,12 +3145,12 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.licenseInput != nil {
-				ingestedLicense, err := b.IngestLicense(ctx, tt.licenseInput)
+				ingestedLicenseID, err := b.IngestLicenseID(ctx, tt.licenseInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestLicenseID() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedLicense.ID
+				nodeID = ingestedLicenseID
 			}
 			if tt.certifyBadCall != nil {
 				found, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)

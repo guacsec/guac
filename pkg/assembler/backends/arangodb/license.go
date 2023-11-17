@@ -73,6 +73,7 @@ func getLicenseQueryValues(license *model.LicenseInputSpec) map[string]any {
 	values["name"] = license.Name
 	values["inline"] = nilToEmpty(license.Inline)
 	values["listversion"] = nilToEmpty(license.ListVersion)
+	values["listversionKey"] = strings.Replace(nilToEmpty(license.ListVersion), " ", "", -1)
 	return values
 }
 
@@ -83,7 +84,7 @@ func nilToEmpty(s *string) string {
 	return *s
 }
 
-func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
+func (c *arangoClient) IngestLicenseIDs(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
 
 	var listOfValues []map[string]any
 
@@ -112,17 +113,11 @@ func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.Lic
 		}
 	}
 	sb.WriteString("]")
-
+	// Note: for the composite keys for license, the listVersion has to be trimmed to remove all spaces as that is not allowed in arango
+	// For example "3.21 2023-06-18" would trim to "3.212023-06-18" for the key
 	query := `
-UPSERT { name:doc.name, inline:doc.inline, listversion:doc.listversion }
-INSERT { name:doc.name, inline:doc.inline, listversion:doc.listversion }
-UPDATE {} IN licenses OPTIONS { indexHint: "byNameInlineListVer" }
-RETURN {
-  "id": NEW._id,
-  "name": NEW.name,
-  "inline": NEW.inline,
-  "listversion": NEW.listversion,
-}`
+INSERT { _key: CONCAT(doc.name, ";", doc.listversionKey), name:doc.name, inline:doc.inline, listversion:doc.listversion} INTO licenses OPTIONS { overwriteMode: "ignore" }
+RETURN { "id": NEW._id }`
 
 	sb.WriteString(query)
 
@@ -132,36 +127,39 @@ RETURN {
 	}
 	defer cursor.Close()
 
-	return getLicenses(ctx, cursor)
+	createdLicenses, err := getLicenses(ctx, cursor)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get licenses from arango cursor: %w", err)
+	}
 
+	var licenseIDs []string
+	for _, license := range createdLicenses {
+		licenseIDs = append(licenseIDs, license.ID)
+	}
+	return licenseIDs, nil
 }
 
-func (c *arangoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
+func (c *arangoClient) IngestLicenseID(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
+	// Note: for the composite keys for license, the listVersion has to be trimmed to remove all spaces as that is not allowed in arango
+	// For example "3.21 2023-06-18" would trim to "3.212023-06-18" for the key
 	query := `
-UPSERT { name:@name, inline:@inline, listversion:@listversion }
-INSERT { name:@name, inline:@inline, listversion:@listversion }
-UPDATE {} IN licenses OPTIONS { indexHint: "byNameInlineListVer" }
-RETURN {
-  "id": NEW._id,
-  "name": NEW.name,
-  "inline": NEW.inline,
-  "listversion": NEW.listversion,
-}`
+INSERT { _key: CONCAT(@name, ";", @listversionKey), name:@name, inline:@inline, listversion:@listversion} INTO licenses OPTIONS { overwriteMode: "ignore" }
+RETURN { "id": NEW._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getLicenseQueryValues(license), "IngestLicense")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getLicenseQueryValues(license), "IngestLicenseID")
 	if err != nil {
-		return nil, fmt.Errorf("failed to ingest license: %w", err)
+		return "", fmt.Errorf("failed to ingest license: %w", err)
 	}
 	defer cursor.Close()
 
 	createdLicenses, err := getLicenses(ctx, cursor)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get licenses from arango cursor: %w", err)
+		return "", fmt.Errorf("failed to get licenses from arango cursor: %w", err)
 	}
 	if len(createdLicenses) == 1 {
-		return createdLicenses[0], nil
+		return createdLicenses[0].ID, nil
 	} else {
-		return nil, fmt.Errorf("number of licenses ingested is greater than one")
+		return "", fmt.Errorf("number of licenses ingested is greater than one")
 	}
 }
 
@@ -177,11 +175,15 @@ func getLicenses(ctx context.Context, cursor driver.Cursor) ([]*model.License, e
 				return nil, fmt.Errorf("failed to get license from cursor: %w", err)
 			}
 		} else {
-			if *doc.Inline == "" {
-				doc.Inline = nil
+			if doc.Inline != nil {
+				if *doc.Inline == "" {
+					doc.Inline = nil
+				}
 			}
-			if *doc.ListVersion == "" {
-				doc.ListVersion = nil
+			if doc.ListVersion != nil {
+				if *doc.ListVersion == "" {
+					doc.ListVersion = nil
+				}
 			}
 			createdLicenses = append(createdLicenses, doc)
 		}

@@ -553,7 +553,7 @@ func TestLegal(t *testing.T) {
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
@@ -661,7 +661,7 @@ func TestLegals(t *testing.T) {
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
@@ -862,7 +862,7 @@ func Test_buildCertifyLegalByID(t *testing.T) {
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
