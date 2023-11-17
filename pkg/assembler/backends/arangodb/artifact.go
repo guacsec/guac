@@ -174,7 +174,7 @@ func getArtifactQueryValues(artifact *model.ArtifactInputSpec) map[string]any {
 	return values
 }
 
-func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+func (c *arangoClient) IngestArtifactIDs(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 	for i := range artifacts {
 		listOfValues = append(listOfValues, getArtifactQueryValues(artifacts[i]))
@@ -203,15 +203,7 @@ func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.A
 	sb.WriteString("]")
 
 	query := `
-UPSERT { algorithm:doc.algorithm, digest:doc.digest } 
-INSERT { algorithm:doc.algorithm, digest:doc.digest } 
-UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
-RETURN {
-	"id": NEW._id,
-	"algorithm": NEW.algorithm,
-	"digest": NEW.digest
-  }`
-
+INSERT { _key: CONCAT(doc.algorithm, doc.digest), algorithm:doc.algorithm, digest:doc.digest} INTO artifacts OPTIONS { overwriteMode: "ignore" } RETURN NEW._id`
 	sb.WriteString(query)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestArtifacts")
@@ -220,34 +212,38 @@ RETURN {
 	}
 	defer cursor.Close()
 
-	return getArtifacts(ctx, cursor)
+	var artifactIDs []string
+	createdArtifactIDs, err := getArtifactIDs(ctx, cursor)
+	if err != nil {
+		return artifactIDs, fmt.Errorf("failed to get artifact IDs from arango cursor: %w", err)
+	}
+
+	for _, id := range createdArtifactIDs {
+		if id != nil {
+			artifactIDs = append(artifactIDs, *id)
+		}
+	}
+	return artifactIDs, nil
 }
 
-func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
+func (c *arangoClient) IngestArtifactID(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
 	query := `
-UPSERT { algorithm:@algorithm, digest:@digest } 
-INSERT { algorithm:@algorithm, digest:@digest } 
-UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
-RETURN {
-	"id": NEW._id,
-	"algorithm": NEW.algorithm,
-	"digest": NEW.digest
-  }`
+INSERT { _key: CONCAT(@algorithm, @digest), algorithm:@algorithm, digest:@digest} INTO artifacts OPTIONS { overwriteMode: "ignore" } RETURN NEW._id`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getArtifactQueryValues(artifact), "IngestArtifact")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getArtifactQueryValues(artifact), "IngestArtifactID")
 	if err != nil {
-		return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+		return "", fmt.Errorf("failed to ingest artifact: %w", err)
 	}
 	defer cursor.Close()
 
-	createdArtifacts, err := getArtifacts(ctx, cursor)
+	createdArtifactIDs, err := getArtifactIDs(ctx, cursor)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get artifacts from arango cursor: %w", err)
+		return "", fmt.Errorf("failed to get artifact IDs from arango cursor: %w", err)
 	}
-	if len(createdArtifacts) == 1 {
-		return createdArtifacts[0], nil
+	if createdArtifactIDs[0] != nil {
+		return *createdArtifactIDs[0], nil
 	} else {
-		return nil, fmt.Errorf("number of artifacts ingested is greater than one")
+		return "", nil
 	}
 }
 
@@ -267,6 +263,24 @@ func getArtifacts(ctx context.Context, cursor driver.Cursor) ([]*model.Artifact,
 		}
 	}
 	return createdArtifacts, nil
+}
+
+func getArtifactIDs(ctx context.Context, cursor driver.Cursor) ([]*string, error) {
+	var createdArtifactIDs []*string
+	for {
+		var doc *string
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to get artifact ID from cursor: %w", err)
+			}
+		} else {
+			createdArtifactIDs = append(createdArtifactIDs, doc)
+		}
+	}
+	return createdArtifactIDs, nil
 }
 
 func (c *arangoClient) buildArtifactResponseByID(ctx context.Context, id string, filter *model.ArtifactSpec) (*model.Artifact, error) {

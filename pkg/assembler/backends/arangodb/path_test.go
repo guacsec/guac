@@ -736,7 +736,7 @@ func Test_Nodes(t *testing.T) {
 				}
 			}
 			for _, a := range tt.inArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -764,12 +764,12 @@ func Test_Nodes(t *testing.T) {
 				nodeID = ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
 			}
 			if tt.artifactInput != nil {
-				ingestedArt, err := b.IngestArtifact(ctx, tt.artifactInput)
+				ingestedArtID, err := b.IngestArtifactID(ctx, tt.artifactInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestArtifactID() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedArt.ID
+				nodeID = ingestedArtID
 			}
 			if tt.builderInput != nil {
 				ingestedBuilder, err := b.IngestBuilder(ctx, tt.builderInput)
@@ -3069,7 +3069,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			for _, a := range tt.inArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}

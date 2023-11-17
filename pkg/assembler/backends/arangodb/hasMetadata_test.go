@@ -775,7 +775,7 @@ func TestHasMetadata(t *testing.T) {
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -1121,7 +1121,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -1369,7 +1369,7 @@ func Test_buildHasMetadataByID(t *testing.T) {
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -1396,132 +1396,3 @@ func Test_buildHasMetadataByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestHasMetadataNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Sub   model.PackageSourceOrArtifactInput
-// 		Match *model.MatchFlags
-// 		HM    *model.HasMetadataInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		InSrc        []*model.SourceInputSpec
-// 		InArt        []*model.ArtifactInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			Calls: []call{
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Match: &model.MatchFlags{
-// 						Pkg: model.PkgMatchTypeSpecificVersion,
-// 					},
-// 					HM: &model.HasMetadataInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": {"1", "5"}, // pkg version
-// 				"5": {"1"},      // certify good
-// 			},
-// 		},
-// 		{
-// 			Name:  "Pkg Name Src and Artifact",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			InSrc: []*model.SourceInputSpec{testdata.S1},
-// 			InArt: []*model.ArtifactInputSpec{testdata.A1},
-// 			Calls: []call{
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Match: &model.MatchFlags{
-// 						Pkg: model.PkgMatchTypeAllVersions,
-// 					},
-// 					HM: &model.HasMetadataInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Source: testdata.S1,
-// 					},
-// 					HM: &model.HasMetadataInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Artifact: testdata.A1,
-// 					},
-// 					HM: &model.HasMetadataInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"1":  {"1"},
-// 				"2":  {"1", "1"},
-// 				"3":  {"1", "1", "9"}, // pkg name
-// 				"4":  {"1"},           // pkg version
-// 				"5":  {"5"},
-// 				"6":  {"5", "5"},
-// 				"7":  {"5", "10"}, // src name
-// 				"8":  {"11"},      // art
-// 				"9":  {"1"},       // cb 1 -> pkg name
-// 				"10": {"5"},       // cb 2 -> src name
-// 				"11": {"8"},       // cb 3 -> art
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := backends.Get("inmem", nil, nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
-// 					t.Fatalf("Could not ingest package: %v", err)
-// 				}
-// 			}
-// 			for _, s := range test.InSrc {
-// 				if _, err := b.IngestSource(ctx, *s); err != nil {
-// 					t.Fatalf("Could not ingest source: %v", err)
-// 				}
-// 			}
-// 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
-// 					t.Fatalf("Could not ingest artifact: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestHasMetadata(ctx, o.Sub, o.Match, *o.HM); err != nil {
-// 					t.Fatalf("Could not ingest HasMetadata: %v", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }
