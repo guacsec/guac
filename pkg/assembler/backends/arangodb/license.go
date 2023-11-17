@@ -73,7 +73,6 @@ func getLicenseQueryValues(license *model.LicenseInputSpec) map[string]any {
 	values["name"] = license.Name
 	values["inline"] = nilToEmpty(license.Inline)
 	values["listversion"] = nilToEmpty(license.ListVersion)
-	values["listversionKey"] = strings.Replace(nilToEmpty(license.ListVersion), " ", "", -1)
 	return values
 }
 
@@ -113,10 +112,11 @@ func (c *arangoClient) IngestLicenseIDs(ctx context.Context, licenses []*model.L
 		}
 	}
 	sb.WriteString("]")
-	// Note: for the composite keys for license, the listVersion has to be trimmed to remove all spaces as that is not allowed in arango
-	// For example "3.21 2023-06-18" would trim to "3.212023-06-18" for the key
+
 	query := `
-INSERT { _key: CONCAT(doc.name, ";", doc.listversionKey), name:doc.name, inline:doc.inline, listversion:doc.listversion} INTO licenses OPTIONS { overwriteMode: "ignore" }
+UPSERT { name:doc.name, inline:doc.inline, listversion:doc.listversion }
+INSERT { name:doc.name, inline:doc.inline, listversion:doc.listversion }
+UPDATE {} IN licenses OPTIONS { indexHint: "byNameInlineListVer" }
 RETURN { "id": NEW._id }`
 
 	sb.WriteString(query)
@@ -140,10 +140,10 @@ RETURN { "id": NEW._id }`
 }
 
 func (c *arangoClient) IngestLicenseID(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
-	// Note: for the composite keys for license, the listVersion has to be trimmed to remove all spaces as that is not allowed in arango
-	// For example "3.21 2023-06-18" would trim to "3.212023-06-18" for the key
 	query := `
-INSERT { _key: CONCAT(@name, ";", @listversionKey), name:@name, inline:@inline, listversion:@listversion} INTO licenses OPTIONS { overwriteMode: "ignore" }
+UPSERT { name:@name, inline:@inline, listversion:@listversion }
+INSERT { name:@name, inline:@inline, listversion:@listversion }
+UPDATE {} IN licenses OPTIONS { indexHint: "byNameInlineListVer" }
 RETURN { "id": NEW._id }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getLicenseQueryValues(license), "IngestLicenseID")

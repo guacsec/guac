@@ -1011,10 +1011,10 @@ func (mr *MockBackendMockRecorder) IngestPackage(ctx, pkg interface{}) *gomock.C
 }
 
 // IngestPackageID mocks base method.
-func (m *MockBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec) (string, error) {
+func (m *MockBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestPackageID", ctx, pkg)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(*model.PackageIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1026,10 +1026,10 @@ func (mr *MockBackendMockRecorder) IngestPackageID(ctx, pkg interface{}) *gomock
 }
 
 // IngestPackageIDs mocks base method.
-func (m *MockBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error) {
+func (m *MockBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestPackageIDs", ctx, pkgs)
-	ret0, _ := ret[0].([]string)
+	ret0, _ := ret[0].([]*model.PackageIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

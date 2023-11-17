@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -131,13 +129,13 @@ func Test_Packages(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = ptrfrom.String(ingestedPkgIDs.PackageVersionID)
 			}
 			got, err := b.Packages(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -242,13 +240,13 @@ func Test_PackageTypes(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = ptrfrom.String(ingestedPkgIDs.PackageVersionID)
 			}
 			got, err := b.(*arangoClient).packagesType(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -356,13 +354,13 @@ func Test_PackagesNamespace(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = ptrfrom.String(ingestedPkgIDs.PackageVersionID)
 			}
 			got, err := b.(*arangoClient).packagesNamespace(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -487,13 +485,13 @@ func Test_PackagesName(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = ptrfrom.String(ingestedPkgIDs.PackageVersionID)
 			}
 			got, err := b.(*arangoClient).packagesName(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -527,27 +525,21 @@ func Test_IngestPackages(t *testing.T) {
 	tests := []struct {
 		name      string
 		pkgInputs []*model.PkgInputSpec
-		want      []*model.Package
 		wantErr   bool
 	}{{
 		name:      "tensorflow empty version",
 		pkgInputs: []*model.PkgInputSpec{testdata.P3, testdata.P4},
-		want:      []*model.Package{testdata.P4out, testdata.P3out},
 		wantErr:   false,
 	}}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := b.IngestPackages(ctx, tt.pkgInputs)
+			got, err := b.IngestPackageIDs(ctx, tt.pkgInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			slices.SortFunc(got, lessPkg)
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			if len(got) != len(tt.pkgInputs) {
+				t.Errorf("Unexpected number of results. Wanted: %d, got %d", len(tt.pkgInputs), len(got))
 			}
 		})
 	}
@@ -599,12 +591,12 @@ func Test_buildPackageResponseFromID(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			got, err := b.(*arangoClient).buildPackageResponseFromID(ctx, ingestedPkg.Namespaces[0].Names[0].Versions[0].ID, tt.pkgFilter)
+			got, err := b.(*arangoClient).buildPackageResponseFromID(ctx, ingestedPkgIDs.PackageVersionID, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.buildPackageResponseFromID() error = %v, wantErr %v", err, tt.wantErr)
 				return

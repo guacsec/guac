@@ -203,7 +203,9 @@ func (c *arangoClient) IngestArtifactIDs(ctx context.Context, artifacts []*model
 	sb.WriteString("]")
 
 	query := `
-INSERT { _key: CONCAT(doc.algorithm, doc.digest), algorithm:doc.algorithm, digest:doc.digest} INTO artifacts OPTIONS { overwriteMode: "ignore" }
+UPSERT { algorithm:doc.algorithm, digest:doc.digest } 
+INSERT { algorithm:doc.algorithm, digest:doc.digest } 
+UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
 RETURN { "id": NEW._id }`
 
 	sb.WriteString(query)
@@ -228,7 +230,9 @@ RETURN { "id": NEW._id }`
 
 func (c *arangoClient) IngestArtifactID(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
 	query := `
-INSERT { _key: CONCAT(@algorithm, @digest), algorithm:@algorithm, digest:@digest} INTO artifacts OPTIONS { overwriteMode: "ignore" }
+UPSERT { algorithm:@algorithm, digest:@digest } 
+INSERT { algorithm:@algorithm, digest:@digest } 
+UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
 RETURN { "id": NEW._id }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getArtifactQueryValues(artifact), "IngestArtifactID")

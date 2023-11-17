@@ -128,7 +128,7 @@ func Test_IngestArtifactID(t *testing.T) {
 			Algorithm: "sha512",
 			Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
 		},
-		wantID:  false,
+		wantID:  true,
 		wantErr: false,
 	}}
 	for _, tt := range tests {

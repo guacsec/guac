@@ -92,8 +92,6 @@ func (c *arangoClient) IngestBuilderIDs(ctx context.Context, builders []*model.B
 		}
 	}
 	sb.WriteString("]")
-	// Note: cannot use composite keys for builder as it contains invalid characters such as "/" that are not allowed.
-	// For example "https://github.com/CreateFork/HubHostedActions@v1"
 	query := `
 UPSERT { uri:doc.uri } 
 INSERT { uri:doc.uri } 
@@ -121,8 +119,6 @@ RETURN { "id": NEW._id }`
 }
 
 func (c *arangoClient) IngestBuilderID(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
-	// Note: cannot use composite keys for builder as it contains invalid characters such as "/" that are not allowed.
-	// For example "https://github.com/CreateFork/HubHostedActions@v1"
 	query := `
 UPSERT { uri:@uri } 
 INSERT { uri:@uri } 
