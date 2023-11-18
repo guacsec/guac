@@ -85,7 +85,7 @@ func (s *Suite) TestNode() {
 				if id, err := b.IngestSourceID(ctx, *inSrc); err != nil {
 					s.T().Fatalf("Could not ingest source: %v", err)
 				} else {
-					ids = append(ids, id)
+					ids = append(ids, id.SourceNameID)
 				}
 			}
 

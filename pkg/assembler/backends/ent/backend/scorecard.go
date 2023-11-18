@@ -138,7 +138,8 @@ func upsertScorecard(ctx context.Context, client *ent.Tx, source model.SourceInp
 	}
 
 	// NOTE: This might be better as a query, but using insert here since the spec is an inputspec
-	srcID, err := upsertSource(ctx, client, source)
+	var srcID *int
+	ids, err := upsertSource(ctx, client, source)
 	if err != nil {
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert Source")
@@ -150,7 +151,10 @@ func upsertScorecard(ctx context.Context, client *ent.Tx, source model.SourceInp
 			return nil, errors.Wrap(err, "get Source ID")
 		}
 	}
-
+	*srcID, err = strconv.Atoi(ids.SourceNameID)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get Source ID")
+	}
 	id, err := client.CertifyScorecard.Create().
 		SetScorecardID(sc).
 		SetSourceID(*srcID).

@@ -111,7 +111,7 @@ func (s *Suite) TestSources() {
 			}
 
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ids[0]
+				tt.srcFilter.ID = &ids[0].SourceNameID
 			}
 			got, err := be.Sources(ctx, tt.srcFilter)
 			if (err != nil) != tt.wantErr {
