@@ -179,18 +179,18 @@ func Test_Path(t *testing.T) {
 			var startID string
 			var stopID string
 			for _, g := range tt.inVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
 			if tt.certifyVulnTwoPkgsCall != nil {
 				var nonVulnPkgID string
 				for _, p := range tt.inPkg {
-					pkg, err := b.IngestPackage(ctx, *p)
+					pkg, err := b.IngestPackageID(ctx, *p)
 					if err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
-					nonVulnPkgID = pkg.Namespaces[0].Names[0].Versions[0].ID
+					nonVulnPkgID = pkg.PackageVersionID
 				}
 				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnTwoPkgsCall.Pkg, *tt.certifyVulnTwoPkgsCall.Vuln, *tt.certifyVulnTwoPkgsCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
@@ -204,7 +204,7 @@ func Test_Path(t *testing.T) {
 			}
 			if tt.certifyVulnCall != nil {
 				for _, p := range tt.inPkg {
-					if _, err := b.IngestPackage(ctx, *p); err != nil {
+					if _, err := b.IngestPackageID(ctx, *p); err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
 				}
@@ -220,7 +220,7 @@ func Test_Path(t *testing.T) {
 			}
 			if tt.isDepCall != nil {
 				for _, p := range tt.inPkg {
-					if _, err := b.IngestPackage(ctx, *p); err != nil {
+					if _, err := b.IngestPackageID(ctx, *p); err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
 				}
@@ -726,12 +726,12 @@ func Test_Nodes(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var nodeID string
 			for _, p := range tt.inPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range tt.inSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -751,17 +751,17 @@ func Test_Nodes(t *testing.T) {
 				}
 			}
 			for _, g := range tt.inVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
 			if tt.pkgInput != nil {
-				ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+				ingestedPkg, err := b.IngestPackageID(ctx, *tt.pkgInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				nodeID = ingestedPkg.PackageVersionID
 			}
 			if tt.artifactInput != nil {
 				ingestedArtID, err := b.IngestArtifactID(ctx, tt.artifactInput)
@@ -780,19 +780,19 @@ func Test_Nodes(t *testing.T) {
 				nodeID = ingestedBuilderID
 			}
 			if tt.srcInput != nil {
-				ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
+				ingestedSrc, err := b.IngestSourceID(ctx, *tt.srcInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedSrc.Namespaces[0].Names[0].ID
+				nodeID = ingestedSrc.SourceNameID
 			}
 			if tt.vulnInput != nil {
-				ingestVuln, err := b.IngestVulnerability(ctx, *tt.vulnInput)
+				ingestVuln, err := b.IngestVulnerabilityID(ctx, *tt.vulnInput)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
 				}
-				nodeID = ingestVuln.VulnerabilityIDs[0].ID
+				nodeID = ingestVuln.VulnerabilityNodeID
 			}
 			if tt.licenseInput != nil {
 				ingestedLicenseID, err := b.IngestLicenseID(ctx, tt.licenseInput)
@@ -3059,12 +3059,12 @@ func Test_Neighbors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var nodeID string
 			for _, p := range tt.inPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range tt.inSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -3084,63 +3084,63 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			for _, g := range tt.inVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
 			if tt.pkgInput != nil {
-				ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+				ingestedPkg, err := b.IngestPackageID(ctx, *tt.pkgInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				if tt.queryPkgTypeID {
-					nodeID = ingestedPkg.ID
+					nodeID = ingestedPkg.PackageTypeID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.queryPkgNamespaceID {
-					nodeID = ingestedPkg.Namespaces[0].ID
+					nodeID = ingestedPkg.PackageNamespaceID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.queryPkgNameID {
-					nodeID = ingestedPkg.Namespaces[0].Names[0].ID
+					nodeID = ingestedPkg.PackageNameID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+					nodeID = ingestedPkg.PackageVersionID
 					tt.usingOnly = []model.Edge{}
 				}
 			}
 			if tt.srcInput != nil {
-				ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
+				ingestedSrc, err := b.IngestSourceID(ctx, *tt.srcInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				if tt.querySrcTypeID {
-					nodeID = ingestedSrc.ID
+					nodeID = ingestedSrc.SourceTypeID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.querySrcNamespaceID {
-					nodeID = ingestedSrc.Namespaces[0].ID
+					nodeID = ingestedSrc.SourceNamespaceID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.querySrcNameID {
-					nodeID = ingestedSrc.Namespaces[0].Names[0].ID
+					nodeID = ingestedSrc.SourceNameID
 					tt.usingOnly = []model.Edge{}
 				}
 			}
 			if tt.vulnInput != nil {
-				ingestVuln, err := b.IngestVulnerability(ctx, *tt.vulnInput)
+				ingestVuln, err := b.IngestVulnerabilityID(ctx, *tt.vulnInput)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
 				}
 				if tt.queryVulnTypeID {
-					nodeID = ingestVuln.ID
+					nodeID = ingestVuln.VulnerabilityTypeID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.queryVulnID {
-					nodeID = ingestVuln.VulnerabilityIDs[0].ID
+					nodeID = ingestVuln.VulnerabilityNodeID
 					tt.usingOnly = []model.Edge{}
 				}
 			}
@@ -3525,7 +3525,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.vulnMetadataCall != nil {
-				ingestedVuln, err := b.IngestVulnerability(ctx, *tt.inVuln[0])
+				ingestedVuln, err := b.IngestVulnerabilityID(ctx, *tt.inVuln[0])
 				if err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
@@ -3538,7 +3538,7 @@ func Test_Neighbors(t *testing.T) {
 					return
 				}
 				if tt.queryVulnID {
-					nodeID = ingestedVuln.VulnerabilityIDs[0].ID
+					nodeID = ingestedVuln.VulnerabilityNodeID
 					tt.usingOnly = []model.Edge{model.EdgeVulnMetadataVulnerability, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryVulnMetadataID {

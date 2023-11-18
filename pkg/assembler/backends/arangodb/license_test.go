@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -67,10 +69,10 @@ func Test_Licenses(t *testing.T) {
 		},
 		{
 			Name:       "Query by ID",
-			Ingests:    []*model.LicenseInputSpec{testdata.L3, testdata.L4},
+			Ingests:    []*model.LicenseInputSpec{testdata.L2, testdata.L3, testdata.L4},
 			IDInFilter: 2,
 			Query:      &model.LicenseSpec{},
-			Exp:        []*model.License{testdata.L4out},
+			Exp:        []*model.License{testdata.L3out},
 		},
 		{
 			Name:    "Query by Name",

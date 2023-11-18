@@ -776,12 +776,12 @@ func TestPointOfContact(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -1122,12 +1122,12 @@ func TestIngestPointOfContacts(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -1368,12 +1368,12 @@ func Test_buildPointOfContactByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}

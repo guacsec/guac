@@ -83,23 +83,11 @@ func (s *Suite) Test_get_package_helpers() {
 			{Key: "a", Value: "b"},
 		},
 	}
-	p2Spec := model.PkgInputSpec{
-		Type:      "apk",
-		Namespace: ptr("test"),
-		Name:      "alpine",
-		Version:   ptr("1.0.0"),
-		Subpath:   ptr("subpath"),
-	}
 
-	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p2Spec)
+	s.Run("HappyPath", func() {
+		ingestP2(s)
+		ingestP1(s)
 	})
-	s.Require().NoError(err)
-	pkgVersionID, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p1Spec)
-	})
-	s.Require().NoError(err)
-	s.Require().NotNil(pkgVersionID)
 
 	s.Run("getPkgName", func() {
 		ingestP2(s)
@@ -149,7 +137,7 @@ func ingestP2(s *Suite) {
 		Subpath:   ptr("subpath"),
 	}
 
-	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*model.PackageIDs, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p2Spec)
 	})
 	s.Require().NoError(err)
@@ -168,15 +156,17 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		},
 	}
 
-	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
+	s.Run("HappyPath", func() {
+		ingestP1(s)
 	})
-	s.Require().NoError(err)
-	s.Require().NotNil(pkg)
-
-	// Ingest twice to ensure upserts are working
-	pkg, err = WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
+	s.Run("Ingest twice", func() {
+		ingestP1(s)
+		// Ingest twice to ensure upserts are working
+		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*model.PackageIDs, error) {
+			return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
+		})
+		s.Require().NoError(err)
+		s.Require().NotNil(pkg)
 	})
 
 	s.Run("Empty keys", func() {
@@ -187,7 +177,7 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 	s.Run("No Qualifiers", func() {
 		ingestP1(s)
 		spec.Qualifiers = nil
-		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
+		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*model.PackageIDs, error) {
 			return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
 		})
 		s.Require().NoError(err)
@@ -241,7 +231,7 @@ func ingestP1(s *Suite) {
 			{Key: "a", Value: "b"},
 		},
 	}
-	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*ent.PackageVersion, error) {
+	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*model.PackageIDs, error) {
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p1Spec)
 	})
 	s.Require().NoError(err)
@@ -268,7 +258,7 @@ func (s *Suite) Test_IngestPackages() {
 
 			got, err := c.IngestPackageIDs(ctx, tt.pkgInputs)
 			if (err != nil) != tt.wantErr {
-				s.T().Errorf("demoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
+				s.T().Errorf("demoClient.IngestPackageIDs() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
@@ -363,7 +353,7 @@ func (s *Suite) Test_Packages() {
 			s.NoError(err)
 			ingestedPkgID, err := be.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("demoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("demoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 

@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -131,7 +133,7 @@ func Test_Packages(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -242,7 +244,7 @@ func Test_PackageTypes(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -356,7 +358,7 @@ func Test_PackagesNamespace(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -487,7 +489,7 @@ func Test_PackagesName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -535,7 +537,7 @@ func Test_IngestPackages(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := b.IngestPackageIDs(ctx, tt.pkgInputs)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestPackageIDs() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if len(got) != len(tt.pkgInputs) {
@@ -593,7 +595,7 @@ func Test_buildPackageResponseFromID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ingestedPkgIDs, err := b.IngestPackageID(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			got, err := b.(*arangoClient).buildPackageResponseFromID(ctx, ingestedPkgIDs.PackageVersionID, tt.pkgFilter)

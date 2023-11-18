@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -232,7 +234,7 @@ func Test_SourceTypes(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -342,7 +344,7 @@ func Test_SourceNamespaces(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -426,7 +428,7 @@ func Test_buildSourceResponseFromID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {

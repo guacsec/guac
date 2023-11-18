@@ -856,7 +856,7 @@ func TestVEX(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
@@ -866,7 +866,7 @@ func TestVEX(t *testing.T) {
 				}
 			}
 			for _, v := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *v); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *v); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %v", err)
 				}
 			}
@@ -1285,15 +1285,15 @@ func TestVEXBulkIngest(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest package: %v", err)
 			}
 
-			if _, err := b.IngestArtifacts(ctx, test.InArt); err != nil {
+			if _, err := b.IngestArtifactIDs(ctx, test.InArt); err != nil {
 				t.Fatalf("Could not ingest artifact: %a", err)
 			}
 
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerability: %v", err)
 			}
 			for _, o := range test.Calls {
@@ -1511,7 +1511,7 @@ func Test_buildCertifyVexByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
@@ -1521,7 +1521,7 @@ func Test_buildCertifyVexByID(t *testing.T) {
 				}
 			}
 			for _, v := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *v); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *v); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %v", err)
 				}
 			}
