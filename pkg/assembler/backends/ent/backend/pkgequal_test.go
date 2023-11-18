@@ -482,7 +482,7 @@ func (s *Suite) TestPkgEqual() {
 				if id, err := b.IngestPackageID(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				} else {
-					pkgs, err := b.Packages(ctx, &model.PkgSpec{ID: &id})
+					pkgs, err := b.Packages(ctx, &model.PkgSpec{ID: &id.PackageVersionID})
 					if err != nil {
 						t.Fatalf("Package not found with ID %v error: %v", id, err)
 					}

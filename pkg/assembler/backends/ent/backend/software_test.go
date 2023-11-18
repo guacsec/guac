@@ -52,7 +52,7 @@ func (s *Suite) TestCreateSoftwareTree() {
 		},
 	})
 	s.NoError(err2)
-	pkgs, err3 := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
+	pkgs, err3 := be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
 	s.NoError(err3)
 	pkg := pkgs[0]
 	s.NoError(err3)
@@ -85,7 +85,7 @@ func (s *Suite) TestCreateSoftwareTree() {
 	// Ensure that we don't get a duplicate row error
 	s.NoError(err2)
 
-	pkgs, err = be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
+	pkgs, err = be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
 	s.NoError(err)
 	pkg = pkgs[0]
 	s.NotNil(pkg)
@@ -137,7 +137,7 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 
 	id2, err4 := be.IngestPackageID(s.Ctx, spec2)
 	s.NoError(err4)
-	pkgs, err3 = be.Packages(s.Ctx, &model.PkgSpec{ID: &id2})
+	pkgs, err3 = be.Packages(s.Ctx, &model.PkgSpec{ID: &id2.PackageVersionID})
 	s.NoError(err3)
 	pkg2 := pkgs[0]
 	s.NotNil(pkg2)

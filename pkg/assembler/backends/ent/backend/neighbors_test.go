@@ -77,7 +77,7 @@ func (s *Suite) TestNode() {
 				if id, err := b.IngestPackageID(ctx, *inP); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				} else {
-					ids = append(ids, id)
+					ids = append(ids, id.PackageVersionID)
 				}
 			}
 
@@ -119,7 +119,7 @@ func (s *Suite) TestNodes() {
 	id, err := be.IngestPackageID(s.Ctx, *p4)
 	s.Require().NoError(err)
 
-	pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
+	pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
 	s.Require().NoError(err)
 	p := pkgs[0]
 

@@ -621,7 +621,7 @@ func (s *Suite) TestIsDependency() {
 				if id, err := b.IngestPackageID(ctx, *a); err != nil {
 					s.Require().NoError(err, "Could not ingest pkg")
 				} else {
-					pksIDs[i] = id
+					pksIDs[i] = id.PackageVersionID
 				}
 			}
 

@@ -367,8 +367,8 @@ func (s *Suite) Test_Packages() {
 				return
 			}
 
-			if tt.idInFilter && ingestedPkgID != "" {
-				tt.pkgFilter.ID = &ingestedPkgID
+			if tt.idInFilter && ingestedPkgID.PackageVersionID != "" {
+				tt.pkgFilter.ID = &ingestedPkgID.PackageVersionID
 			}
 			got, err := be.Packages(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
