@@ -115,7 +115,7 @@ func getSourceQueryValues(source *model.SourceInputSpec) map[string]any {
 	return values
 }
 
-func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
+func (c *arangoClient) IngestSourceIDs(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
 	var listOfValues []map[string]any
 
 	for i := range sources {
@@ -179,26 +179,21 @@ func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.Sourc
 	  
     RETURN {
 	  "type_id": type._id,
-	  "type": type.type,
 	  "namespace_id": ns._id,
-	  "namespace": ns.namespace,
-	  "name_id": name._id,
-	  "name": name.name,
-	  "commit": name.commit,
-	  "tag": name.tag
+	  "name_id": name._id
 	}`
 
 	sb.WriteString(query)
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestSources")
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestSourceIDs")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest source: %w", err)
 	}
 
-	return getSources(ctx, cursor)
+	return getSourceIDs(ctx, cursor)
 }
 
-func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
+func (c *arangoClient) IngestSourceID(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
 	query := `
 	LET type = FIRST(
 		UPSERT { type: @srcType }
@@ -234,29 +229,45 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 	  
     RETURN {
 	  "type_id": type._id,
-	  "type": type.type,
 	  "namespace_id": ns._id,
-	  "namespace": ns.namespace,
-	  "name_id": name._id,
-	  "name": name.name,
-	  "commit": name.commit,
-	  "tag": name.tag
+	  "name_id": name._id
 	}`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getSourceQueryValues(&source), "IngestSource")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getSourceQueryValues(&source), "IngestSourceID")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest source: %w", err)
 	}
 
-	createdSources, err := getSources(ctx, cursor)
+	createdSourceIDs, err := getSourceIDs(ctx, cursor)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sources from arango cursor: %w", err)
 	}
-	if len(createdSources) == 1 {
-		return createdSources[0], nil
+	if len(createdSourceIDs) == 1 {
+		return createdSourceIDs[0], nil
 	} else {
 		return nil, fmt.Errorf("number of sources ingested is greater than one")
 	}
+}
+
+func getSourceIDs(ctx context.Context, cursor driver.Cursor) ([]*model.SourceIDs, error) {
+	var sourceIDs []*model.SourceIDs
+	for {
+		var doc dbSrcName
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to get packages from cursor: %w", err)
+			}
+		} else {
+			sourceIDs = append(sourceIDs, &model.SourceIDs{
+				SourceTypeID:      doc.TypeID,
+				SourceNamespaceID: doc.NamespaceID,
+				SourceNameID:      doc.NameID})
+		}
+	}
+	return sourceIDs, nil
 }
 
 func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *arangoQueryBuilder {
