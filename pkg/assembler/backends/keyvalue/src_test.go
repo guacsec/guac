@@ -64,27 +64,18 @@ func Test_demoClient_IngestSources(t *testing.T) {
 	tests := []struct {
 		name      string
 		srcInputs []*model.SourceInputSpec
-		want      []*model.Source
 		wantErr   bool
 	}{{
 		name:      "test batch source intestion",
 		srcInputs: []*model.SourceInputSpec{s1, s2},
-		want:      []*model.Source{s1out, s2out},
 		wantErr:   false,
 	}}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(context.Background(), nil)
-			got, err := c.IngestSources(ctx, tt.srcInputs)
+			_, err := c.IngestSourceIDs(ctx, tt.srcInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSources() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -145,13 +136,13 @@ func Test_demoClient_Sources(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(context.Background(), nil)
-			ingestedPkg, err := c.IngestSource(ctx, *tt.srcInput)
+			ingestedPkg, err := c.IngestSourceID(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedPkg.Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = &ingestedPkg.SourceNameID
 			}
 			got, err := c.Sources(ctx, tt.srcFilter)
 			if (err != nil) != tt.wantErr {

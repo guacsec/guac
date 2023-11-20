@@ -80,37 +80,37 @@ func (c *demoClient) IngestPointOfContacts(ctx context.Context, subjects model.P
 	var modelPointOfContactIDs []string
 
 	for i := range pointOfContacts {
-		var pointOfContact *model.PointOfContact
+		var pointOfContact string
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
-			pointOfContact, err = c.IngestPointOfContact(ctx, subject, pkgMatchType, *pointOfContacts[i])
+			pointOfContact, err = c.IngestPointOfContactID(ctx, subject, pkgMatchType, *pointOfContacts[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestPointOfContact failed with err: %v", err)
 			}
 		} else if len(subjects.Sources) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
-			pointOfContact, err = c.IngestPointOfContact(ctx, subject, pkgMatchType, *pointOfContacts[i])
+			pointOfContact, err = c.IngestPointOfContactID(ctx, subject, pkgMatchType, *pointOfContacts[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestPointOfContact failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			pointOfContact, err = c.IngestPointOfContact(ctx, subject, pkgMatchType, *pointOfContacts[i])
+			pointOfContact, err = c.IngestPointOfContactID(ctx, subject, pkgMatchType, *pointOfContacts[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestPointOfContact failed with err: %v", err)
 			}
 		}
-		modelPointOfContactIDs = append(modelPointOfContactIDs, pointOfContact.ID)
+		modelPointOfContactIDs = append(modelPointOfContactIDs, pointOfContact)
 	}
 	return modelPointOfContactIDs, nil
 }
 
-func (c *demoClient) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
+func (c *demoClient) IngestPointOfContactID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
 	return c.ingestPointOfContact(ctx, subject, pkgMatchType, pointOfContact, true)
 }
 
-func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec, readOnly bool) (*model.PointOfContact, error) {
+func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestPointOfContact"
 
 	in := &pointOfContactLink{
@@ -132,31 +132,31 @@ func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.Pac
 		var err error
 		foundPkgNameorVersionNode, err = c.getPackageNameOrVerFromInput(ctx, *subject.Package, *pkgMatchType)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.PackageID = foundPkgNameorVersionNode.ID()
 	} else if subject.Artifact != nil {
 		var err error
 		foundArtStrct, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.ArtifactID = foundArtStrct.ThisID
 	} else {
 		var err error
 		srcName, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.SourceID = srcName.ThisID
 	}
 
 	out, err := byKeykv[*pointOfContactLink](ctx, pocCol, in.Key(), c)
 	if err == nil {
-		return c.buildPointOfContact(ctx, out, nil, true)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -168,29 +168,29 @@ func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.Pac
 
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, pocCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if foundPkgNameorVersionNode != nil {
 		if err := foundPkgNameorVersionNode.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if foundArtStrct != nil {
 		if err := foundArtStrct.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if srcName != nil {
 		if err := srcName.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if err := setkv(ctx, pocCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.buildPointOfContact(ctx, in, nil, true)
+	return in.ThisID, nil
 }
 
 // Query PointOfContact
