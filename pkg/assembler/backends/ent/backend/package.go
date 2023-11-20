@@ -93,9 +93,9 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	return collect(pkgs, toModelPackage), nil
 }
 
-func (b *EntBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error) {
+func (b *EntBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
 	// FIXME: (ivanvanderbyl) This will be suboptimal because we can't batch insert relations with upserts. See Readme.
-	pkgsID := make([]string, len(pkgs))
+	pkgsID := make([]*model.PackageIDs, len(pkgs))
 	for i, pkg := range pkgs {
 		p, err := b.IngestPackageID(ctx, *pkg)
 		if err != nil {
@@ -106,8 +106,8 @@ func (b *EntBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInpu
 	return pkgsID, nil
 }
 
-func (b *EntBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec) (string, error) {
-	pkgVersionID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+func (b *EntBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
+	pkgVersionID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.PackageIDs, error) {
 		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), pkg)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to upsert package")
@@ -115,15 +115,15 @@ func (b *EntBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec
 		return p, nil
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return strconv.Itoa(*pkgVersionID), nil
+	return pkgVersionID, nil
 }
 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
-func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*int, error) {
+func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
 
 	pkgID, err := client.PackageType.Create().
 		SetType(pkg.Type).
@@ -213,7 +213,11 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 		}
 	}
 
-	return &id, nil
+	return &model.PackageIDs{
+		PackageTypeID:      strconv.Itoa(pkgID),
+		PackageNamespaceID: strconv.Itoa(nsID),
+		PackageNameID:      strconv.Itoa(nameID),
+		PackageVersionID:   strconv.Itoa(id)}, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {

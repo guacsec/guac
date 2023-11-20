@@ -642,17 +642,17 @@ func TestCertifyBad(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -985,17 +985,17 @@ func TestIngestCertifyBads(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -1204,17 +1204,17 @@ func Test_buildCertifyBadByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -1239,132 +1239,3 @@ func Test_buildCertifyBadByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestCertifyBadNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Sub   model.PackageSourceOrArtifactInput
-// 		Match *model.MatchFlags
-// 		CB    *model.CertifyBadInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		InSrc        []*model.SourceInputSpec
-// 		InArt        []*model.ArtifactInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			Calls: []call{
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Match: &model.MatchFlags{
-// 						Pkg: model.PkgMatchTypeSpecificVersion,
-// 					},
-// 					CB: &model.CertifyBadInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "5"}, // pkg version
-// 				"5": []string{"1"},      // certify bad
-// 			},
-// 		},
-// 		{
-// 			Name:  "Pkg Name Src and Artifact",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			InSrc: []*model.SourceInputSpec{testdata.S1},
-// 			InArt: []*model.ArtifactInputSpec{testdata.A1},
-// 			Calls: []call{
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Match: &model.MatchFlags{
-// 						Pkg: model.PkgMatchTypeAllVersions,
-// 					},
-// 					CB: &model.CertifyBadInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Source: testdata.S1,
-// 					},
-// 					CB: &model.CertifyBadInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Artifact: testdata.A1,
-// 					},
-// 					CB: &model.CertifyBadInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"1":  []string{"1"},
-// 				"2":  []string{"1", "1"},
-// 				"3":  []string{"1", "1", "9"}, // pkg name
-// 				"4":  []string{"1"},           // pkg version
-// 				"5":  []string{"5"},
-// 				"6":  []string{"5", "5"},
-// 				"7":  []string{"5", "10"}, // src name
-// 				"8":  []string{"11"},      // art
-// 				"9":  []string{"1"},       // cb 1 -> pkg name
-// 				"10": []string{"5"},       // cb 2 -> src name
-// 				"11": []string{"8"},       // cb 3 -> art
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
-// 					t.Fatalf("Could not ingest package: %v", err)
-// 				}
-// 			}
-// 			for _, s := range test.InSrc {
-// 				if _, err := b.IngestSource(ctx, *s); err != nil {
-// 					t.Fatalf("Could not ingest source: %v", err)
-// 				}
-// 			}
-// 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
-// 					t.Fatalf("Could not ingest artifact: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB); err != nil {
-// 					t.Fatalf("Could not ingest CertifyBad: %v", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

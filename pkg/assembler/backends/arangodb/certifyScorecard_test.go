@@ -515,7 +515,7 @@ func TestCertifyScorecard(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -738,7 +738,7 @@ func TestIngestScorecards(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -864,7 +864,7 @@ func Test_buildCertifyScorecardByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -891,98 +891,3 @@ func Test_buildCertifyScorecardByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestCertifyScorecardNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Src *model.SourceInputSpec
-// 		SC  *model.ScorecardInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InSrc        []*model.SourceInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InSrc: []*model.SourceInputSpec{testdata.S1},
-// 			Calls: []call{
-// 				{
-// 					Src: testdata.S1,
-// 					SC: &model.ScorecardInputSpec{
-// 						Origin: "test origin",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"3": []string{"1", "4"}, // src name
-// 				"4": []string{"1"},      // SC
-// 			},
-// 		},
-// 		{
-// 			Name:  "Multiple",
-// 			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
-// 			Calls: []call{
-// 				{
-// 					Src: testdata.S1,
-// 					SC: &model.ScorecardInputSpec{
-// 						Origin: "test origin",
-// 					},
-// 				},
-// 				{
-// 					Src: testdata.S2,
-// 					SC: &model.ScorecardInputSpec{
-// 						Origin: "test origin",
-// 					},
-// 				},
-// 				{
-// 					Src: testdata.S2,
-// 					SC: &model.ScorecardInputSpec{
-// 						Origin: "test origin two",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				// test sources are all type git, id:2
-// 				"3": []string{"1", "6"},      // src name 1 -> src namespace, SC1
-// 				"5": []string{"1", "7", "8"}, // src name 2 -> src namespace, SC2, SC3
-// 				"6": []string{"1"},           // SC 1
-// 				"7": []string{"1"},           // SC 2
-// 				"8": []string{"1"},           // SC 3
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, s := range test.InSrc {
-// 				if _, err := b.IngestSource(ctx, *s); err != nil {
-// 					t.Fatalf("Could not ingest source: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestScorecard(ctx, *o.Src, *o.SC); err != nil {
-// 					t.Fatalf("Could not ingest CertifyScorecard: %v", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

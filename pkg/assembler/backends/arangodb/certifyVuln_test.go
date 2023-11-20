@@ -939,11 +939,11 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
 			}
 
@@ -1398,10 +1398,10 @@ func TestIngestCertifyVulns(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerabilities: %a", err)
 			}
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
 			}
 
@@ -1625,11 +1625,11 @@ func Test_buildCertifyVulnByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
 			}
 
@@ -1656,122 +1656,3 @@ func Test_buildCertifyVulnByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestCertifyVulnNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Pkg         *model.PkgInputSpec
-// 		Vuln        *model.VulnerabilityInputSpec
-// 		CertifyVuln *model.ScanMetadataInput
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		InVuln       []*model.VulnerabilityInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:   "HappyPath",
-// 			InPkg:  []*model.PkgInputSpec{testdata.P1},
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-// 			Calls: []call{
-// 				call{
-// 					Pkg:  testdata.P1,
-// 					Vuln: testdata.O1,
-// 					CertifyVuln: &model.ScanMetadataInput{
-// 						Collector:      "test collector",
-// 						Origin:         "test origin",
-// 						ScannerVersion: "v1.0.0",
-// 						ScannerURI:     "test scanner uri",
-// 						DbVersion:      "2023.01.01",
-// 						DbURI:          "test db uri",
-// 						TimeScanned:    testdata.T1,
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "7"}, // pkg version -> pkg name, vex
-// 				"6": []string{"5", "7"}, // Vuln -> vex
-// 				"7": []string{"1", "5"}, // Vex -> pkg version, vuln
-// 			},
-// 		},
-// 		{
-// 			Name:   "Two vex on same package",
-// 			InPkg:  []*model.PkgInputSpec{testdata.P1},
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, o2},
-// 			Calls: []call{
-// 				call{
-// 					Pkg:  testdata.P1,
-// 					Vuln: testdata.O1,
-// 					CertifyVuln: &model.ScanMetadataInput{
-// 						Collector:      "test collector",
-// 						Origin:         "test origin",
-// 						ScannerVersion: "v1.0.0",
-// 						ScannerURI:     "test scanner uri",
-// 						DbVersion:      "2023.01.01",
-// 						DbURI:          "test db uri",
-// 						TimeScanned:    testdata.T1,
-// 					},
-// 				},
-// 				call{
-// 					Pkg:  testdata.P1,
-// 					Vuln: o2,
-// 					CertifyVuln: &model.ScanMetadataInput{
-// 						Collector:      "test collector",
-// 						Origin:         "test origin",
-// 						ScannerVersion: "v1.0.0",
-// 						ScannerURI:     "test scanner uri",
-// 						DbVersion:      "2023.01.01",
-// 						DbURI:          "test db uri",
-// 						TimeScanned:    testdata.T1,
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "8", "9"}, // pkg version -> pkg name, certVuln1, certVuln2
-// 				"6": []string{"5", "8"},      // Vuln1 -> vunType, certVuln1
-// 				"7": []string{"5", "9"},      // Vuln2 -> vunType, certVuln2
-// 				"8": []string{"1", "5"},      // certVuln1 -> pkg version, vuln1
-// 				"9": []string{"1", "5"},      // certVuln2 -> pkg version, vuln2
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
-// 					t.Fatalf("Could not ingest package: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.InVuln {
-// 				if _, err := b.IngestVulnerability(ctx, *o); err != nil {
-// 					t.Fatalf("Could not ingest osv: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestCertifyVuln(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln); err != nil {
-// 					t.Fatalf("Could not ingest certifyVuln")
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

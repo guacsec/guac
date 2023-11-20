@@ -626,12 +626,12 @@ func TestHasSLSA(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
@@ -871,12 +871,12 @@ func TestIngestHasSLSAs(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
@@ -1094,12 +1094,12 @@ func Test_buildHasSlsaByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
@@ -1126,111 +1126,3 @@ func Test_buildHasSlsaByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestHasSLSANeighbors(t *testing.T) {
-// 	type call struct {
-// 		Sub  *model.ArtifactInputSpec
-// 		BF   []*model.ArtifactInputSpec
-// 		BB   *model.BuilderInputSpec
-// 		SLSA *model.SLSAInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InArt        []*model.ArtifactInputSpec
-// 		InBld        []*model.BuilderInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
-// 			InBld: []*model.BuilderInputSpec{testdata.B1},
-// 			Calls: []call{
-// 				{
-// 					Sub: testdata.A1,
-// 					BF:  []*model.ArtifactInputSpec{testdata.A2},
-// 					BB:  testdata.B1,
-// 					SLSA: &model.SLSAInputSpec{
-// 						BuildType: "test type",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"1": []string{"4"},           // testdata.A1
-// 				"2": []string{"4"},           // testdata.A2
-// 				"3": []string{"4"},           // testdata.B1
-// 				"4": []string{"1", "2", "3"}, // hasSBOM
-// 			},
-// 		},
-// 		{
-// 			Name:  "Multiple",
-// 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3, testdata.A4},
-// 			InBld: []*model.BuilderInputSpec{testdata.B1},
-// 			Calls: []call{
-// 				{
-// 					Sub: testdata.A1,
-// 					BF:  []*model.ArtifactInputSpec{testdata.A2},
-// 					BB:  testdata.B1,
-// 					SLSA: &model.SLSAInputSpec{
-// 						BuildType: "test type",
-// 					},
-// 				},
-// 				{
-// 					Sub: testdata.A3,
-// 					BF:  []*model.ArtifactInputSpec{testdata.A4},
-// 					BB:  testdata.B1,
-// 					SLSA: &model.SLSAInputSpec{
-// 						BuildType: "test type",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"1": []string{"6"},           // testdata.A1
-// 				"2": []string{"6"},           // testdata.A2
-// 				"3": []string{"7"},           // testdata.A3
-// 				"4": []string{"7"},           // testdata.A4
-// 				"5": []string{"6", "7"},      // testdata.B1
-// 				"6": []string{"1", "2", "5"}, // hasSBOM 1
-// 				"7": []string{"3", "4", "5"}, // hasSBOM 2
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
-// 					t.Fatalf("Could not ingest artifact: %v", err)
-// 				}
-// 			}
-// 			for _, bld := range test.InBld {
-// 				if _, err := b.IngestBuilder(ctx, bld); err != nil {
-// 					t.Fatalf("Could not ingest builder: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA); err != nil {
-// 					t.Fatalf("Could not ingest HasSLSA: %v", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

@@ -58,3 +58,16 @@ func GetSourceAsIds(sources []*model.Source) []*model.SourceIDs {
 	}
 	return results
 }
+
+// Flattens the trie and returns a flat vulnerability structure containing only IDs
+func GetVulnsAsIds(vulns []*model.Vulnerability) []*model.VulnerabilityIDs {
+	results := []*model.VulnerabilityIDs{}
+	for _, vuln := range vulns {
+		resultVuln := model.VulnerabilityIDs{VulnerabilityTypeID: vuln.ID}
+		for _, vulnID := range vuln.VulnerabilityIDs {
+			resultVuln.VulnerabilityNodeID = vulnID.ID
+			results = append(results, &resultVuln)
+		}
+	}
+	return results
+}

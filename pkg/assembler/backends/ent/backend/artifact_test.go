@@ -51,7 +51,7 @@ func (s *Suite) Test_IngestArtifacts() {
 
 			got, err := be.IngestArtifactIDs(s.Ctx, tt.artifactInputs)
 			if (err != nil) != tt.wantErr {
-				s.T().Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
+				s.T().Errorf("demoClient.IngestArtifactIDs() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {

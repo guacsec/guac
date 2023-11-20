@@ -581,12 +581,12 @@ func TestHasSourceAt(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -876,12 +876,12 @@ func TestIngestHasSourceAts(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -1071,12 +1071,12 @@ func Test_buildHasSourceAtByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -1102,112 +1102,3 @@ func Test_buildHasSourceAtByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestHasSourceAtNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Pkg   *model.PkgInputSpec
-// 		Src   *model.SourceInputSpec
-// 		Match *model.MatchFlags
-// 		HSA   *model.HasSourceAtInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		InSrc        []*model.SourceInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			InSrc: []*model.SourceInputSpec{testdata.S1},
-// 			Calls: []call{
-// 				{
-// 					Pkg: testdata.P1,
-// 					Src: testdata.S1,
-// 					Match: &model.MatchFlags{
-// 						Pkg: model.PkgMatchTypeSpecificVersion,
-// 					},
-// 					HSA: &model.HasSourceAtInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "8"}, // Package Version
-// 				"7": []string{"5", "8"}, // Source Name
-// 				"8": []string{"1", "5"}, // HSA
-// 			},
-// 		},
-// 		{
-// 			Name:  "Package Name and Version",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			InSrc: []*model.SourceInputSpec{testdata.S1},
-// 			Calls: []call{
-// 				{
-// 					Pkg: testdata.P1,
-// 					Src: testdata.S1,
-// 					Match: &model.MatchFlags{
-// 						Pkg: model.PkgMatchTypeSpecificVersion,
-// 					},
-// 					HSA: &model.HasSourceAtInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					Pkg: testdata.P1,
-// 					Src: testdata.S1,
-// 					Match: &model.MatchFlags{
-// 						Pkg: model.PkgMatchTypeAllVersions,
-// 					},
-// 					HSA: &model.HasSourceAtInputSpec{},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"3": []string{"1", "1", "9"}, // Package Name
-// 				"4": []string{"1", "8"},      // Package Version
-// 				"7": []string{"5", "8", "9"}, // Source Name
-// 				"8": []string{"1", "5"},      // HSA -> Version
-// 				"9": []string{"1", "5"},      // HSA -> Name
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := backends.Get("inmem", nil, nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
-// 					t.Fatalf("Could not ingest package: %v", err)
-// 				}
-// 			}
-// 			for _, s := range test.InSrc {
-// 				if _, err := b.IngestSource(ctx, *s); err != nil {
-// 					t.Fatalf("Could not ingest source: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestHasSourceAt(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA); err != nil {
-// 					t.Fatalf("Could not ingest HasSourceAt: %v", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

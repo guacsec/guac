@@ -543,17 +543,17 @@ func TestLegal(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
@@ -651,17 +651,17 @@ func TestLegals(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
@@ -852,17 +852,17 @@ func Test_buildCertifyLegalByID(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}

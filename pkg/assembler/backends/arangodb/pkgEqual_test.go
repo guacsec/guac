@@ -575,7 +575,7 @@ func TestPkgEqual(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
+				if _, err := b.IngestPackageID(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
@@ -810,7 +810,7 @@ func TestIngestPkgEquals(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest pkg: %v", err)
 			}
 			for _, o := range test.Calls {
@@ -1111,7 +1111,7 @@ func Test_buildPkgEqualByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
+				if _, err := b.IngestPackageID(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
@@ -1138,96 +1138,3 @@ func Test_buildPkgEqualByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestPkgEqualNeighbors(t *testing.T) {
-// 	type call struct {
-// 		P1 *model.PkgInputSpec
-// 		P2 *model.PkgInputSpec
-// 		HE *model.PkgEqualInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-// 			Calls: []call{
-// 				{
-// 					P1: testdata.P1,
-// 					P2: testdata.P2,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "6"}, // testdata.P1
-// 				"5": []string{"1", "6"}, // testdata.P2
-// 				"6": []string{"1", "1"}, // pkgequal
-// 			},
-// 		},
-// 		{
-// 			Name:  "Multiple",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
-// 			Calls: []call{
-// 				{
-// 					P1: testdata.P1,
-// 					P2: testdata.P2,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					P1: testdata.P1,
-// 					P2: testdata.P3,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "7", "8"}, // testdata.P1
-// 				"5": []string{"1", "7"},      // testdata.P2
-// 				"6": []string{"1", "8"},      // testdata.P3
-// 				"7": []string{"1", "1"},      // pkgequal 1
-// 				"8": []string{"1", "1"},      // pkgequal 2
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := backends.Get("inmem", nil, nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, a := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *a); err != nil {
-// 					t.Fatalf("Could not ingest pkg: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE); err != nil {
-// 					t.Fatalf("Could not ingest PkgEqual: %v", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

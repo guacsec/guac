@@ -409,6 +409,11 @@ type ComplexityRoot struct {
 		VulnerabilityID func(childComplexity int) int
 	}
 
+	VulnerabilityIDs struct {
+		VulnerabilityNodeID func(childComplexity int) int
+		VulnerabilityTypeID func(childComplexity int) int
+	}
+
 	VulnerabilityMetadata struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
@@ -2586,6 +2591,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.VulnerabilityID.VulnerabilityID(childComplexity), true
+
+	case "VulnerabilityIDs.vulnerabilityNodeID":
+		if e.complexity.VulnerabilityIDs.VulnerabilityNodeID == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityIDs.VulnerabilityNodeID(childComplexity), true
+
+	case "VulnerabilityIDs.vulnerabilityTypeID":
+		if e.complexity.VulnerabilityIDs.VulnerabilityTypeID == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityIDs.VulnerabilityTypeID(childComplexity), true
 
 	case "VulnerabilityMetadata.collector":
 		if e.complexity.VulnerabilityMetadata.Collector == nil {
@@ -5156,7 +5175,7 @@ type SourceName {
 }
 
 """
-The IDs of the ingested pacsourcekage
+The IDs of the ingested source
 """
 type SourceIDs {
   sourceTypeID: ID!
@@ -5500,6 +5519,14 @@ input VulnerabilityInputSpec {
   vulnerabilityID: String!
 }
 
+"""
+The IDs of the ingested vulnerability
+"""
+type VulnerabilityIDs {
+  vulnerabilityTypeID: ID!
+  vulnerabilityNodeID: ID!
+}
+
 extend type Query {
   "Returns all vulnerabilities matching a filter."
   vulnerabilities(vulnSpec: VulnerabilitySpec!): [Vulnerability!]!
@@ -5507,9 +5534,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string."
-  ingestVulnerability(vuln: VulnerabilityInputSpec!): ID!
+  ingestVulnerability(vuln: VulnerabilityInputSpec!): VulnerabilityIDs!
   "Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs can be a an array of empty string."
-  ingestVulnerabilities(vulns: [VulnerabilityInputSpec!]!): [ID!]!
+  ingestVulnerabilities(vulns: [VulnerabilityInputSpec!]!): [VulnerabilityIDs!]!
 }
 `, BuiltIn: false},
 }

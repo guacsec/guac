@@ -48,27 +48,21 @@ func Test_IngestSources(t *testing.T) {
 	tests := []struct {
 		name      string
 		srcInputs []*model.SourceInputSpec
-		want      []*model.Source
 		wantErr   bool
 	}{{
 		name:      "test batch source ingestion",
 		srcInputs: []*model.SourceInputSpec{testdata.S3, testdata.S4},
-		want:      []*model.Source{testdata.S4out, testdata.S3out},
 		wantErr:   false,
 	}}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := b.IngestSources(ctx, tt.srcInputs)
+			got, err := b.IngestSourceIDs(ctx, tt.srcInputs)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSources() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSourceIDs() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			slices.SortFunc(got, lessSource)
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			if len(got) != len(tt.srcInputs) {
+				t.Errorf("Unexpected number of results. Wanted: %d, got %d", len(tt.srcInputs), len(got))
 			}
 		})
 	}
@@ -137,13 +131,13 @@ func Test_Sources(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestSource(ctx, *tt.srcInput)
+			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedPkg.Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = ptrfrom.String(ingestedSrcIDs.SourceNameID)
 			}
 			got, err := b.Sources(ctx, tt.srcFilter)
 			if (err != nil) != tt.wantErr {
@@ -238,13 +232,13 @@ func Test_SourceTypes(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestSource(ctx, *tt.srcInput)
+			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedPkg.Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = ptrfrom.String(ingestedSrcIDs.SourceNameID)
 			}
 			got, err := b.(*arangoClient).sourcesType(ctx, tt.srcFilter)
 			if (err != nil) != tt.wantErr {
@@ -348,13 +342,13 @@ func Test_SourceNamespaces(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestSource(ctx, *tt.srcInput)
+			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedPkg.Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = ptrfrom.String(ingestedSrcIDs.SourceNameID)
 			}
 			got, err := b.(*arangoClient).sourcesNamespace(ctx, tt.srcFilter)
 			if (err != nil) != tt.wantErr {
@@ -432,15 +426,15 @@ func Test_buildSourceResponseFromID(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
+			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedSrc.Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = ptrfrom.String(ingestedSrcIDs.SourceNameID)
 			}
-			got, err := b.(*arangoClient).buildSourceResponseFromID(ctx, ingestedSrc.Namespaces[0].Names[0].ID, tt.srcFilter)
+			got, err := b.(*arangoClient).buildSourceResponseFromID(ctx, ingestedSrcIDs.SourceNameID, tt.srcFilter)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.buildSourceResponseFromID() error = %v, wantErr %v", err, tt.wantErr)
 				return

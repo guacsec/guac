@@ -506,7 +506,7 @@ func (s *Suite) Test_HasSBOM() {
 
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				id, err := b.IngestHasSbomID(ctx, o.Sub, *o.Spec)
+				id, err := b.IngestHasSbomID(ctx, o.Sub, *o.Spec, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != test.ExpIngestErr {
 					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -770,7 +770,7 @@ func (s *Suite) TestIngestHasSBOMs() {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHasSBOMIDs(ctx, o.Sub, o.HS)
+				_, err := b.IngestHasSBOMIDs(ctx, o.Sub, o.HS, nil)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

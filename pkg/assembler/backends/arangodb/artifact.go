@@ -174,7 +174,7 @@ func getArtifactQueryValues(artifact *model.ArtifactInputSpec) map[string]any {
 	return values
 }
 
-func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+func (c *arangoClient) IngestArtifactIDs(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 	for i := range artifacts {
 		listOfValues = append(listOfValues, getArtifactQueryValues(artifacts[i]))
@@ -206,35 +206,11 @@ func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.A
 UPSERT { algorithm:doc.algorithm, digest:doc.digest } 
 INSERT { algorithm:doc.algorithm, digest:doc.digest } 
 UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
-RETURN {
-	"id": NEW._id,
-	"algorithm": NEW.algorithm,
-	"digest": NEW.digest
-  }`
+RETURN { "id": NEW._id }`
 
 	sb.WriteString(query)
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestArtifacts")
-	if err != nil {
-		return nil, fmt.Errorf("failed to ingest artifact: %w", err)
-	}
-	defer cursor.Close()
-
-	return getArtifacts(ctx, cursor)
-}
-
-func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
-	query := `
-UPSERT { algorithm:@algorithm, digest:@digest } 
-INSERT { algorithm:@algorithm, digest:@digest } 
-UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
-RETURN {
-	"id": NEW._id,
-	"algorithm": NEW.algorithm,
-	"digest": NEW.digest
-  }`
-
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getArtifactQueryValues(artifact), "IngestArtifact")
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestArtifactIDs")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest artifact: %w", err)
 	}
@@ -242,12 +218,37 @@ RETURN {
 
 	createdArtifacts, err := getArtifacts(ctx, cursor)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get artifacts from arango cursor: %w", err)
+		return nil, fmt.Errorf("failed to get artifact IDs from arango cursor: %w", err)
+	}
+
+	var artifactIDs []string
+	for _, art := range createdArtifacts {
+		artifactIDs = append(artifactIDs, art.ID)
+	}
+	return artifactIDs, nil
+}
+
+func (c *arangoClient) IngestArtifactID(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
+	query := `
+UPSERT { algorithm:@algorithm, digest:@digest } 
+INSERT { algorithm:@algorithm, digest:@digest } 
+UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
+RETURN { "id": NEW._id }`
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getArtifactQueryValues(artifact), "IngestArtifactID")
+	if err != nil {
+		return "", fmt.Errorf("failed to ingest artifact: %w", err)
+	}
+	defer cursor.Close()
+
+	createdArtifacts, err := getArtifacts(ctx, cursor)
+	if err != nil {
+		return "", fmt.Errorf("failed to get artifact IDs from arango cursor: %w", err)
 	}
 	if len(createdArtifacts) == 1 {
-		return createdArtifacts[0], nil
+		return createdArtifacts[0].ID, nil
 	} else {
-		return nil, fmt.Errorf("number of artifacts ingested is greater than one")
+		return "", fmt.Errorf("number of artifacts ingested is greater than one")
 	}
 }
 
