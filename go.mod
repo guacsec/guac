@@ -8,7 +8,7 @@ require (
 	github.com/in-toto/in-toto-golang v0.9.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
 	github.com/secure-systems-lab/go-securesystemslib v0.7.0
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	go.uber.org/zap v1.26.0
 	google.golang.org/api v0.150.0
 )
@@ -93,7 +93,7 @@ require (
 	github.com/containerd/typeurl/v2 v2.1.1 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -277,7 +277,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/redis/go-redis/v9 v9.3.0
-	github.com/regclient/regclient v0.5.3
+	github.com/regclient/regclient v0.5.4
 	github.com/segmentio/kafka-go v0.4.44
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sigstore/sigstore v1.7.4
