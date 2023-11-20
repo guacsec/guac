@@ -82,8 +82,8 @@ func TestIngestCertifyGood(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestCertifyGood(ctx, o.Sub, &o.Match, *o.CG).
-					Return(testdata.CG1out, nil).
+					IngestCertifyGoodID(ctx, o.Sub, &o.Match, *o.CG).
+					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestCertifyGood(ctx, o.Sub, o.Match, *o.CG)
 				if (err != nil) != test.ExpIngestErr {
@@ -210,8 +210,8 @@ func TestIngestCertifyGoods(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestCertifyGoods(ctx, o.Sub, &o.Match, o.CG).
-					Return([]*model.CertifyGood{testdata.CG1out}, nil).
+					IngestCertifyGoodIDs(ctx, o.Sub, &o.Match, o.CG).
+					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestCertifyGoods(ctx, o.Sub, o.Match, o.CG)
 				if (err != nil) != test.ExpIngestErr {

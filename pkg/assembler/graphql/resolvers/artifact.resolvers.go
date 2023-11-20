@@ -13,23 +13,12 @@ import (
 
 // IngestArtifact is the resolver for the ingestArtifact field.
 func (r *mutationResolver) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
-	ingestedArtifact, err := r.Backend.IngestArtifact(ctx, artifact)
-	if err != nil {
-		return "", err
-	}
-	return ingestedArtifact.ID, err
+	return r.Backend.IngestArtifactID(ctx, artifact)
 }
 
 // IngestArtifacts is the resolver for the ingestArtifacts field.
 func (r *mutationResolver) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
-	ingestedArtifacts, err := r.Backend.IngestArtifacts(ctx, artifacts)
-	ingestedArtifactsIDS := []string{}
-	if err == nil {
-		for _, art := range ingestedArtifacts {
-			ingestedArtifactsIDS = append(ingestedArtifactsIDS, art.ID)
-		}
-	}
-	return ingestedArtifactsIDS, err
+	return r.Backend.IngestArtifactIDs(ctx, artifacts)
 }
 
 // Artifacts is the resolver for the artifacts field.

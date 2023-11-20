@@ -21,13 +21,9 @@ func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgI
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	ingestedCertifyVuln, err := r.Backend.IngestCertifyVuln(ctx, pkg,
+	return r.Backend.IngestCertifyVulnID(ctx, pkg,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
 		certifyVuln)
-	if err != nil {
-		return "", err
-	}
-	return ingestedCertifyVuln.ID, err
 }
 
 // IngestCertifyVulns is the resolver for the ingestCertifyVulns field.
@@ -56,13 +52,7 @@ func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model
 		}
 		lowercaseVulnInputList = append(lowercaseVulnInputList, &lowercaseVulnInput)
 	}
-	ingestedCertifyVulns, err := r.Backend.IngestCertifyVulns(ctx, pkgs, lowercaseVulnInputList, certifyVulns)
-	if err == nil {
-		for _, certifyVuln := range ingestedCertifyVulns {
-			ingestedCertifyVulnsIDS = append(ingestedCertifyVulnsIDS, certifyVuln.ID)
-		}
-	}
-	return ingestedCertifyVulnsIDS, err
+	return r.Backend.IngestCertifyVulnIDs(ctx, pkgs, lowercaseVulnInputList, certifyVulns)
 }
 
 // CertifyVuln is the resolver for the CertifyVuln field.

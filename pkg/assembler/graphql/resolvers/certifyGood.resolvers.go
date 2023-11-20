@@ -21,11 +21,7 @@ func (r *mutationResolver) IngestCertifyGood(ctx context.Context, subject model.
 	if certifyGood.KnownSince.IsZero() {
 		return "", gqlerror.Errorf("certifyGood.KnownSince is a zero time")
 	}
-	ingestedCertifyGood, err := r.Backend.IngestCertifyGood(ctx, subject, &pkgMatchType, certifyGood)
-	if err != nil {
-		return "", err
-	}
-	return ingestedCertifyGood.ID, err
+	return r.Backend.IngestCertifyGoodID(ctx, subject, &pkgMatchType, certifyGood)
 }
 
 // IngestCertifyGoods is the resolver for the ingestCertifyGoods field.
@@ -61,13 +57,7 @@ func (r *mutationResolver) IngestCertifyGoods(ctx context.Context, subjects mode
 		}
 	}
 
-	ingestedCertifyGoods, err := r.Backend.IngestCertifyGoods(ctx, subjects, &pkgMatchType, certifyGoods)
-	if err == nil {
-		for _, certifyGood := range ingestedCertifyGoods {
-			ingestedCertifyGoodsIDS = append(ingestedCertifyGoodsIDS, certifyGood.ID)
-		}
-	}
-	return ingestedCertifyGoodsIDS, err
+	return r.Backend.IngestCertifyGoodIDs(ctx, subjects, &pkgMatchType, certifyGoods)
 }
 
 // CertifyGood is the resolver for the CertifyGood field.
