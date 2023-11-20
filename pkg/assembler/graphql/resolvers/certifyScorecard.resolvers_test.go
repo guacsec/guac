@@ -80,8 +80,8 @@ func TestIngestScorecards(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestScorecards(ctx, o.Src, o.SC).
-					Return([]*model.CertifyScorecard{testdata.SC1out}, nil).
+					IngestScorecardIDs(ctx, o.Src, o.SC).
+					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestScorecards(ctx, o.Src, o.SC)
 				if (err != nil) != test.ExpIngestErr {

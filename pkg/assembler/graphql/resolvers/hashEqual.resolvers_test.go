@@ -100,8 +100,8 @@ func TestIngestHashEquals(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestHashEquals(ctx, o.A1, o.A2, o.HE).
-					Return([]*model.HashEqual{{ID: "a"}}, nil).
+					IngestHashEqualIDs(ctx, o.A1, o.A2, o.HE).
+					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestHashEquals(ctx, o.A1, o.A2, o.HE)
 				if (err != nil) != test.ExpIngestErr {
