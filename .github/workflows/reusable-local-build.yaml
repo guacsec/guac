@@ -37,7 +37,7 @@ jobs:
         with:
           go-version: 'stable'
       - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v5
         with:
           install-only: true
       - run: |
