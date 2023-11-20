@@ -2657,9 +2657,7 @@ func TestHasSBOM(t *testing.T) {
 				if arts, err := b.IngestArtifactIDs(ctx, test.PkgArt.Artifacts); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					for _, art := range arts {
-						includes.Software = append(includes.Software, art)
-					}
+					includes.Software = append(includes.Software, arts...)
 				}
 			}
 
@@ -2975,9 +2973,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 				if arts, err := b.IngestArtifactIDs(ctx, test.PkgArt.Artifacts); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					for _, art := range arts {
-						includes.Software = append(includes.Software, art)
-					}
+					includes.Software = append(includes.Software, arts...)
 				}
 			}
 
@@ -3166,9 +3162,7 @@ func TestHasSBOMNeighbors(t *testing.T) {
 				if arts, err := b.IngestArtifactIDs(ctx, test.PkgArt.Artifacts); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					for _, art := range arts {
-						includes.Software = append(includes.Software, art)
-					}
+					includes.Software = append(includes.Software, arts...)
 				}
 			}
 
