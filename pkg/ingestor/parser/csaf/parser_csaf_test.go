@@ -289,6 +289,7 @@ func Test_csafParser_GetIdentifiers(t *testing.T) {
 				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.ppc64le",
 				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.s390x",
 				"BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.x86_64",
+				"BaseOS-8.6.0.Z.EUS:nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64",
 				"BaseOS-8.6.0.Z.EUS:openssl-1:1.1.1k-7.el8_6.x86_64",
 			},
 		},
