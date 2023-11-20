@@ -64,7 +64,7 @@ func toLowerPtr(s *string) *string {
 }
 
 func (b *EntBackend) IngestArtifactIDs(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
-	funcName := "IngestArtifacts"
+	funcName := "IngestArtifactIDs"
 	records, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := ingestArtifacts(ctx, client, artifacts)

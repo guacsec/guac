@@ -159,8 +159,8 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 	return collect(records, toModelSourceName), nil
 }
 
-func (b *EntBackend) IngestSourceIDs(ctx context.Context, sources []*model.SourceInputSpec) ([]string, error) {
-	ids := make([]string, len(sources))
+func (b *EntBackend) IngestSourceIDs(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
+	ids := make([]*model.SourceIDs, len(sources))
 	for i, src := range sources {
 		s, err := b.IngestSourceID(ctx, *src)
 		if err != nil {
@@ -171,18 +171,18 @@ func (b *EntBackend) IngestSourceIDs(ctx context.Context, sources []*model.Sourc
 	return ids, nil
 }
 
-func (b *EntBackend) IngestSourceID(ctx context.Context, source model.SourceInputSpec) (string, error) {
-	sourceNameID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+func (b *EntBackend) IngestSourceID(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
+	sourceNameID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.SourceIDs, error) {
 		return upsertSource(ctx, ent.TxFromContext(ctx), source)
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return strconv.Itoa(*sourceNameID), nil
+	return sourceNameID, nil
 }
 
-func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec) (*int, error) {
+func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec) (*model.SourceIDs, error) {
 	sourceTypeID, err := client.SourceType.Create().
 		SetType(src.Type).
 		OnConflict(
@@ -263,7 +263,10 @@ func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec
 		}
 	}
 
-	return &sourceNameID, nil
+	return &model.SourceIDs{
+		SourceTypeID:      strconv.Itoa(sourceTypeID),
+		SourceNamespaceID: strconv.Itoa(sourceNamespaceID),
+		SourceNameID:      strconv.Itoa(sourceNameID)}, nil
 }
 
 func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {

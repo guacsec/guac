@@ -55,9 +55,9 @@ func Test_arangoClient_FindSoftware(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := b.IngestPackage(ctx, tt.pkgInput)
+			_, err := b.IngestPackageID(ctx, tt.pkgInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			got, err := b.FindSoftware(ctx, tt.search)
