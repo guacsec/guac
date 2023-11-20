@@ -1278,7 +1278,7 @@ func (Source) IsPackageOrSource() {}
 
 func (Source) IsNode() {}
 
-// The IDs of the ingested pacsourcekage
+// The IDs of the ingested source
 type SourceIDs struct {
 	SourceTypeID      string `json:"sourceTypeID"`
 	SourceNamespaceID string `json:"sourceNamespaceID"`
@@ -1428,6 +1428,12 @@ func (Vulnerability) IsNode() {}
 type VulnerabilityID struct {
 	ID              string `json:"id"`
 	VulnerabilityID string `json:"vulnerabilityID"`
+}
+
+// The IDs of the ingested vulnerability
+type VulnerabilityIDs struct {
+	VulnerabilityTypeID string `json:"vulnerabilityTypeID"`
+	VulnerabilityNodeID string `json:"vulnerabilityNodeID"`
 }
 
 // VulnInputSpec specifies a vulnerability for mutations.

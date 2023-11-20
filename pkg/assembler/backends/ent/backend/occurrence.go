@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -166,7 +167,11 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			if err != nil {
 				return nil, err
 			}
-			occurrenceCreate.SetSourceID(*srcNameID)
+			srcID, err := strconv.Atoi(srcNameID.SourceNameID)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to get Source ID")
+			}
+			occurrenceCreate.SetSourceID(srcID)
 			occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldSourceID)
 			conflictWhere = sql.And(
 				sql.IsNull(occurrence.FieldPackageID),

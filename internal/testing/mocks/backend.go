@@ -1011,10 +1011,10 @@ func (mr *MockBackendMockRecorder) IngestPackage(ctx, pkg interface{}) *gomock.C
 }
 
 // IngestPackageID mocks base method.
-func (m *MockBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec) (string, error) {
+func (m *MockBackend) IngestPackageID(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestPackageID", ctx, pkg)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(*model.PackageIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1026,10 +1026,10 @@ func (mr *MockBackendMockRecorder) IngestPackageID(ctx, pkg interface{}) *gomock
 }
 
 // IngestPackageIDs mocks base method.
-func (m *MockBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInputSpec) ([]string, error) {
+func (m *MockBackend) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestPackageIDs", ctx, pkgs)
-	ret0, _ := ret[0].([]string)
+	ret0, _ := ret[0].([]*model.PackageIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1281,10 +1281,10 @@ func (mr *MockBackendMockRecorder) IngestSource(ctx, source interface{}) *gomock
 }
 
 // IngestSourceID mocks base method.
-func (m *MockBackend) IngestSourceID(ctx context.Context, source model.SourceInputSpec) (string, error) {
+func (m *MockBackend) IngestSourceID(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestSourceID", ctx, source)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(*model.SourceIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1296,10 +1296,10 @@ func (mr *MockBackendMockRecorder) IngestSourceID(ctx, source interface{}) *gomo
 }
 
 // IngestSourceIDs mocks base method.
-func (m *MockBackend) IngestSourceIDs(ctx context.Context, sources []*model.SourceInputSpec) ([]string, error) {
+func (m *MockBackend) IngestSourceIDs(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestSourceIDs", ctx, sources)
-	ret0, _ := ret[0].([]string)
+	ret0, _ := ret[0].([]*model.SourceIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1446,10 +1446,10 @@ func (mr *MockBackendMockRecorder) IngestVulnerability(ctx, vuln interface{}) *g
 }
 
 // IngestVulnerabilityID mocks base method.
-func (m *MockBackend) IngestVulnerabilityID(ctx context.Context, vuln model.VulnerabilityInputSpec) (string, error) {
+func (m *MockBackend) IngestVulnerabilityID(ctx context.Context, vuln model.VulnerabilityInputSpec) (*model.VulnerabilityIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestVulnerabilityID", ctx, vuln)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(*model.VulnerabilityIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1461,10 +1461,10 @@ func (mr *MockBackendMockRecorder) IngestVulnerabilityID(ctx, vuln interface{}) 
 }
 
 // IngestVulnerabilityIDs mocks base method.
-func (m *MockBackend) IngestVulnerabilityIDs(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]string, error) {
+func (m *MockBackend) IngestVulnerabilityIDs(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]*model.VulnerabilityIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestVulnerabilityIDs", ctx, vulns)
-	ret0, _ := ret[0].([]string)
+	ret0, _ := ret[0].([]*model.VulnerabilityIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

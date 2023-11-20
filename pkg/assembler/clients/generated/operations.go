@@ -8228,7 +8228,7 @@ func (v *IngestPkgEqualsResponse) GetIngestPkgEquals() []string { return v.Inges
 // IngestSourceIngestSourceSourceIDs includes the requested fields of the GraphQL type SourceIDs.
 // The GraphQL type's documentation follows.
 //
-// The IDs of the ingested pacsourcekage
+// The IDs of the ingested source
 type IngestSourceIngestSourceSourceIDs struct {
 	SourceTypeID      string `json:"sourceTypeID"`
 	SourceNamespaceID string `json:"sourceNamespaceID"`
@@ -8258,7 +8258,7 @@ func (v *IngestSourceResponse) GetIngestSource() IngestSourceIngestSourceSourceI
 // IngestSourcesIngestSourcesSourceIDs includes the requested fields of the GraphQL type SourceIDs.
 // The GraphQL type's documentation follows.
 //
-// The IDs of the ingested pacsourcekage
+// The IDs of the ingested source
 type IngestSourcesIngestSourcesSourceIDs struct {
 	SourceTypeID      string `json:"sourceTypeID"`
 	SourceNamespaceID string `json:"sourceNamespaceID"`
@@ -8305,25 +8305,65 @@ type IngestVulnEqualsResponse struct {
 // GetIngestVulnEquals returns IngestVulnEqualsResponse.IngestVulnEquals, and is useful for accessing the field via an interface.
 func (v *IngestVulnEqualsResponse) GetIngestVulnEquals() []string { return v.IngestVulnEquals }
 
+// IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs includes the requested fields of the GraphQL type VulnerabilityIDs.
+// The GraphQL type's documentation follows.
+//
+// The IDs of the ingested vulnerability
+type IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs struct {
+	VulnerabilityTypeID string `json:"vulnerabilityTypeID"`
+	VulnerabilityNodeID string `json:"vulnerabilityNodeID"`
+}
+
+// GetVulnerabilityTypeID returns IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs.VulnerabilityTypeID, and is useful for accessing the field via an interface.
+func (v *IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs) GetVulnerabilityTypeID() string {
+	return v.VulnerabilityTypeID
+}
+
+// GetVulnerabilityNodeID returns IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs.VulnerabilityNodeID, and is useful for accessing the field via an interface.
+func (v *IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs) GetVulnerabilityNodeID() string {
+	return v.VulnerabilityNodeID
+}
+
 // IngestVulnerabilitiesResponse is returned by IngestVulnerabilities on success.
 type IngestVulnerabilitiesResponse struct {
 	// Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs can be a an array of empty string.
-	IngestVulnerabilities []string `json:"ingestVulnerabilities"`
+	IngestVulnerabilities []IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs `json:"ingestVulnerabilities"`
 }
 
 // GetIngestVulnerabilities returns IngestVulnerabilitiesResponse.IngestVulnerabilities, and is useful for accessing the field via an interface.
-func (v *IngestVulnerabilitiesResponse) GetIngestVulnerabilities() []string {
+func (v *IngestVulnerabilitiesResponse) GetIngestVulnerabilities() []IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs {
 	return v.IngestVulnerabilities
+}
+
+// IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs includes the requested fields of the GraphQL type VulnerabilityIDs.
+// The GraphQL type's documentation follows.
+//
+// The IDs of the ingested vulnerability
+type IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs struct {
+	VulnerabilityTypeID string `json:"vulnerabilityTypeID"`
+	VulnerabilityNodeID string `json:"vulnerabilityNodeID"`
+}
+
+// GetVulnerabilityTypeID returns IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs.VulnerabilityTypeID, and is useful for accessing the field via an interface.
+func (v *IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs) GetVulnerabilityTypeID() string {
+	return v.VulnerabilityTypeID
+}
+
+// GetVulnerabilityNodeID returns IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs.VulnerabilityNodeID, and is useful for accessing the field via an interface.
+func (v *IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs) GetVulnerabilityNodeID() string {
+	return v.VulnerabilityNodeID
 }
 
 // IngestVulnerabilityResponse is returned by IngestVulnerability on success.
 type IngestVulnerabilityResponse struct {
 	// Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string.
-	IngestVulnerability string `json:"ingestVulnerability"`
+	IngestVulnerability IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs `json:"ingestVulnerability"`
 }
 
 // GetIngestVulnerability returns IngestVulnerabilityResponse.IngestVulnerability, and is useful for accessing the field via an interface.
-func (v *IngestVulnerabilityResponse) GetIngestVulnerability() string { return v.IngestVulnerability }
+func (v *IngestVulnerabilityResponse) GetIngestVulnerability() IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs {
+	return v.IngestVulnerability
+}
 
 // IsDependenciesResponse is returned by IsDependencies on success.
 type IsDependenciesResponse struct {
@@ -25197,7 +25237,10 @@ func IngestVulnEquals(
 // The query or mutation executed by IngestVulnerabilities.
 const IngestVulnerabilities_Operation = `
 mutation IngestVulnerabilities ($vulns: [VulnerabilityInputSpec!]!) {
-	ingestVulnerabilities(vulns: $vulns)
+	ingestVulnerabilities(vulns: $vulns) {
+		vulnerabilityTypeID
+		vulnerabilityNodeID
+	}
 }
 `
 
@@ -25230,7 +25273,10 @@ func IngestVulnerabilities(
 // The query or mutation executed by IngestVulnerability.
 const IngestVulnerability_Operation = `
 mutation IngestVulnerability ($vuln: VulnerabilityInputSpec!) {
-	ingestVulnerability(vuln: $vuln)
+	ingestVulnerability(vuln: $vuln) {
+		vulnerabilityTypeID
+		vulnerabilityNodeID
+	}
 }
 `
 

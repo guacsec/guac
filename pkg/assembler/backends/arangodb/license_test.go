@@ -68,6 +68,13 @@ func Test_Licenses(t *testing.T) {
 			Exp:     []*model.License{testdata.L1out, testdata.L2out},
 		},
 		{
+			Name:       "Query by ID",
+			Ingests:    []*model.LicenseInputSpec{testdata.L2, testdata.L3, testdata.L4},
+			IDInFilter: 2,
+			Query:      &model.LicenseSpec{},
+			Exp:        []*model.License{testdata.L3out},
+		},
+		{
 			Name:    "Query by Name",
 			Ingests: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L3, testdata.L4},
 			Query: &model.LicenseSpec{
@@ -90,13 +97,6 @@ func Test_Licenses(t *testing.T) {
 			Exp: []*model.License{testdata.L3out},
 		},
 		{
-			Name:       "Query by ID",
-			Ingests:    []*model.LicenseInputSpec{testdata.L2, testdata.L3, testdata.L4},
-			IDInFilter: 2,
-			Query:      &model.LicenseSpec{},
-			Exp:        []*model.License{testdata.L3out},
-		},
-		{
 			Name: "Query None",
 			Query: &model.LicenseSpec{
 				ListVersion: ptrfrom.String("foo"),
@@ -114,21 +114,21 @@ func Test_Licenses(t *testing.T) {
 				t.Fatalf("error creating arango backend: %v", err)
 			}
 			for i, ingest := range tt.Ingests {
-				ingestedLicense, err := c.IngestLicense(ctx, ingest)
+				ingestedLicenseID, err := c.IngestLicenseID(ctx, ingest)
 				if (err != nil) != tt.ExpIngestErr {
-					t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.ExpIngestErr)
+					t.Errorf("arangoClient.IngestLicenseID() error = %v, wantErr %v", err, tt.ExpIngestErr)
 					return
 				}
 				if err != nil {
 					return
 				}
 				if (i + 1) == tt.IDInFilter {
-					tt.Query.ID = &ingestedLicense.ID
+					tt.Query.ID = ptrfrom.String(ingestedLicenseID)
 				}
 			}
 			got, err := c.Licenses(ctx, tt.Query)
 			if (err != nil) != tt.ExpQueryErr {
-				t.Errorf("demoClient.Licenses() error = %v, wantErr %v", err, tt.ExpQueryErr)
+				t.Errorf("arangoClient.Licenses() error = %v, wantErr %v", err, tt.ExpQueryErr)
 				return
 			}
 			if err != nil {
@@ -196,9 +196,9 @@ func Test_LicensesBulk(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error creating arango backend: %v", err)
 			}
-			_, err = c.IngestLicenses(ctx, tt.Ingests)
+			_, err = c.IngestLicenseIDs(ctx, tt.Ingests)
 			if (err != nil) != tt.ExpIngestErr {
-				t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.ExpIngestErr)
+				t.Errorf("arangoClient.IngestLicenseIDs() error = %v, wantErr %v", err, tt.ExpIngestErr)
 				return
 			}
 			if err != nil {
@@ -206,7 +206,7 @@ func Test_LicensesBulk(t *testing.T) {
 			}
 			got, err := c.Licenses(ctx, tt.Query)
 			if (err != nil) != tt.ExpQueryErr {
-				t.Errorf("demoClient.Licenses() error = %v, wantErr %v", err, tt.ExpQueryErr)
+				t.Errorf("arangoClient.Licenses() error = %v, wantErr %v", err, tt.ExpQueryErr)
 				return
 			}
 			if err != nil {
@@ -267,17 +267,17 @@ func Test_getLicenseByID(t *testing.T) {
 				t.Fatalf("error creating arango backend: %v", err)
 			}
 			for _, ingest := range tt.Ingests {
-				ingestedLicense, err := c.IngestLicense(ctx, ingest)
+				ingestedLicenseID, err := c.IngestLicenseID(ctx, ingest)
 				if (err != nil) != tt.ExpIngestErr {
-					t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.ExpIngestErr)
+					t.Errorf("arangoClient.IngestLicenseID() error = %v, wantErr %v", err, tt.ExpIngestErr)
 					return
 				}
 				if err != nil {
 					return
 				}
-				got, err := c.(*arangoClient).getLicenseByID(ctx, ingestedLicense.ID)
+				got, err := c.(*arangoClient).getLicenseByID(ctx, ingestedLicenseID)
 				if (err != nil) != tt.ExpQueryErr {
-					t.Errorf("demoClient.Licenses() error = %v, wantErr %v", err, tt.ExpQueryErr)
+					t.Errorf("arangoClient.Licenses() error = %v, wantErr %v", err, tt.ExpQueryErr)
 					return
 				}
 				if err != nil {

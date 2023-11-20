@@ -856,17 +856,17 @@ func TestVEX(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %a", err)
 				}
 			}
 			for _, v := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *v); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *v); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %v", err)
 				}
 			}
@@ -1285,15 +1285,15 @@ func TestVEXBulkIngest(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest package: %v", err)
 			}
 
-			if _, err := b.IngestArtifacts(ctx, test.InArt); err != nil {
+			if _, err := b.IngestArtifactIDs(ctx, test.InArt); err != nil {
 				t.Fatalf("Could not ingest artifact: %a", err)
 			}
 
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerability: %v", err)
 			}
 			for _, o := range test.Calls {
@@ -1511,17 +1511,17 @@ func Test_buildCertifyVexByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %a", err)
 				}
 			}
 			for _, v := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *v); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *v); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %v", err)
 				}
 			}
@@ -1548,119 +1548,3 @@ func Test_buildCertifyVexByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestVEXNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Sub  model.PackageOrArtifactInput
-// 		Vuln *model.VulnerabilityInputSpec
-// 		In   *model.VexStatementInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		InArt        []*model.ArtifactInputSpec
-// 		InVuln       []*model.VulnerabilityInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:   "HappyPath",
-// 			InPkg:  []*model.PkgInputSpec{testdata.P1},
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-// 			Calls: []call{
-// 				call{
-// 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Vuln: testdata.O1,
-// 					In: &model.VexStatementInputSpec{
-// 						VexJustification: "test justification",
-// 						KnownSince:       time.Unix(1e9, 0),
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "7"}, // pkg version -> pkg name, vex
-// 				"6": []string{"5", "7"}, // vuln -> vuln type, vex
-// 				"7": []string{"1", "5"}, // Vex -> pkg version, vuln
-// 			},
-// 		},
-// 		{
-// 			Name:   "Two vex on same package",
-// 			InPkg:  []*model.PkgInputSpec{testdata.P1},
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2},
-// 			Calls: []call{
-// 				{
-// 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Vuln: testdata.O1,
-// 					In: &model.VexStatementInputSpec{
-// 						VexJustification: "test justification",
-// 						KnownSince:       time.Unix(1e9, 0),
-// 					},
-// 				},
-// 				{
-// 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Vuln: testdata.O2,
-// 					In: &model.VexStatementInputSpec{
-// 						VexJustification: "test justification",
-// 						KnownSince:       time.Unix(1e9, 0),
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "8", "9"}, // pkg version -> pkg name, vex1, vex2
-// 				"6": []string{"5", "8"},      // Vuln1 -> vulnType, vex1
-// 				"7": []string{"5", "9"},      // Vuln2 -> vulnType, vex2
-// 				"8": []string{"1", "5"},      // Vex1 -> pkg version, vuln1
-// 				"9": []string{"1", "5"},      // Vex2 -> pkg version, vuln2
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
-// 					t.Fatalf("Could not ingest package: %v", err)
-// 				}
-// 			}
-// 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
-// 					t.Fatalf("Could not ingest artifact: %a", err)
-// 				}
-// 			}
-// 			for _, v := range test.InVuln {
-// 				if _, err := b.IngestVulnerability(ctx, *v); err != nil {
-// 					t.Fatalf("Could not ingest vulnerability: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In); err != nil {
-// 					t.Fatalf("Could not ingest VEXStatement")
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

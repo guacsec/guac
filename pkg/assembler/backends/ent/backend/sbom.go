@@ -164,7 +164,8 @@ func (b *EntBackend) IngestHasSBOMIDs(ctx context.Context, subjects model.Packag
 		} else {
 			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
 		}
-		modelHasSbom, err := b.IngestHasSbomID(ctx, subject, *hasSbom, *includes[i])
+		// TODO(knrc) - handle includes
+		modelHasSbom, err := b.IngestHasSbomID(ctx, subject, *hasSbom, model.HasSBOMIncludesInputSpec{})
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
 		}

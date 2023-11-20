@@ -987,14 +987,14 @@ func TestIngestVulnMetadata(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				ingestedVuln, err := b.IngestVulnerability(ctx, *g)
+				ingestedVuln, err := b.IngestVulnerabilityID(ctx, *g)
 				if err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 				if test.QueryVulnID {
 					test.Query = &model.VulnerabilityMetadataSpec{
 						Vulnerability: &model.VulnerabilitySpec{
-							ID: ptrfrom.String(ingestedVuln.VulnerabilityIDs[0].ID),
+							ID: ptrfrom.String(ingestedVuln.VulnerabilityNodeID),
 						},
 					}
 				}
@@ -1307,7 +1307,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerabilities: %a", err)
 			}
 			for _, o := range test.Calls {
@@ -1459,7 +1459,7 @@ func Test_buildVulnerabilityMetadataByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				_, err := b.IngestVulnerability(ctx, *g)
+				_, err := b.IngestVulnerabilityID(ctx, *g)
 				if err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
@@ -1487,101 +1487,3 @@ func Test_buildVulnerabilityMetadataByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestVulnMetadataNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Vuln         *model.VulnerabilityInputSpec
-// 		VulnMetadata *model.VulnerabilityMetadataInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InVuln       []*model.VulnerabilityInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:   "HappyPath",
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-// 			Calls: []call{
-// 				call{
-// 					Vuln: testdata.O1,
-// 					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
-// 						ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
-// 						ScoreValue: 7.9,
-// 						Timestamp:  testdata.T1,
-// 						Collector:  "test collector",
-// 						Origin:     "test origin",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"2": []string{"1", "3"}, // Vuln -> vunType, vulnMeta1
-// 				"3": []string{"1"},      // vulnMeta1 -> vuln
-// 			},
-// 		},
-// 		{
-// 			Name:   "Two vuln metadata on same vulnerability",
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-// 			Calls: []call{
-// 				call{
-// 					Vuln: testdata.O1,
-// 					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
-// 						ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
-// 						ScoreValue: 7.9,
-// 						Timestamp:  testdata.T1,
-// 						Collector:  "test collector",
-// 						Origin:     "test origin",
-// 					},
-// 				},
-// 				call{
-// 					Vuln: testdata.O1,
-// 					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
-// 						ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
-// 						ScoreValue: 8.9,
-// 						Timestamp:  testdata.T1,
-// 						Collector:  "test collector",
-// 						Origin:     "test origin",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"2": []string{"1", "3", "4"}, // Vuln1 -> vunType, vulnMeta1
-// 				"3": []string{"1"},           // vulnMeta1 -> vuln1
-// 				"4": []string{"1"},           // vulnMeta2 -> vuln2
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, o := range test.InVuln {
-// 				if _, err := b.IngestVulnerability(ctx, *o); err != nil {
-// 					t.Fatalf("Could not ingest osv: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestVulnerabilityMetadata(ctx, *o.Vuln, *o.VulnMetadata); err != nil {
-// 					t.Fatalf("Could not ingest certifyVuln")
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

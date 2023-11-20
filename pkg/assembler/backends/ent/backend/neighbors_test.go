@@ -77,7 +77,7 @@ func (s *Suite) TestNode() {
 				if id, err := b.IngestPackageID(ctx, *inP); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				} else {
-					ids = append(ids, id)
+					ids = append(ids, id.PackageVersionID)
 				}
 			}
 
@@ -85,7 +85,7 @@ func (s *Suite) TestNode() {
 				if id, err := b.IngestSourceID(ctx, *inSrc); err != nil {
 					s.T().Fatalf("Could not ingest source: %v", err)
 				} else {
-					ids = append(ids, id)
+					ids = append(ids, id.SourceNameID)
 				}
 			}
 
@@ -113,25 +113,26 @@ func (s *Suite) TestNodes() {
 		be, err := GetBackend(s.Client)
 		s.Require().NoError(err)
 
-	v, err := be.IngestArtifactID(s.Ctx, a1)
-	s.Require().NoError(err)
+		v, err := be.IngestArtifactID(s.Ctx, a1)
+		s.Require().NoError(err)
 
-	id, err := be.IngestPackageID(s.Ctx, *p4)
-	s.Require().NoError(err)
+		id, err := be.IngestPackageID(s.Ctx, *p4)
+		s.Require().NoError(err)
 
-	pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
-	s.Require().NoError(err)
-	p := pkgs[0]
+		pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
+		s.Require().NoError(err)
+		p := pkgs[0]
 
-	nodes, err := be.Nodes(s.Ctx, []string{v, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
-	s.Require().NoError(err)
-	if diff := cmp.Diff(a1out, nodes[0], ignoreID, ignoreEmptySlices); diff != "" {
-		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
-	}
-	if diff := cmp.Diff(p4outNamespace, nodes[1], ignoreID, ignoreEmptySlices); diff != "" {
-		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
-	}
-	if diff := cmp.Diff(p4out, nodes[2], ignoreID, ignoreEmptySlices); diff != "" {
-		s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
-	}
+		nodes, err := be.Nodes(s.Ctx, []string{v, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
+		s.Require().NoError(err)
+		if diff := cmp.Diff(a1out, nodes[0], ignoreID, ignoreEmptySlices); diff != "" {
+			s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+		}
+		if diff := cmp.Diff(p4outNamespace, nodes[1], ignoreID, ignoreEmptySlices); diff != "" {
+			s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+		}
+		if diff := cmp.Diff(p4out, nodes[2], ignoreID, ignoreEmptySlices); diff != "" {
+			s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
+		}
+	})
 }
