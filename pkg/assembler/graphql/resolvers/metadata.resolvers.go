@@ -19,11 +19,7 @@ func (r *mutationResolver) IngestHasMetadata(ctx context.Context, subject model.
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 
-	ingestedHasMetadata, err := r.Backend.IngestHasMetadata(ctx, subject, &pkgMatchType, hasMetadata)
-	if err != nil {
-		return "", err
-	}
-	return ingestedHasMetadata.ID, err
+	return r.Backend.IngestHasMetadataID(ctx, subject, &pkgMatchType, hasMetadata)
 }
 
 // IngestBulkHasMetadata is the resolver for the ingestBulkHasMetadata field.

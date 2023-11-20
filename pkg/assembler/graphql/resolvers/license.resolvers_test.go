@@ -125,8 +125,8 @@ func TestIngestLicense(t *testing.T) {
 			}
 			b.
 				EXPECT().
-				IngestLicense(ctx, test.Call).
-				Return(&model.License{ID: "a"}, nil).
+				IngestLicenseID(ctx, test.Call).
+				Return("", nil).
 				Times(times)
 			_, err := r.Mutation().IngestLicense(ctx, test.Call)
 			if (err != nil) != test.ExpIngestErr {
@@ -191,8 +191,8 @@ func TestIngestBulkLicense(t *testing.T) {
 			}
 			b.
 				EXPECT().
-				IngestLicenses(ctx, test.Call).
-				Return([]*model.License{}, nil).
+				IngestLicenseIDs(ctx, test.Call).
+				Return(nil, nil).
 				Times(times)
 			_, err := r.Mutation().IngestLicenses(ctx, test.Call)
 			if (err != nil) != test.ExpIngestErr {

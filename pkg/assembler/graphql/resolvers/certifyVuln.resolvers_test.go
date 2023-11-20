@@ -122,7 +122,7 @@ func TestIngestCertifyVulns(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestCertifyVulns(ctx, o.Pkgs, gomock.Any(), o.CertifyVulns).
+					IngestCertifyVulnIDs(ctx, o.Pkgs, gomock.Any(), o.CertifyVulns).
 					//Return([]*model.CertifyScorecard{testdata.SC1out}, nil).
 					Times(times)
 				_, err := r.Mutation().IngestCertifyVulns(ctx, o.Pkgs, o.Vulns, o.CertifyVulns)
