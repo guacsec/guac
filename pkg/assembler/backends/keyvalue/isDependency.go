@@ -64,12 +64,12 @@ func (n *isDependencyLink) BuildModelNode(ctx context.Context, c *demoClient) (m
 
 // Ingest IngestDependencies
 
-func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+func (c *demoClient) IngestDependencyIDs(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO(LUMJJB): match flags
 
-	var modelIsDependencies []*model.IsDependency
+	var modelIsDependencies []string
 	for i := range dependencies {
-		isDependency, err := c.IngestDependency(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
+		isDependency, err := c.IngestDependencyID(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestDependency failed with err: %v", err)
 		}
@@ -79,11 +79,11 @@ func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgIn
 }
 
 // Ingest IsDependency
-func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+func (c *demoClient) IngestDependencyID(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 	return c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, true)
 }
 
-func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec, readOnly bool) (*model.IsDependency, error) {
+func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestDependency"
 
 	inLink := &isDependencyLink{
@@ -102,22 +102,22 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgI
 	// the attestation relates to
 	foundPkgVersion, err := c.getPackageVerFromInput(ctx, packageArg)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	inLink.PackageID = foundPkgVersion.ThisID
 
 	depPkg, err := c.getPackageNameOrVerFromInput(ctx, dependentPackageArg, depPkgMatchType)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	inLink.DepPackageID = depPkg.ID()
 
 	outLink, err := byKeykv[*isDependencyLink](ctx, isDepCol, inLink.Key(), c)
 	if err == nil {
-		return c.buildIsDependency(ctx, outLink, nil, true)
+		return outLink.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -129,20 +129,20 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgI
 
 	inLink.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, isDepCol, inLink); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := foundPkgVersion.setIsDependencyLinks(ctx, inLink.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := depPkg.setIsDependencyLinks(ctx, inLink.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := setkv(ctx, isDepCol, inLink, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	outLink = inLink
 
-	return c.buildIsDependency(ctx, outLink, nil, true)
+	return outLink.ThisID, nil
 }
 
 // Query IsDependency

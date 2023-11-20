@@ -88,21 +88,21 @@ func (n *hasSBOMStruct) BuildModelNode(ctx context.Context, c *demoClient) (mode
 
 // Ingest HasSBOM
 
-func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]*model.HasSbom, error) {
-	var modelHasSboms []*model.HasSbom
+func (c *demoClient) IngestHasSBOMIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
+	var modelHasSboms []string
 
 	for i := range hasSBOMs {
-		var hasSBOM *model.HasSbom
+		var hasSBOM string
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrArtifactInput{Package: subjects.Packages[i]}
-			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i], *includes[i])
+			hasSBOM, err = c.IngestHasSbomID(ctx, subject, *hasSBOMs[i], *includes[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i], *includes[i])
+			hasSBOM, err = c.IngestHasSbomID(ctx, subject, *hasSBOMs[i], *includes[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
 			}
@@ -112,26 +112,26 @@ func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 	return modelHasSboms, nil
 }
 
-func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (*model.HasSbom, error) {
+func (c *demoClient) IngestHasSbomID(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
 
 	c.m.RLock()
 	for _, id := range includes.Software {
 		if err := c.validateSoftwareId(ctx, funcName, id); err != nil {
 			c.m.RUnlock()
-			return nil, err
+			return "", err
 		}
 	}
 	for _, id := range includes.Dependencies {
 		if _, err := byIDkv[*isDependencyLink](ctx, id, c); err != nil {
 			c.m.RUnlock()
-			return nil, gqlerror.Errorf("%v :: dependency id %v is not an ingested isDependency", funcName, id)
+			return "", gqlerror.Errorf("%v :: dependency id %v is not an ingested isDependency", funcName, id)
 		}
 	}
 	for _, id := range includes.Occurrences {
 		if _, err := byIDkv[*isOccurrenceStruct](ctx, id, c); err != nil {
 			c.m.RUnlock()
-			return nil, gqlerror.Errorf("%v :: occurrence id %v is not an ingested isOccurrence", funcName, id)
+			return "", gqlerror.Errorf("%v :: occurrence id %v is not an ingested isOccurrence", funcName, id)
 		}
 	}
 	c.m.RUnlock()
@@ -151,7 +151,7 @@ func (c *demoClient) validateSoftwareId(ctx context.Context, funcName string, id
 	return nil
 }
 
-func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec, includedSoftware, includedDependencies, includedOccurrences []string, readOnly bool) (*model.HasSbom, error) {
+func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec, includedSoftware, includedDependencies, includedOccurrences []string, readOnly bool) (string, error) {
 	funcName := "IngestHasSbom"
 	algorithm := strings.ToLower(input.Algorithm)
 	digest := strings.ToLower(input.Digest)
@@ -179,24 +179,24 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 		var err error
 		pkg, err = c.getPackageVerFromInput(ctx, *subject.Package)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.Pkg = pkg.ThisID
 	} else {
 		var err error
 		art, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.Artifact = art.ThisID
 	}
 
 	out, err := byKeykv[*hasSBOMStruct](ctx, hasSBOMCol, in.Key(), c)
 	if err == nil {
-		return c.convHasSBOM(ctx, out)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -209,24 +209,24 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 	in.ThisID = c.getNextID()
 
 	if err := c.addToIndex(ctx, hasSBOMCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if pkg != nil {
 		if err := pkg.setHasSBOM(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	} else {
 		if err := art.setHasSBOMs(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 
 	if err := setkv(ctx, hasSBOMCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.convHasSBOM(ctx, in)
+	return in.ThisID, nil
 }
 
 func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model.HasSbom, error) {

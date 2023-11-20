@@ -438,12 +438,12 @@ func TestVulnEqual(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
+				_, err := b.IngestVulnEqualID(ctx, *o.Vuln, *o.OtherVuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -618,7 +618,7 @@ func TestIngestVulnEquals(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerability: %a", err)
 			}
 			for _, o := range test.Calls {
@@ -711,12 +711,12 @@ func TestVulnerabilityEqualNeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %s", err)
 				}
 			}
 			for _, o := range test.Calls {
-				if _, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In); err != nil {
+				if _, err := b.IngestVulnEqualID(ctx, *o.Vuln, *o.OtherVuln, *o.In); err != nil {
 					t.Fatalf("Could not ingest vuln Equal: %s", err)
 				}
 			}

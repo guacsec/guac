@@ -549,12 +549,12 @@ func TestIsDependency(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
+				if _, err := b.IngestPackageID(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
+				_, err := b.IngestDependencyID(ctx, *o.P1, *o.P2, o.MF, *o.ID)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -589,43 +589,29 @@ func TestIsDependencies(t *testing.T) {
 		Name         string
 		InPkg        []*model.PkgInputSpec
 		Calls        []call
-		ExpID        []*model.IsDependency
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
 		{
 			Name:  "HappyPath",
 			InPkg: []*model.PkgInputSpec{p1, p2, p3, p4},
-			Calls: []call{{
-				P1s: []*model.PkgInputSpec{p1, p2},
-				P2s: []*model.PkgInputSpec{p2, p4},
-				MF:  mAll,
-				IDs: []*model.IsDependencyInputSpec{
-					{
-						Justification: "test justification",
-					},
-					{
-						Justification: "test justification",
-					},
-				},
-			}},
-			ExpID: []*model.IsDependency{
+			Calls: []call{
 				{
-					Package:           p1out,
-					DependencyPackage: p2outName,
-					Justification:     "test justification",
-				},
-				{
-					Package:           p2out,
-					DependencyPackage: p4outName,
-					Justification:     "test justification",
+					P1s: []*model.PkgInputSpec{p1, p2},
+					P2s: []*model.PkgInputSpec{p2, p4},
+					MF:  mAll,
+					IDs: []*model.IsDependencyInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
 				},
 			},
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
@@ -635,20 +621,14 @@ func TestIsDependencies(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
+				if _, err := b.IngestPackageID(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				got, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
+				_, err := b.IngestDependencyIDs(ctx, o.P1s, o.P2s, o.MF, o.IDs)
 				if (err != nil) != test.ExpIngestErr {
-					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
-				}
-				if err != nil {
-					return
-				}
-				if diff := cmp.Diff(test.ExpID, got, ignoreID); diff != "" {
-					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+					t.Errorf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 			}
 		})
@@ -726,12 +706,12 @@ func TestIsDependencyNeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
+				if _, err := b.IngestPackageID(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				if _, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID); err != nil {
+				if _, err := b.IngestDependencyID(ctx, *o.P1, *o.P2, o.MF, *o.ID); err != nil {
 					t.Fatalf("Could not ingest IsDependency: %v", err)
 				}
 			}
