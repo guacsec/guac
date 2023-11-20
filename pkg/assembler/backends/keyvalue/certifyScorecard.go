@@ -69,10 +69,10 @@ func (n *scorecardLink) BuildModelNode(ctx context.Context, c *demoClient) (mode
 
 // Ingest Scorecards
 
-func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
-	var modelCertifyScorecards []*model.CertifyScorecard
+func (c *demoClient) IngestScorecardIDs(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+	var modelCertifyScorecards []string
 	for i := range scorecards {
-		scorecard, err := c.IngestScorecard(ctx, *sources[i], *scorecards[i])
+		scorecard, err := c.IngestScorecardID(ctx, *sources[i], *scorecards[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestScorecard failed with err: %v", err)
 		}
@@ -82,11 +82,11 @@ func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.Sour
 }
 
 // Ingest CertifyScorecard
-func (c *demoClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
+func (c *demoClient) IngestScorecardID(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
 	return c.certifyScorecard(ctx, source, scorecard, true)
 }
 
-func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec, readOnly bool) (*model.CertifyScorecard, error) {
+func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec, readOnly bool) (string, error) {
 	funcName := "CertifyScorecard"
 
 	checksMap := getChecksFromInput(scorecard.Checks)
@@ -105,16 +105,16 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceIn
 
 	srcName, err := c.getSourceNameFromInput(ctx, source)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	in.SourceID = srcName.ThisID
 
 	out, err := byKeykv[*scorecardLink](ctx, cscCol, in.Key(), c)
 	if err == nil {
-		return c.buildScorecard(ctx, out, nil, true)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -126,16 +126,16 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceIn
 
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, cscCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := srcName.setScorecardLinks(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := setkv(ctx, cscCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.buildScorecard(ctx, in, nil, true)
+	return in.ThisID, nil
 }
 
 // Query CertifyScorecard

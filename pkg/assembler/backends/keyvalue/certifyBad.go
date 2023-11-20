@@ -74,27 +74,27 @@ func (n *badLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Node
 }
 
 // Ingest CertifyBad
-func (c *demoClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
-	var modelCertifyBads []*model.CertifyBad
+func (c *demoClient) IngestCertifyBadIDs(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
+	var modelCertifyBads []string
 
 	for i := range certifyBads {
-		var certifyBad *model.CertifyBad
+		var certifyBad string
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
-			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
+			certifyBad, err = c.IngestCertifyBadID(ctx, subject, pkgMatchType, *certifyBads[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyBad failed with err: %v", err)
 			}
 		} else if len(subjects.Sources) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
-			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
+			certifyBad, err = c.IngestCertifyBadID(ctx, subject, pkgMatchType, *certifyBads[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyBad failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
+			certifyBad, err = c.IngestCertifyBadID(ctx, subject, pkgMatchType, *certifyBads[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyBad failed with err: %v", err)
 			}
@@ -104,10 +104,10 @@ func (c *demoClient) IngestCertifyBads(ctx context.Context, subjects model.Packa
 	return modelCertifyBads, nil
 }
 
-func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
+func (c *demoClient) IngestCertifyBadID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error) {
 	return c.ingestCertifyBad(ctx, subject, pkgMatchType, certifyBad, true)
 }
-func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec, readOnly bool) (*model.CertifyBad, error) {
+func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestCertifyBad"
 
 	in := &badLink{
@@ -128,31 +128,31 @@ func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.Package
 		var err error
 		foundPkgNameorVersionNode, err = c.getPackageNameOrVerFromInput(ctx, *subject.Package, *pkgMatchType)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.PackageID = foundPkgNameorVersionNode.ID()
 	} else if subject.Artifact != nil {
 		var err error
 		foundArtStruct, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.ArtifactID = foundArtStruct.ThisID
 	} else {
 		var err error
 		foundSrcName, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.SourceID = foundSrcName.ThisID
 	}
 
 	out, err := byKeykv[*badLink](ctx, cbCol, in.Key(), c)
 	if err == nil {
-		return c.buildCertifyBad(ctx, out, nil, true)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -164,26 +164,26 @@ func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.Package
 	in.ThisID = c.getNextID()
 
 	if err := c.addToIndex(ctx, cbCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	if foundPkgNameorVersionNode != nil {
 		if err := foundPkgNameorVersionNode.setCertifyBadLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	} else if foundArtStruct != nil {
 		if err := foundArtStruct.setCertifyBadLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	} else {
 		if err := foundSrcName.setCertifyBadLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if err := setkv(ctx, cbCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.buildCertifyBad(ctx, in, nil, true)
+	return in.ThisID, nil
 }
 
 // Query CertifyBad

@@ -796,7 +796,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
@@ -1095,7 +1095,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerabilities: %a", err)
 			}
 			for _, o := range test.Calls {
@@ -1195,7 +1195,7 @@ func TestVulnMetadataNeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, o := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *o); err != nil {
+				if _, err := b.IngestVulnerabilityID(ctx, *o); err != nil {
 					t.Fatalf("Could not ingest osv: %v", err)
 				}
 			}
