@@ -106,8 +106,8 @@ func TestIngestDependencies(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs).
-					Return([]*model.IsDependency{{ID: "a"}}, nil).
+					IngestDependencyIDs(ctx, o.P1s, o.P2s, o.MF, o.IDs).
+					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
 				if (err != nil) != test.ExpIngestErr {

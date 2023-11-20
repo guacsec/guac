@@ -19,11 +19,7 @@ func (r *mutationResolver) IngestCertifyLegal(ctx context.Context, subject model
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 
-	cl, err := r.Backend.IngestCertifyLegal(ctx, subject, declaredLicenses, discoveredLicenses, &certifyLegal)
-	if err != nil {
-		return "", err
-	}
-	return cl.ID, nil
+	return r.Backend.IngestCertifyLegalID(ctx, subject, declaredLicenses, discoveredLicenses, &certifyLegal)
 }
 
 // IngestCertifyLegals is the resolver for the ingestCertifyLegals field.
@@ -49,15 +45,7 @@ func (r *mutationResolver) IngestCertifyLegals(ctx context.Context, subjects mod
 	if valuesDefined != 1 {
 		return nil, gqlerror.Errorf("%v :: must specify at most packages or sources", funcName)
 	}
-	cls, err := r.Backend.IngestCertifyLegals(ctx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
-	if err != nil {
-		return nil, err
-	}
-	var ids []string
-	for _, cl := range cls {
-		ids = append(ids, cl.ID)
-	}
-	return ids, nil
+	return r.Backend.IngestCertifyLegalIDs(ctx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
 }
 
 // CertifyLegal is the resolver for the CertifyLegal field.

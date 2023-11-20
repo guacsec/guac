@@ -77,8 +77,8 @@ func TestIngestCertifyLegal(t *testing.T) {
 			}
 			b.
 				EXPECT().
-				IngestCertifyLegal(ctx, test.Call.Sub, test.Call.Dec, test.Call.Dis, test.Call.CL).
-				Return(&model.CertifyLegal{ID: "123"}, nil).
+				IngestCertifyLegalID(ctx, test.Call.Sub, test.Call.Dec, test.Call.Dis, test.Call.CL).
+				Return("", nil).
 				Times(times)
 			_, err := r.Mutation().IngestCertifyLegal(ctx, test.Call.Sub, test.Call.Dec, test.Call.Dis, *test.Call.CL)
 			if (err != nil) != test.ExpIngestErr {
@@ -223,7 +223,7 @@ func TestIngestCertifyLegals(t *testing.T) {
 			}
 			b.
 				EXPECT().
-				IngestCertifyLegals(ctx, test.Call.Sub, test.Call.Dec, test.Call.Dis, test.Call.CL).
+				IngestCertifyLegalIDs(ctx, test.Call.Sub, test.Call.Dec, test.Call.Dis, test.Call.CL).
 				Return(nil, nil).
 				Times(times)
 			_, err := r.Mutation().IngestCertifyLegals(ctx, test.Call.Sub, test.Call.Dec, test.Call.Dis, test.Call.CL)
