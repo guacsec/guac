@@ -88,7 +88,7 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 	}
 	defer cursor.Close()
 
-	return getCertifyScorecardFromCursor(ctx, cursor)
+	return getCertifyScorecardFromCursor(ctx, cursor, false)
 }
 
 func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyScorecardSpec *model.CertifyScorecardSpec, queryValues map[string]any) {
@@ -222,7 +222,10 @@ func (c *arangoClient) IngestScorecardIDs(ctx context.Context, sources []*model.
 		UPSERT { sourceID:firstSrc.name_id, checks:doc.checks, aggregateScore:doc.aggregateScore, timeScanned:doc.timeScanned, scorecardVersion:doc.scorecardVersion, scorecardCommit:doc.scorecardCommit, collector:doc.collector, origin:doc.origin } 
 			INSERT { sourceID:firstSrc.name_id, checks:doc.checks, aggregateScore:doc.aggregateScore, timeScanned:doc.timeScanned, scorecardVersion:doc.scorecardVersion, scorecardCommit:doc.scorecardCommit, collector:doc.collector, origin:doc.origin } 
 			UPDATE {} IN scorecards
-			RETURN NEW
+			RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			}
 	)
 	
 	LET edgeCollection = (
@@ -238,7 +241,7 @@ func (c *arangoClient) IngestScorecardIDs(ctx context.Context, sources []*model.
 		return nil, fmt.Errorf("failed to ingest scorecard: %w", err)
 	}
 	defer cursor.Close()
-	scorecardList, err := getCertifyScorecardFromCursor(ctx, cursor)
+	scorecardList, err := getCertifyScorecardFromCursor(ctx, cursor, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get scorecard from arango cursor: %w", err)
 	}
@@ -267,7 +270,10 @@ func (c *arangoClient) IngestScorecardID(ctx context.Context, source model.Sourc
 		UPSERT { sourceID:firstSrc.name_id, checks:@checks, aggregateScore:@aggregateScore, timeScanned:@timeScanned, scorecardVersion:@scorecardVersion, scorecardCommit:@scorecardCommit, collector:@collector, origin:@origin } 
 			INSERT { sourceID:firstSrc.name_id, checks:@checks, aggregateScore:@aggregateScore, timeScanned:@timeScanned, scorecardVersion:@scorecardVersion, scorecardCommit:@scorecardCommit, collector:@collector, origin:@origin } 
 			UPDATE {} IN scorecards
-			RETURN NEW
+			RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			}
 	)
 	
 	LET edgeCollection = (
@@ -282,7 +288,7 @@ func (c *arangoClient) IngestScorecardID(ctx context.Context, source model.Sourc
 	}
 	defer cursor.Close()
 
-	scorecardList, err := getCertifyScorecardFromCursor(ctx, cursor)
+	scorecardList, err := getCertifyScorecardFromCursor(ctx, cursor, true)
 	if err != nil {
 		return "", fmt.Errorf("failed to get scorecard from arango cursor: %w", err)
 	}
@@ -313,7 +319,7 @@ func getCollectedScorecardChecks(checksList []string) ([]*model.ScorecardCheck, 
 	return scorecardChecks, nil
 }
 
-func getCertifyScorecardFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyScorecard, error) {
+func getCertifyScorecardFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.CertifyScorecard, error) {
 	type collectedData struct {
 		SrcName          *dbSrcName `json:"srcName"`
 		ScorecardID      string     `json:"scorecard_id"`
@@ -365,6 +371,10 @@ func getCertifyScorecardFromCursor(ctx context.Context, cursor driver.Cursor) ([
 			src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
 				createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
 			certifyScorecard.Source = src
+		} else {
+			if !ingestion {
+				return nil, fmt.Errorf("failed to get source from cursor for scorecard")
+			}
 		}
 		certifyScorecardList = append(certifyScorecardList, certifyScorecard)
 	}

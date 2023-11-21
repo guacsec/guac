@@ -80,7 +80,7 @@ func (n *vexLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Node
 
 // Ingest CertifyVex
 
-func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+func (c *demoClient) IngestVEXStatementIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
 	var modelVexStatementIDs []string
 
 	for i := range vexStatements {

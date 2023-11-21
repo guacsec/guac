@@ -144,7 +144,7 @@ func getPkgVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder 
 	}
 	defer cursor.Close()
 
-	return getCertifyVexFromCursor(ctx, cursor)
+	return getCertifyVexFromCursor(ctx, cursor, false)
 }
 
 func getArtifactVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.CertifyVEXStatement, error) {
@@ -177,7 +177,7 @@ func getArtifactVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBui
 	}
 	defer cursor.Close()
 
-	return getCertifyVexFromCursor(ctx, cursor)
+	return getCertifyVexFromCursor(ctx, cursor, false)
 }
 
 func setVexMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVexSpec *model.CertifyVEXStatementSpec, queryValues map[string]any) {
@@ -259,7 +259,7 @@ func getVEXStatementQueryValues(pkg *model.PkgInputSpec, artifact *model.Artifac
 	return values
 }
 
-func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+func (c *arangoClient) IngestVEXStatementIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
 	if len(subjects.Artifacts) > 0 {
 		var listOfValues []map[string]any
 
@@ -294,49 +294,26 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 		LET firstVuln = FIRST(
 			FOR vVulnID in vulnerabilities
 			  FILTER vVulnID.guacKey == doc.guacVulnKey
-			FOR vType in vulnTypes
-			  FILTER vType._id == vVulnID._parent
-	
 			RETURN {
-			  "typeID": vType._id,
-			  "type": vType.type,
 			  "vuln_id": vVulnID._id,
-			  "vuln": vVulnID.vulnerabilityID,
-			  "vulnDoc": vVulnID
+			  "vuln_key": vVulnID._key
 			}
 		)
 		  
 		LET certifyVex = FIRST(
-			UPSERT { artifactID:artifact._id, vulnerabilityID:firstVuln.vulnDoc._id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
-				INSERT {artifactID:artifact._id, vulnerabilityID:firstVuln.vulnDoc._id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
+			UPSERT { artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
+				INSERT {artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
 				UPDATE {} IN certifyVEXs
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		INSERT { _key: CONCAT("certifyVexArtEdges", artifact._key, certifyVex._key), _from: artifact._id, _to: certifyVex._id } INTO certifyVexArtEdges OPTIONS { overwriteMode: "ignore" }
-		INSERT { _key: CONCAT("certifyVexVulnEdges", certifyVex._key, firstVuln.vulnDoc._key), _from: certifyVex._id, _to: firstVuln.vulnDoc._id } INTO certifyVexVulnEdges OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("certifyVexVulnEdges", certifyVex._key, firstVuln.vuln_key), _from: certifyVex._id, _to: firstVuln.vuln_id } INTO certifyVexVulnEdges OPTIONS { overwriteMode: "ignore" }
 		
-		RETURN {
-		  'artifact': {
-			  'id': artifact._id,
-			  'algorithm': artifact.algorithm,
-			  'digest': artifact.digest
-		  },
-		  'vulnerability': {
-			  'type_id': firstVuln.typeID,
-			  'type': firstVuln.type,
-			  'vuln_id': firstVuln.vuln_id,
-			  'vuln': firstVuln.vuln
-		  },
-		  'certifyVex_id': certifyVex._id,
-		  'status': certifyVex.status,
-		  'vexJustification': certifyVex.vexJustification,
-		  'statement': certifyVex.statement,
-		  'statusNotes': certifyVex.statusNotes,
-		  'knownSince': certifyVex.knownSince,
-		  'collector': certifyVex.collector,
-		  'origin': certifyVex.origin  
-		}`
+		RETURN { 'certifyVex_id': certifyVex._id }`
 
 		sb.WriteString(query)
 
@@ -345,7 +322,7 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 			return nil, fmt.Errorf("failed to ingest artifact VEX: %w", err)
 		}
 		defer cursor.Close()
-		vexList, err := getCertifyVexFromCursor(ctx, cursor)
+		vexList, err := getCertifyVexFromCursor(ctx, cursor, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get VEX from arango cursor: %w", err)
 		}
@@ -390,83 +367,37 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 		query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
-			  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
+			  FILTER pVersion.guacKey == doc.pkgVersionGuacKey	
 			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
 			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
+			  'version_key': pVersion._key
 			}
 		)
 
 		LET firstVuln = FIRST(
 			FOR vVulnID in vulnerabilities
 			  FILTER vVulnID.guacKey == doc.guacVulnKey
-			FOR vType in vulnTypes
-			  FILTER vType._id == vVulnID._parent
-	
 			RETURN {
-			  "typeID": vType._id,
-			  "type": vType.type,
-			  "vuln_id": vVulnID._id,
-			  "vuln": vVulnID.vulnerabilityID,
-			  "vulnDoc": vVulnID
+				"vuln_id": vVulnID._id,
+				"vuln_key": vVulnID._key
 			}
 		)
 		  
 		LET certifyVex = FIRST(
-			UPSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
-				INSERT {packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
+			UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
+				INSERT {packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
 				UPDATE {} IN certifyVEXs
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
-		INSERT { _key: CONCAT("certifyVexPkgEdges", firstPkg.versionDoc._key, certifyVex._key), _from: firstPkg.versionDoc._id, _to: certifyVex._id } INTO certifyVexPkgEdges OPTIONS { overwriteMode: "ignore" }
-		INSERT { _key: CONCAT("certifyVexVulnEdges", certifyVex._key, firstVuln.vulnDoc._key), _from: certifyVex._id, _to: firstVuln.vulnDoc._id } INTO certifyVexVulnEdges OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("certifyVexPkgEdges", firstPkg.version_key, certifyVex._key), _from: firstPkg.version_id, _to: certifyVex._id } INTO certifyVexPkgEdges OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("certifyVexVulnEdges", certifyVex._key, firstVuln.vuln_key), _from: certifyVex._id, _to: firstVuln.vuln_id } INTO certifyVexVulnEdges OPTIONS { overwriteMode: "ignore" }
 		
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'vulnerability': {
-				'type_id': firstVuln.typeID,
-				'type': firstVuln.type,
-				'vuln_id': firstVuln.vuln_id,
-				'vuln': firstVuln.vuln
-			},
-			'certifyVex_id': certifyVex._id,
-			'status': certifyVex.status,
-			'vexJustification': certifyVex.vexJustification,
-			'statement': certifyVex.statement,
-			'statusNotes': certifyVex.statusNotes,
-			'knownSince': certifyVex.knownSince,
-			'collector': certifyVex.collector,
-			'origin': certifyVex.origin  
-		  }`
+		RETURN { 'certifyVex_id': certifyVex._id }`
 
 		sb.WriteString(query)
 
@@ -476,7 +407,7 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 		}
 		defer cursor.Close()
 
-		vexList, err := getCertifyVexFromCursor(ctx, cursor)
+		vexList, err := getCertifyVexFromCursor(ctx, cursor, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get Vex from arango cursor: %w", err)
 		}
@@ -493,7 +424,7 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 	}
 }
 
-func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *arangoClient) IngestVEXStatementID(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
 	if subject.Artifact != nil {
 		query := `
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
@@ -501,89 +432,50 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 		  LET firstVuln = FIRST(
 			FOR vVulnID in vulnerabilities
 			  FILTER vVulnID.guacKey == @guacVulnKey
-			FOR vType in vulnTypes
-			  FILTER vType._id == vVulnID._parent
-	
 			RETURN {
-			  "typeID": vType._id,
-			  "type": vType.type,
-			  "vuln_id": vVulnID._id,
-			  "vuln": vVulnID.vulnerabilityID,
-			  "vulnDoc": vVulnID
+				"vuln_id": vVulnID._id,
+				"vuln_key": vVulnID._key
 			}
 		  )
 		  
 		  LET certifyVex = FIRST(
-			  UPSERT { artifactID:artifact._id, vulnerabilityID:firstVuln.vulnDoc._id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
-				  INSERT {artifactID:artifact._id, vulnerabilityID:firstVuln.vulnDoc._id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
+			  UPSERT { artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
+				  INSERT {artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
 				  UPDATE {} IN certifyVEXs
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		  )
 		  
 		  INSERT { _key: CONCAT("certifyVexArtEdges", artifact._key, certifyVex._key), _from: artifact._id, _to: certifyVex._id } INTO certifyVexArtEdges OPTIONS { overwriteMode: "ignore" }
-		  INSERT { _key: CONCAT("certifyVexVulnEdges", certifyVex._key, firstVuln.vulnDoc._key), _from: certifyVex._id, _to: firstVuln.vulnDoc._id } INTO certifyVexVulnEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("certifyVexVulnEdges", certifyVex._key, firstVuln.vuln_key), _from: certifyVex._id, _to: firstVuln.vuln_id } INTO certifyVexVulnEdges OPTIONS { overwriteMode: "ignore" }
 		  
-		  RETURN {
-			'artifact': {
-				'id': artifact._id,
-				'algorithm': artifact.algorithm,
-				'digest': artifact.digest
-			},
-			'vulnerability': {
-				'type_id': firstVuln.typeID,
-				'type': firstVuln.type,
-				'vuln_id': firstVuln.vuln_id,
-				'vuln': firstVuln.vuln
-			},
-			'certifyVex_id': certifyVex._id,
-			'status': certifyVex.status,
-			'vexJustification': certifyVex.vexJustification,
-			'statement': certifyVex.statement,
-			'statusNotes': certifyVex.statusNotes,
-			'knownSince': certifyVex.knownSince,
-			'collector': certifyVex.collector,
-			'origin': certifyVex.origin  
-		  }`
+		  RETURN { 'certifyVex_id': certifyVex._id }`
 
 		cursor, err := executeQueryWithRetry(ctx, c.db, query, getVEXStatementQueryValues(nil, subject.Artifact, &vulnerability, &vexStatement), "IngestVEXStatement - Artifact")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest VEX: %w", err)
+			return "", fmt.Errorf("failed to ingest VEX: %w", err)
 		}
 		defer cursor.Close()
-		vexList, err := getCertifyVexFromCursor(ctx, cursor)
+		vexList, err := getCertifyVexFromCursor(ctx, cursor, true)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get VEX from arango cursor: %w", err)
+			return "", fmt.Errorf("failed to get VEX from arango cursor: %w", err)
 		}
 
 		if len(vexList) == 1 {
-			return vexList[0], nil
+			return vexList[0].ID, nil
 		} else {
-			return nil, fmt.Errorf("number of VEX ingested is greater than one")
+			return "", fmt.Errorf("number of VEX ingested is greater than one")
 		}
 	} else {
 		query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
 			  FILTER pVersion.guacKey == @pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
 			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
-			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
+				'version_id': pVersion._id,
+				'version_key': pVersion._key
 			}
 		)
 
@@ -603,65 +495,41 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 		  )
 		  
 		LET certifyVex = FIRST(
-			UPSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
-				INSERT {packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
+			UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vulnDoc._id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
+				INSERT {packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vulnDoc._id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
 				UPDATE {} IN certifyVEXs
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
-		INSERT { _key: CONCAT("certifyVexPkgEdges", firstPkg.versionDoc._key, certifyVex._key), _from: firstPkg.versionDoc._id, _to: certifyVex._id } INTO certifyVexPkgEdges OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("certifyVexPkgEdges", firstPkg.version_key, certifyVex._key), _from: firstPkg.version_id, _to: certifyVex._id } INTO certifyVexPkgEdges OPTIONS { overwriteMode: "ignore" }
 		INSERT { _key: CONCAT("certifyVexVulnEdges", certifyVex._key, firstVuln.vulnDoc._key), _from: certifyVex._id, _to: firstVuln.vulnDoc._id } INTO certifyVexVulnEdges OPTIONS { overwriteMode: "ignore" }
 		
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'vulnerability': {
-				'type_id': firstVuln.typeID,
-				'type': firstVuln.type,
-				'vuln_id': firstVuln.vuln_id,
-				'vuln': firstVuln.vuln
-			},
-			'certifyVex_id': certifyVex._id,
-			'status': certifyVex.status,
-			'vexJustification': certifyVex.vexJustification,
-			'statement': certifyVex.statement,
-			'statusNotes': certifyVex.statusNotes,
-			'knownSince': certifyVex.knownSince,
-			'collector': certifyVex.collector,
-			'origin': certifyVex.origin  
-		  }`
+		RETURN { 'certifyVex_id': certifyVex._id }`
 
 		cursor, err := executeQueryWithRetry(ctx, c.db, query, getVEXStatementQueryValues(subject.Package, nil, &vulnerability, &vexStatement), "IngestVEXStatement - Package")
 		if err != nil {
-			return nil, fmt.Errorf("failed to create ingest VEX: %w", err)
+			return "", fmt.Errorf("failed to create ingest VEX: %w", err)
 		}
 		defer cursor.Close()
 
-		vexList, err := getCertifyVexFromCursor(ctx, cursor)
+		vexList, err := getCertifyVexFromCursor(ctx, cursor, true)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get VEX from arango cursor: %w", err)
+			return "", fmt.Errorf("failed to get VEX from arango cursor: %w", err)
 		}
 
 		if len(vexList) == 1 {
-			return vexList[0], nil
+			return vexList[0].ID, nil
 		} else {
-			return nil, fmt.Errorf("number of VEX ingested is greater than one")
+			return "", fmt.Errorf("number of VEX ingested is greater than one")
 		}
 	}
 }
 
-func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyVEXStatement, error) {
+func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.CertifyVEXStatement, error) {
 	type collectedData struct {
 		PkgVersion       *dbPkgVersion   `json:"pkgVersion"`
 		Artifact         *model.Artifact `json:"artifact"`
@@ -699,19 +567,8 @@ func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 				createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
 		}
 
-		vuln := &model.Vulnerability{
-			ID:   createdValue.Vulnerability.VulnID,
-			Type: createdValue.Vulnerability.VulnType,
-			VulnerabilityIDs: []*model.VulnerabilityID{
-				{
-					ID:              createdValue.Vulnerability.VulnID,
-					VulnerabilityID: createdValue.Vulnerability.Vuln,
-				},
-			},
-		}
 		certifyVex := &model.CertifyVEXStatement{
 			ID:               createdValue.CertifyVexId,
-			Vulnerability:    vuln,
 			Status:           model.VexStatus(createdValue.Status),
 			VexJustification: model.VexJustification(createdValue.VexJustification),
 			Statement:        createdValue.Statement,
@@ -725,7 +582,27 @@ func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 		} else if createdValue.Artifact != nil {
 			certifyVex.Subject = createdValue.Artifact
 		} else {
-			return nil, fmt.Errorf("failed to get subject from cursor for certifyVex")
+			if !ingestion {
+				return nil, fmt.Errorf("failed to get subject from cursor for certifyVex")
+			}
+		}
+
+		if createdValue.Vulnerability != nil {
+			vuln := &model.Vulnerability{
+				ID:   createdValue.Vulnerability.VulnID,
+				Type: createdValue.Vulnerability.VulnType,
+				VulnerabilityIDs: []*model.VulnerabilityID{
+					{
+						ID:              createdValue.Vulnerability.VulnID,
+						VulnerabilityID: createdValue.Vulnerability.Vuln,
+					},
+				},
+			}
+			certifyVex.Vulnerability = vuln
+		} else {
+			if !ingestion {
+				return nil, fmt.Errorf("failed to get vulnerability from cursor for scorecard")
+			}
 		}
 
 		certifyVexList = append(certifyVexList, certifyVex)

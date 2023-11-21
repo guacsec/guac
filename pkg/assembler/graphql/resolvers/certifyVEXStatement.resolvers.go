@@ -81,7 +81,7 @@ func (r *mutationResolver) IngestVEXStatements(ctx context.Context, subjects mod
 		}
 		lowercaseVulnInputList = append(lowercaseVulnInputList, &lowercaseVulnInput)
 	}
-	return r.Backend.IngestVEXStatements(ctx, subjects, lowercaseVulnInputList, vexStatements)
+	return r.Backend.IngestVEXStatementIDs(ctx, subjects, lowercaseVulnInputList, vexStatements)
 }
 
 // CertifyVEXStatement is the resolver for the CertifyVEXStatement field.

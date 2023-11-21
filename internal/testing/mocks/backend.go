@@ -830,19 +830,19 @@ func (mr *MockBackendMockRecorder) IngestVEXStatementID(ctx, subject, vulnerabil
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestVEXStatementID", reflect.TypeOf((*MockBackend)(nil).IngestVEXStatementID), ctx, subject, vulnerability, vexStatement)
 }
 
-// IngestVEXStatements mocks base method.
-func (m *MockBackend) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+// IngestVEXStatementIDs mocks base method.
+func (m *MockBackend) IngestVEXStatementIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IngestVEXStatements", ctx, subjects, vulnerabilities, vexStatements)
+	ret := m.ctrl.Call(m, "IngestVEXStatementIDs", ctx, subjects, vulnerabilities, vexStatements)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// IngestVEXStatements indicates an expected call of IngestVEXStatements.
-func (mr *MockBackendMockRecorder) IngestVEXStatements(ctx, subjects, vulnerabilities, vexStatements interface{}) *gomock.Call {
+// IngestVEXStatementIDs indicates an expected call of IngestVEXStatementIDs.
+func (mr *MockBackendMockRecorder) IngestVEXStatementIDs(ctx, subjects, vulnerabilities, vexStatements interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestVEXStatements", reflect.TypeOf((*MockBackend)(nil).IngestVEXStatements), ctx, subjects, vulnerabilities, vexStatements)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IngestVEXStatementIDs", reflect.TypeOf((*MockBackend)(nil).IngestVEXStatementIDs), ctx, subjects, vulnerabilities, vexStatements)
 }
 
 // IngestVulnEqualID mocks base method.
