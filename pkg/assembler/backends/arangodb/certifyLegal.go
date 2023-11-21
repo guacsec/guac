@@ -140,7 +140,7 @@ func getSrcCertifyLegalForQuery(ctx context.Context, c *arangoClient,
 	}
 	defer cursor.Close()
 
-	return c.getCertifyLegalFromCursor(ctx, cursor, decFilter, disFilter)
+	return c.getCertifyLegalFromCursor(ctx, cursor, decFilter, disFilter, false)
 }
 
 func getPkgCertifyLegalForQuery(ctx context.Context, c *arangoClient,
@@ -178,7 +178,7 @@ func getPkgCertifyLegalForQuery(ctx context.Context, c *arangoClient,
 	}
 	defer cursor.Close()
 
-	return c.getCertifyLegalFromCursor(ctx, cursor, decFilter, disFilter)
+	return c.getCertifyLegalFromCursor(ctx, cursor, decFilter, disFilter, false)
 }
 
 func setCertifyLegalMatchValues(aqb *arangoQueryBuilder, certifyLegalSpec *model.CertifyLegalSpec, queryValues map[string]any) {
@@ -259,21 +259,21 @@ func getCertifyLegalQueryValues(pkg *model.PkgInputSpec, source *model.SourceInp
 	return values
 }
 
-func (c *arangoClient) IngestCertifyLegal(
+func (c *arangoClient) IngestCertifyLegalID(
 	ctx context.Context,
 	subject model.PackageOrSourceInput,
 	declaredLicenses []*model.LicenseInputSpec,
 	discoveredLicenses []*model.LicenseInputSpec,
-	certifyLegal *model.CertifyLegalInputSpec) (*model.CertifyLegal, error) {
+	certifyLegal *model.CertifyLegalInputSpec) (string, error) {
 
 	dec, err := c.getLicenses(ctx, declaredLicenses)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get declared licenses list with error: %w", err)
+		return "", fmt.Errorf("failed to get declared licenses list with error: %w", err)
 	}
 
 	dis, err := c.getLicenses(ctx, discoveredLicenses)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get discovered licenses list with error: %w", err)
+		return "", fmt.Errorf("failed to get discovered licenses list with error: %w", err)
 	}
 
 	if subject.Package != nil {
@@ -281,25 +281,9 @@ func (c *arangoClient) IngestCertifyLegal(
 LET firstPkg = FIRST(
     FOR pVersion in pkgVersions
       FILTER pVersion.guacKey == @pkgVersionGuacKey
-    FOR pName in pkgNames
-      FILTER pName._id == pVersion._parent
-    FOR pNs in pkgNamespaces
-      FILTER pNs._id == pName._parent
-    FOR pType in pkgTypes
-      FILTER pType._id == pNs._parent
-
     RETURN {
-      'typeID': pType._id,
-      'type': pType.type,
-      'namespace_id': pNs._id,
-      'namespace': pNs.namespace,
-      'name_id': pName._id,
-      'name': pName.name,
       'version_id': pVersion._id,
-      'version': pVersion.version,
-      'subpath': pVersion.subpath,
-      'qualifier_list': pVersion.qualifier_list,
-      'versionDoc': pVersion
+      'version_key': pVersion._key
     }
 )
 
@@ -329,11 +313,14 @@ LET certifyLegal = FIRST(
     origin:@origin
   }
   UPDATE {} IN certifyLegals
-  RETURN NEW
+  RETURN {
+	'_id': NEW._id,
+	'_key': NEW._key
+  }
 )
 
 LET edgeCollection = (
-  INSERT {  _key: CONCAT("certifyLegalPkgEdges", firstPkg.versionDoc._key, certifyLegal._key), _from: firstPkg.version_id, _to: certifyLegal._id } INTO certifyLegalPkgEdges OPTIONS { overwriteMode: "ignore" }
+  INSERT {  _key: CONCAT("certifyLegalPkgEdges", firstPkg.version_key, certifyLegal._key), _from: firstPkg.version_id, _to: certifyLegal._id } INTO certifyLegalPkgEdges OPTIONS { overwriteMode: "ignore" }
 )
 
 LET declaredLicensesCollection = (FOR decData IN @declaredLicensesKeyList
@@ -344,46 +331,23 @@ LET discoveredLicensesCollection = (FOR disData IN @discoveredLicensesKeyList
   INSERT { _key: CONCAT("certifyLegalDiscoveredLicensesEdges", certifyLegal._key, disData), _from: certifyLegal._id, _to: CONCAT("licenses/", disData) } INTO certifyLegalDiscoveredLicensesEdges OPTIONS { overwriteMode: "ignore" }
 )
 
-RETURN {
-  'pkgVersion': {
-      'type_id': firstPkg.typeID,
-      'type': firstPkg.type,
-      'namespace_id': firstPkg.namespace_id,
-      'namespace': firstPkg.namespace,
-      'name_id': firstPkg.name_id,
-      'name': firstPkg.name,
-      'version_id': firstPkg.version_id,
-      'version': firstPkg.version,
-      'subpath': firstPkg.subpath,
-      'qualifier_list': firstPkg.qualifier_list
-  },
-  'certifyLegal_id': certifyLegal._id,
-  'declaredLicense': certifyLegal.declaredLicense,
-  'declaredLicenses': certifyLegal.declaredLicenses,
-  'discoveredLicense': certifyLegal.discoveredLicense,
-  'discoveredLicenses': certifyLegal.discoveredLicenses,
-  'attribution': certifyLegal.attribution,
-  'justification': certifyLegal.justification,
-  'timeScanned': certifyLegal.timeScanned,
-  'collector': certifyLegal.collector,
-  'origin': certifyLegal.origin
-}`
+RETURN { 'certifyLegal_id': certifyLegal._id }`
 
 		cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyLegalQueryValues(subject.Package, nil, dec, dis, certifyLegal), "IngestCertifyLegal - Pkg")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest package certifyLegal: %w", err)
+			return "", fmt.Errorf("failed to ingest package certifyLegal: %w", err)
 		}
 		defer cursor.Close()
 
-		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil)
+		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil, true)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get certifyLegals from arango cursor: %w", err)
+			return "", fmt.Errorf("failed to get certifyLegals from arango cursor: %w", err)
 		}
 
 		if len(certifyLegalList) == 1 {
-			return certifyLegalList[0], nil
+			return certifyLegalList[0].ID, nil
 		}
-		return nil, fmt.Errorf("number of certifyLegal ingested is greater than one")
+		return "", fmt.Errorf("number of certifyLegal ingested is greater than one")
 	}
 
 	if subject.Source != nil {
@@ -391,22 +355,10 @@ RETURN {
 LET firstSrc = FIRST(
     FOR sName in srcNames
       FILTER sName.guacKey == @srcNameGuacKey
-    FOR sNs in srcNamespaces
-      FILTER sNs._id == sName._parent
-    FOR sType in srcTypes
-      FILTER sType._id == sNs._parent
-
-    RETURN {
-      'typeID': sType._id,
-      'type': sType.type,
-      'namespace_id': sNs._id,
-      'namespace': sNs.namespace,
-      'name_id': sName._id,
-      'name': sName.name,
-      'commit': sName.commit,
-      'tag': sName.tag,
-      'nameDoc': sName
-    }
+	  RETURN {
+		'name_id': sName._id,
+		'name_key': sName._key
+	}
 )
 
 LET certifyLegal = FIRST(
@@ -435,11 +387,14 @@ LET certifyLegal = FIRST(
     origin:@origin
   }
   UPDATE {} IN certifyLegals
-  RETURN NEW
+  RETURN {
+	'_id': NEW._id,
+	'_key': NEW._key
+  }
 )
 
 LET edgeCollection = (
-  INSERT {  _key: CONCAT("certifyLegalSrcEdges", firstSrc.nameDoc._key, certifyLegal._key), _from: firstSrc.name_id, _to: certifyLegal._id } INTO certifyLegalSrcEdges OPTIONS { overwriteMode: "ignore" }
+  INSERT {  _key: CONCAT("certifyLegalSrcEdges", firstSrc.name_key, certifyLegal._key), _from: firstSrc.name_id, _to: certifyLegal._id } INTO certifyLegalSrcEdges OPTIONS { overwriteMode: "ignore" }
 )
 
 LET declaredLicensesCollection = (FOR decData IN @declaredLicensesKeyList
@@ -450,54 +405,33 @@ LET discoveredLicensesCollection = (FOR disData IN @discoveredLicensesKeyList
   INSERT { _key: CONCAT("certifyLegalDiscoveredLicensesEdges", certifyLegal._key, disData), _from: certifyLegal._id, _to: CONCAT("licenses/", disData) } INTO certifyLegalDiscoveredLicensesEdges OPTIONS { overwriteMode: "ignore" }
 )
 
-RETURN {
-  'srcName': {
-      'type_id': firstSrc.typeID,
-      'type': firstSrc.type,
-      'namespace_id': firstSrc.namespace_id,
-      'namespace': firstSrc.namespace,
-      'name_id': firstSrc.name_id,
-      'name': firstSrc.name,
-      'commit': firstSrc.commit,
-      'tag': firstSrc.tag
-  },
-  'certifyLegal_id': certifyLegal._id,
-  'declaredLicense': certifyLegal.declaredLicense,
-  'declaredLicenses': certifyLegal.declaredLicenses,
-  'discoveredLicense': certifyLegal.discoveredLicense,
-  'discoveredLicenses': certifyLegal.discoveredLicenses,
-  'attribution': certifyLegal.attribution,
-  'justification': certifyLegal.justification,
-  'timeScanned': certifyLegal.timeScanned,
-  'collector': certifyLegal.collector,
-  'origin': certifyLegal.origin
-}`
+RETURN { 'certifyLegal_id': certifyLegal._id }`
 
 		cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyLegalQueryValues(nil, subject.Source, dec, dis, certifyLegal), "IngestCertifyLegal - source")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest source certifyLegal: %w", err)
+			return "", fmt.Errorf("failed to ingest source certifyLegal: %w", err)
 		}
 		defer cursor.Close()
 
-		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil)
+		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil, true)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get certifyLegals from arango cursor: %w", err)
+			return "", fmt.Errorf("failed to get certifyLegals from arango cursor: %w", err)
 		}
 
 		if len(certifyLegalList) == 1 {
-			return certifyLegalList[0], nil
+			return certifyLegalList[0].ID, nil
 		}
-		return nil, fmt.Errorf("number of certifyLegal ingested is greater than one")
+		return "", fmt.Errorf("number of certifyLegal ingested is greater than one")
 	}
-	return nil, fmt.Errorf("package or source is not specified for IngestCertifyLegal")
+	return "", fmt.Errorf("package or source is not specified for IngestCertifyLegal")
 }
 
-func (c *arangoClient) IngestCertifyLegals(
+func (c *arangoClient) IngestCertifyLegalIDs(
 	ctx context.Context,
 	subjects model.PackageOrSourceInputs,
 	declaredLicensesList [][]*model.LicenseInputSpec,
 	discoveredLicensesList [][]*model.LicenseInputSpec,
-	certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
+	certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 
 	if len(subjects.Packages) > 0 {
 		var listOfValues []map[string]any
@@ -542,26 +476,10 @@ func (c *arangoClient) IngestCertifyLegals(
 LET firstPkg = FIRST(
   FOR pVersion in pkgVersions
     FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-  FOR pName in pkgNames
-    FILTER pName._id == pVersion._parent
-  FOR pNs in pkgNamespaces
-    FILTER pNs._id == pName._parent
-  FOR pType in pkgTypes
-    FILTER pType._id == pNs._parent
-
-  RETURN {
-    'typeID': pType._id,
-    'type': pType.type,
-    'namespace_id': pNs._id,
-    'namespace': pNs.namespace,
-    'name_id': pName._id,
-    'name': pName.name,
-    'version_id': pVersion._id,
-    'version': pVersion.version,
-    'subpath': pVersion.subpath,
-    'qualifier_list': pVersion.qualifier_list,
-    'versionDoc': pVersion
-  }
+	RETURN {
+		'version_id': pVersion._id,
+		'version_key': pVersion._key
+	}
 )
 
 LET certifyLegal = FIRST(
@@ -590,11 +508,14 @@ LET certifyLegal = FIRST(
     origin:doc.origin
   }
   UPDATE {} IN certifyLegals
-  RETURN NEW
+  RETURN {
+	'_id': NEW._id,
+	'_key': NEW._key
+  }
 )
 
 LET edgeCollection = (
-  INSERT {  _key: CONCAT("certifyLegalPkgEdges", firstPkg.versionDoc._key, certifyLegal._key), _from: firstPkg.version_id, _to: certifyLegal._id } INTO certifyLegalPkgEdges OPTIONS { overwriteMode: "ignore" }
+  INSERT {  _key: CONCAT("certifyLegalPkgEdges", firstPkg.version_key, certifyLegal._key), _from: firstPkg.version_id, _to: certifyLegal._id } INTO certifyLegalPkgEdges OPTIONS { overwriteMode: "ignore" }
 )
 
 LET declaredLicensesCollection = (FOR decData IN doc.declaredLicensesKeyList
@@ -605,30 +526,7 @@ LET discoveredLicensesCollection = (FOR disData IN doc.discoveredLicensesKeyList
   INSERT { _key: CONCAT("certifyLegalDiscoveredLicensesEdges", certifyLegal._key, disData), _from: certifyLegal._id, _to: CONCAT("licenses/", disData) } INTO certifyLegalDiscoveredLicensesEdges OPTIONS { overwriteMode: "ignore" }
 )
 
-RETURN {
-  'pkgVersion': {
-      'type_id': firstPkg.typeID,
-      'type': firstPkg.type,
-      'namespace_id': firstPkg.namespace_id,
-      'namespace': firstPkg.namespace,
-      'name_id': firstPkg.name_id,
-      'name': firstPkg.name,
-      'version_id': firstPkg.version_id,
-      'version': firstPkg.version,
-      'subpath': firstPkg.subpath,
-      'qualifier_list': firstPkg.qualifier_list
-  },
-  'certifyLegal_id': certifyLegal._id,
-  'declaredLicense': certifyLegal.declaredLicense,
-  'declaredLicenses': certifyLegal.declaredLicenses,
-  'discoveredLicense': certifyLegal.discoveredLicense,
-  'discoveredLicenses': certifyLegal.discoveredLicenses,
-  'attribution': certifyLegal.attribution,
-  'justification': certifyLegal.justification,
-  'timeScanned': certifyLegal.timeScanned,
-  'collector': certifyLegal.collector,
-  'origin': certifyLegal.origin
-}`
+RETURN { 'certifyLegal_id': certifyLegal._id }`
 
 		sb.WriteString(query)
 
@@ -638,12 +536,17 @@ RETURN {
 		}
 		defer cursor.Close()
 
-		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil)
+		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get certifyLegals from arango cursor: %w", err)
 		}
 
-		return certifyLegalList, nil
+		var certifyLegalIDList []string
+		for _, certifyLegal := range certifyLegalList {
+			certifyLegalIDList = append(certifyLegalIDList, certifyLegal.ID)
+		}
+
+		return certifyLegalIDList, nil
 	}
 	if len(subjects.Sources) > 0 {
 		var listOfValues []map[string]any
@@ -688,22 +591,10 @@ RETURN {
 LET firstSrc = FIRST(
   FOR sName in srcNames
     FILTER sName.guacKey == doc.srcNameGuacKey
-  FOR sNs in srcNamespaces
-    FILTER sNs._id == sName._parent
-  FOR sType in srcTypes
-    FILTER sType._id == sNs._parent
-
-  RETURN {
-    'typeID': sType._id,
-    'type': sType.type,
-    'namespace_id': sNs._id,
-    'namespace': sNs.namespace,
-    'name_id': sName._id,
-    'name': sName.name,
-    'commit': sName.commit,
-    'tag': sName.tag,
-    'nameDoc': sName
-  }
+    RETURN {
+		'name_id': sName._id,
+		'name_key': sName._key
+	}
 )
 
 LET certifyLegal = FIRST(
@@ -732,11 +623,14 @@ LET certifyLegal = FIRST(
     origin:doc.origin
   }
   UPDATE {} IN certifyLegals
-  RETURN NEW
+  RETURN {
+	'_id': NEW._id,
+	'_key': NEW._key
+  }
 )
 
 LET edgeCollection = (
-  INSERT {  _key: CONCAT("certifyLegalSrcEdges", firstSrc.nameDoc._key, certifyLegal._key), _from: firstSrc.name_id, _to: certifyLegal._id } INTO certifyLegalSrcEdges OPTIONS { overwriteMode: "ignore" }
+  INSERT {  _key: CONCAT("certifyLegalSrcEdges", firstSrc.name_key, certifyLegal._key), _from: firstSrc.name_id, _to: certifyLegal._id } INTO certifyLegalSrcEdges OPTIONS { overwriteMode: "ignore" }
 )
 
 LET declaredLicensesCollection = (FOR decData IN doc.declaredLicensesKeyList
@@ -747,28 +641,7 @@ LET discoveredLicensesCollection = (FOR disData IN doc.discoveredLicensesKeyList
   INSERT { _key: CONCAT("certifyLegalDiscoveredLicensesEdges", certifyLegal._key, disData), _from: certifyLegal._id, _to: CONCAT("licenses/", disData) } INTO certifyLegalDiscoveredLicensesEdges OPTIONS { overwriteMode: "ignore" }
 )
 
-RETURN {
-  'srcName': {
-      'type_id': firstSrc.typeID,
-      'type': firstSrc.type,
-      'namespace_id': firstSrc.namespace_id,
-      'namespace': firstSrc.namespace,
-      'name_id': firstSrc.name_id,
-      'name': firstSrc.name,
-      'commit': firstSrc.commit,
-      'tag': firstSrc.tag
-  },
-  'certifyLegal_id': certifyLegal._id,
-  'declaredLicense': certifyLegal.declaredLicense,
-  'declaredLicenses': certifyLegal.declaredLicenses,
-  'discoveredLicense': certifyLegal.discoveredLicense,
-  'discoveredLicenses': certifyLegal.discoveredLicenses,
-  'attribution': certifyLegal.attribution,
-  'justification': certifyLegal.justification,
-  'timeScanned': certifyLegal.timeScanned,
-  'collector': certifyLegal.collector,
-  'origin': certifyLegal.origin
-}`
+RETURN { 'certifyLegal_id': certifyLegal._id }`
 
 		sb.WriteString(query)
 
@@ -777,19 +650,24 @@ RETURN {
 			return nil, fmt.Errorf("failed to ingest source certifyLegal: %w", err)
 		}
 		defer cursor.Close()
-		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil)
+		certifyLegalList, err := c.getCertifyLegalFromCursor(ctx, cursor, nil, nil, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get certifyLegals from arango cursor: %w", err)
 		}
 
-		return certifyLegalList, nil
+		var certifyLegalIDList []string
+		for _, certifyBad := range certifyLegalList {
+			certifyLegalIDList = append(certifyLegalIDList, certifyBad.ID)
+		}
+
+		return certifyLegalIDList, nil
 
 	}
 	return nil, fmt.Errorf("packages or sources not specified for IngestCertifyLegals")
 }
 
 func (c *arangoClient) getCertifyLegalFromCursor(ctx context.Context,
-	cursor driver.Cursor, decFilter, disFilter []*model.LicenseSpec) (
+	cursor driver.Cursor, decFilter, disFilter []*model.LicenseSpec, ingestion bool) (
 	[]*model.CertifyLegal, error) {
 	type collectedData struct {
 		Pkg                *dbPkgVersion `json:"pkgVersion"`
@@ -883,7 +761,9 @@ func (c *arangoClient) getCertifyLegalFromCursor(ctx context.Context,
 		} else if src != nil {
 			certifyLegal.Subject = src
 		} else {
-			return nil, fmt.Errorf("failed to get subject from cursor for certifyLegal")
+			if !ingestion {
+				return nil, fmt.Errorf("failed to get subject from cursor for certifyLegal")
+			}
 		}
 		certifyLegalList = append(certifyLegalList, certifyLegal)
 	}

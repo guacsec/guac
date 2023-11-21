@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -558,7 +556,7 @@ func TestLegal(t *testing.T) {
 				}
 			}
 			for i, o := range test.Calls {
-				cl, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				clID, err := b.IngestCertifyLegalID(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -566,7 +564,7 @@ func TestLegal(t *testing.T) {
 					return
 				}
 				if (i + 1) == test.IDInFilter {
-					test.Query.ID = &cl.ID
+					test.Query.ID = ptrfrom.String(clID)
 				}
 			}
 			got, err := b.CertifyLegal(ctx, test.Query)
@@ -666,7 +664,7 @@ func TestLegals(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyLegals(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				_, err := b.IngestCertifyLegalIDs(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -867,14 +865,14 @@ func Test_buildCertifyLegalByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				cl, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				clID, err := b.IngestCertifyLegalID(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildCertifyLegalByID(ctx, cl.ID, test.Query)
+				got, err := b.(*arangoClient).buildCertifyLegalByID(ctx, clID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}

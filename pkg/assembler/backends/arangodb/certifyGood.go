@@ -668,7 +668,7 @@ func (c *arangoClient) IngestCertifyGoodIDs(ctx context.Context, subjects model.
 				RETURN {
 					'_id': NEW._id,
 					'_key': NEW._key
-				  }
+				}
 		)
 		
 		LET edgeCollection = (
@@ -693,8 +693,8 @@ func (c *arangoClient) IngestCertifyGoodIDs(ctx context.Context, subjects model.
 	}
 
 	var certifyGoodIDList []string
-	for _, certifyBad := range certifyGoodList {
-		certifyGoodIDList = append(certifyGoodIDList, certifyBad.ID)
+	for _, certifyGood := range certifyGoodList {
+		certifyGoodIDList = append(certifyGoodIDList, certifyGood.ID)
 	}
 
 	return certifyGoodIDList, nil
