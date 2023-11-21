@@ -118,9 +118,25 @@ func (pocu *PointOfContactUpdate) SetEmail(s string) *PointOfContactUpdate {
 	return pocu
 }
 
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (pocu *PointOfContactUpdate) SetNillableEmail(s *string) *PointOfContactUpdate {
+	if s != nil {
+		pocu.SetEmail(*s)
+	}
+	return pocu
+}
+
 // SetInfo sets the "info" field.
 func (pocu *PointOfContactUpdate) SetInfo(s string) *PointOfContactUpdate {
 	pocu.mutation.SetInfo(s)
+	return pocu
+}
+
+// SetNillableInfo sets the "info" field if the given value is not nil.
+func (pocu *PointOfContactUpdate) SetNillableInfo(s *string) *PointOfContactUpdate {
+	if s != nil {
+		pocu.SetInfo(*s)
+	}
 	return pocu
 }
 
@@ -130,9 +146,25 @@ func (pocu *PointOfContactUpdate) SetSince(t time.Time) *PointOfContactUpdate {
 	return pocu
 }
 
+// SetNillableSince sets the "since" field if the given value is not nil.
+func (pocu *PointOfContactUpdate) SetNillableSince(t *time.Time) *PointOfContactUpdate {
+	if t != nil {
+		pocu.SetSince(*t)
+	}
+	return pocu
+}
+
 // SetJustification sets the "justification" field.
 func (pocu *PointOfContactUpdate) SetJustification(s string) *PointOfContactUpdate {
 	pocu.mutation.SetJustification(s)
+	return pocu
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (pocu *PointOfContactUpdate) SetNillableJustification(s *string) *PointOfContactUpdate {
+	if s != nil {
+		pocu.SetJustification(*s)
+	}
 	return pocu
 }
 
@@ -142,9 +174,25 @@ func (pocu *PointOfContactUpdate) SetOrigin(s string) *PointOfContactUpdate {
 	return pocu
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (pocu *PointOfContactUpdate) SetNillableOrigin(s *string) *PointOfContactUpdate {
+	if s != nil {
+		pocu.SetOrigin(*s)
+	}
+	return pocu
+}
+
 // SetCollector sets the "collector" field.
 func (pocu *PointOfContactUpdate) SetCollector(s string) *PointOfContactUpdate {
 	pocu.mutation.SetCollector(s)
+	return pocu
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (pocu *PointOfContactUpdate) SetNillableCollector(s *string) *PointOfContactUpdate {
+	if s != nil {
+		pocu.SetCollector(*s)
+	}
 	return pocu
 }
 
@@ -487,9 +535,25 @@ func (pocuo *PointOfContactUpdateOne) SetEmail(s string) *PointOfContactUpdateOn
 	return pocuo
 }
 
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (pocuo *PointOfContactUpdateOne) SetNillableEmail(s *string) *PointOfContactUpdateOne {
+	if s != nil {
+		pocuo.SetEmail(*s)
+	}
+	return pocuo
+}
+
 // SetInfo sets the "info" field.
 func (pocuo *PointOfContactUpdateOne) SetInfo(s string) *PointOfContactUpdateOne {
 	pocuo.mutation.SetInfo(s)
+	return pocuo
+}
+
+// SetNillableInfo sets the "info" field if the given value is not nil.
+func (pocuo *PointOfContactUpdateOne) SetNillableInfo(s *string) *PointOfContactUpdateOne {
+	if s != nil {
+		pocuo.SetInfo(*s)
+	}
 	return pocuo
 }
 
@@ -499,9 +563,25 @@ func (pocuo *PointOfContactUpdateOne) SetSince(t time.Time) *PointOfContactUpdat
 	return pocuo
 }
 
+// SetNillableSince sets the "since" field if the given value is not nil.
+func (pocuo *PointOfContactUpdateOne) SetNillableSince(t *time.Time) *PointOfContactUpdateOne {
+	if t != nil {
+		pocuo.SetSince(*t)
+	}
+	return pocuo
+}
+
 // SetJustification sets the "justification" field.
 func (pocuo *PointOfContactUpdateOne) SetJustification(s string) *PointOfContactUpdateOne {
 	pocuo.mutation.SetJustification(s)
+	return pocuo
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (pocuo *PointOfContactUpdateOne) SetNillableJustification(s *string) *PointOfContactUpdateOne {
+	if s != nil {
+		pocuo.SetJustification(*s)
+	}
 	return pocuo
 }
 
@@ -511,9 +591,25 @@ func (pocuo *PointOfContactUpdateOne) SetOrigin(s string) *PointOfContactUpdateO
 	return pocuo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (pocuo *PointOfContactUpdateOne) SetNillableOrigin(s *string) *PointOfContactUpdateOne {
+	if s != nil {
+		pocuo.SetOrigin(*s)
+	}
+	return pocuo
+}
+
 // SetCollector sets the "collector" field.
 func (pocuo *PointOfContactUpdateOne) SetCollector(s string) *PointOfContactUpdateOne {
 	pocuo.mutation.SetCollector(s)
+	return pocuo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (pocuo *PointOfContactUpdateOne) SetNillableCollector(s *string) *PointOfContactUpdateOne {
+	if s != nil {
+		pocuo.SetCollector(*s)
+	}
 	return pocuo
 }
 

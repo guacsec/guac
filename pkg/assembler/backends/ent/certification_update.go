@@ -132,9 +132,25 @@ func (cu *CertificationUpdate) SetJustification(s string) *CertificationUpdate {
 	return cu
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (cu *CertificationUpdate) SetNillableJustification(s *string) *CertificationUpdate {
+	if s != nil {
+		cu.SetJustification(*s)
+	}
+	return cu
+}
+
 // SetOrigin sets the "origin" field.
 func (cu *CertificationUpdate) SetOrigin(s string) *CertificationUpdate {
 	cu.mutation.SetOrigin(s)
+	return cu
+}
+
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (cu *CertificationUpdate) SetNillableOrigin(s *string) *CertificationUpdate {
+	if s != nil {
+		cu.SetOrigin(*s)
+	}
 	return cu
 }
 
@@ -144,9 +160,25 @@ func (cu *CertificationUpdate) SetCollector(s string) *CertificationUpdate {
 	return cu
 }
 
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (cu *CertificationUpdate) SetNillableCollector(s *string) *CertificationUpdate {
+	if s != nil {
+		cu.SetCollector(*s)
+	}
+	return cu
+}
+
 // SetKnownSince sets the "known_since" field.
 func (cu *CertificationUpdate) SetKnownSince(t time.Time) *CertificationUpdate {
 	cu.mutation.SetKnownSince(t)
+	return cu
+}
+
+// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
+func (cu *CertificationUpdate) SetNillableKnownSince(t *time.Time) *CertificationUpdate {
+	if t != nil {
+		cu.SetKnownSince(*t)
+	}
 	return cu
 }
 
@@ -513,9 +545,25 @@ func (cuo *CertificationUpdateOne) SetJustification(s string) *CertificationUpda
 	return cuo
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (cuo *CertificationUpdateOne) SetNillableJustification(s *string) *CertificationUpdateOne {
+	if s != nil {
+		cuo.SetJustification(*s)
+	}
+	return cuo
+}
+
 // SetOrigin sets the "origin" field.
 func (cuo *CertificationUpdateOne) SetOrigin(s string) *CertificationUpdateOne {
 	cuo.mutation.SetOrigin(s)
+	return cuo
+}
+
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (cuo *CertificationUpdateOne) SetNillableOrigin(s *string) *CertificationUpdateOne {
+	if s != nil {
+		cuo.SetOrigin(*s)
+	}
 	return cuo
 }
 
@@ -525,9 +573,25 @@ func (cuo *CertificationUpdateOne) SetCollector(s string) *CertificationUpdateOn
 	return cuo
 }
 
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (cuo *CertificationUpdateOne) SetNillableCollector(s *string) *CertificationUpdateOne {
+	if s != nil {
+		cuo.SetCollector(*s)
+	}
+	return cuo
+}
+
 // SetKnownSince sets the "known_since" field.
 func (cuo *CertificationUpdateOne) SetKnownSince(t time.Time) *CertificationUpdateOne {
 	cuo.mutation.SetKnownSince(t)
+	return cuo
+}
+
+// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
+func (cuo *CertificationUpdateOne) SetNillableKnownSince(t *time.Time) *CertificationUpdateOne {
+	if t != nil {
+		cuo.SetKnownSince(*t)
+	}
 	return cuo
 }
 

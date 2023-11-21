@@ -35,9 +35,25 @@ func (pnu *PackageNameUpdate) SetNamespaceID(i int) *PackageNameUpdate {
 	return pnu
 }
 
+// SetNillableNamespaceID sets the "namespace_id" field if the given value is not nil.
+func (pnu *PackageNameUpdate) SetNillableNamespaceID(i *int) *PackageNameUpdate {
+	if i != nil {
+		pnu.SetNamespaceID(*i)
+	}
+	return pnu
+}
+
 // SetName sets the "name" field.
 func (pnu *PackageNameUpdate) SetName(s string) *PackageNameUpdate {
 	pnu.mutation.SetName(s)
+	return pnu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (pnu *PackageNameUpdate) SetNillableName(s *string) *PackageNameUpdate {
+	if s != nil {
+		pnu.SetName(*s)
+	}
 	return pnu
 }
 
@@ -248,9 +264,25 @@ func (pnuo *PackageNameUpdateOne) SetNamespaceID(i int) *PackageNameUpdateOne {
 	return pnuo
 }
 
+// SetNillableNamespaceID sets the "namespace_id" field if the given value is not nil.
+func (pnuo *PackageNameUpdateOne) SetNillableNamespaceID(i *int) *PackageNameUpdateOne {
+	if i != nil {
+		pnuo.SetNamespaceID(*i)
+	}
+	return pnuo
+}
+
 // SetName sets the "name" field.
 func (pnuo *PackageNameUpdateOne) SetName(s string) *PackageNameUpdateOne {
 	pnuo.mutation.SetName(s)
+	return pnuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (pnuo *PackageNameUpdateOne) SetNillableName(s *string) *PackageNameUpdateOne {
+	if s != nil {
+		pnuo.SetName(*s)
+	}
 	return pnuo
 }
 

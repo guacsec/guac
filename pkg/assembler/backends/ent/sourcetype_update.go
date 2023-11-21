@@ -34,6 +34,14 @@ func (stu *SourceTypeUpdate) SetType(s string) *SourceTypeUpdate {
 	return stu
 }
 
+// SetNillableType sets the "type" field if the given value is not nil.
+func (stu *SourceTypeUpdate) SetNillableType(s *string) *SourceTypeUpdate {
+	if s != nil {
+		stu.SetType(*s)
+	}
+	return stu
+}
+
 // AddNamespaceIDs adds the "namespaces" edge to the SourceNamespace entity by IDs.
 func (stu *SourceTypeUpdate) AddNamespaceIDs(ids ...int) *SourceTypeUpdate {
 	stu.mutation.AddNamespaceIDs(ids...)
@@ -182,6 +190,14 @@ type SourceTypeUpdateOne struct {
 // SetType sets the "type" field.
 func (stuo *SourceTypeUpdateOne) SetType(s string) *SourceTypeUpdateOne {
 	stuo.mutation.SetType(s)
+	return stuo
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (stuo *SourceTypeUpdateOne) SetNillableType(s *string) *SourceTypeUpdateOne {
+	if s != nil {
+		stuo.SetType(*s)
+	}
 	return stuo
 }
 

@@ -77,9 +77,25 @@ func (hsau *HasSourceAtUpdate) SetSourceID(i int) *HasSourceAtUpdate {
 	return hsau
 }
 
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (hsau *HasSourceAtUpdate) SetNillableSourceID(i *int) *HasSourceAtUpdate {
+	if i != nil {
+		hsau.SetSourceID(*i)
+	}
+	return hsau
+}
+
 // SetKnownSince sets the "known_since" field.
 func (hsau *HasSourceAtUpdate) SetKnownSince(t time.Time) *HasSourceAtUpdate {
 	hsau.mutation.SetKnownSince(t)
+	return hsau
+}
+
+// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
+func (hsau *HasSourceAtUpdate) SetNillableKnownSince(t *time.Time) *HasSourceAtUpdate {
+	if t != nil {
+		hsau.SetKnownSince(*t)
+	}
 	return hsau
 }
 
@@ -89,15 +105,39 @@ func (hsau *HasSourceAtUpdate) SetJustification(s string) *HasSourceAtUpdate {
 	return hsau
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (hsau *HasSourceAtUpdate) SetNillableJustification(s *string) *HasSourceAtUpdate {
+	if s != nil {
+		hsau.SetJustification(*s)
+	}
+	return hsau
+}
+
 // SetOrigin sets the "origin" field.
 func (hsau *HasSourceAtUpdate) SetOrigin(s string) *HasSourceAtUpdate {
 	hsau.mutation.SetOrigin(s)
 	return hsau
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (hsau *HasSourceAtUpdate) SetNillableOrigin(s *string) *HasSourceAtUpdate {
+	if s != nil {
+		hsau.SetOrigin(*s)
+	}
+	return hsau
+}
+
 // SetCollector sets the "collector" field.
 func (hsau *HasSourceAtUpdate) SetCollector(s string) *HasSourceAtUpdate {
 	hsau.mutation.SetCollector(s)
+	return hsau
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (hsau *HasSourceAtUpdate) SetNillableCollector(s *string) *HasSourceAtUpdate {
+	if s != nil {
+		hsau.SetCollector(*s)
+	}
 	return hsau
 }
 
@@ -365,9 +405,25 @@ func (hsauo *HasSourceAtUpdateOne) SetSourceID(i int) *HasSourceAtUpdateOne {
 	return hsauo
 }
 
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (hsauo *HasSourceAtUpdateOne) SetNillableSourceID(i *int) *HasSourceAtUpdateOne {
+	if i != nil {
+		hsauo.SetSourceID(*i)
+	}
+	return hsauo
+}
+
 // SetKnownSince sets the "known_since" field.
 func (hsauo *HasSourceAtUpdateOne) SetKnownSince(t time.Time) *HasSourceAtUpdateOne {
 	hsauo.mutation.SetKnownSince(t)
+	return hsauo
+}
+
+// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
+func (hsauo *HasSourceAtUpdateOne) SetNillableKnownSince(t *time.Time) *HasSourceAtUpdateOne {
+	if t != nil {
+		hsauo.SetKnownSince(*t)
+	}
 	return hsauo
 }
 
@@ -377,15 +433,39 @@ func (hsauo *HasSourceAtUpdateOne) SetJustification(s string) *HasSourceAtUpdate
 	return hsauo
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (hsauo *HasSourceAtUpdateOne) SetNillableJustification(s *string) *HasSourceAtUpdateOne {
+	if s != nil {
+		hsauo.SetJustification(*s)
+	}
+	return hsauo
+}
+
 // SetOrigin sets the "origin" field.
 func (hsauo *HasSourceAtUpdateOne) SetOrigin(s string) *HasSourceAtUpdateOne {
 	hsauo.mutation.SetOrigin(s)
 	return hsauo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (hsauo *HasSourceAtUpdateOne) SetNillableOrigin(s *string) *HasSourceAtUpdateOne {
+	if s != nil {
+		hsauo.SetOrigin(*s)
+	}
+	return hsauo
+}
+
 // SetCollector sets the "collector" field.
 func (hsauo *HasSourceAtUpdateOne) SetCollector(s string) *HasSourceAtUpdateOne {
 	hsauo.mutation.SetCollector(s)
+	return hsauo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (hsauo *HasSourceAtUpdateOne) SetNillableCollector(s *string) *HasSourceAtUpdateOne {
+	if s != nil {
+		hsauo.SetCollector(*s)
+	}
 	return hsauo
 }
 

@@ -38,15 +38,39 @@ func (sau *SLSAAttestationUpdate) SetBuildType(s string) *SLSAAttestationUpdate 
 	return sau
 }
 
+// SetNillableBuildType sets the "build_type" field if the given value is not nil.
+func (sau *SLSAAttestationUpdate) SetNillableBuildType(s *string) *SLSAAttestationUpdate {
+	if s != nil {
+		sau.SetBuildType(*s)
+	}
+	return sau
+}
+
 // SetBuiltByID sets the "built_by_id" field.
 func (sau *SLSAAttestationUpdate) SetBuiltByID(i int) *SLSAAttestationUpdate {
 	sau.mutation.SetBuiltByID(i)
 	return sau
 }
 
+// SetNillableBuiltByID sets the "built_by_id" field if the given value is not nil.
+func (sau *SLSAAttestationUpdate) SetNillableBuiltByID(i *int) *SLSAAttestationUpdate {
+	if i != nil {
+		sau.SetBuiltByID(*i)
+	}
+	return sau
+}
+
 // SetSubjectID sets the "subject_id" field.
 func (sau *SLSAAttestationUpdate) SetSubjectID(i int) *SLSAAttestationUpdate {
 	sau.mutation.SetSubjectID(i)
+	return sau
+}
+
+// SetNillableSubjectID sets the "subject_id" field if the given value is not nil.
+func (sau *SLSAAttestationUpdate) SetNillableSubjectID(i *int) *SLSAAttestationUpdate {
+	if i != nil {
+		sau.SetSubjectID(*i)
+	}
 	return sau
 }
 
@@ -71,6 +95,14 @@ func (sau *SLSAAttestationUpdate) ClearSlsaPredicate() *SLSAAttestationUpdate {
 // SetSlsaVersion sets the "slsa_version" field.
 func (sau *SLSAAttestationUpdate) SetSlsaVersion(s string) *SLSAAttestationUpdate {
 	sau.mutation.SetSlsaVersion(s)
+	return sau
+}
+
+// SetNillableSlsaVersion sets the "slsa_version" field if the given value is not nil.
+func (sau *SLSAAttestationUpdate) SetNillableSlsaVersion(s *string) *SLSAAttestationUpdate {
+	if s != nil {
+		sau.SetSlsaVersion(*s)
+	}
 	return sau
 }
 
@@ -120,15 +152,39 @@ func (sau *SLSAAttestationUpdate) SetOrigin(s string) *SLSAAttestationUpdate {
 	return sau
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (sau *SLSAAttestationUpdate) SetNillableOrigin(s *string) *SLSAAttestationUpdate {
+	if s != nil {
+		sau.SetOrigin(*s)
+	}
+	return sau
+}
+
 // SetCollector sets the "collector" field.
 func (sau *SLSAAttestationUpdate) SetCollector(s string) *SLSAAttestationUpdate {
 	sau.mutation.SetCollector(s)
 	return sau
 }
 
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (sau *SLSAAttestationUpdate) SetNillableCollector(s *string) *SLSAAttestationUpdate {
+	if s != nil {
+		sau.SetCollector(*s)
+	}
+	return sau
+}
+
 // SetBuiltFromHash sets the "built_from_hash" field.
 func (sau *SLSAAttestationUpdate) SetBuiltFromHash(s string) *SLSAAttestationUpdate {
 	sau.mutation.SetBuiltFromHash(s)
+	return sau
+}
+
+// SetNillableBuiltFromHash sets the "built_from_hash" field if the given value is not nil.
+func (sau *SLSAAttestationUpdate) SetNillableBuiltFromHash(s *string) *SLSAAttestationUpdate {
+	if s != nil {
+		sau.SetBuiltFromHash(*s)
+	}
 	return sau
 }
 
@@ -412,15 +468,39 @@ func (sauo *SLSAAttestationUpdateOne) SetBuildType(s string) *SLSAAttestationUpd
 	return sauo
 }
 
+// SetNillableBuildType sets the "build_type" field if the given value is not nil.
+func (sauo *SLSAAttestationUpdateOne) SetNillableBuildType(s *string) *SLSAAttestationUpdateOne {
+	if s != nil {
+		sauo.SetBuildType(*s)
+	}
+	return sauo
+}
+
 // SetBuiltByID sets the "built_by_id" field.
 func (sauo *SLSAAttestationUpdateOne) SetBuiltByID(i int) *SLSAAttestationUpdateOne {
 	sauo.mutation.SetBuiltByID(i)
 	return sauo
 }
 
+// SetNillableBuiltByID sets the "built_by_id" field if the given value is not nil.
+func (sauo *SLSAAttestationUpdateOne) SetNillableBuiltByID(i *int) *SLSAAttestationUpdateOne {
+	if i != nil {
+		sauo.SetBuiltByID(*i)
+	}
+	return sauo
+}
+
 // SetSubjectID sets the "subject_id" field.
 func (sauo *SLSAAttestationUpdateOne) SetSubjectID(i int) *SLSAAttestationUpdateOne {
 	sauo.mutation.SetSubjectID(i)
+	return sauo
+}
+
+// SetNillableSubjectID sets the "subject_id" field if the given value is not nil.
+func (sauo *SLSAAttestationUpdateOne) SetNillableSubjectID(i *int) *SLSAAttestationUpdateOne {
+	if i != nil {
+		sauo.SetSubjectID(*i)
+	}
 	return sauo
 }
 
@@ -445,6 +525,14 @@ func (sauo *SLSAAttestationUpdateOne) ClearSlsaPredicate() *SLSAAttestationUpdat
 // SetSlsaVersion sets the "slsa_version" field.
 func (sauo *SLSAAttestationUpdateOne) SetSlsaVersion(s string) *SLSAAttestationUpdateOne {
 	sauo.mutation.SetSlsaVersion(s)
+	return sauo
+}
+
+// SetNillableSlsaVersion sets the "slsa_version" field if the given value is not nil.
+func (sauo *SLSAAttestationUpdateOne) SetNillableSlsaVersion(s *string) *SLSAAttestationUpdateOne {
+	if s != nil {
+		sauo.SetSlsaVersion(*s)
+	}
 	return sauo
 }
 
@@ -494,15 +582,39 @@ func (sauo *SLSAAttestationUpdateOne) SetOrigin(s string) *SLSAAttestationUpdate
 	return sauo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (sauo *SLSAAttestationUpdateOne) SetNillableOrigin(s *string) *SLSAAttestationUpdateOne {
+	if s != nil {
+		sauo.SetOrigin(*s)
+	}
+	return sauo
+}
+
 // SetCollector sets the "collector" field.
 func (sauo *SLSAAttestationUpdateOne) SetCollector(s string) *SLSAAttestationUpdateOne {
 	sauo.mutation.SetCollector(s)
 	return sauo
 }
 
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (sauo *SLSAAttestationUpdateOne) SetNillableCollector(s *string) *SLSAAttestationUpdateOne {
+	if s != nil {
+		sauo.SetCollector(*s)
+	}
+	return sauo
+}
+
 // SetBuiltFromHash sets the "built_from_hash" field.
 func (sauo *SLSAAttestationUpdateOne) SetBuiltFromHash(s string) *SLSAAttestationUpdateOne {
 	sauo.mutation.SetBuiltFromHash(s)
+	return sauo
+}
+
+// SetNillableBuiltFromHash sets the "built_from_hash" field if the given value is not nil.
+func (sauo *SLSAAttestationUpdateOne) SetNillableBuiltFromHash(s *string) *SLSAAttestationUpdateOne {
+	if s != nil {
+		sauo.SetBuiltFromHash(*s)
+	}
 	return sauo
 }
 

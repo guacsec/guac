@@ -35,9 +35,25 @@ func (csu *CertifyScorecardUpdate) SetSourceID(i int) *CertifyScorecardUpdate {
 	return csu
 }
 
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (csu *CertifyScorecardUpdate) SetNillableSourceID(i *int) *CertifyScorecardUpdate {
+	if i != nil {
+		csu.SetSourceID(*i)
+	}
+	return csu
+}
+
 // SetScorecardID sets the "scorecard_id" field.
 func (csu *CertifyScorecardUpdate) SetScorecardID(i int) *CertifyScorecardUpdate {
 	csu.mutation.SetScorecardID(i)
+	return csu
+}
+
+// SetNillableScorecardID sets the "scorecard_id" field if the given value is not nil.
+func (csu *CertifyScorecardUpdate) SetNillableScorecardID(i *int) *CertifyScorecardUpdate {
+	if i != nil {
+		csu.SetScorecardID(*i)
+	}
 	return csu
 }
 
@@ -202,9 +218,25 @@ func (csuo *CertifyScorecardUpdateOne) SetSourceID(i int) *CertifyScorecardUpdat
 	return csuo
 }
 
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (csuo *CertifyScorecardUpdateOne) SetNillableSourceID(i *int) *CertifyScorecardUpdateOne {
+	if i != nil {
+		csuo.SetSourceID(*i)
+	}
+	return csuo
+}
+
 // SetScorecardID sets the "scorecard_id" field.
 func (csuo *CertifyScorecardUpdateOne) SetScorecardID(i int) *CertifyScorecardUpdateOne {
 	csuo.mutation.SetScorecardID(i)
+	return csuo
+}
+
+// SetNillableScorecardID sets the "scorecard_id" field if the given value is not nil.
+func (csuo *CertifyScorecardUpdateOne) SetNillableScorecardID(i *int) *CertifyScorecardUpdateOne {
+	if i != nil {
+		csuo.SetScorecardID(*i)
+	}
 	return csuo
 }
 
