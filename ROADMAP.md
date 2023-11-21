@@ -1,17 +1,26 @@
 # GUAC Roadmap
 
-At a high level, the roadmap for GUAC will include
-
-- Persistent Database
-- Harden data quality issues (ingestion)
-- Associate Identity and Trust with various GUAC artifacts
-- VEX support
-- Support for license related information
-- ITE6 support via predicate dictionary
-- Evidence store for SBOMs and attestations
-- Expanded integration via graphQL interface
-  - Policy Engine
-  - CLI with expanded query support
-  - Updated UI
-  - VS code plugin
-  - Others...
+- Optimized Ent backend (with PostgreSQL) [issues](https://github.com/guacsec/guac/issues?q=is%3Aissue+is%3Aopen+ent)
+- Complete CDX VEX Support [#1148](https://github.com/guacsec/guac/issues/1148)
+- Licensing usecases
+  - CDX parser for licenses
+  - Clearly defined collector (clearlydefined.io)
+- Solve NATS ingestion size limit by referencable blobs and enable referencable blobs to evidence store [#731](https://github.com/guacsec/guac/issues/731)
+- Container layerID representation and parsing [#977](https://github.com/guacsec/guac/issues/977)
+- REST API [#1326](https://github.com/guacsec/guac/issues/1326)
+    - Vuln query (query top level package and query vuln)
+    - Unified tree diff (e.g. SBOMs diff to see where they differ)
+    - CLI plumbing from guacone to use REST API
+- Gradual data improvement/slow-ingestion usecases
+  - SBOM Dashboard for GUAC [#1483](https://github.com/guacsec/guac/issues/1483)
+  - What's the next actionable critical dependency? [#1505](https://github.com/guacsec/guac/issues/1505)
+  - "GUAC Scorecard" for artifacts/packages [#1508](https://github.com/guacsec/guac/issues/1508)
+- Enable GraphQL Pagination [#1525](https://github.com/guacsec/guac/issues/1525)
+- UI Improvements
+    - SBOM Diff visualization
+    - Click to view more details
+    - Improve high level navigation
+    - Unknown unknowns (no scorecards, no SLSA, etc. usecase)
+    - Easier to read visualizations
+    - Data representation of software tries should be easier to manage
+    - Show sizable amount of information and “show more” for extra
