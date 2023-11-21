@@ -35,9 +35,25 @@ func (snu *SourceNamespaceUpdate) SetNamespace(s string) *SourceNamespaceUpdate 
 	return snu
 }
 
+// SetNillableNamespace sets the "namespace" field if the given value is not nil.
+func (snu *SourceNamespaceUpdate) SetNillableNamespace(s *string) *SourceNamespaceUpdate {
+	if s != nil {
+		snu.SetNamespace(*s)
+	}
+	return snu
+}
+
 // SetSourceID sets the "source_id" field.
 func (snu *SourceNamespaceUpdate) SetSourceID(i int) *SourceNamespaceUpdate {
 	snu.mutation.SetSourceID(i)
+	return snu
+}
+
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (snu *SourceNamespaceUpdate) SetNillableSourceID(i *int) *SourceNamespaceUpdate {
+	if i != nil {
+		snu.SetSourceID(*i)
+	}
 	return snu
 }
 
@@ -249,9 +265,25 @@ func (snuo *SourceNamespaceUpdateOne) SetNamespace(s string) *SourceNamespaceUpd
 	return snuo
 }
 
+// SetNillableNamespace sets the "namespace" field if the given value is not nil.
+func (snuo *SourceNamespaceUpdateOne) SetNillableNamespace(s *string) *SourceNamespaceUpdateOne {
+	if s != nil {
+		snuo.SetNamespace(*s)
+	}
+	return snuo
+}
+
 // SetSourceID sets the "source_id" field.
 func (snuo *SourceNamespaceUpdateOne) SetSourceID(i int) *SourceNamespaceUpdateOne {
 	snuo.mutation.SetSourceID(i)
+	return snuo
+}
+
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (snuo *SourceNamespaceUpdateOne) SetNillableSourceID(i *int) *SourceNamespaceUpdateOne {
+	if i != nil {
+		snuo.SetSourceID(*i)
+	}
 	return snuo
 }
 

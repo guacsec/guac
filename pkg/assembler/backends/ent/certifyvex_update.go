@@ -77,9 +77,25 @@ func (cvu *CertifyVexUpdate) SetVulnerabilityID(i int) *CertifyVexUpdate {
 	return cvu
 }
 
+// SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
+func (cvu *CertifyVexUpdate) SetNillableVulnerabilityID(i *int) *CertifyVexUpdate {
+	if i != nil {
+		cvu.SetVulnerabilityID(*i)
+	}
+	return cvu
+}
+
 // SetKnownSince sets the "known_since" field.
 func (cvu *CertifyVexUpdate) SetKnownSince(t time.Time) *CertifyVexUpdate {
 	cvu.mutation.SetKnownSince(t)
+	return cvu
+}
+
+// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
+func (cvu *CertifyVexUpdate) SetNillableKnownSince(t *time.Time) *CertifyVexUpdate {
+	if t != nil {
+		cvu.SetKnownSince(*t)
+	}
 	return cvu
 }
 
@@ -89,9 +105,25 @@ func (cvu *CertifyVexUpdate) SetStatus(s string) *CertifyVexUpdate {
 	return cvu
 }
 
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (cvu *CertifyVexUpdate) SetNillableStatus(s *string) *CertifyVexUpdate {
+	if s != nil {
+		cvu.SetStatus(*s)
+	}
+	return cvu
+}
+
 // SetStatement sets the "statement" field.
 func (cvu *CertifyVexUpdate) SetStatement(s string) *CertifyVexUpdate {
 	cvu.mutation.SetStatement(s)
+	return cvu
+}
+
+// SetNillableStatement sets the "statement" field if the given value is not nil.
+func (cvu *CertifyVexUpdate) SetNillableStatement(s *string) *CertifyVexUpdate {
+	if s != nil {
+		cvu.SetStatement(*s)
+	}
 	return cvu
 }
 
@@ -101,9 +133,25 @@ func (cvu *CertifyVexUpdate) SetStatusNotes(s string) *CertifyVexUpdate {
 	return cvu
 }
 
+// SetNillableStatusNotes sets the "status_notes" field if the given value is not nil.
+func (cvu *CertifyVexUpdate) SetNillableStatusNotes(s *string) *CertifyVexUpdate {
+	if s != nil {
+		cvu.SetStatusNotes(*s)
+	}
+	return cvu
+}
+
 // SetJustification sets the "justification" field.
 func (cvu *CertifyVexUpdate) SetJustification(s string) *CertifyVexUpdate {
 	cvu.mutation.SetJustification(s)
+	return cvu
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (cvu *CertifyVexUpdate) SetNillableJustification(s *string) *CertifyVexUpdate {
+	if s != nil {
+		cvu.SetJustification(*s)
+	}
 	return cvu
 }
 
@@ -113,9 +161,25 @@ func (cvu *CertifyVexUpdate) SetOrigin(s string) *CertifyVexUpdate {
 	return cvu
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (cvu *CertifyVexUpdate) SetNillableOrigin(s *string) *CertifyVexUpdate {
+	if s != nil {
+		cvu.SetOrigin(*s)
+	}
+	return cvu
+}
+
 // SetCollector sets the "collector" field.
 func (cvu *CertifyVexUpdate) SetCollector(s string) *CertifyVexUpdate {
 	cvu.mutation.SetCollector(s)
+	return cvu
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (cvu *CertifyVexUpdate) SetNillableCollector(s *string) *CertifyVexUpdate {
+	if s != nil {
+		cvu.SetCollector(*s)
+	}
 	return cvu
 }
 
@@ -378,9 +442,25 @@ func (cvuo *CertifyVexUpdateOne) SetVulnerabilityID(i int) *CertifyVexUpdateOne 
 	return cvuo
 }
 
+// SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
+func (cvuo *CertifyVexUpdateOne) SetNillableVulnerabilityID(i *int) *CertifyVexUpdateOne {
+	if i != nil {
+		cvuo.SetVulnerabilityID(*i)
+	}
+	return cvuo
+}
+
 // SetKnownSince sets the "known_since" field.
 func (cvuo *CertifyVexUpdateOne) SetKnownSince(t time.Time) *CertifyVexUpdateOne {
 	cvuo.mutation.SetKnownSince(t)
+	return cvuo
+}
+
+// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
+func (cvuo *CertifyVexUpdateOne) SetNillableKnownSince(t *time.Time) *CertifyVexUpdateOne {
+	if t != nil {
+		cvuo.SetKnownSince(*t)
+	}
 	return cvuo
 }
 
@@ -390,9 +470,25 @@ func (cvuo *CertifyVexUpdateOne) SetStatus(s string) *CertifyVexUpdateOne {
 	return cvuo
 }
 
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (cvuo *CertifyVexUpdateOne) SetNillableStatus(s *string) *CertifyVexUpdateOne {
+	if s != nil {
+		cvuo.SetStatus(*s)
+	}
+	return cvuo
+}
+
 // SetStatement sets the "statement" field.
 func (cvuo *CertifyVexUpdateOne) SetStatement(s string) *CertifyVexUpdateOne {
 	cvuo.mutation.SetStatement(s)
+	return cvuo
+}
+
+// SetNillableStatement sets the "statement" field if the given value is not nil.
+func (cvuo *CertifyVexUpdateOne) SetNillableStatement(s *string) *CertifyVexUpdateOne {
+	if s != nil {
+		cvuo.SetStatement(*s)
+	}
 	return cvuo
 }
 
@@ -402,9 +498,25 @@ func (cvuo *CertifyVexUpdateOne) SetStatusNotes(s string) *CertifyVexUpdateOne {
 	return cvuo
 }
 
+// SetNillableStatusNotes sets the "status_notes" field if the given value is not nil.
+func (cvuo *CertifyVexUpdateOne) SetNillableStatusNotes(s *string) *CertifyVexUpdateOne {
+	if s != nil {
+		cvuo.SetStatusNotes(*s)
+	}
+	return cvuo
+}
+
 // SetJustification sets the "justification" field.
 func (cvuo *CertifyVexUpdateOne) SetJustification(s string) *CertifyVexUpdateOne {
 	cvuo.mutation.SetJustification(s)
+	return cvuo
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (cvuo *CertifyVexUpdateOne) SetNillableJustification(s *string) *CertifyVexUpdateOne {
+	if s != nil {
+		cvuo.SetJustification(*s)
+	}
 	return cvuo
 }
 
@@ -414,9 +526,25 @@ func (cvuo *CertifyVexUpdateOne) SetOrigin(s string) *CertifyVexUpdateOne {
 	return cvuo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (cvuo *CertifyVexUpdateOne) SetNillableOrigin(s *string) *CertifyVexUpdateOne {
+	if s != nil {
+		cvuo.SetOrigin(*s)
+	}
+	return cvuo
+}
+
 // SetCollector sets the "collector" field.
 func (cvuo *CertifyVexUpdateOne) SetCollector(s string) *CertifyVexUpdateOne {
 	cvuo.mutation.SetCollector(s)
+	return cvuo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (cvuo *CertifyVexUpdateOne) SetNillableCollector(s *string) *CertifyVexUpdateOne {
+	if s != nil {
+		cvuo.SetCollector(*s)
+	}
 	return cvuo
 }
 

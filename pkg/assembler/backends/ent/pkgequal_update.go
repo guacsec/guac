@@ -34,9 +34,25 @@ func (peu *PkgEqualUpdate) SetOrigin(s string) *PkgEqualUpdate {
 	return peu
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (peu *PkgEqualUpdate) SetNillableOrigin(s *string) *PkgEqualUpdate {
+	if s != nil {
+		peu.SetOrigin(*s)
+	}
+	return peu
+}
+
 // SetCollector sets the "collector" field.
 func (peu *PkgEqualUpdate) SetCollector(s string) *PkgEqualUpdate {
 	peu.mutation.SetCollector(s)
+	return peu
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (peu *PkgEqualUpdate) SetNillableCollector(s *string) *PkgEqualUpdate {
+	if s != nil {
+		peu.SetCollector(*s)
+	}
 	return peu
 }
 
@@ -46,9 +62,25 @@ func (peu *PkgEqualUpdate) SetJustification(s string) *PkgEqualUpdate {
 	return peu
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (peu *PkgEqualUpdate) SetNillableJustification(s *string) *PkgEqualUpdate {
+	if s != nil {
+		peu.SetJustification(*s)
+	}
+	return peu
+}
+
 // SetPackagesHash sets the "packages_hash" field.
 func (peu *PkgEqualUpdate) SetPackagesHash(s string) *PkgEqualUpdate {
 	peu.mutation.SetPackagesHash(s)
+	return peu
+}
+
+// SetNillablePackagesHash sets the "packages_hash" field if the given value is not nil.
+func (peu *PkgEqualUpdate) SetNillablePackagesHash(s *string) *PkgEqualUpdate {
+	if s != nil {
+		peu.SetPackagesHash(*s)
+	}
 	return peu
 }
 
@@ -212,9 +244,25 @@ func (peuo *PkgEqualUpdateOne) SetOrigin(s string) *PkgEqualUpdateOne {
 	return peuo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (peuo *PkgEqualUpdateOne) SetNillableOrigin(s *string) *PkgEqualUpdateOne {
+	if s != nil {
+		peuo.SetOrigin(*s)
+	}
+	return peuo
+}
+
 // SetCollector sets the "collector" field.
 func (peuo *PkgEqualUpdateOne) SetCollector(s string) *PkgEqualUpdateOne {
 	peuo.mutation.SetCollector(s)
+	return peuo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (peuo *PkgEqualUpdateOne) SetNillableCollector(s *string) *PkgEqualUpdateOne {
+	if s != nil {
+		peuo.SetCollector(*s)
+	}
 	return peuo
 }
 
@@ -224,9 +272,25 @@ func (peuo *PkgEqualUpdateOne) SetJustification(s string) *PkgEqualUpdateOne {
 	return peuo
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (peuo *PkgEqualUpdateOne) SetNillableJustification(s *string) *PkgEqualUpdateOne {
+	if s != nil {
+		peuo.SetJustification(*s)
+	}
+	return peuo
+}
+
 // SetPackagesHash sets the "packages_hash" field.
 func (peuo *PkgEqualUpdateOne) SetPackagesHash(s string) *PkgEqualUpdateOne {
 	peuo.mutation.SetPackagesHash(s)
+	return peuo
+}
+
+// SetNillablePackagesHash sets the "packages_hash" field if the given value is not nil.
+func (peuo *PkgEqualUpdateOne) SetNillablePackagesHash(s *string) *PkgEqualUpdateOne {
+	if s != nil {
+		peuo.SetPackagesHash(*s)
+	}
 	return peuo
 }
 

@@ -34,15 +34,39 @@ func (heu *HashEqualUpdate) SetOrigin(s string) *HashEqualUpdate {
 	return heu
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (heu *HashEqualUpdate) SetNillableOrigin(s *string) *HashEqualUpdate {
+	if s != nil {
+		heu.SetOrigin(*s)
+	}
+	return heu
+}
+
 // SetCollector sets the "collector" field.
 func (heu *HashEqualUpdate) SetCollector(s string) *HashEqualUpdate {
 	heu.mutation.SetCollector(s)
 	return heu
 }
 
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (heu *HashEqualUpdate) SetNillableCollector(s *string) *HashEqualUpdate {
+	if s != nil {
+		heu.SetCollector(*s)
+	}
+	return heu
+}
+
 // SetJustification sets the "justification" field.
 func (heu *HashEqualUpdate) SetJustification(s string) *HashEqualUpdate {
 	heu.mutation.SetJustification(s)
+	return heu
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (heu *HashEqualUpdate) SetNillableJustification(s *string) *HashEqualUpdate {
+	if s != nil {
+		heu.SetJustification(*s)
+	}
 	return heu
 }
 
@@ -203,15 +227,39 @@ func (heuo *HashEqualUpdateOne) SetOrigin(s string) *HashEqualUpdateOne {
 	return heuo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (heuo *HashEqualUpdateOne) SetNillableOrigin(s *string) *HashEqualUpdateOne {
+	if s != nil {
+		heuo.SetOrigin(*s)
+	}
+	return heuo
+}
+
 // SetCollector sets the "collector" field.
 func (heuo *HashEqualUpdateOne) SetCollector(s string) *HashEqualUpdateOne {
 	heuo.mutation.SetCollector(s)
 	return heuo
 }
 
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (heuo *HashEqualUpdateOne) SetNillableCollector(s *string) *HashEqualUpdateOne {
+	if s != nil {
+		heuo.SetCollector(*s)
+	}
+	return heuo
+}
+
 // SetJustification sets the "justification" field.
 func (heuo *HashEqualUpdateOne) SetJustification(s string) *HashEqualUpdateOne {
 	heuo.mutation.SetJustification(s)
+	return heuo
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (heuo *HashEqualUpdateOne) SetNillableJustification(s *string) *HashEqualUpdateOne {
+	if s != nil {
+		heuo.SetJustification(*s)
+	}
 	return heuo
 }
 

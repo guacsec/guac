@@ -36,9 +36,25 @@ func (ou *OccurrenceUpdate) SetArtifactID(i int) *OccurrenceUpdate {
 	return ou
 }
 
+// SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
+func (ou *OccurrenceUpdate) SetNillableArtifactID(i *int) *OccurrenceUpdate {
+	if i != nil {
+		ou.SetArtifactID(*i)
+	}
+	return ou
+}
+
 // SetJustification sets the "justification" field.
 func (ou *OccurrenceUpdate) SetJustification(s string) *OccurrenceUpdate {
 	ou.mutation.SetJustification(s)
+	return ou
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (ou *OccurrenceUpdate) SetNillableJustification(s *string) *OccurrenceUpdate {
+	if s != nil {
+		ou.SetJustification(*s)
+	}
 	return ou
 }
 
@@ -48,9 +64,25 @@ func (ou *OccurrenceUpdate) SetOrigin(s string) *OccurrenceUpdate {
 	return ou
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (ou *OccurrenceUpdate) SetNillableOrigin(s *string) *OccurrenceUpdate {
+	if s != nil {
+		ou.SetOrigin(*s)
+	}
+	return ou
+}
+
 // SetCollector sets the "collector" field.
 func (ou *OccurrenceUpdate) SetCollector(s string) *OccurrenceUpdate {
 	ou.mutation.SetCollector(s)
+	return ou
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (ou *OccurrenceUpdate) SetNillableCollector(s *string) *OccurrenceUpdate {
+	if s != nil {
+		ou.SetCollector(*s)
+	}
 	return ou
 }
 
@@ -301,9 +333,25 @@ func (ouo *OccurrenceUpdateOne) SetArtifactID(i int) *OccurrenceUpdateOne {
 	return ouo
 }
 
+// SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
+func (ouo *OccurrenceUpdateOne) SetNillableArtifactID(i *int) *OccurrenceUpdateOne {
+	if i != nil {
+		ouo.SetArtifactID(*i)
+	}
+	return ouo
+}
+
 // SetJustification sets the "justification" field.
 func (ouo *OccurrenceUpdateOne) SetJustification(s string) *OccurrenceUpdateOne {
 	ouo.mutation.SetJustification(s)
+	return ouo
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (ouo *OccurrenceUpdateOne) SetNillableJustification(s *string) *OccurrenceUpdateOne {
+	if s != nil {
+		ouo.SetJustification(*s)
+	}
 	return ouo
 }
 
@@ -313,9 +361,25 @@ func (ouo *OccurrenceUpdateOne) SetOrigin(s string) *OccurrenceUpdateOne {
 	return ouo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (ouo *OccurrenceUpdateOne) SetNillableOrigin(s *string) *OccurrenceUpdateOne {
+	if s != nil {
+		ouo.SetOrigin(*s)
+	}
+	return ouo
+}
+
 // SetCollector sets the "collector" field.
 func (ouo *OccurrenceUpdateOne) SetCollector(s string) *OccurrenceUpdateOne {
 	ouo.mutation.SetCollector(s)
+	return ouo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (ouo *OccurrenceUpdateOne) SetNillableCollector(s *string) *OccurrenceUpdateOne {
+	if s != nil {
+		ouo.SetCollector(*s)
+	}
 	return ouo
 }
 

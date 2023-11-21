@@ -84,9 +84,25 @@ func (su *ScorecardUpdate) SetScorecardVersion(s string) *ScorecardUpdate {
 	return su
 }
 
+// SetNillableScorecardVersion sets the "scorecard_version" field if the given value is not nil.
+func (su *ScorecardUpdate) SetNillableScorecardVersion(s *string) *ScorecardUpdate {
+	if s != nil {
+		su.SetScorecardVersion(*s)
+	}
+	return su
+}
+
 // SetScorecardCommit sets the "scorecard_commit" field.
 func (su *ScorecardUpdate) SetScorecardCommit(s string) *ScorecardUpdate {
 	su.mutation.SetScorecardCommit(s)
+	return su
+}
+
+// SetNillableScorecardCommit sets the "scorecard_commit" field if the given value is not nil.
+func (su *ScorecardUpdate) SetNillableScorecardCommit(s *string) *ScorecardUpdate {
+	if s != nil {
+		su.SetScorecardCommit(*s)
+	}
 	return su
 }
 
@@ -96,9 +112,25 @@ func (su *ScorecardUpdate) SetOrigin(s string) *ScorecardUpdate {
 	return su
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (su *ScorecardUpdate) SetNillableOrigin(s *string) *ScorecardUpdate {
+	if s != nil {
+		su.SetOrigin(*s)
+	}
+	return su
+}
+
 // SetCollector sets the "collector" field.
 func (su *ScorecardUpdate) SetCollector(s string) *ScorecardUpdate {
 	su.mutation.SetCollector(s)
+	return su
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (su *ScorecardUpdate) SetNillableCollector(s *string) *ScorecardUpdate {
+	if s != nil {
+		su.SetCollector(*s)
+	}
 	return su
 }
 
@@ -326,9 +358,25 @@ func (suo *ScorecardUpdateOne) SetScorecardVersion(s string) *ScorecardUpdateOne
 	return suo
 }
 
+// SetNillableScorecardVersion sets the "scorecard_version" field if the given value is not nil.
+func (suo *ScorecardUpdateOne) SetNillableScorecardVersion(s *string) *ScorecardUpdateOne {
+	if s != nil {
+		suo.SetScorecardVersion(*s)
+	}
+	return suo
+}
+
 // SetScorecardCommit sets the "scorecard_commit" field.
 func (suo *ScorecardUpdateOne) SetScorecardCommit(s string) *ScorecardUpdateOne {
 	suo.mutation.SetScorecardCommit(s)
+	return suo
+}
+
+// SetNillableScorecardCommit sets the "scorecard_commit" field if the given value is not nil.
+func (suo *ScorecardUpdateOne) SetNillableScorecardCommit(s *string) *ScorecardUpdateOne {
+	if s != nil {
+		suo.SetScorecardCommit(*s)
+	}
 	return suo
 }
 
@@ -338,9 +386,25 @@ func (suo *ScorecardUpdateOne) SetOrigin(s string) *ScorecardUpdateOne {
 	return suo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (suo *ScorecardUpdateOne) SetNillableOrigin(s *string) *ScorecardUpdateOne {
+	if s != nil {
+		suo.SetOrigin(*s)
+	}
+	return suo
+}
+
 // SetCollector sets the "collector" field.
 func (suo *ScorecardUpdateOne) SetCollector(s string) *ScorecardUpdateOne {
 	suo.mutation.SetCollector(s)
+	return suo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (suo *ScorecardUpdateOne) SetNillableCollector(s *string) *ScorecardUpdateOne {
+	if s != nil {
+		suo.SetCollector(*s)
+	}
 	return suo
 }
 

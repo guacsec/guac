@@ -34,15 +34,39 @@ func (veu *VulnEqualUpdate) SetJustification(s string) *VulnEqualUpdate {
 	return veu
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (veu *VulnEqualUpdate) SetNillableJustification(s *string) *VulnEqualUpdate {
+	if s != nil {
+		veu.SetJustification(*s)
+	}
+	return veu
+}
+
 // SetOrigin sets the "origin" field.
 func (veu *VulnEqualUpdate) SetOrigin(s string) *VulnEqualUpdate {
 	veu.mutation.SetOrigin(s)
 	return veu
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (veu *VulnEqualUpdate) SetNillableOrigin(s *string) *VulnEqualUpdate {
+	if s != nil {
+		veu.SetOrigin(*s)
+	}
+	return veu
+}
+
 // SetCollector sets the "collector" field.
 func (veu *VulnEqualUpdate) SetCollector(s string) *VulnEqualUpdate {
 	veu.mutation.SetCollector(s)
+	return veu
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (veu *VulnEqualUpdate) SetNillableCollector(s *string) *VulnEqualUpdate {
+	if s != nil {
+		veu.SetCollector(*s)
+	}
 	return veu
 }
 
@@ -203,15 +227,39 @@ func (veuo *VulnEqualUpdateOne) SetJustification(s string) *VulnEqualUpdateOne {
 	return veuo
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (veuo *VulnEqualUpdateOne) SetNillableJustification(s *string) *VulnEqualUpdateOne {
+	if s != nil {
+		veuo.SetJustification(*s)
+	}
+	return veuo
+}
+
 // SetOrigin sets the "origin" field.
 func (veuo *VulnEqualUpdateOne) SetOrigin(s string) *VulnEqualUpdateOne {
 	veuo.mutation.SetOrigin(s)
 	return veuo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (veuo *VulnEqualUpdateOne) SetNillableOrigin(s *string) *VulnEqualUpdateOne {
+	if s != nil {
+		veuo.SetOrigin(*s)
+	}
+	return veuo
+}
+
 // SetCollector sets the "collector" field.
 func (veuo *VulnEqualUpdateOne) SetCollector(s string) *VulnEqualUpdateOne {
 	veuo.mutation.SetCollector(s)
+	return veuo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (veuo *VulnEqualUpdateOne) SetNillableCollector(s *string) *VulnEqualUpdateOne {
+	if s != nil {
+		veuo.SetCollector(*s)
+	}
 	return veuo
 }
 

@@ -34,6 +34,14 @@ func (lu *LicenseUpdate) SetName(s string) *LicenseUpdate {
 	return lu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (lu *LicenseUpdate) SetNillableName(s *string) *LicenseUpdate {
+	if s != nil {
+		lu.SetName(*s)
+	}
+	return lu
+}
+
 // SetInline sets the "inline" field.
 func (lu *LicenseUpdate) SetInline(s string) *LicenseUpdate {
 	lu.mutation.SetInline(s)
@@ -328,6 +336,14 @@ type LicenseUpdateOne struct {
 // SetName sets the "name" field.
 func (luo *LicenseUpdateOne) SetName(s string) *LicenseUpdateOne {
 	luo.mutation.SetName(s)
+	return luo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (luo *LicenseUpdateOne) SetNillableName(s *string) *LicenseUpdateOne {
+	if s != nil {
+		luo.SetName(*s)
+	}
 	return luo
 }
 
