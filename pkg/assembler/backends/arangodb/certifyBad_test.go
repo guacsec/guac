@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -642,22 +640,52 @@ func TestCertifyBad(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					if test.QueryPkgID {
+						test.Query = &model.CertifyBadSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Package: &model.PkgSpec{
+									ID: ptrfrom.String(pkgIDs.PackageVersionID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if srcIDs, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
+				} else {
+					if test.QuerySourceID {
+						test.Query = &model.CertifyBadSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Source: &model.SourceSpec{
+									ID: ptrfrom.String(srcIDs.SourceNameID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if artID, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
+				} else {
+					if test.QueryArtID {
+						test.Query = &model.CertifyBadSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Artifact: &model.ArtifactSpec{
+									ID: ptrfrom.String(artID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB)
+				cbID, err := b.IngestCertifyBadID(ctx, o.Sub, o.Match, *o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -666,40 +694,7 @@ func TestCertifyBad(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.CertifyBadSpec{
-						ID: ptrfrom.String(found.ID),
-					}
-				}
-				if test.QueryPkgID {
-					if _, ok := found.Subject.(*model.Package); ok {
-						test.Query = &model.CertifyBadSpec{
-							Subject: &model.PackageSourceOrArtifactSpec{
-								Package: &model.PkgSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QuerySourceID {
-					if _, ok := found.Subject.(*model.Source); ok {
-						test.Query = &model.CertifyBadSpec{
-							Subject: &model.PackageSourceOrArtifactSpec{
-								Source: &model.SourceSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Source).Namespaces[0].Names[0].ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QueryArtID {
-					if _, ok := found.Subject.(*model.Artifact); ok {
-						test.Query = &model.CertifyBadSpec{
-							Subject: &model.PackageSourceOrArtifactSpec{
-								Artifact: &model.ArtifactSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Artifact).ID),
-								},
-							},
-						}
+						ID: ptrfrom.String(cbID),
 					}
 				}
 			}
@@ -1000,7 +995,7 @@ func TestIngestCertifyBads(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyBads(ctx, o.Sub, o.Match, o.CB)
+				_, err := b.IngestCertifyBadIDs(ctx, o.Sub, o.Match, o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1218,7 +1213,7 @@ func Test_buildCertifyBadByID(t *testing.T) {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
-			found, err := b.IngestCertifyBad(ctx, test.Call.Sub, test.Call.Match, *test.Call.CB)
+			cbID, err := b.IngestCertifyBadID(ctx, test.Call.Sub, test.Call.Match, *test.Call.CB)
 			if (err != nil) != test.ExpIngestErr {
 				t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 			}
@@ -1226,7 +1221,7 @@ func Test_buildCertifyBadByID(t *testing.T) {
 				return
 			}
 
-			got, err := b.(*arangoClient).buildCertifyBadByID(ctx, found.ID, test.Query)
+			got, err := b.(*arangoClient).buildCertifyBadByID(ctx, cbID, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
