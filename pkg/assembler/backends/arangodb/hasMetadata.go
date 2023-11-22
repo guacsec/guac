@@ -190,7 +190,7 @@ func getSrcHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return getHasMetadataFromCursor(ctx, cursor)
+	return getHasMetadataFromCursor(ctx, cursor, false)
 }
 
 func getArtHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.HasMetadata, error) {
@@ -216,7 +216,7 @@ func getArtHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return getHasMetadataFromCursor(ctx, cursor)
+	return getHasMetadataFromCursor(ctx, cursor, false)
 }
 
 func getPkgHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any, includeDepPkgVersion bool) ([]*model.HasMetadata, error) {
@@ -270,7 +270,7 @@ func getPkgHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return getHasMetadataFromCursor(ctx, cursor)
+	return getHasMetadataFromCursor(ctx, cursor, false)
 }
 
 func setHasMetadataMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasMetadataSpec *model.HasMetadataSpec, queryValues map[string]any) {
@@ -332,32 +332,18 @@ func getHasMetadataQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 	return values
 }
 
-func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
+func (c *arangoClient) IngestHasMetadataID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
+	var cursor driver.Cursor
+	var err error
 	if subject.Package != nil {
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
 			query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
-			  FILTER pVersion.guacKey == @pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
+			  FILTER pVersion.guacKey == @pkgVersionGuacKey	
 			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
 			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
+			  'version_key': pVersion._key
 			}
 		)
 		  
@@ -365,119 +351,57 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 			  UPSERT {  packageID:firstPkg.version_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
 				  INSERT {  packageID:firstPkg.version_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
 				  UPDATE {} IN hasMetadataCollection
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("hasMetadataPkgVersionEdges", firstPkg.versionDoc._key, hasMetadata._key), _from: firstPkg.version_id, _to: hasMetadata._id } INTO hasMetadataPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("hasMetadataPkgVersionEdges", firstPkg.version_key, hasMetadata._key), _from: firstPkg.version_id, _to: hasMetadata._id } INTO hasMetadataPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'hasMetadata_id': hasMetadata._id,
-			'key': hasMetadata.key,
-			'value': hasMetadata.value,
-			'timestamp': hasMetadata.timestamp,
-			'justification': hasMetadata.justification,
-			'collector': hasMetadata.collector,
-			'origin': hasMetadata.origin  
-		  }`
+		  RETURN { 'hasMetadata_id': hasMetadata._id }`
 
-			cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(subject.Package, pkgMatchType, nil, nil, &hasMetadata), "IngestHasMetadata - PkgVersion")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(subject.Package, pkgMatchType, nil, nil, &hasMetadata), "IngestHasMetadata - PkgVersion")
 			if err != nil {
-				return nil, fmt.Errorf("failed to ingest package hasMetadata: %w", err)
+				return "", fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
 			defer cursor.Close()
 
-			hasMetadataList, err := getHasMetadataFromCursor(ctx, cursor)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
-			}
-
-			if len(hasMetadataList) == 1 {
-				return hasMetadataList[0], nil
-			} else {
-				return nil, fmt.Errorf("number of hasMetadata ingested is greater than one")
-			}
 		} else {
 			query := `
 			LET firstPkg = FIRST(
 				FOR pName in pkgNames
-				  FILTER pName.guacKey == @pkgNameGuacKey
-				FOR pNs in pkgNamespaces
-				  FILTER pNs._id == pName._parent
-				FOR pType in pkgTypes
-				  FILTER pType._id == pNs._parent
-		
-				RETURN {
-				  'typeID': pType._id,
-				  'type': pType.type,
-				  'namespace_id': pNs._id,
-				  'namespace': pNs.namespace,
-				  'name_id': pName._id,
-				  'name': pName.name,
-				  'nameDoc': pName
-				}
+				  FILTER pName.guacKey == @pkgNameGuacKey		
+				  RETURN {
+					'name_id': pName._id,
+					'name_key': pName._key,
+				  }
 			)
 			  
 			  LET hasMetadata = FIRST(
 				  UPSERT {  packageID:firstPkg.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
 					  INSERT {  packageID:firstPkg.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
 					  UPDATE {} IN hasMetadataCollection
-					  RETURN NEW
+					  RETURN {
+						'_id': NEW._id,
+						'_key': NEW._key
+					  }
 			  )
 			  
 			  LET edgeCollection = (
-				INSERT {  _key: CONCAT("hasMetadataPkgNameEdges", firstPkg.nameDoc._key, hasMetadata._key), _from: firstPkg.name_id, _to: hasMetadata._id } INTO hasMetadataPkgNameEdges OPTIONS { overwriteMode: "ignore" }
+				INSERT {  _key: CONCAT("hasMetadataPkgNameEdges", firstPkg.name_key, hasMetadata._key), _from: firstPkg.name_id, _to: hasMetadata._id } INTO hasMetadataPkgNameEdges OPTIONS { overwriteMode: "ignore" }
 			  )
 			  
-			  RETURN {
-				'pkgVersion': {
-					'type_id': firstPkg.typeID,
-					'type': firstPkg.type,
-					'namespace_id': firstPkg.namespace_id,
-					'namespace': firstPkg.namespace,
-					'name_id': firstPkg.name_id,
-					'name': firstPkg.name
-				},
-				'hasMetadata_id': hasMetadata._id,
-			    'key': hasMetadata.key,
-			    'value': hasMetadata.value,
-			 	'timestamp': hasMetadata.timestamp,
-				'justification': hasMetadata.justification,
-				'collector': hasMetadata.collector,
-				'origin': hasMetadata.origin  
-			  }`
+			  RETURN { 'hasMetadata_id': hasMetadata._id }`
 
-			cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(subject.Package, pkgMatchType, nil, nil, &hasMetadata), "IngestHasMetadata - PkgName")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(subject.Package, pkgMatchType, nil, nil, &hasMetadata), "IngestHasMetadata - PkgName")
 			if err != nil {
-				return nil, fmt.Errorf("failed to ingest package hasMetadata: %w", err)
+				return "", fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
 			defer cursor.Close()
-
-			hasMetadataList, err := getHasMetadataFromCursor(ctx, cursor)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
-			}
-
-			if len(hasMetadataList) == 1 {
-				return hasMetadataList[0], nil
-			} else {
-				return nil, fmt.Errorf("number of hasMetadata ingested is greater than one")
-			}
 		}
-
 	} else if subject.Artifact != nil {
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
@@ -485,120 +409,74 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 			UPSERT { artifactID:artifact._id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
 				INSERT { artifactID:artifact._id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
 				UPDATE {} IN hasMetadataCollection
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		LET edgeCollection = (
 		  INSERT {  _key: CONCAT("hasMetadataArtEdges", artifact._key, hasMetadata._key), _from: artifact._id, _to: hasMetadata._id } INTO hasMetadataArtEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
-		RETURN {
-		  'artifact': {
-			  'id': artifact._id,
-			  'algorithm': artifact.algorithm,
-			  'digest': artifact.digest
-		  },
-		  'hasMetadata_id': hasMetadata._id,
-		  'key': hasMetadata.key,
-		  'value': hasMetadata.value,
-		  'timestamp': hasMetadata.timestamp,
-		  'justification': hasMetadata.justification,
-		  'collector': hasMetadata.collector,
-		  'origin': hasMetadata.origin  
-		}`
+		RETURN { 'hasMetadata_id': hasMetadata._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(nil, nil, subject.Artifact, nil, &hasMetadata), "IngestHasMetadata - artifact")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(nil, nil, subject.Artifact, nil, &hasMetadata), "IngestHasMetadata - artifact")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest artifact hasMetadata: %w", err)
+			return "", fmt.Errorf("failed to ingest artifact hasMetadata: %w", err)
 		}
 		defer cursor.Close()
-		hasMetadataList, err := getHasMetadataFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
-		}
-
-		if len(hasMetadataList) == 1 {
-			return hasMetadataList[0], nil
-		} else {
-			return nil, fmt.Errorf("number of hasMetadata ingested is greater than one")
-		}
-
 	} else if subject.Source != nil {
 		query := `
 		LET firstSrc = FIRST(
 			FOR sName in srcNames
 			  FILTER sName.guacKey == @srcNameGuacKey
-			FOR sNs in srcNamespaces
-			  FILTER sNs._id == sName._parent
-			FOR sType in srcTypes
-			  FILTER sType._id == sNs._parent
-	
-			RETURN {
-			  'typeID': sType._id,
-			  'type': sType.type,
-			  'namespace_id': sNs._id,
-			  'namespace': sNs.namespace,
-			  'name_id': sName._id,
-			  'name': sName.name,
-			  'commit': sName.commit,
-			  'tag': sName.tag,
-			  'nameDoc': sName
-			}
+			  RETURN {
+				'name_id': sName._id,
+				'name_key': sName._key,
+			  }
 		)
 		  
 		LET hasMetadata = FIRST(
 			UPSERT { sourceID:firstSrc.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
 				INSERT { sourceID:firstSrc.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
 				UPDATE {} IN hasMetadataCollection
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		LET edgeCollection = (
-		  INSERT {  _key: CONCAT("hasMetadataSrcEdges", firstSrc.nameDoc._key, hasMetadata._key), _from: firstSrc.name_id, _to: hasMetadata._id } INTO hasMetadataSrcEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT {  _key: CONCAT("hasMetadataSrcEdges", firstSrc.name_key, hasMetadata._key), _from: firstSrc.name_id, _to: hasMetadata._id } INTO hasMetadataSrcEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
-		RETURN {
-		  'srcName': {
-			  'type_id': firstSrc.typeID,
-			  'type': firstSrc.type,
-			  'namespace_id': firstSrc.namespace_id,
-			  'namespace': firstSrc.namespace,
-			  'name_id': firstSrc.name_id,
-			  'name': firstSrc.name,
-			  'commit': firstSrc.commit,
-			  'tag': firstSrc.tag
-		  },
-		  'hasMetadata_id': hasMetadata._id,
-		  'key': hasMetadata.key,
-		  'value': hasMetadata.value,
-		  'timestamp': hasMetadata.timestamp,
-		  'justification': hasMetadata.justification,
-		  'collector': hasMetadata.collector,
-		  'origin': hasMetadata.origin  
-		}`
+		RETURN { 'hasMetadata_id': hasMetadata._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(nil, nil, nil, subject.Source, &hasMetadata), "IngestHasMetadata - source")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(nil, nil, nil, subject.Source, &hasMetadata), "IngestHasMetadata - source")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest source hasMetadata: %w", err)
+			return "", fmt.Errorf("failed to ingest source hasMetadata: %w", err)
 		}
 		defer cursor.Close()
-		hasMetadataList, err := getHasMetadataFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
-		}
-
-		if len(hasMetadataList) == 1 {
-			return hasMetadataList[0], nil
-		} else {
-			return nil, fmt.Errorf("number of hasMetadata ingested is greater than one")
-		}
-
 	} else {
-		return nil, fmt.Errorf("package, artifact, or source is specified for IngestHasMetadata")
+		return "", fmt.Errorf("package, artifact, or source is specified for IngestHasMetadata")
+	}
+
+	hasMetadataList, err := getHasMetadataFromCursor(ctx, cursor, true)
+	if err != nil {
+		return "", fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
+	}
+
+	if len(hasMetadataList) == 1 {
+		return hasMetadataList[0].ID, nil
+	} else {
+		return "", fmt.Errorf("number of hasMetadata ingested is greater than one")
 	}
 }
 
 func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
+	var cursor driver.Cursor
+	var err error
 	if len(subjects.Packages) > 0 {
 		var listOfValues []map[string]any
 
@@ -629,28 +507,13 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 		sb.WriteString("]")
 
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			query := `LET firstPkg = FIRST(
+			query := `
+			LET firstPkg = FIRST(
 				FOR pVersion in pkgVersions
 				  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-				FOR pName in pkgNames
-				  FILTER pName._id == pVersion._parent
-				FOR pNs in pkgNamespaces
-				  FILTER pNs._id == pName._parent
-				FOR pType in pkgTypes
-				  FILTER pType._id == pNs._parent
-		
 				RETURN {
-				  'typeID': pType._id,
-				  'type': pType.type,
-				  'namespace_id': pNs._id,
-				  'namespace': pNs.namespace,
-				  'name_id': pName._id,
-				  'name': pName.name,
 				  'version_id': pVersion._id,
-				  'version': pVersion.version,
-				  'subpath': pVersion.subpath,
-				  'qualifier_list': pVersion.qualifier_list,
-				  'versionDoc': pVersion
+				  'version_key': pVersion._key
 				}
 			)
 			  
@@ -658,73 +521,34 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 				  UPSERT {  packageID:firstPkg.version_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 					  INSERT {  packageID:firstPkg.version_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 					  UPDATE {} IN hasMetadataCollection
-					  RETURN NEW
+					  RETURN {
+						'_id': NEW._id,
+						'_key': NEW._key
+					  }
 			  )
 			  
 			  LET edgeCollection = (
-				INSERT {  _key: CONCAT("hasMetadataPkgVersionEdges", firstPkg.versionDoc._key, hasMetadata._key), _from: firstPkg.version_id, _to: hasMetadata._id } INTO hasMetadataPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
+				INSERT {  _key: CONCAT("hasMetadataPkgVersionEdges", firstPkg.version_key, hasMetadata._key), _from: firstPkg.version_id, _to: hasMetadata._id } INTO hasMetadataPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
 			  )
 			  
-			  RETURN {
-				'pkgVersion': {
-					'type_id': firstPkg.typeID,
-					'type': firstPkg.type,
-					'namespace_id': firstPkg.namespace_id,
-					'namespace': firstPkg.namespace,
-					'name_id': firstPkg.name_id,
-					'name': firstPkg.name,
-					'version_id': firstPkg.version_id,
-					'version': firstPkg.version,
-					'subpath': firstPkg.subpath,
-					'qualifier_list': firstPkg.qualifier_list
-				},
-				'hasMetadata_id': hasMetadata._id,
-				'key': hasMetadata.key,
-				'value': hasMetadata.value,
-				'timestamp': hasMetadata.timestamp,
-				'justification': hasMetadata.justification,
-				'collector': hasMetadata.collector,
-				'origin': hasMetadata.origin  
-			  }`
+			  RETURN { 'hasMetadata_id': hasMetadata._id }`
 
 			sb.WriteString(query)
 
-			cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBulkHasMetadata - PkgVersion")
+			cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBulkHasMetadata - PkgVersion")
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
 			defer cursor.Close()
-
-			ingestHasMetadataList, err := getHasMetadataFromCursor(ctx, cursor)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
-			}
-
-			var hasMetadataIDList []string
-			for _, ingestedHasMetadata := range ingestHasMetadataList {
-				hasMetadataIDList = append(hasMetadataIDList, ingestedHasMetadata.ID)
-			}
-
-			return hasMetadataIDList, nil
 
 		} else {
 			query := `
 			LET firstPkg = FIRST(
 				FOR pName in pkgNames
 				  FILTER pName.guacKey == doc.pkgNameGuacKey
-				FOR pNs in pkgNamespaces
-				  FILTER pNs._id == pName._parent
-				FOR pType in pkgTypes
-				  FILTER pType._id == pNs._parent
-		
 				RETURN {
-				  'typeID': pType._id,
-				  'type': pType.type,
-				  'namespace_id': pNs._id,
-				  'namespace': pNs.namespace,
 				  'name_id': pName._id,
-				  'name': pName.name,
-				  'nameDoc': pName
+				  'name_key': pName._key
 				}
 			)
 			  
@@ -732,52 +556,26 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 				  UPSERT {  packageID:firstPkg.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 					  INSERT {  packageID:firstPkg.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 					  UPDATE {} IN hasMetadataCollection
-					  RETURN NEW
+					  RETURN {
+						'_id': NEW._id,
+						'_key': NEW._key
+					}
 			  )
 			  
 			  LET edgeCollection = (
-				INSERT {  _key: CONCAT("hasMetadataPkgNameEdges", firstPkg.nameDoc._key, hasMetadata._key), _from: firstPkg.name_id, _to: hasMetadata._id } INTO hasMetadataPkgNameEdges OPTIONS { overwriteMode: "ignore" }
+				INSERT {  _key: CONCAT("hasMetadataPkgNameEdges", firstPkg.name_key, hasMetadata._key), _from: firstPkg.name_id, _to: hasMetadata._id } INTO hasMetadataPkgNameEdges OPTIONS { overwriteMode: "ignore" }
 			  )
 			  
-			  RETURN {
-				'pkgVersion': {
-					'type_id': firstPkg.typeID,
-					'type': firstPkg.type,
-					'namespace_id': firstPkg.namespace_id,
-					'namespace': firstPkg.namespace,
-					'name_id': firstPkg.name_id,
-					'name': firstPkg.name
-				},
-				'hasMetadata_id': hasMetadata._id,
-			    'key': hasMetadata.key,
-			    'value': hasMetadata.value,
-			 	'timestamp': hasMetadata.timestamp,
-				'justification': hasMetadata.justification,
-				'collector': hasMetadata.collector,
-				'origin': hasMetadata.origin  
-			  }`
+			  RETURN { 'hasMetadata_id': hasMetadata._id }`
 
 			sb.WriteString(query)
 
-			cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBulkHasMetadata - PkgName")
+			cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBulkHasMetadata - PkgName")
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
 			defer cursor.Close()
-
-			ingestHasMetadataList, err := getHasMetadataFromCursor(ctx, cursor)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
-			}
-
-			var hasMetadataIDList []string
-			for _, ingestedHasMetadata := range ingestHasMetadataList {
-				hasMetadataIDList = append(hasMetadataIDList, ingestedHasMetadata.ID)
-			}
-
-			return hasMetadataIDList, nil
 		}
-
 	} else if len(subjects.Artifacts) > 0 {
 		var listOfValues []map[string]any
 
@@ -813,48 +611,25 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 			UPSERT { artifactID:artifact._id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				INSERT { artifactID:artifact._id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				UPDATE {} IN hasMetadataCollection
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		LET edgeCollection = (
 		  INSERT {  _key: CONCAT("hasMetadataArtEdges", artifact._key, hasMetadata._key), _from: artifact._id, _to: hasMetadata._id } INTO hasMetadataArtEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
-		RETURN {
-		  'artifact': {
-			  'id': artifact._id,
-			  'algorithm': artifact.algorithm,
-			  'digest': artifact.digest
-		  },
-		  'hasMetadata_id': hasMetadata._id,
-		  'key': hasMetadata.key,
-		  'value': hasMetadata.value,
-		  'timestamp': hasMetadata.timestamp,
-		  'justification': hasMetadata.justification,
-		  'collector': hasMetadata.collector,
-		  'origin': hasMetadata.origin  
-		}`
+		RETURN { 'hasMetadata_id': hasMetadata._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBulkHasMetadata - artifact")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBulkHasMetadata - artifact")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact hasMetadata: %w", err)
 		}
 		defer cursor.Close()
-
-		ingestHasMetadataList, err := getHasMetadataFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
-		}
-
-		var hasMetadataIDList []string
-		for _, ingestedHasMetadata := range ingestHasMetadataList {
-			hasMetadataIDList = append(hasMetadataIDList, ingestedHasMetadata.ID)
-		}
-
-		return hasMetadataIDList, nil
-
 	} else if len(subjects.Sources) > 0 {
 		var listOfValues []map[string]any
 
@@ -888,21 +663,9 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 		LET firstSrc = FIRST(
 			FOR sName in srcNames
 			  FILTER sName.guacKey == doc.srcNameGuacKey
-			FOR sNs in srcNamespaces
-			  FILTER sNs._id == sName._parent
-			FOR sType in srcTypes
-			  FILTER sType._id == sNs._parent
-	
 			RETURN {
-			  'typeID': sType._id,
-			  'type': sType.type,
-			  'namespace_id': sNs._id,
-			  'namespace': sNs.namespace,
 			  'name_id': sName._id,
-			  'name': sName.name,
-			  'commit': sName.commit,
-			  'tag': sName.tag,
-			  'nameDoc': sName
+			  'name_key': sName._key
 			}
 		)
 		  
@@ -910,59 +673,43 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 			UPSERT { sourceID:firstSrc.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				INSERT { sourceID:firstSrc.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				UPDATE {} IN hasMetadataCollection
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		LET edgeCollection = (
-		  INSERT {  _key: CONCAT("hasMetadataSrcEdges", firstSrc.nameDoc._key, hasMetadata._key), _from: firstSrc.name_id, _to: hasMetadata._id } INTO hasMetadataSrcEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT {  _key: CONCAT("hasMetadataSrcEdges", firstSrc.name_key, hasMetadata._key), _from: firstSrc.name_id, _to: hasMetadata._id } INTO hasMetadataSrcEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
-		RETURN {
-		  'srcName': {
-			  'type_id': firstSrc.typeID,
-			  'type': firstSrc.type,
-			  'namespace_id': firstSrc.namespace_id,
-			  'namespace': firstSrc.namespace,
-			  'name_id': firstSrc.name_id,
-			  'name': firstSrc.name,
-			  'commit': firstSrc.commit,
-			  'tag': firstSrc.tag
-		  },
-		  'hasMetadata_id': hasMetadata._id,
-		  'key': hasMetadata.key,
-		  'value': hasMetadata.value,
-		  'timestamp': hasMetadata.timestamp,
-		  'justification': hasMetadata.justification,
-		  'collector': hasMetadata.collector,
-		  'origin': hasMetadata.origin  
-		}`
+		RETURN { 'hasMetadata_id': hasMetadata._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBulkHasMetadata - source")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBulkHasMetadata - source")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source hasMetadata: %w", err)
 		}
 		defer cursor.Close()
-
-		ingestHasMetadataList, err := getHasMetadataFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
-		}
-
-		var hasMetadataIDList []string
-		for _, ingestedHasMetadata := range ingestHasMetadataList {
-			hasMetadataIDList = append(hasMetadataIDList, ingestedHasMetadata.ID)
-		}
-
-		return hasMetadataIDList, nil
-
 	} else {
 		return nil, fmt.Errorf("packages, artifacts, or sources not specified for IngestBulkHasMetadata")
 	}
+
+	ingestHasMetadataList, err := getHasMetadataFromCursor(ctx, cursor, true)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hasMetadata from arango cursor: %w", err)
+	}
+
+	var hasMetadataIDList []string
+	for _, ingestedHasMetadata := range ingestHasMetadataList {
+		hasMetadataIDList = append(hasMetadataIDList, ingestedHasMetadata.ID)
+	}
+
+	return hasMetadataIDList, nil
 }
 
-func getHasMetadataFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.HasMetadata, error) {
+func getHasMetadataFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.HasMetadata, error) {
 	type collectedData struct {
 		PkgVersion    *dbPkgVersion   `json:"pkgVersion"`
 		Artifact      *model.Artifact `json:"artifact"`
@@ -1020,7 +767,9 @@ func getHasMetadataFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 		} else if createdValue.Artifact != nil {
 			hasMetadata.Subject = createdValue.Artifact
 		} else {
-			return nil, fmt.Errorf("failed to get subject from cursor for hasMetadata")
+			if !ingestion {
+				return nil, fmt.Errorf("failed to get subject from cursor for hasMetadata")
+			}
 		}
 		hasMetadataList = append(hasMetadataList, hasMetadata)
 	}
