@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -472,13 +470,24 @@ func TestHashEqual(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
-					t.Fatalf("Could not ingest artifact: %v", err)
+			if artIDs, err := b.IngestArtifactIDs(ctx, test.InArt); err != nil {
+				t.Fatalf("Could not ingest artifact: %v", err)
+			} else {
+				if test.QueryArtID {
+					test.Query = &model.HashEqualSpec{
+						Artifacts: []*model.ArtifactSpec{
+							{
+								ID: ptrfrom.String(artIDs[0]),
+							},
+							{
+								ID: ptrfrom.String(artIDs[2]),
+							},
+						},
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestHashEqual(ctx, *o.A1, *o.A2, *o.HE)
+				heID, err := b.IngestHashEqualID(ctx, *o.A1, *o.A2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -487,19 +496,7 @@ func TestHashEqual(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.HashEqualSpec{
-						ID: ptrfrom.String(found.ID),
-					}
-				}
-				if test.QueryArtID {
-					test.Query = &model.HashEqualSpec{
-						Artifacts: []*model.ArtifactSpec{
-							{
-								ID: ptrfrom.String(found.Artifacts[0].ID),
-							},
-							{
-								ID: ptrfrom.String(found.Artifacts[1].ID),
-							},
-						},
+						ID: ptrfrom.String(heID),
 					}
 				}
 			}
@@ -805,7 +802,7 @@ func TestIngestHashEquals(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHashEquals(ctx, o.A1, o.A2, o.HE)
+				_, err := b.IngestHashEqualIDs(ctx, o.A1, o.A2, o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -910,14 +907,14 @@ func Test_buildHashEqualByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestHashEqual(ctx, *o.A1, *o.A2, *o.HE)
+				heID, err := b.IngestHashEqualID(ctx, *o.A1, *o.A2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildHashEqualByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildHashEqualByID(ctx, heID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
