@@ -35,8 +35,8 @@ func lessLicense(a, b *model.License) int {
 
 func Test_Licenses(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -109,7 +109,7 @@ func Test_Licenses(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			c, err := getBackend(ctx, arangArg)
+			c, err := getBackend(ctx, arangoArgs)
 			if err != nil {
 				t.Fatalf("error creating arango backend: %v", err)
 			}
@@ -144,8 +144,8 @@ func Test_Licenses(t *testing.T) {
 
 func Test_LicensesBulk(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -192,7 +192,7 @@ func Test_LicensesBulk(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			c, err := getBackend(ctx, arangArg)
+			c, err := getBackend(ctx, arangoArgs)
 			if err != nil {
 				t.Fatalf("error creating arango backend: %v", err)
 			}
@@ -222,8 +222,8 @@ func Test_LicensesBulk(t *testing.T) {
 
 func Test_getLicenseByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -262,7 +262,7 @@ func Test_getLicenseByID(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			c, err := getBackend(ctx, arangArg)
+			c, err := getBackend(ctx, arangoArgs)
 			if err != nil {
 				t.Fatalf("error creating arango backend: %v", err)
 			}

@@ -529,14 +529,14 @@ func TestLegal(t *testing.T) {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := getBackend(ctx, arangArg)
+			b, err := getBackend(ctx, arangoArgs)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -637,14 +637,14 @@ func TestLegals(t *testing.T) {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := getBackend(ctx, arangArg)
+			b, err := getBackend(ctx, arangoArgs)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -838,14 +838,14 @@ func Test_buildCertifyLegalByID(t *testing.T) {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := getBackend(ctx, arangArg)
+			b, err := getBackend(ctx, arangoArgs)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}

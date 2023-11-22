@@ -482,21 +482,15 @@ func (c *arangoClient) IngestVEXStatementID(ctx context.Context, subject model.P
 		LET firstVuln = FIRST(
 			FOR vVulnID in vulnerabilities
 			  FILTER vVulnID.guacKey == @guacVulnKey
-			FOR vType in vulnTypes
-			  FILTER vType._id == vVulnID._parent
-	
 			RETURN {
-			  "typeID": vType._id,
-			  "type": vType.type,
-			  "vuln_id": vVulnID._id,
-			  "vuln": vVulnID.vulnerabilityID,
-			  "vulnDoc": vVulnID
+				"vuln_id": vVulnID._id,
+				"vuln_key": vVulnID._key
 			}
-		  )
+		)
 		  
 		LET certifyVex = FIRST(
-			UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vulnDoc._id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
-				INSERT {packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vulnDoc._id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
+			UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
+				INSERT {packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
 				UPDATE {} IN certifyVEXs
 				RETURN {
 					'_id': NEW._id,
@@ -505,7 +499,7 @@ func (c *arangoClient) IngestVEXStatementID(ctx context.Context, subject model.P
 		)
 		
 		INSERT { _key: CONCAT("certifyVexPkgEdges", firstPkg.version_key, certifyVex._key), _from: firstPkg.version_id, _to: certifyVex._id } INTO certifyVexPkgEdges OPTIONS { overwriteMode: "ignore" }
-		INSERT { _key: CONCAT("certifyVexVulnEdges", certifyVex._key, firstVuln.vulnDoc._key), _from: certifyVex._id, _to: firstVuln.vulnDoc._id } INTO certifyVexVulnEdges OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("certifyVexVulnEdges", certifyVex._key, firstVuln.vuln_key), _from: certifyVex._id, _to: firstVuln.vuln_id } INTO certifyVexVulnEdges OPTIONS { overwriteMode: "ignore" }
 		
 		  
 		RETURN { 'certifyVex_id': certifyVex._id }`

@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -42,12 +40,12 @@ var vmd1 = &model.ScanMetadata{
 
 func TestIngestCertifyVulnerability(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -939,17 +937,32 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
+				if vulnIDs, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
+				} else {
+					if test.QueryVulnID {
+						test.Query = &model.CertifyVulnSpec{
+							Vulnerability: &model.VulnerabilitySpec{
+								ID: ptrfrom.String(vulnIDs.VulnerabilityNodeID),
+							},
+						}
+					}
 				}
 			}
-			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
+			if pkgIDs, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
+			} else {
+				if test.QueryPkgID {
+					test.Query = &model.CertifyVulnSpec{
+						Package: &model.PkgSpec{
+							ID: ptrfrom.String(pkgIDs[0].PackageVersionID),
+						},
+					}
+				}
 			}
-
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				record, err := b.IngestCertifyVuln(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
+				cvID, err := b.IngestCertifyVulnID(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -958,24 +971,10 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.CertifyVulnSpec{
-						ID: ptrfrom.String(record.ID),
+						ID: ptrfrom.String(cvID),
 					}
 				}
-				if test.QueryPkgID {
-					test.Query = &model.CertifyVulnSpec{
-						Package: &model.PkgSpec{
-							ID: ptrfrom.String(record.Package.Namespaces[0].Names[0].Versions[0].ID),
-						},
-					}
-				}
-				if test.QueryVulnID {
-					test.Query = &model.CertifyVulnSpec{
-						Vulnerability: &model.VulnerabilitySpec{
-							ID: ptrfrom.String(record.Vulnerability.ID),
-						},
-					}
-				}
-				ids[i] = record.ID
+				ids[i] = cvID
 			}
 			if test.Query != nil {
 				if test.Query.ID != nil {
@@ -1001,12 +1000,12 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 
 func TestIngestCertifyVulns(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1404,9 +1403,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
 			}
-
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyVulns(ctx, o.Pkgs, o.Vulns, o.CertifyVulns)
+				_, err := b.IngestCertifyVulnIDs(ctx, o.Pkgs, o.Vulns, o.CertifyVulns)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1415,7 +1413,6 @@ func TestIngestCertifyVulns(t *testing.T) {
 				}
 
 			}
-
 			got, err := b.CertifyVuln(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
@@ -1432,12 +1429,12 @@ func TestIngestCertifyVulns(t *testing.T) {
 
 func Test_buildCertifyVulnByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1634,7 +1631,7 @@ func Test_buildCertifyVulnByID(t *testing.T) {
 			}
 
 			for _, o := range test.Calls {
-				record, err := b.IngestCertifyVuln(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
+				cvID, err := b.IngestCertifyVulnID(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1642,7 +1639,7 @@ func Test_buildCertifyVulnByID(t *testing.T) {
 					return
 				}
 
-				got, err := b.(*arangoClient).buildCertifyVulnByID(ctx, record.ID, test.Query)
+				got, err := b.(*arangoClient).buildCertifyVulnByID(ctx, cvID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
