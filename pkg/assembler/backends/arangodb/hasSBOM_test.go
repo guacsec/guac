@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -568,18 +566,38 @@ func TestHasSBOM(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					if test.QueryPkgID {
+						test.Query = &model.HasSBOMSpec{
+							Subject: &model.PackageOrArtifactSpec{
+								Package: &model.PkgSpec{
+									ID: ptrfrom.String(pkgIDs.PackageVersionID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if artID, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
+				} else {
+					if test.QueryArtID {
+						test.Query = &model.HasSBOMSpec{
+							Subject: &model.PackageOrArtifactSpec{
+								Artifact: &model.ArtifactSpec{
+									ID: ptrfrom.String(artID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, o := range test.Calls {
 				// TODO (knrc) handle includes
-				found, err := b.IngestHasSbom(ctx, o.Sub, *o.HS, model.HasSBOMIncludesInputSpec{})
+				hsID, err := b.IngestHasSbomID(ctx, o.Sub, *o.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -588,29 +606,7 @@ func TestHasSBOM(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.HasSBOMSpec{
-						ID: ptrfrom.String(found.ID),
-					}
-				}
-				if test.QueryPkgID {
-					if _, ok := found.Subject.(*model.Package); ok {
-						test.Query = &model.HasSBOMSpec{
-							Subject: &model.PackageOrArtifactSpec{
-								Package: &model.PkgSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QueryArtID {
-					if _, ok := found.Subject.(*model.Artifact); ok {
-						test.Query = &model.HasSBOMSpec{
-							Subject: &model.PackageOrArtifactSpec{
-								Artifact: &model.ArtifactSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Artifact).ID),
-								},
-							},
-						}
+						ID: ptrfrom.String(hsID),
 					}
 				}
 			}
@@ -838,7 +834,7 @@ func TestIngestHasSBOM(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc)
+				_, err := b.IngestHasSBOMIDs(ctx, o.Sub, o.HS, o.Inc)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1035,14 +1031,14 @@ func Test_buildHasSbomByID(t *testing.T) {
 			}
 			for _, o := range test.Calls {
 				// TODO (knrc) handle includes
-				found, err := b.IngestHasSbom(ctx, o.Sub, *o.HS, model.HasSBOMIncludesInputSpec{})
+				hsID, err := b.IngestHasSbomID(ctx, o.Sub, *o.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildHasSbomByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildHasSbomByID(ctx, hsID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}

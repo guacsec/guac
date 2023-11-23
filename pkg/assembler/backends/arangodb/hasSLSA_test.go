@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -626,17 +624,33 @@ func TestHasSLSA(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if artID, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
+				} else {
+					if test.QuerySubjectID {
+						test.Query = &model.HasSLSASpec{
+							Subject: &model.ArtifactSpec{
+								ID: ptrfrom.String(artID),
+							},
+						}
+					}
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
+				if buildID, err := b.IngestBuilderID(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
+				} else {
+					if test.QueryBuilderID {
+						test.Query = &model.HasSLSASpec{
+							BuiltBy: &model.BuilderSpec{
+								ID: ptrfrom.String(buildID),
+							},
+						}
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
+				slsaID, err := b.IngestSLSAID(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -645,21 +659,7 @@ func TestHasSLSA(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.HasSLSASpec{
-						ID: ptrfrom.String(found.ID),
-					}
-				}
-				if test.QuerySubjectID {
-					test.Query = &model.HasSLSASpec{
-						Subject: &model.ArtifactSpec{
-							ID: ptrfrom.String(found.Subject.ID),
-						},
-					}
-				}
-				if test.QueryBuilderID {
-					test.Query = &model.HasSLSASpec{
-						BuiltBy: &model.BuilderSpec{
-							ID: ptrfrom.String(found.Slsa.BuiltBy.ID),
-						},
+						ID: ptrfrom.String(slsaID),
 					}
 				}
 			}
@@ -881,7 +881,7 @@ func TestIngestHasSLSAs(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
+				_, err := b.IngestSLSAIDs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1104,14 +1104,14 @@ func Test_buildHasSlsaByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
+				slsaID, err := b.IngestSLSAID(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildHasSlsaByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildHasSlsaByID(ctx, slsaID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
