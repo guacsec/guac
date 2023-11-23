@@ -172,7 +172,7 @@ func getPkgHasSourceAtForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return getHasSourceAtFromCursor(ctx, cursor)
+	return getHasSourceAtFromCursor(ctx, cursor, false)
 }
 
 func queryHasSourceAtBasedOnFilter(arangoQueryBuilder *arangoQueryBuilder, hasSourceAtSpec *model.HasSourceAtSpec, queryValues map[string]any) {
@@ -256,211 +256,105 @@ func getHasSourceAtQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 	return values
 }
 
-func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
+func (c *arangoClient) IngestHasSourceAtID(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
+	var cursor driver.Cursor
+	var err error
 	if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
 		query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
 			  FILTER pVersion.guacKey == @pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
-			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
-			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
-			}
+			  RETURN {
+				'version_id': pVersion._id,
+				'version_key': pVersion._key
+			  }
 		)
 
 		LET firstSrc = FIRST(
 			FOR sName in srcNames
 			  FILTER sName.guacKey == @srcNameGuacKey
-			FOR sNs in srcNamespaces
-			  FILTER sNs._id == sName._parent
-			FOR sType in srcTypes
-			  FILTER sType._id == sNs._parent
-	
-			RETURN {
-			  'typeID': sType._id,
-			  'type': sType.type,
-			  'namespace_id': sNs._id,
-			  'namespace': sNs.namespace,
-			  'name_id': sName._id,
-			  'name': sName.name,
-			  'commit': sName.commit,
-			  'tag': sName.tag,
-			  'nameDoc': sName
-			}
+			  RETURN {
+				'name_id': sName._id,
+				'name_key': sName._key,
+			  }
 		)
 		  
 		  LET hasSourceAt = FIRST(
 			  UPSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
 				  INSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
 				  UPDATE {} IN hasSourceAts
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		  )
-
-		   			
-		  INSERT { _key: CONCAT("hasSourceAtPkgVersionEdges", firstPkg.versionDoc._key, hasSourceAt._key), _from: firstPkg.versionDoc._id, _to: hasSourceAt._id } INTO hasSourceAtPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
-		  INSERT { _key: CONCAT("hasSourceAtEdges", hasSourceAt._key, firstSrc.nameDoc._key), _from: hasSourceAt._id, _to: firstSrc.nameDoc._id } INTO hasSourceAtEdges OPTIONS { overwriteMode: "ignore" }
+	
+		  INSERT { _key: CONCAT("hasSourceAtPkgVersionEdges", firstPkg.version_key, hasSourceAt._key), _from: firstPkg.version_id, _to: hasSourceAt._id } INTO hasSourceAtPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("hasSourceAtEdges", hasSourceAt._key, firstSrc.name_key), _from: hasSourceAt._id, _to: firstSrc.name_id } INTO hasSourceAtEdges OPTIONS { overwriteMode: "ignore" }
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'srcName': {
-				'type_id': firstSrc.typeID,
-				'type': firstSrc.type,
-				'namespace_id': firstSrc.namespace_id,
-				'namespace': firstSrc.namespace,
-				'name_id': firstSrc.name_id,
-				'name': firstSrc.name,
-				'commit': firstSrc.commit,
-				'tag': firstSrc.tag
-			},
-			'hasSourceAt_id': hasSourceAt._id,
-			'knownSince': hasSourceAt.knownSince,
-			'justification': hasSourceAt.justification,
-			'collector': hasSourceAt.collector,
-			'origin': hasSourceAt.origin  
-		  }`
+		  RETURN { 'hasSourceAt_id': hasSourceAt._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasSourceAtQueryValues(&pkg, &pkgMatchType, &source, &hasSourceAt), "IngestHasSourceAt - PkgVersion")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSourceAtQueryValues(&pkg, &pkgMatchType, &source, &hasSourceAt), "IngestHasSourceAt - PkgVersion")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
+			return "", fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
 		defer cursor.Close()
-
-		hasSourceAtList, err := getHasSourceAtFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasSourceAt from arango cursor: %w", err)
-		}
-
-		if len(hasSourceAtList) == 1 {
-			return hasSourceAtList[0], nil
-		} else {
-			return nil, fmt.Errorf("number of hasSourceAt ingested is greater than one")
-		}
 	} else {
 		query := `
 			LET firstPkg = FIRST(
 				FOR pName in pkgNames
-				  FILTER pName.guacKey == @pkgNameGuacKey
-				FOR pNs in pkgNamespaces
-				  FILTER pNs._id == pName._parent
-				FOR pType in pkgTypes
-				  FILTER pType._id == pNs._parent
-		
-				RETURN {
-				  'typeID': pType._id,
-				  'type': pType.type,
-				  'namespace_id': pNs._id,
-				  'namespace': pNs.namespace,
-				  'name_id': pName._id,
-				  'name': pName.name,
-				  'nameDoc': pName
-				}
+				  FILTER pName.guacKey == @pkgNameGuacKey		
+				  RETURN {
+					'name_id': pName._id,
+					'name_key': pName._key,
+				  }
 			)
 
 			LET firstSrc = FIRST(
 				FOR sName in srcNames
 				  FILTER sName.guacKey == @srcNameGuacKey
-				FOR sNs in srcNamespaces
-				  FILTER sNs._id == sName._parent
-				FOR sType in srcTypes
-				  FILTER sType._id == sNs._parent
-		
-				RETURN {
-				  'typeID': sType._id,
-				  'type': sType.type,
-				  'namespace_id': sNs._id,
-				  'namespace': sNs.namespace,
-				  'name_id': sName._id,
-				  'name': sName.name,
-				  'commit': sName.commit,
-				  'tag': sName.tag,
-				  'nameDoc': sName
-				}
+				  RETURN {
+					'name_id': sName._id,
+					'name_key': sName._key,
+				  }
 			)
 			  
 			  LET hasSourceAt = FIRST(
 				  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
 					  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
 					  UPDATE {} IN hasSourceAts
-					  RETURN NEW
+					  RETURN {
+						'_id': NEW._id,
+						'_key': NEW._key
+					}
 			  )
 			  
-			  INSERT { _key: CONCAT("hasSourceAtPkgNameEdges", firstPkg.nameDoc._key, hasSourceAt._key), _from: firstPkg.nameDoc._id, _to: hasSourceAt._id } INTO hasSourceAtPkgNameEdges OPTIONS { overwriteMode: "ignore" }
-		  	  INSERT { _key: CONCAT("hasSourceAtEdges", hasSourceAt._key, firstSrc.nameDoc._key), _from: hasSourceAt._id, _to:firstSrc.nameDoc._id } INTO hasSourceAtEdges OPTIONS { overwriteMode: "ignore" }
+			  INSERT { _key: CONCAT("hasSourceAtPkgNameEdges", firstPkg.name_key, hasSourceAt._key), _from: firstPkg.name_id, _to: hasSourceAt._id } INTO hasSourceAtPkgNameEdges OPTIONS { overwriteMode: "ignore" }
+		  	  INSERT { _key: CONCAT("hasSourceAtEdges", hasSourceAt._key, firstSrc.name_key), _from: hasSourceAt._id, _to:firstSrc.name_id } INTO hasSourceAtEdges OPTIONS { overwriteMode: "ignore" }
 			  
-			  RETURN {
-				'pkgVersion': {
-					'type_id': firstPkg.typeID,
-					'type': firstPkg.type,
-					'namespace_id': firstPkg.namespace_id,
-					'namespace': firstPkg.namespace,
-					'name_id': firstPkg.name_id,
-					'name': firstPkg.name
-				},
-				'srcName': {
-					'type_id': firstSrc.typeID,
-					'type': firstSrc.type,
-					'namespace_id': firstSrc.namespace_id,
-					'namespace': firstSrc.namespace,
-					'name_id': firstSrc.name_id,
-					'name': firstSrc.name,
-					'commit': firstSrc.commit,
-					'tag': firstSrc.tag
-				},
-				'hasSourceAt_id': hasSourceAt._id,
-				'knownSince': hasSourceAt.knownSince,
-				'justification': hasSourceAt.justification,
-				'collector': hasSourceAt.collector,
-				'origin': hasSourceAt.origin  
-			  }`
+			  RETURN { 'hasSourceAt_id': hasSourceAt._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasSourceAtQueryValues(&pkg, &pkgMatchType, &source, &hasSourceAt), "IngestHasSourceAt - PkgName")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSourceAtQueryValues(&pkg, &pkgMatchType, &source, &hasSourceAt), "IngestHasSourceAt - PkgName")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
+			return "", fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
 		defer cursor.Close()
-
-		hasSourceAtList, err := getHasSourceAtFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasSourceAt from arango cursor: %w", err)
-		}
-
-		if len(hasSourceAtList) == 1 {
-			return hasSourceAtList[0], nil
-		} else {
-			return nil, fmt.Errorf("number of hasSourceAt ingested is greater than one")
-		}
+	}
+	hasSourceAtList, err := getHasSourceAtFromCursor(ctx, cursor, true)
+	if err != nil {
+		return "", fmt.Errorf("failed to get hasSourceAt from arango cursor: %w", err)
 	}
 
+	if len(hasSourceAtList) == 1 {
+		return hasSourceAtList[0].ID, nil
+	} else {
+		return "", fmt.Errorf("number of hasSourceAt ingested is greater than one")
+	}
 }
 
 func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType *model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
+	var cursor driver.Cursor
+	var err error
 	var listOfValues []map[string]any
 
 	for i := range pkgs {
@@ -494,46 +388,18 @@ func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.Pkg
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
 			  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
 			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
 			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
+			  'version_key': pVersion._key
 			}
 		)
 
 		LET firstSrc = FIRST(
 			FOR sName in srcNames
 			  FILTER sName.guacKey == doc.srcNameGuacKey
-			FOR sNs in srcNamespaces
-			  FILTER sNs._id == sName._parent
-			FOR sType in srcTypes
-			  FILTER sType._id == sNs._parent
-	
 			RETURN {
-			  'typeID': sType._id,
-			  'type': sType.type,
-			  'namespace_id': sNs._id,
-			  'namespace': sNs.namespace,
 			  'name_id': sName._id,
-			  'name': sName.name,
-			  'commit': sName.commit,
-			  'tag': sName.tag,
-			  'nameDoc': sName
+			  'name_key': sName._key
 			}
 		)
 		  
@@ -541,102 +407,42 @@ func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.Pkg
 			  UPSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  INSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN hasSourceAts
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		  )
 
 		   			
-		  INSERT { _key: CONCAT("hasSourceAtPkgVersionEdges", firstPkg.versionDoc._key, hasSourceAt._key), _from: firstPkg.versionDoc._id, _to: hasSourceAt._id } INTO hasSourceAtPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
-		  INSERT { _key: CONCAT("hasSourceAtEdges", hasSourceAt._key, firstSrc.nameDoc._key), _from: hasSourceAt._id, _to: firstSrc.nameDoc._id } INTO hasSourceAtEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("hasSourceAtPkgVersionEdges", firstPkg.version_key, hasSourceAt._key), _from: firstPkg.version_id, _to: hasSourceAt._id } INTO hasSourceAtPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("hasSourceAtEdges", hasSourceAt._key, firstSrc.name_key), _from: hasSourceAt._id, _to: firstSrc.name_id } INTO hasSourceAtEdges OPTIONS { overwriteMode: "ignore" }
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'srcName': {
-				'type_id': firstSrc.typeID,
-				'type': firstSrc.type,
-				'namespace_id': firstSrc.namespace_id,
-				'namespace': firstSrc.namespace,
-				'name_id': firstSrc.name_id,
-				'name': firstSrc.name,
-				'commit': firstSrc.commit,
-				'tag': firstSrc.tag
-			},
-			'hasSourceAt_id': hasSourceAt._id,
-			'knownSince': hasSourceAt.knownSince,
-			'justification': hasSourceAt.justification,
-			'collector': hasSourceAt.collector,
-			'origin': hasSourceAt.origin  
-		  }`
+		  RETURN { 'hasSourceAt_id': hasSourceAt._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSourceAts - PkgVersion")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSourceAts - PkgVersion")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
 		defer cursor.Close()
-
-		ingestHasSourceAtList, err := getHasSourceAtFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasSourceAt from arango cursor: %w", err)
-		}
-
-		var hasSourceAtIDList []string
-		for _, ingestedHasSourceAt := range ingestHasSourceAtList {
-			hasSourceAtIDList = append(hasSourceAtIDList, ingestedHasSourceAt.ID)
-		}
-
-		return hasSourceAtIDList, nil
-
 	} else {
 		query := `
 		LET firstPkg = FIRST(
 			FOR pName in pkgNames
 			  FILTER pName.guacKey == doc.pkgNameGuacKey
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
 			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
 			  'name_id': pName._id,
-			  'name': pName.name,
-			  'nameDoc': pName
+			  'name_key': pName._key
 			}
 		)
 
 		LET firstSrc = FIRST(
 			FOR sName in srcNames
 			  FILTER sName.guacKey == doc.srcNameGuacKey
-			FOR sNs in srcNamespaces
-			  FILTER sNs._id == sName._parent
-			FOR sType in srcTypes
-			  FILTER sType._id == sNs._parent
-	
 			RETURN {
-			  'typeID': sType._id,
-			  'type': sType.type,
-			  'namespace_id': sNs._id,
-			  'namespace': sNs.namespace,
 			  'name_id': sName._id,
-			  'name': sName.name,
-			  'commit': sName.commit,
-			  'tag': sName.tag,
-			  'nameDoc': sName
+			  'name_key': sName._key
 			}
 		)
 		  
@@ -644,61 +450,39 @@ func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.Pkg
 			  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN hasSourceAts
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
 		  )
 		  
-		  INSERT { _key: CONCAT("hasSourceAtPkgNameEdges", firstPkg.nameDoc._key, hasSourceAt._key), _from: firstPkg.nameDoc._id, _to: hasSourceAt._id } INTO hasSourceAtPkgNameEdges OPTIONS { overwriteMode: "ignore" }
-			INSERT { _key: CONCAT("hasSourceAtEdges", hasSourceAt._key, firstSrc.nameDoc._key), _from: hasSourceAt._id, _to:firstSrc.nameDoc._id } INTO hasSourceAtEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("hasSourceAtPkgNameEdges", firstPkg.name_key, hasSourceAt._key), _from: firstPkg.name_id, _to: hasSourceAt._id } INTO hasSourceAtPkgNameEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("hasSourceAtEdges", hasSourceAt._key, firstSrc.name_key), _from: hasSourceAt._id, _to:firstSrc.name_id } INTO hasSourceAtEdges OPTIONS { overwriteMode: "ignore" }
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name
-			},
-			'srcName': {
-				'type_id': firstSrc.typeID,
-				'type': firstSrc.type,
-				'namespace_id': firstSrc.namespace_id,
-				'namespace': firstSrc.namespace,
-				'name_id': firstSrc.name_id,
-				'name': firstSrc.name,
-				'commit': firstSrc.commit,
-				'tag': firstSrc.tag
-			},
-			'hasSourceAt_id': hasSourceAt._id,
-			'knownSince': hasSourceAt.knownSince,
-			'justification': hasSourceAt.justification,
-			'collector': hasSourceAt.collector,
-			'origin': hasSourceAt.origin  
-		  }`
+ 		  RETURN { 'hasSourceAt_id': hasSourceAt._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSourceAts - PkgName")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSourceAts - PkgName")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
 		defer cursor.Close()
-
-		ingestHasSourceAtList, err := getHasSourceAtFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasSourceAt from arango cursor: %w", err)
-		}
-
-		var hasSourceAtIDList []string
-		for _, ingestedHasSourceAt := range ingestHasSourceAtList {
-			hasSourceAtIDList = append(hasSourceAtIDList, ingestedHasSourceAt.ID)
-		}
-
-		return hasSourceAtIDList, nil
 	}
+	ingestHasSourceAtList, err := getHasSourceAtFromCursor(ctx, cursor, true)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hasSourceAt from arango cursor: %w", err)
+	}
+
+	var hasSourceAtIDList []string
+	for _, ingestedHasSourceAt := range ingestHasSourceAtList {
+		hasSourceAtIDList = append(hasSourceAtIDList, ingestedHasSourceAt.ID)
+	}
+
+	return hasSourceAtIDList, nil
 }
 
-func getHasSourceAtFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.HasSourceAt, error) {
+func getHasSourceAtFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.HasSourceAt, error) {
 	type collectedData struct {
 		PkgVersion    *dbPkgVersion `json:"pkgVersion"`
 		SrcName       *dbSrcName    `json:"srcName"`
@@ -726,21 +510,25 @@ func getHasSourceAtFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 
 	var hasSourceAtList []*model.HasSourceAt
 	for _, createdValue := range createdValues {
-		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
-			createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-		src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
-			createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
+		var hasSourceAt *model.HasSourceAt
+		if !ingestion {
+			pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+				createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+			src := generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
+				createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
 
-		hasSourceAt := &model.HasSourceAt{
-			ID:            createdValue.HasSourceAtID,
-			Package:       pkg,
-			Source:        src,
-			KnownSince:    createdValue.KnownSince,
-			Justification: createdValue.Justification,
-			Origin:        createdValue.Origin,
-			Collector:     createdValue.Collector,
+			hasSourceAt = &model.HasSourceAt{
+				ID:            createdValue.HasSourceAtID,
+				Package:       pkg,
+				Source:        src,
+				KnownSince:    createdValue.KnownSince,
+				Justification: createdValue.Justification,
+				Origin:        createdValue.Origin,
+				Collector:     createdValue.Collector,
+			}
+		} else {
+			hasSourceAt = &model.HasSourceAt{ID: createdValue.HasSourceAtID}
 		}
-
 		hasSourceAtList = append(hasSourceAtList, hasSourceAt)
 	}
 	return hasSourceAtList, nil
