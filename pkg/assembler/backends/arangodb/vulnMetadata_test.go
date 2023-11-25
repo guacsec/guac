@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -1320,7 +1318,6 @@ func TestIngestVulnMetadatas(t *testing.T) {
 				}
 
 			}
-
 			got, err := b.VulnerabilityMetadata(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)

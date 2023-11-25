@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -228,12 +226,12 @@ func TestVulnEqual(t *testing.T) {
 				{
 					Vulnerabilities: []*model.Vulnerability{
 						{
-							Type:             "cve",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
-						},
-						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+						},
+						{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
 						},
 					},
 					Justification: "test justification",
@@ -595,13 +593,16 @@ func TestVulnEqual(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
+			var collectedVulnIDs []*model.VulnerabilityIDs
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
+				if vulnIDs, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
+				} else {
+					collectedVulnIDs = append(collectedVulnIDs, vulnIDs)
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
+				veID, err := b.IngestVulnEqualID(ctx, *o.Vuln, *o.OtherVuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -610,17 +611,17 @@ func TestVulnEqual(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.VulnEqualSpec{
-						ID: ptrfrom.String(found.ID),
+						ID: ptrfrom.String(veID),
 					}
 				}
 				if test.QueryVulnID {
 					test.Query = &model.VulnEqualSpec{
 						Vulnerabilities: []*model.VulnerabilitySpec{
 							{
-								ID: ptrfrom.String(found.Vulnerabilities[0].ID),
+								ID: ptrfrom.String(collectedVulnIDs[1].VulnerabilityNodeID),
 							},
 							{
-								ID: ptrfrom.String(found.Vulnerabilities[1].ID),
+								ID: ptrfrom.String(collectedVulnIDs[2].VulnerabilityNodeID),
 							},
 						},
 					}
@@ -957,14 +958,14 @@ func Test_buildVulnEqualByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
+				veID, err := b.IngestVulnEqualID(ctx, *o.Vuln, *o.OtherVuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildVulnEqualByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildVulnEqualByID(ctx, veID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
