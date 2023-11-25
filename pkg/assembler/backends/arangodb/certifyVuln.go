@@ -103,7 +103,7 @@ func getPkgCertifyVulnForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return geCertifyVulnFromCursor(ctx, cursor)
+	return geCertifyVulnFromCursor(ctx, cursor, false)
 }
 
 func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVulnSpec *model.CertifyVulnSpec, queryValues map[string]any) {
@@ -189,7 +189,7 @@ func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.Vul
 	return values
 }
 
-func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
+func (c *arangoClient) IngestCertifyVulnIDs(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range certifyVulns {
@@ -221,82 +221,36 @@ func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.Pkg
 	query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
-			  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
+			  FILTER pVersion.guacKey == doc.pkgVersionGuacKey	
 			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
 			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
+			  'version_key': pVersion._key
 			}
 		)
 
 		LET firstVuln = FIRST(
 			FOR vVulnID in vulnerabilities
 			  FILTER vVulnID.guacKey == doc.guacVulnKey
-			FOR vType in vulnTypes
-			  FILTER vType._id == vVulnID._parent
-	
 			RETURN {
-			  "typeID": vType._id,
-			  "type": vType.type,
-			  "vuln_id": vVulnID._id,
-			  "vuln": vVulnID.vulnerabilityID,
-			  "vulnDoc": vVulnID
+				"vuln_id": vVulnID._id,
+				"vuln_key": vVulnID._key
 			}
 		)
 		  
 		  LET certifyVuln = FIRST(
-			  UPSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
-				  INSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
+			  UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
+				  INSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN certifyVulns
-				  RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		  )
 		  			
-		  INSERT { _key: CONCAT("certifyVulnPkgEdges", firstPkg.versionDoc._key, certifyVuln._key), _from: firstPkg.versionDoc._id, _to: certifyVuln._id } INTO certifyVulnPkgEdges OPTIONS { overwriteMode: "ignore" }
-		  INSERT { _key: CONCAT("certifyVulnEdges", certifyVuln._key, firstVuln.vulnDoc._key), _from: certifyVuln._id, _to: firstVuln.vulnDoc._id } INTO certifyVulnEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("certifyVulnPkgEdges", firstPkg.version_key, certifyVuln._key), _from: firstPkg.version_id, _to: certifyVuln._id } INTO certifyVulnPkgEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("certifyVulnEdges", certifyVuln._key, firstVuln.vuln_key), _from: certifyVuln._id, _to: firstVuln.vuln_id } INTO certifyVulnEdges OPTIONS { overwriteMode: "ignore" }
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'vulnerability': {
-				'type_id': firstVuln.typeID,
-				'type': firstVuln.type,
-				'vuln_id': firstVuln.vuln_id,
-				'vuln': firstVuln.vuln
-			},
-			'certifyVuln_id': certifyVuln._id,
-     		'timeScanned': certifyVuln.timeScanned,
-			'dbUri': certifyVuln.dbUri,
-			'dbVersion': certifyVuln.dbVersion,
-			'scannerUri': certifyVuln.scannerUri,
-			'scannerVersion': certifyVuln.scannerVersion,
-			'collector': certifyVuln.collector,
-			'origin': certifyVuln.origin
-		  }`
+		  RETURN { 'certifyVuln_id': certifyVuln._id }`
 
 	sb.WriteString(query)
 
@@ -306,114 +260,73 @@ func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.Pkg
 	}
 	defer cursor.Close()
 
-	certifyVulnList, err := geCertifyVulnFromCursor(ctx, cursor)
+	certifyVulnList, err := geCertifyVulnFromCursor(ctx, cursor, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get certifyVulns from arango cursor: %w", err)
 	}
 
-	return certifyVulnList, nil
+	var certifyVulnIDList []string
+	for _, ingestCertifyVuln := range certifyVulnList {
+		certifyVulnIDList = append(certifyVulnIDList, ingestCertifyVuln.ID)
+	}
+
+	return certifyVulnIDList, nil
 }
 
-func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
+func (c *arangoClient) IngestCertifyVulnID(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
 	query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
 			  FILTER pVersion.guacKey == @pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
 			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
-			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
+				'version_id': pVersion._id,
+				'version_key': pVersion._key
 			}
 		)
 
 		LET firstVuln = FIRST(
 			FOR vVulnID in vulnerabilities
 			  FILTER vVulnID.guacKey == @guacVulnKey
-			FOR vType in vulnTypes
-			  FILTER vType._id == vVulnID._parent
-	
 			RETURN {
-			  "typeID": vType._id,
-			  "type": vType.type,
-			  "vuln_id": vVulnID._id,
-			  "vuln": vVulnID.vulnerabilityID,
-			  "vulnDoc": vVulnID
+				"vuln_id": vVulnID._id,
+				"vuln_key": vVulnID._key
 			}
 		)
 		  
 		  LET certifyVuln = FIRST(
-			  UPSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
-				  INSERT { packageID:firstPkg.versionDoc._id, vulnerabilityID:firstVuln.vulnDoc._id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
+			  UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
+				  INSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
 				  UPDATE {} IN certifyVulns
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
 		  )
 		  			
-		  INSERT { _key: CONCAT("certifyVulnPkgEdges", firstPkg.versionDoc._key, certifyVuln._key), _from: firstPkg.versionDoc._id, _to: certifyVuln._id } INTO certifyVulnPkgEdges OPTIONS { overwriteMode: "ignore" }
-		  INSERT { _key: CONCAT("certifyVulnEdges", certifyVuln._key, firstVuln.vulnDoc._key), _from: certifyVuln._id, _to: firstVuln.vulnDoc._id } INTO certifyVulnEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("certifyVulnPkgEdges", firstPkg.version_key, certifyVuln._key), _from: firstPkg.version_id, _to: certifyVuln._id } INTO certifyVulnPkgEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("certifyVulnEdges", certifyVuln._key, firstVuln.vvuln_key), _from: certifyVuln._id, _to: firstVuln.vuln_id } INTO certifyVulnEdges OPTIONS { overwriteMode: "ignore" }
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'vulnerability': {
-				'type_id': firstVuln.typeID,
-				'type': firstVuln.type,
-				'vuln_id': firstVuln.vuln_id,
-				'vuln': firstVuln.vuln
-			},
-			'certifyVuln_id': certifyVuln._id,
-     		'timeScanned': certifyVuln.timeScanned,
-			'dbUri': certifyVuln.dbUri,
-			'dbVersion': certifyVuln.dbVersion,
-			'scannerUri': certifyVuln.scannerUri,
-			'scannerVersion': certifyVuln.scannerVersion,
-			'collector': certifyVuln.collector,
-			'origin': certifyVuln.origin
-		  }`
+		  RETURN { 'certifyVuln_id': certifyVuln._id }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyVulnQueryValues(&pkg, &vulnerability, &certifyVuln), "IngestCertifyVuln")
 	if err != nil {
-		return nil, fmt.Errorf("failed to ingest certifyVuln: %w", err)
+		return "", fmt.Errorf("failed to ingest certifyVuln: %w", err)
 	}
 	defer cursor.Close()
 
-	certifyVulnList, err := geCertifyVulnFromCursor(ctx, cursor)
+	certifyVulnList, err := geCertifyVulnFromCursor(ctx, cursor, true)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get certifyVulns from arango cursor: %w", err)
+		return "", fmt.Errorf("failed to get certifyVulns from arango cursor: %w", err)
 	}
 
 	if len(certifyVulnList) == 1 {
-		return certifyVulnList[0], nil
+		return certifyVulnList[0].ID, nil
 	} else {
-		return nil, fmt.Errorf("number of certifyVulns ingested is greater than one")
+		return "", fmt.Errorf("number of certifyVulns ingested is greater than one")
 	}
 }
 
-func geCertifyVulnFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.CertifyVuln, error) {
+func geCertifyVulnFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.CertifyVuln, error) {
 	type collectedData struct {
 		PkgVersion     *dbPkgVersion `json:"pkgVersion"`
 		Vulnerability  *dbVulnID     `json:"vulnerability"`
@@ -444,24 +357,8 @@ func geCertifyVulnFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 
 	var certifyVulnList []*model.CertifyVuln
 	for _, createdValue := range createdValues {
-		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
-			createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
-
-		vuln := &model.Vulnerability{
-			ID:   createdValue.Vulnerability.VulnID,
-			Type: createdValue.Vulnerability.VulnType,
-			VulnerabilityIDs: []*model.VulnerabilityID{
-				{
-					ID:              createdValue.Vulnerability.VulnID,
-					VulnerabilityID: createdValue.Vulnerability.Vuln,
-				},
-			},
-		}
-
 		certifyVuln := &model.CertifyVuln{
-			ID:            createdValue.CertifyVulnID,
-			Package:       pkg,
-			Vulnerability: vuln,
+			ID: createdValue.CertifyVulnID,
 			Metadata: &model.ScanMetadata{
 				TimeScanned:    createdValue.TimeScanned,
 				DbURI:          createdValue.DbUri,
@@ -471,6 +368,32 @@ func geCertifyVulnFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mode
 				Origin:         createdValue.Origin,
 				Collector:      createdValue.Collector,
 			},
+		}
+		if createdValue.PkgVersion != nil {
+			pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+				createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+			certifyVuln.Package = pkg
+		} else {
+			if !ingestion {
+				return nil, fmt.Errorf("failed to get subject from cursor for certifyVex")
+			}
+		}
+		if createdValue.PkgVersion != nil {
+			vuln := &model.Vulnerability{
+				ID:   createdValue.Vulnerability.VulnID,
+				Type: createdValue.Vulnerability.VulnType,
+				VulnerabilityIDs: []*model.VulnerabilityID{
+					{
+						ID:              createdValue.Vulnerability.VulnID,
+						VulnerabilityID: createdValue.Vulnerability.Vuln,
+					},
+				},
+			}
+			certifyVuln.Vulnerability = vuln
+		} else {
+			if !ingestion {
+				return nil, fmt.Errorf("failed to get subject from cursor for certifyVex")
+			}
 		}
 		certifyVulnList = append(certifyVulnList, certifyVuln)
 	}

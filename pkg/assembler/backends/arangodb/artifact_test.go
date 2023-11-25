@@ -43,12 +43,12 @@ func lessArtifact(a, b *model.Artifact) int {
 
 func Test_IngestArtifactIDs(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := getBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -86,12 +86,12 @@ func Test_IngestArtifactIDs(t *testing.T) {
 
 func Test_IngestArtifactID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := getBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -150,12 +150,12 @@ func Test_IngestArtifactID(t *testing.T) {
 
 func Test_Artifacts(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := getBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -241,12 +241,12 @@ func Test_Artifacts(t *testing.T) {
 
 func Test_buildArtifactResponseByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}

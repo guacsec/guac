@@ -31,12 +31,12 @@ import (
 
 func TestCertifyScorecard(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -515,12 +515,21 @@ func TestCertifyScorecard(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if srcID, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
+				} else {
+					if test.QuerySourceID {
+						test.Query = &model.CertifyScorecardSpec{
+							Source: &model.SourceSpec{
+								ID: ptrfrom.String(srcID.SourceNameID),
+							},
+						}
+
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestScorecard(ctx, *o.Src, *o.SC)
+				scoreID, err := b.IngestScorecardID(ctx, *o.Src, *o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -529,16 +538,8 @@ func TestCertifyScorecard(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.CertifyScorecardSpec{
-						ID: ptrfrom.String(found.ID),
+						ID: ptrfrom.String(scoreID),
 					}
-				}
-				if test.QuerySourceID {
-					test.Query = &model.CertifyScorecardSpec{
-						Source: &model.SourceSpec{
-							ID: ptrfrom.String(found.Source.Namespaces[0].Names[0].ID),
-						},
-					}
-
 				}
 			}
 			got, err := b.Scorecards(ctx, test.Query)
@@ -557,12 +558,12 @@ func TestCertifyScorecard(t *testing.T) {
 
 func TestIngestScorecards(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -743,7 +744,7 @@ func TestIngestScorecards(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestScorecards(ctx, o.Src, o.SC)
+				_, err := b.IngestScorecardIDs(ctx, o.Src, o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -767,12 +768,12 @@ func TestIngestScorecards(t *testing.T) {
 
 func Test_buildCertifyScorecardByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -869,7 +870,7 @@ func Test_buildCertifyScorecardByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestScorecard(ctx, *o.Src, *o.SC)
+				scoreID, err := b.IngestScorecardID(ctx, *o.Src, *o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -877,7 +878,7 @@ func Test_buildCertifyScorecardByID(t *testing.T) {
 					return
 				}
 
-				got, err := b.(*arangoClient).buildCertifyScorecardByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildCertifyScorecardByID(ctx, scoreID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
