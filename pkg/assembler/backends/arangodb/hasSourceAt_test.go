@@ -31,12 +31,12 @@ import (
 
 func TestHasSourceAt(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -581,17 +581,33 @@ func TestHasSourceAt(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					if test.QueryPkgID {
+						test.Query = &model.HasSourceAtSpec{
+							Package: &model.PkgSpec{
+								ID: ptrfrom.String(pkgIDs.PackageVersionID),
+							},
+						}
+					}
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if srcIDs, err := b.IngestSourceID(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
+				} else {
+					if test.QuerySourceID {
+						test.Query = &model.HasSourceAtSpec{
+							Source: &model.SourceSpec{
+								ID: ptrfrom.String(srcIDs.SourceNameID),
+							},
+						}
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestHasSourceAt(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
+				hsID, err := b.IngestHasSourceAtID(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -600,22 +616,7 @@ func TestHasSourceAt(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.HasSourceAtSpec{
-						ID: ptrfrom.String(found.ID),
-					}
-				}
-				if test.QueryPkgID {
-					test.Query = &model.HasSourceAtSpec{
-						Package: &model.PkgSpec{
-							ID: ptrfrom.String(found.Package.Namespaces[0].Names[0].Versions[0].ID),
-						},
-					}
-
-				}
-				if test.QuerySourceID {
-					test.Query = &model.HasSourceAtSpec{
-						Source: &model.SourceSpec{
-							ID: ptrfrom.String(found.Source.Namespaces[0].Names[0].ID),
-						},
+						ID: ptrfrom.String(hsID),
 					}
 				}
 			}
@@ -635,12 +636,12 @@ func TestHasSourceAt(t *testing.T) {
 
 func TestIngestHasSourceAts(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -910,12 +911,12 @@ func TestIngestHasSourceAts(t *testing.T) {
 
 func Test_buildHasSourceAtByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1081,14 +1082,14 @@ func Test_buildHasSourceAtByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestHasSourceAt(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
+				hsID, err := b.IngestHasSourceAtID(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildHasSourceAtByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildHasSourceAtByID(ctx, hsID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}

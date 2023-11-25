@@ -90,7 +90,7 @@ func getVulnMetadataForQuery(ctx context.Context, c *arangoClient, arangoQueryBu
 	}
 	defer cursor.Close()
 
-	return geVulnMetadataFromCursor(ctx, cursor)
+	return geVulnMetadataFromCursor(ctx, cursor, false)
 }
 
 func setVulnMetadataMatchValues(arangoQueryBuilder *arangoQueryBuilder, vulnMetadata *model.VulnerabilityMetadataSpec, queryValues map[string]any) error {
@@ -167,41 +167,25 @@ func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerab
 	LET firstVuln = FIRST(
 		FOR vVulnID in vulnerabilities
 		  FILTER vVulnID.guacKey == @guacVulnKey
-		FOR vType in vulnTypes
-		  FILTER vType._id == vVulnID._parent
-
 		RETURN {
-		  "typeID": vType._id,
-		  "type": vType.type,
-		  "vuln_id": vVulnID._id,
-		  "vuln": vVulnID.vulnerabilityID,
-		  "vulnDoc": vVulnID
+			"vuln_id": vVulnID._id,
+			"vuln_key": vVulnID._key
 		}
 	)
 	  
 	  LET vulnMetadata = FIRST(
-		  UPSERT { vulnerabilityID:firstVuln.vulnDoc._id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin } 
-			  INSERT { vulnerabilityID:firstVuln.vulnDoc._id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin } 
+		  UPSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin } 
+			  INSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin } 
 			  UPDATE {} IN vulnMetadataCollection
-			  RETURN NEW
+			  RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			  }
 	  )
 				  
-	  INSERT { _key: CONCAT("vulnMetadataEdges", firstVuln.vulnDoc._key, vulnMetadata._key), _from: firstVuln.vulnDoc._id, _to: vulnMetadata._id } INTO vulnMetadataEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("vulnMetadataEdges", firstVuln.vuln_key, vulnMetadata._key), _from: firstVuln.vuln_id, _to: vulnMetadata._id } INTO vulnMetadataEdges OPTIONS { overwriteMode: "ignore" }
 	  
-	  RETURN {
-		'vulnerability': {
-			'type_id': firstVuln.typeID,
-			'type': firstVuln.type,
-			'vuln_id': firstVuln.vuln_id,
-			'vuln': firstVuln.vuln
-		},
-		'vulnMetadata_id': vulnMetadata._id,
-		'scoreType': vulnMetadata.scoreType,
-		'scoreValue': vulnMetadata.scoreValue,
-		'timestamp': vulnMetadata.timestamp,
-		'collector': vulnMetadata.collector,
-		'origin': vulnMetadata.origin
-	  }`
+	  RETURN { 'vulnMetadata_id': vulnMetadata._id }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getVulnMetadataQueryValues(&vulnerability, vulnerabilityMetadata), "IngestVulnerabilityMetadata")
 	if err != nil {
@@ -209,7 +193,7 @@ func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerab
 	}
 	defer cursor.Close()
 
-	vulnMetadataList, err := geVulnMetadataFromCursor(ctx, cursor)
+	vulnMetadataList, err := geVulnMetadataFromCursor(ctx, cursor, true)
 	if err != nil {
 		return "", fmt.Errorf("failed to get VulnerabilityMetadata from arango cursor: %w", err)
 	}
@@ -252,43 +236,27 @@ func (c *arangoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vuln
 
 	query := `
 	  LET firstVuln = FIRST(
-		FOR vVulnID in vulnerabilities
-		  FILTER vVulnID.guacKey == doc.guacVulnKey
-		FOR vType in vulnTypes
-		  FILTER vType._id == vVulnID._parent
-
-		RETURN {
-		  "typeID": vType._id,
-		  "type": vType.type,
-		  "vuln_id": vVulnID._id,
-		  "vuln": vVulnID.vulnerabilityID,
-		  "vulnDoc": vVulnID
-		}
+			FOR vVulnID in vulnerabilities
+			  FILTER vVulnID.guacKey == doc.guacVulnKey
+			RETURN {
+				"vuln_id": vVulnID._id,
+				"vuln_key": vVulnID._key
+			}
 	  )
 	  
 	  LET vulnMetadata = FIRST(
-		  UPSERT { vulnerabilityID:firstVuln.vulnDoc._id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin } 
-			  INSERT { vulnerabilityID:firstVuln.vulnDoc._id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin } 
+		  UPSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin } 
+			  INSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin } 
 			  UPDATE {} IN vulnMetadataCollection
-			  RETURN NEW
+			  RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			  }
 	  )
 				  
-	  INSERT { _key: CONCAT("vulnMetadataEdges", firstVuln.vulnDoc._key, vulnMetadata._key), _from: firstVuln.vulnDoc._id, _to: vulnMetadata._id } INTO vulnMetadataEdges OPTIONS { overwriteMode: "ignore" }
+	  INSERT { _key: CONCAT("vulnMetadataEdges", firstVuln.vuln_key, vulnMetadata._key), _from: firstVuln.vuln_id, _to: vulnMetadata._id } INTO vulnMetadataEdges OPTIONS { overwriteMode: "ignore" }
 	  
-	  RETURN {
-		'vulnerability': {
-			'type_id': firstVuln.typeID,
-			'type': firstVuln.type,
-			'vuln_id': firstVuln.vuln_id,
-			'vuln': firstVuln.vuln
-		},
-		'vulnMetadata_id': vulnMetadata._id,
-		'scoreType': vulnMetadata.scoreType,
-		'scoreValue': vulnMetadata.scoreValue,
-		'timestamp': vulnMetadata.timestamp,
-		'collector': vulnMetadata.collector,
-		'origin': vulnMetadata.origin
-	  }`
+	  RETURN { 'vulnMetadata_id': vulnMetadata._id }`
 
 	sb.WriteString(query)
 
@@ -298,7 +266,7 @@ func (c *arangoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vuln
 	}
 	defer cursor.Close()
 
-	vulnMetadataList, err := geVulnMetadataFromCursor(ctx, cursor)
+	vulnMetadataList, err := geVulnMetadataFromCursor(ctx, cursor, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get VulnerabilityMetadatas from arango cursor: %w", err)
 	}
@@ -310,7 +278,7 @@ func (c *arangoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vuln
 	return vulnMetadataIDList, nil
 }
 
-func geVulnMetadataFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.VulnerabilityMetadata, error) {
+func geVulnMetadataFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.VulnerabilityMetadata, error) {
 	type collectedData struct {
 		Vulnerability  *dbVulnID                    `json:"vulnerability"`
 		VulnMetadataID string                       `json:"vulnMetadata_id"`
@@ -338,25 +306,30 @@ func geVulnMetadataFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mod
 
 	var vulnMetadataList []*model.VulnerabilityMetadata
 	for _, createdValue := range createdValues {
-		vuln := &model.Vulnerability{
-			ID:   createdValue.Vulnerability.VulnID,
-			Type: createdValue.Vulnerability.VulnType,
-			VulnerabilityIDs: []*model.VulnerabilityID{
-				{
-					ID:              createdValue.Vulnerability.VulnID,
-					VulnerabilityID: createdValue.Vulnerability.Vuln,
+		var vulnMetadata *model.VulnerabilityMetadata
+		if !ingestion {
+			vuln := &model.Vulnerability{
+				ID:   createdValue.Vulnerability.VulnID,
+				Type: createdValue.Vulnerability.VulnType,
+				VulnerabilityIDs: []*model.VulnerabilityID{
+					{
+						ID:              createdValue.Vulnerability.VulnID,
+						VulnerabilityID: createdValue.Vulnerability.Vuln,
+					},
 				},
-			},
-		}
+			}
 
-		vulnMetadata := &model.VulnerabilityMetadata{
-			ID:            createdValue.VulnMetadataID,
-			Vulnerability: vuln,
-			ScoreType:     createdValue.ScoreType,
-			ScoreValue:    createdValue.ScoreValue,
-			Timestamp:     createdValue.Timestamp,
-			Origin:        createdValue.Origin,
-			Collector:     createdValue.Collector,
+			vulnMetadata = &model.VulnerabilityMetadata{
+				ID:            createdValue.VulnMetadataID,
+				Vulnerability: vuln,
+				ScoreType:     createdValue.ScoreType,
+				ScoreValue:    createdValue.ScoreValue,
+				Timestamp:     createdValue.Timestamp,
+				Origin:        createdValue.Origin,
+				Collector:     createdValue.Collector,
+			}
+		} else {
+			vulnMetadata = &model.VulnerabilityMetadata{ID: createdValue.VulnMetadataID}
 		}
 		vulnMetadataList = append(vulnMetadataList, vulnMetadata)
 	}

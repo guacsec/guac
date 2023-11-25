@@ -90,7 +90,7 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 	}
 	defer cursor.Close()
 
-	return getHasSLSAFromCursor(c, ctx, cursor, map[string][]*model.Artifact{}, hasSLSASpec.BuiltFrom)
+	return getHasSLSAFromCursor(c, ctx, cursor, map[string][]*model.Artifact{}, hasSLSASpec.BuiltFrom, false)
 }
 
 func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *model.HasSLSASpec, queryValues map[string]any) {
@@ -195,7 +195,7 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 	return values
 }
 
-func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
+func (c *arangoClient) IngestSLSAIDs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
 	builtFromMap := map[string][]*model.Artifact{}
 	var listOfValues []map[string]any
 
@@ -238,7 +238,10 @@ func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifa
 		UPSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:doc.builtFrom, buildType:doc.buildType, slsaPredicate:doc.slsaPredicate, slsaVersion:doc.slsaVersion, startedOn:doc.startedOn, finishedOn:doc.finishedOn, collector:doc.collector, origin:doc.origin } 
 		INSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:doc.builtFrom, buildType:doc.buildType, slsaPredicate:doc.slsaPredicate, slsaVersion:doc.slsaVersion, startedOn:doc.startedOn, finishedOn:doc.finishedOn, collector:doc.collector, origin:doc.origin } 
 		UPDATE {} IN hasSLSAs
-		RETURN NEW
+		RETURN {
+			'_id': NEW._id,
+			'_key': NEW._key
+		}
 	)
 
 	INSERT { _key: CONCAT("hasSLSASubjectArtEdges", subject._key, hasSLSA._key), _from: subject._id, _to: hasSLSA._id } INTO hasSLSASubjectArtEdges OPTIONS { overwriteMode: "ignore" }
@@ -248,26 +251,7 @@ func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifa
 		INSERT { _key: CONCAT("hasSLSABuiltFromEdges", hasSLSA._key, bfData), _from: hasSLSA._id, _to: CONCAT("artifacts/", bfData) } INTO hasSLSABuiltFromEdges OPTIONS { overwriteMode: "ignore" }
 	)
 
-	RETURN {
-		'subject': {
-			'id': subject._id,
-			'algorithm': subject.algorithm,
-			'digest': subject.digest
-		},
-		'builtBy': {
-			'id': builtBy._id,
-			'uri': builtBy.uri
-		},
-		'hasSLSA_id': hasSLSA._id,
-		'buildType': hasSLSA.buildType,
-		'builtFrom': hasSLSA.builtFrom,
-		'slsaPredicate': hasSLSA.slsaPredicate,
-		'slsaVersion': hasSLSA.slsaVersion,
-		'startedOn': hasSLSA.startedOn,
-		'finishedOn': hasSLSA.finishedOn,
-		'collector': hasSLSA.collector,
-		'origin': hasSLSA.origin
-	}`
+	RETURN { 'hasSLSA_id': hasSLSA._id }`
 
 	sb.WriteString(query)
 
@@ -276,19 +260,24 @@ func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifa
 		return nil, fmt.Errorf("failed to ingest hasSLSA: %w", err)
 	}
 	defer cursor.Close()
-	hasSLSAList, err := getHasSLSAFromCursor(c, ctx, cursor, builtFromMap, nil)
+	hasSLSAList, err := getHasSLSAFromCursor(c, ctx, cursor, builtFromMap, nil, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get hasSLSA from arango cursor: %w", err)
 	}
 
-	return hasSLSAList, nil
+	var hasSLSAIDList []string
+	for _, hasSLSA := range hasSLSAList {
+		hasSLSAIDList = append(hasSLSAIDList, hasSLSA.ID)
+	}
+
+	return hasSLSAIDList, nil
 }
 
-func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+func (c *arangoClient) IngestSLSAID(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
 	// get materials (builtFrom artifacts) as they should already be ingested
 	artifacts, err := c.getMaterials(ctx, builtFrom)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get built from artifact with error: %w", err)
+		return "", fmt.Errorf("failed to get built from artifact with error: %w", err)
 	}
 
 	query := `
@@ -298,7 +287,10 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInp
 		UPSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:@builtFrom, buildType:@buildType, slsaPredicate:@slsaPredicate, slsaVersion:@slsaVersion, startedOn:@startedOn, finishedOn:@finishedOn, collector:@collector, origin:@origin } 
 		INSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:@builtFrom, buildType:@buildType, slsaPredicate:@slsaPredicate, slsaVersion:@slsaVersion, startedOn:@startedOn, finishedOn:@finishedOn, collector:@collector, origin:@origin } 
 		UPDATE {} IN hasSLSAs
-		RETURN NEW
+		RETURN {
+			'_id': NEW._id,
+			'_key': NEW._key
+		}
 	)
 
 	INSERT { _key: CONCAT("hasSLSASubjectArtEdges", subject._key, hasSLSA._key), _from: subject._id, _to: hasSLSA._id } INTO hasSLSASubjectArtEdges OPTIONS { overwriteMode: "ignore" }
@@ -308,42 +300,23 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInp
 		INSERT { _key: CONCAT("hasSLSABuiltFromEdges", hasSLSA._key, bfData), _from: hasSLSA._id, _to: CONCAT("artifacts/", bfData) } INTO hasSLSABuiltFromEdges OPTIONS { overwriteMode: "ignore" }
 	)
 
-	RETURN {
-		'subject': {
-			'id': subject._id,
-			'algorithm': subject.algorithm,
-			'digest': subject.digest
-		},
-		'builtBy': {
-			'id': builtBy._id,
-			'uri': builtBy.uri
-		},
-		'hasSLSA_id': hasSLSA._id,
-		'buildType': hasSLSA.buildType,
-		'builtFrom': hasSLSA.builtFrom,
-		'slsaPredicate': hasSLSA.slsaPredicate,
-		'slsaVersion': hasSLSA.slsaVersion,
-		'startedOn': hasSLSA.startedOn,
-		'finishedOn': hasSLSA.finishedOn,
-		'collector': hasSLSA.collector,
-		'origin': hasSLSA.origin
-	}`
+	RETURN { 'hasSLSA_id': hasSLSA._id }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getSLSAValues(subject, artifacts, builtBy, slsa), "IngestSLSA")
 	if err != nil {
-		return nil, fmt.Errorf("failed to ingest hasSLSA: %w", err)
+		return "", fmt.Errorf("failed to ingest hasSLSA: %w", err)
 	}
 	defer cursor.Close()
 
-	hasSLSAList, err := getHasSLSAFromCursor(c, ctx, cursor, map[string][]*model.Artifact{artifactKey(subject.Algorithm, subject.Digest): artifacts}, nil)
+	hasSLSAList, err := getHasSLSAFromCursor(c, ctx, cursor, map[string][]*model.Artifact{artifactKey(subject.Algorithm, subject.Digest): artifacts}, nil, true)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get hasSLSA from arango cursor: %w", err)
+		return "", fmt.Errorf("failed to get hasSLSA from arango cursor: %w", err)
 	}
 
 	if len(hasSLSAList) == 1 {
-		return hasSLSAList[0], nil
+		return hasSLSAList[0].ID, nil
 	} else {
-		return nil, fmt.Errorf("number of hasSLSA ingested is greater than one")
+		return "", fmt.Errorf("number of hasSLSA ingested is greater than one")
 	}
 }
 
@@ -353,7 +326,7 @@ func artifactKey(alg, dig string) string {
 	return strings.Join([]string{algorithm, digest}, ":")
 }
 
-func getHasSLSAFromCursor(c *arangoClient, ctx context.Context, cursor driver.Cursor, builtFromMap map[string][]*model.Artifact, filterBuiltFrom []*model.ArtifactSpec) ([]*model.HasSlsa, error) {
+func getHasSLSAFromCursor(c *arangoClient, ctx context.Context, cursor driver.Cursor, builtFromMap map[string][]*model.Artifact, filterBuiltFrom []*model.ArtifactSpec, ingestion bool) ([]*model.HasSlsa, error) {
 	type collectedData struct {
 		Subject       *model.Artifact `json:"subject"`
 		BuiltBy       *model.Builder  `json:"builtBy"`
@@ -385,55 +358,62 @@ func getHasSLSAFromCursor(c *arangoClient, ctx context.Context, cursor driver.Cu
 
 	var hasSLSAList []*model.HasSlsa
 	for _, createdValue := range createdValues {
-		if createdValue.BuiltBy == nil || createdValue.Subject == nil {
-			return nil, fmt.Errorf("failed to get subject or builtBy from cursor for hasSLSA")
-		}
-		var builtFromArtifacts []*model.Artifact
-		if val, ok := builtFromMap[artifactKey(createdValue.Subject.Algorithm, createdValue.Subject.Digest)]; ok {
-			builtFromArtifacts = val
-		} else {
-			artifacts, err := c.getMaterialsByID(ctx, createdValue.BuiltFrom)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get artifact by ID for hasSLSA builtFrom with error: %w", err)
+		if !ingestion {
+			if createdValue.BuiltBy == nil || createdValue.Subject == nil {
+				return nil, fmt.Errorf("failed to get subject or builtBy from cursor for hasSLSA")
 			}
-			matchingArtifacts := true
-			if filterBuiltFrom != nil {
-				matchingArtifacts = false
-				for _, bfArtifact := range filterBuiltFrom {
-					if containsMatchingArtifact(artifacts, bfArtifact.ID, bfArtifact.Algorithm, bfArtifact.Digest) {
-						matchingArtifacts = true
-						break
+			var builtFromArtifacts []*model.Artifact
+			if val, ok := builtFromMap[artifactKey(createdValue.Subject.Algorithm, createdValue.Subject.Digest)]; ok {
+				builtFromArtifacts = val
+			} else {
+				artifacts, err := c.getMaterialsByID(ctx, createdValue.BuiltFrom)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get artifact by ID for hasSLSA builtFrom with error: %w", err)
+				}
+				matchingArtifacts := true
+				if filterBuiltFrom != nil {
+					matchingArtifacts = false
+					for _, bfArtifact := range filterBuiltFrom {
+						if containsMatchingArtifact(artifacts, bfArtifact.ID, bfArtifact.Algorithm, bfArtifact.Digest) {
+							matchingArtifacts = true
+							break
+						}
 					}
 				}
-			}
-			if matchingArtifacts {
-				builtFromArtifacts = artifacts
-			}
-		}
-
-		if len(builtFromArtifacts) > 0 {
-			slsa := &model.Slsa{
-				BuiltFrom:     builtFromArtifacts,
-				BuiltBy:       createdValue.BuiltBy,
-				BuildType:     createdValue.BuildType,
-				SlsaPredicate: getCollectedPredicates(createdValue.SlsaPredicate),
-				SlsaVersion:   createdValue.SlsaVersion,
-				Origin:        createdValue.Origin,
-				Collector:     createdValue.Collector,
+				if matchingArtifacts {
+					builtFromArtifacts = artifacts
+				}
 			}
 
-			if !createdValue.StartedOn.Equal(time.Unix(0, 0).UTC()) {
-				slsa.StartedOn = createdValue.StartedOn
-			}
+			if len(builtFromArtifacts) > 0 {
+				slsa := &model.Slsa{
+					BuiltFrom:     builtFromArtifacts,
+					BuiltBy:       createdValue.BuiltBy,
+					BuildType:     createdValue.BuildType,
+					SlsaPredicate: getCollectedPredicates(createdValue.SlsaPredicate),
+					SlsaVersion:   createdValue.SlsaVersion,
+					Origin:        createdValue.Origin,
+					Collector:     createdValue.Collector,
+				}
 
-			if !createdValue.FinishedOn.Equal(time.Unix(0, 0).UTC()) {
-				slsa.FinishedOn = createdValue.FinishedOn
-			}
+				if !createdValue.StartedOn.Equal(time.Unix(0, 0).UTC()) {
+					slsa.StartedOn = createdValue.StartedOn
+				}
 
+				if !createdValue.FinishedOn.Equal(time.Unix(0, 0).UTC()) {
+					slsa.FinishedOn = createdValue.FinishedOn
+				}
+
+				hasSLSA := &model.HasSlsa{
+					ID:      createdValue.HasSLSAId,
+					Subject: createdValue.Subject,
+					Slsa:    slsa,
+				}
+				hasSLSAList = append(hasSLSAList, hasSLSA)
+			}
+		} else {
 			hasSLSA := &model.HasSlsa{
-				ID:      createdValue.HasSLSAId,
-				Subject: createdValue.Subject,
-				Slsa:    slsa,
+				ID: createdValue.HasSLSAId,
 			}
 			hasSLSAList = append(hasSLSAList, hasSLSA)
 		}

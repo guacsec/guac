@@ -31,12 +31,12 @@ import (
 
 func TestVEX(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -856,22 +856,50 @@ func TestVEX(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackageID(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					if test.QueryPkgID {
+						test.Query = &model.CertifyVEXStatementSpec{
+							Subject: &model.PackageOrArtifactSpec{
+								Package: &model.PkgSpec{
+									ID: ptrfrom.String(pkgIDs.PackageVersionID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if artID, err := b.IngestArtifactID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %a", err)
+				} else {
+					if test.QueryArtID {
+						test.Query = &model.CertifyVEXStatementSpec{
+							Subject: &model.PackageOrArtifactSpec{
+								Artifact: &model.ArtifactSpec{
+									ID: ptrfrom.String(artID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, v := range test.InVuln {
-				if _, err := b.IngestVulnerabilityID(ctx, *v); err != nil {
+				if vulnIDs, err := b.IngestVulnerabilityID(ctx, *v); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %v", err)
+				} else {
+					if test.QueryVulnID {
+						test.Query = &model.CertifyVEXStatementSpec{
+							Vulnerability: &model.VulnerabilitySpec{
+								ID: ptrfrom.String(vulnIDs.VulnerabilityNodeID),
+							},
+						}
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
+				vexID, err := b.IngestVEXStatementID(ctx, o.Sub, *o.Vuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -880,36 +908,7 @@ func TestVEX(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.CertifyVEXStatementSpec{
-						ID: ptrfrom.String(found.ID),
-					}
-				}
-				if test.QueryPkgID {
-					if _, ok := found.Subject.(*model.Package); ok {
-						test.Query = &model.CertifyVEXStatementSpec{
-							Subject: &model.PackageOrArtifactSpec{
-								Package: &model.PkgSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QueryArtID {
-					if _, ok := found.Subject.(*model.Artifact); ok {
-						test.Query = &model.CertifyVEXStatementSpec{
-							Subject: &model.PackageOrArtifactSpec{
-								Artifact: &model.ArtifactSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Artifact).ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QueryVulnID {
-					test.Query = &model.CertifyVEXStatementSpec{
-						Vulnerability: &model.VulnerabilitySpec{
-							ID: ptrfrom.String(found.Vulnerability.ID),
-						},
+						ID: ptrfrom.String(vexID),
 					}
 				}
 			}
@@ -929,12 +928,12 @@ func TestVEX(t *testing.T) {
 
 func TestVEXBulkIngest(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1321,12 +1320,12 @@ func TestVEXBulkIngest(t *testing.T) {
 
 func Test_buildCertifyVexByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1526,14 +1525,14 @@ func Test_buildCertifyVexByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
+				vexID, err := b.IngestVEXStatementID(ctx, o.Sub, *o.Vuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildCertifyVexByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildCertifyVexByID(ctx, vexID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}

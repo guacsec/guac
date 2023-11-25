@@ -531,14 +531,14 @@ func TestLegal(t *testing.T) {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := getBackend(ctx, arangArg)
+			b, err := getBackend(ctx, arangoArgs)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -558,7 +558,7 @@ func TestLegal(t *testing.T) {
 				}
 			}
 			for i, o := range test.Calls {
-				cl, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				clID, err := b.IngestCertifyLegalID(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -566,7 +566,7 @@ func TestLegal(t *testing.T) {
 					return
 				}
 				if (i + 1) == test.IDInFilter {
-					test.Query.ID = &cl.ID
+					test.Query.ID = ptrfrom.String(clID)
 				}
 			}
 			got, err := b.CertifyLegal(ctx, test.Query)
@@ -639,14 +639,14 @@ func TestLegals(t *testing.T) {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := getBackend(ctx, arangArg)
+			b, err := getBackend(ctx, arangoArgs)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -666,7 +666,7 @@ func TestLegals(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyLegals(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				_, err := b.IngestCertifyLegalIDs(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -840,14 +840,14 @@ func Test_buildCertifyLegalByID(t *testing.T) {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			b, err := getBackend(ctx, arangArg)
+			b, err := getBackend(ctx, arangoArgs)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
@@ -867,14 +867,14 @@ func Test_buildCertifyLegalByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				cl, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				clID, err := b.IngestCertifyLegalID(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildCertifyLegalByID(ctx, cl.ID, test.Query)
+				got, err := b.(*arangoClient).buildCertifyLegalByID(ctx, clID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}

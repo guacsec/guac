@@ -191,7 +191,7 @@ func getSrcPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 	}
 	defer cursor.Close()
 
-	return getPointOfContactFromCursor(ctx, cursor)
+	return getPointOfContactFromCursor(ctx, cursor, false)
 }
 
 func getArtPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.PointOfContact, error) {
@@ -217,7 +217,7 @@ func getArtPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 	}
 	defer cursor.Close()
 
-	return getPointOfContactFromCursor(ctx, cursor)
+	return getPointOfContactFromCursor(ctx, cursor, false)
 }
 
 func getPkgPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any, includeDepPkgVersion bool) ([]*model.PointOfContact, error) {
@@ -271,7 +271,7 @@ func getPkgPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 	}
 	defer cursor.Close()
 
-	return getPointOfContactFromCursor(ctx, cursor)
+	return getPointOfContactFromCursor(ctx, cursor, false)
 }
 
 func setPointOfContactMatchValues(arangoQueryBuilder *arangoQueryBuilder, PointOfContactSpec *model.PointOfContactSpec, queryValues map[string]any) {
@@ -333,150 +333,74 @@ func getPointOfContactQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.M
 	return values
 }
 
-func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
+func (c *arangoClient) IngestPointOfContactID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
+	var cursor driver.Cursor
+	var err error
 	if subject.Package != nil {
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
 			query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
 			  FILTER pVersion.guacKey == @pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
-			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
-			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
-			}
+			  RETURN {
+				'version_id': pVersion._id,
+				'version_key': pVersion._key
+			  }
 		)
 		  
 		  LET pointOfContact = FIRST(
 			  UPSERT {  packageID:firstPkg.version_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
 				  INSERT {  packageID:firstPkg.version_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
 				  UPDATE {} IN pointOfContacts
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("pointOfContactPkgVersionEdges", firstPkg.versionDoc._key, pointOfContact._key), _from: firstPkg.version_id, _to: pointOfContact._id } INTO pointOfContactPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("pointOfContactPkgVersionEdges", firstPkg.version_key, pointOfContact._key), _from: firstPkg.version_id, _to: pointOfContact._id } INTO pointOfContactPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'pointOfContact_id': pointOfContact._id,
-			'email': pointOfContact.email,
-			'info': pointOfContact.info,
-			'since': pointOfContact.since,
-			'justification': pointOfContact.justification,
-			'collector': pointOfContact.collector,
-			'origin': pointOfContact.origin  
-		  }`
+		  RETURN { 'pointOfContact_id': pointOfContact._id }`
 
-			cursor, err := executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(subject.Package, pkgMatchType, nil, nil, &pointOfContact), "IngestPointOfContact - PkgVersion")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(subject.Package, pkgMatchType, nil, nil, &pointOfContact), "IngestPointOfContact - PkgVersion")
 			if err != nil {
-				return nil, fmt.Errorf("failed to ingest package pointOfContact: %w", err)
+				return "", fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
 			defer cursor.Close()
-
-			pointOfContacts, err := getPointOfContactFromCursor(ctx, cursor)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
-			}
-
-			if len(pointOfContacts) == 1 {
-				return pointOfContacts[0], nil
-			} else {
-				return nil, fmt.Errorf("number of pointOfContact ingested is greater than one")
-			}
 		} else {
 			query := `
 			LET firstPkg = FIRST(
 				FOR pName in pkgNames
-				  FILTER pName.guacKey == @pkgNameGuacKey
-				FOR pNs in pkgNamespaces
-				  FILTER pNs._id == pName._parent
-				FOR pType in pkgTypes
-				  FILTER pType._id == pNs._parent
-		
-				RETURN {
-				  'typeID': pType._id,
-				  'type': pType.type,
-				  'namespace_id': pNs._id,
-				  'namespace': pNs.namespace,
-				  'name_id': pName._id,
-				  'name': pName.name,
-				  'nameDoc': pName
-				}
+				  FILTER pName.guacKey == @pkgNameGuacKey		
+				  RETURN {
+					'name_id': pName._id,
+					'name_key': pName._key,
+				  }
 			)
 			  
 			  LET pointOfContact = FIRST(
 				  UPSERT {  packageID:firstPkg.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
 					  INSERT {  packageID:firstPkg.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
 					  UPDATE {} IN pointOfContacts
-					  RETURN NEW
+					  RETURN {
+						'_id': NEW._id,
+						'_key': NEW._key
+					  }
 			  )
 			  
 			  LET edgeCollection = (
-				INSERT {  _key: CONCAT("pointOfContactPkgNameEdges", firstPkg.nameDoc._key, pointOfContact._key), _from: firstPkg.name_id, _to: pointOfContact._id } INTO pointOfContactPkgNameEdges OPTIONS { overwriteMode: "ignore" }
+				INSERT {  _key: CONCAT("pointOfContactPkgNameEdges", firstPkg.name_key, pointOfContact._key), _from: firstPkg.name_id, _to: pointOfContact._id } INTO pointOfContactPkgNameEdges OPTIONS { overwriteMode: "ignore" }
 			  )
 			  
-			  RETURN {
-				'pkgVersion': {
-					'type_id': firstPkg.typeID,
-					'type': firstPkg.type,
-					'namespace_id': firstPkg.namespace_id,
-					'namespace': firstPkg.namespace,
-					'name_id': firstPkg.name_id,
-					'name': firstPkg.name
-				},
-				'pointOfContact_id': pointOfContact._id,
-				'email': pointOfContact.email,
-				'info': pointOfContact.info,
-				'since': pointOfContact.since,
-				'justification': pointOfContact.justification,
-				'collector': pointOfContact.collector,
-				'origin': pointOfContact.origin    
-			  }`
+			  RETURN { 'pointOfContact_id': pointOfContact._id }`
 
-			cursor, err := executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(subject.Package, pkgMatchType, nil, nil, &pointOfContact), "IngestPointOfContact - PkgName")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(subject.Package, pkgMatchType, nil, nil, &pointOfContact), "IngestPointOfContact - PkgName")
 			if err != nil {
-				return nil, fmt.Errorf("failed to ingest package pointOfContact: %w", err)
+				return "", fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
 			defer cursor.Close()
-
-			pointOfContacts, err := getPointOfContactFromCursor(ctx, cursor)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
-			}
-
-			if len(pointOfContacts) == 1 {
-				return pointOfContacts[0], nil
-			} else {
-				return nil, fmt.Errorf("number of pointOfContact ingested is greater than one")
-			}
 		}
 
 	} else if subject.Artifact != nil {
@@ -486,120 +410,73 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 			UPSERT { artifactID:artifact._id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
 				INSERT { artifactID:artifact._id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
 				UPDATE {} IN pointOfContacts
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		LET edgeCollection = (
 		  INSERT {  _key: CONCAT("pointOfContactArtEdges", artifact._key, pointOfContact._key), _from: artifact._id, _to: pointOfContact._id } INTO pointOfContactArtEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
-		RETURN {
-		  'artifact': {
-			  'id': artifact._id,
-			  'algorithm': artifact.algorithm,
-			  'digest': artifact.digest
-		  },
-		  'pointOfContact_id': pointOfContact._id,
-		  'email': pointOfContact.email,
-		  'info': pointOfContact.info,
-		  'since': pointOfContact.since,
-		  'justification': pointOfContact.justification,
-		  'collector': pointOfContact.collector,
-		  'origin': pointOfContact.origin    
-		}`
+		RETURN { 'pointOfContact_id': pointOfContact._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(nil, nil, subject.Artifact, nil, &pointOfContact), "IngestPointOfContact - artifact")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(nil, nil, subject.Artifact, nil, &pointOfContact), "IngestPointOfContact - artifact")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest artifact pointOfContact: %w", err)
+			return "", fmt.Errorf("failed to ingest artifact pointOfContact: %w", err)
 		}
 		defer cursor.Close()
-		pointOfContacts, err := getPointOfContactFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
-		}
-
-		if len(pointOfContacts) == 1 {
-			return pointOfContacts[0], nil
-		} else {
-			return nil, fmt.Errorf("number of pointOfContact ingested is greater than one")
-		}
-
 	} else if subject.Source != nil {
 		query := `
 		LET firstSrc = FIRST(
 			FOR sName in srcNames
 			  FILTER sName.guacKey == @srcNameGuacKey
-			FOR sNs in srcNamespaces
-			  FILTER sNs._id == sName._parent
-			FOR sType in srcTypes
-			  FILTER sType._id == sNs._parent
-	
-			RETURN {
-			  'typeID': sType._id,
-			  'type': sType.type,
-			  'namespace_id': sNs._id,
-			  'namespace': sNs.namespace,
-			  'name_id': sName._id,
-			  'name': sName.name,
-			  'commit': sName.commit,
-			  'tag': sName.tag,
-			  'nameDoc': sName
-			}
+			  RETURN {
+				'name_id': sName._id,
+				'name_key': sName._key,
+			  }
 		)
 		  
 		LET pointOfContact = FIRST(
 			UPSERT { sourceID:firstSrc.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
 				INSERT { sourceID:firstSrc.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
 				UPDATE {} IN pointOfContacts
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		LET edgeCollection = (
-		  INSERT {  _key: CONCAT("pointOfContactSrcEdges", firstSrc.nameDoc._key, pointOfContact._key), _from: firstSrc.name_id, _to: pointOfContact._id } INTO pointOfContactSrcEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT {  _key: CONCAT("pointOfContactSrcEdges", firstSrc.name_key, pointOfContact._key), _from: firstSrc.name_id, _to: pointOfContact._id } INTO pointOfContactSrcEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
-		RETURN {
-		  'srcName': {
-			  'type_id': firstSrc.typeID,
-			  'type': firstSrc.type,
-			  'namespace_id': firstSrc.namespace_id,
-			  'namespace': firstSrc.namespace,
-			  'name_id': firstSrc.name_id,
-			  'name': firstSrc.name,
-			  'commit': firstSrc.commit,
-			  'tag': firstSrc.tag
-		  },
-		  'pointOfContact_id': pointOfContact._id,
-		  'email': pointOfContact.email,
-		  'info': pointOfContact.info,
-		  'since': pointOfContact.since,
-		  'justification': pointOfContact.justification,
-		  'collector': pointOfContact.collector,
-		  'origin': pointOfContact.origin    
-		}`
+		RETURN { 'pointOfContact_id': pointOfContact._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(nil, nil, nil, subject.Source, &pointOfContact), "IngestPointOfContact - source")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(nil, nil, nil, subject.Source, &pointOfContact), "IngestPointOfContact - source")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest source pointOfContact: %w", err)
+			return "", fmt.Errorf("failed to ingest source pointOfContact: %w", err)
 		}
 		defer cursor.Close()
-		pointOfContacts, err := getPointOfContactFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
-		}
-
-		if len(pointOfContacts) == 1 {
-			return pointOfContacts[0], nil
-		} else {
-			return nil, fmt.Errorf("number of pointOfContact ingested is greater than one")
-		}
-
 	} else {
-		return nil, fmt.Errorf("package, artifact, or source is specified for IngestPointOfContact")
+		return "", fmt.Errorf("package, artifact, or source is specified for IngestPointOfContact")
+	}
+	pointOfContacts, err := getPointOfContactFromCursor(ctx, cursor, true)
+	if err != nil {
+		return "", fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
+	}
+
+	if len(pointOfContacts) == 1 {
+		return pointOfContacts[0].ID, nil
+	} else {
+		return "", fmt.Errorf("number of pointOfContact ingested is greater than one")
 	}
 }
 
 func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error) {
+	var cursor driver.Cursor
+	var err error
 	if len(subjects.Packages) > 0 {
 		var listOfValues []map[string]any
 
@@ -630,28 +507,13 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 		sb.WriteString("]")
 
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			query := `LET firstPkg = FIRST(
+			query := `
+			LET firstPkg = FIRST(
 				FOR pVersion in pkgVersions
 				  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-				FOR pName in pkgNames
-				  FILTER pName._id == pVersion._parent
-				FOR pNs in pkgNamespaces
-				  FILTER pNs._id == pName._parent
-				FOR pType in pkgTypes
-				  FILTER pType._id == pNs._parent
-		
 				RETURN {
-				  'typeID': pType._id,
-				  'type': pType.type,
-				  'namespace_id': pNs._id,
-				  'namespace': pNs.namespace,
-				  'name_id': pName._id,
-				  'name': pName.name,
 				  'version_id': pVersion._id,
-				  'version': pVersion.version,
-				  'subpath': pVersion.subpath,
-				  'qualifier_list': pVersion.qualifier_list,
-				  'versionDoc': pVersion
+				  'version_key': pVersion._key
 				}
 			)
 			  
@@ -659,73 +521,33 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 				  UPSERT {  packageID:firstPkg.version_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 					  INSERT {  packageID:firstPkg.version_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 					  UPDATE {} IN pointOfContacts
-					  RETURN NEW
+					  RETURN {
+						'_id': NEW._id,
+						'_key': NEW._key
+					  }
 			  )
 			  
 			  LET edgeCollection = (
-				INSERT {  _key: CONCAT("pointOfContactPkgVersionEdges", firstPkg.versionDoc._key, pointOfContact._key), _from: firstPkg.version_id, _to: pointOfContact._id } INTO pointOfContactPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
+				INSERT {  _key: CONCAT("pointOfContactPkgVersionEdges", firstPkg.version_key, pointOfContact._key), _from: firstPkg.version_id, _to: pointOfContact._id } INTO pointOfContactPkgVersionEdges OPTIONS { overwriteMode: "ignore" }
 			  )
 			  
-			  RETURN {
-				'pkgVersion': {
-					'type_id': firstPkg.typeID,
-					'type': firstPkg.type,
-					'namespace_id': firstPkg.namespace_id,
-					'namespace': firstPkg.namespace,
-					'name_id': firstPkg.name_id,
-					'name': firstPkg.name,
-					'version_id': firstPkg.version_id,
-					'version': firstPkg.version,
-					'subpath': firstPkg.subpath,
-					'qualifier_list': firstPkg.qualifier_list
-				},
-				'pointOfContact_id': pointOfContact._id,
-				'email': pointOfContact.email,
-				'info': pointOfContact.info,
-				'since': pointOfContact.since,
-				'justification': pointOfContact.justification,
-				'collector': pointOfContact.collector,
-				'origin': pointOfContact.origin    
-			  }`
+			  RETURN { 'pointOfContact_id': pointOfContact._id }`
 
 			sb.WriteString(query)
 
-			cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPointOfContacts - PkgVersion")
+			cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPointOfContacts - PkgVersion")
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
 			defer cursor.Close()
-
-			ingestPointOfContactList, err := getPointOfContactFromCursor(ctx, cursor)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
-			}
-
-			var pointOfContactIDList []string
-			for _, ingestedPointOfContact := range ingestPointOfContactList {
-				pointOfContactIDList = append(pointOfContactIDList, ingestedPointOfContact.ID)
-			}
-
-			return pointOfContactIDList, nil
-
 		} else {
 			query := `
 			LET firstPkg = FIRST(
 				FOR pName in pkgNames
 				  FILTER pName.guacKey == doc.pkgNameGuacKey
-				FOR pNs in pkgNamespaces
-				  FILTER pNs._id == pName._parent
-				FOR pType in pkgTypes
-				  FILTER pType._id == pNs._parent
-		
 				RETURN {
-				  'typeID': pType._id,
-				  'type': pType.type,
-				  'namespace_id': pNs._id,
-				  'namespace': pNs.namespace,
 				  'name_id': pName._id,
-				  'name': pName.name,
-				  'nameDoc': pName
+				  'name_key': pName._key
 				}
 			)
 			  
@@ -733,50 +555,25 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 				  UPSERT {  packageID:firstPkg.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 					  INSERT {  packageID:firstPkg.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 					  UPDATE {} IN pointOfContacts
-					  RETURN NEW
+					  RETURN {
+						'_id': NEW._id,
+						'_key': NEW._key
+					}
 			  )
 			  
 			  LET edgeCollection = (
-				INSERT {  _key: CONCAT("pointOfContactPkgNameEdges", firstPkg.nameDoc._key, pointOfContact._key), _from: firstPkg.name_id, _to: pointOfContact._id } INTO pointOfContactPkgNameEdges OPTIONS { overwriteMode: "ignore" }
+				INSERT {  _key: CONCAT("pointOfContactPkgNameEdges", firstPkg.name_key, pointOfContact._key), _from: firstPkg.name_id, _to: pointOfContact._id } INTO pointOfContactPkgNameEdges OPTIONS { overwriteMode: "ignore" }
 			  )
 			  
-			  RETURN {
-				'pkgVersion': {
-					'type_id': firstPkg.typeID,
-					'type': firstPkg.type,
-					'namespace_id': firstPkg.namespace_id,
-					'namespace': firstPkg.namespace,
-					'name_id': firstPkg.name_id,
-					'name': firstPkg.name
-				},
-				'pointOfContact_id': pointOfContact._id,
-				'email': pointOfContact.email,
-				'info': pointOfContact.info,
-				'since': pointOfContact.since,
-				'justification': pointOfContact.justification,
-				'collector': pointOfContact.collector,
-				'origin': pointOfContact.origin    
-			  }`
+			  RETURN { 'pointOfContact_id': pointOfContact._id }`
 
 			sb.WriteString(query)
 
-			cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPointOfContacts - PkgName")
+			cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPointOfContacts - PkgName")
 			if err != nil {
 				return nil, fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
 			defer cursor.Close()
-
-			ingestPointOfContactList, err := getPointOfContactFromCursor(ctx, cursor)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
-			}
-
-			var pointOfContactIDList []string
-			for _, ingestedPointOfContact := range ingestPointOfContactList {
-				pointOfContactIDList = append(pointOfContactIDList, ingestedPointOfContact.ID)
-			}
-
-			return pointOfContactIDList, nil
 		}
 
 	} else if len(subjects.Artifacts) > 0 {
@@ -814,48 +611,25 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 			UPSERT { artifactID:artifact._id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				INSERT { artifactID:artifact._id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				UPDATE {} IN pointOfContacts
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		LET edgeCollection = (
 		  INSERT {  _key: CONCAT("pointOfContactArtEdges", artifact._key, pointOfContact._key), _from: artifact._id, _to: pointOfContact._id } INTO pointOfContactArtEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
-		RETURN {
-		  'artifact': {
-			  'id': artifact._id,
-			  'algorithm': artifact.algorithm,
-			  'digest': artifact.digest
-		  },
-		  'pointOfContact_id': pointOfContact._id,
-		  'email': pointOfContact.email,
-		  'info': pointOfContact.info,
-		  'since': pointOfContact.since,
-		  'justification': pointOfContact.justification,
-		  'collector': pointOfContact.collector,
-		  'origin': pointOfContact.origin    
-		}`
+		RETURN { 'pointOfContact_id': pointOfContact._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPointOfContacts - artifact")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPointOfContacts - artifact")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact pointOfContact: %w", err)
 		}
 		defer cursor.Close()
-
-		ingestPointOfContactList, err := getPointOfContactFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
-		}
-
-		var pointOfContactIDList []string
-		for _, ingestedPointOfContact := range ingestPointOfContactList {
-			pointOfContactIDList = append(pointOfContactIDList, ingestedPointOfContact.ID)
-		}
-
-		return pointOfContactIDList, nil
-
 	} else if len(subjects.Sources) > 0 {
 		var listOfValues []map[string]any
 
@@ -889,21 +663,9 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 		LET firstSrc = FIRST(
 			FOR sName in srcNames
 			  FILTER sName.guacKey == doc.srcNameGuacKey
-			FOR sNs in srcNamespaces
-			  FILTER sNs._id == sName._parent
-			FOR sType in srcTypes
-			  FILTER sType._id == sNs._parent
-	
 			RETURN {
-			  'typeID': sType._id,
-			  'type': sType.type,
-			  'namespace_id': sNs._id,
-			  'namespace': sNs.namespace,
 			  'name_id': sName._id,
-			  'name': sName.name,
-			  'commit': sName.commit,
-			  'tag': sName.tag,
-			  'nameDoc': sName
+			  'name_key': sName._key
 			}
 		)
 		  
@@ -911,59 +673,42 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 			UPSERT { sourceID:firstSrc.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				INSERT { sourceID:firstSrc.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				UPDATE {} IN pointOfContacts
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		LET edgeCollection = (
-		  INSERT {  _key: CONCAT("pointOfContactSrcEdges", firstSrc.nameDoc._key, pointOfContact._key), _from: firstSrc.name_id, _to: pointOfContact._id } INTO pointOfContactSrcEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT {  _key: CONCAT("pointOfContactSrcEdges", firstSrc.name_key, pointOfContact._key), _from: firstSrc.name_id, _to: pointOfContact._id } INTO pointOfContactSrcEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
-		RETURN {
-		  'srcName': {
-			  'type_id': firstSrc.typeID,
-			  'type': firstSrc.type,
-			  'namespace_id': firstSrc.namespace_id,
-			  'namespace': firstSrc.namespace,
-			  'name_id': firstSrc.name_id,
-			  'name': firstSrc.name,
-			  'commit': firstSrc.commit,
-			  'tag': firstSrc.tag
-		  },
-		  'pointOfContact_id': pointOfContact._id,
-		  'email': pointOfContact.email,
-		  'info': pointOfContact.info,
-		  'since': pointOfContact.since,
-		  'justification': pointOfContact.justification,
-		  'collector': pointOfContact.collector,
-		  'origin': pointOfContact.origin    
-		}`
+		RETURN { 'pointOfContact_id': pointOfContact._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPointOfContacts - source")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestPointOfContacts - source")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source pointOfContact: %w", err)
 		}
 		defer cursor.Close()
-
-		ingestPointOfContactList, err := getPointOfContactFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
-		}
-
-		var pointOfContactIDList []string
-		for _, ingestedPointOfContact := range ingestPointOfContactList {
-			pointOfContactIDList = append(pointOfContactIDList, ingestedPointOfContact.ID)
-		}
-
-		return pointOfContactIDList, nil
-
 	} else {
 		return nil, fmt.Errorf("packages, artifacts, or sources not specified for IngestPointOfContacts")
 	}
+	ingestPointOfContactList, err := getPointOfContactFromCursor(ctx, cursor, true)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get pointOfContact from arango cursor: %w", err)
+	}
+
+	var pointOfContactIDList []string
+	for _, ingestedPointOfContact := range ingestPointOfContactList {
+		pointOfContactIDList = append(pointOfContactIDList, ingestedPointOfContact.ID)
+	}
+
+	return pointOfContactIDList, nil
 }
 
-func getPointOfContactFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.PointOfContact, error) {
+func getPointOfContactFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.PointOfContact, error) {
 	type collectedData struct {
 		PkgVersion       *dbPkgVersion   `json:"pkgVersion"`
 		Artifact         *model.Artifact `json:"artifact"`
@@ -1021,7 +766,9 @@ func getPointOfContactFromCursor(ctx context.Context, cursor driver.Cursor) ([]*
 		} else if createdValue.Artifact != nil {
 			poc.Subject = createdValue.Artifact
 		} else {
-			return nil, fmt.Errorf("failed to get subject from cursor for pointOfContact")
+			if !ingestion {
+				return nil, fmt.Errorf("failed to get subject from cursor for pointOfContact")
+			}
 		}
 		pocList = append(pocList, poc)
 	}
