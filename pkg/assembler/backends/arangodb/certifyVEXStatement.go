@@ -259,7 +259,7 @@ func getVEXStatementQueryValues(pkg *model.PkgInputSpec, artifact *model.Artifac
 	return values
 }
 
-func (c *arangoClient) IngestVEXStatementIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
 	if len(subjects.Artifacts) > 0 {
 		var listOfValues []map[string]any
 

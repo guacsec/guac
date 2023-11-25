@@ -1023,7 +1023,7 @@ func TestVEXBulkIngest(t *testing.T) {
 				t.Fatalf("Could not ingest vulnerability: %v", err)
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestVEXStatementIDs(ctx, o.Subs, o.Vulns, o.Vexs)
+				_, err := b.IngestVEXStatements(ctx, o.Subs, o.Vulns, o.Vexs)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
