@@ -343,7 +343,10 @@ func (c *arangoClient) IngestOccurrenceIDs(ctx context.Context, subjects model.P
 			  UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN isOccurrences
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
 		  )
 	
 		  INSERT { _key: CONCAT("isOccurrenceSubjectSrcEdges", firstSrc.name_key, isOccurrence._key), _from: firstSrc.name_id, _to: isOccurrence._id } INTO isOccurrenceSubjectSrcEdges OPTIONS { overwriteMode: "ignore" }
@@ -393,7 +396,10 @@ func (c *arangoClient) IngestOccurrenceID(ctx context.Context, subject model.Pac
 		  UPSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
 			  INSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
 			  UPDATE {} IN isOccurrences
-			  RETURN NEW
+			  RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			  }
 	)
 	
 	INSERT { _key: CONCAT("isOccurrenceSubjectPkgEdges", firstPkg.version_key, isOccurrence._key), _from: firstPkg.version_id, _to: isOccurrence._id } INTO isOccurrenceSubjectPkgEdges OPTIONS { overwriteMode: "ignore" }

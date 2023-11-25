@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package arangodb
 
 import (
@@ -574,13 +572,16 @@ func TestPkgEqual(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
+			var collectedPkgIDs []*model.PackageIDs
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *a); err != nil {
+				if pkgIDs, err := b.IngestPackageID(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
+				} else {
+					collectedPkgIDs = append(collectedPkgIDs, pkgIDs)
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
+				peID, err := b.IngestPkgEqualID(ctx, *o.P1, *o.P2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -589,13 +590,13 @@ func TestPkgEqual(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.PkgEqualSpec{
-						ID: ptrfrom.String(found.ID),
+						ID: ptrfrom.String(peID),
 					}
 				}
 				if test.QueryPkgID {
 					test.Query = &model.PkgEqualSpec{
 						Packages: []*model.PkgSpec{{
-							ID: ptrfrom.String(found.Packages[0].Namespaces[0].Names[0].Versions[0].ID),
+							ID: ptrfrom.String(collectedPkgIDs[0].PackageVersionID),
 						}},
 					}
 				}
@@ -603,10 +604,10 @@ func TestPkgEqual(t *testing.T) {
 					test.Query = &model.PkgEqualSpec{
 						Packages: []*model.PkgSpec{
 							{
-								ID: ptrfrom.String(found.Packages[0].Namespaces[0].Names[0].Versions[0].ID),
+								ID: ptrfrom.String(collectedPkgIDs[0].PackageVersionID),
 							},
 							{
-								ID: ptrfrom.String(found.Packages[1].Namespaces[0].Names[0].Versions[0].ID),
+								ID: ptrfrom.String(collectedPkgIDs[1].PackageVersionID),
 							},
 						},
 					}
@@ -1116,14 +1117,14 @@ func Test_buildPkgEqualByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
+				peID, err := b.IngestPkgEqualID(ctx, *o.P1, *o.P2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildPkgEqualByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildPkgEqualByID(ctx, peID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
