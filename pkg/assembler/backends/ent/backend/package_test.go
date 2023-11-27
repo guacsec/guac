@@ -137,11 +137,7 @@ func ingestP2(s *Suite) {
 		Subpath:   ptr("subpath"),
 	}
 
-<<<<<<< HEAD
-	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*model.PackageIDs, error) {
-=======
 	_, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
->>>>>>> 33a3e3e (Ent - OccurrenceID)
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p2Spec)
 	})
 	s.Require().NoError(err)
@@ -160,7 +156,6 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		},
 	}
 
-<<<<<<< HEAD
 	s.Run("HappyPath", func() {
 		ingestP1(s)
 	})
@@ -172,71 +167,66 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		})
 		s.Require().NoError(err)
 		s.Require().NotNil(pkg)
-=======
-	id, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
-	})
-	s.Require().NoError(err)
-	s.Require().NotNil(id)
-
-	// Ingest twice to ensure upserts are working
-	id, err = WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
-		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
->>>>>>> 33a3e3e (Ent - OccurrenceID)
-	})
-
-	s.Run("Empty keys", func() {
-		ingestP1(s)
-		s.Empty(s.Client.PackageVersion.Query().Where(packageversion.QualifiersIsEmpty()).AllX(s.Ctx))
-	})
-
-	s.Run("No Qualifiers", func() {
-		ingestP1(s)
-		spec.Qualifiers = nil
-<<<<<<< HEAD
-		pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*model.PackageIDs, error) {
-=======
 		id, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
->>>>>>> 33a3e3e (Ent - OccurrenceID)
 			return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
 		})
 		s.Require().NoError(err)
 		s.Require().NotNil(id)
 
-		s.Len(s.Client.PackageVersion.Query().Where(packageversion.QualifiersIsEmpty()).AllX(s.Ctx), 1)
-	})
+		// Ingest twice to ensure upserts are working
+		id, err = WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
+			return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
+		})
 
-	s.Run("Single key", func() {
-		ingestP1(s)
-		versions := s.Client.PackageVersion.Query().Where(packageversion.QualifiersWithKeys("arch", "a")).AllX(s.Ctx)
-		s.NotEmpty(versions)
-	})
+		s.Run("Empty keys", func() {
+			ingestP1(s)
+			s.Empty(s.Client.PackageVersion.Query().Where(packageversion.QualifiersIsEmpty()).AllX(s.Ctx))
+		})
 
-	s.Run("Multiple keys", func() {
-		ingestP1(s)
-		versions := s.Client.PackageVersion.Query().Where(packageversion.QualifiersContains("arch", "arm64")).AllX(s.Ctx)
-		s.NotEmpty(versions)
-	})
+		s.Run("No Qualifiers", func() {
+			ingestP1(s)
+			spec.Qualifiers = nil
 
-	s.Run("Using spec - Null value", func() {
-		ingestP1(s)
-		versions := s.Client.PackageVersion.Query().Where(
-			packageversion.QualifiersMatch([]*model.PackageQualifierSpec{{Key: "arch"}}, false),
-		).AllX(s.Ctx)
-		s.NotEmpty(versions)
-	})
+			id, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
+				return upsertPackage(s.Ctx, ent.TxFromContext(ctx), spec)
+			})
+			s.Require().NoError(err)
+			s.Require().NotNil(id)
 
-	s.Run("Using spec - Multiple", func() {
-		ingestP1(s)
-		versions := s.Client.PackageVersion.Query().Where(
-			packageversion.QualifiersMatch([]*model.PackageQualifierSpec{
-				{Key: "arch"},
-				{Key: "a", Value: ptr("b")},
-			}, false),
-		).AllX(s.Ctx)
-		s.NotEmpty(versions)
-	})
+			s.Len(s.Client.PackageVersion.Query().Where(packageversion.QualifiersIsEmpty()).AllX(s.Ctx), 1)
+		})
 
+		s.Run("Single key", func() {
+			ingestP1(s)
+			versions := s.Client.PackageVersion.Query().Where(packageversion.QualifiersWithKeys("arch", "a")).AllX(s.Ctx)
+			s.NotEmpty(versions)
+		})
+
+		s.Run("Multiple keys", func() {
+			ingestP1(s)
+			versions := s.Client.PackageVersion.Query().Where(packageversion.QualifiersContains("arch", "arm64")).AllX(s.Ctx)
+			s.NotEmpty(versions)
+		})
+
+		s.Run("Using spec - Null value", func() {
+			ingestP1(s)
+			versions := s.Client.PackageVersion.Query().Where(
+				packageversion.QualifiersMatch([]*model.PackageQualifierSpec{{Key: "arch"}}, false),
+			).AllX(s.Ctx)
+			s.NotEmpty(versions)
+		})
+
+		s.Run("Using spec - Multiple", func() {
+			ingestP1(s)
+			versions := s.Client.PackageVersion.Query().Where(
+				packageversion.QualifiersMatch([]*model.PackageQualifierSpec{
+					{Key: "arch"},
+					{Key: "a", Value: ptr("b")},
+				}, false),
+			).AllX(s.Ctx)
+			s.NotEmpty(versions)
+		})
+	})
 }
 
 func ingestP1(s *Suite) {
@@ -251,11 +241,9 @@ func ingestP1(s *Suite) {
 			{Key: "a", Value: "b"},
 		},
 	}
-<<<<<<< HEAD
-	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*model.PackageIDs, error) {
-=======
+
 	pkg, err := WithinTX(s.Ctx, s.Client, func(ctx context.Context) (*int, error) {
->>>>>>> 33a3e3e (Ent - OccurrenceID)
+
 		return upsertPackage(s.Ctx, ent.TxFromContext(ctx), p1Spec)
 	})
 	s.Require().NoError(err)

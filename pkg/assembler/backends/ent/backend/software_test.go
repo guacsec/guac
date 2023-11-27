@@ -52,11 +52,8 @@ func (s *Suite) TestCreateSoftwareTree() {
 			},
 		})
 		s.NoError(err2)
-<<<<<<< HEAD
-		pkgs, err3 := be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
-=======
+
 		pkgs, err3 := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
->>>>>>> 33a3e3e (Ent - OccurrenceID)
 		s.NoError(err3)
 		pkg := pkgs[0]
 		s.NoError(err3)
@@ -89,11 +86,7 @@ func (s *Suite) TestCreateSoftwareTree() {
 		// Ensure that we don't get a duplicate row error
 		s.NoError(err2)
 
-<<<<<<< HEAD
-		pkgs, err = be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
-=======
 		pkgs, err = be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
->>>>>>> 33a3e3e (Ent - OccurrenceID)
 		s.NoError(err)
 		pkg = pkgs[0]
 		s.NotNil(pkg)
@@ -127,11 +120,9 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 			Qualifiers: []*model.PackageQualifierInputSpec{{Key: "arch", Value: "x86"}},
 		})
 		s.NoError(err2)
-<<<<<<< HEAD
-		pkgs, err3 := be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
-=======
+
 		pkgs, err3 := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
->>>>>>> 33a3e3e (Ent - OccurrenceID)
+
 		pkg1 := pkgs[0]
 		s.NoError(err3)
 		s.NotNil(pkg1)
@@ -149,11 +140,9 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 
 		id2, err4 := be.IngestPackageID(s.Ctx, spec2)
 		s.NoError(err4)
-<<<<<<< HEAD
-		pkgs, err3 = be.Packages(s.Ctx, &model.PkgSpec{ID: &id2.PackageVersionID})
-=======
+
 		pkgs, err3 = be.Packages(s.Ctx, &model.PkgSpec{ID: &id2})
->>>>>>> 33a3e3e (Ent - OccurrenceID)
+
 		s.NoError(err3)
 		pkg2 := pkgs[0]
 		s.NotNil(pkg2)
@@ -180,40 +169,6 @@ func (s *Suite) TestIngestOccurrence_Package() {
 			},
 			model.ArtifactInputSpec{
 				Algorithm: "sha256", Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-<<<<<<< HEAD
-<<<<<<< HEAD
-			},
-			model.IsOccurrenceInputSpec{
-				Justification: "this artifact is an occurrence of this openssl",
-				Origin:        "Demo ingestion",
-				Collector:     "Demo ingestion",
-			},
-		)
-		s.NoError(err)
-		s.NotNil(oc)
-	})
-=======
-			})
-		s.NoError(err)
-
-	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-	oc, err := be.IngestOccurrenceID(s.Ctx,
-		model.PackageOrSourceInput{
-			Package: p1,
-		},
-		model.ArtifactInputSpec{
-			Algorithm: "sha256", Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-		},
-		model.IsOccurrenceInputSpec{
-			Justification: "this artifact is an occurrence of this openssl",
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
-		},
-	)
-	s.NoError(err)
-	s.NotNil(oc)
->>>>>>> 13283a5 (Ent - OccurrenceID)
-=======
 			},
 			model.IsOccurrenceInputSpec{})
 		s.NoError(err)
@@ -235,5 +190,4 @@ func (s *Suite) TestIngestOccurrence_Package() {
 		s.NoError(err)
 		s.NotNil(id)
 	})
->>>>>>> 33a3e3e (Ent - OccurrenceID)
 }

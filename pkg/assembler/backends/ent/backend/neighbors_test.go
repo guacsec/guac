@@ -116,12 +116,12 @@ func (s *Suite) TestNodes() {
 		v, err := be.IngestArtifactID(s.Ctx, a1)
 		s.Require().NoError(err)
 
-		id, err := be.IngestPackageID(s.Ctx, *p4)
+		pkg, err := be.IngestPackageID(s.Ctx, *p4)
 		s.Require().NoError(err)
 
 		//pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
 
-		pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id})
+		pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &pkg.PackageVersionID})
 
 		s.Require().NoError(err)
 		p := pkgs[0]

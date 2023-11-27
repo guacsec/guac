@@ -1054,10 +1054,7 @@ func (s *Suite) TestIngestVulnMetadatas() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-<<<<<<< HEAD
-=======
 
->>>>>>> 33a3e3e (Ent - OccurrenceID)
 			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerabilities: %a", err)
 			}

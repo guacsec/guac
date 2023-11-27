@@ -641,14 +641,14 @@ func (s *Suite) TestPointOfContact() {
 			}
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				poc, err := b.IngestPointOfContact(ctx, o.Sub, o.Match, *o.HM)
+				poc, err := b.IngestPointOfContactID(ctx, o.Sub, o.Match, *o.HM)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				recordIDs[i] = poc.ID
+				recordIDs[i] = poc
 			}
 
 			if test.Query.ID != nil {

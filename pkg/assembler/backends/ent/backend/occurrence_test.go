@@ -683,11 +683,8 @@ func (s *Suite) TestIngestOccurrences() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-<<<<<<< HEAD
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
-=======
+
 				if _, err = b.IngestPackageID(ctx, *p); err != nil {
->>>>>>> 33a3e3e (Ent - OccurrenceID)
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 

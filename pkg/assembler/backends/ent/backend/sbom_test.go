@@ -831,12 +831,11 @@ func (s *Suite) TestIngestHasSBOMs() {
 				}
 			}
 			for _, o := range test.Calls {
-<<<<<<< HEAD
-				_, err := b.IngestHasSBOMIDs(ctx, o.Sub, o.HS, nil)
-=======
+
+				//	_, err := b.IngestHasSBOMIDs(ctx, o.Sub, o.HS, nil)
 
 				_, err := b.IngestHasSBOMIDs(ctx, o.Sub, o.HS, o.Inc)
->>>>>>> 33a3e3e (Ent - OccurrenceID)
+
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

@@ -678,14 +678,14 @@ func (s *Suite) TestHasMetadata() {
 			}
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				hm, err := b.IngestHasMetadata(ctx, o.Sub, o.Match, *o.HM)
+				id, err := b.IngestHasMetadataID(ctx, o.Sub, o.Match, *o.HM)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				recordIDs[i] = hm.ID
+				recordIDs[i] = id
 			}
 
 			if test.Query.ID != nil {
