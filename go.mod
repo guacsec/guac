@@ -40,7 +40,7 @@ require (
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20231106174013-bbf56f31fb17 // indirect
 	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.31.0
@@ -201,7 +201,6 @@ require (
 	github.com/spf13/afero v1.10.0 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/theupdateframework/go-tuf v0.5.2 // indirect
 	github.com/tiancaiamao/gp v0.0.0-20221230034425-4025bc8a4d4a // indirect
 	github.com/tikv/pd/client v0.0.0-20231115064546-181fdc95be65 // indirect
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
@@ -282,7 +281,7 @@ require (
 	github.com/regclient/regclient v0.5.4
 	github.com/segmentio/kafka-go v0.4.44
 	github.com/segmentio/ksuid v1.0.4
-	github.com/sigstore/sigstore v1.7.4
+	github.com/sigstore/sigstore v1.7.5
 	github.com/spdx/tools-golang v0.5.3
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4
