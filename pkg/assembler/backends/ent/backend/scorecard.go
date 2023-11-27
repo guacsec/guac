@@ -21,8 +21,6 @@ import (
 
 	"strconv"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
@@ -90,6 +88,7 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 	return collect(records, toModelCertifyScorecard), nil
 }
 
+/*
 func (b *EntBackend) IngestScorecardIDs(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	var scs []string
 	for i, sc := range scorecards {
@@ -100,7 +99,7 @@ func (b *EntBackend) IngestScorecardIDs(ctx context.Context, sources []*model.So
 		scs = append(scs, id)
 	}
 	return scs, nil
-}
+}*/
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 // IngestScorecard takes a scorecard and a source and creates a certifyScorecard

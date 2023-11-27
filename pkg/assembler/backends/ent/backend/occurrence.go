@@ -17,10 +17,8 @@ package backend
 
 import (
 	"context"
-<<<<<<< HEAD
-=======
 	stdsql "database/sql"
->>>>>>> 13283a5 (Ent - OccurrenceID)
+
 	"strconv"
 
 	"entgo.io/ent/dialect/sql"
@@ -169,7 +167,7 @@ func (b *EntBackend) IngestOccurrenceID(ctx context.Context,
 				sql.IsNull(occurrence.FieldSourceID),
 			)
 		} else if subject.Source != nil {
-			srcNameID, err = upsertSource(ctx, tx, *subject.Source)
+			srcNameID, err := upsertSource(ctx, tx, *subject.Source)
 			if err != nil {
 				return nil, err
 			}
