@@ -22,6 +22,9 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// Remove the ebedded backends.Backend interface in the EntBackend struct so
+// that we know which methods are not implemented.
+
 func (b *EntBackend) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
 	return nil, fmt.Errorf("not implemented: Path")
 }
