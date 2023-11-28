@@ -28,10 +28,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
-	var modelLicenses []*model.License
+func (b *EntBackend) IngestLicenseIDs(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
+	var modelLicenses []string
 	for i, license := range licenses {
-		modelLicense, err := b.IngestLicense(ctx, license)
+		modelLicense, err := b.IngestLicenseID(ctx, license)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestLicense failed with element #%v with err: %v", i, err)
 		}
@@ -40,7 +40,7 @@ func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.Licen
 	return modelLicenses, nil
 }
 
-func (b *EntBackend) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
+func (b *EntBackend) IngestLicenseID(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
 		licenseID, err := upsertLicense(ctx, client, *license)
@@ -51,12 +51,10 @@ func (b *EntBackend) IngestLicense(ctx context.Context, license *model.LicenseIn
 		return licenseID, nil
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &model.License{
-		ID: nodeID(*record),
-	}, nil
+	return nodeID(*record), nil
 }
 
 func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([]*model.License, error) {
