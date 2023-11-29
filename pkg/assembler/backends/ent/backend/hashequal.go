@@ -50,22 +50,23 @@ func (b *EntBackend) HashEqual(ctx context.Context, spec *model.HashEqualSpec) (
 	return collect(records, toModelHashEqual), nil
 }
 
-func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, spec model.HashEqualInputSpec) (*model.HashEqual, error) {
+func (b *EntBackend) IngestHashEqualID(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, spec model.HashEqualInputSpec) (string, error) {
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.HashEqual, error) {
 		tx := ent.TxFromContext(ctx)
 		return upsertHashEqual(ctx, tx, artifact, equalArtifact, spec)
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelHashEqual(record.Unwrap()), nil
+	//TODO optimize for only returning ID
+	return nodeID(record.ID), nil
 }
 
-func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
-	var result []*model.HashEqual
+func (b *EntBackend) IngestHashEqualIDs(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
+	var result []string
 	for i := range hashEquals {
-		he, err := b.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
+		he, err := b.IngestHashEqualID(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHashEquals failed for elements #%v with err: %v", i, err)
 		}

@@ -445,14 +445,14 @@ func (s *Suite) TestVulnEqual() {
 			}
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				ve, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
+				ve, err := b.IngestVulnEqualID(ctx, *o.Vuln, *o.OtherVuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				recordIDs[i] = ve.ID
+				recordIDs[i] = ve
 			}
 
 			if test.Query.ID != nil {

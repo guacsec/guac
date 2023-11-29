@@ -677,14 +677,14 @@ func (s *Suite) TestVEX() {
 			}
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
+				v, err := b.IngestVEXStatementID(ctx, o.Sub, *o.Vuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 
 			if test.Query.ID != nil {

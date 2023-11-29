@@ -205,16 +205,16 @@ var s2out = &model.Source{
 
 func (s *Suite) TestOccurrenceHappyPath() {
 	s.Run("HappyPath", func() {
-		be, err := GetBackend(s.Client)
+		b, err := GetBackend(s.Client)
 		s.Require().NoError(err)
 
-		_, err = be.IngestPackageID(s.Ctx, *p1)
+		_, err = b.IngestPackageID(s.Ctx, *p1)
 		s.Require().NoError(err)
 
-		_, err = be.IngestArtifactID(s.Ctx, a1)
+		_, err = b.IngestArtifactID(s.Ctx, a1)
 		s.Require().NoError(err)
 
-		occ, err := be.IngestOccurrence(s.Ctx,
+		occ, err := b.IngestOccurrenceID(s.Ctx,
 			model.PackageOrSourceInput{
 				Package: p1,
 			},
@@ -225,15 +225,6 @@ func (s *Suite) TestOccurrenceHappyPath() {
 		)
 		s.Require().NoError(err)
 		s.Require().NotNil(occ)
-		s.Equal("test justification", occ.Justification)
-		s.Equal(a1.Digest, occ.Artifact.Digest)
-
-		if pkgSrc, ok := occ.Subject.(*model.Package); ok && pkgSrc != nil {
-			s.Equal(p1.Type, pkgSrc.Type)
-			s.NotEmpty(pkgSrc.Namespaces[0].Names[0].Versions[0].ID)
-		} else {
-			s.Failf("fail", "subject is not a package, got %T", occ.Subject)
-		}
 	})
 }
 
@@ -579,7 +570,7 @@ func (s *Suite) TestOccurrence() {
 			}
 
 			for _, o := range test.Calls {
-				_, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
+				_, err := b.IngestOccurrenceID(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
 				if test.ExpIngestErr {
 					s.Require().Error(err, "Expected ingest error")
 				} else {
@@ -612,9 +603,7 @@ func (s *Suite) TestIngestOccurrences() {
 		InSrc        []*model.SourceInputSpec
 		InArt        []*model.ArtifactInputSpec
 		Calls        []call
-		ExpOcc       []*model.IsOccurrence
 		ExpIngestErr bool
-		ExpQueryErr  bool
 	}{{
 		Name:  "HappyPath - packages",
 		InPkg: []*model.PkgInputSpec{p1, p2},
@@ -632,17 +621,6 @@ func (s *Suite) TestIngestOccurrences() {
 				}},
 			},
 		},
-		ExpOcc: []*model.IsOccurrence{
-			&model.IsOccurrence{
-				Subject:       p1out,
-				Artifact:      a1out,
-				Justification: "test justification",
-			}, &model.IsOccurrence{
-				Subject:       p2out,
-				Artifact:      a2out,
-				Justification: "test justification",
-			},
-		},
 	}, {
 		Name:  "HappyPath - sources",
 		InSrc: []*model.SourceInputSpec{s1},
@@ -656,13 +634,6 @@ func (s *Suite) TestIngestOccurrences() {
 				Occurrences: []*model.IsOccurrenceInputSpec{{
 					Justification: "test justification",
 				}},
-			},
-		},
-		ExpOcc: []*model.IsOccurrence{
-			{
-				Subject:       s1out,
-				Artifact:      a1out,
-				Justification: "test justification",
 			},
 		},
 	}}
@@ -690,15 +661,9 @@ func (s *Suite) TestIngestOccurrences() {
 				}
 			}
 			for _, o := range test.Calls {
-				got, err := b.IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+				_, err := b.IngestOccurrenceIDs(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
-				}
-				if err != nil {
-					return
-				}
-				if diff := cmp.Diff(test.ExpOcc, got, ignoreID); diff != "" {
-					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}
 		})

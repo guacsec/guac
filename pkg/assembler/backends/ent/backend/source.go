@@ -68,25 +68,26 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	return collect(records, toModelHasSourceAt), nil
 }
 
-func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
+func (b *EntBackend) IngestHasSourceAtID(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.HasSourceAt, error) {
 		return upsertHasSourceAt(ctx, ent.TxFromContext(ctx), pkg, pkgMatchType, source, hasSourceAt)
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelHasSourceAt(record.Unwrap()), nil
+	//TODO optimize for only returning ID
+	return nodeID(record.ID), nil
 }
 
 func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType *model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
 	var result []string
 	for i := range hasSourceAts {
-		hsa, err := b.IngestHasSourceAt(ctx, *pkgs[i], *pkgMatchType, *sources[i], *hasSourceAts[i])
+		hsa, err := b.IngestHasSourceAtID(ctx, *pkgs[i], *pkgMatchType, *sources[i], *hasSourceAts[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSourceAts failed with err: %v", err)
 		}
-		result = append(result, hsa.ID)
+		result = append(result, hsa)
 	}
 	return result, nil
 }

@@ -523,14 +523,14 @@ func (s *Suite) TestHasSLSA() {
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestSLSA(ctx, *o.Sub, o.BuiltFrom, *o.Builder, *o.SLSA)
+				v, err := b.IngestSLSAID(ctx, *o.Sub, o.BuiltFrom, *o.Builder, *o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 			if test.Query != nil && test.Query.ID != nil {
 				idIdx, err := strconv.Atoi(*test.Query.ID)
@@ -757,7 +757,7 @@ func (s *Suite) TestIngestHasSLSAs() {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
+				_, err := b.IngestSLSAIDs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
