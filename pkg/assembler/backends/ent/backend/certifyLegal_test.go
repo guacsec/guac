@@ -490,12 +490,12 @@ func (s *Suite) TestLegal() {
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				_, err := b.IngestCertifyLegalID(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -588,12 +588,12 @@ func (s *Suite) TestLegals() {
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicense(ctx, a); err != nil {
+				if _, err := b.IngestLicenseID(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyLegals(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				_, err := b.IngestCertifyLegalIDs(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

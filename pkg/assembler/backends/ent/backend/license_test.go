@@ -114,14 +114,14 @@ func (s *Suite) TestLicense() {
 			}
 			recordIDs := make([]string, len(test.Ingests))
 			for x, i := range test.Ingests {
-				lic, err := b.IngestLicense(ctx, i)
+				lic, err := b.IngestLicenseID(ctx, i)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				recordIDs[x] = lic.ID
+				recordIDs[x] = lic
 			}
 
 			if test.Query.ID != nil {
@@ -159,12 +159,10 @@ func (s *Suite) TestIngestLicenses() {
 	tests := []struct {
 		name    string
 		ingests []*model.LicenseInputSpec
-		exp     []*model.License
 	}{
 		{
 			name:    "Multiple",
 			ingests: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L3, testdata.L4},
-			exp:     []*model.License{{}, {}, {}, {}},
 		},
 	}
 	ctx := s.Ctx
@@ -175,13 +173,8 @@ func (s *Suite) TestIngestLicenses() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			got, err := b.IngestLicenses(ctx, test.ingests)
-			if err != nil {
+			if _, err := b.IngestLicenseIDs(ctx, test.ingests); err != nil {
 				t.Fatalf("ingest error: %v", err)
-				return
-			}
-			if diff := cmp.Diff(test.exp, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}

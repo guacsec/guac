@@ -33,7 +33,6 @@ var Errorf = gqlerror.Errorf
 const MaxPageSize = 1000
 
 type EntBackend struct {
-	backends.Backend
 	client *ent.Client
 }
 

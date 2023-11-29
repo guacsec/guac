@@ -575,14 +575,14 @@ func (s *Suite) TestIngestCertifyVulnerability() {
 
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				record, err := b.IngestCertifyVuln(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
+				record, err := b.IngestCertifyVulnID(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				recordIDs[i] = record.ID
+				recordIDs[i] = record
 			}
 
 			if test.Query.ID != nil {
@@ -1041,14 +1041,14 @@ func (s *Suite) TestIngestCertifyVulns() {
 
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				cvs, err := b.IngestCertifyVulns(ctx, o.Pkgs, o.Vulns, o.CertifyVulns)
+				cvs, err := b.IngestCertifyVulnIDs(ctx, o.Pkgs, o.Vulns, o.CertifyVulns)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				recordIDs[i] = cvs[0].ID
+				recordIDs[i] = cvs[0]
 			}
 
 			if test.Query.ID != nil {

@@ -563,14 +563,14 @@ func (s *Suite) TestCertifyBad() {
 			}
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB)
+				v, err := b.IngestCertifyBadID(ctx, o.Sub, o.Match, *o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 
 			if test.Query.ID != nil {
@@ -912,7 +912,7 @@ func (s *Suite) TestIngestCertifyBads() {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyBads(ctx, o.Sub, o.Match, o.CB)
+				_, err := b.IngestCertifyBadIDs(ctx, o.Sub, o.Match, o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1482,14 +1482,14 @@ func (s *Suite) TestCertifyGood() {
 			}
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestCertifyGood(ctx, o.Sub, o.Match, *o.CG)
+				v, err := b.IngestCertifyGoodID(ctx, o.Sub, o.Match, *o.CG)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 			if test.Query.ID != nil {
 				idIdx, err := strconv.Atoi(*test.Query.ID)
@@ -1779,7 +1779,7 @@ func (s *Suite) TestIngestCertifyGoods() {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyGoods(ctx, o.Sub, o.Match, o.CG)
+				_, err := b.IngestCertifyGoodIDs(ctx, o.Sub, o.Match, o.CG)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

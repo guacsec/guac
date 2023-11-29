@@ -158,7 +158,7 @@ func (s *Suite) TestIngestOccurrence_Package() {
 		s.NoError(err)
 
 		// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-		oc, err := be.IngestOccurrence(s.Ctx,
+		oc, err := be.IngestOccurrenceID(s.Ctx,
 			model.PackageOrSourceInput{
 				Package: p1,
 			},

@@ -494,14 +494,14 @@ func (s *Suite) TestHashEqual() {
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestHashEqual(ctx, *o.A1, *o.A2, *o.HE)
+				v, err := b.IngestHashEqualID(ctx, *o.A1, *o.A2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 
 			if test.Query != nil && test.Query.ID != nil {
@@ -773,7 +773,7 @@ func (s *Suite) TestIngestHashEquals() {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHashEquals(ctx, o.A1, o.A2, o.HE)
+				_, err := b.IngestHashEqualIDs(ctx, o.A1, o.A2, o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

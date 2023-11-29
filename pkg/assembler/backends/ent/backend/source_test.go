@@ -625,14 +625,14 @@ func (s *Suite) TestHasSourceAt() {
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestHasSourceAt(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
+				v, err := b.IngestHasSourceAtID(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 
 			if test.Query.ID != nil {
