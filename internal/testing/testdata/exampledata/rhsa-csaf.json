@@ -420,6 +420,23 @@
             ],
             "category": "architecture",
             "name": "s390x"
+          },
+          {
+            "branches": [
+              {
+                "category": "product_version",
+                "name": "nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64",
+                "product": {
+                  "name": "nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64",
+                  "product_id": "nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64",
+                  "product_identification_helper": {
+                    "purl": "pkg:rpm/redhat/nginx@1.20.1-1.module%2Bel8.8.0%2B20359%2B9bd89172.1?arch=x86_64&epoch=1"
+                  }
+                }
+              }
+            ],
+            "category": "architecture",
+            "name": "x86_64"
           }
         ],
         "category": "vendor",
@@ -741,6 +758,15 @@
         },
         "product_reference": "openssl-perl-1:1.1.1k-8.el8_6.x86_64",
         "relates_to_product_reference": "BaseOS-8.6.0.Z.EUS"
+      },
+      {
+        "category": "default_component_of",
+        "full_product_name": {
+          "name": "nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64 as a component of Red Hat Enterprise Linux BaseOS EUS (v.8.6)",
+          "product_id": "BaseOS-8.6.0.Z.EUS:nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64"
+        },
+        "product_reference": "nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64",
+        "relates_to_product_reference": "BaseOS-8.6.0.Z.EUS"
       }
     ]
   },
@@ -813,7 +839,8 @@
           "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.aarch64",
           "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.ppc64le",
           "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.s390x",
-          "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.x86_64"
+          "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.x86_64",
+          "BaseOS-8.6.0.Z.EUS:nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64"
         ]
       },
       "references": [
@@ -873,7 +900,8 @@
             "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.aarch64",
             "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.ppc64le",
             "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.s390x",
-            "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.x86_64"
+            "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.x86_64",
+            "BaseOS-8.6.0.Z.EUS:nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64"
           ],
           "url": "https://access.redhat.com/errata/RHSA-2023:1441"
         }
@@ -928,7 +956,8 @@
             "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.aarch64",
             "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.ppc64le",
             "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.s390x",
-            "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.x86_64"
+            "BaseOS-8.6.0.Z.EUS:openssl-perl-1:1.1.1k-8.el8_6.x86_64",
+            "BaseOS-8.6.0.Z.EUS:nginx-1:1.20.1-1.module+el8.8.0+20359+9bd89172.1.x86_64"
           ]
         }
       ],
