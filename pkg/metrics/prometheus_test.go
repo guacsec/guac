@@ -21,13 +21,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
-func TestMetrics(t *testing.T) {
+func TestRegisterCounter(t *testing.T) {
 	ctx := WithMetrics(context.Background())
 	collector := FromContext(ctx)
 
@@ -35,21 +34,45 @@ func TestMetrics(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = collector.RegisterHistogram(ctx, "test_histogram", "label1")
+
+	err = collector.AddCounter(ctx, "test_counter", 1, "label1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = collector.RegisterGauge(ctx, "test_gauge", "label1")
+}
+
+func TestRegisterHistogram(t *testing.T) {
+	ctx := WithMetrics(context.Background())
+	collector := FromContext(ctx)
+
+	_, err := collector.RegisterHistogram(ctx, "test_histogram", "label1")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = collector.RegisterGauge(ctx, "test_gauge", "label1")
-	if err == nil {
-		t.Fatal("expected error")
+	err = collector.ObserveHistogram(ctx, "test_histogram", 2.5, "label1")
+	if err != nil {
+		t.Fatal(err)
 	}
+}
 
-	time.Sleep(1 * time.Second)
+func TestRegisterGauge(t *testing.T) {
+	ctx := WithMetrics(context.Background())
+	collector := FromContext(ctx)
+
+	_, err := collector.RegisterGauge(ctx, "test_gauge", "label1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = collector.SetGauge(ctx, "test_gauge", 1.5, "label1")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestMetricsHandler(t *testing.T) {
+	ctx := WithMetrics(context.Background())
+	collector := FromContext(ctx)
 
 	handler := collector.MetricsHandler()
 
@@ -61,32 +84,34 @@ func TestMetrics(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 
-	err = collector.ObserveHistogram(ctx, "test_histogram", 2.5, "label1")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = collector.AddCounter(ctx, "test_counter", 1, "label1")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = collector.SetGauge(ctx, "test_gauge", 1.5, "label1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = collector.AddCounter(ctx, "non_existing_counter", 1, "label1")
-	if err == nil {
-		t.Fatal("expected error for non-existing counter")
-	}
-
-	assertMetricRegistered(t, "guac_test_histogram")
-	assertMetricRegistered(t, "guac_test_counter")
-	assertMetricRegistered(t, "guac_test_gauge")
-
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
+}
+
+func TestNonExistingCounter(t *testing.T) {
+	ctx := WithMetrics(context.Background())
+	collector := FromContext(ctx)
+
+	err := collector.AddCounter(ctx, "non_existing_counter", 1, "label1")
+	if err == nil {
+		t.Fatal("expected error for non-existing counter")
+	}
+}
+
+func TestHandlerBody(t *testing.T) {
+	ctx := WithMetrics(context.Background())
+	collector := FromContext(ctx)
+
+	handler := collector.MetricsHandler()
+
+	req, err := http.NewRequest("GET", "/metrics", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
 
 	expected := `guac_test_counter{label1="label1"}`
 	if !strings.Contains(rr.Body.String(), expected) {

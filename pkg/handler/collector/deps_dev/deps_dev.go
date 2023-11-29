@@ -541,8 +541,8 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 		logger.Debugf("The version key was not found in the map: %v", versionKey)
 		versionResponse, err = d.client.GetVersion(ctx, versionReq)
 		if err != nil {
-			if err := d.metrics.AddCounter(ctx, GetVersionErrorsCounter, 1, pkgType, *namespace, name); err != nil {
-				logger.Errorf("failed to add counter: %v", err)
+			if metricsErr := d.metrics.AddCounter(ctx, GetVersionErrorsCounter, 1, pkgType, *namespace, name); metricsErr != nil {
+				logger.Errorf("failed to add counter: %v", metricsErr)
 			}
 			return fmt.Errorf("failed to get version information: %w", err)
 		}

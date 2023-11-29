@@ -71,9 +71,6 @@ var depsDevCmd = &cobra.Command{
 			viper.GetBool("enable-prometheus"),
 			viper.GetString("prometheus-address"),
 		)
-		//print out all the flags
-		logger.Infof("viewing flags: %+v", opts)
-		logger.Infof("prometheus address: %s %s", opts.promeAddr, viper.GetString("prometheus-addr"))
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -93,6 +90,7 @@ var depsDevCmd = &cobra.Command{
 		if opts.enablePrometheus {
 			go func() {
 				http.Handle("/metrics", m.MetricsHandler())
+				logger.Infof("Prometheus server is listening on: %s", opts.promeAddr)
 				if err := http.ListenAndServe(opts.promeAddr, nil); err != nil {
 					logger.Fatalf("Error starting HTTP server: %v", err)
 				}
