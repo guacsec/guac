@@ -293,22 +293,6 @@ var includedTestExpectedSBOM = &model.HasSbom{
 
 // End of Test resources
 
-func getPackageVersionFromIngestedPackage(pkg *model.Package) (string, error) {
-	if pkg != nil {
-		if len(pkg.Namespaces) == 1 {
-			namespace := pkg.Namespaces[0]
-			if len(namespace.Names) == 1 {
-				name := namespace.Names[0]
-				if len(name.Versions) == 1 {
-					version := name.Versions[0]
-					return version.ID, nil
-				}
-			}
-		}
-	}
-	return "", fmt.Errorf("could not retrieve ingested PackageVersion from package id %v", pkg)
-}
-
 func getNodeIds(nodes []model.Node) ([]string, error) {
 	var ids []string
 	for _, node := range nodes {
