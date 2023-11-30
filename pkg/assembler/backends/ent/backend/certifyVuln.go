@@ -33,7 +33,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func (b *EntBackend) IngestCertifyVulnID(ctx context.Context, pkg model.PkgInputSpec, spec model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
+func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, spec model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
 
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
@@ -90,7 +90,7 @@ func (b *EntBackend) IngestCertifyVulnID(ctx context.Context, pkg model.PkgInput
 	return nodeID(*record), nil
 }
 
-func (b *EntBackend) IngestCertifyVulnIDs(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	var modelCertifyVulns = make([]string, len(vulnerabilities))
 	eg, ctx := errgroup.WithContext(ctx)
 	for i := range certifyVulns {
@@ -99,7 +99,7 @@ func (b *EntBackend) IngestCertifyVulnIDs(ctx context.Context, pkgs []*model.Pkg
 		vuln := *vulnerabilities[index]
 		certifyVuln := *certifyVulns[index]
 		concurrently(eg, func() error {
-			modelCertifyVuln, err := b.IngestCertifyVulnID(ctx, pkg, vuln, certifyVuln)
+			modelCertifyVuln, err := b.IngestCertifyVuln(ctx, pkg, vuln, certifyVuln)
 			if err == nil {
 				modelCertifyVulns[index] = modelCertifyVuln
 				return err

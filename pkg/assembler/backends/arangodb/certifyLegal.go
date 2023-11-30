@@ -259,7 +259,7 @@ func getCertifyLegalQueryValues(pkg *model.PkgInputSpec, source *model.SourceInp
 	return values
 }
 
-func (c *arangoClient) IngestCertifyLegalID(
+func (c *arangoClient) IngestCertifyLegal(
 	ctx context.Context,
 	subject model.PackageOrSourceInput,
 	declaredLicenses []*model.LicenseInputSpec,
@@ -426,7 +426,7 @@ RETURN { 'certifyLegal_id': certifyLegal._id }`
 	return "", fmt.Errorf("package or source is not specified for IngestCertifyLegal")
 }
 
-func (c *arangoClient) IngestCertifyLegalIDs(
+func (c *arangoClient) IngestCertifyLegals(
 	ctx context.Context,
 	subjects model.PackageOrSourceInputs,
 	declaredLicensesList [][]*model.LicenseInputSpec,

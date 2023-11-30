@@ -82,7 +82,7 @@ func TestIngestHasSLSA(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestSLSAID(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA).
+					IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA).
 					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestSlsa(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
@@ -182,7 +182,7 @@ func TestIngestHasSLSAs(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestSLSAIDs(ctx, o.Sub, o.BF, o.BB, o.SLSA).
+					IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA).
 					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA)

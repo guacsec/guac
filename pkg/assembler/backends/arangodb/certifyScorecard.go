@@ -179,7 +179,7 @@ func getScorecardValues(src *model.SourceInputSpec, scorecard *model.ScorecardIn
 
 // Ingest Scorecards
 
-func (c *arangoClient) IngestScorecardIDs(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range sources {
@@ -255,7 +255,7 @@ func (c *arangoClient) IngestScorecardIDs(ctx context.Context, sources []*model.
 
 // Ingest Scorecard
 
-func (c *arangoClient) IngestScorecardID(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
 	query := `
 	LET firstSrc = FIRST(
 		FOR sName in srcNames

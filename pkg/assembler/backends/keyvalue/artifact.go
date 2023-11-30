@@ -141,10 +141,10 @@ func (c *demoClient) artifactModelByID(ctx context.Context, id string) (*model.A
 
 // Ingest Artifacts
 
-func (c *demoClient) IngestArtifactIDs(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
 	var modelArtifacts []string
 	for _, art := range artifacts {
-		modelArt, err := c.IngestArtifactID(ctx, art)
+		modelArt, err := c.IngestArtifact(ctx, art)
 		if err != nil {
 			return nil, gqlerror.Errorf("ingestArtifact failed with err: %v", err)
 		}
@@ -153,7 +153,7 @@ func (c *demoClient) IngestArtifactIDs(ctx context.Context, artifacts []*model.A
 	return modelArtifacts, nil
 }
 
-func (c *demoClient) IngestArtifactID(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
+func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
 	return c.ingestArtifact(ctx, artifact, true)
 }
 

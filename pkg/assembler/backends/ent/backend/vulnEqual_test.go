@@ -439,13 +439,13 @@ func (s *Suite) TestVulnEqual() {
 			}
 
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				ve, err := b.IngestVulnEqualID(ctx, *o.Vuln, *o.OtherVuln, *o.In)
+				ve, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -631,7 +631,7 @@ func (s *Suite) TestIngestVulnEquals() {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
 
-			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerability: %a", err)
 			}
 			for _, o := range test.Calls {

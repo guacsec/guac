@@ -106,7 +106,7 @@ func TestIngestDependencies(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestDependencyIDs(ctx, o.P1s, o.P2s, o.MF, o.IDs).
+					IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs).
 					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)

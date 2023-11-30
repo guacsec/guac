@@ -64,7 +64,7 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 func (b *EntBackend) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
 	var ids []string
 	for i, vulnEqual := range vulnEquals {
-		ve, err := b.IngestVulnEqualID(ctx, *vulnerabilities[i], *otherVulnerabilities[i], *vulnEqual)
+		ve, err := b.IngestVulnEqual(ctx, *vulnerabilities[i], *otherVulnerabilities[i], *vulnEqual)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestVulnEquals failed with err: %v", err)
 		}
@@ -73,7 +73,7 @@ func (b *EntBackend) IngestVulnEquals(ctx context.Context, vulnerabilities []*mo
 	return ids, nil
 }
 
-func (b *EntBackend) IngestVulnEqualID(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
+func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
 
 	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		tx := ent.TxFromContext(ctx)

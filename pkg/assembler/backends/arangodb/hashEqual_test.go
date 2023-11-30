@@ -472,7 +472,7 @@ func TestHashEqual(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if artIDs, err := b.IngestArtifactIDs(ctx, test.InArt); err != nil {
+			if artIDs, err := b.IngestArtifacts(ctx, test.InArt); err != nil {
 				t.Fatalf("Could not ingest artifact: %v", err)
 			} else {
 				if test.QueryArtID {
@@ -489,7 +489,7 @@ func TestHashEqual(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				heID, err := b.IngestHashEqualID(ctx, *o.A1, *o.A2, *o.HE)
+				heID, err := b.IngestHashEqual(ctx, *o.A1, *o.A2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -799,12 +799,12 @@ func TestIngestHashEquals(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHashEqualIDs(ctx, o.A1, o.A2, o.HE)
+				_, err := b.IngestHashEquals(ctx, o.A1, o.A2, o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -904,12 +904,12 @@ func Test_buildHashEqualByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				heID, err := b.IngestHashEqualID(ctx, *o.A1, *o.A2, *o.HE)
+				heID, err := b.IngestHashEqual(ctx, *o.A1, *o.A2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

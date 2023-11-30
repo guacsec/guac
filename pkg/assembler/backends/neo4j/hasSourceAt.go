@@ -158,7 +158,7 @@ func setHasSourceAtValues(sb *strings.Builder, hasSourceAtSpec *model.HasSourceA
 	}
 }
 
-func (c *neo4jClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
+func (c *neo4jClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	panic(fmt.Errorf("not implemented: IngestHasSourceAt"))
 }
 

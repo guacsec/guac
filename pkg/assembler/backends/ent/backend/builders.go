@@ -58,7 +58,7 @@ func builderInputQueryPredicate(spec model.BuilderInputSpec) predicate.Builder {
 	return builder.URIEqualFold(spec.URI)
 }
 
-func (b *EntBackend) IngestBuilderID(ctx context.Context, build *model.BuilderInputSpec) (string, error) {
+func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.BuilderInputSpec) (string, error) {
 	funcName := "IngestBuilder"
 	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
@@ -70,10 +70,10 @@ func (b *EntBackend) IngestBuilderID(ctx context.Context, build *model.BuilderIn
 	return strconv.Itoa(*id), nil
 }
 
-func (b *EntBackend) IngestBuilderIDs(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
+func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
 	var buildersID []string
 	for _, builder := range builders {
-		id, err := b.IngestBuilderID(ctx, builder)
+		id, err := b.IngestBuilder(ctx, builder)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestBuilders failed with err: %v", err)
 		}

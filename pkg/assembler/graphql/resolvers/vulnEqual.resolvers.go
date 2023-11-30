@@ -37,7 +37,7 @@ func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability mo
 	}
 
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	return r.Backend.IngestVulnEqualID(ctx,
+	return r.Backend.IngestVulnEqual(ctx,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
 		model.VulnerabilityInputSpec{Type: strings.ToLower(otherVulnerability.Type), VulnerabilityID: strings.ToLower(otherVulnerability.VulnerabilityID)},
 		vulnEqual)

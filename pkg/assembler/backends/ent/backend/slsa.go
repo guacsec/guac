@@ -68,7 +68,7 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 	return collect(records, toModelHasSLSA), nil
 }
 
-func (b *EntBackend) IngestSLSAID(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
+func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
 	att, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SLSAAttestation, error) {
 		return upsertSLSA(ctx, ent.TxFromContext(ctx), subject, builtFrom, builtBy, slsa)
 	})
@@ -80,10 +80,10 @@ func (b *EntBackend) IngestSLSAID(ctx context.Context, subject model.ArtifactInp
 	return nodeID(att.ID), nil
 }
 
-func (b *EntBackend) IngestSLSAIDs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
 	var modelHasSlsas []string
 	for i, slsa := range slsaList {
-		modelHasSlsa, err := b.IngestSLSAID(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsa)
+		modelHasSlsa, err := b.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsa)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestSLSAs failed with err: %v", err)
 		}

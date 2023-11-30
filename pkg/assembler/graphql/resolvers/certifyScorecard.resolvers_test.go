@@ -80,7 +80,7 @@ func TestIngestScorecards(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestScorecardIDs(ctx, o.Src, o.SC).
+					IngestScorecards(ctx, o.Src, o.SC).
 					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestScorecards(ctx, o.Src, o.SC)

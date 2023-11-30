@@ -479,7 +479,7 @@ func (s *Suite) TestPkgEqual() {
 			}
 			pkgIDs := make([]string, len(test.InPkg))
 			for i, a := range test.InPkg {
-				if id, err := b.IngestPackageID(ctx, *a); err != nil {
+				if id, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				} else {
 					pkgs, err := b.Packages(ctx, &model.PkgSpec{ID: &id.PackageVersionID})
@@ -511,7 +511,7 @@ func (s *Suite) TestPkgEqual() {
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				id, err := b.IngestPkgEqualID(ctx, *o.P1, *o.P2, *o.PkgEqual)
+				id, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.PkgEqual)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -731,7 +731,7 @@ func (s *Suite) TestIngestPkgEquals() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 
-			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest pkg: %v", err)
 			}
 			for _, o := range test.Calls {
@@ -826,12 +826,12 @@ func (s *Suite) TestPkgEqualNeighbors() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *a); err != nil {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				if _, err := b.IngestPkgEqualID(ctx, *o.P1, *o.P2, *o.HE); err != nil {
+				if _, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE); err != nil {
 					t.Fatalf("Could not ingest PkgEqual: %v", err)
 				}
 			}

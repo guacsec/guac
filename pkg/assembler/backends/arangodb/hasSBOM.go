@@ -218,7 +218,7 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 	return values
 }
 
-func (c *arangoClient) IngestHasSBOMIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
+func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
 	// TODO(knrc) - handle includes
 	var cursor driver.Cursor
 	var err error
@@ -356,7 +356,7 @@ func (c *arangoClient) IngestHasSBOMIDs(ctx context.Context, subjects model.Pack
 	return hasSbomIDList, nil
 }
 
-func (c *arangoClient) IngestHasSbomID(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
+func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	// TODO(knrc) - handle includes
 	var cursor driver.Cursor
 	var err error

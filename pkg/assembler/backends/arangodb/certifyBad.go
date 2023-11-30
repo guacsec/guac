@@ -310,7 +310,7 @@ func getCertifyBadQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Match
 	return values
 }
 
-func (c *arangoClient) IngestCertifyBadID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error) {
+func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error) {
 	var cursor driver.Cursor
 	var err error
 	if subject.Package != nil {
@@ -450,7 +450,7 @@ func (c *arangoClient) IngestCertifyBadID(ctx context.Context, subject model.Pac
 	}
 }
 
-func (c *arangoClient) IngestCertifyBadIDs(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
+func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
 	var cursor driver.Cursor
 	var err error
 	if len(subjects.Packages) > 0 {

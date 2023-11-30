@@ -421,7 +421,7 @@ func (c *arangoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInp
 	return pkgEqualIDList, nil
 }
 
-func (c *arangoClient) IngestPkgEqualID(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
+func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	query := `
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions

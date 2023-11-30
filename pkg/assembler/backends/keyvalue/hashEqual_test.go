@@ -397,12 +397,12 @@ func TestHashEqual(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHashEqualID(ctx, *o.A1, *o.A2, *o.HE)
+				_, err := b.IngestHashEqual(ctx, *o.A1, *o.A2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -667,12 +667,12 @@ func TestIngestHashEquals(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHashEqualIDs(ctx, o.A1, o.A2, o.HE)
+				_, err := b.IngestHashEquals(ctx, o.A1, o.A2, o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -768,12 +768,12 @@ func TestHashEqualNeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				if _, err := b.IngestHashEqualID(ctx, *o.A1, *o.A2, *o.HE); err != nil {
+				if _, err := b.IngestHashEqual(ctx, *o.A1, *o.A2, *o.HE); err != nil {
 					t.Fatalf("Could not ingest HashEqual: %v", err)
 				}
 			}

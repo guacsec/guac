@@ -224,7 +224,7 @@ func Test_demoClient_IngestArtifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			_, err := c.IngestArtifactIDs(ctx, tt.artifactInputs)
+			_, err := c.IngestArtifacts(ctx, tt.artifactInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -266,7 +266,7 @@ func Test_demoClient_IngestArtifact(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
 
-			_, err := c.IngestArtifactID(ctx, tt.artifactInput)
+			_, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -337,7 +337,7 @@ func Test_demoClient_Artifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			ingestedArt, err := c.IngestArtifactID(ctx, tt.artifactInput)
+			ingestedArt, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -419,7 +419,7 @@ func Test_demoClient_buildArtifactResponse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			art, err := c.IngestArtifactID(ctx, tt.artifactInput)
+			art, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -474,7 +474,7 @@ func Test_demoClient_getArtifactIDFromInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			art, err := c.IngestArtifactID(ctx, tt.artifactInput)
+			art, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return

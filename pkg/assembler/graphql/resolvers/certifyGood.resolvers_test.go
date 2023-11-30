@@ -82,7 +82,7 @@ func TestIngestCertifyGood(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestCertifyGoodID(ctx, o.Sub, &o.Match, *o.CG).
+					IngestCertifyGood(ctx, o.Sub, &o.Match, *o.CG).
 					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestCertifyGood(ctx, o.Sub, o.Match, *o.CG)
@@ -210,7 +210,7 @@ func TestIngestCertifyGoods(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestCertifyGoodIDs(ctx, o.Sub, &o.Match, o.CG).
+					IngestCertifyGoods(ctx, o.Sub, &o.Match, o.CG).
 					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestCertifyGoods(ctx, o.Sub, o.Match, o.CG)

@@ -515,7 +515,7 @@ func TestCertifyScorecard(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, s := range test.InSrc {
-				if srcID, err := b.IngestSourceID(ctx, *s); err != nil {
+				if srcID, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				} else {
 					if test.QuerySourceID {
@@ -529,7 +529,7 @@ func TestCertifyScorecard(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				scoreID, err := b.IngestScorecardID(ctx, *o.Src, *o.SC)
+				scoreID, err := b.IngestScorecard(ctx, *o.Src, *o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -739,12 +739,12 @@ func TestIngestScorecards(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestScorecardIDs(ctx, o.Src, o.SC)
+				_, err := b.IngestScorecards(ctx, o.Src, o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -865,12 +865,12 @@ func Test_buildCertifyScorecardByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				scoreID, err := b.IngestScorecardID(ctx, *o.Src, *o.SC)
+				scoreID, err := b.IngestScorecard(ctx, *o.Src, *o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

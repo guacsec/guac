@@ -482,17 +482,17 @@ func TestHasSLSA(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestSLSAID(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
+				_, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -708,17 +708,17 @@ func TestIngestHasSLSAs(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestSLSAIDs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
+				_, err := b.IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -817,17 +817,17 @@ func TestHasSLSANeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				if _, err := b.IngestSLSAID(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA); err != nil {
+				if _, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA); err != nil {
 					t.Fatalf("Could not ingest HasSLSA: %v", err)
 				}
 			}

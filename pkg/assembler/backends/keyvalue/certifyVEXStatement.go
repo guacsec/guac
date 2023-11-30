@@ -88,13 +88,13 @@ func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.Pac
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrArtifactInput{Package: subjects.Packages[i]}
-			certVex, err = c.IngestVEXStatementID(ctx, subject, *vulnerabilities[i], *vexStatements[i])
+			certVex, err = c.IngestVEXStatement(ctx, subject, *vulnerabilities[i], *vexStatements[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestVEXStatement failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			certVex, err = c.IngestVEXStatementID(ctx, subject, *vulnerabilities[i], *vexStatements[i])
+			certVex, err = c.IngestVEXStatement(ctx, subject, *vulnerabilities[i], *vexStatements[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestVEXStatement failed with err: %v", err)
 			}
@@ -104,7 +104,7 @@ func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.Pac
 	return modelVexStatementIDs, nil
 }
 
-func (c *demoClient) IngestVEXStatementID(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
+func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
 	return c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, true)
 }
 

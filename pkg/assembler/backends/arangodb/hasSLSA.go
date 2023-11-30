@@ -195,7 +195,7 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 	return values
 }
 
-func (c *arangoClient) IngestSLSAIDs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
 	builtFromMap := map[string][]*model.Artifact{}
 	var listOfValues []map[string]any
 
@@ -273,7 +273,7 @@ func (c *arangoClient) IngestSLSAIDs(ctx context.Context, subjects []*model.Arti
 	return hasSLSAIDList, nil
 }
 
-func (c *arangoClient) IngestSLSAID(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
+func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
 	// get materials (builtFrom artifacts) as they should already be ingested
 	artifacts, err := c.getMaterials(ctx, builtFrom)
 	if err != nil {

@@ -71,7 +71,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 	return collect(records, toModelHasSBOM), nil
 }
 
-func (b *EntBackend) IngestHasSbomID(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
+func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
 
 	sbomId, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
@@ -136,7 +136,7 @@ func (b *EntBackend) IngestHasSbomID(ctx context.Context, subject model.PackageO
 			ID(ctx)
 		if err != nil {
 			if err != stdsql.ErrNoRows {
-				return nil, errors.Wrap(err, "IngestHasSbomID")
+				return nil, errors.Wrap(err, "IngestHasSbom")
 			}
 			id, err = client.BillOfMaterials.Query().
 				Where(billofmaterials.URIEQ(spec.URI)).
@@ -155,7 +155,7 @@ func (b *EntBackend) IngestHasSbomID(ctx context.Context, subject model.PackageO
 	return strconv.Itoa(*sbomId), nil
 }
 
-func (b *EntBackend) IngestHasSBOMIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
+func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
 	var modelHasSboms []string
 	for i, hasSbom := range hasSBOMs {
 		var subject model.PackageOrArtifactInput
@@ -165,7 +165,7 @@ func (b *EntBackend) IngestHasSBOMIDs(ctx context.Context, subjects model.Packag
 			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
 		}
 		// TODO(knrc) - handle includes
-		modelHasSbom, err := b.IngestHasSbomID(ctx, subject, *hasSbom, model.HasSBOMIncludesInputSpec{})
+		modelHasSbom, err := b.IngestHasSbom(ctx, subject, *hasSbom, model.HasSBOMIncludesInputSpec{})
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
 		}

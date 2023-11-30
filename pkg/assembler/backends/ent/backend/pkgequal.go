@@ -45,7 +45,7 @@ func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]
 	return collect(records, toModelPkgEqual), nil
 }
 
-func (b *EntBackend) IngestPkgEqualID(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
+func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		return upsertPackageEqual(ctx, ent.TxFromContext(ctx), pkg, depPkg, pkgEqual)
 	})
@@ -59,7 +59,7 @@ func (b *EntBackend) IngestPkgEqualID(ctx context.Context, pkg model.PkgInputSpe
 func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
 	var ids []string
 	for i, pkgEqual := range pkgEquals {
-		id, err := b.IngestPkgEqualID(ctx, *pkgs[i], *otherPackages[i], *pkgEqual)
+		id, err := b.IngestPkgEqual(ctx, *pkgs[i], *otherPackages[i], *pkgEqual)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestPkgEquals failed with err: %v", err)
 		}

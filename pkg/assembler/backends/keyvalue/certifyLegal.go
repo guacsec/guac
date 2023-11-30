@@ -81,7 +81,7 @@ func (n *certifyLegalStruct) BuildModelNode(ctx context.Context, c *demoClient) 
 	return c.convLegal(ctx, n)
 }
 
-func (c *demoClient) IngestCertifyLegalIDs(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
+func (c *demoClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 	var rv []string
 
 	for i, v := range certifyLegals {
@@ -89,13 +89,13 @@ func (c *demoClient) IngestCertifyLegalIDs(ctx context.Context, subjects model.P
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrSourceInput{Package: subjects.Packages[i]}
-			l, err = c.IngestCertifyLegalID(ctx, subject, declaredLicensesList[i], discoveredLicensesList[i], v)
+			l, err = c.IngestCertifyLegal(ctx, subject, declaredLicensesList[i], discoveredLicensesList[i], v)
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyLegals failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageOrSourceInput{Source: subjects.Sources[i]}
-			l, err = c.IngestCertifyLegalID(ctx, subject, declaredLicensesList[i], discoveredLicensesList[i], v)
+			l, err = c.IngestCertifyLegal(ctx, subject, declaredLicensesList[i], discoveredLicensesList[i], v)
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyLegals failed with err: %v", err)
 			}
@@ -105,7 +105,7 @@ func (c *demoClient) IngestCertifyLegalIDs(ctx context.Context, subjects model.P
 	return rv, nil
 }
 
-func (c *demoClient) IngestCertifyLegalID(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (string, error) {
+func (c *demoClient) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (string, error) {
 	return c.ingestCertifyLegal(ctx, subject, declaredLicenses, discoveredLicenses, certifyLegal, true)
 }
 

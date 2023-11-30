@@ -14,12 +14,12 @@ import (
 func (r *mutationResolver) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
 	// Return the ids of the package which has been ingested
 
-	return r.Backend.IngestPackageID(ctx, pkg)
+	return r.Backend.IngestPackage(ctx, pkg)
 }
 
 // IngestPackages is the resolver for the ingestPackages field.
 func (r *mutationResolver) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
-	return r.Backend.IngestPackageIDs(ctx, pkgs)
+	return r.Backend.IngestPackages(ctx, pkgs)
 }
 
 // Packages is the resolver for the packages field.

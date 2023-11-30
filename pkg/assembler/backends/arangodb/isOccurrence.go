@@ -232,7 +232,7 @@ func getOccurrenceQueryValues(pkg *model.PkgInputSpec, src *model.SourceInputSpe
 	return values
 }
 
-func (c *arangoClient) IngestOccurrenceIDs(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	var cursor driver.Cursor
 	var err error
 	if len(subjects.Packages) > 0 {
@@ -293,7 +293,7 @@ func (c *arangoClient) IngestOccurrenceIDs(ctx context.Context, subjects model.P
 
 		sb.WriteString(query)
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestOccurrenceIDs")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestOccurrences")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package occurrence: %w", err)
 		}
@@ -356,7 +356,7 @@ func (c *arangoClient) IngestOccurrenceIDs(ctx context.Context, subjects model.P
 
 		sb.WriteString(query)
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestOccurrenceIDs")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestOccurrences")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source occurrence: %w", err)
 		}
@@ -376,7 +376,7 @@ func (c *arangoClient) IngestOccurrenceIDs(ctx context.Context, subjects model.P
 	return isOcurIDList, nil
 }
 
-func (c *arangoClient) IngestOccurrenceID(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
 	var cursor driver.Cursor
 	var err error
 	if subject.Package != nil {

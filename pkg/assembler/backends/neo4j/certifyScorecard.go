@@ -190,13 +190,13 @@ func setCertifyScorecardValues(sb *strings.Builder, certifyScorecardSpec *model.
 
 // Ingest Scorecards
 
-func (c *neo4jClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
-	return []*model.CertifyScorecard{}, fmt.Errorf("not implemented: IngestScorecards")
+func (c *neo4jClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+	return []string{}, fmt.Errorf("not implemented: IngestScorecards")
 }
 
 // Ingest Scorecard
 
-func (c *neo4jClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
+func (c *neo4jClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
@@ -207,7 +207,7 @@ func (c *neo4jClient) IngestScorecard(ctx context.Context, source model.SourceIn
 
 	if source.Commit != nil && source.Tag != nil {
 		if *source.Commit != "" && *source.Tag != "" {
-			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
+			return "", gqlerror.Errorf("Passing both commit and tag selectors is an error")
 		}
 	}
 
@@ -302,8 +302,8 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag, certifyScoreca
 			return &certification, nil
 		})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return result.(*model.CertifyScorecard), nil
+	return result.(*model.CertifyScorecard).ID, nil
 }

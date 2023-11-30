@@ -83,7 +83,7 @@ func nilToEmpty(s *string) string {
 	return *s
 }
 
-func (c *arangoClient) IngestLicenseIDs(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
+func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
 
 	var listOfValues []map[string]any
 
@@ -139,14 +139,14 @@ RETURN { "id": NEW._id }`
 	return licenseIDs, nil
 }
 
-func (c *arangoClient) IngestLicenseID(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
+func (c *arangoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
 	query := `
 UPSERT { name:@name, inline:@inline, listversion:@listversion }
 INSERT { name:@name, inline:@inline, listversion:@listversion }
 UPDATE {} IN licenses OPTIONS { indexHint: "byNameInlineListVer" }
 RETURN { "id": NEW._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getLicenseQueryValues(license), "IngestLicenseID")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getLicenseQueryValues(license), "IngestLicense")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest license: %w", err)
 	}

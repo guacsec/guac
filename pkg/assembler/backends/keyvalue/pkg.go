@@ -351,10 +351,10 @@ func (n *pkgVersion) Key() string {
 
 // Ingest Package
 
-func (c *demoClient) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
+func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
 	var modelPkgs []*model.PackageIDs
 	for _, pkg := range pkgs {
-		modelPkg, err := c.IngestPackageID(ctx, *pkg)
+		modelPkg, err := c.IngestPackage(ctx, *pkg)
 		if err != nil {
 			return nil, gqlerror.Errorf("ingestPackage failed with err: %v", err)
 		}
@@ -363,7 +363,7 @@ func (c *demoClient) IngestPackageIDs(ctx context.Context, pkgs []*model.PkgInpu
 	return modelPkgs, nil
 }
 
-func (c *demoClient) IngestPackageID(ctx context.Context, input model.PkgInputSpec) (*model.PackageIDs, error) {
+func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.PackageIDs, error) {
 	inType := &pkgType{
 		Type: input.Type,
 	}

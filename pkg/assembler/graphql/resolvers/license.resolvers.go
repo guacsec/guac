@@ -16,7 +16,7 @@ func (r *mutationResolver) IngestLicense(ctx context.Context, license *model.Lic
 	if err := helper.ValidateLicenseInput(license); err != nil {
 		return "", err
 	}
-	return r.Backend.IngestLicenseID(ctx, license)
+	return r.Backend.IngestLicense(ctx, license)
 }
 
 // IngestLicenses is the resolver for the ingestLicenses field.
@@ -26,7 +26,7 @@ func (r *mutationResolver) IngestLicenses(ctx context.Context, licenses []*model
 			return nil, err
 		}
 	}
-	return r.Backend.IngestLicenseIDs(ctx, licenses)
+	return r.Backend.IngestLicenses(ctx, licenses)
 }
 
 // Licenses is the resolver for the licenses field.

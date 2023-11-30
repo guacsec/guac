@@ -13,12 +13,12 @@ import (
 
 // IngestSource is the resolver for the ingestSource field.
 func (r *mutationResolver) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
-	return r.Backend.IngestSourceID(ctx, source)
+	return r.Backend.IngestSource(ctx, source)
 }
 
 // IngestSources is the resolver for the ingestSources field.
 func (r *mutationResolver) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
-	return r.Backend.IngestSourceIDs(ctx, sources)
+	return r.Backend.IngestSources(ctx, sources)
 }
 
 // Sources is the resolver for the sources field.

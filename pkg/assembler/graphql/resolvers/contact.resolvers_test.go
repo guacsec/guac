@@ -82,7 +82,7 @@ func TestIngestPointOfContact(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestPointOfContactID(ctx, o.Sub, &o.Match, *o.HM).
+					IngestPointOfContact(ctx, o.Sub, &o.Match, *o.HM).
 					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestPointOfContact(ctx, o.Sub, o.Match, *o.HM)

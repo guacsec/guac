@@ -289,7 +289,7 @@ func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*
 	return vulnEqualIDList, nil
 }
 
-func (c *arangoClient) IngestVulnEqualID(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
+func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	query := `
 	LET firstVuln = FIRST(
 		FOR vVulnID in vulnerabilities

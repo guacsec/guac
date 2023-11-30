@@ -62,10 +62,10 @@ func (c *demoClient) builderByInput(ctx context.Context, b *model.BuilderInputSp
 
 // Ingest Builders
 
-func (c *demoClient) IngestBuilderIDs(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
+func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
 	var modelBuilders []string
 	for _, build := range builders {
-		modelBuild, err := c.IngestBuilderID(ctx, build)
+		modelBuild, err := c.IngestBuilder(ctx, build)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestBuilder failed with err: %v", err)
 		}
@@ -76,7 +76,7 @@ func (c *demoClient) IngestBuilderIDs(ctx context.Context, builders []*model.Bui
 
 // Ingest Builder
 
-func (c *demoClient) IngestBuilderID(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
+func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
 	return c.ingestBuilder(ctx, builder, true)
 }
 

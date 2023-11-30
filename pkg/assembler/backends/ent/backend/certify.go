@@ -53,7 +53,7 @@ func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 	return collect(records, toModelCertifyGood), nil
 }
 
-func (b *EntBackend) IngestCertifyBadID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (string, error) {
+func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (string, error) {
 
 	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
@@ -66,7 +66,7 @@ func (b *EntBackend) IngestCertifyBadID(ctx context.Context, subject model.Packa
 	return nodeID(certRecord.ID), nil
 }
 
-func (b *EntBackend) IngestCertifyBadIDs(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
+func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
 	var result []string
 	for i := range certifyBads {
 		var subject model.PackageSourceOrArtifactInput
@@ -77,7 +77,7 @@ func (b *EntBackend) IngestCertifyBadIDs(ctx context.Context, subjects model.Pac
 		} else {
 			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
 		}
-		cb, err := b.IngestCertifyBadID(ctx, subject, pkgMatchType, *certifyBads[i])
+		cb, err := b.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestCertifyBads failed with err: %v", err)
 		}
@@ -86,7 +86,7 @@ func (b *EntBackend) IngestCertifyBadIDs(ctx context.Context, subjects model.Pac
 	return result, nil
 }
 
-func (b *EntBackend) IngestCertifyGoodID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (string, error) {
+func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (string, error) {
 
 	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
@@ -99,7 +99,7 @@ func (b *EntBackend) IngestCertifyGoodID(ctx context.Context, subject model.Pack
 	return nodeID(certRecord.ID), nil
 }
 
-func (b *EntBackend) IngestCertifyGoodIDs(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
+func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
 	var result []string
 	for i := range certifyGoods {
 		var subject model.PackageSourceOrArtifactInput
@@ -110,7 +110,7 @@ func (b *EntBackend) IngestCertifyGoodIDs(ctx context.Context, subjects model.Pa
 		} else {
 			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
 		}
-		cg, err := b.IngestCertifyGoodID(ctx, subject, pkgMatchType, *certifyGoods[i])
+		cg, err := b.IngestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestCertifyGoods failed with err: %v", err)
 		}

@@ -59,7 +59,7 @@ func (s *Suite) TestIngestBuilder() {
 			if err != nil {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
-			id, err := b.IngestBuilderID(ctx, tt.builderInput)
+			id, err := b.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -108,7 +108,7 @@ func (s *Suite) TestIngestBuilders() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			ids, err := b.IngestBuilderIDs(ctx, tt.builderInputs)
+			ids, err := b.IngestBuilders(ctx, tt.builderInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -176,7 +176,7 @@ func (s *Suite) TestBuilders() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			id, err := b.IngestBuilderID(ctx, tt.builderInput)
+			id, err := b.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -242,7 +242,7 @@ func (s *Suite) TestExactBuilder() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			id, err := b.IngestBuilderID(ctx, tt.builderInput)
+			id, err := b.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -291,7 +291,7 @@ func (s *Suite) TestBuildersIngestSameTwice() {
 			}
 
 			for _, bIn := range tt.builderInputsSpec {
-				if _, err := b.IngestBuilderID(ctx, bIn); err != nil {
+				if _, err := b.IngestBuilder(ctx, bIn); err != nil {
 					t.Fatalf("Could not ingest builder: %v , err: %v", bIn, err)
 				}
 			}

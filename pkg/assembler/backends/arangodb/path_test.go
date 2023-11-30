@@ -181,13 +181,13 @@ func Test_Path(t *testing.T) {
 			if tt.certifyVulnTwoPkgsCall != nil {
 				var nonVulnPkgID string
 				for _, p := range tt.inPkg {
-					pkg, err := b.IngestPackageID(ctx, *p)
+					pkg, err := b.IngestPackage(ctx, *p)
 					if err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
 					nonVulnPkgID = pkg.PackageVersionID
 				}
-				cvID, err := b.IngestCertifyVulnID(ctx, *tt.certifyVulnTwoPkgsCall.Pkg, *tt.certifyVulnTwoPkgsCall.Vuln, *tt.certifyVulnTwoPkgsCall.CertifyVuln)
+				cvID, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnTwoPkgsCall.Pkg, *tt.certifyVulnTwoPkgsCall.Vuln, *tt.certifyVulnTwoPkgsCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -199,20 +199,20 @@ func Test_Path(t *testing.T) {
 			}
 			if tt.certifyVulnCall != nil {
 				for _, p := range tt.inPkg {
-					if pkgIDs, err := b.IngestPackageID(ctx, *p); err != nil {
+					if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					} else {
 						startID = pkgIDs.PackageVersionID
 					}
 				}
 				for _, g := range tt.inVuln {
-					if vulnIDs, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
+					if vulnIDs, err := b.IngestVulnerability(ctx, *g); err != nil {
 						t.Fatalf("Could not ingest vulnerability: %a", err)
 					} else {
 						stopID = vulnIDs.VulnerabilityNodeID
 					}
 				}
-				_, err := b.IngestCertifyVulnID(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
+				_, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -222,11 +222,11 @@ func Test_Path(t *testing.T) {
 			}
 			if tt.isDepCall != nil {
 				for _, p := range tt.inPkg {
-					if _, err := b.IngestPackageID(ctx, *p); err != nil {
+					if _, err := b.IngestPackage(ctx, *p); err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
 				}
-				dID, err := b.IngestDependencyID(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -732,84 +732,84 @@ func Test_Nodes(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var nodeID string
 			for _, p := range tt.inPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range tt.inSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range tt.inArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range tt.inBld {
-				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
 			for _, a := range tt.inLic {
-				if _, err := b.IngestLicenseID(ctx, a); err != nil {
+				if _, err := b.IngestLicense(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
 			for _, g := range tt.inVuln {
-				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
 			if tt.pkgInput != nil {
-				ingestedPkg, err := b.IngestPackageID(ctx, *tt.pkgInput)
+				ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				nodeID = ingestedPkg.PackageVersionID
 			}
 			if tt.artifactInput != nil {
-				ingestedArtID, err := b.IngestArtifactID(ctx, tt.artifactInput)
+				ingestedArtID, err := b.IngestArtifact(ctx, tt.artifactInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestArtifactID() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				nodeID = ingestedArtID
 			}
 			if tt.builderInput != nil {
-				ingestedBuilderID, err := b.IngestBuilderID(ctx, tt.builderInput)
+				ingestedBuilderID, err := b.IngestBuilder(ctx, tt.builderInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestBuilderID() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				nodeID = ingestedBuilderID
 			}
 			if tt.srcInput != nil {
-				ingestedSrc, err := b.IngestSourceID(ctx, *tt.srcInput)
+				ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				nodeID = ingestedSrc.SourceNameID
 			}
 			if tt.vulnInput != nil {
-				ingestVuln, err := b.IngestVulnerabilityID(ctx, *tt.vulnInput)
+				ingestVuln, err := b.IngestVulnerability(ctx, *tt.vulnInput)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
 				}
 				nodeID = ingestVuln.VulnerabilityNodeID
 			}
 			if tt.licenseInput != nil {
-				ingestedLicenseID, err := b.IngestLicenseID(ctx, tt.licenseInput)
+				ingestedLicenseID, err := b.IngestLicense(ctx, tt.licenseInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestLicenseID() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				nodeID = ingestedLicenseID
 			}
 			if tt.certifyBadCall != nil {
-				cbID, err := b.IngestCertifyBadID(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
+				cbID, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -819,7 +819,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = cbID
 			}
 			if tt.certifyGoodCall != nil {
-				cgID, err := b.IngestCertifyGoodID(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
+				cgID, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -829,7 +829,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = cgID
 			}
 			if tt.certifyLegalCall != nil {
-				cLID, err := b.IngestCertifyLegalID(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
+				cLID, err := b.IngestCertifyLegal(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -839,7 +839,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = cLID
 			}
 			if tt.scorecardCall != nil {
-				sID, err := b.IngestScorecardID(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
+				sID, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -849,7 +849,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = sID
 			}
 			if tt.vexCall != nil {
-				vID, err := b.IngestVEXStatementID(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
+				vID, err := b.IngestVEXStatement(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -859,7 +859,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = vID
 			}
 			if tt.certifyVulnCall != nil {
-				cvID, err := b.IngestCertifyVulnID(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
+				cvID, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -869,7 +869,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = cvID
 			}
 			if tt.hashEqualCall != nil {
-				heID, err := b.IngestHashEqualID(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
+				heID, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -879,7 +879,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = heID
 			}
 			if tt.hasMetadataCall != nil {
-				hmID, err := b.IngestHasMetadataID(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
+				hmID, err := b.IngestHasMetadata(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -890,7 +890,7 @@ func Test_Nodes(t *testing.T) {
 			}
 			if tt.hasSBOMCall != nil {
 				// TODO (knrc) handle includes
-				hsID, err := b.IngestHasSbomID(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
+				hsID, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -900,7 +900,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = hsID
 			}
 			if tt.hasSlsaCall != nil {
-				sID, err := b.IngestSLSAID(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
+				sID, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -910,7 +910,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = sID
 			}
 			if tt.hasSourceAtCall != nil {
-				hsID, err := b.IngestHasSourceAtID(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
+				hsID, err := b.IngestHasSourceAt(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -920,7 +920,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = hsID
 			}
 			if tt.isDepCall != nil {
-				dID, err := b.IngestDependencyID(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -930,7 +930,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = dID
 			}
 			if tt.isOcurCall != nil {
-				oID, err := b.IngestOccurrenceID(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
+				oID, err := b.IngestOccurrence(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -940,7 +940,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = oID
 			}
 			if tt.pkgEqualCall != nil {
-				peID, err := b.IngestPkgEqualID(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
+				peID, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -950,7 +950,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = peID
 			}
 			if tt.pointOfContactCall != nil {
-				pocID, err := b.IngestPointOfContactID(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
+				pocID, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -960,7 +960,7 @@ func Test_Nodes(t *testing.T) {
 				nodeID = pocID
 			}
 			if tt.vulnEqualCall != nil {
-				veID, err := b.IngestVulnEqualID(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
+				veID, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3065,39 +3065,39 @@ func Test_Neighbors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var nodeID string
 			for _, p := range tt.inPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range tt.inSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range tt.inArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range tt.inBld {
-				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
 			for _, a := range tt.inLic {
-				if _, err := b.IngestLicenseID(ctx, a); err != nil {
+				if _, err := b.IngestLicense(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
 			for _, g := range tt.inVuln {
-				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
 			if tt.pkgInput != nil {
-				ingestedPkg, err := b.IngestPackageID(ctx, *tt.pkgInput)
+				ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				if tt.queryPkgTypeID {
@@ -3118,9 +3118,9 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.srcInput != nil {
-				ingestedSrc, err := b.IngestSourceID(ctx, *tt.srcInput)
+				ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				if tt.querySrcTypeID {
@@ -3137,7 +3137,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.vulnInput != nil {
-				ingestVuln, err := b.IngestVulnerabilityID(ctx, *tt.vulnInput)
+				ingestVuln, err := b.IngestVulnerability(ctx, *tt.vulnInput)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
 				}
@@ -3151,15 +3151,15 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.licenseInput != nil {
-				ingestedLicenseID, err := b.IngestLicenseID(ctx, tt.licenseInput)
+				ingestedLicenseID, err := b.IngestLicense(ctx, tt.licenseInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("arangoClient.IngestLicenseID() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				nodeID = ingestedLicenseID
 			}
 			if tt.certifyBadCall != nil {
-				cbID, err := b.IngestCertifyBadID(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
+				cbID, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3192,7 +3192,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.certifyGoodCall != nil {
-				cgID, err := b.IngestCertifyGoodID(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
+				cgID, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3225,7 +3225,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.certifyLegalCall != nil {
-				clID, err := b.IngestCertifyLegalID(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
+				clID, err := b.IngestCertifyLegal(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3257,7 +3257,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.scorecardCall != nil {
-				sID, err := b.IngestScorecardID(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
+				sID, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3277,7 +3277,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.vexCall != nil {
-				vexID, err := b.IngestVEXStatementID(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
+				vexID, err := b.IngestVEXStatement(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3305,7 +3305,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.certifyVulnCall != nil {
-				cvID, err := b.IngestCertifyVulnID(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
+				cvID, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3329,7 +3329,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.hashEqualCall != nil {
-				heID, err := b.IngestHashEqualID(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
+				heID, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3354,7 +3354,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.hasMetadataCall != nil {
-				hmID, err := b.IngestHasMetadataID(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
+				hmID, err := b.IngestHasMetadata(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3387,7 +3387,7 @@ func Test_Neighbors(t *testing.T) {
 			}
 			if tt.hasSBOMCall != nil {
 				// TODO (knrc) handle includes
-				hsID, err := b.IngestHasSbomID(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
+				hsID, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3411,7 +3411,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.hasSlsaCall != nil {
-				slsaID, err := b.IngestSLSAID(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
+				slsaID, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3435,7 +3435,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.hasSourceAtCall != nil {
-				hsID, err := b.IngestHasSourceAtID(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
+				hsID, err := b.IngestHasSourceAt(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3463,7 +3463,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.isDepCall != nil {
-				dID, err := b.IngestDependencyID(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3487,7 +3487,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.isOcurCall != nil {
-				oID, err := b.IngestOccurrenceID(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
+				oID, err := b.IngestOccurrence(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3515,7 +3515,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.pkgEqualCall != nil {
-				peID, err := b.IngestPkgEqualID(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
+				peID, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3539,7 +3539,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.pointOfContactCall != nil {
-				pocID, err := b.IngestPointOfContactID(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
+				pocID, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3571,7 +3571,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.vulnEqualCall != nil {
-				veID, err := b.IngestVulnEqualID(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
+				veID, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -3595,7 +3595,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.vulnMetadataCall != nil {
-				ingestedVuln, err := b.IngestVulnerabilityID(ctx, *tt.inVuln[0])
+				ingestedVuln, err := b.IngestVulnerability(ctx, *tt.inVuln[0])
 				if err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}

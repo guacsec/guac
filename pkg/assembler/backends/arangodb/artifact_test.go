@@ -72,9 +72,9 @@ func Test_IngestArtifactIDs(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := c.IngestArtifactIDs(ctx, tt.artifactInputs)
+			got, err := c.IngestArtifacts(ctx, tt.artifactInputs)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestArtifactIDs() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestArtifacts() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if len(got) != len(tt.artifactInputs) {
@@ -135,9 +135,9 @@ func Test_IngestArtifactID(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := c.IngestArtifactID(ctx, tt.artifactInput)
+			got, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestArtifactID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if (got != "") != tt.wantID {
@@ -218,9 +218,9 @@ func Test_Artifacts(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedArtID, err := c.IngestArtifactID(ctx, tt.artifactInput)
+			ingestedArtID, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestArtifactID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -309,9 +309,9 @@ func Test_buildArtifactResponseByID(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedArtID, err := b.IngestArtifactID(ctx, tt.artifactInput)
+			ingestedArtID, err := b.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestArtifactID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {

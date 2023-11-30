@@ -256,9 +256,9 @@ func (s *Suite) Test_IngestPackages() {
 			c, err := GetBackend(s.Client)
 			s.NoError(err)
 
-			got, err := c.IngestPackageIDs(ctx, tt.pkgInputs)
+			got, err := c.IngestPackages(ctx, tt.pkgInputs)
 			if (err != nil) != tt.wantErr {
-				s.T().Errorf("demoClient.IngestPackageIDs() error = %v, wantErr %v", err, tt.wantErr)
+				s.T().Errorf("demoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
@@ -351,9 +351,9 @@ func (s *Suite) Test_Packages() {
 			t := s.T()
 			be, err := GetBackend(s.Client)
 			s.NoError(err)
-			ingestedPkgID, err := be.IngestPackageID(ctx, *tt.pkgInput)
+			ingestedPkgID, err := be.IngestPackage(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("demoClient.IngestPackageID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("demoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
@@ -417,7 +417,7 @@ func (s *Suite) TestPackagesIngestSameTwice() {
 			}
 
 			for _, bIn := range tt.pkgInputsSpec {
-				if _, err := b.IngestPackageID(ctx, bIn); err != nil {
+				if _, err := b.IngestPackage(ctx, bIn); err != nil {
 					t.Fatalf("Could not ingest package: %v , err: %v", bIn, err)
 				}
 			}

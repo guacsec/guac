@@ -13,7 +13,7 @@ import (
 
 // IngestHashEqual is the resolver for the ingestHashEqual field.
 func (r *mutationResolver) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
-	return r.Backend.IngestHashEqualID(ctx, artifact, otherArtifact, hashEqual)
+	return r.Backend.IngestHashEqual(ctx, artifact, otherArtifact, hashEqual)
 }
 
 // IngestHashEquals is the resolver for the ingestHashEquals field.
@@ -26,7 +26,7 @@ func (r *mutationResolver) IngestHashEquals(ctx context.Context, artifacts []*mo
 		return ingestedHashEqualsIDS, gqlerror.Errorf("%v :: uneven artifacts and hashEquals for ingestion", funcName)
 	}
 
-	return r.Backend.IngestHashEqualIDs(ctx, artifacts, otherArtifacts, hashEquals)
+	return r.Backend.IngestHashEquals(ctx, artifacts, otherArtifacts, hashEquals)
 }
 
 // HashEqual is the resolver for the HashEqual field.
