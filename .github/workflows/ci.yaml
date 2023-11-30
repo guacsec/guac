@@ -22,7 +22,6 @@ on:
   pull_request:
     branches:
       - main
-      - 1116-return-ID
     types:
       - opened
       - synchronize
